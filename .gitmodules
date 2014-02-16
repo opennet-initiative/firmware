@@ -1,0 +1,6 @@
+[submodule "openwrt"]
+	path = openwrt
+	url = git://git.openwrt.org/openwrt.git
+[submodule "packages"]
+	path = packages
+	url = git://git.openwrt.org/packages.git

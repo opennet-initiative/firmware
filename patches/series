@@ -1,0 +1,2 @@
+hostapd_netifd_enable_ieee80211h.patch
+luci_show_dfs_channels.patch

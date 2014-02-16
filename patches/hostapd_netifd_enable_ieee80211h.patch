@@ -1,0 +1,43 @@
+add the hostapd setting "ieee80211h=1" enabling channels that require DFS
+
+see https://dev.openwrt.org/ticket/14867
+
+In recent trunk all of ath9k, nl80211, and hostapd support the use of 5 GHz
+outdoor channels in Europe by implementing radar detection and DFS (802.11h
+protocol extensions).
+
+Currently 802.11h is not enabled by hostapd.
+
+The patch adds the setting "ieee80211h=1" during the generation of
+hostapd.conf via luci.
+Index: opennet/openwrt/package/network/services/hostapd/files/netifd.sh
+===================================================================
+--- opennet.orig/openwrt/package/network/services/hostapd/files/netifd.sh	2014-02-16 17:32:43.265544537 +0100
++++ opennet/openwrt/package/network/services/hostapd/files/netifd.sh	2014-02-16 17:32:51.605542583 +0100
+@@ -147,7 +147,7 @@
+ 		maxassoc max_inactivity disassoc_low_ack isolate auth_cache \
+ 		wps_pushbutton wps_label ext_registrar \
+ 		wps_device_type wps_device_name wps_manufacturer wps_pin \
+-		macfilter ssid wmm hidden short_preamble
++		macfilter ssid wmm hidden short_preamble doth
+ 
+ 	set_default isolate 0
+ 	set_default maxassoc 0
+@@ -156,6 +156,7 @@
+ 	set_default disassoc_low_ack 1
+ 	set_default hidden 0
+ 	set_default wmm 1
++	set_default doth 1
+ 
+ 	append bss_conf "ctrl_interface=/var/run/hostapd"
+ 	if [ "$isolate" -gt 0 ]; then
+@@ -167,6 +168,9 @@
+ 	if [ "$max_inactivity" -gt 0 ]; then
+ 		append bss_conf "ap_max_inactivity=$max_inactivity" "$N"
+ 	fi
++	if [ "$doth" -gt 0 ]; then
++		append bss_conf "ieee80211h=1" "$N"
++	fi
+ 
+ 	append bss_conf "disassoc_low_ack=$disassoc_low_ack" "$N"
+ 	append bss_conf "preamble=$short_preamble" "$N"

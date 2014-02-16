@@ -1,0 +1,31 @@
+do not hide DFS channels in luci web-interface
+
+see https://dev.openwrt.org/ticket/14919
+
+Channels with the "restricted" flag are not shown by luci.
+Any channel with one of the following attributes is marked as "restricted" by
+iwinfo:
+* NL80211_FREQUENCY_ATTR_PASSIVE_SCAN
+* NL80211_FREQUENCY_ATTR_NO_IBSS
+* NL80211_FREQUENCY_ATTR_RADAR
+
+The patch removes NL80211_FREQUENCY_ATTR_RADAR from the above list. Thus DFS
+channels are displayed.
+
+Sadly no visual indication is given if the current wireless driver supports DFS.
+Thus hostapd may refuse to select the configured channel without any further
+explanation.
+Index: opennet/openwrt/package/network/utils/iwinfo/src/iwinfo_nl80211.c
+===================================================================
+--- opennet.orig/openwrt/package/network/utils/iwinfo/src/iwinfo_nl80211.c	2014-02-16 15:31:06.296399206 +0100
++++ opennet/openwrt/package/network/utils/iwinfo/src/iwinfo_nl80211.c	2014-02-16 18:14:33.381048007 +0100
+@@ -2066,8 +2066,7 @@
+ 
+ 			e->restricted = (
+ 				freqs[NL80211_FREQUENCY_ATTR_PASSIVE_SCAN] ||
+-				freqs[NL80211_FREQUENCY_ATTR_NO_IBSS]      ||
+-				freqs[NL80211_FREQUENCY_ATTR_RADAR]
++				freqs[NL80211_FREQUENCY_ATTR_NO_IBSS]
+ 			) ? 1 : 0;
+ 
+ 			e++;

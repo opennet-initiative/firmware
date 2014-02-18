@@ -1,0 +1,21 @@
+config 'gateways' 'gateways'
+	option 'better_gw' '0'
+	option 'current_gw' ''
+	option 'searchmask' '$1 ~ "^192\\.168\\.0\\.[0-9]+$" && $1 != "192.168.0.0"'
+	option 'vpn_recheck_age' '20'
+	option 'vpn_nonworking_timeout' '5'
+	option 'vpn_bettergateway_timeout' '5'
+	option 'autosearch' 'on'
+	option 'vpn_sort_criteria' 'etx'
+    # use gateways as dns-servers
+    option 'gw_dns' 'true'
+    # use gateways as ntp-servers
+    option 'gw_ntp' 'true'
+
+
+config 'openssl' 'openssl'
+	option 'countryName'	'de'
+	option 'provinceName'	'Mecklenburg-Vorpommern'
+	option 'localityName' 	'Rostock'
+	option 'organizationalUnitName'	'users'
+	option 'days'	'3650'

@@ -1,0 +1,103 @@
+<%#
+Opennet Firmware
+
+Copyright 2010 Rene Ejury <opennet@absorb.it>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+
+<% local uci = require "luci.model.uci"
+   local cursor = uci.cursor() %>
+
+<%+header%>
+
+<% function show_portmap(src_zone) %>
+	<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
+	<table class="cbi-section-table">
+	<tr class="cbi-section-table-titles">
+<!--		<th class="cbi-section-table-cell">Name</th>
+		<th class="cbi-section-table-cell">Protokolle</th>-->
+		<th class="cbi-section-table-cell"><%:Source-Port%></th>
+		<th class="cbi-section-table-cell"><%:Target-Address%></th>
+		<th class="cbi-section-table-cell"><%:Target-Port%></th>
+		<th />
+	</tr>
+<%	local t = {} cursor:foreach("firewall", "redirect", function(s) if src_zone == s.src then t[#t +1] = s end end)
+	for index = 1, #t do
+		local s = t[index]	%>
+		<tr id="cbi-network-lan" class="cbi-section-table-row">
+<!--		<td class="cbi-value-field"><div id="cbi-network-lan-name"><%=s[".name"]%></div></td>
+		<td class="cbi-value-field"><div id="cbi-network-lan-proto"><%=s.proto%></div></td>-->
+		<td class="cbi-value-field"><div id="cbi-network-lan-src_dport"><%=s.src_dport%></div></td>
+		<td class="cbi-value-field"><div id="cbi-network-lan-dest_ip"><%=s.dest_ip%></div></td>
+		<td class="cbi-value-field"><div id="cbi-network-lan-dest_port"><%=s.dest_port%></div></td>
+		<td class="cbi-section-table-cell">
+			<input class="cbi-button cbi-button-del" type="submit" value="<%=s[".name"]%>" title="Del" name="<%=src_zone%>_del_section" />
+		</td>
+		</tr>
+		<tr />				
+<%	end	%>
+		<tr id="cbi-network-lan" class="cbi-section-table-row">
+<!--			<td class="cbi-value-field"><div id="cbi-network-lan-name"><input type="value" name="name" /></div></td>
+			<td class="cbi-value-field"><div id="cbi-network-lan-proto"><input type="value" name="proto" /></div></td>-->
+			<td class="cbi-value-field"><div id="cbi-network-lan-src_dport"><input type="value" name="src_dport" /></div></td>
+			<td class="cbi-value-field"><div id="cbi-network-lan-dest_ip"><input type="value" name="dest_ip" /></div></td>
+			<td class="cbi-value-field"><div id="cbi-network-lan-dest_port"><input type="value" name="dest_port" /></div></td>
+			<td class="cbi-value-field cbi-value-field-add"><input class="cbi-button cbi-button-add" type="submit" value="Add" name="<%=src_zone%>" title="Add"/></td>
+		</tr>
+	</table>
+	</form>
+<% end %>
+
+<h2><a id="content" name="content"><%:Portmapping - Forwarding of Ports%></a></h2>
+
+<% if cursor:get("network", "on_vpn") then %>
+<h3><%:Forwarding from the Internet through your OpenVPN tunnel%></h3>
+<%	require("luci.sys")
+	function split(str)
+		local t = { }
+		str:gsub("%S+", function (w) table.insert(t, w) end)
+		return t
+	end
+	data = split(luci.sys.exec("/usr/sbin/on_portcalc.sh"))
+	%>
+	<div class="cbi-map">
+		<fieldset class="cbi-section">
+			<div class="cbi-value-comment">
+<%			if data[1] and data[1] ~= "" then
+				print(luci.i18n.stringf([[Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.]], data[1], data[2], data[3]))
+			end %>
+			<%:The target should be an IP-Address in your local network. Additionally you can enter the target port in the related field.%></div>
+			<% show_portmap("on_vpn") %>
+		</fieldset>
+	</div>
+<% end %>
+<h3><%:Forwarding from Opennet%></h3>
+	<div class="cbi-map">
+		<fieldset class="cbi-section">
+			<div class="cbi-value-comment"><%:The following ports will be forwarded from Opennet (usually WIFI) to computers in your local network. They are usually not reachable directly from the Internet. This section might contain forwardings for Free Internet Access (Wifidog, port 67) and Internet Sharing (Usergateway Forwarding, ports 1600 and 123).%></div>
+			<% show_portmap("opennet") %>
+		</fieldset>
+	</div>
+
+<h3><%:Forwarding from DHCP-wireless network%></h3>
+	<div class="cbi-map">
+		<fieldset class="cbi-section">
+			<div class="cbi-value-comment"><%:The following ports will be forwarded from computers connected to your WIFI (and not running olsr) to computers in your local network.%></div>
+			<% show_portmap("local") %>
+		</fieldset>
+	</div>
+
+<h3><%:Forwarding from Internet (WAN-connector)%></h3>
+	<div class="cbi-map">
+		<fieldset class="cbi-section">
+			<div class="cbi-value-comment"><%:The follwing ports will be forwarded from Internet (your WAN connector) to your local network. If Internet is connected to your WAN, these ports are directly reachable from the outside.%></div>
+			<% show_portmap("wan") %>
+		</fieldset>
+	</div>
+<%+footer%>

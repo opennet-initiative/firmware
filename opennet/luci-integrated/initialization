@@ -1,0 +1,2 @@
+uci set system.@system[0].cronloglevel=9
+

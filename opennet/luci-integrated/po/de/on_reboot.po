@@ -1,0 +1,25 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-05-18 19:45+0200\n"
+"Last-Translator: rene <opennet@absorb.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "System Reboot"
+msgstr "System Neustart"
+
+msgid "Reboots the operating system of your device"
+msgstr "Neustart des Betriebssytem deines Routers"
+
+msgid "Perform Reboot"
+msgstr "Neustart durchführen"
+
+msgid "Remove Configuration and Reboot"
+msgstr "Konfiguration entfernen und Router Neustarten"
+
+msgid "Remove current configuration and redetect and reconfigure device interfaces again. After reboot, local LAN-device will be at %s/%s. A probably disabled DHCP-Server on LAN will not be reenabled - you should do this by hand. Opennet devices (WLAN) will be configured to start with %s/%s and follow the rules for multiple interfaces. If this is not enough for you, you can try a complete reset at the <a href='%s/admin/system/flashops/'>system backup page</a>, but be aware that you will loose all keys and certs than too."
+msgstr "Entferne die aktuelle Konfiguration und erkenne und konfiguriere die vorhandenen Schnittstellen erneut. Nach dem Neustart wird die LAN-Schnittstelle unter %s/%s zu erreichen sein. Ein deaktivierter DHCP-Server wird dabei nicht wieder aktiviert - Du solltest dies per Hand tun. Die Opennet-Schnittstellen (WLAN) werden beginnend mit der Adresse %s/%s konfiguriert und folgen bei Bedarf den Regeln für mehrere Schnittstellen im Opennet. Wenn das nicht ausreichen sollte, kannst Du auch eine komplette Wiederherstellung der Grundeinstellungen <a href='%s/admin/system/flashops/'>Wiederherstellungsseite des Systems</a> versuchen - Du solltest aber beachten. dass eventuell gespeicherte VPN-Schlüssel oder Zertifikate dabei verloren gehen."
+
+msgid "Please wait: Device rebooting..."
+msgstr "Please wait: Device rebooting..."

@@ -1,0 +1,40 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-05-18 19:45+0200\n"
+"Last-Translator: rene <opennet@absorb.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Welcome to the Configuration Pages of your Access Point"
+msgstr "Welcome to the Configuration Pages of your Access Point"
+
+msgid "Base Configuration"
+msgstr "Base Configuration"
+
+msgid "The following points are the ones required to configure any Opennet Access-Point. Please use them all if the mentioned order if you like to configure your Accesspoint the easiest way. Choose the items below or from the menu on the left."
+msgstr "The following points are the ones required to configure any Opennet Access-Point. Please use them all if the mentioned order if you like to configure your Accesspoint the easiest way. Choose the items below or from the menu on the left."
+
+msgid "Network"
+msgstr "Network"
+
+msgid "Basic Network Configuration - just enter your Opennet ID and everything will be adapted"
+msgstr "Basic Network Configuration - just enter your Opennet ID and everything will be adapted"
+
+msgid "VPN Tunnel"
+msgstr "VPN Tunnel"
+
+msgid "If you like to use the Internet, you should create or upload your OpenVPN Certificates and Keys here"
+msgstr "If you like to use the Internet, you should create or upload your OpenVPN Certificates and Keys here"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "You should change the default password into some privat one here"
+msgstr "You should change the default password into some privat one here"
+
+msgid "Reboot"
+msgstr "Reboot"
+
+msgid "After the configuration is done, it's the beste to restart the Router once - it's still the beste way to get a clean environment"
+msgstr "After the configuration is done, it's the beste to restart the Router once - it's still the beste way to get a clean environment"

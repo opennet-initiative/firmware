@@ -1,0 +1,78 @@
+<%#
+Opennet Firmware
+
+Copyright 2010 Rene Ejury <opennet@absorb.it>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+<h3><%:Key Generation%></h3>
+<% if certstatus.on_key_exists and (certstatus.on_csr_exists or certstatus.on_crt_exists) and not force_show_generatefields then %>
+	<form method="post" action="<%=REQUEST_URI%>">
+	<input type="submit" name="force_show_generatefields" class="cbi-button-plain" value="<%:...show...%>" />
+	</form>
+<% else %>
+
+<% if (openssl.commonName == "") then
+    openssl.commonName=test
+    end %>
+
+<form method="post" action="<%=REQUEST_URI%>?generate=true">
+<div class="cbi-map">
+	<fieldset class="cbi-section">
+		<fieldset class="cbi-section-node">
+			<div class="cbi-value">
+				<label class="cbi-value-title"><%:Country%></label>
+				<div class="cbi-value-field">
+					<input type="text" size="48" name="openssl.countryName" value="<%=openssl.countryName%>" disabled="disabled" />
+				</div>
+			</div>
+			<div class="cbi-value">
+				<label class="cbi-value-title"><%:Province%></label>
+				<div class="cbi-value-field">
+					<input type="text" size="48" name="openssl.provinceName" value="<%=openssl.provinceName%>" disabled="disabled" />
+				</div>
+			</div>
+			<div class="cbi-value">
+				<label class="cbi-value-title"><%:Locality%></label>
+				<div class="cbi-value-field">
+					<input type="text" size="48" name="openssl.localityName" value="<%=openssl.localityName%>" disabled="disabled" />
+				</div>
+			</div>
+			<div class="cbi-value">
+				<label class="cbi-value-title"><%:Organizational Unit%></label>
+				<div class="cbi-value-field">
+					<input type="text" size="48" name="openssl.organizationalUnitName" value="<%=openssl.organizationalUnitName%>" disabled="disabled" />
+				</div>
+			</div>
+			<div class="cbi-value">
+				<label class="cbi-value-title"><%:Certificate Name%></label>
+				<div class="cbi-value-field">
+					<input type="text" size="48" name="openssl.commonName" value="<%=openssl.commonName%>" />
+				</div>
+			</div>
+            <div class="cbi-value">
+                <label class="cbi-value-title"><%:Member Name%></label>
+                <div class="cbi-value-field">
+                    <input type="text" size="48" name="openssl.organizationName" value="<%=openssl.organizationName%>" />
+                </div>
+            </div>
+			<div class="cbi-value">
+				<label class="cbi-value-title"><%:Member Email Address%></label>
+				<div class="cbi-value-field">
+					<input type="text" size="48" name="openssl.EmailAddress" value="<%=openssl.EmailAddress%>" />
+				</div>
+			</div>
+			<div class="cbi-value">
+				<label class="cbi-value-title" />
+				<div class="cbi-value-field"><input type="submit" name="gen_csr" value="<%:generate%>" /></div>
+			</div>
+		</fieldset>
+	</fieldset>
+</div>
+</form>
+<% end %>

@@ -1,0 +1,29 @@
+<%#
+Opennet Firmware
+
+Copyright 2010 Rene Ejury <opennet@absorb.it>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+$Id: index.htm 5448 2009-10-31 15:54:11Z jow $
+
+-%>
+<%+header%>
+<h2><a id="content" name="content"><%:Welcome to the Configuration Pages of your Access Point%></a></h2>
+<h3><%:Base Configuration%></h3>
+    <div class="cbi-map"><fieldset class="cbi-section">
+        <p><%:The following points are the ones required to configure any Opennet Access-Point. Please use them all if the mentioned order if you like to configure your Accesspoint the easiest way. Choose the items below or from the menu on the left.%></p>
+        <ul>
+            <li><a href="<%=REQUEST_URI%>/funknetz"><%:Network%></a><p><%:Basic Network Configuration - just enter your Opennet ID and everything will be adapted%></p></li>
+            <% if luci.sys.exec("opkg status on-openvpn | grep installed") ~= "" then %>
+            <li><a href="<%=REQUEST_URI%>/vpn_tunnel"><%:VPN Tunnel%></a><p><%:If you like to use the Internet, you should create or upload your OpenVPN Certificates and Keys here%></p></li>
+            <% end %>
+            <li><a href="<%=REQUEST_URI%>/passwd"><%:Password%></a><p><%:You should change the default password into some privat one here%></p></li>
+            <li><a href="<%=REQUEST_URI%>/restart"><%:Reboot%></a><p><%:After the configuration is done, it's the beste to restart the Router once - it's still the beste way to get a clean environment%></p></li>
+        </ul>
+	</fieldset></div>
+<%+footer%>

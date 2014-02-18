@@ -1,0 +1,20 @@
+package openvpn
+
+config openvpn opennet_user
+	option client 1
+	option enable 1
+	option proto udp
+	option dev tun
+	option persist_key 1
+	option persist_tun 1
+	option ca /etc/openvpn/opennet_user/opennet-ca.crt
+	option cert /etc/openvpn/opennet_user/on_aps.crt
+	option key /etc/openvpn/opennet_user/on_aps.key
+	option nobind 1
+	option comp_lzo 1
+	option up /etc/openvpn/opennet_user/opennet_up.sh
+	option down /etc/openvpn/opennet_user/opennet_down.sh
+	option ns_cert_type server
+	option rport 1600
+	option script_security "2 execve"
+	list remote "192.168.0.254"

@@ -1,0 +1,353 @@
+#!/bin/sh
+#
+# Opennet Firmware
+# 
+# Copyright 2010 Rene Ejury <opennet@absorb.it>
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+# 	http://www.apache.org/licenses/LICENSE-2.0
+# 
+
+# include helper functions
+. /usr/bin/on-helper.sh
+
+# retrieve DEBUG-state
+DEBUG=$(uci -q get on-core.defaults.debug)
+
+msg_debug() {
+	$DEBUG && logger -t on_vpngateway_check[$$] "$1"
+}
+
+msg_info() {
+	logger -t on_vpngateway_check[$$] "$1"
+}
+
+#################################################################################
+# initialization to prevent two instances running at the same time
+# If interrupted, remove pid-file and set a mark in log
+USER_INTERRUPT=13
+trap 'rm -f /var/run/on_vpngateway_check.pid; logger -t on_vpngateway_check[$$] was killed by another instance; exit $USER_INTERRUPT' TERM INT
+
+msg_debug "starting another instance ($1)"
+# echo "starting another instance"
+# check if other instance is running, if yes, kill other instance
+if [ -f /var/run/on_vpngateway_check.pid ]; then
+	msg_debug "detected /var/run/on_vpngateway_check.pid"
+	kill $(cat /var/run/on_vpngateway_check.pid);
+fi
+
+# register that process is running
+# wait till other process is finished
+limit=30 # number of seconds to wait at most till other instance is finished.
+while [ -f /var/run/on_vpngateway_check.pid ];do
+	msg_debug "sleeping till other instance is finished"
+	sleep 1;
+	limit=$((limit-1))
+	if [ "$limit" = "0" ]; then
+		msg_debug "other instance doesn't finished in time, aborting"
+		exit;
+	fi
+done;
+pidof on_vpngateway_check >/var/run/on_vpngateway_check.pid
+#################################################################################
+
+
+#################################################################################
+# search all available gateways by criteria defined in on-openvpn.@gateways[0].vpn_sort_criteria
+# and sort them dependent on their ETX or Metric distance
+gateway_autosearch()
+{
+	activate_olsr_service
+	
+	# only do this if explicitely requested (param refresh) or activated in config
+	if [ "$1" != "refresh" ] && [ "$(uci -q get on-openvpn.@gateways[0].autosearch)" != "on" ]; then return; fi
+	
+	# it's now done in lua, because it's easier with associative arrays
+	lua /usr/lib/lua/luci/model/opennet/on_vpn_autosearch.lua
+}
+
+#################################################################################
+# check olsrd config for activated nameservice plugin
+# if not found activate, required for speed of gateways
+activate_olsr_service () {
+  found=""; nr=0;
+  while ( [ -n "$(uci -q get olsrd.@LoadPlugin[$nr])" ] ); do
+    if [ "$(uci -q get olsrd.@LoadPlugin[$nr].library | cut -d. -f1)" == "olsrd_nameservice" ]; then
+      return
+    fi
+    : $((nr++))
+  done
+    
+  new_section="$(uci add olsrd LoadPlugin)"
+  uci set olsrd.$new_section.library="olsrd_nameservice.so.0.3"
+  uci commit olsrd
+  /etc/init.d/olsrd restart >/dev/null
+}
+
+#################################################################################
+# try to establish openvpn tunnel
+# return a string, if it works (else return nothing)
+# parameter is index to test
+test_vpngateway()
+{
+	# if there is no cert, no chance (and sense) to check the target gateways
+	if ! [ -e /etc/openvpn/opennet_user/on_aps.crt ]; then return; fi
+		
+	age=$(uci -q get on-openvpn.gate_$1.age)
+	if [ $age -ge $((recheck_age+nonworking_timeout)) ]; then
+		# if there was no vpn-availability for a dedicated time (nonworking_timeout minutes), declare vpn-status as not working
+		uci -q set on-openvpn.gate_$1.status='n';
+		uci -q set on-openvpn.gate_$1.age=0;
+		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+	elif [ $age -ge $recheck_age ]; then
+		# check vpn-availability...
+		
+		gw_ipaddr=$(uci -q get on-openvpn.gate_$1.ipaddr);
+		# if there is no ipaddr stored than query dns for IP address
+		if [ -z "$gw_ipaddr" ]; then gw_ipaddr=$(query_dns $(uci -q get on-openvpn.gate_$1.name)); fi
+		if [ -z "$gw_ipaddr" ]; then return; fi
+		
+		# if gateway could only be reached over a local tunnel, dont use it - it will not work anyway
+		if [ -n "$(ip route show table $olsrd_routingTable | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ]; then return; fi
+		
+		# check if it is possible to open tunnel to the gateway (10 sec. maximum)
+		# test-parameters; '--dev null' will be prefaced
+		openvpn_test_parameters="--client --ns-cert-type server --remote $gw_ipaddr 1600 --ca /etc/openvpn/opennet_user/opennet-ca.crt --cert /etc/openvpn/opennet_user/on_aps.crt --key /etc/openvpn/opennet_user/on_aps.key --inactive 10 --verb 3 --nice 3 --resolv-retry 0 --ping-exit 5"
+		
+		msg_debug "start vpn test of $gw_ipaddr"
+
+		# if 'Initial packet' is recieved, stop waiting and accept connection
+		if [ -n "$(openvpn --dev null $openvpn_test_parameters | \
+		awk '
+			/Initial packet/ {
+				print; 
+				system("kill 2>/dev/null $(ps|grep \"openvpn --dev null\" |grep -v grep|cut -b 0-5)")
+			}')" ]; then
+			uci -q set on-openvpn.gate_$1.age=0;
+			uci -q set on-openvpn.gate_$1.status="y";
+			uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+			echo "vpn-availability of gw $gw_ipaddr successfully tested";
+		fi
+		msg_debug "finished vpn test of $gw_ipaddr"
+    elif [ "$(uci -q get on-openvpn.gate_$1.status)" == "y" ]; then
+        echo "vpn-availability of gw $gw_ipaddr still valid"
+	fi
+}
+
+#################################################################################
+# test if gateway is blacklisted, set or remove blacklisted option
+# parameter is index to test, echo true if blacklisted
+check_blacklisting()
+{
+	gw_ipaddr=$(uci -q get on-openvpn.gate_$1.ipaddr);
+	# if there is no ipaddr stored than query dns for IP address
+	if [ -z "$gw_ipaddr" ]; then gw_ipaddr=$(query_dns $(uci -q get on-openvpn.gate_$1.name)); fi
+	if [ -z "$gw_ipaddr" ]; then return; fi
+
+	blacklisted=$(uci -q get on-openvpn.gate_$1.blacklisted);
+	
+	# check if currently checked Gateway is blacklisted, if found then continue in loop
+	index_bl=0;
+	while [ -n "$(uci -q get on-openvpn.@blacklist_gateway[$index_bl])" ] ; do
+		msg_debug "check_blacklisting $index_bl"
+		if [ "$(uci -q get on-openvpn.@blacklist_gateway[$index_bl].ipaddr)" == "$gw_ipaddr" ]; then
+			uci -q set on-openvpn.gate_$1.blacklisted='true';
+			uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+			echo "gateway $gw_ipaddr is blacklisted"; return;
+		fi
+		: $((index_bl++))
+	done
+	
+	# gateway is not blacklisted
+	if [ -n "$blacklisted" ]; then
+		uci -q delete on-openvpn.gate_$1.blacklisted;
+		uci -q delete on-openvpn.gate_$1.status;
+		uci -q delete on-openvpn.gate_$1.age;
+		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+	fi
+}
+check_all_blacklisting()
+{
+	index_abl=1;
+	while [ -n "$(uci -q get on-openvpn.gate_$index_abl)" ] ; do
+		check_blacklisting $((index_abl++))
+	done
+}
+
+#################################################################################
+# test if gateway is blacklisted, set or remove blacklisted option
+# parameter is index to test, echo true if blacklisted
+check_all_gateways()
+{
+    found_first_gw=
+	all_gws=
+	current_gw_ipaddr=$(uci -q get openvpn.opennet_user.remote)
+	better_gw_count=$(uci -q get on-openvpn.@gateways[0].better_gw)
+	index=1;
+	while [ -n "$(uci -q get on-openvpn.gate_$index)" ] ; do
+		gw_ipaddr=$(uci -q get on-openvpn.gate_$index.ipaddr);
+		
+		# if no age set yet than set to recheck_age to force immediate testing
+		age=$(uci -q get on-openvpn.gate_$index.age)
+		if [ "$age" ]; then uci -q set on-openvpn.gate_$index.age=$((++age));
+		else uci -q set on-openvpn.gate_$index.age=$recheck_age;
+		fi
+
+        msg_debug "checking $gw_ipaddr age $age"
+
+        # check if currently checked Gateway is blacklisted, if found then continue in loop
+		if [ -n "$(check_blacklisting $index)" ]; then : $((index++)); continue; fi
+
+        # add gateway to list of all (even non-working) gateways (used for dns and ntp)
+        all_gws="${all_gws} ${gw_ipaddr}"
+
+		if ! [ -e "/etc/openvpn/opennet_user/on_aps.crt" ] || ! [ -e "/etc/openvpn/opennet_user/on_aps.key" ]; then
+			msg_debug "no testing, key or cert missing"
+			continue;
+		fi
+
+        msg_debug "         $gw_ipaddr not blacklisted"
+        
+		# check if gateway is known to work, else continue in loop
+		if [ -z "$(test_vpngateway $index)" ]; then : $((index++)); continue; fi
+		
+        # add gateway to list of all current gateways (used for dns and ntp)
+        current_gws="${current_gws} ${gw_ipaddr}"
+        
+		msg_debug "         $gw_ipaddr is known to work"
+		
+		# if first gateway is not found yet and route to current $gw_ipaddr exists, try if it's better to use this gateway
+		if [ -z "$found_first_gw" ] && [ -n "$(ip route show table $olsrd_routingTable | awk '$1 == "'$gw_ipaddr'"')" ]; then
+            msg_info "checking first found gw - $gw_ipaddr"
+			if [ "$gw_ipaddr" != "$current_gw_ipaddr" ]; then
+                msg_debug "first found gw - $gw_ipaddr != $current_gw_ipaddr"
+				if [ -z "$current_gw_ipaddr" ] || [ $((better_gw_count++)) -gt $bettergateway_timeout ]; then
+					msg_info "found a better gateway, changing to $gw_ipaddr"
+			
+					# set gateway information
+					uci -q set openvpn.opennet_user.remote=$gw_ipaddr
+					uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+					/etc/init.d/openvpn down opennet_user
+					/etc/init.d/openvpn up opennet_user
+					better_gw_count=0
+				fi
+				uci -q set on-openvpn.@gateways[0].better_gw=$better_gw_count
+			else
+                msg_debug "first found gw - $gw_ipaddr == $current_gw_ipaddr"
+                uci -q set on-openvpn.@gateways[0].better_gw=0
+			fi
+			found_first_gw='true'
+		fi
+		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+		: $((index++))
+	done
+
+    # add current gateway always to list of all current gateways (even if marked as not working)
+    current_gws="${current_gws} ${current_gw_ipaddr}"
+	# if there are no working gateways (maybe no key/cert), just use any found one to have some dns/ntp
+	if [ -z "${current_gws//[[:space:]]}" ]; then
+		current_gws=$all_gws;
+	fi
+}
+
+start_stop_openvpn() {
+  # stop vpn-tunnel if its not working because route goes trough ugw-tunnel
+  # this might be a problem on usergateways: before the ugw-tunnel is working, the user-vpn-gateway is reachable
+  # later, if all gateways best reached via the ugw-tunnel, the user-tunnel runs forever complaining about not to work.
+  if [ -n "$(ip route show table $olsrd_routingTable | awk '/tap/ && $1 == "'$gw_ipaddr'"')" ]; then
+      if [ -e "/tmp/openvpn_msg.txt" ]; then
+        msg_info "stopping nonworking gateway"
+        /etc/init.d/openvpn down opennet_user
+        uci -q set on-openvpn.@gateways[0].better_gw=0
+        uci commit on-openvpn;              # commit after every change to prevent uci memory problems
+      fi
+  elif [ -n "$gw_ipaddr" ] && [ ! -e "/var/run/openvpn-opennet_user.pid" ] && [ -e "/etc/openvpn/opennet_user/on_aps.crt" ] && [ -e "/etc/openvpn/opennet_user/on_aps.key" ]; then
+      sleep 5; # wait a litte while, maybe ntp was updated and time has to be set
+      /etc/init.d/openvpn up opennet_user
+  fi
+}
+
+update_ntp_from_gws() {
+    if $(uci -q get on-openvpn.gateways.gw_ntp) && [ -n "$current_gws" ]; then
+        update_required=false; no=0;
+        for gw in $current_gws; do
+            if [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; then
+                if [ "$(uci -q get ntpclient.@ntpserver[${no}].hostname)" != "$gw" ]; then
+                    update_required=true;
+                    uci -q set ntpclient.@ntpserver[${no}].hostname=$gw;
+                    uci -q set ntpclient.@ntpserver[${no}].port=123;
+                fi
+            else
+                update_required=true;
+                item=$(uci add ntpclient ntpserver)
+                uci -q set ntpclient.${item}.hostname=$gw;
+                uci -q set ntpclient.${item}.port=123;
+            fi
+            : $((no++))
+        done
+        while [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; do
+            uci delete ntpclient.@ntpserver[${no}];
+        done
+        if $update_required; then
+            msg_debug "updating NTP entries"
+            uci commit ntpclient
+            /etc/init.d/ntpclient start;
+        fi
+    fi
+}
+
+update_dns_from_gws()
+{
+    if $(uci -q get on-openvpn.gateways.gw_dns) && [ -n "$current_gws" ]; then
+        echo "# nameserver added by opennet firmware" >/tmp/resolv.conf.auto-generating
+        echo "# check (uci on-core.settings.gw_dns)" >>/tmp/resolv.conf.auto-generating
+        for gw in $current_gws; do
+            echo "nameserver $gw # added by on_vpngateway_check" >>/tmp/resolv.conf.auto-generating
+        done
+		cmp -s /tmp/resolv.conf.auto /tmp/resolv.conf.auto-generating
+		if [ $? -ne 0 ]; then
+            msg_debug "updating DNS entries"
+            mv /tmp/resolv.conf.auto-generating /tmp/resolv.conf.auto
+        else
+            rm /tmp/resolv.conf.auto-generating
+        fi
+    fi
+}
+
+#################################################################################
+# check is usually done every minute, therefore values are equal to minutes
+# after how many times gateway-vpn-function should rechecked
+recheck_age=$(uci -q get on-openvpn.@gateways[0].vpn_recheck_age)
+# how often it will be tried to establish a connection till gateway is declared as not to work
+nonworking_timeout=$(uci -q get on-openvpn.@gateways[0].vpn_nonworking_timeout)
+# how long the current gateway will be kept if a better one is found (small values might result in gateway-flipping)
+bettergateway_timeout=$(uci -q get on-openvpn.@gateways[0].vpn_bettergateway_timeout)
+# olsrd routing table
+olsrd_routingTable=$(uci -q get olsrd.@olsrd[0].RtTable)
+# global variable to store currently found gateways
+current_gws=""
+
+
+case "$1" in
+	"refresh")
+		gateway_autosearch $1;
+	;;
+	"check_blacklisting")
+		check_all_blacklisting;
+	;;
+	*)
+		gateway_autosearch; check_all_gateways; update_dns_from_gws; update_ntp_from_gws; start_stop_openvpn;
+	;;
+esac
+
+
+# commit changes, otherwise they will slow down the whole system significantly
+# uci commit on-openvpn - already done before
+
+# remove registration
+rm -f /var/run/on_vpngateway_check.pid
+msg_debug "finishing another instance"
+

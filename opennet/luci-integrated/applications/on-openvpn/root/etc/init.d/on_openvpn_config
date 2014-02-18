@@ -1,0 +1,43 @@
+#!/bin/sh /etc/rc.common
+#
+# Opennet Firmware
+# 
+# Copyright 2010 Rene Ejury <opennet@absorb.it>
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+
+START=21
+
+start() {
+	if [ -z "$(uci -q get network.on_vpn)" ]; then
+		local batch
+		
+		# add new network to configuration (to be recognized by olsrd)
+		append batch "set network.on_vpn=interface${N}"
+		append batch "set network.on_vpn.proto=none${N}"
+		append batch "set network.on_vpn.ifname=tun0${N}"
+
+		append batch "set firewall.zone_on_vpn=zone${N}"
+		append batch "set firewall.zone_on_vpn.name=on_vpn${N}"
+		append batch "set firewall.zone_on_vpn.network=on_vpn${N}"
+		append batch "set firewall.zone_on_vpn.forward=ACCEPT${N}"
+		append batch "set firewall.zone_on_vpn.input=ACCEPT${N}"
+		append batch "set firewall.zone_on_vpn.output=ACCEPT${N}"
+		append batch "set firewall.zone_on_vpn.masq=1${N}"
+
+		echo "$batch${N}commit network${N}" | uci -q batch
+
+		section=$(uci add firewall forwarding)
+		uci set firewall.$section.src='local'
+		uci set firewall.$section.dest='on_vpn'
+
+		uci commit firewall
+	fi
+
+    exit 0
+}

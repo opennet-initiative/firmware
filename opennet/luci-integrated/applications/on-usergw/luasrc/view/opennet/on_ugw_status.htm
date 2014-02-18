@@ -1,0 +1,67 @@
+<%#
+Opennet Firmware
+
+Copyright 2010 Rene Ejury <opennet@absorb.it>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+
+<% local uci = require "luci.model.uci"
+   local cursor = uci.cursor()
+   require ("luci.model.opennet.on_usergw")
+%>
+
+
+<script type="text/javascript">//<![CDATA[
+
+function change_hna() {
+//   if (confirm("<%:Change announced Address (useful if collisions arise).%>"))
+  var hna_xhr = new XHR();
+  hna_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/change_hna', null,
+    function(x) {
+      if (x.responseText)
+        document.getElementById("hna").innerHTML = x.responseText;
+    }
+  );
+  return false;
+}
+
+function check_ugw_status() {
+  var run_xhr = new XHR();
+  run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/check_ugw_status/', null,
+  function(x) {
+  if (x.responseText)
+    document.getElementById("ugw_status_content").innerHTML = x.responseText;
+  }
+  );
+}
+
+if (window.attachEvent) {window.attachEvent('onload', init);}
+else if (window.addEventListener) {window.addEventListener('load', init, false);}
+else {document.addEventListener('load', init, false);} 
+// 
+//   window .onload = function test() {init();}
+function init() {
+  check_ugw_status();
+  setInterval('check_ugw_status()', 10000 )
+}
+//]]></script>
+
+<% if certstatus.on_keycrt_ok then %>
+<h3><%:Status Internet-Sharing%></h3>
+<div id="ugw_status_content">
+<div class="cbi-map">
+  <fieldset class="cbi-section">
+    <fieldset class="cbi-section-node">
+      <img class='loading_img_small' id="ugw_status_spinner" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
+    </fieldset>
+  </fieldset>
+</div>
+</div>
+
+<% end %>

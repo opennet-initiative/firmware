@@ -1,0 +1,298 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-05-18 19:45+0200\n"
+"Last-Translator: rene <opennet@absorb.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Opennet Usergateways"
+msgstr "Opennet Internet-Freigabe / Usergateways"
+
+msgid "Status Internet-Sharing"
+msgstr "Status Internet-Freigabe"
+
+msgid "Internet shared"
+msgstr "Internet freigegeben"
+
+msgid "Central Gateways connected locally"
+msgstr "Zentrale Gateways lokal eingebunden"
+
+msgid "Gateway-Forward activated"
+msgstr "Weiterleitung zum Gateway aktiviert"
+
+msgid "Internet-Sharing enabled"
+msgstr "Internet-Freigabe aktiviert"
+
+msgid "Internet not shared"
+msgstr "Internet nicht freigegeben"
+
+msgid "Usergateway-Tunnel active"
+msgstr "Usergateway-Tunnel aktiv"
+
+msgid "Usergateway-Tunnel not running"
+msgstr "Usergateway-Tunnel laufen nicht"
+
+msgid "Internet-Sharing possible"
+msgstr "Internet-Freigabe ist möglich"
+
+msgid "Internet-Sharing impossible"
+msgstr "Internet-Freigabe ist nicht möglich"
+
+msgid "<abbr title='Annouced Address, which stands for the local Gateway. This address might be changed automatically if it is announced by some other Gateway in the network'>Usergateway-Address</abbr>:"
+msgid "<abbr title='Verbeitete Adresse für den lokalen Gateway. Diese Adresse kann automatisch geändert werden, wenn sie von einem anderen Gateway genutzt wird'>Usergateway-Adresse</abbr>:"
+
+msgid "Change announced HNA Address"
+msgid "Ändere Adresse des lokalen Gateways (HNA-Adresse)"
+
+msgid "change Address"
+msgid "ändere Adresse"
+
+msgid "no central Gateway-IPs connected trough tunnel"
+msgstr "keine zentralen Gateway-IPs sind über den Tunnel eingebunden"
+
+msgid "central Gateway-IP %s connected trough tunnel"
+msgstr "zentrale Gateway-IP %s ist über den Tunnel eingebunden"
+
+msgid "central Gateway-IPs %s connected trough tunnel"
+msgstr "zentrale Gateway-IPs %s sind über die Tunnel eingebunden"
+
+msgid "Gateway-Forward from %s to %s activated"
+msgstr "Gateway-Weiterleitung von %s zu %s aktiviert"
+
+msgid "Manage Internet-Sharing"
+msgstr "Verwalte Internet-Freigabe"
+
+msgid "Internet-Sharing disabled"
+msgstr "Internet-Freigabe deaktiviert"
+
+msgid "disable Sharing"
+msgstr "deaktivere Freigabe"
+
+msgid "enable Sharing"
+msgstr "aktiviere Freigabe"
+
+msgid "Internet-Sharing is currently disabled for %s Minutes. It will be automatically reenabled, but you can enable it manually if you like."
+msgstr "Internet-Freigabe ist vorübergehend für %s Minuten unterbrochen. Sie wird automatisch wiederhergestellt, Du kannst sie aber auch manuell wieder aktivieren."
+
+msgid "Internet-Sharing will be automatically reenabled in between the next 5 Minutes. You can enable it manually if you like."
+msgstr "Internet-Freigabe wird in den nächsten 5 Minuten automatisch reaktiviert. Du kannst sie aber auch manuell wieder aktivieren."
+
+msgid "suspend Internet-Sharing for"
+msgstr "unterbreche Internet-Freigabe für"
+
+msgid "minutes"
+msgstr "Minuten"
+
+msgid "hour"
+msgstr "Stunde"
+
+msgid "hours"
+msgstr "Stunden"
+
+msgid "day"
+msgstr "Tag"
+
+msgid "suspend now"
+msgstr "unterbreche jetzt"
+
+msgid "Usergateway-Status"
+msgstr "Usergateway-Status"
+
+msgid "Check route trough WAN and ping-time of Gateways (again). This will take approximately 5 seconds per Gateway."
+msgstr "Prüfe, dass die Route durch den WAN-Anschluss geht und die ping-Zeit der Gateways. Dies dauert etwa 5 Sekunden je Gateway."
+
+msgid "Check speed to and from the Gateways (again). This will take approximately 1 minute per Gateway."
+msgstr "Prüfe die Übertragungsgeschwindigkeit von und zu den Gateways. Dies dauert etwa eine Minute je Gateway."
+
+msgid "Check MTU to and from the Gateways (again). This will take approximately 5 minutes per Gateway."
+msgstr "Prüfe die MTU von und zu den Gateways. Dies dauert etwa 5 Minuten je Gateway."
+
+msgid "Check VPN availability of Gateways (again). This will take approximately 10 seconds per Gateway."
+msgstr "Prüfe die Verfügbarkeit von VPN an den Gateways. Dies dauert etwa 10 Sekunden je Gateway."
+
+msgid "automated check is running, manual modifications are temporarily disabled"
+msgstr "automatische Prüfung läuft, Änderungen sind vorübergehend nicht möglich"
+
+msgid "Internet Sharing Status Overview"
+msgstr "Internet-Freigabe Status"
+
+msgid "Status Details, all checks have to be successful"
+msgstr "Status Details, alle Tests müssen erfolgreich sein"
+
+msgid "<abbr title='click to forward to this gateway immediately'>Gateway-Name</abbr>"
+msgstr "<abbr title='Klicke um die Weiterleitung sofort zu wechseln'>Gateway-Name</abbr>"
+
+msgid "<abbr title='If Tunnel is activated, a central Gateway-IP is mapped to the local Router. Multiple Tunnels can exist parallel.'>UGW-Tunnel</abbr>"
+msgstr "<abbr title='Wenn der Tunnel aktiviert ist, wird eine zentrale Gateway-Adresse auf den lokalen Router abgebildet. Mehrere Tunnel (und Abbildungen) können gleichzeitig aktiv sein.'>UGW-Tunnel</abbr>"
+
+msgid "<abbr title='If Forwarding is activated, all received VPN-Traffic is routed to the outside Gateway. Only one forward can exist at any time.'>VPN-Forwarding</abbr>"
+msgstr "<abbr title='Wenn eine Weiterleitung aktiviert ist, werden empfangene VPN-Pakete weiter zum zentralen Gateway geschickt. Zu jeder Zeit kann nur eine Weiterleitung existieren.'>VPN-Weiterleitung</abbr>"
+
+msgid "<abbr title='Indicates if route to Gateway points trough WAN-device, this is required. If not check/reconfigure your WAN connection, maybe it is not working.'>WAN</abbr>"
+msgstr "<abbr title='Zeigt an, ob die Route zum Gateway durch die WAN-Schnittstelle geht. Dies ist Vorraussetzung für alle anderen Tests. Wenn die Routen nicht durch das WAN-Interface gehen, solltest Du Deine WAN-Verbindung überprüfen'>WAN</abbr>"
+
+msgid "<abbr title='Indicates the Ping-Time in miliseconds. If Gateway cannot be pinged or the ping-time is high, it is probably (temporarily) down.'>Ping-Time</abbr>"
+msgstr "<abbr title='Gibt die Ping-Zeit in Millisekunden an. Wenn ein Gateway nicht ange-ping-t werden kann oder die Ping-Zeit sehr hoch ist, dann ist er vermutlich (vorrübergehend) abgeschaltet.'>Ping-Zeit</abbr>"
+
+msgid "<abbr title='Indicates Upload / Download Speed.'>Speed</abbr>"
+msgstr "<abbr title='Zeigt Upload / Download Geschwindigkeit.'>Geschwindigkeit</abbr>"
+
+msgid "<abbr title='Indicates if the Gateway supports VPN for the users. This is at least required to sucessfully use VPN-Forwarding.'>VPN-Status</abbr>"
+msgstr "<abbr title='Zeigt ob der Gateway VPN für die Nutzer auch übers Internet unterstützt. Dies ist Vorraussetzung für eine VPN-Weiterleitung.'>VPN-Status</abbr>"
+
+msgid "<abbr title='Maximum Transmission Unit - match of configured and measured values is required to share your Internet in any case'>MTU-Status</abbr>"
+msgstr "<abbr title='Maximum Transmission Unit - eine Übereinstimmung von eingestellten und gemessenen Werten ist erforderlich für eine Freigabe des lokalen Internets.'>MTU-Status</abbr>"
+
+msgid "No IP-Address found for Gateway-Name, Gateway cannot be used"
+msgstr "Konnte IP-Adresse für den Gateway nicht ermitteln, Gateway kann nicht genutzt werden"
+
+msgid "Loading"
+msgstr "Lade"
+
+msgid "This will take approximately 5 seconds per Gateway"
+msgstr "Dies wird etwa 5 Sekunden je Gateway dauern"
+
+msgid "check WAN-Connection"
+msgstr "prüfe WAN-Verbindung"
+
+msgid "This will take approximately 1 minute per Gateway"
+msgstr "Dies wird etwa eine Minute je Gateway dauern"
+
+msgid "check Speed"
+msgstr "prüfe Geschwindigkeit"
+
+msgid "This will take approximately 10 seconds per Gateway"
+msgstr "Dies wird etwa 10 Sekunden je Gateway dauern"
+
+msgid "check VPN"
+msgstr "prüfe VPN"
+
+msgid "This will take approximately 5 minutes per Gateway"
+msgstr "Dies wird etwa 5 Minuten je Gateway dauern"
+
+msgid "check MTU"
+msgstr "prüfe MTU"
+
+msgid ": upload to Gateway %s kbit/s; download from Gateway %s kbit/s"
+msgstr ": upload zum Gateway %s kbit/s; download vom Gateway %s kbit/s"
+
+msgid "(tried/measured) to Gateway: %s/%s from Gateway: %s/%s"
+msgstr "(eingestellt/gemessen) zum Gateway: %s/%s vom Gateway: %s/%s"
+
+msgid "tested %s minutes ago"
+msgstr "vor %s Minuten geprüft"
+
+msgid "Click to switch Forwarding to Gateway %s (IP: %s)"
+msgstr "Klicke um die Weiterleitung zum Gateway %s (IP: %s) zu wechseln"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "exists"
+msgstr "vorhanden"
+
+msgid "missing"
+msgstr "fehlt"
+
+msgid "download"
+msgstr "herunterladen"
+
+msgid "Certificate Request (.csr)"
+msgstr "Zertifikat-Anffrage (.csr)"
+
+msgid "Private Key (.key)"
+msgstr "Geheimer Schlüssel (.key)"
+
+msgid "Certificate (.crt)"
+msgstr "Zertifikat (.crt)"
+
+msgid "Send Certificate Request (.csr) <b> and only this file </b> to <a href='mailto:%s?subject=Certificate Request for %s %s&amp;body=[please attach the Certificate Request (.csr) - and only this file - to this mail and write some nice words to the administrator]'>%s</a> in order to get the required certificate."
+msgstr "Sende die Zertifikat-Anfrage (.csr) <b>und nur diese Datei</b> an <a href='mailto:%s?subject=Zertifikat-Anfrage für %s %s&amp;body=[bitte füge die Zertifikat-Anfrage (.csr) - und nur diese Datei - als Anhang an diese mail und schreibe einige nette Worte an den Administrator]'>%s</a> um ein Zertifikat zu erhalten."
+
+msgid "AccessPoint (type users)"
+msgstr "AccessPoint (type users)"
+
+msgid "UserGateway (type user gateway)"
+msgstr "UserGateway (type user gateway)"
+
+msgid "Key/Cert Status"
+msgstr "Status Schlüssel/Zertifikat"
+
+msgid "Key Management"
+msgstr "Schlüssel Verwaltung"
+
+msgid "...show..."
+msgstr "...anzeigen..."
+
+msgid "upload Certificate (.crt) or Private Key (.key)"
+msgstr "hochladen von Zertifikat (.crt) oder Geheimem Schlüssel (.key)"
+
+msgid "search file"
+msgstr "suche Datei"
+
+msgid "upload"
+msgstr "hochladen"
+
+msgid "Key Generation"
+msgstr "Schlüssel Erzeugung"
+
+msgid "countryName"
+msgstr "Land"
+
+msgid "Province"
+msgstr "Bundesland"
+
+msgid "Locality"
+msgstr "Ort"
+
+msgid "Member Name"
+msgstr "Dein Name"
+
+msgid "Organizational Unit"
+msgstr "Organisations-Einheit"
+
+msgid "Certificate Name"
+msgstr "Zertifikat-Name"
+
+msgid "Member Email Address"
+msgstr "Deine EMail Adresse"
+
+msgid "generate"
+msgstr "erzeuge Schlüssel"
+
+msgid "countryName"
+msgstr "Land"
+
+msgid "stateOrProvinceName"
+msgstr "Bundesland"
+
+msgid "organizationName"
+msgstr "Nutzer-Name"
+
+msgid "organizationalUnitName"
+msgstr "Zertifikat-Typ"
+
+msgid "commonName"
+msgstr "Zertifikat-Name"
+
+msgid "emailAddress"
+msgstr "EMail Adresse"
+
+msgid "localityName"
+msgstr "Ort"
+
+msgid "Private Key and Certificate do not match. Please replace Certificate!"
+msgstr "Der geheime Schlüssel und das Zertifikat passen nicht zueinander. Bitte ersetze das Zertifikat!"
+
+msgid "Private Key and Certificate do not match. Certificate-Request also does not match Private Key, therefore sending the Certificate Request to opennet authority will not help. Please replace Certificate or Private Key or regenerate Key and Certificate Request."
+msgstr "Der geheime Schlüssel und das Zertifikat passen nicht zueinander. Die Zertifikat-Anfrage passt auch nicht zum geheimen Schlüssel, darum hilft es auch nichts, die Zertifikat-Anfrage an Opennet zu senden. Bitte ersetze das Zertifikat oder den geheimen Schlüssel oder erzeuge Schlüssel und Zertifikat-Anfrage neu."
+
+msgid "Certificate-Request contents"
+msgstr "Zertifikat-Anfrage Details"
+
+msgid "Certificate contents"
+msgstr "Zertifikat Details"
+
+msgid "uploaded or generated on this date."
+msgstr "bei dieser Zeit erstellt oder hochgeladen"

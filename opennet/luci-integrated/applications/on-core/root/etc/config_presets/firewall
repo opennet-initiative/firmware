@@ -1,0 +1,50 @@
+
+config 'defaults'
+	option 'syn_flood' '1'
+	option 'forward' 'REJECT'
+	option 'input' 'REJECT'
+	option 'output' 'REJECT'
+
+config 'zone' 'zone_wan'
+	option 'name' 'wan'
+	option 'input' 'REJECT'
+	option 'output' 'ACCEPT'
+	option 'forward' 'REJECT'
+	option 'masq' '1'
+
+config 'zone' 'zone_opennet'
+	option 'name' 'opennet'
+	option 'input' 'ACCEPT'
+	option 'output' 'ACCEPT'
+	option 'forward' 'ACCEPT'
+	option 'network' 'on_eth_0 on_wifi_0'
+
+config 'zone' 'zone_local'
+	option 'name' 'local'
+	option 'network' 'lan wifi'
+	option 'input' 'ACCEPT'
+	option 'output' 'ACCEPT'
+	option 'forward' 'ACCEPT'
+	option 'masq' '1'
+
+config 'forwarding'
+	option 'src' 'local'
+	option 'dest' 'wan'
+	option 'mtu_fix' '1'
+
+config 'forwarding'
+	option 'src' 'local'
+	option 'dest' 'opennet'
+
+config 'rule'
+	option 'src' 'wan'
+	option 'proto' 'udp'
+	option 'dest_port' '68'
+	option 'target' 'ACCEPT'
+
+config 'include'
+	option 'path' '/etc/firewall.opennet'
+
+config 'include'
+    option 'path' '/etc/firewall.user'
+

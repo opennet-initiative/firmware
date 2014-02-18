@@ -1,0 +1,7 @@
+# Syntax for lines is : minute hour day month dayofweek command #
+* * * * * /usr/bin/run-parts.sh /etc/cron.minutely
+*/5 * * * * /usr/bin/run-parts.sh /etc/cron.5mins
+01 * * * * /usr/bin/run-parts.sh /etc/cron.hourly
+02 4 * * * /usr/bin/run-parts.sh /etc/cron.daily
+#22 4 * * 0 /usr/bin/run-parts.sh /etc/cron.weekly
+#42 4 1 * * /usr/bin/run-parts.sh /etc/cron.monthly 

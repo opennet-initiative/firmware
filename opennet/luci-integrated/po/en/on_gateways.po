@@ -1,0 +1,94 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-05-18 19:45+0200\n"
+"Last-Translator: rene <opennet@absorb.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Opennet OpenVPN Gateways"
+msgstr "Opennet OpenVPN Gateways"
+
+msgid "Here you can configure the IP-Addresses of your choosen Gateways."
+msgstr "Here you can configure the IP-Addresses of your choosen Gateways."
+
+msgid "If you like to find more Information about the Gateways in Opennet, have a look in the Opennet-Wiki. Usually the first found Gateway in your list is the one you are going to use. The Gateway will be changed without your action, if the current Gateway does not work for around 6 minutes. Any Change of your Gateway will drop all your Internet Connections.<br />If non of the Gateways in your list are reachable or working (of if your list is empty), OpenVPN is deactivated. <br />Automated Gateway Search: The Gateways will be detected by an internal algorithm and ordered by their distance. In special cases this might nit be the best solution.<br/><br/>Additional Information about the column-values.<br/>If any Gateway is active, then the test-connection to the OpenVPN-Service of this server was successfull. If this information is missing, the test was not done before"
+msgstr "If you like to find more Information about the Gateways in Opennet, have a look in the Opennet-Wiki. Usually the first found Gateway in your list is the one you are going to use. The Gateway will be changed without your action, if the current Gateway does not work for around 6 minutes. Any Change of your Gateway will drop all your Internet Connections.<br />If non of the Gateways in your list are reachable or working (of if your list is empty), OpenVPN is deactivated. <br />Automated Gateway Search: The Gateways will be detected by an internal algorithm and ordered by their distance. In special cases this might nit be the best solution.<br/><br/>Additional Information about the column-values.<br/>If any Gateway is active, then the test-connection to the OpenVPN-Service of this server was successfull. If this information is missing, the test was not done before"
+
+msgid "...more Information..."
+msgstr "...more Information..."
+
+msgid "Gateway-List"
+msgstr "Gateway-List"
+
+msgid "automated gateway-search"
+msgstr "automated gateway-search"
+
+msgid "activated"
+msgstr "activated"
+
+msgid "deactivated"
+msgstr "deactivated"
+
+msgid "toggle"
+msgstr "toggle"
+
+msgid "<abbr title='Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR'>ETX</abbr> (rounded)"
+msgstr "<abbr title='Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR'>ETX</abbr> (rounded)"
+
+msgid "Distance"
+msgstr "Distance"
+
+msgid "active"
+msgstr "active"
+
+msgid "<abbr title='click to choose immediately as your gateway'>IP-Address</abbr>"
+msgstr "<abbr title='click to choose immediately as your gateway'>IP-Address</abbr>"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Select Gateway"
+msgstr "Select Gateway"
+
+msgid "Current Gateway"
+msgstr "Aktueller Gateway"
+
+msgid "<abbr title='Number of Hops to the Gateway'>Distance</abbr> / <abbr title='Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR'>ETX</abbr>"
+msgstr "<abbr title='Number of Hops to the Gateway'>Distance</abbr> / <abbr title='Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR'>ETX</abbr>"
+
+msgid "(<abbr title='This offset is added to the values before use/display'>Offset</abbr>)"
+msgstr "(<abbr title='This offset is added to the values before use/display'>Offset</abbr>)"
+
+msgid "increase offset"
+msgstr "increase offset"
+
+msgid "decrease offset"
+msgstr "decrease offset"
+
+msgid "<abbr title='Announced Upload / Download Speed.'>Speed</abbr>"
+msgstr "<abbr title='Announced Upload / Download Speed.'>Speed</abbr>"
+
+msgid "upload to Internet %s kbit/s; download from Internet %s kbit/s"
+msgstr "upload to Internet %s kbit/s; download from Internet %s kbit/s"
+
+msgid "VPN-Status"
+msgstr "VPN-Status"
+
+msgid "Test-Age"
+msgstr "Test-Age"
+
+msgid "reset test counter"
+msgstr "reset test counter"
+
+msgid "add"
+msgstr "add"
+
+msgid "The first reachable and not blocked Gateway is not the current active one. The Tunnel will be restarted and the Gateway will be changed in about %s minutes. The changes will be shown after a reload of this page."
+msgstr "The first reachable and not blocked Gateway is not the current active one. The Tunnel will be restarted and the Gateway will be changed in about %s minutes. The changes will be shown after a reload of this page."
+
+msgid "Gateway-Blacklist"
+msgstr "Gateway-Blacklist"
+
+msgid "IP Address"
+msgstr "IP Address"

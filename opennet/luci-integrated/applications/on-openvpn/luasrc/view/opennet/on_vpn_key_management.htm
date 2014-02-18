@@ -1,0 +1,122 @@
+<%#
+Opennet Firmware
+
+Copyright 2010 Rene Ejury <opennet@absorb.it>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+<% require ("luci.model.opennet.on_crt_data")
+%>
+<h3><%:Key/Cert Status%></h3>
+<div class="cbi-map">
+	<fieldset class="cbi-section">
+		<fieldset class="cbi-section-node">
+			<table class="cert-status">
+			<tr>
+			<% 	if certstatus.on_crt_exists then %>
+				<td class="cert_infotable" rowspan="5"><% display_crt_infotable(certtype) %></td>
+			<%	end %>
+			<% 	if certstatus.on_csr_exists and not certstatus.on_keycrt_ok then %>
+				<td class="cert_infotable" rowspan="5"><% display_csr_infotable(certtype) %></td>
+				<td>
+					<label><%:Certificate Request (.csr)%></label><br />
+					<abbr title='<%:uploaded or generated on this date.%>'><div class="cbi-value-description"><% print(os.date("%c", certstatus.on_csr_date)) %></div></abbr>
+				</td>
+				<td>
+					<div class="cert_available" status="ok">&nbsp;&nbsp;&nbsp;</div>
+				</td>
+				<td>
+					<a href="<%=REQUEST_URI%>?download=csr"><%:download%></a>
+				</td>
+			</tr>
+			<tr>
+			<% end %>
+				<td>
+					<label><%:Private Key (.key)%></label><br />
+					<% if certstatus.on_key_exists then %>
+						<abbr title='<%:uploaded or generated on this date.%>'><div class="cbi-value-description"><% print(os.date("%c", certstatus.on_key_date)) %></div></abbr>
+						</td><td>
+						<div class="cert_available" status="ok">&nbsp;&nbsp;&nbsp;</div>
+						</td><td>
+						<a href="<%=REQUEST_URI%>?download=key"><%:download%></a>
+						</td>
+					<% else %>
+						</td><td><div class="cert_available" status="missing">&nbsp;&nbsp;&nbsp;</div></td><td></td>
+					<% end %>
+			</tr>
+			<tr>
+				<td>
+					<label><%:Certificate (.crt)%></label><br />
+					<% if certstatus.on_crt_exists then %>
+						<abbr title='<%:uploaded or generated on this date.%>'><div class="cbi-value-description"><% print(os.date("%c", certstatus.on_crt_date)) %></div></abbr>
+						</td><td>
+						<div class="cert_available" status="ok">&nbsp;&nbsp;&nbsp;</div>
+						</td><td>
+						<a href="<%=REQUEST_URI%>?download=crt"><%:download%></a>
+						</td>
+					<% else %>
+						</td><td><div class="cert_available" status="missing">&nbsp;&nbsp;&nbsp;</div></td><td></td>
+					<% end %>
+			</tr>
+			</table>
+		</fieldset>
+			<div class="cbi-value-description">
+				<% if certstatus.on_crt_exists and certstatus.on_key_exists and (certstatus.on_crt_modulus ~= certstatus.on_key_modulus) then
+					if certstatus.on_csr_modulus == certstatus.on_key_modulus then 
+						%><div class="errorbox"><%
+						print(luci.i18n.stringf([[Private Key and Certificate do not match. Please replace Certificate!]]))
+						%></div><%
+					else
+						%><div class="errorbox"><%
+						print(luci.i18n.stringf([[Private Key and Certificate do not match. Certificate-Request also does not match Private Key, therefore sending the Certificate Request to opennet authority will not help. Please replace Certificate or Private Key or regenerate Key and Certificate Request.]]))
+						%></div><%
+					end
+				end %>
+			</div>
+			<div class="cbi-value-description">
+				<% if certstatus.on_keycsr_ok and (not(certstatus.on_crt_exists) or not(certstatus.on_keycrt_ok)) then 
+					local uci = require "luci.model.uci"
+					local cursor = uci.cursor()
+					local contact_email = cursor:get("on-core", "defaults", "csr_contact")
+					local on_id = cursor:get("on-core", "settings", "on_id")
+					if not on_id then on_id = "" end
+					%><div class="ifacebox"><%
+					local type = luci.i18n.stringf("AccessPoint (type users)")
+					if (certtype == "ugw") then type = luci.i18n.stringf("UserGateway (type user gateway)") end
+					print(luci.i18n.stringf([[Send Certificate Request (.csr) <b> and only this file </b> to <a href='mailto:%s?subject=Certificate Request for %s %s&amp;body=[please attach the Certificate Request (.csr) - and only this file - to this mail and write some nice words to the administrator]'>%s</a> in order to get the required certificate.]], contact_email, type, on_id, contact_email ))
+					%></div><%
+				end %>
+			</div>
+	</fieldset>
+</div>
+<h3><%:Key Management%></h3>
+<% if certstatus.on_key_exists and certstatus.on_crt_exists and not force_show_uploadfields then %>
+	<form method="post" action="<%=REQUEST_URI%>">
+	<input type="submit" name="force_show_uploadfields" class="cbi-button-plain" value="<%:...show...%>" />
+	</form>
+<% else %>
+<div class="cbi-map">
+	<fieldset class="cbi-section">
+		<form method="post" action="<%=REQUEST_URI%>?upload=true" enctype="multipart/form-data">
+		<div class="cbi-value-description">
+			<%:upload Certificate (.crt) or Private Key (.key)%>
+		</div>
+		<fieldset class="cbi-section-node">
+			<table width="100%"><tr>
+				<td>
+					<input type="file" name="opensslfile" value="<%:search file%>" />
+				</td>
+				<td>
+					<input type="submit" class="cbi-button cbi-button-apply" value="<%:upload%>" />
+				</td>
+      </tr></table>
+		</fieldset>
+		</form>
+	</fieldset>
+</div>
+<% end %>

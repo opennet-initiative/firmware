@@ -1,0 +1,25 @@
+config 'olsrd'
+	option 'IpVersion' '4'
+	option 'FIBMetric' 'flat'
+	option 'LinkQualityAlgorithm' 'etx_ff'
+	option 'NatThreshold' '0.75'
+    option 'RtTable' '12'
+        option 'RtTableDefault' '13'
+    
+config 'Interface'
+	option 'interface' ''
+
+config 'LoadPlugin'
+	option 'library' 'olsrd_txtinfo.so.0.1'
+	option 'accept' '127.0.0.1'
+
+config 'LoadPlugin'
+        option 'library' 'olsrd_httpinfo.so.0.1'
+        option 'Net'    '0.0.0.0 0.0.0.0'
+        option 'Port'      '8080'
+
+config 'LoadPlugin'
+        option 'library' 'olsrd_ondataservice_light.so.0.1'
+        option "interval" "10800"
+        option "inc_interval" "5"
+        option "database" "/tmp/database.json"

@@ -1,0 +1,122 @@
+#!/bin/sh /etc/rc.common
+#
+# Opennet Firmware
+# 
+# Copyright 2010 Rene Ejury <opennet@absorb.it>
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+
+START=21
+
+start() {
+	# include this file only during "start" ("enable" or "disable" may use IPKG_INSTROOT)
+	. /usr/bin/on-helper.sh
+
+	# while reconfiguring, on_id is usually not set. Anyway, just try to read it...
+	on_id=$(uci -q get on-core.settings.on_id)
+	if [ -z "$on_id" ]; then on_id=$(uci -q get on-core.defaults.on_id_preset); fi
+	on_ipschema=$(uci -q get on-core.defaults.on_ipschema)
+	free_ipschema=$(uci -q get on-wifidog.defaults.free_ipschema)
+	free_netmask=$(uci -q get on-wifidog.defaults.free_netmask)	
+
+	free_ipaddr=$(get_on_ip $on_id $free_ipschema 0)
+	free_ipaddr_first=$(get_on_ip "0.1" $free_ipschema 0)
+	on_ipaddr=$(get_on_ip $on_id $on_ipschema 0)
+
+	if [ -z "$(uci -q get network.free)" ]; then
+		local batch
+		
+		# configure opennet dhcp/wifidog wifi
+		append batch "set network.free=interface${N}"
+		append batch "set network.free.ifname=none${N}"
+		append batch "set network.free.type=bridge${N}"
+		
+		append batch "set network.free.proto=static${N}"
+		append batch "set network.free.netmask=${free_netmask}${N}"
+		append batch "set network.free.defaultroute=0${N}"
+		append batch "set network.free.peerdns=0${N}"
+		append batch "set network.free.ipaddr=${free_ipaddr}${N}"
+
+		append batch "set network.0=alias${N}"
+		append batch "set network.0.proto=static${N}"
+		append batch "set network.0.interface=free${N}"
+		append batch "set network.0.ipaddr=${free_ipaddr_first}${N}"
+		append batch "set network.0.netmask=${free_netmask}${N}"
+
+		append batch "set firewall.zone_free=zone${N}"
+		append batch "set firewall.zone_free.name=free${N}"
+		append batch "set firewall.zone_free.network=free${N}"
+		append batch "set firewall.zone_free.forward=ACCEPT${N}"
+		append batch "set firewall.zone_free.input=ACCEPT${N}"
+		append batch "set firewall.zone_free.output=ACCEPT${N}"
+
+		append batch "set dhcp.@dnsmasq[0].nonwildcard=1${N}"
+
+		append batch "set luci.flash_keep.wifidog=/etc/wifidog.conf${N}"
+
+		echo "$batch${N}commit network${N}commit dhcp${N}commit luci${N}" | uci -q batch
+
+		section=$(uci add firewall forwarding)
+		uci set firewall.$section.src='free'
+		uci set firewall.$section.dest='on_vpn'
+
+		section=$(uci add firewall forwarding)
+		uci set firewall.$section.src='local'
+		uci set firewall.$section.dest='free'
+
+		section=$(uci add firewall redirect)
+		uci set firewall.$section.src='opennet'
+		uci set firewall.$section.proto='udp'
+		uci set firewall.$section.src_dport='67'
+		uci set firewall.$section.target='DNAT'
+		uci set firewall.$section.src_port='67'
+		uci set firewall.$section.dest_ip=${free_ipaddr}
+		uci set firewall.$section.src_dip=${on_ipaddr}
+		uci commit firewall
+	else	# fix pre 0.3-6 version bug
+		no=0
+		while [ -n "$(uci -q get firewall.@redirect[$no])" ]; do
+			src=$(uci -q get firewall.@redirect[$no].src);
+			proto=$(uci -q get firewall.@redirect[$no].proto);
+			src_dport=$(uci -q get firewall.@redirect[$no].src_dport);
+			target=$(uci -q get firewall.@redirect[$no].target);
+			src_port=$(uci -q get firewall.@redirect[$no].src_port);
+			if [ "$src" == "opennet" ] && [ "$proto" == "udp" ] && [ "$src_dport" == "67" ] && [ "$target" == "DNAT" ] && [ "$src_port" == "67" ]; then
+				uci set firewall.@redirect[$no].dest_ip=${free_ipaddr}
+				uci set firewall.@redirect[$no].src_dip=${on_ipaddr}
+				uci commit firewall
+				break;
+			fi
+			: $((no++))
+		done
+	fi
+
+
+    if [ -n "$(grep "GatewayInterface br-lan" /etc/wifidog.conf)" ]; then
+      ln -sf /etc/etc_presets/wifidog.conf /etc/wifidog.conf;
+    fi
+	# change current ID if starting with AP or not set
+	currentID=$(awk '{if ($1 == "GatewayID" && $2 !~ "^AP" && $2 != "OpennetWifidogNode") {print $2; exit}}' /etc/wifidog.conf)
+	if [ -z "$currentID" ] ; then
+		awk '{if ($1 != "GatewayID") print;}' /etc/wifidog.conf >/tmp/wifidog.conf
+		echo "GatewayID AP$on_id" >>/tmp/wifidog.conf
+		rm /etc/wifidog.conf
+		mv /tmp/wifidog.conf /etc/wifidog.conf
+	fi
+
+	awk '{if ($1 != "if" || $2 == "tun0" || $4 != "true") print;}' /etc/etc_presets/dhcp-fwd.conf >/tmp/dhcp-fwd.conf
+	for network in $(uci -q get firewall.zone_opennet.network); do
+		ifname=$(uci -q get network.$network.ifname)
+		if [ -n "$ifname" ] && [ "$ifname" != "none" ]; then
+			echo "if $ifname false true true" >>/tmp/dhcp-fwd.conf
+		fi
+	done
+	mv /tmp/dhcp-fwd.conf /etc/dhcp-fwd.conf
+
+    exit 0
+}

@@ -1,0 +1,39 @@
+config 'openssl' 'openssl'
+	option 'countryName'	'de'
+	option 'provinceName'	'Mecklenburg-Vorpommern'
+	option 'localityName' 	'Rostock'
+	option 'organizationalUnitName'	'user gateways'
+	option 'days'	'3650'
+
+config 'usergw'
+      list 'name'     'erina.on-i.de'
+      list 'name'     'subaru.on-i.de'
+      list 'centralIP'        '192.168.0.247'
+      list 'centralIP'        '192.168.0.248'
+      option 'vpn_recheck_age' '30'
+      option 'vpn_nonworking_timeout' '10'
+      option 'vpn_bettergateway_timeout' '10'
+
+config '192.168.0' 'ugwng_hna_mask'
+
+config 'sharing'    'ugw_sharing'
+        option 'shareInternet'  'off'
+#        option 'blockSharing'   '0'
+
+config openvpn_preset opennet_ugw
+    option client 1
+    option enable 0
+    option proto udp
+    option dev tap
+    option persist_key 1
+    option persist_tun 1
+    option ca /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
+    option cert /etc/openvpn/opennet_ugw/on_ugws.crt
+    option key /etc/openvpn/opennet_ugw/on_ugws.key
+    option comp_lzo 1
+    option up /etc/openvpn/opennet_ugw/opennet_ugw_up.sh
+    option down /etc/openvpn/opennet_ugw/opennet_ugw_down.sh
+    option ns_cert_type server
+    option script_security "2 execve"
+    option rport 1602
+    option nobind 1

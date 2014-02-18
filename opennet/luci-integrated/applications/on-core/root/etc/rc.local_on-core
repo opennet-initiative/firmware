@@ -1,0 +1,41 @@
+# commands to initialize the opennet-firmware environment
+# rc.local_on-core
+
+. /usr/bin/on-helper.sh
+
+if [ -n "$(pidof olsrd)" ]; then                    # don't search for the rule if olsrd is not running
+    index=5					    # wait for a maximum of 5*3 sec.
+    while [ -z "$olsrprio" ] && [ "$((index--))" != "0" ]; do
+            olsrprio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /olsrd/ {print $1; exit}')
+        sleep 3
+    done
+fi
+
+if [ -z "$olsrprio" ]; then
+    olsrprio=65535			            # default value
+    ip rule add table olsrd prio $olsrprio
+fi
+
+ip rule add table olsrd-default prio $((olsrprio+10))
+
+mainprio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /main/ {print $1; exit}')
+for network in $(echo "$(uci get -q firewall.zone_local.network)"); do
+	networkprefix=$(get_network $network)
+	[ -n "$networkprefix" ] && ip rule add from $networkprefix table main prio $mainprio
+done
+ip rule add from all iif lo table main prio $mainprio
+ip rule del table main
+ip rule add table main prio $((olsrprio+20))
+
+#   prefer olsrd-routes for main and tunnel network
+for network in $(uci get on-core.defaults.on_network); do
+    ip route prepend throw $network table main
+done
+
+for network in $(echo "$(uci get -q firewall.zone_local.network) $(uci get -q firewall.zone_free.network)"); do
+	networkprefix=$(get_network $network)
+	[ -n "$networkprefix" ] && ip route add throw $networkprefix table olsrd
+    [ -n "$networkprefix" ] && ip route add throw $networkprefix table olsrd-default
+done
+
+exit 0

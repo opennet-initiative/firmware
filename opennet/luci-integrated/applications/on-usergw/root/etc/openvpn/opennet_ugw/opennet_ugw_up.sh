@@ -1,0 +1,1 @@
+/usr/sbin/opennet_ugw_up.sh

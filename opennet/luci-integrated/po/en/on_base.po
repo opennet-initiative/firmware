@@ -1,0 +1,49 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-05-18 19:45+0200\n"
+"Last-Translator: rene <opennet@absorb.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Opennet"
+msgstr "Opennet"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Graphs"
+msgstr "Graphs"
+
+msgid "Base"
+msgstr "Base"
+
+msgid "ON Extended"
+msgstr "ON Extended"
+
+msgid "Network"
+msgstr "Network"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "Contact"
+msgstr "Contact"
+
+msgid "Reboot"
+msgstr "Reboot"
+
+msgid "Opennet ID"
+msgstr "Opennet ID"
+
+msgid "VPN Gateways"
+msgstr "VPN Gateways"
+
+msgid "VPN Tunnel"
+msgstr "VPN Tunnel"
+
+msgid "Port-Mapping"
+msgstr "Port-Mapping"
+
+msgid "Internet Sharing"
+msgstr "Internet Sharing"

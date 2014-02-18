@@ -1,0 +1,170 @@
+<%#
+Opennet Firmware
+
+Copyright 2010 Rene Ejury <opennet@absorb.it>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+<%+header%>
+<h2><a id="content" name="content"><%:Opennet ID%></a></h2>
+<%+cbi/apply_xhr%>
+
+<%
+local uci = require "luci.model.uci"
+local cursor = uci.cursor()
+local form_id = luci.http.formvalue("form_id")
+local on_id = cursor:get("on-core", "settings", "on_id")
+local devices = { "on_eth_", "on_wifi_" }
+
+if (form_id) then
+	function split(str)
+		local t = { }
+		str:gsub("%d+", function (w) table.insert(t, w) end)
+		return t
+	end
+	local t = split(form_id)
+	
+	local replace_id = false
+    if #t == 1 then
+        t[2] = t[1]
+        t[1] = "1"
+        replace_id = true
+    elseif #t == 2 then
+        replace_id = true    
+    elseif form_id:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$") then
+        t[1] = t[3]
+        t[2] = t[4]
+        replace_id = true
+    end
+    
+    if replace_id then
+        on_ipschema = cursor:get("on-core", "defaults", "on_ipschema")
+        on_netmask = cursor:get("on-core", "defaults", "on_netmask")
+        
+        local addrcount = 0
+        local on_base_address = luci.sys.exec("on_id_1="..t[1].."; on_id_2="..t[2].."; no="..addrcount.."; eval echo "..on_ipschema)
+        for index = 1, #devices do
+			local count = 0
+			while (cursor:get_all("network", devices[index]..count)) do
+				if (cursor:get("network", devices[index]..count, "ifname") ~= "none") then
+					if addrcount == 0 then on_ipaddr = on_base_address
+					else on_ipaddr = luci.sys.exec("on_id_1="..t[1].."; on_id_2="..t[2].."; no="..addrcount.."; eval echo "..on_ipschema)
+					end
+					cursor:set("network", devices[index]..count, "proto", "static")
+					cursor:set("network", devices[index]..count, "ipaddr", on_ipaddr)
+					cursor:set("network", devices[index]..count, "netmask", on_netmask)
+					addrcount = addrcount + 1
+				end
+				count = count + 1
+			end
+		end
+        
+		olsrd = cursor:get_all("olsrd")
+		for k, v in pairs(olsrd) do
+			if v.RtTableDefault then	-- just to find the right section, it also contains RtTableDefault
+				cursor:set("olsrd", k, "MainIp", on_base_address)
+				break
+			end
+		end
+
+		free_ipschema = cursor:get("on-wifidog", "defaults", "free_ipschema")
+        free_netmask = cursor:get("on-wifidog", "defaults", "free_netmask")
+
+		if free_ipschema then
+			free_ipaddr = luci.sys.exec("on_id_1="..t[1].."; on_id_2="..t[2].."; no=0; eval echo "..free_ipschema)
+			cursor:set("network", "free", "proto", "static")
+			cursor:set("network", "free", "ipaddr", free_ipaddr)
+			cursor:set("network", "free", "netmask", free_netmask)			
+		end
+		
+		redirects = cursor:get_all("firewall")
+		for k, v in pairs(redirects) do
+			if v.src == "opennet" and v.proto == "udp" and v.src_dport == "67" and v.target == "DNAT" and v.src_port == "67" then
+				cursor:set("firewall", k, "dest_ip", free_ipaddr)
+				cursor:set("firewall", k, "src_dip", on_base_address)
+			end
+		end
+		
+        cursor:set("on-core", "settings", "on_id", t[1].."."..t[2])
+        cursor:foreach("system", "system", function(s)
+			cursor:set("system", s[".name"], "hostname", "AP-"..t[1].."-"..t[2])
+		end)
+        cursor:commit("network")
+        cursor:commit("firewall")
+        cursor:commit("olsrd")
+        cursor:commit("on-core")
+        cursor:commit("system")
+
+        configs = { "network", "olsrd", "firewall", "on-core", "system" }
+        cbi_apply_xhr('uci-apply', configs)
+
+    else
+        form_id = on_id
+    end
+else
+	form_id = on_id
+end
+%>
+
+<h3><%:Opennet-ID / Network ID%></h3>
+	<div class="cbi-map">
+		<fieldset class="cbi-section">
+			<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
+			<p><% print(luci.i18n.string([[Great that you decided to take part in Opennet. Get the address of you Access-Point yourself, <a href='https://wiki.opennet-initiative.de/wiki/Opennet_Nodes'>make an entry in the Opennet-Wiki</a> and aquire a free IP-Address. (Please take care of the information at <a href='https://wiki.opennet-initiative.de/wiki/Mitmachen'>Mitmachen</a>).]])) %></p>
+			<p><% print(luci.i18n.string([[Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your first Opennet-Network-Interface, any change will reconfigure your network settings immediately.]])) %></p>
+			<fieldset class="cbi-section-node">
+				<div class="cbi-value">
+					<label class="cbi-value-title">
+						<input type="value" name="form_id" value="<%=form_id%>" />
+					</label>
+					<div class="cbi-value-field">
+						<input type="submit" class="cbi-button cbi-button-apply" value="<%:use%>"
+                          onclick="return confirm('<%
+                            print(luci.i18n.string([[Be aware that the network will be restarted immediately,\n and you might loose the contact to your router.\n\nAre you really wan\'t to update the network-id?]]))
+                            %>')" />
+					</div>
+				</div>
+			</fieldset>
+			</form>
+		</fieldset>
+	</div>
+
+<h3><%:related network addresses%></h3>
+	<div class="cbi-map">
+		<fieldset class="cbi-section">
+			<fieldset class="cbi-section-node">
+				<table class="cbi-section-table">
+				<%
+				for index = 1, #devices do
+					local count = 0
+					while (cursor:get_all("network", devices[index]..count)) do
+						local v = cursor:get_all("network", devices[index]..count)
+						%>
+						<tr id="cbi-network-lan" class="cbi-section-table-row">
+							<th><h3><%=v[".name"]%> (<%:device%> <%=v.ifname%>)</h3></th>
+							<td class="cbi-value-field"><div id="cbi-network-lan-ipaddr"><%=v.ipaddr%> / <%=v.netmask%></div></td>
+						</tr>
+						<%
+						count = count + 1
+					end
+				end 
+				local free = cursor:get_all("network", "free")
+				if free then
+						%>
+						<tr id="cbi-network-lan" class="cbi-section-table-row">
+							<th><h3><%=free[".name"]%> (<%:device%> <%=free.ifname%>)</h3></th>
+							<td class="cbi-value-field"><div id="cbi-network-lan-ipaddr"><%=free.ipaddr%> / <%=free.netmask%></div></td>
+						</tr>
+						<%
+				end				
+				%>
+				</table>
+			</fieldset>
+		</fieldset>
+	</div>
+<%+footer%>

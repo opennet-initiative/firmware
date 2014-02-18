@@ -1,0 +1,46 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-05-18 19:45+0200\n"
+"Last-Translator: rene <opennet@absorb.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Source-Port"
+msgstr "Quell-Port"
+
+msgid "Target-Address"
+msgstr "Ziel-Adresse"
+
+msgid "Target-Port"
+msgstr "Ziel-Port"
+
+msgid "Portmapping - Forwarding of Ports"
+msgstr "Portmapping - Weiterleitung von Ports"
+
+msgid "Forwarding from the Internet through your OpenVPN tunnel"
+msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
+
+msgid "Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports."
+msgstr "Basierend auf Deinem Zertifikat (%s) werden die Ports von %s bis %s durch Deinen VPN-Tunnel zu deinem WLAN-Router geleitet. Du solltest diese Ports als Quell-Ports angeben."
+
+msgid "The target should be an IP-Address in your local network. Additionally you can enter the target port in the related field."
+msgstr "Als Ziel der Weiterleitungen muss eine IP-Adresse im lokalen Netzwerk angegeben werden. Zusätzlich kann ein Zielport angegeben werden."
+
+msgid "Forwarding from Opennet"
+msgstr "Weiterleitung aus dem Opennet"
+
+msgid "The following ports will be forwarded from Opennet (usually WIFI) to computers in your local network. They are usually not reachable directly from the Internet. This section might contain forwardings for Free Internet Access (Wifidog, port 67) and Internet Sharing (Usergateway Forwarding, ports 1600 and 123)."
+msgstr "Die folgenden Ports werden aus dem Opennet (WLAN) an Rechner im lokalen Netzwerk weitergeleitet. Sie sind vom Internet aus nicht (direkt) erreichbar. Dieser Bereich kann Weiterleitungen für freien Netzwerkzugriff (Wifidog, port 67) und Internet-Freigabe (Usergateway-Weiterleitung, ports 1600 und 123) enthalten."
+
+msgid "Forwarding from DHCP-wireless network"
+msgstr "Weiterleitung aus dem DHCP-Funknetz"
+
+msgid "The following ports will be forwarded from computers connected to your WIFI (and not running olsr) to computers in your local network."
+msgstr "Die folgenden Ports werden aus dem WLAN von Rechnern ohne olsr mit einer Adresse im lokalen Wireless DHCP-Bereich an Rechner im lokalen Netzwerk weitergeleitet."
+
+msgid "Forwarding from Internet (WAN-connector)"
+msgstr "Weiterleitung aus dem Internet (WAN-Anschluss)"
+
+msgid "The follwing ports will be forwarded from Internet (your WAN connector) to your local network. If Internet is connected to your WAN, these ports are directly reachable from the outside."
+msgstr "Die folgenden Ports werden aus dem Internet (WAN) an Rechner im lokalen Netzwerk weitergeleitet. Sie sind vom Internet aus direkt erreichbar."

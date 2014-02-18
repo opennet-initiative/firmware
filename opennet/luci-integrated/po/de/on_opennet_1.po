@@ -1,0 +1,40 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-05-18 19:45+0200\n"
+"Last-Translator: rene <opennet@absorb.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Welcome to the Configuration Pages of your Access Point"
+msgstr "Willkommen zu den Verwaltungs-Seiten dieser Access-Points!"
+
+msgid "Base Configuration"
+msgstr "Basis-Konfiguration"
+
+msgid "The following points are the ones required to configure any Opennet Access-Point. Please use them all if the mentioned order if you like to configure your Accesspoint the easiest way. Choose the items below or from the menu on the left."
+msgstr "Die folgenden Punkte sind für eine Konfiguration des Opennet-Accesspoints notwendig. Bitte arbeite diese einfach in der vorgegebenen Reihenfolge ab, wenn Du Deinen Accesspoint einfach konfigurieren willst."
+
+msgid "Network"
+msgstr "Netzwerk"
+
+msgid "Basic Network Configuration - just enter your Opennet ID and everything will be adapted"
+msgstr "Grundlegende Netzwerk-Konfiguration - einfach deine Opennet-ID eingeben und die Interfaces werden entsprechend konfiguriert"
+
+msgid "VPN Tunnel"
+msgstr "VPN Tunnel"
+
+msgid "If you like to use the Internet, you should create or upload your OpenVPN Certificates and Keys here"
+msgstr "Wenn Du Internet nutzen möchtest, solltest Du hier Dein Zertifikat und deinen Schlüssel hochladen oder zuerst eine Zertifikat-Anfrage erstellen"
+
+msgid "Password"
+msgstr "Passwort"
+
+msgid "You should change the default password into some privat one here"
+msgstr "Du solltest das Standard-Passwort ändern, wähle dafür diesen Punkt"
+
+msgid "Reboot"
+msgstr "Neustart"
+
+msgid "After the configuration is done, it's the beste to restart the Router once - it's still the beste way to get a clean environment"
+msgstr "Wenn die erste Konfiguration erledigt ist, is es sinnvoll den Accesspoint neu zu starten. Das ist immer noch der beste Weg eine saubere stabile Umgebung zu erhalten"

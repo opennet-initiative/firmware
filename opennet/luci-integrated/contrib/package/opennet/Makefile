@@ -151,16 +151,6 @@ define Package/on-wifidog/install
 	$(call Package/opennet/install/template,$(1),applications/on-wifidog)
 endef
 
-define Package/on-tinc
-  $(call Package/opennet)
-  TITLE:=Tinc tunneling extensions
-  DEPENDS+=+on-core +tinc
-endef
-
-define Package/on-tinc/install
-	$(call Package/opennet/install/template,$(1),applications/on-tinc)
-endef
-
 ifneq ($(CONFIG_PACKAGE_on-core),)
 	PKG_SELECTED_MODULES+=applications/on-core
 endif
@@ -172,9 +162,6 @@ ifneq ($(CONFIG_PACKAGE_on-usergw),)
 endif
 ifneq ($(CONFIG_PACKAGE_on-wifidog),)
 	PKG_SELECTED_MODULES+=applications/on-wifidog
-endif
-ifneq ($(CONFIG_PACKAGE_on-tinc),)
-	PKG_SELECTED_MODULES+=applications/on-tinc
 endif
 
 MAKE_FLAGS += \

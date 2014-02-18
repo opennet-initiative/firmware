@@ -1,0 +1,13 @@
+# quilt-Einstellungen
+# hilfreich zur Vermeidung von irrelevanten Patch-Commits aufgrund verschiedener Zeitstempel
+# Anwendung:
+#    1) dauerhaft: cp quiltrc ~/.quiltrc
+#    2) fuer die laufende Shell: source quiltrc
+#
+# siehe http://wiki.openwrt.org/doc/devel/patches
+
+export QUILT_DIFF_ARGS="--no-timestamps --no-index -pab --color=auto"
+export QUILT_REFRESH_ARGS="--no-timestamps --no-index -pab"
+export QUILT_PATCH_OPTS="--unified"
+export QUILT_DIFF_OPTS="-p"
+

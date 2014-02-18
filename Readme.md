@@ -7,6 +7,23 @@ Entwicklungsumgebung einrichten
     git submodule update
 
 
+quilt-Konfiguration
+-------------------
+
+Für die komfortable Verwendung von quilt sollten ein paar quilt-Einstellungen gesetzt werden.
+
+Als dauerhafte Lösung ist folgendes möglich - dabei werden jedoch eventuell vorhandene quilt-Einstellungen gelöscht:
+
+    cp quiltrc ~/.quiltrc
+
+Alternativ können die Einstellungen auch zu Beginn jeder Shell-Sitzung importiert werden:
+
+    source quiltrc
+
+Falls die obigen Einstellungen nicht gesetzt werden, wird quilt unnötige Patch-Korrekturen vornehmen, sobald sich Zeitstempel ändern.
+Dies ist nicht wünschenswert.
+
+
 Die Firmware weiterentwickeln
 =============================
 Wir verwenden das Patch-Verwaltungssystem *quilt*. Dies erleichtert die Erstellung und Pflege von Patch-Serien gegenüber fremden Quellen.

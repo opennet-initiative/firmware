@@ -73,6 +73,10 @@ Im Gegensatz zum openwrt-Repository befinden sich in den Paket-Repositories ledi
 
         quilt header -e
 
+6. den Patch committen:
+
+        git commit patches/PATCH_NAME.patch
+
 
 Einen bestehenden Patch verändern
 ---------------------------------

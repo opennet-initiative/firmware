@@ -1,14 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=on-usergw
-PKG_VERSION:=$(shell cat ../../VERSION)
-PKG_RELEASE:=1
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
-PKG_BUILD_DEPENDS:=$(if $(STAGING_DIR_ROOT),lua/host)
-
-include $(INCLUDE_DIR)/package.mk
-
+include $(INCLUDE_DIR)/opennet.mk
 
 define Package/on-usergw
   SECTION:=opennet
@@ -24,9 +18,8 @@ define Package/on-usergw/description
 endef
 
 define Package/on-usergw/install
-	$(CP) -a $(PKG_BUILD_DIR)/$(2)/dist/* $(1)/ -R
-	$(CP) -a $(PKG_BUILD_DIR)/$(2)/ipkg/* $(1)/CONTROL/ 2>/dev/null || true
+	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 
-$(eval $(call BuildPackage,on-usergw))
+$(eval $(call BuildPackage,$(PKG_NAME)))
 

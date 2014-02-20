@@ -1,17 +1,8 @@
-Build-Prozess
-=============
-
-Makefile in Root-Verzeichnis schreiben?
-
-
-Konfigurationen
+Offene Aufgaben
 ===============
 
-Alte Konfigurationen übernehmen - eventuell einen trivialen Builder dafür bauen?
-
-
 Übersetzungen
-=============
+-------------
 
 siehe luci/Makefile:
  
@@ -20,6 +11,10 @@ siehe luci/Makefile:
             ./build/i18n-po2lua.pl ./po host/lua-po
 
 Wahrscheinlich muss in jedem uebersetzungsfaehigen Paket die obige Zeile in der Build-Anweisung eingetragen werden.
+
+
+ondataservice integrieren
+-------------------------
 
 
 Unklarheiten

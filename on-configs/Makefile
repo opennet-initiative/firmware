@@ -14,11 +14,11 @@ $(CONFIGS):
 	@# keep the timestamp of the current .config file if there is no change
 	@test -f "$(CURRENT_CONFIG)" && mv "$(CURRENT_CONFIG)" "$(PREVIOUS_CONFIG)" || true
 	@cat "$@" "$(COMMON_CONFIG)" > "$(CURRENT_CONFIG)"
-	@make -C "$(BUILD_DIR)" defconfig >/dev/null
+	@$(MAKE) -C "$(BUILD_DIR)" defconfig >/dev/null
 	@if diff -q "$(CURRENT_CONFIG)" "$(PREVIOUS_CONFIG)" >/dev/null; then \
 			mv "$(PREVIOUS_CONFIG)" "$(CURRENT_CONFIG)"; \
 		else	rm -f "$(PREVIOUS_CONFIG)"; fi
-	@make -C "$(BUILD_DIR)"
+	@$(MAKE) -C "$(BUILD_DIR)"
 
 list:
 	@echo $(CONFIGS) | tr " " "\n"

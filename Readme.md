@@ -1,10 +1,21 @@
 Entwicklungsumgebung einrichten
 ===============================
 
+Erforderliche Pakete installieren
+---------------------------------
+
+Debian:
+
+    apt-get update
+    apt-get install build-essential git flex gcc-multilib subversion libncurses5-dev zlib1g-dev liblzo2-dev gawk unzip python
+
+
+Lokale Build-Umgebung einrichten
+--------------------------------
+
     git clone https://projects.farbdev.org/opennet/on-firmware.git
     cd on-firmware
-    git submodule init
-    git submodule update
+    make init
 
 
 Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den Upstream auf die schreibfähige URL umstellen:

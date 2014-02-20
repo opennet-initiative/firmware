@@ -152,10 +152,13 @@ Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den 
     git remote set-url origin git@projects.farbdev.org:opennet/on-firmware.git
 
 
-Rückblick: Initialisierung der Entwicklungsumgebung
-===================================================
+Historischer Rückblick: Erstellung der Entwicklungsumgebung im Jahr 2014
+========================================================================
 
-Die folgende Beschreibung ist nicht relevant fuer die Weiterentwicklung der Firmware. Sie bietet jedoch einen schnellen Einstieg in die Struktur der Firmware-Entwicklungsumgebung.
+**Die folgende Beschreibung ist nicht relevant fuer die Weiterentwicklung der Firmware.**
+
+Die Beschreibung soll lediglich die Struktur der Firmware-Entwicklungsumgebung verdeutlichen.
+
 
 Repositories verknüpfen
 -----------------------

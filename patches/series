@@ -2,3 +2,4 @@ oni-feeds.patch
 hostapd_netifd_enable_ieee80211h.patch
 luci_show_dfs_channels.patch
 wifidog_iptables_long_table_names.patch
+makefile_include_opennet_packages.patch

@@ -1,0 +1,27 @@
+olsrd fuer Opennet
+==================
+
+Problemlage
+-----------
+
+* wir verwenden ein olsrd-Plugin namens ondataservice zur Erfassung von AP-Informationen
+* das Plugin funktioniert (nach einem fluechtigen Test) nicht mit olsrd v0.6.6 (segfault innerhalb von Minuten)
+ * diese Tests fanden auf dem yurika-Server statt
+
+
+Kurzfristiger Workaround
+------------------------
+
+Die Quelle der aktuellen olsrd-Version ist folgender Commit des routing-Repositories:
+       commit f7dfc4f2a55b39cfb5ef06b075264d05c82761d3
+       Author: Saverio Proto <zioproto@gmail.com>
+       Date:   Fri Jul 6 00:19:26 2012 +0000
+
+
+Langfristige Loesung
+--------------------
+
+* Test und gegenenfalls Anpassung des ondataservice-Plugin auf eine aktuelle olsrd-Version
+* Übertragung des ondataservice-Patches (siehe patches-Verzeichnis im olsrd-Verzeichnis) in das Routing-Repository
+* eine Integration des ondataservice-Plugin in den olsrd-Upstream-Code wurde im jahr 2013 kurz auf der Mailingliste erwogen, wird aber wohl nicht stattfinden
+

@@ -1,10 +1,15 @@
 Entwicklungsumgebung einrichten
 ===============================
 
-    git clone git@projects.farbdev.org:opennet/on-firmware.git
+    git clone https://projects.farbdev.org/opennet/on-firmware.git
     cd on-firmware
     git submodule init
     git submodule update
+
+
+Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den Upstream auf die schreibfähige URL umstellen:
+
+    git remote set-url origin git@projects.farbdev.org:opennet/on-firmware.git
 
 
 quilt-Konfiguration
@@ -102,8 +107,8 @@ Einen bestehenden Patch verändern
         quilt header -e
 
 
-openwrt-Repositories
---------------------
+openwrt-Repositories aktualisieren
+----------------------------------
 
 1. alle Patches zurücknehmen:
 

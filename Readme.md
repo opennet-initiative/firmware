@@ -17,10 +17,11 @@ Lokale Build-Umgebung einrichten
     cd on-firmware
     make init
 
+Nun kannst du mit folgendem Kommando die aktuelle Firmware bauen:
 
-Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den Upstream auf die schreibfähige URL umstellen:
+    make all
 
-    git remote set-url origin git@projects.farbdev.org:opennet/on-firmware.git
+Dieser Prozess wird (insbesondere beim ersten Mail) viele Stunden dauern, da zuerst die Cross-Compile-Toolchain für die jeweilige Zielplattform erzeugt werden muss.
 
 
 quilt-Konfiguration
@@ -64,7 +65,7 @@ Im openwrt-Repository befindet sich das Basissystem und openwrt-spezifischer Cod
     git commit patches/IRGENDEIN_THEMA.patch
 
 
-Eine Datei in den Paket-Repositories ändern
+Eine Datei in einem Paket-Repository ändern
 -------------------------------------------
 
 Im Gegensatz zum openwrt-Repository befinden sich in den Paket-Repositories lediglich Makefiles (Rezepte für den Paketbau) und openwrt-spezifische Patches. Unsere Änderungen sind üblicherweise ebenfalls Patches, die zu den openwrt-Patches hinzukommen.
@@ -138,6 +139,17 @@ openwrt-Repositories aktualisieren
 5. falls der Commit als aktueller Repository-Zustand gespeichert werden soll, dann committen:
 
         git commit openwrt
+
+
+Senden von Änderungen in das Opennet-Repository
+===============================================
+
+Für das Einbringen von Änderungen in das öffentliche Firmware-Repository benötigst du einen git-Account.
+Diesen kannst du auf der Opennet-Firmware-Mailingliste erfragen: https://list.opennet-initiative.de/mailman/listinfo/firmware
+
+Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den Upstream auf die schreibfähige URL umstellen:
+
+    git remote set-url origin git@projects.farbdev.org:opennet/on-firmware.git
 
 
 Rückblick: Initialisierung der Entwicklungsumgebung

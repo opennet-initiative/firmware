@@ -3,14 +3,16 @@ LUCI_DIR = luci
 CUSTOM_PO_DIR = opennet/po
 CUSTOM_PACKAGES_DIR = opennet/packages
 LANGUAGES = de
+ARCHS = ar71xx bcm43xx ixp4xx tl-wr1043nd tl-wr842nd x86
 
 .PHONY: all clean patch unpatch menuconfig feeds
 
-all: feeds translate
-	@$(MAKE) -C on-configs list | grep "^[a-zA-Z0-9_-]\+$$" | while read arch; do \
-		$(MAKE) -C on-configs $$arch; \
-		$(MAKE) -C "$(OPENWRT_DIR)" || exit 1; \
-	 done
+all: $(ARCHS)
+
+$(ARCHS): feeds translate
+	@echo "Building for target architecture: $@"
+	$(MAKE) -C on-configs $@
+	$(MAKE) -C "$(OPENWRT_DIR)"
 
 init:
 	@# update submodules if necessary

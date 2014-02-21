@@ -1,10 +1,16 @@
+# Lars Kruse <devel@sumpfralle.de>, 2014.
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"Last-Translator: rene <opennet@absorb.it>\n"
+"PO-Revision-Date: 2014-02-21 01:15+0200\n"
+"Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
+"Language-Team: none\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
 
 msgid ""
 "After the configuration is done, it's the beste to restart the Router once - "
@@ -28,7 +34,7 @@ msgstr ""
 "die Interfaces werden entsprechend konfiguriert"
 
 msgid "Confirmation"
-msgstr ""
+msgstr "Bestätigung"
 
 msgid "Extended Configuration"
 msgstr "Erweiterte Konfiguration"
@@ -82,7 +88,7 @@ msgid "Networks:"
 msgstr "Netzwerk:"
 
 msgid "OLSR-Status"
-msgstr ""
+msgstr "OLSR-Status"
 
 msgid "ON Extended"
 msgstr "ON Erweitert"
@@ -103,7 +109,7 @@ msgid "Password"
 msgstr "Passwort"
 
 msgid "Password successfully changed!"
-msgstr ""
+msgstr "Passwort wurde erfolgreich geändert!"
 
 msgid "Perform Reboot"
 msgstr "Neustart durchführen"
@@ -127,7 +133,7 @@ msgid "Remove Configuration and Reboot"
 msgstr "Konfiguration entfernen und Router Neustarten"
 
 msgid "Router Password"
-msgstr ""
+msgstr "Router-Passwort"
 
 msgid "Source-Port"
 msgstr "Quell-Port"
@@ -223,7 +229,7 @@ msgstr ""
 "diese."
 
 msgid "Unknown Error, password not changed!"
-msgstr ""
+msgstr "Unbekannter Fehler, Kennwort nicht geändert!"
 
 msgid "Uptime:"
 msgstr "Gerätelaufzeit:"

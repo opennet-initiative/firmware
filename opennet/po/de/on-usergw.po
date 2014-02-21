@@ -1,13 +1,19 @@
+# Lars Kruse <devel@sumpfralle.de>, 2014.
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"Last-Translator: rene <opennet@absorb.it>\n"
+"PO-Revision-Date: 2014-02-21 01:17+0200\n"
+"Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
+"Language-Team: none\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
 
 msgid "Change announced Address (useful if collisions arise)."
-msgstr ""
+msgstr "Ändere die öffentliche Adressse (sinnvoll bei Kollisionen)"
 
 msgid ""
 "Check MTU to and from the Gateways (again). This will take approximately 5 "
@@ -71,6 +77,8 @@ msgstr "Usergateway-Status"
 
 msgid "[[No IP-Address found for Gateway-Name, Gateway cannot be used]]"
 msgstr ""
+"[[Keine IP-Adresse gefunden für Gateway-Name, Gateway kann verwendet "
+"werden]]"
 
 msgid "add"
 msgstr "hinzufügen"
@@ -93,10 +101,10 @@ msgid "check WAN-Connection"
 msgstr "prüfe WAN-Verbindung"
 
 msgid "delete"
-msgstr ""
+msgstr "löschen"
 
 msgid "down"
-msgstr ""
+msgstr "runter"
 
 msgid "up"
-msgstr ""
+msgstr "hoch"

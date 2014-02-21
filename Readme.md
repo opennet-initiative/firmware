@@ -191,10 +191,11 @@ Ein erster Patch: Paket-Feeds einbinden
     quilt add openwrt/feeds.conf
     # die feeds-Datei mit Inhalten füllen
     cat - >openwrt/feeds.conf <<-EOF
-    	src-link        opennet         ../opennet
-    	src-link        packages        ../packages
-    	src-link        routing         ../routing
-    	src-link        luci            ../luci
+    	src-link        opennet         ../../opennet
+    	src-link        packages        ../../packages
+    	src-link        routing         ../../routing
+    	src-link        luci            ../../luci
+	src-link	telephony	../../telephony
     EOF
     # den Patch entsprechend der Dateiveränderungen aktualisieren
     quilt refresh

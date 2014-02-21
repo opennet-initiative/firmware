@@ -1,8 +1,9 @@
 Paket-Quellen fuer die Opennet-Firmware (fuer den Bau erforderlich)
 --- /dev/null
 +++ b/openwrt/feeds.conf
-@@ -0,0 +1,4 @@
+@@ -0,0 +1,5 @@
 +src-link	opennet		../../opennet
 +src-link	packages	../../packages
 +src-link	routing		../../routing
 +src-link	luci		../../luci
++src-link	telephony	../../telephony

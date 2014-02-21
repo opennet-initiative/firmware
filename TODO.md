@@ -13,6 +13,20 @@ Konfigurationsdateien
 In den opennet-Paketen muessen die Konfigurationsdateien explizit genannt werden.
 
 
+Sonstiges
+---------
+
+ID-Setzen fuehrt zu:
+
+    This page contains the following errors:
+    error on line 119 at column 57: expected '>'
+    Below is a rendering of the page up to the first error.
+
+Falsche IP beim Start
+
+DHCP laeuft erst nach Neustart
+
+
 Unklarheiten
 ============
 

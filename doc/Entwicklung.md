@@ -1,13 +1,50 @@
-Die Firmware weiterentwickeln
-=============================
-Wir verwenden das Patch-Verwaltungssystem *quilt*. Dies erleichtert die Erstellung und Pflege von Patch-Serien gegenüber fremden Quellen.
+Überblick
+=========
 
-Das Howto von *quilt* ist hier zu finden: http://repo.or.cz/w/guilt.git/blob/HEAD:/Documentation/HOWTO
+Die Opennet-Firmware basiert auf den Komponenten *git*, *quilt* und der *openwrt*-Entwicklungsumgebung.
+Links zur Dokumentation dieser Komponenten findest du am Ende dieses Dokuments.
+
+Die grundlegende Struktur der Entwicklungsumgebung ist in der [Struktur-Dokumentation](Struktur.md) beschrieben.
+
+Die Verzeichnisse haben die folgenden Inhalte:
+
+* *openwrt* -- das openwrt-Repository (Build-Umgebung, Kernel und Basispakete)
+* openwrt-Paket-Feeds:
+** *packages* -- die meisten openwrt-Pakete
+** *routing* -- Routing-Pakete
+** *luci* -- luci-basierte Webinterface-Pakete
+** *telephony* -- Telefonie-Pakete
+* *opennet* -- Opennet-Pakete und angepasste/neue Pakete
+* *patches* -- Änderungen an openwrt oder den externen Paket-Feeds
+* *doc* -- diese Dokumentation
+
+
+Externe Respositories
+---------------------
+
+Die externen Repositories (openwrt, packages, routing, telephony) werden von uns nur in Form von Patches angepasst.
+Deren Version (also die git-commit-ID) wird in unserem Repository versioniert - der aktuelle Stand bezüglich der Upstream-Repositories ist also Teil der Versionsverwaltung.
+
+
+Patches
+-------
+
+Unsere Patches (gegen die externen Repositories) werden im Verzeichnis *patches* mittels *quilt* gepflegt. Die meisten dieser Patches sind bei openwrt eingereicht und harren auf ihre Upstream-Integration.
+
+
+Unser Paket-Feed *opennet*
+--------------------------
+
+In diesem Paket-Feed liegen unsere selbsterstellten Pakete (*on-*), die für den VPN-Tunnelaufbau und die Datensammlung erforderlich sind. Zusätzlich können hier Pakete untergebracht werden, die (noch) nicht in openwrt enthalten sind.
+
+
+Vorbereitung der Entwicklungsumgebung
+=====================================
 
 quilt-Konfiguration
 -------------------
 
-Für die komfortable Verwendung von quilt sollten ein paar quilt-Einstellungen gesetzt werden.
+Für die komfortable Verwendung des Patch-Verwaltungsystems *quilt* sollten ein paar quilt-Einstellungen gesetzt werden.
 
 Als dauerhafte Lösung ist folgendes möglich - dabei werden jedoch eventuell vorhandene quilt-Einstellungen gelöscht:
 
@@ -22,8 +59,9 @@ Falls die obigen Einstellungen nicht gesetzt werden, wird quilt unnötige Patch-
 Dies ist nicht wünschenswert.
 
 
-Senden von Änderungen in das Opennet-Repository
------------------------
+Umstellung der nur-lese git-URL
+-------------------------------
+
 Für das Einbringen von Änderungen in das öffentliche Firmware-Repository benötigst du einen git-Account.
 Diesen kannst du auf der Opennet-Firmware-Mailingliste erfragen: https://list.opennet-initiative.de/mailman/listinfo/firmware
 
@@ -32,24 +70,35 @@ Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den 
     git remote set-url origin git@projects.farbdev.org:opennet/on-firmware.git
 
 
+Irrelevante Dateien von git ignorieren lassen
+---------------------------------------------
+
+Füge die folgenden Zeilen in die Datei *.git/info/exclude
+
+    \.pc
+
+
+Änderungen an der Firmware vornehmen
+====================================
+
 Eine Datei im Opennet-Repository ändern
 ---------------------------------------
 Nach dem Auschecken editiere die gewünschten Dateien. Wenn du .patch-Dateien editieren will, musst du weitere Dinge beachten (siehe andere Abschnitte). 
 
 Um deine Änderungen einzuchecken, führe folgende Kommandos aus:
 
-    #lokal einchecken
+    # lokal einchecken
     git commit
-    #(Versuch) Änderungen remote einzuchecken
+    # (Versuch) Änderungen remote einzuchecken
     git push
-    #Wenn es keinen Fehler gibt, bist du fertig. Glückwunsch!
+    # Wenn es keinen Fehler gibt, bist du fertig. Glückwunsch!
 
-    #Nun kann es sein, dass andere Personen zwischendurch Änderungen gemacht haben. Wenn dem so ist, bekommst du eine Fehlermeldung mit entsprechendem Hinweis. Dieses Problem kannst du folgendermaßen lösen. 
-    #alle vorher eingespielten Patches zurückspielen
+    # Nun kann es sein, dass andere Personen zwischendurch Änderungen gemacht haben. Wenn dem so ist, bekommst du eine Fehlermeldung mit entsprechendem Hinweis. Dieses Problem kannst du folgendermaßen lösen. 
+    # alle vorher eingespielten Patches zurückspielen
     make unpatch
-    #hole alle Änderungen von remote und wende deine Änderungen darauf an
+    # hole alle Änderungen von remote und wende deine Änderungen darauf an
     git pull --rebase
-    #deine Änderungen remote einchecken
+    # deine Änderungen remote einchecken
     git push
 
 
@@ -62,10 +111,13 @@ Im openwrt-Repository befindet sich das Basissystem und openwrt-spezifischer Cod
     quilt push -a
     # einen neuen Patch beginnen
     quilt new IRGENDEIN_THEMA.patch
+    # Hinweis: "quilt edit" ist identisch zu "quilt add", manuellen Änderungen und einem anschließenden "quilt refresh"
     quilt edit openwrt/IRGENDEINE_DATEI
     # Patch beschreiben
     quilt header -e
     # ausprobieren ...
+    # falls weitere Änderungen vorgenommen wurden, dann nochmal die Patch-Datei aktualisieren
+    quilt refresh
     # Patch committen
     git commit patches/IRGENDEIN_THEMA.patch
 
@@ -124,26 +176,45 @@ Einen bestehenden Patch verändern
         quilt header -e
 
 
-openwrt-Repositories aktualisieren
-----------------------------------
+Paket-Feeds oder das openwrt-Repository aktualisieren
+-----------------------------------------------------
 
 1. alle Patches zurücknehmen:
 
-        quilt pop -a
+        make unpatch
 
-2. in das Repository-Verzeichnis wechseln und zum gewünschten Commit wechseln:
+2. in das Repository-Verzeichnis wechseln und zum gewünschten Commit wechseln (für spezifische commits: *git checkout*):
 
-        cd openwrt; git checkout FOO; cd ..
+        cd openwrt; git pull; cd ..
 
 3. Patches wieder anwenden:
 
-        quilt push -a
+        make patch
 
 4. herumprobieren
 
 5. falls der Commit als aktueller Repository-Zustand gespeichert werden soll, dann committen:
 
         git commit openwrt
+
+
+Einen neuen Paket-Feed einbinden
+--------------------------------
+
+Ziel: den Patch patches/oni-feeds.patch verändern (z.B. um einen weiteren Feed zu erweitern)
+
+    # alle Patches zurücknehmen
+    make unpatch
+    # alle Patches auflisten
+    quilt series
+    # alles bis zu dem gewünschten Patch anwenden
+    quilt push oni-feeds.patch
+    # die neue Feeds-Quelle eintrage
+    vi openwrt/feeds.conf
+    # Patch-Datei aktuasieren
+    quilt refresh
+    # den neuen Patch in das Repository hochladen
+    git commit patches/oni-feeds.patch -m "andere feeds-Dinge hinzugefügt"
 
 
 Einzelnes Paket bauen
@@ -154,4 +225,26 @@ Für die schnelle Lösung von Build-Problemen ist es oft sinnvoll, nur das eine 
     TOPDIR=$(pwd)/openwrt make -C opennet/packages/on-core V=99
  
 
+
+Externe Dokumentationen
+=======================
+
+git
+---
+
+Die git-Doku befindet sich hier: http://git-scm.com/documentation
+
+
+quilt
+-----
+
+Wir verwenden das Patch-Verwaltungssystem *quilt*. Dies erleichtert die Erstellung und Pflege von Patch-Serien gegenüber fremden Quellen.
+
+Das Howto von *quilt* ist hier zu finden: http://repo.or.cz/w/guilt.git/blob/HEAD:/Documentation/HOWTO
+
+
+openwrt
+-------
+
+Die Entwicklungsdokumentation von *openwrt* ist hier zu finden: http://wiki.openwrt.org/doc/devel/start
 

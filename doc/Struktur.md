@@ -1,3 +1,12 @@
+Überblick
+=========
+
+Die Opennet-Entwicklungsumgebung ist die Zusammenfassung der openwrt-Repositories und ein paar weniger Opennet-Pakete.
+Zusätzlich enthält sie Patches gegenüber *openwrt*, die es bisher noch nicht in deren Repository geschafft haben oder die zu opennet-spezifisch sind.
+
+
+
+
 Historischer Rückblick: Erstellung der Entwicklungsumgebung im Jahr 2014
 ========================================================================
 
@@ -15,6 +24,7 @@ Repositories verknüpfen
     git submodule add git://git.openwrt.org/packages.git packages
     git submodule add git://git.openwrt.org/project/luci.git luci
     git submodule add git://github.com/openwrt-routing/packages.git routing
+    git submodule add http://feeds.openwrt.nanl.de/openwrt/telephony.git telephony
     git commit -m "openwrt-Repositories als Submodule eingebunden"
 
 

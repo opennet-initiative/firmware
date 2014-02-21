@@ -1,0 +1,57 @@
+This patch adds the option for building OPENVPN_nossl_ENABLE_SMALL. 
+By default OpenVPN is always built in SMALL version. But we want to
+build it in non-SMALL version. This patch enables to "not"
+select SMALL and therefore build non-SMALL.
+--- a/openwrt/package/network/services/openvpn/Config-nossl.in
++++ b/openwrt/package/network/services/openvpn/Config-nossl.in
+@@ -44,4 +44,11 @@ config OPENVPN_nossl_ENABLE_IPROUTE2
+ 	bool "Enable support for iproute2"
+ 	default n
+ 
++config OPENVPN_nossl_ENABLE_SMALL
++	bool "Enable size optimization"
++	default y
++	help
++	  enable smaller executable size (disable OCC, usage
++	  message, and verb 4 parm list)
++
+ endif
+--- a/openwrt/package/network/services/openvpn/Config-openssl.in
++++ b/openwrt/package/network/services/openvpn/Config-openssl.in
+@@ -56,4 +56,11 @@ config OPENVPN_openssl_ENABLE_IPROUTE2
+ 	bool "Enable support for iproute2"
+ 	default n
+ 
++config OPENVPN_openssl_ENABLE_SMALL
++	bool "Enable size optimization"
++	default y
++	help
++	  enable smaller executable size (disable OCC, usage
++	  message, and verb 4 parm list)
++
+ endif
+--- a/openwrt/package/network/services/openvpn/Config-polarssl.in
++++ b/openwrt/package/network/services/openvpn/Config-polarssl.in
+@@ -56,4 +56,11 @@ config OPENVPN_polarssl_ENABLE_IPROUTE2
+ 	bool "Enable support for iproute2"
+ 	default n
+ 
++config OPENVPN_polarssl_ENABLE_SMALL
++	bool "Enable size optimization"
++	default y
++	help
++	  enable smaller executable size (disable OCC, usage
++	  message, and verb 4 parm list)
++
+ endif
+--- a/openwrt/package/network/services/openvpn/Makefile
++++ b/openwrt/package/network/services/openvpn/Makefile
+@@ -66,7 +66,7 @@ CONFIGURE_VARS += \
+ 
+ define Build/Configure
+ 	$(call Build/Configure/Default, \
+-		--enable-small \
++		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_SMALL),--enable-small) \
+ 		--disable-selinux \
+ 		--disable-systemd \
+ 		--disable-plugins \

@@ -9,7 +9,7 @@ LANGUAGES = de
 all: feeds translate
 	@$(MAKE) -C on-configs list | grep "^[a-zA-Z0-9_-]\+$$" | while read arch; do \
 		$(MAKE) -C on-configs $$arch; \
-		$(MAKE) -C "$(OPENWRT_DIR)"; \
+		$(MAKE) -C "$(OPENWRT_DIR)" || exit 1; \
 	 done
 
 init:

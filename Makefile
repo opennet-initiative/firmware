@@ -6,7 +6,7 @@ LANGUAGES = de
 
 .PHONY: all clean patch unpatch menuconfig feeds
 
-all: feeds
+all: feeds translate
 	@$(MAKE) -C on-configs list | grep "^[a-zA-Z0-9_-]\+$$" | while read arch; do \
 		$(MAKE) -C on-configs $$arch; \
 		$(MAKE) -C "$(OPENWRT_DIR)"; \

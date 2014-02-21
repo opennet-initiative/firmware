@@ -21,6 +21,38 @@ Falls die obigen Einstellungen nicht gesetzt werden, wird quilt unnötige Patch-
 
 Dies ist nicht wünschenswert.
 
+
+Senden von Änderungen in das Opennet-Repository
+-----------------------
+Für das Einbringen von Änderungen in das öffentliche Firmware-Repository benötigst du einen git-Account.
+Diesen kannst du auf der Opennet-Firmware-Mailingliste erfragen: https://list.opennet-initiative.de/mailman/listinfo/firmware
+
+Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den Upstream auf die schreibfähige URL umstellen:
+
+    git remote set-url origin git@projects.farbdev.org:opennet/on-firmware.git
+
+
+Eine Datei im Opennet-Repository ändern
+---------------------------------------
+Nach dem Auschecken editiere die gewünschten Dateien. Wenn du .patch-Dateien editieren will, musst du weitere Dinge beachten (siehe andere Abschnitte). 
+
+Um deine Änderungen einzuchecken, führe folgende Kommandos aus:
+
+    #lokal einchecken
+    git commit
+    #(Versuch) Änderungen remote einzuchecken
+    git push
+    #Wenn es keinen Fehler gibt, bist du fertig. Glückwunsch!
+
+    #Nun kann es sein, dass andere Personen zwischendurch Änderungen gemacht haben. Wenn dem so ist, bekommst du eine Fehlermeldung mit entsprechendem Hinweis. Dieses Problem kannst du folgendermaßen lösen. 
+    #alle vorher eingespielten Patches zurückspielen
+    make unpatch
+    #hole alle Änderungen von remote und wende deine Änderungen darauf an
+    git pull --rebase
+    #deine Änderungen remote einchecken
+    git push
+
+
 Eine Datei im openwrt-Repository ändern
 ---------------------------------------
 
@@ -122,13 +154,4 @@ Für die schnelle Lösung von Build-Problemen ist es oft sinnvoll, nur das eine 
     TOPDIR=$(pwd)/openwrt make -C opennet/packages/on-core V=99
  
 
-Senden von Änderungen in das Opennet-Repository
-===============================================
-
-Für das Einbringen von Änderungen in das öffentliche Firmware-Repository benötigst du einen git-Account.
-Diesen kannst du auf der Opennet-Firmware-Mailingliste erfragen: https://list.opennet-initiative.de/mailman/listinfo/firmware
-
-Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den Upstream auf die schreibfähige URL umstellen:
-
-    git remote set-url origin git@projects.farbdev.org:opennet/on-firmware.git
 

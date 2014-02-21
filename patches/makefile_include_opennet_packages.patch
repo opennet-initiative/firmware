@@ -11,8 +11,8 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +
 +
 +define Package/opennet/install/template
-+	$(CP) -a $(PKG_BUILD_DIR)/$(2)/files/* $(1)/ -R
-+	$(CP) -a $(PKG_BUILD_DIR)/$(2)/ipkg/* $(1)/CONTROL/ 2>/dev/null || true
++	$(CP) -a $(PKG_BUILD_DIR)/files/* $(1)/ -R
++	$(CP) -a $(PKG_BUILD_DIR)/ipkg/* $(1)/CONTROL/ 2>/dev/null || true
 +endef
 +
 +# falls Build/Compile nicht definiert wird, dann wird das Makefile aus dem build_dir geloescht

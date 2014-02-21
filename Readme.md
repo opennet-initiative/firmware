@@ -141,6 +141,14 @@ openwrt-Repositories aktualisieren
         git commit openwrt
 
 
+Einzelnes Paket bauen
+---------------------
+
+Für die schnelle Lösung von Build-Problemen ist es oft sinnvoll, nur das eine problematische Paket erstellen zu lassen:
+
+    TOPDIR=$(pwd)/openwrt make -C opennet/packages/on-core V=99
+ 
+
 Senden von Änderungen in das Opennet-Repository
 ===============================================
 

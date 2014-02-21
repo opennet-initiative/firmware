@@ -1,0 +1,267 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-05-18 19:45+0200\n"
+"Last-Translator: rene <opennet@absorb.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid ""
+"After the configuration is done, it's the beste to restart the Router once - "
+"it's still the beste way to get a clean environment"
+msgstr ""
+"Wenn die erste Konfiguration erledigt ist, is es sinnvoll den Accesspoint "
+"neu zu starten. Das ist immer noch der beste Weg eine saubere stabile "
+"Umgebung zu erhalten"
+
+msgid "Base"
+msgstr "Basis"
+
+msgid "Base Configuration"
+msgstr "Basis-Konfiguration"
+
+msgid ""
+"Basic Network Configuration - just enter your Opennet ID and everything will "
+"be adapted"
+msgstr ""
+"Grundlegende Netzwerk-Konfiguration - einfach deine Opennet-ID eingeben und "
+"die Interfaces werden entsprechend konfiguriert"
+
+msgid "Confirmation"
+msgstr ""
+
+msgid "Extended Configuration"
+msgstr "Erweiterte Konfiguration"
+
+msgid "Forwarding from DHCP-wireless network"
+msgstr "Weiterleitung aus dem DHCP-Funknetz"
+
+msgid "Forwarding from Internet (WAN-connector)"
+msgstr "Weiterleitung aus dem Internet (WAN-Anschluss)"
+
+msgid "Forwarding from Opennet"
+msgstr "Weiterleitung aus dem Opennet"
+
+msgid "Forwarding from the Internet through your OpenVPN tunnel"
+msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
+
+msgid "Graphs"
+msgstr "Graphen"
+
+msgid "Hardware-Information:"
+msgstr "Geräteinfo:"
+
+msgid ""
+"If you like to forward ports from the outside (for instance the Internet) to "
+"Computers in your local network, configure it here."
+msgstr ""
+"Wenn Du Ports von anderen Netzwerken (bspw. aus dem Internet) zu Computern "
+"in Deinem lokalen Netzwerk weiterleiten möchtest, kannst Du dies hier "
+"konfigurieren."
+
+msgid ""
+"If you like to use the Internet, you should create or upload your OpenVPN "
+"Certificates and Keys here"
+msgstr ""
+"Wenn Du Internet nutzen möchtest, solltest Du hier Dein Zertifikat und "
+"deinen Schlüssel hochladen oder zuerst eine Zertifikat-Anfrage erstellen"
+
+msgid "Internet Sharing"
+msgstr "Internet Freigabe"
+
+msgid "Loading"
+msgstr "Lade"
+
+msgid "Neighbors:"
+msgstr "Nachbarn:"
+
+msgid "Network"
+msgstr "Netzwerk"
+
+msgid "Networks:"
+msgstr "Netzwerk:"
+
+msgid "OLSR-Status"
+msgstr ""
+
+msgid "ON Extended"
+msgstr "ON Erweitert"
+
+msgid "OpenVPN:"
+msgstr "OpenVPN:"
+
+msgid "Opennet"
+msgstr "Opennet"
+
+msgid "Opennet ID"
+msgstr "Opennet ID"
+
+msgid "Opennet-ID / Network ID"
+msgstr "Opennet-ID / Netzwerk ID"
+
+msgid "Password"
+msgstr "Passwort"
+
+msgid "Password successfully changed!"
+msgstr ""
+
+msgid "Perform Reboot"
+msgstr "Neustart durchführen"
+
+msgid "Please wait: Device rebooting..."
+msgstr "Please wait: Device rebooting..."
+
+msgid "Port-Mapping"
+msgstr "Port-Mapping"
+
+msgid "Portmapping - Forwarding of Ports"
+msgstr "Portmapping - Weiterleitung von Ports"
+
+msgid "Reboot"
+msgstr "Neustart"
+
+msgid "Reboots the operating system of your device"
+msgstr "Neustart des Betriebssytem deines Routers"
+
+msgid "Remove Configuration and Reboot"
+msgstr "Konfiguration entfernen und Router Neustarten"
+
+msgid "Router Password"
+msgstr ""
+
+msgid "Source-Port"
+msgstr "Quell-Port"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Status Information"
+msgstr "Status Information"
+
+msgid "System Reboot"
+msgstr "System Neustart"
+
+msgid "System:"
+msgstr "System:"
+
+msgid "Target-Address"
+msgstr "Ziel-Adresse"
+
+msgid "Target-Port"
+msgstr "Ziel-Port"
+
+msgid ""
+"The following points are the ones required to configure any Opennet Access-"
+"Point. Please use them all if the mentioned order if you like to configure "
+"your Accesspoint the easiest way. Choose the items below or from the menu on "
+"the left."
+msgstr ""
+"Die folgenden Punkte sind für eine Konfiguration des Opennet-Accesspoints "
+"notwendig. Bitte arbeite diese einfach in der vorgegebenen Reihenfolge ab, "
+"wenn Du Deinen Accesspoint einfach konfigurieren willst."
+
+msgid ""
+"The following points are useful if you like to specifically change some "
+"Accesspoint behavior. They are not required for proper work of your "
+"Accesspoint, but can be really useful if you like to extend the "
+"functionality of your Accesspoint."
+msgstr ""
+"Die folgenden Punkte sind nötig, um die Funktion des Accesspoints "
+"spezifischer zu beeinflussen. Diese sind nicht unbedingt für einen "
+"reibungslosen Betrieb des Accesspoints nötig, können aber bei besonderen "
+"Gegebenheiten sehr nützlich sein."
+
+msgid ""
+"The following ports will be forwarded from Opennet (usually WIFI) to "
+"computers in your local network. They are usually not reachable directly "
+"from the Internet. This section might contain forwardings for Free Internet "
+"Access (Wifidog, port 67) and Internet Sharing (Usergateway Forwarding, "
+"ports 1600 and 123)."
+msgstr ""
+"Die folgenden Ports werden aus dem Opennet (WLAN) an Rechner im lokalen "
+"Netzwerk weitergeleitet. Sie sind vom Internet aus nicht (direkt) "
+"erreichbar. Dieser Bereich kann Weiterleitungen für freien Netzwerkzugriff "
+"(Wifidog, port 67) und Internet-Freigabe (Usergateway-Weiterleitung, ports "
+"1600 und 123) enthalten."
+
+msgid ""
+"The following ports will be forwarded from computers connected to your WIFI "
+"(and not running olsr) to computers in your local network."
+msgstr ""
+"Die folgenden Ports werden aus dem WLAN von Rechnern ohne olsr mit einer "
+"Adresse im lokalen Wireless DHCP-Bereich an Rechner im lokalen Netzwerk "
+"weitergeleitet."
+
+msgid ""
+"The follwing ports will be forwarded from Internet (your WAN connector) to "
+"your local network. If Internet is connected to your WAN, these ports are "
+"directly reachable from the outside."
+msgstr ""
+"Die folgenden Ports werden aus dem Internet (WAN) an Rechner im lokalen "
+"Netzwerk weitergeleitet. Sie sind vom Internet aus direkt erreichbar."
+
+msgid ""
+"The target should be an IP-Address in your local network. Additionally you "
+"can enter the target port in the related field."
+msgstr ""
+"Als Ziel der Weiterleitungen muss eine IP-Adresse im lokalen Netzwerk "
+"angegeben werden. Zusätzlich kann ein Zielport angegeben werden."
+
+msgid ""
+"This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to "
+"the requirements of Opennet Rostock."
+msgstr ""
+"Auf diesem Access-Point läuft die Opennet-Firmware, eine Anpassung von "
+"OpenWrt auf die Bedürfnisse von Opennet Rostock."
+
+msgid ""
+"This is the place where you can configure your Opennet-Internet-Gateways. "
+"Select, how they are ordered and add or blacklist specific Gateways"
+msgstr ""
+"Hier kannst Du die OpenVPN-Internet-Gateways konfigurieren. Wähle aus, wie "
+"diese sortiert werde und füge spezifische Gateways hinzu oder blockiere "
+"diese."
+
+msgid "Unknown Error, password not changed!"
+msgstr ""
+
+msgid "Uptime:"
+msgstr "Gerätelaufzeit:"
+
+msgid "VPN Gateways"
+msgstr "VPN Gateways"
+
+msgid "VPN Tunnel"
+msgstr "VPN Tunnel"
+
+msgid "Welcome to the Configuration Pages of your Access Point"
+msgstr "Willkommen zu den Verwaltungs-Seiten dieser Access-Points!"
+
+msgid "Welcome to the Extended Configuration Pages of your Access Point"
+msgstr "Willkommen zu den Erweiterten Verwaltungs-Seiten dieser Access-Points!"
+
+msgid "Wireless:"
+msgstr "Funknetz:"
+
+msgid ""
+"You have some WAN-connection like DSL and like to share the Internet? Here "
+"you can create and manage the required VPN-Certificates to turn your "
+"Accesspoint into a User-Gateway. If you like to enable or disable the "
+"Internet-Sharing, this is the place to choose"
+msgstr ""
+"Wenn Du eine WAN-Verbindung (wie bspw. DSL) hast und Internet im Opennet "
+"anbieten möchtest, ist hier die notwendige Konfiguration. Hier erstellst und "
+"verwaltest Du die benötigten VPN-Zertifikate und entscheidest, ob und wann "
+"Du Dein Internet freigeben möchtest."
+
+msgid "You should change the default password into some privat one here"
+msgstr "Du solltest das Standard-Passwort ändern, wähle dafür diesen Punkt"
+
+msgid "device"
+msgstr "Schnittstelle"
+
+msgid "related network addresses"
+msgstr "zugehörige Netzwerkadressen"
+
+msgid "use"
+msgstr "übernehmen"

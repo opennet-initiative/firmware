@@ -1,0 +1,89 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid "Change announced Address (useful if collisions arise)."
+msgstr ""
+
+msgid ""
+"Check MTU to and from the Gateways (again). This will take approximately 5 "
+"minutes per Gateway."
+msgstr ""
+
+msgid ""
+"Check VPN availability of Gateways (again). This will take approximately 10 "
+"seconds per Gateway."
+msgstr ""
+
+msgid ""
+"Check route trough WAN and ping-time of Gateways (again). This will take "
+"approximately 5 seconds per Gateway."
+msgstr ""
+
+msgid ""
+"Check speed to and from the Gateways (again). This will take approximately 1 "
+"minute per Gateway."
+msgstr ""
+
+msgid "Internet Sharing"
+msgstr ""
+
+msgid "Internet Sharing Status Overview"
+msgstr ""
+
+msgid "Loading"
+msgstr ""
+
+msgid "Opennet Usergateways"
+msgstr ""
+
+msgid "Status Details, all checks have to be successful"
+msgstr ""
+
+msgid "Status Internet-Sharing"
+msgstr ""
+
+msgid "This will take approximately 1 minute per Gateway"
+msgstr ""
+
+msgid "This will take approximately 10 seconds per Gateway"
+msgstr ""
+
+msgid "This will take approximately 5 minutes per Gateway"
+msgstr ""
+
+msgid "This will take approximately 5 seconds per Gateway"
+msgstr ""
+
+msgid "Usergateway-Status"
+msgstr ""
+
+msgid "[[No IP-Address found for Gateway-Name, Gateway cannot be used]]"
+msgstr ""
+
+msgid "add"
+msgstr ""
+
+msgid ""
+"automated check is running, manual modifications are temporarily disabled"
+msgstr ""
+
+msgid "check MTU"
+msgstr ""
+
+msgid "check Speed"
+msgstr ""
+
+msgid "check VPN"
+msgstr ""
+
+msgid "check WAN-Connection"
+msgstr ""
+
+msgid "delete"
+msgstr ""
+
+msgid "down"
+msgstr ""
+
+msgid "up"
+msgstr ""

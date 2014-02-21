@@ -1,0 +1,224 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid ""
+"After the configuration is done, it's the beste to restart the Router once - "
+"it's still the beste way to get a clean environment"
+msgstr ""
+
+msgid "Base"
+msgstr ""
+
+msgid "Base Configuration"
+msgstr ""
+
+msgid ""
+"Basic Network Configuration - just enter your Opennet ID and everything will "
+"be adapted"
+msgstr ""
+
+msgid "Confirmation"
+msgstr ""
+
+msgid "Extended Configuration"
+msgstr ""
+
+msgid "Forwarding from DHCP-wireless network"
+msgstr ""
+
+msgid "Forwarding from Internet (WAN-connector)"
+msgstr ""
+
+msgid "Forwarding from Opennet"
+msgstr ""
+
+msgid "Forwarding from the Internet through your OpenVPN tunnel"
+msgstr ""
+
+msgid "Graphs"
+msgstr ""
+
+msgid "Hardware-Information:"
+msgstr ""
+
+msgid ""
+"If you like to forward ports from the outside (for instance the Internet) to "
+"Computers in your local network, configure it here."
+msgstr ""
+
+msgid ""
+"If you like to use the Internet, you should create or upload your OpenVPN "
+"Certificates and Keys here"
+msgstr ""
+
+msgid "Internet Sharing"
+msgstr ""
+
+msgid "Loading"
+msgstr ""
+
+msgid "Neighbors:"
+msgstr ""
+
+msgid "Network"
+msgstr ""
+
+msgid "Networks:"
+msgstr ""
+
+msgid "OLSR-Status"
+msgstr ""
+
+msgid "ON Extended"
+msgstr ""
+
+msgid "OpenVPN:"
+msgstr ""
+
+msgid "Opennet"
+msgstr ""
+
+msgid "Opennet ID"
+msgstr ""
+
+msgid "Opennet-ID / Network ID"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Password successfully changed!"
+msgstr ""
+
+msgid "Perform Reboot"
+msgstr ""
+
+msgid "Please wait: Device rebooting..."
+msgstr ""
+
+msgid "Port-Mapping"
+msgstr ""
+
+msgid "Portmapping - Forwarding of Ports"
+msgstr ""
+
+msgid "Reboot"
+msgstr ""
+
+msgid "Reboots the operating system of your device"
+msgstr ""
+
+msgid "Remove Configuration and Reboot"
+msgstr ""
+
+msgid "Router Password"
+msgstr ""
+
+msgid "Source-Port"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Status Information"
+msgstr ""
+
+msgid "System Reboot"
+msgstr ""
+
+msgid "System:"
+msgstr ""
+
+msgid "Target-Address"
+msgstr ""
+
+msgid "Target-Port"
+msgstr ""
+
+msgid ""
+"The following points are the ones required to configure any Opennet Access-"
+"Point. Please use them all if the mentioned order if you like to configure "
+"your Accesspoint the easiest way. Choose the items below or from the menu on "
+"the left."
+msgstr ""
+
+msgid ""
+"The following points are useful if you like to specifically change some "
+"Accesspoint behavior. They are not required for proper work of your "
+"Accesspoint, but can be really useful if you like to extend the "
+"functionality of your Accesspoint."
+msgstr ""
+
+msgid ""
+"The following ports will be forwarded from Opennet (usually WIFI) to "
+"computers in your local network. They are usually not reachable directly "
+"from the Internet. This section might contain forwardings for Free Internet "
+"Access (Wifidog, port 67) and Internet Sharing (Usergateway Forwarding, "
+"ports 1600 and 123)."
+msgstr ""
+
+msgid ""
+"The following ports will be forwarded from computers connected to your WIFI "
+"(and not running olsr) to computers in your local network."
+msgstr ""
+
+msgid ""
+"The follwing ports will be forwarded from Internet (your WAN connector) to "
+"your local network. If Internet is connected to your WAN, these ports are "
+"directly reachable from the outside."
+msgstr ""
+
+msgid ""
+"The target should be an IP-Address in your local network. Additionally you "
+"can enter the target port in the related field."
+msgstr ""
+
+msgid ""
+"This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to "
+"the requirements of Opennet Rostock."
+msgstr ""
+
+msgid ""
+"This is the place where you can configure your Opennet-Internet-Gateways. "
+"Select, how they are ordered and add or blacklist specific Gateways"
+msgstr ""
+
+msgid "Unknown Error, password not changed!"
+msgstr ""
+
+msgid "Uptime:"
+msgstr ""
+
+msgid "VPN Gateways"
+msgstr ""
+
+msgid "VPN Tunnel"
+msgstr ""
+
+msgid "Welcome to the Configuration Pages of your Access Point"
+msgstr ""
+
+msgid "Welcome to the Extended Configuration Pages of your Access Point"
+msgstr ""
+
+msgid "Wireless:"
+msgstr ""
+
+msgid ""
+"You have some WAN-connection like DSL and like to share the Internet? Here "
+"you can create and manage the required VPN-Certificates to turn your "
+"Accesspoint into a User-Gateway. If you like to enable or disable the "
+"Internet-Sharing, this is the place to choose"
+msgstr ""
+
+msgid "You should change the default password into some privat one here"
+msgstr ""
+
+msgid "device"
+msgstr ""
+
+msgid "related network addresses"
+msgstr ""
+
+msgid "use"
+msgstr ""

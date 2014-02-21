@@ -1,4 +1,8 @@
 OPENWRT_DIR = openwrt
+LUCI_DIR = luci
+CUSTOM_PO_DIR = opennet/po
+CUSTOM_PACKAGES_DIR = opennet/packages
+LANGUAGES = de
 
 .PHONY: all clean patch unpatch menuconfig feeds
 
@@ -18,6 +22,15 @@ menuconfig: feeds
 	$(MAKE) -C "$(OPENWRT_DIR)" menuconfig
 	@quilt diff
 	@quilt delete
+
+translate:
+	@find "$(CUSTOM_PACKAGES_DIR)" -mindepth 1 -maxdepth 1 -type d | while read dname; do \
+		"$(LUCI_DIR)/build/i18n-scan.pl" "$$dname" >"$(CUSTOM_PO_DIR)/templates/$$(basename "$$dname").pot"; \
+		for lang in $(LANGUAGES); do \
+			echo "$(CUSTOM_PO_DIR)/$$lang/$$(basename "$$dname").po"; \
+		 done | while read fname; do test ! -e "$$fname" && touch "$$fname" || true; done; \
+	 done
+	@"$(LUCI_DIR)/build/i18n-update.pl" "$(CUSTOM_PO_DIR)"
 
 feeds: patch
 	"$(OPENWRT_DIR)/scripts/feeds" update -a

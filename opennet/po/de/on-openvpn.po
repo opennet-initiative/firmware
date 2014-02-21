@@ -1,0 +1,144 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-05-18 19:45+0200\n"
+"Last-Translator: rene <opennet@absorb.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "...more Information..."
+msgstr "...mehr Informationen..."
+
+msgid "...show..."
+msgstr "...anzeigen..."
+
+msgid "Certificate (.crt)"
+msgstr "Zertifikat (.crt)"
+
+msgid "Certificate Name"
+msgstr "Zertifikat-Name"
+
+msgid "Certificate Request (.csr)"
+msgstr "Zertifikat-Anfrage (.csr)"
+
+msgid "Country"
+msgstr ""
+
+msgid "Current Gateway"
+msgstr "Aktueller Gateway"
+
+msgid "Distance"
+msgstr "Entfernung"
+
+msgid "Gateway-Blacklist"
+msgstr "Gateway-Blacklist"
+
+msgid "Gateway-List"
+msgstr "Gateway-Liste"
+
+msgid "Here you can configure the IP-Addresses of your choosen Gateways."
+msgstr ""
+"In diesem Bereich können die IP-Adressen der von Dir gewünschten OpenVPN-"
+"Gateways konfiguriert werden."
+
+msgid "IP Address"
+msgstr "IP Adresse"
+
+msgid "Key Generation"
+msgstr "Schlüssel Erzeugung"
+
+msgid "Key Management"
+msgstr "Schlüssel Verwaltung"
+
+msgid "Key/Cert Status"
+msgstr "Status Schlüssel/Zertifikat"
+
+msgid "Loading"
+msgstr "Lade"
+
+msgid "Locality"
+msgstr "Ort"
+
+msgid "Member Email Address"
+msgstr "Deine EMail Adresse"
+
+msgid "Member Name"
+msgstr "Dein Name"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Opennet OpenVPN Gateways"
+msgstr "Opennet OpenVPN Gateways"
+
+msgid "Organizational Unit"
+msgstr "Organisations-Einheit"
+
+msgid "Private Key (.key)"
+msgstr "Geheimer Schlüssel (.key)"
+
+msgid "Province"
+msgstr "Bundesland"
+
+msgid "Select Gateway"
+msgstr "Gateway auswählen"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Test-Age"
+msgstr "Testalter"
+
+msgid "VPN Gateways"
+msgstr "VPN Gateways"
+
+msgid "VPN Tunnel"
+msgstr "VPN Tunnel"
+
+msgid "VPN-Status"
+msgstr "VPN-Status"
+
+msgid "activated"
+msgstr "aktiv"
+
+msgid "active"
+msgstr "Aktiv"
+
+msgid "add"
+msgstr "hinzufügen"
+
+msgid "automated gateway-search"
+msgstr "automatische Gateway-Suche"
+
+msgid "deactivated"
+msgstr "aus"
+
+msgid "decrease offset"
+msgstr "Offset verringern"
+
+msgid "download"
+msgstr "herunterladen"
+
+msgid "generate"
+msgstr "erzeuge Schlüssel"
+
+msgid "increase offset"
+msgstr "Offset erhöhen"
+
+msgid "reset test counter"
+msgstr "zurücksetzen"
+
+msgid "search file"
+msgstr "suche Datei"
+
+msgid "toggle"
+msgstr "umschalten"
+
+msgid "upload"
+msgstr "hochladen"
+
+msgid "upload Certificate (.crt) or Private Key (.key)"
+msgstr "hochladen von Zertifikat (.crt) oder Geheimem Schlüssel (.key)"
+
+msgid "uploaded or generated on this date."
+msgstr "bei dieser Zeit erstellt oder hochgeladen"

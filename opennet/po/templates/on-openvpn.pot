@@ -1,0 +1,137 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid "...more Information..."
+msgstr ""
+
+msgid "...show..."
+msgstr ""
+
+msgid "Certificate (.crt)"
+msgstr ""
+
+msgid "Certificate Name"
+msgstr ""
+
+msgid "Certificate Request (.csr)"
+msgstr ""
+
+msgid "Country"
+msgstr ""
+
+msgid "Current Gateway"
+msgstr ""
+
+msgid "Distance"
+msgstr ""
+
+msgid "Gateway-Blacklist"
+msgstr ""
+
+msgid "Gateway-List"
+msgstr ""
+
+msgid "Here you can configure the IP-Addresses of your choosen Gateways."
+msgstr ""
+
+msgid "IP Address"
+msgstr ""
+
+msgid "Key Generation"
+msgstr ""
+
+msgid "Key Management"
+msgstr ""
+
+msgid "Key/Cert Status"
+msgstr ""
+
+msgid "Loading"
+msgstr ""
+
+msgid "Locality"
+msgstr ""
+
+msgid "Member Email Address"
+msgstr ""
+
+msgid "Member Name"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Opennet OpenVPN Gateways"
+msgstr ""
+
+msgid "Organizational Unit"
+msgstr ""
+
+msgid "Private Key (.key)"
+msgstr ""
+
+msgid "Province"
+msgstr ""
+
+msgid "Select Gateway"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Test-Age"
+msgstr ""
+
+msgid "VPN Gateways"
+msgstr ""
+
+msgid "VPN Tunnel"
+msgstr ""
+
+msgid "VPN-Status"
+msgstr ""
+
+msgid "activated"
+msgstr ""
+
+msgid "active"
+msgstr ""
+
+msgid "add"
+msgstr ""
+
+msgid "automated gateway-search"
+msgstr ""
+
+msgid "deactivated"
+msgstr ""
+
+msgid "decrease offset"
+msgstr ""
+
+msgid "download"
+msgstr ""
+
+msgid "generate"
+msgstr ""
+
+msgid "increase offset"
+msgstr ""
+
+msgid "reset test counter"
+msgstr ""
+
+msgid "search file"
+msgstr ""
+
+msgid "toggle"
+msgstr ""
+
+msgid "upload"
+msgstr ""
+
+msgid "upload Certificate (.crt) or Private Key (.key)"
+msgstr ""
+
+msgid "uploaded or generated on this date."
+msgstr ""

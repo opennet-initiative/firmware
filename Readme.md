@@ -17,9 +17,13 @@ Lokale Build-Umgebung einrichten
     cd on-firmware
     make init
 
-Nun kannst du mit folgendem Kommando die aktuelle Firmware bauen:
+Eine spezielle Architektur (z.B. ar71xx)  kannst du bauen mit:
+    
+    make ar71xx
+
+Alternativ kannst du mit folgendem Kommando die Firmware für alle Architekturen bauen:
 
     make all
 
-Dieser Prozess wird (insbesondere beim ersten Mail) viele Stunden dauern, da zuerst die Cross-Compile-Toolchain für die jeweilige Zielplattform erzeugt werden muss.
+Dieser Prozess wird (insbesondere beim ersten Mal) viele Stunden dauern, da zuerst die Cross-Compile-Toolchain für die jeweilige Zielplattform erzeugt werden muss.
 

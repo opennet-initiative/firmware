@@ -1,7 +1,7 @@
 die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 --- /dev/null
 +++ b/openwrt/include/opennet.mk
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,31 @@
 +PKG_VERSION:=0.5
 +PKG_RELEASE:=1
 +PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -11,10 +11,11 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +
 +
 +define Package/opennet/install/template
-+	$(CP) -a $(PKG_BUILD_DIR)/files/* $(1)/ -R
-+	$(CP) -a $(PKG_BUILD_DIR)/ipkg/* $(1)/CONTROL/ 2>/dev/null || true
++	$(CP) -a -R "$(PKG_BUILD_DIR)/files" "$(1)/"
++	$(CP) -a -R "$(PKG_BUILD_DIR)/ipkg" "$(1)/CONTROL"
 +	$(INSTALL_DIR) "$(1)/usr/lib/lua/luci/i18n"
-+	$(CP) "$(PKG_BUILD_DIR)/lmo"/*.lmo "$(1)/usr/lib/lua/luci/i18n/"
++	# leere po-Dateien fuehren zu fehlenden lmo-Dateien (z.B. on-core) - das koennen wir ignorieren
++	$(CP) "$(PKG_BUILD_DIR)/lmo"/*.lmo "$(1)/usr/lib/lua/luci/i18n/" || true
 +endef
 +
 +# falls Build/Compile nicht definiert wird, dann wird das Makefile aus dem build_dir geloescht

@@ -99,9 +99,6 @@ msgstr "Deine EMail Adresse"
 msgid "generate"
 msgstr "erzeuge Schlüssel"
 
-msgid "countryName"
-msgstr "Land"
-
 msgid "stateOrProvinceName"
 msgstr "Bundesland"
 

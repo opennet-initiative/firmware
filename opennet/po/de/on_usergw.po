@@ -40,13 +40,13 @@ msgid "Internet-Sharing impossible"
 msgstr "Internet-Freigabe ist nicht möglich"
 
 msgid "<abbr title='Annouced Address, which stands for the local Gateway. This address might be changed automatically if it is announced by some other Gateway in the network'>Usergateway-Address</abbr>:"
-msgid "<abbr title='Verbeitete Adresse für den lokalen Gateway. Diese Adresse kann automatisch geändert werden, wenn sie von einem anderen Gateway genutzt wird'>Usergateway-Adresse</abbr>:"
+msgstr "<abbr title='Verbeitete Adresse für den lokalen Gateway. Diese Adresse kann automatisch geändert werden, wenn sie von einem anderen Gateway genutzt wird'>Usergateway-Adresse</abbr>:"
 
 msgid "Change announced HNA Address"
-msgid "Ändere Adresse des lokalen Gateways (HNA-Adresse)"
+msgstr "Ändere Adresse des lokalen Gateways (HNA-Adresse)"
 
 msgid "change Address"
-msgid "ändere Adresse"
+msgstr "ändere Adresse"
 
 msgid "no central Gateway-IPs connected trough tunnel"
 msgstr "keine zentralen Gateway-IPs sind über den Tunnel eingebunden"
@@ -260,9 +260,6 @@ msgstr "Deine EMail Adresse"
 
 msgid "generate"
 msgstr "erzeuge Schlüssel"
-
-msgid "countryName"
-msgstr "Land"
 
 msgid "stateOrProvinceName"
 msgstr "Bundesland"

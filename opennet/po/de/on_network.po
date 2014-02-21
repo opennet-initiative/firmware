@@ -18,7 +18,7 @@ msgstr "Schön, dass Du Dich für das Mitmachen beim Opennet entschieden hast. D
 msgid "Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your first Opennet-Network-Interface, any change will reconfigure your network settings immediately."
 msgstr "Bitte gebe die Opennet-ID (1.X oder 2.X o.ä) oder die Opennet Netzwerk-Adresse ein, jede Änderung wird die Netzwerkkarten umgehend neu konfigurieren:"
 
-msgid "Be aware that the network will be restarted immediately,\n and you might loose the contact to your router.\n\nAre you really wan\'t to update the network-id?"
+msgid "Be aware that the network will be restarted immediately,\n and you might loose the contact to your router.\n\nAre you really wan't to update the network-id?"
 msgstr "Dies wird alle Netzwerkverbindungen sofort neu starten,\n es kann sein dass Du den Kontakt zum Router verlierst.\n\nWillst Du die Netzwerk-ID wirklich ändern?"
 
 msgid "use"

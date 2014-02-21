@@ -1,20 +1,16 @@
 Offene Aufgaben
 ===============
 
-Übersetzungen
--------------
-
-siehe luci/Makefile:
- 
-    i18nbuild:
-            mkdir -p host/lua-po
-            ./build/i18n-po2lua.pl ./po host/lua-po
-
-Wahrscheinlich muss in jedem uebersetzungsfaehigen Paket die obige Zeile in der Build-Anweisung eingetragen werden.
-
-
 ondataservice integrieren
 -------------------------
+
+Das ondataservice-Plugin ist noch nicht in den Feeds  sichtbar. Ein Teild des Patch muss auf das Makefile angewandt werden.
+
+
+Konfigurationsdateien
+---------------------
+
+In den opennet-Paketen muessen die Konfigurationsdateien explizit genannt werden.
 
 
 Unklarheiten

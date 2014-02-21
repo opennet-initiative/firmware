@@ -16,9 +16,9 @@ $(ARCHS): feeds translate
 
 init:
 	@# update submodules if necessary
-	@test ! -d "$(OPENWRT_DIR)/package" && git submodule init || true
-	@git submodule update
-	@test -z "$$QUILT_DIFF_ARGS" && echo >&2 "ACHTUNG: Die erforderlichen quilt-Einstellungen sind derzeit nicht aktiv. Im zweiten Absatz von Readme.md werden die Konsequenzen und die Behebung dieses Mangels erklaert."
+	git submodule init --quiet
+	git submodule update
+	@test -z "$$QUILT_DIFF_ARGS" -a ! -e ~/.quiltrc && echo >&2 "HINWEIS: falls du Patches aendern moechtest, dann lies bitte doc/Entwicklung.md (Stichwort: 'quilt-Konfiguration')" || true
 
 menuconfig: feeds
 	@# verfolge Aenderungen an der .config-Datei und zeige sie nach menuconfig an

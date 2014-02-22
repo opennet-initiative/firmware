@@ -51,8 +51,9 @@ Füge die folgenden Zeilen in die Datei *.git/info/exclude
 Änderungen an der Firmware vornehmen
 ====================================
 
-Eine Datei im Opennet-Repository ändern
----------------------------------------
+Änderungen im Opennet-Repository auf den Server pushen
+------------------------------------------------------
+
 Nach dem Auschecken editiere die gewünschten Dateien. Wenn du .patch-Dateien editieren will, musst du weitere Dinge beachten (siehe andere Abschnitte). 
 
 Um deine Änderungen einzuchecken, führe folgende Kommandos aus:
@@ -63,13 +64,31 @@ Um deine Änderungen einzuchecken, führe folgende Kommandos aus:
     git push
     # Wenn es keinen Fehler gibt, bist du fertig. Glückwunsch!
 
-    # Nun kann es sein, dass andere Personen zwischendurch Änderungen gemacht haben. Wenn dem so ist, bekommst du eine Fehlermeldung mit entsprechendem Hinweis. Dieses Problem kannst du folgendermaßen lösen. 
+Nun kann es sein, dass andere Personen zwischendurch Änderungen gemacht haben. Wenn dem so ist, bekommst du eine Fehlermeldung mit entsprechendem Hinweis. Dieses Problem kannst du folgendermaßen lösen: 
+
     # alle vorher eingespielten Patches zurückspielen
     make unpatch
     # hole alle Änderungen von remote und wende deine Änderungen darauf an
     git pull --rebase
     # deine Änderungen remote einchecken
     git push
+
+
+Änderungen vom entfernten git-Repository lokal pullen
+-----------------------------------------------------
+
+Prinzipiell ist die Arbeit mit dem opennet-Repository identisch mit dem üblichen Umgang mit git-Arbeitsumgebungen.
+Lediglich die *quilt*-Patches führen unter besonderen Bedingungen zu einem leicht geänderten Verhalten.
+Daher wird anstelle des üblichen `git pull` folgende Abfolge empfohlen:
+
+    # lokale Patches zurücknehmen (vermeidet Konflikte, falls Patch-Dateien geändert werden)
+    make unpatch
+    # entfernte Änderungen 
+    git pull --rebase
+
+
+**Achtung**: `git pull --rebase` manipuliert deine lokale git-History. Falls du frische lokale Commits also bereits zu einem anderen Server übertragen haben solltest, dann führt dies zu unüberschaubaren Chaos. Verzichte in diesem Fall auf `--rebase`.
+
 
 
 Eine Datei im openwrt-Repository ändern
@@ -146,8 +165,8 @@ Einen bestehenden Patch verändern
         quilt header -e
 
 
-Paket-Feeds oder das openwrt-Repository aktualisieren
------------------------------------------------------
+Paket-Repositories oder das openwrt-Repository aktualisieren
+------------------------------------------------------------
 
 1. alle Patches zurücknehmen:
 
@@ -181,7 +200,7 @@ Ziel: den Patch patches/oni-feeds.patch verändern (z.B. um einen weiteren Feed 
     quilt push oni-feeds.patch
     # die neue Feeds-Quelle eintrage
     vi openwrt/feeds.conf
-    # Patch-Datei aktuasieren
+    # Patch-Datei aktualisieren
     quilt refresh
     # den neuen Patch in das Repository hochladen
     git commit patches/oni-feeds.patch -m "andere feeds-Dinge hinzugefügt"
@@ -194,6 +213,34 @@ Für die schnelle Lösung von Build-Problemen ist es oft sinnvoll, nur das eine 
 
     TOPDIR=$(pwd)/openwrt make -C opennet/packages/on-core V=99
  
+
+Neue Pakete oder Paketoptionen einbinden
+----------------------------------------
+
+Die Liste vorhandener Pakete und ihrer Einstellungen wird mit dem *feeds*-Skript von openwrt verwaltet. Die Feeds werden mittels des meta-Makefile vor jedem Build und vor jedem Aufruf von `make menuconfig` aktualisiert. Du kannst dies jedoch auch manuell auslösen:
+
+    make feeds
+
+
+Fehler beim Build analysieren
+-----------------------------
+
+Eine detaillierte Fehlerausgabe erhältst mit der make-Zugabe von `V=s`:
+
+    make ar71xx V=s
+
+Dabei erleichtert es den Überblick deutlich, wenn du parallele Build-Prozess (z.B. `-j 3`) *nicht* verwendest. Andernfalls musst du eventuell ein paar Seiten in der Build-Ausgabe zurückblättern, um die Fehlermeldung zu finden.
+
+
+Parallele Build-Prozesse für Mehr-Kern-Prozessoren
+--------------------------------------------------
+
+Wie üblich in make-Buildumgebung kannst du manuell mehrere parallele Prozesse für den Paketbau verwenden. Als Faustregel wird üblicherweise ein Wert von *Anzahl der Kerne + 1* empfohlen. Bei einem vier-Kern-Rechner wäre dies folgende Zeile:
+
+    make -j 5
+
+In den ersten 20 Zeilen der Build-Ausgabe wirst du ein paar Fehlermeldung bezüglich `-j1` finden - diese sind ein Indikator für eine openwert-spezifische Unfeinheit. Der finale Build-Prozess wird ungeachtet dieser Warnungen parallelisiert ablaufen.
+
 
 
 Externe Dokumentationen

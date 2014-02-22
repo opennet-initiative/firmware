@@ -242,6 +242,28 @@ Wie üblich in make-Buildumgebung kannst du manuell mehrere parallele Prozesse f
 In den ersten 20 Zeilen der Build-Ausgabe wirst du ein paar Fehlermeldung bezüglich `-j1` finden - diese sind ein Indikator für eine openwert-spezifische Unfeinheit. Der finale Build-Prozess wird ungeachtet dieser Warnungen parallelisiert ablaufen.
 
 
+Build-Konfiguration (menuconfig)
+================================
+
+Die opennet-Entwicklungsumgebung verwendet grundlegend die Abläufe der openwrt-Buildumgebung. Es gibt jedoch ein paar Besonderheiten, bzw. Komfortfunktionen.
+
+Da die opennet-Firmware verschiedene Ziel-Plattformen (ar71xx, ixp44, x86, ...) unterstützt, müssen verschiedene Konfigurationen gepflegt werden. Zur Erleichterung der Pflege und zur Vermeidung von Doppelungen gibt es für jede Ziel-Plattform eine separate Datei (z.B. *on-configs/ar71xx*), sowie eine Datei mit Einstellungen, die für alle Zielplattformen gelten (*on-configs/common*). Letztere sind für den Entwicklungsprozess wohl die interessanteren.
+
+
+Konfiguration für eine Plattform erstellen
+------------------------------------------
+
+Die finale openwrt-Konfiguration wird aus der Ziel-Plattform-Konfiguration und der allgemeinen Konfiguration erstellt und anschließend mittels `make defconfig` durch openwrt auf Aufabhängigkeiten zu prüfen und mit den Standardwerten aufzufüllen.
+
+Diese Konfiguration für eine Plattform kann beispielsweise mittels `make config-arx71xx` erstellt werden. Das Ergebnis ist anschließend als *openwrt/.config* verfügbar.
+
+
+Konfigurationsänderungen
+------------------------
+
+Zur verbesserten Überschaubarkeit von Einstellungsänderungen ist in dem meta-Makefile ein Target namens `menuconfig` integriert. Es zeigt dir nach dem Ausführen des gewohnten `make -C openwrt menuconfig` den Unterschied zwischen der vorherigen und der gespeicherten Konfiguration in Form eines diffs an.
+
+
 
 Externe Dokumentationen
 =======================

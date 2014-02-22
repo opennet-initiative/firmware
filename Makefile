@@ -11,8 +11,11 @@ all: $(ARCHS)
 
 $(ARCHS): feeds translate
 	@echo "Building for target architecture: $@"
-	$(MAKE) -C on-configs $@
+	$(MAKE) "config-$@"
 	$(MAKE) -C "$(OPENWRT_DIR)"
+
+config-%:
+	$(MAKE) -C on-configs "$(patsubst config-%,%,$@)"
 
 init:
 	@# update submodules if necessary

@@ -4,38 +4,8 @@
 Die Opennet-Firmware basiert auf den Komponenten *git*, *quilt* und der *openwrt*-Entwicklungsumgebung.
 Links zur Dokumentation dieser Komponenten findest du am Ende dieses Dokuments.
 
-Die grundlegende Struktur der Entwicklungsumgebung ist in der [Struktur-Dokumentation](Struktur.md) beschrieben.
-
-Die Verzeichnisse haben die folgenden Inhalte:
-
-* *openwrt* -- das openwrt-Repository (Build-Umgebung, Kernel und Basispakete)
-* openwrt-Paket-Feeds:
-** *packages* -- die meisten openwrt-Pakete
-** *routing* -- Routing-Pakete
-** *luci* -- luci-basierte Webinterface-Pakete
-** *telephony* -- Telefonie-Pakete
-* *opennet* -- Opennet-Pakete und angepasste/neue Pakete
-* *patches* -- Änderungen an openwrt oder den externen Paket-Feeds
-* *doc* -- diese Dokumentation
-
-
-Externe Respositories
----------------------
-
-Die externen Repositories (openwrt, packages, routing, telephony) werden von uns nur in Form von Patches angepasst.
-Deren Version (also die git-commit-ID) wird in unserem Repository versioniert - der aktuelle Stand bezüglich der Upstream-Repositories ist also Teil der Versionsverwaltung.
-
-
-Patches
--------
-
-Unsere Patches (gegen die externen Repositories) werden im Verzeichnis *patches* mittels *quilt* gepflegt. Die meisten dieser Patches sind bei openwrt eingereicht und harren auf ihre Upstream-Integration.
-
-
-Unser Paket-Feed *opennet*
---------------------------
-
-In diesem Paket-Feed liegen unsere selbsterstellten Pakete (*on-*), die für den VPN-Tunnelaufbau und die Datensammlung erforderlich sind. Zusätzlich können hier Pakete untergebracht werden, die (noch) nicht in openwrt enthalten sind.
+Die grundlegende Struktur der Entwicklungsumgebung ist in der [Struktur-Dokumentation] (Struktur.md) beschrieben.
+Ein Kurzeinstieg in den Bau von Firmware-Abbildern ist in der [Readme] (../Readme.md) zu finden.
 
 
 Vorbereitung der Entwicklungsumgebung

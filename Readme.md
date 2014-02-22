@@ -1,6 +1,10 @@
 Entwicklungsumgebung einrichten
 ===============================
 
+Die Einrichtung der Entwicklungsumgebung dauert nur wenige Minuten und ist untenstehend beschrieben.
+Der gesamte Prozess der Image-Erzeugung erfordert dagegen ca. 10 GB Festplattenplatz je Zielarchitektur und dauert - je nach Rechner - üblicherweise mindestens ein dutzend Stunden.
+
+
 Erforderliche Pakete installieren
 ---------------------------------
 
@@ -25,5 +29,14 @@ Alternativ kannst du mit folgendem Kommando die Firmware für alle Architekturen
 
     make all
 
-Dieser Prozess wird (insbesondere beim ersten Mal) viele Stunden dauern, da zuerst die Cross-Compile-Toolchain für die jeweilige Zielplattform erzeugt werden muss.
+Die Ergebnisse (Flash-Images und nachinstallierbare Pakete) findest du anschließend unter *openwrt/bin/...*.
+
+
+Detaildokumentation
+===================
+
+Hier findest du Informationen zu weiterführende Details:
+
+1. *[Struktur der Build-Umgebung] (doc/Struktur.md)*
+2. *[Enwicklungsleitfaden] (doc/Entwicklung.md)*
 

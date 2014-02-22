@@ -5,7 +5,7 @@ CUSTOM_PACKAGES_DIR = opennet/packages
 LANGUAGES = de
 ARCHS = ar71xx bcm43xx ixp4xx tl-wr1043nd tl-wr842nd x86
 
-.PHONY: all clean patch unpatch menuconfig feeds
+.PHONY: all clean patch unpatch menuconfig feeds init
 
 all: $(ARCHS)
 

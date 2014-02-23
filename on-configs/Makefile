@@ -16,7 +16,7 @@ $(CONFIGS):
 	@test -f "$(CURRENT_CONFIG)" && mv "$(CURRENT_CONFIG)" "$(PREVIOUS_CONFIG)" || true
 	@cat "$@" "$(COMMON_CONFIG)" > "$(CURRENT_CONFIG)"
 	@$(MAKE) -C "$(BUILD_DIR)" defconfig >/dev/null
-	@if diff -q "$(CURRENT_CONFIG)" "$(PREVIOUS_CONFIG)" >/dev/null; then \
+	@if test -e "$(PREVIOUS_CONFIG)" && diff -q "$(CURRENT_CONFIG)" "$(PREVIOUS_CONFIG)" >/dev/null; then \
 			mv "$(PREVIOUS_CONFIG)" "$(CURRENT_CONFIG)"; \
 		else	rm -f "$(PREVIOUS_CONFIG)"; fi
 

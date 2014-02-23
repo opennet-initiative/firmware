@@ -10,7 +10,7 @@ define Package/on-openvpn
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Rene Ejury <opennet@absorb.it>
   TITLE:=VPN extensions
-  DEPENDS+=+on-core +openvpn +libopenssl +openssl-util +liblzo +kmod-tun
+  DEPENDS+=+on-core +openvpn-openssl +openssl-util +liblzo +kmod-tun
 endef
 
 define Package/on-openvpn/description

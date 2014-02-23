@@ -23,5 +23,7 @@ Langfristige Loesung
 
 * Test und gegenenfalls Anpassung des ondataservice-Plugin auf eine aktuelle olsrd-Version
 * Übertragung des ondataservice-Patches (siehe patches-Verzeichnis im olsrd-Verzeichnis) in das Routing-Repository
-* eine Integration des ondataservice-Plugin in den olsrd-Upstream-Code wurde im jahr 2013 kurz auf der Mailingliste erwogen, wird aber wohl nicht stattfinden
+* Übertragung des Makefile-Patches (Makefile_ondataservice.patch) in das meta-Patches-Verzeichnis
+
+Eine Integration des ondataservice-Plugin in den olsrd-Upstream-Code wurde im jahr 2013 kurz auf der Mailingliste erwogen, wird aber wohl nicht stattfinden.
 

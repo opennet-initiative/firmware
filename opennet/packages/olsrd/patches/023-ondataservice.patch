@@ -1,0 +1,2802 @@
+diff --git a/Makefile b/Makefile
+index de030c1..8e63e7f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -183,6 +183,9 @@
+ endif
+ endif
+
++# for all platforms
++SUBDIRS += ondataservice ondataservice_light
++
+ libs:
+                @set -e;for dir in $(SUBDIRS);do $(MAKECMD) -C lib/$$dir LIBDIR=$(LIBDIR);done
+
+@@ -420,6 +420,25 @@ watchdog_install:
+ watchdog_uninstall:
+ 		@$(MAKECMD) -C lib/watchdog DESTDIR=$(DESTDIR) uninstall
+ 
++ondataservice:
++		@$(MAKECMD) -C lib/ondataservice clean
++		@$(MAKECMD) -C lib/ondataservice
++
++ondataservice_install:
++		@$(MAKECMD) -C lib/ondataservice DESTDIR=$(DESTDIR) install
++
++ondataservice_uninstall:
++		@$(MAKECMD) -C lib/ondataservice DESTDIR=$(DESTDIR) uninstall
++
++ondataservice_light:
++		@$(MAKECMD) -C lib/ondataservice_light clean
++		@$(MAKECMD) -C lib/ondataservice_light
++
++ondataservice_light_install:
++		@$(MAKECMD) -C lib/ondataservice_light DESTDIR=$(DESTDIR) install
++
++ondataservice_light_uninstall:
++		@$(MAKECMD) -C lib/ondataservice_light DESTDIR=$(DESTDIR) uninstall
+ 
+ build_all:	all switch libs
+ install_all:	install install_libs
+diff --git a/lib/ondataservice/Makefile b/lib/ondataservice/Makefile
+new file mode 100644
+index 0000000..951ed28
+--- /dev/null
++++ b/lib/ondataservice/Makefile
+@@ -0,0 +1,79 @@
++# The olsr.org Optimized Link-State Routing daemon(olsrd)
++# Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
++# All rights reserved.
++#
++# Redistribution and use in source and binary forms, with or without 
++# modification, are permitted provided that the following conditions 
++# are met:
++#
++# * Redistributions of source code must retain the above copyright 
++#   notice, this list of conditions and the following disclaimer.
++# * Redistributions in binary form must reproduce the above copyright 
++#   notice, this list of conditions and the following disclaimer in 
++#   the documentation and/or other materials provided with the 
++#   distribution.
++# * Neither the name of olsr.org, olsrd nor the names of its 
++#   contributors may be used to endorse or promote products derived 
++#   from this software without specific prior written permission.
++#
++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
++# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
++# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
++# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
++# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
++# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
++# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
++# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
++# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
++# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
++# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
++# POSSIBILITY OF SUCH DAMAGE.
++#
++# Visit http://www.olsr.org for more information.
++#
++# If you find this software useful feel free to make a donation
++# to the project. For more information see the website or contact
++# the copyright holders.
++#
++
++OLSRD_PLUGIN =	true
++PLUGIN_NAME =	olsrd_ondataservice
++# dont change version here for backward-compatible changes,
++# it will change the library name and won't load with the
++# olsrd-config already existing on the device
++PLUGIN_VER =	0.1
++
++LIBS +=            -lsqlite3
++
++TOPDIR = ../..
++include $(TOPDIR)/Makefile.inc
++
++ifeq ($(OS),win32)
++default_target install clean:
++	@echo "**** We use the regex library here. Does Win32 has something like this?"
++else
++ifeq ($(OS),android)
++# On Android Google forgot to include regex engine code for Froyo version (but also there was
++# no support in older versions for it) so we have here this missing code.
++# http://groups.google.com/group/android-ndk/browse_thread/thread/5ea6f0650f0e3fc
++SRCS +=     $(wildcard $(TOPDIR)/android/regex/reg*.c)
++HDRS +=     $(wildcard $(TOPDIR)/android/regex/*.h)
++CFLAGS += -D__POSIX_VISIBLE
++endif
++
++default_target: $(PLUGIN_FULLNAME)
++
++$(PLUGIN_FULLNAME): $(OBJS) version-script.txt
++		@echo "[LD] $@"
++		@$(CC) $(LDFLAGS) -o $(PLUGIN_FULLNAME) $(OBJS) $(LIBS)
++
++install:	$(PLUGIN_FULLNAME)
++		$(STRIP) $(PLUGIN_FULLNAME)
++		$(INSTALL_LIB)
++
++uninstall:
++		$(UNINSTALL_LIB)
++
++clean:
++		rm -f $(OBJS) $(SRCS:%.c=%.d) $(PLUGIN_FULLNAME)
++endif
+diff --git a/lib/ondataservice/README_ONDATASERVICE b/lib/ondataservice/README_ONDATASERVICE
+new file mode 100644
+index 0000000..9b346e1
+--- /dev/null
++++ b/lib/ondataservice/README_ONDATASERVICE
+@@ -0,0 +1,65 @@
++---------------------------------------------------------------------
++ONDATASERVICE PLUGIN FOR OLSRD
++by Rene Ejury <opennet@absorb.it>
++based on and copied from:
++NAMESERVICE PLUGIN FOR OLSRD
++by Bruno Randolf <bruno.randolf@4g-systems.biz>
++---------------------------------------------------------------------
++  full version, can receive data but requires sqlite3-library
++
++---------------------------------------------------------------------
++PLUGIN PARAMETERS (PlParam)
++---------------------------------------------------------------------
++
++PlParam "interval" "SEC"
++	interval for sending the DATABASE in seconds.
++	(default: 10800 - 3 hours)
++
++PlParam "inc_interval" "SEC"
++    interval for continously sending TABLES from DATABASE in seconds.
++    (default: 5 seconds)
++
++PlParam "cleanup_interval" "SEC"
++    Interval how often DATABASE should be checked for old DATASETS.
++    (default: 1800 - 0.5 hours)
++
++PlParam "timeout" "SEC"
++	validity time for received NAME messages in seconds.
++    (how long received data stays in the database)
++	(default: 21600 - 6 hours)
++
++PlParam "vtime" "SEC"
++    validity time for sended message-packages in seconds.
++    (how long this message-data is forwarded through the net)
++    (default: 300 - 5 mins)
++
++PlParam "database" "/path/to/database"
++        Path to the database
++
++PlParam "dbcreatescript" "/path/to/dbcreatescript"
++        Path to some executable script to create the database
++        script will be called with database-path (see PlParam above)
++        as only parameter
++        (default not set, database is not created if not existent)
++
++PlParam "receive" "false|true"
++        Set to true if you like to receive and store the values.
++        Otherwise the values from other Nodes are ignored.
++        (default: false - not stored)
++
++PlParam "spreadall" "false|true"
++        Set to true if you like to spread all data from the database.
++        (default: false - only data for own mainip is spreaded)
++
++---------------------------------------------------------------------
++SAMPLE CONFIG
++---------------------------------------------------------------------
++
++add in /etc/olsrd.conf:
++
++LoadPlugin "olsrd_ondataservice.so.0.1"
++{
++    PlParam "interval"  "120"
++    PlParam "timeout"   "300"
++    PlParam "database"  "/tmp/database"
++}
+diff --git a/lib/ondataservice/SAMPLE_DBCREATESCRIPT.sh b/lib/ondataservice/SAMPLE_DBCREATESCRIPT.sh
+new file mode 100755
+index 0000000..22dd4e9
+--- /dev/null
++++ b/lib/ondataservice/SAMPLE_DBCREATESCRIPT.sh
+@@ -0,0 +1,34 @@
++#!/bin/sh
++SQL_STRING="CREATE TABLE nodes
++    (originator text, mainip text, sys_ver text, sys_board text, sys_cpu text, sys_mem int, sys_uptime text,
++    sys_load text, sys_free int, sys_watchdog bool, sys_os_type text,
++    sys_os_name text, sys_os_rel text, sys_os_ver text, sys_os_arc text,
++    sys_os_insttime int, on_core_ver text, on_core_insttime int, on_packages text,
++    on_id text, on_olsrd_status text, on_olsrd_mainip text,
++    on_wifidog_status bool, on_wifidog_id text, on_vpn_cn text, on_vpn_status bool,
++    on_vpn_gw text, on_vpn_autosearch bool, on_vpn_sort text, on_vpn_gws text, on_vpn_blist text,
++    on_ugw_status bool, on_ugw_enabled bool, on_ugw_possible bool, on_ugw_tunnel bool,
++    on_ugw_connected text, on_ugw_presetips text, on_ugw_presetnames text,
++    on_old_autoadapttxpwr text, on_old_remoteconf text,
++    db_time text, db_epoch int, db_ver text, db_update int, CONSTRAINT key_nodes PRIMARY KEY (mainip) ON CONFLICT REPLACE);
++    
++    CREATE TABLE ifaces
++    (originator text, mainip text, if_name text, if_type_bridge text, if_type_bridgedif bool, if_hwaddr text,
++    ip_label text, ip_addr text, ip_broadcast text,
++    on_networks text, on_zones text, on_olsr bool,
++    dhcp_start text, dhcp_limit text, dhcp_leasetime text, dhcp_fwd text,
++    ifstat_collisions int, ifstat_rx_compressed int, ifstat_rx_errors int,
++    ifstat_rx_length_errors int, ifstat_rx_packets int, ifstat_tx_carrier_errors int,
++    ifstat_tx_errors int, ifstat_tx_packets int, ifstat_multicast int,
++    ifstat_rx_crc_errors int, ifstat_rx_fifo_errors int, ifstat_rx_missed_errors int,
++    ifstat_tx_aborted_errors int, ifstat_tx_compressed int, ifstat_tx_fifo_errors int,
++    ifstat_tx_window_errors int, ifstat_rx_bytes int, ifstat_rx_dropped int,
++    ifstat_rx_frame_errors int, ifstat_rx_over_errors int, ifstat_tx_bytes int,
++    ifstat_tx_dropped int, ifstat_tx_heartbeat_errors int,
++    wlan_essid text, wlan_apmac text, wlan_type text, wlan_hwmode text, wlan_mode text,
++    wlan_channel text, wlan_freq text, wlan_txpower text, wlan_signal text, wlan_noise text,
++    wlan_bitrate text, wlan_crypt text, wlan_vaps text,
++    db_ver text, db_update int, CONSTRAINT key_ifaces PRIMARY KEY (mainip, if_name) ON CONFLICT REPLACE);"
++
++sqlite3 -batch $1 "$SQL_STRING"
++
+diff --git a/lib/ondataservice/src/compat.c b/lib/ondataservice/src/compat.c
+new file mode 100644
+index 0000000..4d639be
+--- /dev/null
++++ b/lib/ondataservice/src/compat.c
+@@ -0,0 +1,35 @@
++#include "compat.h"
++
++#if !defined(__linux__) && !defined(__GLIBC__)
++#include <stdlib.h>
++#include <string.h>
++
++/* strndup() is a GNU extention */
++char *
++strndup(const char *ptr, size_t size)
++{
++  size_t len = strlen(ptr);
++  char *ret = NULL;
++
++  if (len > size)
++    len = size;
++
++  ret = malloc(len + 1);
++
++  if (!ret)
++    return NULL;
++
++  memcpy(ret, ptr, len);
++  ret[len] = '\0';
++
++  return ret;
++}
++
++#endif
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
+diff --git a/lib/ondataservice/src/compat.h b/lib/ondataservice/src/compat.h
+new file mode 100644
+index 0000000..c607c91
+--- /dev/null
++++ b/lib/ondataservice/src/compat.h
+@@ -0,0 +1,17 @@
++#ifndef _NAMESERVICE_COMPAT
++#define _NAMESERVICE_COMPAT
++
++#include <sys/types.h>
++
++#if !defined(__linux__) && !defined(__GLIBC__)
++char *strndup(const char *ptr, size_t size);
++#endif
++
++#endif
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
+diff --git a/lib/ondataservice/src/crc16.c b/lib/ondataservice/src/crc16.c
+new file mode 100644
+index 0000000..dc877ca
+--- /dev/null
++++ b/lib/ondataservice/src/crc16.c
+@@ -0,0 +1,62 @@
++#include <stdlib.h>
++#include "crc16.h"
++
++// ------------ http://stackoverflow.com/questions/3853670/are-there-any-free-crc-libraries-that-covers-a-lot-of-the-crc-algorithms
++
++/******************************************/
++/*  CRC table for polynomial 0xA001 CCITT */
++/******************************************/
++
++#define CRC16(crc,c) crc = (crc >> 8) ^ crctab[(crc ^ c) & 0xff]
++
++const u_int16_t crctab[256] = {
++    0x0000, 0xc0c1, 0xc181, 0x0140, 0xc301, 0x03c0, 0x0280, 0xc241,
++    0xc601, 0x06c0, 0x0780, 0xc741, 0x0500, 0xc5c1, 0xc481, 0x0440,
++    0xcc01, 0x0cc0, 0x0d80, 0xcd41, 0x0f00, 0xcfc1, 0xce81, 0x0e40,
++    0x0a00, 0xcac1, 0xcb81, 0x0b40, 0xc901, 0x09c0, 0x0880, 0xc841,
++    0xd801, 0x18c0, 0x1980, 0xd941, 0x1b00, 0xdbc1, 0xda81, 0x1a40,
++    0x1e00, 0xdec1, 0xdf81, 0x1f40, 0xdd01, 0x1dc0, 0x1c80, 0xdc41,
++    0x1400, 0xd4c1, 0xd581, 0x1540, 0xd701, 0x17c0, 0x1680, 0xd641,
++    0xd201, 0x12c0, 0x1380, 0xd341, 0x1100, 0xd1c1, 0xd081, 0x1040,
++    0xf001, 0x30c0, 0x3180, 0xf141, 0x3300, 0xf3c1, 0xf281, 0x3240,
++    0x3600, 0xf6c1, 0xf781, 0x3740, 0xf501, 0x35c0, 0x3480, 0xf441,
++    0x3c00, 0xfcc1, 0xfd81, 0x3d40, 0xff01, 0x3fc0, 0x3e80, 0xfe41,
++    0xfa01, 0x3ac0, 0x3b80, 0xfb41, 0x3900, 0xf9c1, 0xf881, 0x3840,
++    0x2800, 0xe8c1, 0xe981, 0x2940, 0xeb01, 0x2bc0, 0x2a80, 0xea41,
++    0xee01, 0x2ec0, 0x2f80, 0xef41, 0x2d00, 0xedc1, 0xec81, 0x2c40,
++    0xe401, 0x24c0, 0x2580, 0xe541, 0x2700, 0xe7c1, 0xe681, 0x2640,
++    0x2200, 0xe2c1, 0xe381, 0x2340, 0xe101, 0x21c0, 0x2080, 0xe041,
++    0xa001, 0x60c0, 0x6180, 0xa141, 0x6300, 0xa3c1, 0xa281, 0x6240,
++    0x6600, 0xa6c1, 0xa781, 0x6740, 0xa501, 0x65c0, 0x6480, 0xa441,
++    0x6c00, 0xacc1, 0xad81, 0x6d40, 0xaf01, 0x6fc0, 0x6e80, 0xae41,
++    0xaa01, 0x6ac0, 0x6b80, 0xab41, 0x6900, 0xa9c1, 0xa881, 0x6840,
++    0x7800, 0xb8c1, 0xb981, 0x7940, 0xbb01, 0x7bc0, 0x7a80, 0xba41,
++    0xbe01, 0x7ec0, 0x7f80, 0xbf41, 0x7d00, 0xbdc1, 0xbc81, 0x7c40,
++    0xb401, 0x74c0, 0x7580, 0xb541, 0x7700, 0xb7c1, 0xb681, 0x7640,
++    0x7200, 0xb2c1, 0xb381, 0x7340, 0xb101, 0x71c0, 0x7080, 0xb041,
++    0x5000, 0x90c1, 0x9181, 0x5140, 0x9301, 0x53c0, 0x5280, 0x9241,
++    0x9601, 0x56c0, 0x5780, 0x9741, 0x5500, 0x95c1, 0x9481, 0x5440,
++    0x9c01, 0x5cc0, 0x5d80, 0x9d41, 0x5f00, 0x9fc1, 0x9e81, 0x5e40,
++    0x5a00, 0x9ac1, 0x9b81, 0x5b40, 0x9901, 0x59c0, 0x5880, 0x9841,
++    0x8801, 0x48c0, 0x4980, 0x8941, 0x4b00, 0x8bc1, 0x8a81, 0x4a40,
++    0x4e00, 0x8ec1, 0x8f81, 0x4f40, 0x8d01, 0x4dc0, 0x4c80, 0x8c41,
++    0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641,
++    0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040
++};
++
++//=========================================================================
++//  Description:   Calculate a CRC on a buffer
++//  Parameters:    buffer - address of buffer
++//                 length - length of buffer
++//  Returns:       CRC
++//=========================================================================
++u_int16_t crcCalculate(char *buffer, unsigned int length)
++{
++    u_int16_t Crc = 0;
++
++    for (; length; --length) {
++        CRC16(Crc, *buffer++);
++    }
++    return(Crc);
++}
++
+diff --git a/lib/ondataservice/src/crc16.h b/lib/ondataservice/src/crc16.h
+new file mode 100644
+index 0000000..729d784
+--- /dev/null
++++ b/lib/ondataservice/src/crc16.h
+@@ -0,0 +1,6 @@
++
++// copied from http://stackoverflow.com/questions/3853670/are-there-any-free-crc-libraries-that-covers-a-lot-of-the-crc-algorithms
++
++
++u_int16_t crcCalculate(char *buffer, unsigned int length);
++
+diff --git a/lib/ondataservice/src/olsrd_plugin.c b/lib/ondataservice/src/olsrd_plugin.c
+new file mode 100644
+index 0000000..c6989c5
+--- /dev/null
++++ b/lib/ondataservice/src/olsrd_plugin.c
+@@ -0,0 +1,84 @@
++
++/*
++ * Copyright (c) 2005, Bruno Randolf <bruno.randolf@4g-systems.biz>
++ * Copyright (c) 2004, Andreas Tonnesen(andreto-at-olsr.org)
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice,
++ *   this list of conditions and the following disclaimer.
++ * * Redistributions in binary form must reproduce the above copyright notice,
++ *   this list of conditions and the following disclaimer in the documentation
++ *   and/or other materials provided with the distribution.
++ * * Neither the name of the UniK olsr daemon nor the names of its contributors
++ *   may be used to endorse or promote products derived from this software
++ *   without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
++ * IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
++ * OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++/*
++ * Dynamic linked library for olsr.org olsrd
++ */
++
++#include <stdio.h>
++#include <string.h>
++
++#include "olsrd_plugin.h"
++#include "ondataservice.h"
++
++#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
++#define PLUGIN_INTERFACE_VERSION 5
++
++static void __attribute__ ((constructor)) my_init(void);
++
++static void __attribute__ ((destructor)) my_fini(void);
++
++int
++olsrd_plugin_interface_version(void)
++{
++  return PLUGIN_INTERFACE_VERSION;
++}
++
++int
++olsrd_plugin_init(void)
++{
++  return ondata_init();
++}
++
++static void
++my_init(void)
++{
++  /* Print plugin info to stdout */
++  printf("%s\n", MOD_DESC);
++
++  ondata_constructor();
++
++  return;
++}
++
++static void
++my_fini(void)
++{
++  ondata_destructor();
++}
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
+diff --git a/lib/ondataservice/src/ondataservice.c b/lib/ondataservice/src/ondataservice.c
+new file mode 100644
+index 0000000..6229dfd
+--- /dev/null
++++ b/lib/ondataservice/src/ondataservice.c
+@@ -0,0 +1,583 @@
++
++/*
++ * Copyright (c) 2011, Rene Ejury <opennet@absorb.it>
++ * Copyright (c) 2006, Jens Nachtigall <nachtigall@web.de>
++ * Copyright (c) 2005, Bruno Randolf <bruno.randolf@4g-systems.biz>
++ * Copyright (c) 2004, Andreas Tonnesen(andreto-at-olsr.org)
++ * Copyright (c) 2007, Sven-Ola <sven-ola@gmx.de>
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice,
++ *   this list of conditions and the following disclaimer.
++ * * Redistributions in binary form must reproduce the above copyright notice,
++ *   this list of conditions and the following disclaimer in the documentation
++ *   and/or other materials provided with the distribution.
++ * * Neither the name of the UniK olsr daemon nor the names of its contributors
++ *   may be used to endorse or promote products derived from this software
++ *   without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
++ * IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
++ * OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++/*
++ * Dynamic linked library for UniK OLSRd
++ */
++
++#define _GNU_SOURCE 1
++
++#include <stdio.h>
++#include <string.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <ctype.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <signal.h>
++#include <fcntl.h>
++#include <time.h>
++#include <sqlite3.h>
++
++#include "olsr.h"
++#include "net_olsr.h"
++#include "parser.h"
++
++#include "plugin_util.h"
++#include "ondataservice.h"
++#include "compat.h"
++#include "crc16.h"
++
++const char *DATABASE_TABLES[2] = {"nodes", "ifaces"};
++const int unsigned numberOfTables = 2;
++
++/* config parameters */
++static int my_interval = EMISSION_INTERVAL;
++static int my_inc_interval = EMISSION_INC_INTERVAL;
++static int my_cleanup_interval = CLEANUP_INTERVAL;  // how often database will be cleaned of outdated data
++static int my_timeout = ONDATA_TIMEOUT;          // how long the data stays valid
++static int my_vtime = ONDATA_VALID_TIME;            // how long the data will be spread trough the net
++static char my_database[MAX_FILE + 1];
++static char my_dbcreatescript[MAX_FILE + 1];
++static bool my_receive = false;
++static bool my_spreadall = false;
++
++/* periodic message generation */
++struct timer_entry *msg_gen_timer = NULL;
++struct timer_entry *db_cleanup_timer = NULL;
++
++/**
++ * do initialization
++ */
++void
++ondata_constructor(void)
++{
++#ifdef WIN32
++  int len;
++
++  GetWindowsDirectory(my_database, MAX_FILE - 12);
++
++  len = strlen(my_database);
++  if (my_database[len - 1] != '\\')
++    strscat(my_database, "\\", sizeof(my_database));
++  strscat(my_database, DATABASE_FILE, sizeof(my_database));
++
++  GetWindowsDirectory(my_dbcreatescript, MAX_FILE - 12);
++
++  len = strlen(my_dbcreatescript);
++  if (my_dbcreatescript[len - 1] != '\\')
++    strscat(my_dbcreatescript, "\\", sizeof(my_dbcreatescript));
++  strscat(my_dbcreatescript, "", sizeof(my_dbcreatescript));
++#else
++  strscpy(my_database, DATABASE_FILE, sizeof(my_database));
++  strscpy(my_dbcreatescript, "", sizeof(my_dbcreatescript));
++#endif
++
++
++}
++
++/* *INDENT-OFF* */
++static const struct olsrd_plugin_parameters plugin_parameters[] = {
++  { .name = "interval",           .set_plugin_parameter = &set_plugin_int,         .data = &my_interval },
++  { .name = "inc_interval",            .set_plugin_parameter = &set_plugin_int,         .data = &my_inc_interval },
++  { .name = "cleanup_interval",            .set_plugin_parameter = &set_plugin_int,         .data = &my_cleanup_interval },
++  { .name = "timeout",            .set_plugin_parameter = &set_plugin_int,         .data = &my_timeout },
++  { .name = "database",          .set_plugin_parameter = &set_plugin_string,      .data = &my_database,          .addon = {sizeof(my_database)} },
++  { .name = "dbcreatescript",          .set_plugin_parameter = &set_plugin_string,      .data = &my_dbcreatescript,          .addon = {sizeof(my_dbcreatescript)} },
++  { .name = "receive",            .set_plugin_parameter = &set_plugin_boolean,     .data = &my_receive },
++  { .name = "spreadall",            .set_plugin_parameter = &set_plugin_boolean,     .data = &my_spreadall },
++  { .name = "vtime",            .set_plugin_parameter = &set_plugin_int,     .data = &my_vtime },
++};
++/* *INDENT-OFF* */
++
++void
++olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *size)
++{
++  *params = plugin_parameters;
++  *size = sizeof(plugin_parameters) / sizeof(*plugin_parameters);
++}
++
++/**
++ * last initialization
++ *
++ * we have to do this here because some things like main_addr
++ * or the dns suffix (for validation) are not known before
++ *
++ * this is beause of the order in which the plugin is initialized
++ * by the plugin loader:
++ *   - first the parameters are sent
++ *   - then register_olsr_data() from olsrd_plugin.c is called
++ *     which sets up main_addr and some other variables
++ *   - register_olsr_data() then then finally calls this function
++ */
++int
++ondata_init(void)
++{
++  /* register functions with olsrd */
++  if (my_receive) olsr_parser_add_function(&olsr_parser, PARSER_TYPE);
++
++  /* periodic message generation */
++  msg_gen_timer = olsr_start_timer(my_interval * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC, &olsr_ondatasvc_gen, NULL, 0);
++  
++  /* periodic database cleanup generation */
++  if (my_receive) db_cleanup_timer = olsr_start_timer(my_cleanup_interval * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC, &olsr_ondataservice_expire_db_timer, NULL, 0);
++
++  return 1;
++}
++
++/**
++ * called at unload: free everything
++ *
++ * XXX: should I delete the hosts/services/resolv.conf files on exit?
++ */
++void
++ondata_destructor(void)
++{
++  olsr_stop_timer(msg_gen_timer);
++  
++  if (my_receive) olsr_stop_timer(db_cleanup_timer);
++}
++
++int
++open_database(sqlite3 **localdb)
++{
++  int unsigned rc = sqlite3_open_v2(my_database, localdb, SQLITE_OPEN_READWRITE, NULL);
++  if(rc != SQLITE_OK && strlen(my_dbcreatescript) != 0){
++    char *buf;
++    fprintf(stderr, "Can't open database, trying to (re)create database: %s\n", my_dbcreatescript);
++    asprintf(&buf,"%s %s", my_dbcreatescript, my_database);
++    system(buf);
++    free(buf);
++    rc = sqlite3_open_v2(my_database, localdb, SQLITE_OPEN_READWRITE, NULL);
++  }
++  return rc;
++}
++
++
++/**
++ * Callback for the db validity timer.
++ */
++void
++olsr_ondataservice_expire_db_timer(void *foo __attribute__ ((unused)))
++{
++  sqlite3 *localdb;
++  sqlite3_stmt *localppStmt;
++  char *localzSql;
++  const char *pzTail;           /* OUT of sqlite3_prepare_v2: Pointer to unused portion of zSql */
++  const char *SQLframe = "DELETE FROM %s WHERE (originator != '' AND mainip != '%s' AND db_update < %lu );";
++  struct ipaddr_str main_addr;
++  char *mainip;
++  int unsigned currentTable = 0, rc;
++  long unsigned min_update_time;
++  
++  min_update_time = time(NULL) - my_timeout;
++  mainip = (char*)olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
++  
++  rc = open_database(&localdb);
++  if( rc == SQLITE_OK ){
++    while (currentTable < numberOfTables) {
++  
++      // build Database statement / assumption that time will not be bigger than 20chars long
++      localzSql = olsr_malloc(strlen(SQLframe) + strlen(mainip) + strlen(DATABASE_TABLES[currentTable]) + 20 + 1, "update_ondata_entry: space for SQL query");
++      sprintf(localzSql, SQLframe, DATABASE_TABLES[currentTable], mainip, min_update_time);
++
++      // apply statement to database
++      // use 1500 as max MTU and therefore as max SQL size (which is not quite accurate)
++      rc = sqlite3_prepare_v2(localdb, localzSql, 1500, &localppStmt, &pzTail);
++      if( rc == SQLITE_OK ){
++        sqlite3_step(localppStmt);
++        sqlite3_finalize(localppStmt);
++        OLSR_PRINTF(5, "ONDATA PLUGIN: Database cleaned: %s\n", localzSql);
++      }
++      else fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(localdb));
++      free(localzSql);
++      currentTable++;
++    }
++  }
++  else fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(localdb));
++
++  sqlite3_close(localdb);
++}
++
++/**
++ * Scheduled event: generate and send ONDATA packet
++ */
++void
++olsr_ondatasvc_gen(void *foo __attribute__ ((unused)))
++{
++  /* send buffer: huge */
++  char buffer[10240];
++  union olsr_message *message = (union olsr_message *)buffer;
++  struct interface *ifn;
++  int ondatasize;
++
++  /* fill message */
++  if (olsr_cnf->ip_version == AF_INET) {
++    /* IPv4 */
++    message->v4.olsr_msgtype = MESSAGE_TYPE;
++    message->v4.olsr_vtime = reltime_to_me((double)my_vtime * MSEC_PER_SEC);
++    memcpy(&message->v4.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
++    message->v4.ttl = MAX_TTL;
++    message->v4.hopcnt = 0;
++    message->v4.seqno = htons(get_msg_seqno());
++
++    ondatasize = encap_ondatamsg((struct ondatamsg *)ARM_NOWARN_ALIGN(&message->v4.message));
++    if (!ondatasize) return;
++    ondatasize = ondatasize + sizeof(struct olsrmsg);
++    message->v4.olsr_msgsize = htons(ondatasize);
++  } else {
++    /* IPv6 */
++    message->v6.olsr_msgtype = MESSAGE_TYPE;
++    message->v6.olsr_vtime = reltime_to_me((double)my_vtime * MSEC_PER_SEC);
++    memcpy(&message->v6.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
++    message->v6.ttl = MAX_TTL;
++    message->v6.hopcnt = 0;
++    message->v6.seqno = htons(get_msg_seqno());
++
++    ondatasize = encap_ondatamsg((struct ondatamsg *)ARM_NOWARN_ALIGN(&message->v6.message));
++    if (!ondatasize) return;
++    ondatasize = ondatasize + sizeof(struct olsrmsg6);
++    
++    message->v6.olsr_msgsize = htons(ondatasize);
++  }
++    
++  /* looping trough interfaces */
++  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
++    OLSR_PRINTF(3, "ONDATA PLUGIN: Generating packet - [%s]\n", ifn->int_name);
++
++    if (net_outbuffer_push(ifn, message, ondatasize) != ondatasize) {
++      /* send data and try again */
++      net_output(ifn);
++      if (net_outbuffer_push(ifn, message, ondatasize) != ondatasize) {
++        OLSR_PRINTF(1, "ONDATA PLUGIN: could not send on interface: %s\n", ifn->int_name);
++      }
++    }
++  }
++}
++
++/**
++ * Parse ondata olsr message of ONDATA type
++ */
++bool
++olsr_parser(union olsr_message *m, struct interface *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr __attribute__ ((unused)))
++{
++  struct ondatamsg *ondatamessage;
++  union olsr_ip_addr originator;
++  int size;
++
++  /* Fetch the originator of the messsage */
++  if (olsr_cnf->ip_version == AF_INET) {
++    memcpy(&originator, &m->v4.originator, olsr_cnf->ipsize);
++  } else {
++    memcpy(&originator, &m->v6.originator, olsr_cnf->ipsize);
++  }
++
++  /* Fetch the message based on IP version */
++  if (olsr_cnf->ip_version == AF_INET) {
++    size = ntohs(m->v4.olsr_msgsize);
++    ondatamessage = (struct ondatamsg *)ARM_NOWARN_ALIGN(&m->v4.message);
++  } else {
++    size = ntohs(m->v6.olsr_msgsize);
++    ondatamessage = (struct ondatamsg *)ARM_NOWARN_ALIGN(&m->v6.message);
++  }
++
++  /* Check if message originated from this node.
++     If so - back off */
++  if (ipequal(&originator, &olsr_cnf->main_addr))
++    return false;
++
++  update_ondata_entry(&originator, ondatamessage, size);
++  /* Forward the message */
++  return true;
++}
++
++// Database Variables / should be kept over different calls, therefore global
++sqlite3 *db;
++sqlite3_stmt *ppStmt;
++char *zSql;
++
++int unsigned currentTable = 0;
++bool db_open = 0;
++bool table_open = 0;
++
++/**
++ * Encapsulate a ondata message into a packet.
++ *
++ * It assumed that there is enough space in the buffer to do this!
++ *
++ * Returns: the length of the message that was appended
++ */
++int
++encap_ondatamsg(struct ondatamsg *msg)
++{
++  const char *pzTail;           /* OUT of sqlite3_prepare_v2: Pointer to unused portion of zSql */
++  const char *SQLframe = "SELECT * FROM %s WHERE mainip = '%s';";
++  const char *SQLframeSpreadAll = "SELECT * FROM %s WHERE originator = '';";
++  
++  struct ipaddr_str main_addr;
++  char *mainip;
++  char *pos;
++  int iCol, rc;
++  uint16_t checksum;
++  uint16_t messageLength = 0;
++  
++  // open Database if this not a 'continued Transmission - and Database is already open'
++  mainip = (char*)olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
++  
++  if (!db_open) {
++    OLSR_PRINTF(5, "ONDATA PLUGIN: opening database\n");
++    
++    currentTable = 0;
++    rc = open_database(&db);
++    
++    if( rc == SQLITE_OK) db_open = 1;
++    else {
++      fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
++      sqlite3_close(db); return 0;
++    }
++  }
++  
++  // if there is no Data available, search next Table with Data
++  if (!table_open) {
++    while (currentTable < numberOfTables) {
++      OLSR_PRINTF(5, "ONDATA PLUGIN: using next table %s\n", DATABASE_TABLES[currentTable]);
++      // build SQL-query
++      if (!my_spreadall) {
++        zSql = olsr_malloc(strlen(SQLframe) + strlen(DATABASE_TABLES[currentTable]) + strlen(mainip) + 1, "encap_ondatamsg: space for SQL query");      
++        sprintf(zSql, SQLframe, DATABASE_TABLES[currentTable], mainip);
++      }
++      else {
++        zSql = olsr_malloc(strlen(SQLframeSpreadAll) + strlen(DATABASE_TABLES[currentTable])+ 1, "encap_ondatamsg: space for SQL query");      
++        sprintf(zSql, SQLframeSpreadAll, DATABASE_TABLES[currentTable]);
++      }
++      // open table
++      rc = sqlite3_prepare_v2(db, zSql, 100, &ppStmt, &pzTail);
++      if( rc == SQLITE_OK) {
++        table_open = 1;
++        break;
++      }
++      else {
++        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
++        free(zSql);
++      }
++      currentTable++;
++    }
++  }
++  
++  // if still no valid table found, give up
++  if (!table_open) {
++    OLSR_PRINTF(5, "ONDATA PLUGIN: no further table found\n");
++    sqlite3_close(db);
++    db_open = 0;
++    // reset timer to normal interval
++    olsr_change_timer(msg_gen_timer, my_interval * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC);
++    return 0;
++  }
++  
++  // add all datasets
++  if (sqlite3_step(ppStmt) == SQLITE_ROW) {
++    OLSR_PRINTF(5, "ONDATA PLUGIN: adding all datasets\n");
++    // add all the entries after the ondatamsg header (and keep space for it)
++    pos = (char *)msg + sizeof(struct ondatamsg);
++    
++    // always add the Table-Name as first field
++    pos = create_packet((struct ondata *)ARM_NOWARN_ALIGN(pos), DATABASE_TABLES[currentTable]);
++  
++    // never transmit originator (col=0), this will be detected at the other end_pos
++    // skip last column, it will set at destination to the receiving-time
++    iCol = 1;
++    while (iCol < sqlite3_column_count(ppStmt) - 1) {
++      pos = create_packet((struct ondata *)ARM_NOWARN_ALIGN(pos), (char *)sqlite3_column_text(ppStmt, iCol));
++      iCol++;
++    }
++    // write the ondatamsg header with the number of announced entries and the protocol version
++    msg->nr_datasets = htons(--iCol);   // it won't count the table-name as dataset (and neither mainip-Col)
++    msg->version = htons(ONDATA_PROTOCOL_VERSION);
++    messageLength = pos - (char *)msg;
++    msg->length = htons(messageLength);
++    checksum = crcCalculate((char *)msg + sizeof(uint16_t), messageLength - sizeof(uint16_t));
++    msg->checksum = htons(checksum);
++    
++    OLSR_PRINTF(3, "ONDATA PLUGIN: ##### finished creating packet, length=%d, crc16=0x%x\n", messageLength, checksum);    
++  }
++  else {
++    OLSR_PRINTF(5, "ONDATA PLUGIN: finalize query\n");
++    sqlite3_finalize(ppStmt);
++    free(zSql);
++    currentTable++;
++    table_open = 0;
++  }
++
++  // increase Transmission-Time as long as there is data
++  olsr_change_timer(msg_gen_timer, 1 * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC);
++  return messageLength;     //length
++}
++
++/**
++ * convert each of my to be announced ondata_entries into network
++ * compatible format
++ *
++ * return the length of the ondata packet
++ */
++char *
++create_packet(struct ondata *to, const char *value )
++{
++  char *pos = (char *)to;  int valuelen = strlen((const char*)value);
++  int k;
++  to->valuelen = htons(valuelen);
++  OLSR_PRINTF(5, "ONDATA PLUGIN: Announcing value %s %d\n", value, valuelen);
++  pos += sizeof(struct ondata);
++  memcpy(pos, value, valuelen);
++  pos += valuelen;
++  // do 4-byte padding
++  for (k = sizeof(struct ondata) + valuelen; (k & 3) != 0; k++)
++    *pos++ = '\0';
++  
++  return pos;
++}
++
++/**
++ * unpack the received message and delegate to the decapsulation function for each
++ * ondata entry in the message
++ */
++void
++update_ondata_entry(union olsr_ip_addr *originator, struct ondatamsg *msg, int msg_size)
++{
++  struct ipaddr_str strbuf;
++  char *pos, *end_pos, *values, *valuepos, *table, *originatorIP;
++  struct ondata *from_packet;
++  int i, rc;
++  uint16_t checksum;
++  sqlite3 *localdb;
++  sqlite3_stmt *localppStmt;
++  char *localzSql;
++  const char *SQLframe = "INSERT OR REPLACE INTO %s VALUES (%s);", *pzTail;
++
++  
++  originatorIP = (char*)olsr_ip_to_string(&strbuf, originator);
++  OLSR_PRINTF(3, "ONDATA PLUGIN: Received Message from %s, version %d, msg_size %d, checksum 0x%x\n", originatorIP, ntohs(msg->version), ntohs(msg->length), ntohs(msg->checksum));
++
++  if (ntohs(msg->version) != ONDATA_PROTOCOL_VERSION) {
++    OLSR_PRINTF(3, "ONDATA PLUGIN: ignoring wrong version %d\n", ntohs(msg->version));
++    return;
++  }
++
++  // calculate checksum
++  checksum = crcCalculate((char *)msg + sizeof(uint16_t), ntohs(msg->length) - sizeof(uint16_t));
++  if (ntohs(msg->checksum) != checksum) {
++    OLSR_PRINTF(3, "ONDATA PLUGIN: ignoring checksum error 0x%x\n", checksum);
++    return;
++  }
++  else OLSR_PRINTF(5, "ONDATA PLUGIN: validated checksum 0x%x\n", checksum);
++  
++  
++  // every value will be enclosed in brackets "'" and separated by a comma ","
++  // so we need four bytes more per value (and we take more than we need, yeah)
++  values = olsr_malloc(strlen(originatorIP) + 1 + ntohs(msg->length) + msg->nr_datasets*3, "update_ondata_entry: space for SQL values");
++  valuepos = values;
++  
++  // checksum is valid, now add the values to the database.
++  // first field is the tablename, abort if it does not exist
++  // all following fields contain the table-values for one row.
++  
++  pos = (char *)msg + sizeof(struct ondatamsg);
++  end_pos = pos + msg_size - sizeof(struct ondata *);     // at least one struct ondata has to be left
++
++
++  from_packet = (struct ondata *)ARM_NOWARN_ALIGN(pos);
++  table = olsr_malloc(ntohs(from_packet->valuelen) + 1, "update_ondata_entry: space for Table Name");
++  
++  memcpy(table, (char *)from_packet + sizeof(struct ondata), ntohs(from_packet->valuelen));
++  *(table + ntohs(from_packet->valuelen)) = '\0';
++  
++  // set new position and calculate alignment
++  pos += ((sizeof(struct ondata) + ntohs(from_packet->valuelen) - 1) | 3) + 1;
++  
++  // add originator IP
++  memcpy(valuepos++, "'", 1);
++  memcpy(valuepos, originatorIP, strlen(originatorIP));
++  valuepos += strlen(originatorIP);
++  memcpy(valuepos, "',", 2);
++  valuepos += 2; 
++  
++  for (i = ntohs(msg->nr_datasets); i > 0 && pos < end_pos; i--) {
++    from_packet = (struct ondata *)ARM_NOWARN_ALIGN(pos);
++    
++    memcpy(valuepos++, "'", 1);
++    memcpy(valuepos, (char *)from_packet + sizeof(struct ondata), ntohs(from_packet->valuelen));
++    valuepos += ntohs(from_packet->valuelen);
++    memcpy(valuepos, "',", 2);
++    valuepos += 2;
++
++    // set new position and calculate alignment
++    pos += ((sizeof(struct ondata) + ntohs(from_packet->valuelen) - 1) | 3) + 1;
++  }
++
++  // add current time to detect age of datasets (and remove them after timeout)
++  sprintf(valuepos, "'%lu'", (uintmax_t)time(NULL));
++  
++  // build Database statement
++  localzSql = olsr_malloc(strlen(SQLframe) + strlen(table) + strlen(values) + 1, "update_ondata_entry: space for SQL query");
++  sprintf(localzSql, SQLframe, table, values);
++  free(table); free(values);
++  
++  // apply statement to database
++  rc = open_database(&localdb);
++  if( rc == SQLITE_OK ){
++    // use 1500 as max MTU and therefore as max SQL size (which is not quite accurate)
++    rc = sqlite3_prepare_v2(localdb, localzSql, 1500, &localppStmt, &pzTail);
++    if( rc == SQLITE_OK ){
++      sqlite3_step(localppStmt);
++      sqlite3_finalize(localppStmt);
++      OLSR_PRINTF(5, "ONDATA PLUGIN: Data added: %s\n", localzSql);
++    }
++    else fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(localdb));
++  }
++  else fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(localdb));
++  
++  sqlite3_close(localdb);
++  free(localzSql);
++}
++
++/*
++ * Local Variables:
++ * mode: c
++ * c-indent-tabs-mode: t
++ * indent-tabs-mode: t
++ * c-basic-offset: 4
++ * tab-width: 4
++ * End:
++ */
++
+diff --git a/lib/ondataservice/src/ondataservice.h b/lib/ondataservice/src/ondataservice.h
+new file mode 100644
+index 0000000..f88841a
+--- /dev/null
++++ b/lib/ondataservice/src/ondataservice.h
+@@ -0,0 +1,108 @@
++
++/*
++ * Copyright (c) 2005, Bruno Randolf <bruno.randolf@4g-systems.biz>
++ * Copyright (c) 2004, Andreas Tonnesen(andreto-at-olsr.org)
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice,
++ *   this list of conditions and the following disclaimer.
++ * * Redistributions in binary form must reproduce the above copyright notice,
++ *   this list of conditions and the following disclaimer in the documentation
++ *   and/or other materials provided with the distribution.
++ * * Neither the name of the UniK olsr daemon nor the names of its contributors
++ *   may be used to endorse or promote products derived from this software
++ *   without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
++ * IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
++ * OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++/*
++ * Dynamic linked library for UniK OLSRd
++ */
++
++#ifndef _ONDATASERVICE_PLUGIN
++#define _ONDATASERVICE_PLUGIN
++
++#include <sys/time.h>
++// #include <regex.h>
++
++#include "olsr_types.h"
++#include "interfaces.h"
++#include "olsr_protocol.h"
++#include "common/list.h"
++
++#include "olsrd_plugin.h"
++#include "ondataservice_msg.h"
++#include "hashing.h"
++// #include "mapwrite.h"
++// #include "mantissa.h"
++
++#define PLUGIN_NAME		"OLSRD ondataservice plugin"
++#define PLUGIN_VERSION		"0.2"
++#define PLUGIN_AUTHOR		"Rene Ejury, Bruno Randolf, Jens Nachtigall, Sven-Ola Tuecke"
++#define DATABASE_FILE		"/tmp/database"
++
++#define MESSAGE_TYPE		222 /* hope this is a good choice */
++#define PARSER_TYPE		MESSAGE_TYPE
++#define EMISSION_INTERVAL	10800 /* seconds - 10800 = 3hours */
++#define EMISSION_INC_INTERVAL   5 /* seconds between transmission of rows from one dataset */
++#define EMISSION_JITTER         25  /* percent */
++#define ONDATA_TIMEOUT  21600  /* seconds, how long old data stays valid - 21600 = 6hours */
++#define ONDATA_VALID_TIME 300  /* seconds, how long a package should maximally be spreaded through the net - 300 - 5mins*/ 
++#define CLEANUP_INTERVAL    1800 /* seconds, how often cleanup will be triggered - 1800 = 0.5hours */
++
++#define ONDATA_PROTOCOL_VERSION	1
++
++#define MAX_FILE 		255
++
++/* Parser function to register with the scheduler */
++bool olsr_parser(union olsr_message *, struct interface *, union olsr_ip_addr *);
++
++/* callback for periodic timer */
++void olsr_ondatasvc_gen(void *);
++
++/* open or create and open database */
++#include <sqlite3.h>
++int open_database(sqlite3 **localdb);
++
++/* callback for database cleanup */
++void olsr_ondataservice_expire_db_timer(void *);
++
++int encap_ondatamsg(struct ondatamsg *);
++
++void update_ondata_entry(union olsr_ip_addr *, struct ondatamsg *, int);
++
++int register_olsr_param(char *key, char *value);
++
++
++char *create_packet(struct ondata *to, const char *value);
++
++void ondata_constructor(void);
++
++void ondata_destructor(void);
++
++int ondata_init(void);
++
++#endif
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
++
+diff --git a/lib/ondataservice/src/ondataservice_msg.h b/lib/ondataservice/src/ondataservice_msg.h
+new file mode 100644
+index 0000000..b22fbee
+--- /dev/null
++++ b/lib/ondataservice/src/ondataservice_msg.h
+@@ -0,0 +1,68 @@
++
++/*
++ * Copyright (c) 2005, Bruno Randolf <bruno.randolf@4g-systems.biz>
++ * Copyright (c) 2004, Andreas Tonnesen(andreto-at-olsr.org)
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice,
++ *   this list of conditions and the following disclaimer.
++ * * Redistributions in binary form must reproduce the above copyright notice,
++ *   this list of conditions and the following disclaimer in the documentation
++ *   and/or other materials provided with the distribution.
++ * * Neither the name of the UniK olsr daemon nor the names of its contributors
++ *   may be used to endorse or promote products derived from this software
++ *   without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
++ * IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
++ * OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++/*
++ * Dynamic linked library for UniK OLSRd
++ */
++
++#ifndef _ONDATASERVICE_MSG
++#define _ONDATASERVICE_MSG
++
++/**
++ * the data, forwarder or service entry as found in a packet within a
++ * message
++ **/
++struct ondata {
++  uint16_t valuelen;                     // length of the value
++  /*
++   * value is written separatedly in plain text after this struct and padded to 4 byte
++   */
++};
++
++struct ondatamsg {
++  uint16_t checksum;
++  uint16_t version;                     // version number of the ondataservice plugin
++  uint16_t nr_datasets;                 // number of following packets including all the data
++  uint16_t length;                      // length in bytes / required to calculate checksum on receive
++  /*
++   * at least one struct name following
++   */
++};
++
++#endif
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
+diff --git a/lib/ondataservice/version-script.txt b/lib/ondataservice/version-script.txt
+new file mode 100644
+index 0000000..a145659
+--- /dev/null
++++ b/lib/ondataservice/version-script.txt
+@@ -0,0 +1,10 @@
++VERS_1.0
++{
++  global:
++    olsrd_plugin_interface_version;
++    olsrd_plugin_init;
++    olsrd_get_plugin_parameters;
++
++  local:
++    *;
++};
+diff --git a/lib/ondataservice_light/Makefile b/lib/ondataservice_light/Makefile
+new file mode 100644
+index 0000000..01dd2db
+--- /dev/null
++++ b/lib/ondataservice_light/Makefile
+@@ -0,0 +1,79 @@
++# The olsr.org Optimized Link-State Routing daemon(olsrd)
++# Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
++# All rights reserved.
++#
++# Redistribution and use in source and binary forms, with or without 
++# modification, are permitted provided that the following conditions 
++# are met:
++#
++# * Redistributions of source code must retain the above copyright 
++#   notice, this list of conditions and the following disclaimer.
++# * Redistributions in binary form must reproduce the above copyright 
++#   notice, this list of conditions and the following disclaimer in 
++#   the documentation and/or other materials provided with the 
++#   distribution.
++# * Neither the name of olsr.org, olsrd nor the names of its 
++#   contributors may be used to endorse or promote products derived 
++#   from this software without specific prior written permission.
++#
++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
++# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
++# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
++# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
++# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
++# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
++# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
++# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
++# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
++# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
++# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
++# POSSIBILITY OF SUCH DAMAGE.
++#
++# Visit http://www.olsr.org for more information.
++#
++# If you find this software useful feel free to make a donation
++# to the project. For more information see the website or contact
++# the copyright holders.
++#
++
++OLSRD_PLUGIN =	true
++PLUGIN_NAME =	olsrd_ondataservice_light
++# dont change version here for backward-compatible changes,
++# it will change the library name and won't load with the
++# olsrd-config already existing on the device
++PLUGIN_VER =	0.1
++
++LIBS += 
++
++TOPDIR = ../..
++include $(TOPDIR)/Makefile.inc
++
++ifeq ($(OS),win32)
++default_target install clean:
++	@echo "**** We use the regex library here. Does Win32 has something like this?"
++else
++ifeq ($(OS),android)
++# On Android Google forgot to include regex engine code for Froyo version (but also there was
++# no support in older versions for it) so we have here this missing code.
++# http://groups.google.com/group/android-ndk/browse_thread/thread/5ea6f0650f0e3fc
++SRCS +=     $(wildcard $(TOPDIR)/android/regex/reg*.c)
++HDRS +=     $(wildcard $(TOPDIR)/android/regex/*.h)
++CFLAGS += -D__POSIX_VISIBLE
++endif
++
++default_target: $(PLUGIN_FULLNAME)
++
++$(PLUGIN_FULLNAME): $(OBJS) version-script.txt
++		@echo "[LD] $@"
++		@$(CC) $(LDFLAGS) -o $(PLUGIN_FULLNAME) $(OBJS) $(LIBS)
++
++install:	$(PLUGIN_FULLNAME)
++		$(STRIP) $(PLUGIN_FULLNAME)
++		$(INSTALL_LIB)
++
++uninstall:
++		$(UNINSTALL_LIB)
++
++clean:
++		rm -f $(OBJS) $(SRCS:%.c=%.d) $(PLUGIN_FULLNAME)
++endif
+diff --git a/lib/ondataservice_light/README_ONDATASERVICE_LIGHT b/lib/ondataservice_light/README_ONDATASERVICE_LIGHT
+new file mode 100644
+index 0000000..174cd28
+--- /dev/null
++++ b/lib/ondataservice_light/README_ONDATASERVICE_LIGHT
+@@ -0,0 +1,42 @@
++---------------------------------------------------------------------
++ONDATASERVICE_LIGHT PLUGIN FOR OLSRD
++by Rene Ejury <opennet@absorb.it>
++based on and copied from:
++NAMESERVICE PLUGIN FOR OLSRD
++by Bruno Randolf <bruno.randolf@4g-systems.biz>
++---------------------------------------------------------------------
++
++Plugin just to spread json-values stored in a json-database
++no reception possible, but does not require sqlite-library
++
++---------------------------------------------------------------------
++PLUGIN PARAMETERS (PlParam)
++---------------------------------------------------------------------
++
++PlParam "interval" "SEC"
++	interval for sending the DATABASE in seconds.
++	(default: 10800 - 3 hours)
++
++PlParam "inc_interval" "SEC"
++    interval for continously sending TABLES from DATABASE in seconds.
++    (default: 5 seconds)
++
++PlParam "database" "/path/to/database"
++        Path to the database (json)
++
++PlParam "vtime" "SEC"
++    validity time for sended message-packages in seconds.
++    (how long this message-data is forwarded through the net)
++    (default: 300 - 5 mins)
++
++---------------------------------------------------------------------
++SAMPLE CONFIG
++---------------------------------------------------------------------
++
++add in /etc/olsrd.conf:
++
++LoadPlugin "olsrd_ondataservice_light.so.0.1"
++{
++    PlParam "interval"  "120"
++    PlParam "database"  "/tmp/database.json"
++}
+diff --git a/lib/ondataservice_light/src/cJSON.c b/lib/ondataservice_light/src/cJSON.c
+new file mode 100644
+index 0000000..e2c9c69
+--- /dev/null
++++ b/lib/ondataservice_light/src/cJSON.c
+@@ -0,0 +1,514 @@
++/*
++  Copyright (c) 2009 Dave Gamble
++
++  Permission is hereby granted, free of charge, to any person obtaining a copy
++  of this software and associated documentation files (the "Software"), to deal
++  in the Software without restriction, including without limitation the rights
++  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++  copies of the Software, and to permit persons to whom the Software is
++  furnished to do so, subject to the following conditions:
++
++  The above copyright notice and this permission notice shall be included in
++  all copies or substantial portions of the Software.
++
++  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++  THE SOFTWARE.
++*/
++
++/* cJSON */
++/* JSON parser in C. */
++
++#include <string.h>
++#include <stdio.h>
++#include <math.h>
++#include <stdlib.h>
++#include <float.h>
++#include <limits.h>
++#include <ctype.h>
++#include "cJSON.h"
++
++static const char *ep;
++
++// const char *cJSON_GetErrorPtr(void) {return ep;}
++
++// static int cJSON_strcasecmp(const char *s1,const char *s2)
++// {
++// 	if (!s1) return (s1==s2)?0:1;if (!s2) return 1;
++// 	for(; tolower(*s1) == tolower(*s2); ++s1, ++s2)	if(*s1 == 0)	return 0;
++// 	return tolower(*(const unsigned char *)s1) - tolower(*(const unsigned char *)s2);
++// }
++
++static void *(*cJSON_malloc)(size_t sz) = malloc;
++static void (*cJSON_free)(void *ptr) = free;
++
++static char* cJSON_strdup(const char* str)
++{
++      size_t len;
++      char* copy;
++
++      len = strlen(str) + 1;
++      if (!(copy = (char*)cJSON_malloc(len))) return 0;
++      memcpy(copy,str,len);
++      return copy;
++}
++
++void cJSON_InitHooks(cJSON_Hooks* hooks)
++{
++    if (!hooks) { /* Reset hooks */
++        cJSON_malloc = malloc;
++        cJSON_free = free;
++        return;
++    }
++
++	cJSON_malloc = (hooks->malloc_fn)?hooks->malloc_fn:malloc;
++	cJSON_free	 = (hooks->free_fn)?hooks->free_fn:free;
++}
++
++/* Internal constructor. */
++static cJSON *cJSON_New_Item(void)
++{
++	cJSON* node = (cJSON*)cJSON_malloc(sizeof(cJSON));
++	if (node) memset(node,0,sizeof(cJSON));
++	return node;
++}
++
++/* Delete a cJSON structure. */
++void cJSON_Delete(cJSON *c)
++{
++	cJSON *next;
++	while (c)
++	{
++		next=c->next;
++		if (!(c->type&cJSON_IsReference) && c->child) cJSON_Delete(c->child);
++		if (!(c->type&cJSON_IsReference) && c->valuestring) cJSON_free(c->valuestring);
++		if (c->string) cJSON_free(c->string);
++		cJSON_free(c);
++		c=next;
++	}
++}
++
++// /* Parse the input text to generate a number, and populate the result into item. */
++// static const char *parse_number(cJSON *item,const char *num)
++// {
++// 	double n=0,sign=1,scale=0;int subscale=0,signsubscale=1;
++// 
++// 	/* Could use sscanf for this? */
++// 	if (*num=='-') sign=-1,num++;	/* Has sign? */
++// 	if (*num=='0') num++;			/* is zero */
++// 	if (*num>='1' && *num<='9')	do	n=(n*10.0)+(*num++ -'0');	while (*num>='0' && *num<='9');	/* Number? */
++// 	if (*num=='.' && num[1]>='0' && num[1]<='9') {num++;		do	n=(n*10.0)+(*num++ -'0'),scale--; while (*num>='0' && *num<='9');}	/* Fractional part? */
++// 	if (*num=='e' || *num=='E')		/* Exponent? */
++// 	{	num++;if (*num=='+') num++;	else if (*num=='-') signsubscale=-1,num++;		/* With sign? */
++// 		while (*num>='0' && *num<='9') subscale=(subscale*10)+(*num++ - '0');	/* Number? */
++// 	}
++// 
++// 	n=sign*n*pow(10.0,(scale+subscale*signsubscale));	/* number = +/- number.fraction * 10^+/- exponent */
++// 	
++// 	item->valuedouble=n;
++// 	item->valueint=(int)n;
++// 	item->type=cJSON_Number;
++// 	return num;
++// }
++
++// /* Render the number nicely from the given item into a string. */
++// static char *print_number(cJSON *item)
++// {
++// 	char *str;
++// 	double d=item->valuedouble;
++// 	if (fabs(((double)item->valueint)-d)<=DBL_EPSILON && d<=INT_MAX && d>=INT_MIN)
++// 	{
++// 		str=(char*)cJSON_malloc(21);	/* 2^64+1 can be represented in 21 chars. */
++// 		if (str) sprintf(str,"%d",item->valueint);
++// 	}
++// 	else
++// 	{
++// 		str=(char*)cJSON_malloc(64);	/* This is a nice tradeoff. */
++// 		if (str)
++// 		{
++// 			if (fabs(floor(d)-d)<=DBL_EPSILON)			sprintf(str,"%.0f",d);
++// 			else if (fabs(d)<1.0e-6 || fabs(d)>1.0e9)	sprintf(str,"%e",d);
++// 			else										sprintf(str,"%f",d);
++// 		}
++// 	}
++// 	return str;
++// }
++
++/* Parse the input text into an unescaped cstring, and populate item. */
++static const unsigned char firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
++static const char *parse_string(cJSON *item,const char *str)
++{
++	const char *ptr=str+1;char *ptr2;char *out;int len=0;unsigned uc,uc2;
++	if (*str!='\"') {ep=str;return 0;}	/* not a string! */
++	
++	while (*ptr!='\"' && *ptr && ++len) if (*ptr++ == '\\') ptr++;	/* Skip escaped quotes. */
++	
++	out=(char*)cJSON_malloc(len+1);	/* This is how long we need for the string, roughly. */
++	if (!out) return 0;
++	
++	ptr=str+1;ptr2=out;
++	while (*ptr!='\"' && *ptr)
++	{
++		if (*ptr!='\\') *ptr2++=*ptr++;
++		else
++		{
++			ptr++;
++			switch (*ptr)
++			{
++				case 'b': *ptr2++='\b';	break;
++				case 'f': *ptr2++='\f';	break;
++				case 'n': *ptr2++='\n';	break;
++				case 'r': *ptr2++='\r';	break;
++				case 't': *ptr2++='\t';	break;
++				case 'u':	 /* transcode utf16 to utf8. */
++					sscanf(ptr+1,"%4x",&uc);ptr+=4;	/* get the unicode char. */
++
++					if ((uc>=0xDC00 && uc<=0xDFFF) || uc==0)	break;	// check for invalid.
++
++					if (uc>=0xD800 && uc<=0xDBFF)	// UTF16 surrogate pairs.
++					{
++						if (ptr[1]!='\\' || ptr[2]!='u')	break;	// missing second-half of surrogate.
++						sscanf(ptr+3,"%4x",&uc2);ptr+=6;
++						if (uc2<0xDC00 || uc2>0xDFFF)		break;	// invalid second-half of surrogate.
++						uc=0x10000 | ((uc&0x3FF)<<10) | (uc2&0x3FF);
++					}
++
++					len=4;if (uc<0x80) len=1;else if (uc<0x800) len=2;else if (uc<0x10000) len=3; ptr2+=len;
++					
++					switch (len) {
++						case 4: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
++						case 3: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
++						case 2: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
++						case 1: *--ptr2 =(uc | firstByteMark[len]);
++					}
++					ptr2+=len;
++					break;
++				default:  *ptr2++=*ptr; break;
++			}
++			ptr++;
++		}
++	}
++	*ptr2=0;
++	if (*ptr=='\"') ptr++;
++	item->valuestring=out;
++	item->type=cJSON_String;
++	return ptr;
++}
++
++// /* Render the cstring provided to an escaped version that can be printed. */
++// static char *print_string_ptr(const char *str)
++// {
++// 	const char *ptr;char *ptr2,*out;int len=0;unsigned char token;
++// 	
++// 	if (!str) return cJSON_strdup("");
++// 	ptr=str;while ((token=*ptr) && ++len) {if (strchr("\"\\\b\f\n\r\t",token)) len++; else if (token<32) len+=5;ptr++;}
++// 	
++// 	out=(char*)cJSON_malloc(len+3);
++// 	if (!out) return 0;
++// 
++// 	ptr2=out;ptr=str;
++// 	*ptr2++='\"';
++// 	while (*ptr)
++// 	{
++// 		if ((unsigned char)*ptr>31 && *ptr!='\"' && *ptr!='\\') *ptr2++=*ptr++;
++// 		else
++// 		{
++// 			*ptr2++='\\';
++// 			switch (token=*ptr++)
++// 			{
++// 				case '\\':	*ptr2++='\\';	break;
++// 				case '\"':	*ptr2++='\"';	break;
++// 				case '\b':	*ptr2++='b';	break;
++// 				case '\f':	*ptr2++='f';	break;
++// 				case '\n':	*ptr2++='n';	break;
++// 				case '\r':	*ptr2++='r';	break;
++// 				case '\t':	*ptr2++='t';	break;
++// 				default: sprintf(ptr2,"u%04x",token);ptr2+=5;	break;	/* escape and print */
++// 			}
++// 		}
++// 	}
++// 	*ptr2++='\"';*ptr2++=0;
++// 	return out;
++// }
++// /* Invote print_string_ptr (which is useful) on an item. */
++// static char *print_string(cJSON *item)	{return print_string_ptr(item->valuestring);}
++
++/* Predeclare these prototypes. */
++static const char *parse_value(cJSON *item,const char *value);
++// static char *print_value(cJSON *item,int depth,int fmt);
++// static const char *parse_array(cJSON *item,const char *value);
++// static char *print_array(cJSON *item,int depth,int fmt);
++static const char *parse_object(cJSON *item,const char *value);
++// static char *print_object(cJSON *item,int depth,int fmt);
++
++/* Utility to jump whitespace and cr/lf */
++static const char *skip(const char *in) {while (in && *in && (unsigned char)*in<=32) in++; return in;}
++
++/* Parse an object - create a new root, and populate. */
++cJSON *cJSON_Parse(const char *value)
++{
++	cJSON *c=cJSON_New_Item();
++	ep=0;
++	if (!c) return 0;       /* memory fail */
++
++	if (!parse_value(c,skip(value))) {cJSON_Delete(c);return 0;}
++	return c;
++}
++
++/* Render a cJSON item/entity/structure to text. */
++// char *cJSON_Print(cJSON *item)				{return print_value(item,0,1);}
++// char *cJSON_PrintUnformatted(cJSON *item)	{return print_value(item,0,0);}
++
++/* Parser core - when encountering text, process appropriately. */
++static const char *parse_value(cJSON *item,const char *value)
++{
++	if (!value)						return 0;	/* Fail on null. */
++// 	if (!strncmp(value,"null",4))	{ item->type=cJSON_NULL;  return value+4; }
++// 	if (!strncmp(value,"false",5))	{ item->type=cJSON_False; return value+5; }
++// 	if (!strncmp(value,"true",4))	{ item->type=cJSON_True; item->valueint=1;	return value+4; }
++	if (*value=='\"')				{ return parse_string(item,value); }
++// 	if (*value=='-' || (*value>='0' && *value<='9'))	{ return parse_number(item,value); }
++// 	if (*value=='[')				{ return parse_array(item,value); }
++	if (*value=='{')				{ return parse_object(item,value); }
++
++	ep=value;return 0;	/* failure. */
++}
++
++/* Render a value to text. */
++// static char *print_value(cJSON *item,int depth,int fmt)
++// {
++// 	char *out=0;
++// 	if (!item) return 0;
++// 	switch ((item->type)&255)
++// 	{
++// 		case cJSON_NULL:	out=cJSON_strdup("null");	break;
++// 		case cJSON_False:	out=cJSON_strdup("false");break;
++// 		case cJSON_True:	out=cJSON_strdup("true"); break;
++// 		case cJSON_Number:	out=print_number(item);break;
++// 		case cJSON_String:	out=print_string(item);break;
++// 		case cJSON_Array:	out=print_array(item,depth,fmt);break;
++// 		case cJSON_Object:	out=print_object(item,depth,fmt);break;
++// 	}
++// 	return out;
++// }
++
++// /* Build an array from input text. */
++// static const char *parse_array(cJSON *item,const char *value)
++// {
++// 	cJSON *child;
++// 	if (*value!='[')	{ep=value;return 0;}	/* not an array! */
++// 
++// 	item->type=cJSON_Array;
++// 	value=skip(value+1);
++// 	if (*value==']') return value+1;	/* empty array. */
++// 
++// 	item->child=child=cJSON_New_Item();
++// 	if (!item->child) return 0;		 /* memory fail */
++// 	value=skip(parse_value(child,skip(value)));	/* skip any spacing, get the value. */
++// 	if (!value) return 0;
++// 
++// 	while (*value==',')
++// 	{
++// 		cJSON *new_item;
++// 		if (!(new_item=cJSON_New_Item())) return 0; 	/* memory fail */
++// 		child->next=new_item;new_item->prev=child;child=new_item;
++// 		value=skip(parse_value(child,skip(value+1)));
++// 		if (!value) return 0;	/* memory fail */
++// 	}
++// 
++// 	if (*value==']') return value+1;	/* end of array */
++// 	ep=value;return 0;	/* malformed. */
++// }
++
++/* Render an array to text */
++// static char *print_array(cJSON *item,int depth,int fmt)
++// {
++// 	char **entries;
++// 	char *out=0,*ptr,*ret;int len=5;
++// 	cJSON *child=item->child;
++// 	int numentries=0,i=0,fail=0;
++// 	
++// 	/* How many entries in the array? */
++// 	while (child) numentries++,child=child->next;
++// 	/* Allocate an array to hold the values for each */
++// 	entries=(char**)cJSON_malloc(numentries*sizeof(char*));
++// 	if (!entries) return 0;
++// 	memset(entries,0,numentries*sizeof(char*));
++// 	/* Retrieve all the results: */
++// 	child=item->child;
++// 	while (child && !fail)
++// 	{
++// 		ret=print_value(child,depth+1,fmt);
++// 		entries[i++]=ret;
++// 		if (ret) len+=strlen(ret)+2+(fmt?1:0); else fail=1;
++// 		child=child->next;
++// 	}
++// 	
++// 	/* If we didn't fail, try to malloc the output string */
++// 	if (!fail) out=(char*)cJSON_malloc(len);
++// 	/* If that fails, we fail. */
++// 	if (!out) fail=1;
++// 
++// 	/* Handle failure. */
++// 	if (fail)
++// 	{
++// 		for (i=0;i<numentries;i++) if (entries[i]) cJSON_free(entries[i]);
++// 		cJSON_free(entries);
++// 		return 0;
++// 	}
++// 	
++// 	/* Compose the output array. */
++// 	*out='[';
++// 	ptr=out+1;*ptr=0;
++// 	for (i=0;i<numentries;i++)
++// 	{
++// 		strcpy(ptr,entries[i]);ptr+=strlen(entries[i]);
++// 		if (i!=numentries-1) {*ptr++=',';if(fmt)*ptr++=' ';*ptr=0;}
++// 		cJSON_free(entries[i]);
++// 	}
++// 	cJSON_free(entries);
++// 	*ptr++=']';*ptr++=0;
++// 	return out;	
++// }
++
++/* Build an object from the text. */
++static const char *parse_object(cJSON *item,const char *value)
++{
++	cJSON *child;
++	if (*value!='{')	{ep=value;return 0;}	/* not an object! */
++	
++	item->type=cJSON_Object;
++	value=skip(value+1);
++	if (*value=='}') return value+1;	/* empty array. */
++	
++	item->child=child=cJSON_New_Item();
++	if (!item->child) return 0;
++	value=skip(parse_string(child,skip(value)));
++	if (!value) return 0;
++	child->string=child->valuestring;child->valuestring=0;
++	if (*value!=':') {ep=value;return 0;}	/* fail! */
++	value=skip(parse_value(child,skip(value+1)));	/* skip any spacing, get the value. */
++	if (!value) return 0;
++	
++	while (*value==',')
++	{
++		cJSON *new_item;
++		if (!(new_item=cJSON_New_Item()))	return 0; /* memory fail */
++		child->next=new_item;new_item->prev=child;child=new_item;
++		value=skip(parse_string(child,skip(value+1)));
++		if (!value) return 0;
++		child->string=child->valuestring;child->valuestring=0;
++		if (*value!=':') {ep=value;return 0;}	/* fail! */
++		value=skip(parse_value(child,skip(value+1)));	/* skip any spacing, get the value. */
++		if (!value) return 0;
++	}
++	
++	if (*value=='}') return value+1;	/* end of array */
++	ep=value;return 0;	/* malformed. */
++}
++
++// /* Render an object to text. */
++// static char *print_object(cJSON *item,int depth,int fmt)
++// {
++// 	char **entries=0,**names=0;
++// 	char *out=0,*ptr,*ret,*str;int len=7,i=0,j;
++// 	cJSON *child=item->child;
++// 	int numentries=0,fail=0;
++// 	/* Count the number of entries. */
++// 	while (child) numentries++,child=child->next;
++// 	/* Allocate space for the names and the objects */
++// 	entries=(char**)cJSON_malloc(numentries*sizeof(char*));
++// 	if (!entries) return 0;
++// 	names=(char**)cJSON_malloc(numentries*sizeof(char*));
++// 	if (!names) {cJSON_free(entries);return 0;}
++// 	memset(entries,0,sizeof(char*)*numentries);
++// 	memset(names,0,sizeof(char*)*numentries);
++// 
++// 	/* Collect all the results into our arrays: */
++// 	child=item->child;depth++;if (fmt) len+=depth;
++// 	while (child)
++// 	{
++// 		names[i]=str=print_string_ptr(child->string);
++// 		entries[i++]=ret=print_value(child,depth,fmt);
++// 		if (str && ret) len+=strlen(ret)+strlen(str)+2+(fmt?2+depth:0); else fail=1;
++// 		child=child->next;
++// 	}
++// 	
++// 	/* Try to allocate the output string */
++// 	if (!fail) out=(char*)cJSON_malloc(len);
++// 	if (!out) fail=1;
++// 
++// 	/* Handle failure */
++// 	if (fail)
++// 	{
++// 		for (i=0;i<numentries;i++) {if (names[i]) cJSON_free(names[i]);if (entries[i]) cJSON_free(entries[i]);}
++// 		cJSON_free(names);cJSON_free(entries);
++// 		return 0;
++// 	}
++// 	
++// 	/* Compose the output: */
++// 	*out='{';ptr=out+1;if (fmt)*ptr++='\n';*ptr=0;
++// 	for (i=0;i<numentries;i++)
++// 	{
++// 		if (fmt) for (j=0;j<depth;j++) *ptr++='\t';
++// 		strcpy(ptr,names[i]);ptr+=strlen(names[i]);
++// 		*ptr++=':';if (fmt) *ptr++='\t';
++// 		strcpy(ptr,entries[i]);ptr+=strlen(entries[i]);
++// 		if (i!=numentries-1) *ptr++=',';
++// 		if (fmt) *ptr++='\n';*ptr=0;
++// 		cJSON_free(names[i]);cJSON_free(entries[i]);
++// 	}
++// 	
++// 	cJSON_free(names);cJSON_free(entries);
++// 	if (fmt) for (i=0;i<depth-1;i++) *ptr++='\t';
++// 	*ptr++='}';*ptr++=0;
++// 	return out;	
++// }
++
++/* Get Array size/item / object item. */
++// int    cJSON_GetArraySize(cJSON *array)							{cJSON *c=array->child;int i=0;while(c)i++,c=c->next;return i;}
++// cJSON *cJSON_GetArrayItem(cJSON *array,int item)				{cJSON *c=array->child;  while (c && item>0) item--,c=c->next; return c;}
++// cJSON *cJSON_GetObjectItem(cJSON *object,const char *string)	{cJSON *c=object->child; while (c && cJSON_strcasecmp(c->string,string)) c=c->next; return c;}
++
++/* Utility for array list handling. */
++// static void suffix_object(cJSON *prev,cJSON *item) {prev->next=item;item->prev=prev;}
++/* Utility for handling references. */
++// static cJSON *create_reference(cJSON *item) {cJSON *ref=cJSON_New_Item();if (!ref) return 0;memcpy(ref,item,sizeof(cJSON));ref->string=0;ref->type|=cJSON_IsReference;ref->next=ref->prev=0;return ref;}
++
++/* Add item to array/object. */
++// void   cJSON_AddItemToArray(cJSON *array, cJSON *item)						{cJSON *c=array->child;if (!item) return; if (!c) {array->child=item;} else {while (c && c->next) c=c->next; suffix_object(c,item);}}
++// void   cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item)	{if (!item) return; if (item->string) cJSON_free(item->string);item->string=cJSON_strdup(string);cJSON_AddItemToArray(object,item);}
++// void	cJSON_AddItemReferenceToArray(cJSON *array, cJSON *item)						{cJSON_AddItemToArray(array,create_reference(item));}
++// void	cJSON_AddItemReferenceToObject(cJSON *object,const char *string,cJSON *item)	{cJSON_AddItemToObject(object,string,create_reference(item));}
++
++// cJSON *cJSON_DetachItemFromArray(cJSON *array,int which)			{cJSON *c=array->child;while (c && which>0) c=c->next,which--;if (!c) return 0;
++// 	if (c->prev) c->prev->next=c->next;if (c->next) c->next->prev=c->prev;if (c==array->child) array->child=c->next;c->prev=c->next=0;return c;}
++// void   cJSON_DeleteItemFromArray(cJSON *array,int which)			{cJSON_Delete(cJSON_DetachItemFromArray(array,which));}
++// cJSON *cJSON_DetachItemFromObject(cJSON *object,const char *string) {int i=0;cJSON *c=object->child;while (c && cJSON_strcasecmp(c->string,string)) i++,c=c->next;if (c) return cJSON_DetachItemFromArray(object,i);return 0;}
++// void   cJSON_DeleteItemFromObject(cJSON *object,const char *string) {cJSON_Delete(cJSON_DetachItemFromObject(object,string));}
++
++/* Replace array/object items with new ones. */
++// void   cJSON_ReplaceItemInArray(cJSON *array,int which,cJSON *newitem)		{cJSON *c=array->child;while (c && which>0) c=c->next,which--;if (!c) return;
++// 	newitem->next=c->next;newitem->prev=c->prev;if (newitem->next) newitem->next->prev=newitem;
++// 	if (c==array->child) array->child=newitem; else newitem->prev->next=newitem;c->next=c->prev=0;cJSON_Delete(c);}
++// void   cJSON_ReplaceItemInObject(cJSON *object,const char *string,cJSON *newitem){int i=0;cJSON *c=object->child;while(c && cJSON_strcasecmp(c->string,string))i++,c=c->next;if(c){newitem->string=cJSON_strdup(string);cJSON_ReplaceItemInArray(object,i,newitem);}}
++
++/* Create basic types: */
++// cJSON *cJSON_CreateNull(void)						{cJSON *item=cJSON_New_Item();if(item)item->type=cJSON_NULL;return item;}
++// cJSON *cJSON_CreateTrue(void)						{cJSON *item=cJSON_New_Item();if(item)item->type=cJSON_True;return item;}
++// cJSON *cJSON_CreateFalse(void)						{cJSON *item=cJSON_New_Item();if(item)item->type=cJSON_False;return item;}
++// cJSON *cJSON_CreateBool(int b)					{cJSON *item=cJSON_New_Item();if(item)item->type=b?cJSON_True:cJSON_False;return item;}
++// cJSON *cJSON_CreateNumber(double num)			{cJSON *item=cJSON_New_Item();if(item){item->type=cJSON_Number;item->valuedouble=num;item->valueint=(int)num;}return item;}
++cJSON *cJSON_CreateString(const char *string)	{cJSON *item=cJSON_New_Item();if(item){item->type=cJSON_String;item->valuestring=cJSON_strdup(string);}return item;}
++// cJSON *cJSON_CreateArray(void)						{cJSON *item=cJSON_New_Item();if(item)item->type=cJSON_Array;return item;}
++cJSON *cJSON_CreateObject(void)						{cJSON *item=cJSON_New_Item();if(item)item->type=cJSON_Object;return item;}
++
++/* Create Arrays: */
++// cJSON *cJSON_CreateIntArray(int *numbers,int count)				{int i;cJSON *n=0,*p=0,*a=cJSON_CreateArray();for(i=0;a && i<count;i++){n=cJSON_CreateNumber(numbers[i]);if(!i)a->child=n;else suffix_object(p,n);p=n;}return a;}
++// cJSON *cJSON_CreateFloatArray(float *numbers,int count)			{int i;cJSON *n=0,*p=0,*a=cJSON_CreateArray();for(i=0;a && i<count;i++){n=cJSON_CreateNumber(numbers[i]);if(!i)a->child=n;else suffix_object(p,n);p=n;}return a;}
++// cJSON *cJSON_CreateDoubleArray(double *numbers,int count)		{int i;cJSON *n=0,*p=0,*a=cJSON_CreateArray();for(i=0;a && i<count;i++){n=cJSON_CreateNumber(numbers[i]);if(!i)a->child=n;else suffix_object(p,n);p=n;}return a;}
++// cJSON *cJSON_CreateStringArray(const char **strings,int count)	{int i;cJSON *n=0,*p=0,*a=cJSON_CreateArray();for(i=0;a && i<count;i++){n=cJSON_CreateString(strings[i]);if(!i)a->child=n;else suffix_object(p,n);p=n;}return a;}
+diff --git a/lib/ondataservice_light/src/cJSON.h b/lib/ondataservice_light/src/cJSON.h
+new file mode 100644
+index 0000000..158160c
+--- /dev/null
++++ b/lib/ondataservice_light/src/cJSON.h
+@@ -0,0 +1,127 @@
++/*
++  Copyright (c) 2009 Dave Gamble
++ 
++  Permission is hereby granted, free of charge, to any person obtaining a copy
++  of this software and associated documentation files (the "Software"), to deal
++  in the Software without restriction, including without limitation the rights
++  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++  copies of the Software, and to permit persons to whom the Software is
++  furnished to do so, subject to the following conditions:
++ 
++  The above copyright notice and this permission notice shall be included in
++  all copies or substantial portions of the Software.
++ 
++  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++  THE SOFTWARE.
++*/
++
++#ifndef cJSON__h
++#define cJSON__h
++
++#ifdef __cplusplus
++extern "C"
++{
++#endif
++
++/* cJSON Types: */
++#define cJSON_False 0
++#define cJSON_True 1
++#define cJSON_NULL 2
++#define cJSON_Number 3
++#define cJSON_String 4
++#define cJSON_Array 5
++#define cJSON_Object 6
++	
++#define cJSON_IsReference 256
++
++/* The cJSON structure: */
++typedef struct cJSON {
++	struct cJSON *next,*prev;	/* next/prev allow you to walk array/object chains. Alternatively, use GetArraySize/GetArrayItem/GetObjectItem */
++	struct cJSON *child;		/* An array or object item will have a child pointer pointing to a chain of the items in the array/object. */
++
++	int type;					/* The type of the item, as above. */
++
++	char *valuestring;			/* The item's string, if type==cJSON_String */
++	int valueint;				/* The item's number, if type==cJSON_Number */
++	double valuedouble;			/* The item's number, if type==cJSON_Number */
++
++	char *string;				/* The item's name string, if this item is the child of, or is in the list of subitems of an object. */
++} cJSON;
++
++typedef struct cJSON_Hooks {
++      void *(*malloc_fn)(size_t sz);
++      void (*free_fn)(void *ptr);
++} cJSON_Hooks;
++
++/* Supply malloc, realloc and free functions to cJSON */
++extern void cJSON_InitHooks(cJSON_Hooks* hooks);
++
++
++/* Supply a block of JSON, and this returns a cJSON object you can interrogate. Call cJSON_Delete when finished. */
++extern cJSON *cJSON_Parse(const char *value);
++/* Render a cJSON entity to text for transfer/storage. Free the char* when finished. */
++// extern char  *cJSON_Print(cJSON *item);
++/* Render a cJSON entity to text for transfer/storage without any formatting. Free the char* when finished. */
++// extern char  *cJSON_PrintUnformatted(cJSON *item);
++/* Delete a cJSON entity and all subentities. */
++extern void   cJSON_Delete(cJSON *c);
++
++/* Returns the number of items in an array (or object). */
++// extern int	  cJSON_GetArraySize(cJSON *array);
++/* Retrieve item number "item" from array "array". Returns NULL if unsuccessful. */
++// extern cJSON *cJSON_GetArrayItem(cJSON *array,int item);
++/* Get item "string" from object. Case insensitive. */
++// extern cJSON *cJSON_GetObjectItem(cJSON *object,const char *string);
++
++/* For analysing failed parses. This returns a pointer to the parse error. You'll probably need to look a few chars back to make sense of it. Defined when cJSON_Parse() returns 0. 0 when cJSON_Parse() succeeds. */
++// extern const char *cJSON_GetErrorPtr(void);
++	
++/* These calls create a cJSON item of the appropriate type. */
++// extern cJSON *cJSON_CreateNull(void);
++// extern cJSON *cJSON_CreateTrue(void);
++// extern cJSON *cJSON_CreateFalse(void);
++// extern cJSON *cJSON_CreateBool(int b);
++// extern cJSON *cJSON_CreateNumber(double num);
++extern cJSON *cJSON_CreateString(const char *string);
++// extern cJSON *cJSON_CreateArray(void);
++extern cJSON *cJSON_CreateObject(void);
++
++/* These utilities create an Array of count items. */
++// extern cJSON *cJSON_CreateIntArray(int *numbers,int count);
++// extern cJSON *cJSON_CreateFloatArray(float *numbers,int count);
++// extern cJSON *cJSON_CreateDoubleArray(double *numbers,int count);
++// extern cJSON *cJSON_CreateStringArray(const char **strings,int count);
++
++/* Append item to the specified array/object. */
++// extern void cJSON_AddItemToArray(cJSON *array, cJSON *item);
++// extern void	cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item);
++/* Append reference to item to the specified array/object. Use this when you want to add an existing cJSON to a new cJSON, but don't want to corrupt your existing cJSON. */
++// extern void cJSON_AddItemReferenceToArray(cJSON *array, cJSON *item);
++// extern void	cJSON_AddItemReferenceToObject(cJSON *object,const char *string,cJSON *item);
++
++/* Remove/Detatch items from Arrays/Objects. */
++// extern cJSON *cJSON_DetachItemFromArray(cJSON *array,int which);
++// extern void   cJSON_DeleteItemFromArray(cJSON *array,int which);
++// extern cJSON *cJSON_DetachItemFromObject(cJSON *object,const char *string);
++// extern void   cJSON_DeleteItemFromObject(cJSON *object,const char *string);
++	
++/* Update array items. */
++// extern void cJSON_ReplaceItemInArray(cJSON *array,int which,cJSON *newitem);
++// extern void cJSON_ReplaceItemInObject(cJSON *object,const char *string,cJSON *newitem);
++
++#define cJSON_AddNullToObject(object,name)	cJSON_AddItemToObject(object, name, cJSON_CreateNull())
++#define cJSON_AddTrueToObject(object,name)	cJSON_AddItemToObject(object, name, cJSON_CreateTrue())
++#define cJSON_AddFalseToObject(object,name)		cJSON_AddItemToObject(object, name, cJSON_CreateFalse())
++#define cJSON_AddNumberToObject(object,name,n)	cJSON_AddItemToObject(object, name, cJSON_CreateNumber(n))
++#define cJSON_AddStringToObject(object,name,s)	cJSON_AddItemToObject(object, name, cJSON_CreateString(s))
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
+diff --git a/lib/ondataservice_light/src/compat.c b/lib/ondataservice_light/src/compat.c
+new file mode 100644
+index 0000000..4d639be
+--- /dev/null
++++ b/lib/ondataservice_light/src/compat.c
+@@ -0,0 +1,35 @@
++#include "compat.h"
++
++#if !defined(__linux__) && !defined(__GLIBC__)
++#include <stdlib.h>
++#include <string.h>
++
++/* strndup() is a GNU extention */
++char *
++strndup(const char *ptr, size_t size)
++{
++  size_t len = strlen(ptr);
++  char *ret = NULL;
++
++  if (len > size)
++    len = size;
++
++  ret = malloc(len + 1);
++
++  if (!ret)
++    return NULL;
++
++  memcpy(ret, ptr, len);
++  ret[len] = '\0';
++
++  return ret;
++}
++
++#endif
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
+diff --git a/lib/ondataservice_light/src/compat.h b/lib/ondataservice_light/src/compat.h
+new file mode 100644
+index 0000000..c607c91
+--- /dev/null
++++ b/lib/ondataservice_light/src/compat.h
+@@ -0,0 +1,17 @@
++#ifndef _NAMESERVICE_COMPAT
++#define _NAMESERVICE_COMPAT
++
++#include <sys/types.h>
++
++#if !defined(__linux__) && !defined(__GLIBC__)
++char *strndup(const char *ptr, size_t size);
++#endif
++
++#endif
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
+diff --git a/lib/ondataservice_light/src/crc16.c b/lib/ondataservice_light/src/crc16.c
+new file mode 100644
+index 0000000..dc877ca
+--- /dev/null
++++ b/lib/ondataservice_light/src/crc16.c
+@@ -0,0 +1,62 @@
++#include <stdlib.h>
++#include "crc16.h"
++
++// ------------ http://stackoverflow.com/questions/3853670/are-there-any-free-crc-libraries-that-covers-a-lot-of-the-crc-algorithms
++
++/******************************************/
++/*  CRC table for polynomial 0xA001 CCITT */
++/******************************************/
++
++#define CRC16(crc,c) crc = (crc >> 8) ^ crctab[(crc ^ c) & 0xff]
++
++const u_int16_t crctab[256] = {
++    0x0000, 0xc0c1, 0xc181, 0x0140, 0xc301, 0x03c0, 0x0280, 0xc241,
++    0xc601, 0x06c0, 0x0780, 0xc741, 0x0500, 0xc5c1, 0xc481, 0x0440,
++    0xcc01, 0x0cc0, 0x0d80, 0xcd41, 0x0f00, 0xcfc1, 0xce81, 0x0e40,
++    0x0a00, 0xcac1, 0xcb81, 0x0b40, 0xc901, 0x09c0, 0x0880, 0xc841,
++    0xd801, 0x18c0, 0x1980, 0xd941, 0x1b00, 0xdbc1, 0xda81, 0x1a40,
++    0x1e00, 0xdec1, 0xdf81, 0x1f40, 0xdd01, 0x1dc0, 0x1c80, 0xdc41,
++    0x1400, 0xd4c1, 0xd581, 0x1540, 0xd701, 0x17c0, 0x1680, 0xd641,
++    0xd201, 0x12c0, 0x1380, 0xd341, 0x1100, 0xd1c1, 0xd081, 0x1040,
++    0xf001, 0x30c0, 0x3180, 0xf141, 0x3300, 0xf3c1, 0xf281, 0x3240,
++    0x3600, 0xf6c1, 0xf781, 0x3740, 0xf501, 0x35c0, 0x3480, 0xf441,
++    0x3c00, 0xfcc1, 0xfd81, 0x3d40, 0xff01, 0x3fc0, 0x3e80, 0xfe41,
++    0xfa01, 0x3ac0, 0x3b80, 0xfb41, 0x3900, 0xf9c1, 0xf881, 0x3840,
++    0x2800, 0xe8c1, 0xe981, 0x2940, 0xeb01, 0x2bc0, 0x2a80, 0xea41,
++    0xee01, 0x2ec0, 0x2f80, 0xef41, 0x2d00, 0xedc1, 0xec81, 0x2c40,
++    0xe401, 0x24c0, 0x2580, 0xe541, 0x2700, 0xe7c1, 0xe681, 0x2640,
++    0x2200, 0xe2c1, 0xe381, 0x2340, 0xe101, 0x21c0, 0x2080, 0xe041,
++    0xa001, 0x60c0, 0x6180, 0xa141, 0x6300, 0xa3c1, 0xa281, 0x6240,
++    0x6600, 0xa6c1, 0xa781, 0x6740, 0xa501, 0x65c0, 0x6480, 0xa441,
++    0x6c00, 0xacc1, 0xad81, 0x6d40, 0xaf01, 0x6fc0, 0x6e80, 0xae41,
++    0xaa01, 0x6ac0, 0x6b80, 0xab41, 0x6900, 0xa9c1, 0xa881, 0x6840,
++    0x7800, 0xb8c1, 0xb981, 0x7940, 0xbb01, 0x7bc0, 0x7a80, 0xba41,
++    0xbe01, 0x7ec0, 0x7f80, 0xbf41, 0x7d00, 0xbdc1, 0xbc81, 0x7c40,
++    0xb401, 0x74c0, 0x7580, 0xb541, 0x7700, 0xb7c1, 0xb681, 0x7640,
++    0x7200, 0xb2c1, 0xb381, 0x7340, 0xb101, 0x71c0, 0x7080, 0xb041,
++    0x5000, 0x90c1, 0x9181, 0x5140, 0x9301, 0x53c0, 0x5280, 0x9241,
++    0x9601, 0x56c0, 0x5780, 0x9741, 0x5500, 0x95c1, 0x9481, 0x5440,
++    0x9c01, 0x5cc0, 0x5d80, 0x9d41, 0x5f00, 0x9fc1, 0x9e81, 0x5e40,
++    0x5a00, 0x9ac1, 0x9b81, 0x5b40, 0x9901, 0x59c0, 0x5880, 0x9841,
++    0x8801, 0x48c0, 0x4980, 0x8941, 0x4b00, 0x8bc1, 0x8a81, 0x4a40,
++    0x4e00, 0x8ec1, 0x8f81, 0x4f40, 0x8d01, 0x4dc0, 0x4c80, 0x8c41,
++    0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641,
++    0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040
++};
++
++//=========================================================================
++//  Description:   Calculate a CRC on a buffer
++//  Parameters:    buffer - address of buffer
++//                 length - length of buffer
++//  Returns:       CRC
++//=========================================================================
++u_int16_t crcCalculate(char *buffer, unsigned int length)
++{
++    u_int16_t Crc = 0;
++
++    for (; length; --length) {
++        CRC16(Crc, *buffer++);
++    }
++    return(Crc);
++}
++
+diff --git a/lib/ondataservice_light/src/crc16.h b/lib/ondataservice_light/src/crc16.h
+new file mode 100644
+index 0000000..729d784
+--- /dev/null
++++ b/lib/ondataservice_light/src/crc16.h
+@@ -0,0 +1,6 @@
++
++// copied from http://stackoverflow.com/questions/3853670/are-there-any-free-crc-libraries-that-covers-a-lot-of-the-crc-algorithms
++
++
++u_int16_t crcCalculate(char *buffer, unsigned int length);
++
+diff --git a/lib/ondataservice_light/src/olsrd_plugin.c b/lib/ondataservice_light/src/olsrd_plugin.c
+new file mode 100644
+index 0000000..c6989c5
+--- /dev/null
++++ b/lib/ondataservice_light/src/olsrd_plugin.c
+@@ -0,0 +1,84 @@
++
++/*
++ * Copyright (c) 2005, Bruno Randolf <bruno.randolf@4g-systems.biz>
++ * Copyright (c) 2004, Andreas Tonnesen(andreto-at-olsr.org)
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice,
++ *   this list of conditions and the following disclaimer.
++ * * Redistributions in binary form must reproduce the above copyright notice,
++ *   this list of conditions and the following disclaimer in the documentation
++ *   and/or other materials provided with the distribution.
++ * * Neither the name of the UniK olsr daemon nor the names of its contributors
++ *   may be used to endorse or promote products derived from this software
++ *   without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
++ * IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
++ * OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++/*
++ * Dynamic linked library for olsr.org olsrd
++ */
++
++#include <stdio.h>
++#include <string.h>
++
++#include "olsrd_plugin.h"
++#include "ondataservice.h"
++
++#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
++#define PLUGIN_INTERFACE_VERSION 5
++
++static void __attribute__ ((constructor)) my_init(void);
++
++static void __attribute__ ((destructor)) my_fini(void);
++
++int
++olsrd_plugin_interface_version(void)
++{
++  return PLUGIN_INTERFACE_VERSION;
++}
++
++int
++olsrd_plugin_init(void)
++{
++  return ondata_init();
++}
++
++static void
++my_init(void)
++{
++  /* Print plugin info to stdout */
++  printf("%s\n", MOD_DESC);
++
++  ondata_constructor();
++
++  return;
++}
++
++static void
++my_fini(void)
++{
++  ondata_destructor();
++}
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
+diff --git a/lib/ondataservice_light/src/ondataservice.c b/lib/ondataservice_light/src/ondataservice.c
+new file mode 100644
+index 0000000..9ffee15
+--- /dev/null
++++ b/lib/ondataservice_light/src/ondataservice.c
+@@ -0,0 +1,316 @@
++
++/*
++ * Copyright (c) 2011, Rene Ejury <opennet@absorb.it>
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice,
++ *   this list of conditions and the following disclaimer.
++ * * Redistributions in binary form must reproduce the above copyright notice,
++ *   this list of conditions and the following disclaimer in the documentation
++ *   and/or other materials provided with the distribution.
++ * * Neither the name of the UniK olsr daemon nor the names of its contributors
++ *   may be used to endorse or promote products derived from this software
++ *   without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
++ * IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
++ * OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++/*
++ * Dynamic linked library for UniK OLSRd
++ */
++
++#define _GNU_SOURCE 1
++
++#include <stdio.h>
++#include <string.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <ctype.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <signal.h>
++#include <fcntl.h>
++#include <time.h>
++
++
++#include "olsr.h"
++#include "net_olsr.h"
++#include "parser.h"
++
++#include "plugin_util.h"
++#include "ondataservice.h"
++#include "compat.h"
++#include "crc16.h"
++#include "cJSON.h"
++
++/* config parameters */
++static int my_interval = EMISSION_INTERVAL;
++static int my_inc_interval = EMISSION_INC_INTERVAL;
++static char my_database[MAX_FILE + 1];
++static int my_vtime = ONDATA_VALID_TIME;            // how long the data will be spread trough the net
++
++/* periodic message generation */
++struct timer_entry *msg_gen_timer = NULL;
++
++/**
++ * do initialization
++ */
++void
++ondata_constructor(void)
++{
++#ifdef WIN32
++  int len;
++
++  GetWindowsDirectory(my_database, MAX_FILE - 12);
++
++  len = strlen(my_database);
++  if (my_database[len - 1] != '\\')
++    strscat(my_database, "\\", sizeof(my_database));
++  strscat(my_database, DATABASE_FILE, sizeof(my_database));
++
++#else
++  strscpy(my_database, DATABASE_FILE, sizeof(my_database));
++#endif
++
++}
++
++/* *INDENT-OFF* */
++static const struct olsrd_plugin_parameters plugin_parameters[] = {
++  { .name = "interval",           .set_plugin_parameter = &set_plugin_int,         .data = &my_interval },
++  { .name = "inc_interval",            .set_plugin_parameter = &set_plugin_int,         .data = &my_inc_interval },
++  { .name = "database",          .set_plugin_parameter = &set_plugin_string,      .data = &my_database,          .addon = {sizeof(my_database)} },
++  { .name = "vtime",            .set_plugin_parameter = &set_plugin_int,     .data = &my_vtime },
++};
++/* *INDENT-OFF* */
++
++void
++olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *size)
++{
++  *params = plugin_parameters;
++  *size = sizeof(plugin_parameters) / sizeof(*plugin_parameters);
++}
++
++/**
++ * last initialization
++ *
++ * we have to do this here because some things like main_addr
++ * or the dns suffix (for validation) are not known before
++ *
++ * this is beause of the order in which the plugin is initialized
++ * by the plugin loader:
++ *   - first the parameters are sent
++ *   - then register_olsr_data() from olsrd_plugin.c is called
++ *     which sets up main_addr and some other variables
++ *   - register_olsr_data() then then finally calls this function
++ */
++int
++ondata_init(void)
++{
++  /* periodic message generation */
++  msg_gen_timer = olsr_start_timer(my_interval * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC, &olsr_ondatasvc_gen, NULL, 0);
++  
++  return 1;
++}
++
++/**
++ * called at unload: free everything
++ *
++ * XXX: should I delete the hosts/services/resolv.conf files on exit?
++ */
++void
++ondata_destructor(void)
++{
++  olsr_stop_timer(msg_gen_timer);
++}
++
++/**
++ * Scheduled event: generate and send ONDATA packet
++ */
++void
++olsr_ondatasvc_gen(void *foo __attribute__ ((unused)))
++{
++  /* send buffer: huge */
++  char buffer[10240];
++  union olsr_message *message = (union olsr_message *)buffer;
++  struct interface *ifn;
++  int ondatasize;
++
++  /* fill message */
++  if (olsr_cnf->ip_version == AF_INET) {
++    /* IPv4 */
++    message->v4.olsr_msgtype = MESSAGE_TYPE;
++    message->v4.olsr_vtime = reltime_to_me((double)my_vtime * MSEC_PER_SEC);
++    memcpy(&message->v4.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
++    message->v4.ttl = MAX_TTL;
++    message->v4.hopcnt = 0;
++    message->v4.seqno = htons(get_msg_seqno());
++
++    ondatasize = encap_ondatamsg((struct ondatamsg *)ARM_NOWARN_ALIGN(&message->v4.message));
++    if (!ondatasize) return;
++    ondatasize = ondatasize + sizeof(struct olsrmsg);
++    message->v4.olsr_msgsize = htons(ondatasize);
++  } else {
++    /* IPv6 */
++    message->v6.olsr_msgtype = MESSAGE_TYPE;
++    message->v6.olsr_vtime = reltime_to_me((double)my_vtime * MSEC_PER_SEC);
++    memcpy(&message->v6.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
++    message->v6.ttl = MAX_TTL;
++    message->v6.hopcnt = 0;
++    message->v6.seqno = htons(get_msg_seqno());
++
++    ondatasize = encap_ondatamsg((struct ondatamsg *)ARM_NOWARN_ALIGN(&message->v6.message));
++    if (!ondatasize) return;
++    ondatasize = ondatasize + sizeof(struct olsrmsg6);
++    
++    message->v6.olsr_msgsize = htons(ondatasize);
++  }
++    
++  /* looping trough interfaces */
++  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
++    OLSR_PRINTF(3, "ONDATA PLUGIN: Generating packet - [%s]\n", ifn->int_name);
++
++    if (net_outbuffer_push(ifn, message, ondatasize) != ondatasize) {
++      /* send data and try again */
++      net_output(ifn);
++      if (net_outbuffer_push(ifn, message, ondatasize) != ondatasize) {
++        OLSR_PRINTF(1, "ONDATA PLUGIN: could not send on interface: %s\n", ifn->int_name);
++      }
++    }
++  }
++}
++
++// Database Variables / should be kept over different calls, therefore global
++FILE *fp = NULL;
++
++/**
++ * Encapsulate a ondata message into a packet.
++ *
++ * It assumed that there is enough space in the buffer to do this!
++ *
++ * Returns: the length of the message that was appended
++ */
++int
++encap_ondatamsg(struct ondatamsg *msg)
++{
++  struct ipaddr_str main_addr;
++  char *mainip;
++  char *pos;
++  int iCol;
++  uint16_t checksum;
++  uint16_t messageLength = 0;
++  cJSON *json = NULL, *elem;
++  char line [ 3000 ]; /* or other suitable maximum line size */
++
++  mainip = (char*)olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
++  
++  // open Database if this not a 'continued Transmission - and Database is already open'
++  if (fp == NULL) {
++    OLSR_PRINTF(0, "ONDATA PLUGIN: opening json file\n");
++    json = NULL;
++    fp=fopen(my_database, "r");
++    
++    if(fp == NULL) {
++      fprintf(stderr, "Can't open json file %s\n", my_database);
++      return 0;
++    }
++  }
++  
++  // search next Table with Data
++  if (fp != NULL) {
++    if ( fgets ( line, sizeof line, fp ) != NULL ) {
++      json=cJSON_Parse(line);
++    }
++  }
++  
++  // if no further Table give up
++  if (!json) {
++    OLSR_PRINTF(0, "ONDATA PLUGIN: no further table found\n");
++    olsr_change_timer(msg_gen_timer, my_interval * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC);
++    fclose (fp);
++    fp = NULL;
++    return 0;
++  }
++
++  OLSR_PRINTF(0, "ONDATA PLUGIN: using next table %s\n", json->child->string);
++  
++  // add all datasets
++  OLSR_PRINTF(0, "ONDATA PLUGIN: adding all datasets\n");
++  // add all the entries after the ondatamsg header (and keep space for it)
++  pos = (char *)msg + sizeof(struct ondatamsg);
++  
++  // always add the Table-Name as first field
++  pos = create_packet((struct ondata *)ARM_NOWARN_ALIGN(pos), json->child->string);
++  
++  // never transmit originator (col=0), this will be detected at the other end_pos
++  elem = json->child->child->next;
++  // skip last column, it will set at destination to the receiving-time
++  iCol = 1;
++  do {
++    pos = create_packet((struct ondata *)ARM_NOWARN_ALIGN(pos), elem->valuestring);
++    iCol++;
++    elem = elem->next;
++  } while(elem->next);
++  cJSON_Delete(json);
++  
++  // write the ondatamsg header with the number of announced entries and the protocol version
++  msg->nr_datasets = htons(--iCol);   // it won't count the table-name as dataset (and neither mainip-Col)
++  msg->version = htons(ONDATA_PROTOCOL_VERSION);
++  messageLength = pos - (char *)msg;
++  msg->length = htons(messageLength);
++  checksum = crcCalculate((char *)msg + sizeof(uint16_t), messageLength - sizeof(uint16_t));
++  msg->checksum = htons(checksum);
++  
++  OLSR_PRINTF(0, "ONDATA PLUGIN: ##### finished creating packet, length=%d, crc16=0x%x\n", messageLength, checksum);    
++
++  // increase Transmission-Time as long as there is data
++  olsr_change_timer(msg_gen_timer, 1 * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC);
++  return messageLength;     //length
++}
++
++/**
++ * convert each of my to be announced ondata_entries into network
++ * compatible format
++ *
++ * return the length of the ondata packet
++ */
++char *
++create_packet(struct ondata *to, const char *value )
++{
++  char *pos = (char *)to;  int valuelen = strlen((const char*)value);
++  int k;
++  to->valuelen = htons(valuelen);
++  OLSR_PRINTF(5, "ONDATA PLUGIN: Announcing value %s %d\n", value, valuelen);
++  pos += sizeof(struct ondata);
++  memcpy(pos, value, valuelen);
++  pos += valuelen;
++  // do 4-byte padding
++  for (k = sizeof(struct ondata) + valuelen; (k & 3) != 0; k++)
++    *pos++ = '\0';
++  
++  return pos;
++}
++
++/*
++ * Local Variables:
++ * mode: c
++ * c-indent-tabs-mode: t
++ * indent-tabs-mode: t
++ * c-basic-offset: 4
++ * tab-width: 4
++ * End:
++ */
++
+diff --git a/lib/ondataservice_light/src/ondataservice.h b/lib/ondataservice_light/src/ondataservice.h
+new file mode 100644
+index 0000000..c8221c8
+--- /dev/null
++++ b/lib/ondataservice_light/src/ondataservice.h
+@@ -0,0 +1,101 @@
++
++/*
++ * Copyright (c) 2011, Rene Ejury <opennet@absorb.it>
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice,
++ *   this list of conditions and the following disclaimer.
++ * * Redistributions in binary form must reproduce the above copyright notice,
++ *   this list of conditions and the following disclaimer in the documentation
++ *   and/or other materials provided with the distribution.
++ * * Neither the name of the UniK olsr daemon nor the names of its contributors
++ *   may be used to endorse or promote products derived from this software
++ *   without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
++ * IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
++ * OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++/*
++ * Dynamic linked library for UniK OLSRd
++ */
++
++#ifndef _ONDATASERVICE_PLUGIN
++#define _ONDATASERVICE_PLUGIN
++
++#include <sys/time.h>
++// #include <regex.h>
++
++#include "olsr_types.h"
++#include "interfaces.h"
++#include "olsr_protocol.h"
++#include "common/list.h"
++
++#include "olsrd_plugin.h"
++#include "ondataservice_msg.h"
++#include "hashing.h"
++// #include "mapwrite.h"
++// #include "mantissa.h"
++
++#define PLUGIN_NAME		"OLSRD ondataservice plugin"
++#define PLUGIN_VERSION		"0.2"
++#define PLUGIN_AUTHOR		"Rene Ejury, Bruno Randolf, Jens Nachtigall, Sven-Ola Tuecke"
++#define DATABASE_FILE   "/tmp/database.json"
++
++#define MESSAGE_TYPE		222 /* hope this is a good choice */
++#define PARSER_TYPE		    MESSAGE_TYPE
++#define EMISSION_INTERVAL	10800 /* seconds - 10800 = 3hours */
++#define EMISSION_INC_INTERVAL   5 /* seconds between transmission of rows from one dataset */
++#define EMISSION_JITTER         25  /* percent */
++#define ONDATA_VALID_TIME 300  /* seconds, how long a package should maximally be spreaded through the net - 300 - 5mins*/ 
++
++#define ONDATA_PROTOCOL_VERSION	1
++
++#define MAX_FILE 		255
++
++/* Parser function to register with the scheduler */
++bool olsr_parser(union olsr_message *, struct interface *, union olsr_ip_addr *);
++
++/* callback for periodic timer */
++void olsr_ondatasvc_gen(void *);
++
++/* callback for database cleanup */
++void olsr_ondataservice_expire_db_timer(void *);
++
++int encap_ondatamsg(struct ondatamsg *);
++
++void update_ondata_entry(union olsr_ip_addr *, struct ondatamsg *, int);
++
++int register_olsr_param(char *key, char *value);
++
++
++char *create_packet(struct ondata *to, const char *value);
++
++void ondata_constructor(void);
++
++void ondata_destructor(void);
++
++int ondata_init(void);
++
++#endif
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
++
+diff --git a/lib/ondataservice_light/src/ondataservice_msg.h b/lib/ondataservice_light/src/ondataservice_msg.h
+new file mode 100644
+index 0000000..b22fbee
+--- /dev/null
++++ b/lib/ondataservice_light/src/ondataservice_msg.h
+@@ -0,0 +1,68 @@
++
++/*
++ * Copyright (c) 2005, Bruno Randolf <bruno.randolf@4g-systems.biz>
++ * Copyright (c) 2004, Andreas Tonnesen(andreto-at-olsr.org)
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice,
++ *   this list of conditions and the following disclaimer.
++ * * Redistributions in binary form must reproduce the above copyright notice,
++ *   this list of conditions and the following disclaimer in the documentation
++ *   and/or other materials provided with the distribution.
++ * * Neither the name of the UniK olsr daemon nor the names of its contributors
++ *   may be used to endorse or promote products derived from this software
++ *   without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
++ * IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
++ * OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++/*
++ * Dynamic linked library for UniK OLSRd
++ */
++
++#ifndef _ONDATASERVICE_MSG
++#define _ONDATASERVICE_MSG
++
++/**
++ * the data, forwarder or service entry as found in a packet within a
++ * message
++ **/
++struct ondata {
++  uint16_t valuelen;                     // length of the value
++  /*
++   * value is written separatedly in plain text after this struct and padded to 4 byte
++   */
++};
++
++struct ondatamsg {
++  uint16_t checksum;
++  uint16_t version;                     // version number of the ondataservice plugin
++  uint16_t nr_datasets;                 // number of following packets including all the data
++  uint16_t length;                      // length in bytes / required to calculate checksum on receive
++  /*
++   * at least one struct name following
++   */
++};
++
++#endif
++
++/*
++ * Local Variables:
++ * c-basic-offset: 2
++ * indent-tabs-mode: nil
++ * End:
++ */
+diff --git a/lib/ondataservice_light/version-script.txt b/lib/ondataservice_light/version-script.txt
+new file mode 100644
+index 0000000..a145659
+--- /dev/null
++++ b/lib/ondataservice_light/version-script.txt
+@@ -0,0 +1,10 @@
++VERS_1.0
++{
++  global:
++    olsrd_plugin_interface_version;
++    olsrd_plugin_init;
++    olsrd_get_plugin_parameters;
++
++  local:
++    *;
++};

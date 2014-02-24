@@ -40,13 +40,6 @@ Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den 
     git remote set-url origin git@projects.farbdev.org:opennet/on-firmware.git
 
 
-Irrelevante Dateien von git ignorieren lassen
----------------------------------------------
-
-Füge die folgenden Zeilen in die Datei *.git/info/exclude
-
-    \.pc
-
 
 Änderungen an der Firmware vornehmen
 ====================================

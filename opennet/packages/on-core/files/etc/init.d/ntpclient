@@ -8,43 +8,39 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 # 
-#   http://www.apache.org/licenses/LICENSE-2.0
+#	http://www.apache.org/licenses/LICENSE-2.0
 # 
 
 START=70
 
 change_banner() {
-    awk '{print last; last=$0} END{ if(last !~ "no time retrieved") { print last; exit 1 }}' /etc/banner >/tmp/banner &&
-        {
-            echo " - $(date) - system restart -----" >>/tmp/banner; mv /tmp/banner /etc/banner; sync
-        }
-    return 0;
+	awk '{print last; last=$0} END{ if(last !~ "no time retrieved") { print last; exit 1 }}' /etc/banner >/tmp/banner &&
+		{ echo " - $(date) - system restart -----" >>/tmp/banner; mv /tmp/banner /etc/banner; sync; }
+	return 0;
 }
 
 get_time() {
-    while true; do
-      no=0;
-      while [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; do
-          hostname=$(uci -q get ntpclient.@ntpserver[${no}].hostname)
-          port=$(uci -q get ntpclient.@ntpserver[${no}].port)
-          ping -c 1 $hostname >/dev/null 2>/dev/null && 
-              [ -n "$(/usr/sbin/ntpclient -s -c 3 -i 5 -g 1000000 -p $port -h $hostname)" ] &&
-              change_banner && return
-          : $((no++))
-      done;
-      if [ -f /tmp/stop_ntpclient ]; then
-          rm /tmp/stop_ntpclient; return
-      fi
-      sleep 3;
-    done;
+	while true; do
+		no=0;
+		while [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; do
+			hostname=$(uci -q get ntpclient.@ntpserver[${no}].hostname)
+			port=$(uci -q get ntpclient.@ntpserver[${no}].port)
+			ping -c 1 $hostname >/dev/null 2>/dev/null && 
+			[ -n "$(/usr/sbin/ntpclient -s -c 3 -i 5 -g 1000000 -p "$port" -h "$hostname")" ] && change_banner && return
+			: $((no++))
+		done
+		[ -f /tmp/stop_ntpclient ] && rm -f /tmp/stop_ntpclient && return
+		sleep 3
+	done
 }
 
 start() {
-    for pid in $(pidof ntpclient); do [ $pid == $$ ] || kill $pid; done
+	for pid in $(pidof ntpclient); do [ "$pid" != "$$" ] && kill "$pid"; done
 	get_time &
-    exit 0
+	exit 0
 }
 
 stop() {
-    touch /tmp/stop_ntpclient
+	touch /tmp/stop_ntpclient
 }
+

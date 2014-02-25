@@ -10,37 +10,37 @@ Im Paket *on-core* befindet sich eine Datei *etc/init.d/on_config*. Beim Booten 
 check_firmware_upgrade:
 
 * die bisherige Version wird aus /etc/banner ausgelesen
-** folgend auf den String "opennet-firmware-ng" (viertes Token dieser Zeile)
+  * folgend auf den String "opennet-firmware-ng" (viertes Token dieser Zeile)
 * die aktuelle Version wird via `opkg status on-core` ausgelesen
 * bei Unterschieden werden:
-** die Default-Einstellungen (*etc/etc_presets*) aus on-core werden kopiert
-*** passwd wird überschrieben
-*** etc/rc.local wird überschrieben; dadurch wird der Aufruf folgender Skripte sichergestellt:
-**** rc.local_on-core: policy-Routing initialisieren
-**** rc.local_on-openvpn: gibt es nicht mehr
-**** rc.local_on-usergw: gibt es nicht mehr
-**** rc.local_user: kann vom Nutzer erstellt werden
-*** init.d/watchdog wird überschrieben
-** /etc/banner (mit neuer Versionsnummer) geschrieben
-** auf APs mit aktiviertem UserGW wird folgendes aufgerufen: `require('luci.model.opennet.on_usergw') upgrade()`
+  * die Default-Einstellungen (*etc/etc_presets*) aus on-core werden kopiert
+    * passwd wird überschrieben
+    * etc/rc.local wird überschrieben; dadurch wird der Aufruf folgender Skripte sichergestellt:
+      * rc.local_on-core: policy-Routing initialisieren
+      * rc.local_on-openvpn: gibt es nicht mehr
+      * rc.local_on-usergw: gibt es nicht mehr
+      * rc.local_user: kann vom Nutzer erstellt werden
+    * init.d/watchdog wird überschrieben
+  * /etc/banner (mit neuer Versionsnummer) geschrieben
+  * auf APs mit aktiviertem UserGW wird folgendes aufgerufen: `require('luci.model.opennet.on_usergw') upgrade()`
 
 
 Opennet-Erstkonfiguration:
 
 * preset-Dateien (etc/config_presets/*) werden nach etc/ kopiert:
-** firewall: manuell erstellte Zonenkonfiguration
-** ntpclient: siehe "Zeitsychronisation"
-** olsrd: Basiskonfiguration inkl. nameservice
-** on-core: IP- und Netzwerkkonfiguration entsprechend den Opennet-Konventionen, sowie csr-Mailadresse, debug und on_id
+  * firewall: manuell erstellte Zonenkonfiguration
+  * ntpclient: siehe "Zeitsychronisation"
+  * olsrd: Basiskonfiguration inkl. nameservice
+  * on-core: IP- und Netzwerkkonfiguration entsprechend den Opennet-Konventionen, sowie csr-Mailadresse, debug und on_id
 
 
 **TODO**:
 
 * /etc/passwd darf nicht spontan ueberschrieben werden - dabei gehen Nutzeraccounts (z.B.: von an deren Paketen) verloren
-** stattdessen lediglich das root-Passwort setzen
+  * stattdessen lediglich das root-Passwort setzen
 * Verweise auf rc.local_on-openvpn und rc.local_on-usergw aus rc.local entfernen
 * firewall: nicht selbst schreiben, sondern vorhandenes anpassen (unklar, inwieweit sich die Struktur bei openwrt verändert hat)
-** Hinzufügen der opennet-Zone sollte genügen
+  * Hinzufügen der opennet-Zone sollte genügen
 * olsrd-Konfiguration: es genügt wahrscheinlich, nameservice hinzuzufügen, anstelle die komplette Datei zu überschreiben
 
 
@@ -102,6 +102,7 @@ Die Datei *etc/firewall.opennet* fügt anscheinend eine relevante Masquerade-Reg
 * Datei *etc/firewall.opennet* in eine übliche uci-Firewall-Regel umwandeln
 
 
+
 Nutzer-VPN
 ----------
 Im Paket *on-openvpn* ist das config-preset *on-openvpn* enthalten, das die Suchmaske fuer gateway-IPs festlegt (192.168.0.x), sowie konfigurierbar festlegt, dass alle Gateways als ntp- und DNS-Server verwendet werden sollen.
@@ -113,9 +114,9 @@ Das config_preset *openvpn* überschreibt das Original des openvpn-Pakets.
 Minütlich läuft ein cronjob (*on_vpngateway_check*), der folgendes tut:
 
 * prüfen, ob ein anderer cronjob bereits läuft (falls ja, dann töten, kurz warten - notfalls abbrechen, falls er nicht stirbt)
-** Prüfung erfolgt über eine definierte PID-Datei
+  * Prüfung erfolgt über eine definierte PID-Datei
 * olsrd-nameservice-Plugin aktivieren (via uci), falls es nicht aktiv ist
-** das ist fuer die automatische gateway-Suche noetig, da die Gateways einen nameservice-Eintrag verteilen
+  * das ist fuer die automatische gateway-Suche noetig, da die Gateways einen nameservice-Eintrag verteilen
 
 
 
@@ -125,6 +126,23 @@ Minütlich läuft ein cronjob (*on_vpngateway_check*), der folgendes tut:
 * prüfen, ob sich die Konfiguration "unseres" OpenVPN-Servers als separate Konfiguration hinzufügen lässt (anstatt die komplette openvpn-Konfiguration zu überschreiben)
 * der Seiteneffekt der nameservice-Plugin-Aktivierung sollte explizit angewiesen werden
 * Verbindungsaufbau wird mit allen vorhandenen Gateways versucht
-** jeweils nur kurze Verbindungen (via OpenVPN-Parameter 'inactive=10')
+  * jeweils nur kurze Verbindungen (via OpenVPN-Parameter 'inactive=10')
 
+
+
+Usergateway
+-----------
+Im Paket *on-usergw* sind zwei VPN-Konfigurationen (opennet_ugw, opennet_vpntest) enthalten.
+Außerdem ist ein Skript für den VPN-Aufbau, sowie für einen Geschwindigkeitstest und für das Kündigen einer alten IP vorhanden.
+
+
+**TODO**:
+
+* die genaue Funktionsweise des ugw-Skripts analysieren und beschreiben
+
+
+
+Wifidog
+-------
+**TODO**
 

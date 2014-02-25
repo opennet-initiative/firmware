@@ -11,8 +11,8 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +
 +
 +define Package/opennet/install/template
-+	$(CP) -a -R "$(PKG_BUILD_DIR)/files" "$(1)/"
-+	$(CP) -a -R "$(PKG_BUILD_DIR)/ipkg" "$(1)/CONTROL"
++	$(CP) -a -R "$(PKG_BUILD_DIR)/files/." "$(1)/"
++	$(CP) -a -R "$(PKG_BUILD_DIR)/ipkg/." "$(1)/CONTROL"
 +	$(INSTALL_DIR) "$(1)/usr/lib/lua/luci/i18n"
 +	# leere po-Dateien fuehren zu fehlenden lmo-Dateien (z.B. on-core) - das koennen wir ignorieren
 +	$(CP) "$(PKG_BUILD_DIR)/lmo"/*.lmo "$(1)/usr/lib/lua/luci/i18n/" || true

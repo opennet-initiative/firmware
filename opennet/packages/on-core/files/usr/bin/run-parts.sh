@@ -4,31 +4,21 @@
 #
 # based on rc.unslung by unslung guys :-)
 #
-if [ -z "$1" ]
-then
-echo "Usage : $0 "
-fi
 
-RUNDIR=$1"/*"
+[ $# -lt 1 -o -z "$1" -o ! -d "$1" ] && echo "Usage : $0 DIRECTORY" && exit 1
 
-for i in $RUNDIR ;do
 
-# Ignore dangling symlinks (if any).
-[ ! -f "$i" ] && continue
+find "$1" -maxdepth 1 -mindepth 1 | while read fname; do
 
-case "$i" in
-*.sh)
-# Source shell script for speed.
-(
-trap - INT QUIT TSTP
-set start
-. $i
-)
-;;
-*)
-# No sh extension, so fork subprocess.
-$i start
-;;
-esac
+	# Ignore dangling symlinks (if any).
+	[ ! -f "$fname" ] && continue
+
+	if [ "$fname" != "${fname%.sh}" ]; then
+		# Source shell script for speed.
+		( trap - INT QUIT TSTP; set start; . "$fname" )
+	else
+		# No sh extension, so fork subprocess.
+		"$fname" start
+	fi
 done
 

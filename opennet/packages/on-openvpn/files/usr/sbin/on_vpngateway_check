@@ -16,6 +16,8 @@
 
 # retrieve DEBUG-state
 DEBUG=$(uci -q get on-core.defaults.debug)
+PID_FILE=/var/run/on_vpngateway_check.pid
+VPN_DIR=/etc/openvpn/opennet_user
 
 msg_debug() {
 	$DEBUG && logger -t on_vpngateway_check[$$] "$1"
@@ -29,20 +31,20 @@ msg_info() {
 # initialization to prevent two instances running at the same time
 # If interrupted, remove pid-file and set a mark in log
 USER_INTERRUPT=13
-trap 'rm -f /var/run/on_vpngateway_check.pid; logger -t on_vpngateway_check[$$] was killed by another instance; exit $USER_INTERRUPT' TERM INT
+trap "rm -f '$PID_FILE'; logger -t on_vpngateway_check[$$] was killed by another instance; exit $USER_INTERRUPT" TERM INT
 
 msg_debug "starting another instance ($1)"
 # echo "starting another instance"
 # check if other instance is running, if yes, kill other instance
-if [ -f /var/run/on_vpngateway_check.pid ]; then
-	msg_debug "detected /var/run/on_vpngateway_check.pid"
-	kill $(cat /var/run/on_vpngateway_check.pid);
+if [ -f "$PID_FILE" ]; then
+	msg_debug "detected '$PID_FILE'"
+	kill $(cat "$PID_FILE");
 fi
 
 # register that process is running
 # wait till other process is finished
 limit=30 # number of seconds to wait at most till other instance is finished.
-while [ -f /var/run/on_vpngateway_check.pid ];do
+while [ -f "$PID_FILE" ];do
 	msg_debug "sleeping till other instance is finished"
 	sleep 1;
 	limit=$((limit-1))
@@ -50,8 +52,8 @@ while [ -f /var/run/on_vpngateway_check.pid ];do
 		msg_debug "other instance doesn't finished in time, aborting"
 		exit;
 	fi
-done;
-pidof on_vpngateway_check >/var/run/on_vpngateway_check.pid
+done
+echo "$$" >"$PID_FILE"
 #################################################################################
 
 
@@ -94,28 +96,28 @@ activate_olsr_service () {
 test_vpngateway()
 {
 	# if there is no cert, no chance (and sense) to check the target gateways
-	if ! [ -e /etc/openvpn/opennet_user/on_aps.crt ]; then return; fi
-		
+	[ ! -e "$VPN_DIR/on_aps.crt" ] && return
+
 	age=$(uci -q get on-openvpn.gate_$1.age)
-	if [ $age -ge $((recheck_age+nonworking_timeout)) ]; then
+	if [ "$age" -ge $((recheck_age+nonworking_timeout)) ]; then
 		# if there was no vpn-availability for a dedicated time (nonworking_timeout minutes), declare vpn-status as not working
 		uci -q set on-openvpn.gate_$1.status='n';
 		uci -q set on-openvpn.gate_$1.age=0;
 		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
-	elif [ $age -ge $recheck_age ]; then
+	elif [ "$age" -ge "$recheck_age" ]; then
 		# check vpn-availability...
 		
 		gw_ipaddr=$(uci -q get on-openvpn.gate_$1.ipaddr);
 		# if there is no ipaddr stored than query dns for IP address
-		if [ -z "$gw_ipaddr" ]; then gw_ipaddr=$(query_dns $(uci -q get on-openvpn.gate_$1.name)); fi
-		if [ -z "$gw_ipaddr" ]; then return; fi
+		[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns $(uci -q get on-openvpn.gate_$1.name))
+		[ -z "$gw_ipaddr" ] && return
 		
 		# if gateway could only be reached over a local tunnel, dont use it - it will not work anyway
-		if [ -n "$(ip route show table $olsrd_routingTable | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ]; then return; fi
+		[ -n "$(ip route show table $olsrd_routingTable | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ] && return
 		
 		# check if it is possible to open tunnel to the gateway (10 sec. maximum)
 		# test-parameters; '--dev null' will be prefaced
-		openvpn_test_parameters="--client --ns-cert-type server --remote $gw_ipaddr 1600 --ca /etc/openvpn/opennet_user/opennet-ca.crt --cert /etc/openvpn/opennet_user/on_aps.crt --key /etc/openvpn/opennet_user/on_aps.key --inactive 10 --verb 3 --nice 3 --resolv-retry 0 --ping-exit 5"
+		openvpn_test_parameters="--client --ns-cert-type server --remote $gw_ipaddr 1600 --ca '$VPN_DIR/opennet-ca.crt' --cert '$VPN_DIR/on_aps.crt' --key '$VPN_DIR/on_aps.key' --inactive 10 --verb 3 --nice 3 --resolv-retry 0 --ping-exit 5"
 		
 		msg_debug "start vpn test of $gw_ipaddr"
 
@@ -144,8 +146,8 @@ check_blacklisting()
 {
 	gw_ipaddr=$(uci -q get on-openvpn.gate_$1.ipaddr);
 	# if there is no ipaddr stored than query dns for IP address
-	if [ -z "$gw_ipaddr" ]; then gw_ipaddr=$(query_dns $(uci -q get on-openvpn.gate_$1.name)); fi
-	if [ -z "$gw_ipaddr" ]; then return; fi
+	[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns $(uci -q get on-openvpn.gate_$1.name))
+	[ -z "$gw_ipaddr" ] && return
 
 	blacklisted=$(uci -q get on-openvpn.gate_$1.blacklisted);
 	
@@ -204,7 +206,7 @@ check_all_gateways()
         # add gateway to list of all (even non-working) gateways (used for dns and ntp)
         all_gws="${all_gws} ${gw_ipaddr}"
 
-		if ! [ -e "/etc/openvpn/opennet_user/on_aps.crt" ] || ! [ -e "/etc/openvpn/opennet_user/on_aps.key" ]; then
+		if ! [ -e "$VPN_DIR/on_aps.crt" ] || ! [ -e "$VPN_DIR/on_aps.key" ]; then
 			msg_debug "no testing, key or cert missing"
 			continue;
 		fi
@@ -264,7 +266,7 @@ start_stop_openvpn() {
         uci -q set on-openvpn.@gateways[0].better_gw=0
         uci commit on-openvpn;              # commit after every change to prevent uci memory problems
       fi
-  elif [ -n "$gw_ipaddr" ] && [ ! -e "/var/run/openvpn-opennet_user.pid" ] && [ -e "/etc/openvpn/opennet_user/on_aps.crt" ] && [ -e "/etc/openvpn/opennet_user/on_aps.key" ]; then
+  elif [ -n "$gw_ipaddr" ] && [ ! -e "/var/run/openvpn-opennet_user.pid" ] && [ -e "$VPN_DIR/on_aps.crt" ] && [ -e "$VPN_DIR/on_aps.key" ]; then
       sleep 5; # wait a litte while, maybe ntp was updated and time has to be set
       /etc/init.d/openvpn up opennet_user
   fi
@@ -348,6 +350,6 @@ esac
 # uci commit on-openvpn - already done before
 
 # remove registration
-rm -f /var/run/on_vpngateway_check.pid
+rm -f "$PID_FILE"
 msg_debug "finishing another instance"
 

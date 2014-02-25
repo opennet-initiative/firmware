@@ -1,1 +1,1 @@
-/usr/sbin/olsrd_check.sh
+../../usr/sbin/olsrd_check.sh

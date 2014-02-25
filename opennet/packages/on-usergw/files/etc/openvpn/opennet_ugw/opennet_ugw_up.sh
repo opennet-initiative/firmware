@@ -1,1 +1,1 @@
-/usr/sbin/opennet_ugw_up.sh
+../../../usr/sbin/opennet_ugw_up.sh

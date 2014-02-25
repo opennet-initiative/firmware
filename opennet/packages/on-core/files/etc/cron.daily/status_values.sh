@@ -1,1 +1,1 @@
-/usr/sbin/status_values.sh
+../../usr/sbin/status_values.sh

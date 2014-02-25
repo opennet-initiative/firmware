@@ -1,1 +1,1 @@
-/usr/sbin/clean_ugw_hna.sh
+../../usr/sbin/clean_ugw_hna.sh

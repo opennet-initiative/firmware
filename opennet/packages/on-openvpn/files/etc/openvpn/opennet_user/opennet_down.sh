@@ -1,1 +1,1 @@
-/usr/sbin/opennet_down.sh
+../../../usr/sbin/opennet_down.sh

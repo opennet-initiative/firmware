@@ -11,7 +11,7 @@ config 'defaults' 'defaults'
 	option	'on_id_preset'	'33.127'
 	option	'on_ipschema'	'"192.168."$((no*10+on_id_1))"."$on_id_2'
 	option	'on_netmask'	'255.255.0.0'
-    
+
 	list	'on_network'	'192.168.0.0/16'
 	list	'on_network'	'10.2.0.0/16'
 
@@ -19,7 +19,8 @@ config 'defaults' 'defaults'
 	option	'wifi_ssid'	'olsr.opennet-initiative.de'
 	option	'wifi_mode'	'adhoc'
 	option	'wifi_bssid'	'02:ca:ff:ee:ba:be'
-    
+
 config 'settings' 'settings'
 	# initially opennet-id is not set
 	# option 'on_id'	not yet set
+

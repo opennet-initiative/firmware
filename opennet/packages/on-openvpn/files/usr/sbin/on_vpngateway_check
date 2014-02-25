@@ -20,7 +20,7 @@ PID_FILE=/var/run/on_vpngateway_check.pid
 VPN_DIR=/etc/openvpn/opennet_user
 
 msg_debug() {
-	$DEBUG && logger -t on_vpngateway_check[$$] "$1"
+	$DEBUG && logger -t on_vpngateway_check[$$] "$1" || true
 }
 
 msg_info() {

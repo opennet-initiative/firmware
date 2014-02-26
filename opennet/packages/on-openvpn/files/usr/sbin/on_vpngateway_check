@@ -12,7 +12,7 @@
 # 
 
 # include helper functions
-. /usr/bin/on-helper.sh
+. $IPKG_INSTROOT/usr/bin/on-helper.sh
 
 # retrieve DEBUG-state
 DEBUG=$(uci -q get on-core.defaults.debug)

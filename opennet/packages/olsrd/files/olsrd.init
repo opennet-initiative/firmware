@@ -640,7 +640,7 @@ start() {
 		olsrd_update_schema "list" "$@"
 	}
 
-	. /lib/functions/network.sh
+	. $IPKG_INSTROOT/lib/functions/network.sh
 
 	config_load olsrd
 	reset_cb

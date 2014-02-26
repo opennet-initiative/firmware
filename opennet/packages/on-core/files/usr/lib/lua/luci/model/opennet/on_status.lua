@@ -162,7 +162,7 @@ end
 
 function relevant(networks)
   for network in networks:gmatch("%S+") do
-    local devices = luci.sys.exec(". /lib/functions.sh; include /lib/network; scan_interfaces; "..
+    local devices = luci.sys.exec(". $IPKG_INSTROOT/lib/functions.sh; include /lib/network; scan_interfaces; "..
       "[ -n \"$(config_get "..network.." ipaddr)\" ] && config_get "..network.." device")
     devices = devices.gsub(devices, "%c+", "")
     if devices ~= "" then
@@ -191,7 +191,7 @@ function printInterfaces(networks, zoneName)
 end
 
 function printValues(network)
-  ifname = luci.sys.exec(". /lib/functions.sh; include /lib/network; scan_interfaces; config_get "..network.." ifname")
+  ifname = luci.sys.exec(". $IPKG_INSTROOT/lib/functions.sh; include /lib/network; scan_interfaces; config_get "..network.." ifname")
   ifname = ifname.gsub(ifname, "%c+", "")
   if not ifname or ifname == "" then
     return

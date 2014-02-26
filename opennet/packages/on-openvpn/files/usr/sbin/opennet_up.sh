@@ -17,7 +17,7 @@ if [ -e /tmp/openvpn_msg.txt ]; then
 fi
 echo "vpn-tunnel active" >/tmp/openvpn_msg.txt	# a short message for the web frontend
 
-. /usr/bin/on-helper.sh
+. $IPKG_INSTROOT/usr/bin/on-helper.sh
 
 if [ -z "$(ip rule show | grep "lookup tun")" ];then
     mainprio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /main/ {print $1; exit}')

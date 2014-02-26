@@ -14,7 +14,7 @@
 # set -x
 
 # include helper functions
-. /usr/bin/on-helper.sh
+. $IPKG_INSTROOT/usr/bin/on-helper.sh
 
 # retrieve DEBUG-state
 DEBUG=$(uci -q get on-core.defaults.debug)
@@ -76,7 +76,7 @@ update_olsr_service () {
 # $1=nr
 ugw_checkSpeed () {
 	echo "ugw_checkSpeed" >"$DATA_LOCK_FILE"
-	. /usr/sbin/on_speed_check
+	. $IPKG_INSTROOT/usr/sbin/on_speed_check
 	on_ugw=$(uci -q get on-usergw.opennet_ugw$1.name)
 	download_speed=$(download $on_ugw)
 	upload_speed=$(upload $on_ugw)

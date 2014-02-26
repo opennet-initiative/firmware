@@ -14,7 +14,7 @@
 # retrieve DEBUG-state
 DEBUG=$(uci -q get on-core.defaults.debug)
 
-. /lib/functions.sh
+. $IPKG_INSTROOT/lib/functions.sh
 
 # newline
 N="
@@ -47,8 +47,8 @@ fi
 
 # adding on_tapX (tapX) to firewall zone opennet
 $DEBUG && logger -t opennet_ugw_down.sh "adding firewall-rules for ${dev}"
-. /lib/functions.sh
-. /lib/firewall/core.sh
+. $IPKG_INSTROOT/lib/functions.sh
+. $IPKG_INSTROOT/lib/firewall/core.sh
 fw_reload
 
 olsrd_ifaces="$(uci -q get olsrd.@Interface[0].interface)";

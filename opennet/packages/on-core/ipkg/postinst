@@ -17,7 +17,7 @@ if [ -z "${IPKG_INSTROOT}" ]; then
 	echo "restart your system after installation finished"
 	echo "bitte nach Ende der Installation neu starten"
 	echo "***********************************************"
-	. /usr/bin/on-helper.sh
+	. $IPKG_INSTROOT/usr/bin/on-helper.sh
 	check_firmware_upgrade
 
     /etc/init.d/on_config enable

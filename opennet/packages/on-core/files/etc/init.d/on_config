@@ -15,7 +15,7 @@ START=20
 
 start() {
 	# include this file only during "start" ("enable" or "disable" may use IPKG_INSTROOT)
-	. /usr/bin/on-helper.sh
+	. $IPKG_INSTROOT/usr/bin/on-helper.sh
 
 	check_firmware_upgrade
 	[ -n "$(grep on_ /etc/config/network)" ] || {

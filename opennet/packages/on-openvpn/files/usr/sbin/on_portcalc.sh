@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /usr/bin/on-helper.sh
+. $IPKG_INSTROOT/usr/bin/on-helper.sh
 
 client_cn=$(get_client_cn)
 

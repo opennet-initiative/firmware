@@ -29,7 +29,7 @@ get_network() {
 # 	else
 # 		ifname=$(uci -q get network.$1.ifname)
 # 	fi
-	. /lib/functions.sh;
+	. $IPKG_INSTROOT/lib/functions.sh;
 	include /lib/network;
 	scan_interfaces;
 	ifname=$(config_get $1 ifname)

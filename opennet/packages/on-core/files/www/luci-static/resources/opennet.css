@@ -18,9 +18,13 @@ body {
     border: 1px solid #040;
 }
 
-.status_page_table { margin: 0.5em; }
+.status_page_table {
+	margin: 0.5em;
+}
 
-.right-border { border-right: 1px dotted gray; }
+.right-border {
+	border-right: 1px dotted gray;
+}
 
 .status_page_table th, .status_page_table td {
     padding: 0.5em;
@@ -29,17 +33,25 @@ body {
     font-size: 0.8em;
 }
 
-table { border-collapse: collapse; }
+table {
+	border-collapse: collapse;
+}
 
-tr[blacklisted="true"] { background-color: #bbb; }
+tr[blacklisted="true"] {
+	background-color: #bbb;
+}
 
-tr[blacklisted="true"] #cbi-network-lan-status, tr[blacklisted="true"] #cbi-network-lan-age { display: none; }
+tr[blacklisted="true"] #cbi-network-lan-status, tr[blacklisted="true"] #cbi-network-lan-age {
+	display: none;
+}
 
 a:link, a:visited {
 	text-decoration:underline;
 }
 
-a:hover { color:red; }
+a:hover {
+	color:red;
+}
 
 #maincontent {
 	background: rgba(245, 245, 245, 0.8);
@@ -54,11 +66,17 @@ a:hover { color:red; }
 	margin-right: 90px;
 }
 
-#maincontent h3 { color: #0a51a1; }
+#maincontent h3 {
+	color: #0a51a1;
+}
 
-#maincontent p { margin-bottom: 1em; }
+#maincontent p {
+	margin-bottom: 1em;
+}
 
-img.loading_img_small { height: 1.5em; }
+img.loading_img_small {
+	height: 1.5em;
+}
 
 
 code {
@@ -66,11 +84,17 @@ code {
 	white-space: pre;
 }
 
-#maincontent ul { margin-left: 2em; }
+#maincontent ul {
+	margin-left: 2em;
+}
 
-.hidden { display:none; }
+.hidden {
+	display:none;
+}
 
-.error { color:#FF0000; }
+.error {
+	color:#FF0000;
+}
 
 .warning {
 	color: red;
@@ -78,7 +102,9 @@ code {
 	font-weight: bold;
 }
 
-.clear { clear: both; }
+.clear {
+	clear: both;
+}
 
 .cbi-section {
 	border:1px solid #555555;
@@ -86,14 +112,18 @@ code {
 	padding:1em;
 }
 
-.cbi-section-node { border: none; }
+.cbi-section-node {
+	border: none;
+}
 
 div.cbi-map {
 	margin-left:2em;
 	margin-right:2em;
 }
 
-div.cbi-value { border: none; }
+div.cbi-value {
+	border: none;
+}
 
 .cbi-value-title {
 	float:left;
@@ -137,16 +167,19 @@ input.cbi-input-del, input.cbi-button-del {
 	background:transparent url(../../luci-static/opennet/gtk-clear.png) no-repeat scroll 1px center;
 }
 
-#cbi-network-lan-active[active="n"], #cbi-network-lan-status[status="n"], .ugw-wan-route, .ugw-wan-ping, .ugw-mtu, .ugw-centralip, .ugw-tunnel_active[status="inactive"],
-	.cert_available {
-    background:transparent url(../../luci-static/opennet/gtk-no.png) no-repeat scroll center;
+#cbi-network-lan-active[active="n"], #cbi-network-lan-status[status="n"],
+.ugw-wan-route, .ugw-wan-ping, .ugw-mtu, .ugw-centralip,
+.ugw-tunnel_active[status="inactive"], .cert_available {
+	background:transparent url(../../luci-static/opennet/gtk-no.png) no-repeat scroll center;
 }
 
 #cbi-network-lan-active[active="y"], #cbi-network-lan-status[status="y"], .ugw-wan-route[status="ok"], .ugw-wan-ping[status="ok"], .ugw-mtu[status="ok"], .ugw-centralip[status="ok"], .ugw-tunnel_active[status="ok"], .cert_available[status="ok"] {
 	background:transparent url(../../luci-static/opennet/gtk-ok.png) no-repeat scroll center;
 }
 
-input.cbi-button { background-color: white; }
+input.cbi-button {
+	background-color: white;
+}
 
 input.cbi-button-up {
 	background:transparent url(../../luci-static/opennet/gtk-go-up.png) no-repeat scroll 1px center;
@@ -156,7 +189,9 @@ input.cbi-button-down {
 	background:transparent url(../../luci-static/opennet/gtk-go-down.png) no-repeat scroll 1px center;
 }
 
-input.cbi-button-small { background-size: 12px auto; }
+input.cbi-button-small {
+	background-size: 12px auto;
+}
 
 input.cbi-button-toggle {
 	background:transparent url(../../luci-static/opennet/gtk-refresh.png) no-repeat scroll 1px center;
@@ -170,9 +205,13 @@ input.cbi-button-add {
 }
 
 /* modifiers to make menu left-right style */
-ul.dropdowns li { float:none; }
+ul.dropdowns li {
+	float:none;
+}
 
-ul.dropdowns ul li ul { top:none; }
+ul.dropdowns ul li ul {
+	top:none;
+}
 
 ul.dropdowns li.over ul, ul.dropdowns li.focus ul, ul.dropdowns li:hover ul {
 	left:100%;
@@ -180,11 +219,22 @@ ul.dropdowns li.over ul, ul.dropdowns li.focus ul, ul.dropdowns li:hover ul {
 }
 
 /* hide dropbear configuration in password dialog field */
-#cbi-dropbear { display: none; }
+#cbi-dropbear {
+	display: none;
+}
 
-.cbi-value-ugwstatus { font-size: 90%; }
+.cbi-value-ugwstatus {
+	font-size: 90%;
+}
 
-table.usergw-status, table.cert-status { width: 90%; }
+table.usergw-status, table.cert-status {
+	width: 90%;
+}
 
-td.cert_infotable { vertical-align: top; }
+td.cert_infotable {
+	vertical-align: top;
+}
+
+// Ende des media-all-Zweigs
+}
 

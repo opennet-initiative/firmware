@@ -17,13 +17,17 @@ $(ARCHS): feeds translate
 config-%:
 	$(MAKE) -C on-configs "$(patsubst config-%,%,$@)"
 
+menuconfig:
+	@echo 'For "menuconfig" please use the command "make config-ARCH" whereas ARCH is replaces by target architecture.'
+	@echo "Example: make config-ar71xx"
+
 init:
 	@# update submodules if necessary
 	git submodule init --quiet
 	git submodule update
 	@test -z "$$QUILT_DIFF_ARGS" -a ! -e ~/.quiltrc && echo >&2 "HINWEIS: falls du Patches aendern moechtest, dann lies bitte doc/Entwicklung.md (Stichwort: 'quilt-Konfiguration')" || true
 
-menuconfig: feeds
+diff-menuconfig: feeds
 	@# verfolge Aenderungen an der .config-Datei und zeige sie nach menuconfig an
 	@quilt new "temp-menuconfig-$(shell date +%Y%m%d%H%M)"
 	@quilt add "$(OPENWRT_DIR)/.config"

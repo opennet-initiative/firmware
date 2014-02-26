@@ -251,10 +251,10 @@ Die finale openwrt-Konfiguration wird aus der Ziel-Plattform-Konfiguration und d
 Diese Konfiguration für eine Plattform kann beispielsweise mittels `make config-arx71xx` erstellt werden. Das Ergebnis ist anschließend als *openwrt/.config* verfügbar.
 
 
-Konfigurationsänderungen
-------------------------
+Konfigurationsänderungen betrachten
+-----------------------------------
 
-Zur verbesserten Überschaubarkeit von Einstellungsänderungen ist in dem meta-Makefile ein Target namens `menuconfig` integriert. Es zeigt dir nach dem Ausführen des gewohnten `make -C openwrt menuconfig` den Unterschied zwischen der vorherigen und der gespeicherten Konfiguration in Form eines diffs an.
+Zur verbesserten Überschaubarkeit von Einstellungsänderungen ist in dem meta-Makefile ein Target namens `diff-menuconfig` integriert. Es zeigt dir nach dem Ausführen des gewohnten `make -C openwrt menuconfig` den Unterschied zwischen der vorherigen und der gespeicherten Konfiguration in Form eines diffs an.
 
 
 

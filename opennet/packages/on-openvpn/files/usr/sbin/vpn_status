@@ -15,25 +15,26 @@
 
 print_status()
 {
-	autosearch=$(uci -q get on-openvpn.gateways.autosearch);
-	output="\nautosearch: $autosearch";
-	if [ "$autosearch" == "on" ]; then
-		sort_by_etx=$(uci -q get on-openvpn.gateways.vpn_sort_criteria);
-		output="$output\tsort by: $sort_by_etx"
-	fi
+	local autosearch=$(uci -q get on-openvpn.gateways.autosearch)
+	local current_gw_ipaddr=$(uci -q get openvpn.opennet_user.remote)
+	local index=1
+	local gw_ipaddr
+	local age
+	local status
 
-	echo -e "$output"
+	echo -n "autosearch: $autosearch"
+	[ "$autosearch" == "on" ] && echo -e -n "\tsort by: $(uci -q get on-openvpn.gateways.vpn_sort_criteria)"
+	echo
+	echo
 	echo -e "\nno.\tactive\tIP\t\tDist/ETX\tVPN\tAge"
 	echo '/route' | nc localhost 2006 > /tmp/olsrd_txtinfo_vpnstatus.txt
-	current_gw_ipaddr=$(uci -q get openvpn.opennet_user.remote)
-	index=1;
 	while [ -n "$(uci -q get on-openvpn.gate_$index)" ] ; do
 		gw_ipaddr=$(uci -q get on-openvpn.gate_$index.ipaddr);
 		age=$(uci -q get on-openvpn.gate_$index.age);
 		status=$(uci -q get on-openvpn.gate_$index.status);
-		active=""; if [ "$gw_ipaddr" == "$current_gw_ipaddr" ]; then active="*"; fi;
+		[ "$gw_ipaddr" == "$current_gw_ipaddr" && active="*" || active=""
 		dist=$(awk 'BEGIN {FS="[/\x09]+"} $1=="'$gw_ipaddr'" {print $4"/"$5;}' /tmp/olsrd_txtinfo_vpnstatus.txt);
-		if [ ${#dist} -lt 8 ]; then dist="$dist\t"; fi
+		[ ${#dist} -lt 8 ] && dist="$dist\t"
 		echo -e "$index\t$active\t$gw_ipaddr\t$dist\t$status\t$age"
 		: $((index++))
 	done
@@ -46,105 +47,84 @@ print_usage()
 {
 	echo
 	echo "*** vpn_status supports the following options: ***"
-	echo "toggle_auto    - will toggle the autosearch mode"
-	echo "toggle_etx     - will toggle sort by etx or hops"
-	echo "add_gw \$IP     - will expect IP address as param"
-	echo "del_gw \$POS    - will expect number of gateway"
-	echo "move_top \$POS  - will expect number of gateway"
+	echo "toggle_auto    - toggle the autosearch mode"
+	echo "toggle_etx     - toggle sort by etx or hops"
+	echo "add_gw \$IP     - manually add a gateway"
+	echo "del_gw \$POS    - delete a existing gateway"
+	echo "move_top \$POS  - move a gateway to the top of the priority list"
 }
 
 
 move_top()
 {
-	uci -q set on-openvpn.gateways.autosearch="off"
-	position=$1
+	local position=$1
 	uci -q rename on-openvpn.gate_$position="gate_MOVETOP";
-	uci commit on-openvpn;							# commit after every change to prevent uci memory problems
 	while [ $((position--)) -ge 1 ] ; do
 		uci -q rename on-openvpn.gate_$position="gate_"$((position+1));
-		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
 	done
-	uci -q rename on-openvpn.gate_MOVETOP="gate_1";
-	uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+	uci -q rename on-openvpn.gate_MOVETOP="gate_1"
+	# commit after every change to prevent uci memory problems
+	uci commit on-openvpn
 }
 
 add_gw()
 {
-	uci -q set on-openvpn.gateways.autosearch="off"
-	ipaddr=$1
-	index=1;
-	while [ -n "$(uci -q get on-openvpn.gate_$index)" ] ; do : $((index++)); done
+	local ipaddr=$1
+	local index=1;
+	while uci -q get "on-openvpn.gate_$((index++))"; do true; done
 	uci -q set on-openvpn.gate_${index}=gateway;
 	uci -q set on-openvpn.gate_${index}.ipaddr=$ipaddr;
-	uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+	# commit after every change to prevent uci memory problems
+	uci commit on-openvpn
 }
 
 del_gw()
 {
-	uci -q set on-openvpn.gateways.autosearch="off"
-	position=$1
+	local position=$1
 	uci -q del on-openvpn.gate_$position;
-	uci commit on-openvpn;
-	while [ -n "$(uci -q get on-openvpn.gate_$((++position)))" ] ; do
-		uci -q rename on-openvpn.gate_$((++position))="gate_"$((position-1));
-		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+	while uci -q get "on-openvpn.gate_$((++position))"; do
+		uci -q rename "on-openvpn.gate_$position=gate_$((position-1))"
 	done
+	# commit after every change to prevent uci memory problems
+	uci commit on-openvpn
 }
 
 toggle_etx()
 {
-	sort_by_etx=$(uci -q get on-openvpn.gateways.vpn_sort_criteria);
-	if [ "$sort_by_etx" == "etx" ]; then sort_by_etx="metric";
-	else sort_by_etx="etx"; fi
+	local sort_by_etx=$(uci -q get on-openvpn.gateways.vpn_sort_criteria);
+	[ "$sort_by_etx" == "etx" ] && sort_by_etx="metric" || sort_by_etx="etx"
 	uci -q set on-openvpn.gateways.vpn_sort_criteria=$sort_by_etx;
-	uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+	# commit after every change to prevent uci memory problems
+	uci commit on-openvpn
 }
 
-toggle_auto()
-{
-	autosearch=$(uci -q get on-openvpn.gateways.autosearch);
-	if [ "$autosearch" == "on" ]; then autosearch="off";
-	else autosearch="on"; fi
-	uci -q set on-openvpn.gateways.autosearch=$autosearch;
-	uci commit on-openvpn;							# commit after every change to prevent uci memory problems
+toggle_autosearch() {
+	local autosearch=$(uci -q get on-openvpn.gateways.autosearch)
+	[ "$autosearch" == "on" ] && autosearch="off" || autosearch="on"
+	uci -q set on-openvpn.gateways.autosearch=$autosearch
+	# commit after every change to prevent uci memory problems
+	uci commit on-openvpn
 }
 
-param2=$2
+
 case "$1" in
-	"move_top")
-		if [ -n "$param2" ]; then
-			move_top $param2;
-		else echo "ERROR: move_top requires two parameters"
-		fi
-		print_status;
+	move_top|add_gw|del_gw)
+		[ -z "$2" ] && echo >&2 "ERROR: '$1' requires two parameters" && exit 1
+		"$1" "$2"
+		print_status
 	;;
-	"add_gw")
-		if [ -n "$param2" ]; then
-			add_gw $param2;
-		else echo "ERROR: add_gw requires two parameters"
-		fi
-		print_status;
+	toggle_etx|toggle_auto)
+		"$1"
+		print_status
 	;;
-	"del_gw")
-		if [ -n "$param2" ]; then
-			del_gw $param2;
-		else echo "ERROR: del_gw requires two parameters"
-		fi
-		print_status;
-	;;
-	"toggle_etx")
-		toggle_etx;print_status;
-	;;
-	"toggle_auto")
-		toggle_auto;print_status;
+	help|--help)
+		print_usage
 	;;
 	*)
-		print_status;print_usage;
+		print_usage >&2
+		exit 1
 	;;
 esac
 
-
-
-
-
+exit 0
 

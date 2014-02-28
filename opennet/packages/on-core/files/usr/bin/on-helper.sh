@@ -23,19 +23,79 @@ get_client_cn() {
 		-subject -nameopt multiline -noout 2>/dev/null | awk '/commonName/ {print $3}'
 }
 
+DEBUG=$(uci -q get on-core.defaults.debug)
+msg_debug() {
+	$DEBUG && logger -t $(basename "$0")[$$] "$1" || true
+}
+
+msg_info() {
+	logger -t $(basename "$0")[$$] "$1"
+}
+
+update_dns_from_gws()
+{
+	# TODO: Abhaengigkeit von on-openvpn loesen; regelmaessig aufrufen
+	if $(uci -q get on-openvpn.gateways.gw_dns) && [ -n "$current_gws" ]; then
+		(
+		echo "# nameserver added by opennet firmware"
+		echo "# check (uci on-core.settings.gw_dns)"
+		for gw in $current_gws; do
+			echo "nameserver $gw # added by on_vpngateway_check"
+		done
+		) >/tmp/resolv.conf.auto-generating
+		if cmp -s /tmp/resolv.conf.auto /tmp/resolv.conf.auto-generating; then
+			rm /tmp/resolv.conf.auto-generating
+		else
+			msg_debug "updating DNS entries"
+			mv /tmp/resolv.conf.auto-generating /tmp/resolv.conf.auto
+		fi
+	fi
+}
+
+update_ntp_from_gws() {
+	# TODO: Abhaengigkeit von on-openvpn loesen; regelmaessig aufrufen
+	if $(uci -q get on-openvpn.gateways.gw_ntp) && [ -n "$current_gws" ]; then
+		update_required=false
+		no=0
+		for gw in $current_gws; do
+			if [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; then
+				if [ "$(uci -q get ntpclient.@ntpserver[${no}].hostname)" != "$gw" ]; then
+					update_required=true
+					uci -q set ntpclient.@ntpserver[${no}].hostname=$gw
+					uci -q set ntpclient.@ntpserver[${no}].port=123
+				fi
+			else
+				update_required=true;
+				item=$(uci add ntpclient ntpserver)
+				uci -q set ntpclient.${item}.hostname=$gw;
+				uci -q set ntpclient.${item}.port=123;
+			fi
+			: $((no++))
+		done
+		while [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; do
+			uci delete ntpclient.@ntpserver[${no}]
+		done
+		if $update_required; then
+			msg_debug "updating NTP entries"
+			uci commit ntpclient
+			/etc/init.d/ntpclient start
+		fi
+	fi
+}
+
 get_network() {
 # 	if [ "$(uci -q get network.$1.type)" == "bridge" ]; then
 # 		ifname="br-$1"
 # 	else
 # 		ifname=$(uci -q get network.$1.ifname)
 # 	fi
-	. $IPKG_INSTROOT/lib/functions.sh;
-	include /lib/network;
-	scan_interfaces;
-	ifname=$(config_get $1 ifname)
+	. "$IPKG_INSTROOT/lib/functions.sh"
+	include "$IPKG_INSTROOT/lib/network"
+	scan_interfaces
+	ifname="$(config_get $1 ifname)"
 	if [ -n "$ifname" ] && [ "$ifname" != "none" ]; then                   
-		ipaddr=$(ip address show label $ifname | awk '/inet/ {print $2; exit}')    
-		[ -z "$ipaddr" ] || { eval $(ipcalc -p -n $ipaddr); echo $NETWORK/$PREFIX; }
+		ipaddr="$(ip address show label "$ifname" | awk '/inet/ {print $2; exit}')"
+		[ -z "$ipaddr" ] || { eval $(ipcalc -p -n "$ipaddr"); echo $NETWORK/$PREFIX; }
 	fi
 }
 

@@ -1,31 +1,21 @@
 #!/bin/sh
 #
 # Opennet Firmware
-# 
+#
 # Copyright 2010 Rene Ejury <opennet@absorb.it>
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # 	http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 
 # include helper functions
 . $IPKG_INSTROOT/usr/bin/on-helper.sh
 
-# retrieve DEBUG-state
-DEBUG=$(uci -q get on-core.defaults.debug)
 PID_FILE=/var/run/on_vpngateway_check.pid
 VPN_DIR=/etc/openvpn/opennet_user
-
-msg_debug() {
-	$DEBUG && logger -t on_vpngateway_check[$$] "$1" || true
-}
-
-msg_info() {
-	logger -t on_vpngateway_check[$$] "$1"
-}
 
 #################################################################################
 # initialization to prevent two instances running at the same time
@@ -45,7 +35,7 @@ fi
 # wait till other process is finished
 limit=30 # number of seconds to wait at most till other instance is finished.
 while [ -f "$PID_FILE" ];do
-	msg_debug "sleeping till other instance is finished"
+	msg_debug "sleeping until other instance is finished"
 	sleep 1;
 	limit=$((limit-1))
 	if [ "$limit" = "0" ]; then
@@ -68,7 +58,7 @@ gateway_autosearch()
 	if [ "$1" != "refresh" ] && [ "$(uci -q get on-openvpn.@gateways[0].autosearch)" != "on" ]; then return; fi
 	
 	# it's now done in lua, because it's easier with associative arrays
-	lua /usr/lib/lua/luci/model/opennet/on_vpn_autosearch.lua
+	lua "$IPKG_INSTROOT/usr/lib/lua/luci/model/opennet/on_vpn_autosearch.lua"
 }
 
 #################################################################################
@@ -124,7 +114,7 @@ test_vpngateway()
 		if [ -n "$(openvpn --dev null $openvpn_test_parameters | \
 		awk '
 			/Initial packet/ {
-				print; 
+				print;
 				system("kill 2>/dev/null $(ps|grep \"openvpn --dev null\" |grep -v grep|cut -b 0-5)")
 			}')" ]; then
 			uci -q set on-openvpn.gate_$1.age=0;
@@ -219,7 +209,7 @@ check_all_gateways()
 		
 		# add gateway to list of all current gateways (used for dns and ntp)
 		current_gws="${current_gws} ${gw_ipaddr}"
-        
+
 		msg_debug "         $gw_ipaddr is known to work"
 		
 		# if first gateway is not found yet and route to current $gw_ipaddr exists, try if it's better to use this gateway
@@ -265,61 +255,12 @@ start_stop_openvpn() {
 			msg_info "stopping nonworking gateway"
 			/etc/init.d/openvpn down opennet_user
 			uci -q set on-openvpn.@gateways[0].better_gw=0
-	  		# commit after every change to prevent uci memory problems
+			# commit after every change to prevent uci memory problems
 			uci commit on-openvpn
 		fi
 	elif [ -n "$gw_ipaddr" ] && [ ! -e "/var/run/openvpn-opennet_user.pid" ] && [ -e "$VPN_DIR/on_aps.crt" ] && [ -e "$VPN_DIR/on_aps.key" ]; then
-	      sleep 5; # wait a litte while, maybe ntp was updated and time has to be set
-	      /etc/init.d/openvpn up opennet_user
-	fi
-}
-
-update_ntp_from_gws() {
-	if $(uci -q get on-openvpn.gateways.gw_ntp) && [ -n "$current_gws" ]; then
-	update_required=false
-	no=0
-	for gw in $current_gws; do
-		if [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; then
-			if [ "$(uci -q get ntpclient.@ntpserver[${no}].hostname)" != "$gw" ]; then
-				update_required=true
-				uci -q set ntpclient.@ntpserver[${no}].hostname=$gw
-				uci -q set ntpclient.@ntpserver[${no}].port=123
-			fi
-		else
-			update_required=true;
-			item=$(uci add ntpclient ntpserver)
-			uci -q set ntpclient.${item}.hostname=$gw;
-			uci -q set ntpclient.${item}.port=123;
-		fi
-		: $((no++))
-        done
-        while [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; do
-            uci delete ntpclient.@ntpserver[${no}];
-        done
-        if $update_required; then
-		msg_debug "updating NTP entries"
-		uci commit ntpclient
-		/etc/init.d/ntpclient start;
-        fi
-    fi
-}
-
-update_dns_from_gws()
-{
-	if $(uci -q get on-openvpn.gateways.gw_dns) && [ -n "$current_gws" ]; then
-		(
-		echo "# nameserver added by opennet firmware"
-		echo "# check (uci on-core.settings.gw_dns)"
-		for gw in $current_gws; do
-			echo "nameserver $gw # added by on_vpngateway_check"
-		done
-		) >/tmp/resolv.conf.auto-generating
-		if cmp -s /tmp/resolv.conf.auto /tmp/resolv.conf.auto-generating; then
-			rm /tmp/resolv.conf.auto-generating
-		else
-			msg_debug "updating DNS entries"
-			mv /tmp/resolv.conf.auto-generating /tmp/resolv.conf.auto
-		fi
+		sleep 5; # wait a litte while, maybe ntp was updated and time has to be set
+		/etc/init.d/openvpn up opennet_user
 	fi
 }
 
@@ -340,13 +281,15 @@ current_gws=""
 case "$1" in
 	"refresh")
 		gateway_autosearch $1;
-	;;
+		;;
 	"check_blacklisting")
-		check_all_blacklisting;
-	;;
+		check_all_blacklisting
+		;;
 	*)
-		gateway_autosearch; check_all_gateways; update_dns_from_gws; update_ntp_from_gws; start_stop_openvpn;
-	;;
+		gateway_autosearch
+		check_all_gateways
+		start_stop_openvpn
+		;;
 esac
 
 

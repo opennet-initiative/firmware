@@ -17,16 +17,7 @@
 . $IPKG_INSTROOT/usr/bin/on-helper.sh
 
 # retrieve DEBUG-state
-DEBUG=$(uci -q get on-core.defaults.debug)
 DATA_LOCK_FILE=/var/run/on_usergateway_check
-
-msg_debug() {
-	$DEBUG && logger -t on_vpngateway_check[$$] "$1" || true
-}
-
-msg_info() {
-	logger -t on_vpngateway_check[$$] "$1"
-}
 
 #################################################################################
 # update olsrd_nameservice plugin and spread speed information for this gateway

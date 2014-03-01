@@ -32,55 +32,76 @@ msg_info() {
 	logger -t $(basename "$0")[$$] "$1"
 }
 
-update_dns_from_gws()
-{
-	# TODO: Abhaengigkeit von on-openvpn loesen; regelmaessig aufrufen
-	if $(uci -q get on-openvpn.gateways.gw_dns) && [ -n "$current_gws" ]; then
-		(
-		echo "# nameserver added by opennet firmware"
-		echo "# check (uci on-core.settings.gw_dns)"
-		for gw in $current_gws; do
-			echo "nameserver $gw # added by on_vpngateway_check"
-		done
-		) >/tmp/resolv.conf.auto-generating
-		if cmp -s /tmp/resolv.conf.auto /tmp/resolv.conf.auto-generating; then
-			rm /tmp/resolv.conf.auto-generating
-		else
-			msg_debug "updating DNS entries"
-			mv /tmp/resolv.conf.auto-generating /tmp/resolv.conf.auto
-		fi
+# update a file if its content changed
+# return exitcode=0 (success) if the file was updated
+# return exitcode=1 (failure) if there was no change
+_update_file_if_changed() {
+	local target_filename="$1"
+	local content="$(cat -)"
+	if [ -e "$target_filename" ] && echo "$content" | cmp -s - "$target_filename"; then
+		# the content did not change
+		return 1
+	else
+		# updated content
+		echo "$content" > "$target_filename"
+		return 0
 	fi
 }
 
-update_ntp_from_gws() {
-	# TODO: Abhaengigkeit von on-openvpn loesen; regelmaessig aufrufen
-	if $(uci -q get on-openvpn.gateways.gw_ntp) && [ -n "$current_gws" ]; then
-		update_required=false
-		no=0
-		for gw in $current_gws; do
-			if [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; then
-				if [ "$(uci -q get ntpclient.@ntpserver[${no}].hostname)" != "$gw" ]; then
-					update_required=true
-					uci -q set ntpclient.@ntpserver[${no}].hostname=$gw
-					uci -q set ntpclient.@ntpserver[${no}].port=123
-				fi
-			else
-				update_required=true;
-				item=$(uci add ntpclient ntpserver)
-				uci -q set ntpclient.${item}.hostname=$gw;
-				uci -q set ntpclient.${item}.port=123;
-			fi
-			: $((no++))
+# Gather the list of routable IPs specified via on-core.services.dns_ip_regex.
+# Store this list as a resolv.conf-compatible file in on-core.services.dns_resolv_file. 
+# The file is only updated in case of changes.
+update_dns_servers() {
+	local dns_ip_regex="$(uci -q get on-core.services.dns_ip_regex)"
+	local dns_resolv_file="$(uci -q get on-core.services.dns_resolv_file)"
+	# quit if no regex is given
+	[ -z "$dns_ip_regex" -o -z "$dns_resolv_file" ] && return 1
+	# create temporary resolv.conf.auto file
+	(
+		echo "# nameservers added by opennet firmware"
+		echo "# see: uci get on-core.services.dns_ip_regex"
+		get_mesh_ips_by_regex "$dns_ip_regex" | sort | while read ip; do
+			echo "nameserver $ip	# added by on-helper/update_dns_servers"
 		done
-		while [ -n "$(uci -q get ntpclient.@ntpserver[${no}])" ]; do
-			uci delete ntpclient.@ntpserver[${no}]
+	) | _update_file_if_changed "$dns_resolv_file" && msg_info "updating DNS entries"
+	return
+}
+
+# Gather the list of routable IPs specified via on-core.services.ntp_ip_regex.
+# Store this list as ntpclient-compatible uci settings. 
+# The uci settings are only updated in case of changes.
+# ntpclient is restarted in case of changes.
+update_ntp_servers() {
+	local ntp_ip_regex="$(uci -q get on-core.services.ntp_ip_regex)"
+	# quit if no regex is given
+	[ -z "$ntp_ip_regex" ] && return 1
+	local current_servers="$(uci show ntpclient | grep "\.hostname=" | cut -f 2- -d = | sort)"
+	local new_servers="$(get_mesh_ips_by_regex "$ntp_ip_regex" | sort)"
+	local section_name=
+		set -x
+	if [ "$current_servers" != "$new_servers" ]; then
+		# delete all current servers
+		while uci -q delete ntpclient.@ntpserver[0]; do true; done
+		for ip in $new_servers; do
+			section_name="$(uci add ntpclient ntpserver)"
+			uci set "ntpclient.${section_name}.hostname=$ip"
+			uci set "ntpclient.${section_name}.port=123"
 		done
-		if $update_required; then
-			msg_debug "updating NTP entries"
-			uci commit ntpclient
-			/etc/init.d/ntpclient start
-		fi
+		msg_info "updating NTP entries"
+		uci commit ntpclient
+		restart_ntpclient
 	fi
+}
+
+# stop and start ntpclient
+# This should be used whenever the list of ntp server changes.
+# BEWARE: this function depends on internals of ntpclient's hotplug script
+restart_ntpclient() {
+	local ntpclient_script="$(find /etc/hotplug.d/iface/ -type f | grep ntpclient | head -n 1)"
+	[ -z "$ntpclient_script" ] && msg_info "error: failed to restart ntpclient" && return 0
+	. "$ntpclient_script"
+	stop_ntpclient
+	start_ntpclient
 }
 
 get_network() {
@@ -93,7 +114,7 @@ get_network() {
 	include "$IPKG_INSTROOT/lib/network"
 	scan_interfaces
 	ifname="$(config_get $1 ifname)"
-	if [ -n "$ifname" ] && [ "$ifname" != "none" ]; then                   
+	if [ -n "$ifname" ] && [ "$ifname" != "none" ]; then
 		ipaddr="$(ip address show label "$ifname" | awk '/inet/ {print $2; exit}')"
 		[ -z "$ipaddr" ] || { eval $(ipcalc -p -n "$ipaddr"); echo $NETWORK/$PREFIX; }
 	fi
@@ -170,5 +191,12 @@ get_on_ip() {
 		on_id_1=1
 	fi
 	echo $(eval echo $on_ipschema)
+}
+
+# find all routes matching a given regex
+# remove trailing "/32"
+get_mesh_ips_by_regex() {
+	local regex="$1"
+	echo /route | nc localhost 2006 | grep "^[0-9\.]\+" | awk '{print $1}' | sed 's#/32$##' | grep "$regex"
 }
 

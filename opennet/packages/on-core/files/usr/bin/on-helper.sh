@@ -143,7 +143,8 @@ check_firmware_upgrade() {
 }
 
 copy_etc_presets() {
-	ln -sf /etc/etc_presets/passwd /etc/passwd
+	# set root password
+	echo "root:admin" | chpasswd
 	ln -sf /etc/etc_presets/rc.local /etc/rc.local
 	ln -sf /etc/etc_presets/watchdog /etc/init.d/watchdog
 }

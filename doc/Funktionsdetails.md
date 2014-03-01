@@ -17,8 +17,6 @@ check_firmware_upgrade:
     * passwd wird überschrieben
     * etc/rc.local wird überschrieben; dadurch wird der Aufruf folgender Skripte sichergestellt:
       * rc.local_on-core: policy-Routing initialisieren
-      * rc.local_on-openvpn: gibt es nicht mehr
-      * rc.local_on-usergw: gibt es nicht mehr
       * rc.local_user: kann vom Nutzer erstellt werden
     * init.d/watchdog wird überschrieben
   * /etc/banner (mit neuer Versionsnummer) geschrieben
@@ -36,12 +34,12 @@ Opennet-Erstkonfiguration:
 
 **TODO**:
 
-* /etc/passwd darf nicht spontan ueberschrieben werden - dabei gehen Nutzeraccounts (z.B.: von an deren Paketen) verloren
+* /etc/passwd darf nicht spontan ueberschrieben werden - dabei gehen Nutzeraccounts (z.B.: von anderen Paketen) verloren
   * stattdessen lediglich das root-Passwort setzen
-* Verweise auf rc.local_on-openvpn und rc.local_on-usergw aus rc.local entfernen
 * firewall: nicht selbst schreiben, sondern vorhandenes anpassen (unklar, inwieweit sich die Struktur bei openwrt verändert hat)
   * Hinzufügen der opennet-Zone sollte genügen
 * olsrd-Konfiguration: es genügt wahrscheinlich, nameservice hinzuzufügen, anstelle die komplette Datei zu überschreiben
+* rc.local unveraendert lassen; stattdessen policy-routing in separates init-Skript und local_user weglassen
 
 
 Zeit synchroniseren

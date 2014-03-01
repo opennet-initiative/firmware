@@ -159,3 +159,6 @@ CONFIG_PACKAGE_kmod-switch-rtl8366-smi=y
 CONFIG_PACKAGE_kmod-switch-rtl8366rb=y
 CONFIG_PACKAGE_kmod-switch-rtl8366s=y
 
+# fuer automatisierte Tests
+CONFIG_PACKAGE_uucp=m
+

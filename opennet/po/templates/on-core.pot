@@ -175,7 +175,7 @@ msgstr ""
 
 msgid ""
 "This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to "
-"the requirements of Opennet Rostock."
+"the requirements of the Opennet Initiative e.V."
 msgstr ""
 
 msgid ""

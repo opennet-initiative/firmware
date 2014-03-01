@@ -215,10 +215,10 @@ msgstr ""
 
 msgid ""
 "This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to "
-"the requirements of Opennet Rostock."
+"the requirements of the Opennet Initiative e.V."
 msgstr ""
 "Auf diesem Access-Point läuft die Opennet-Firmware, eine Anpassung von "
-"OpenWrt auf die Bedürfnisse von Opennet Rostock."
+"OpenWrt auf die Bedürfnisse des Opennet Initiative e.V."
 
 msgid ""
 "This is the place where you can configure your Opennet-Internet-Gateways. "

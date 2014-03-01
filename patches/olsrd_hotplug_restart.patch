@@ -1,0 +1,22 @@
+olsrd prueft nach dem ersten Start (geprueft anhand der Existenz der
+olsrd.conf-Datei im tmpfs) nicht mehr gruendlich, ob frisch aktivierte
+Netzwerk-Interfaces olsr-Pakete aussenden sollen.
+Wir sabotieren die olsrd.conf-Existenzpruefung.
+
+Pruefung auf Notwendigkeit dieses Patches:
+Ein bisher nicht konfiguriertes ON-Interface (z.B. ON_ETH_0) mit einer IP
+versehen und einem physischen Netzwerkinterface zuordnen. Im Fehlerfall
+startet olsrd _nicht_ neu, auf dass auf diesem Interface bis zum nächsten
+Neustart keine olsrd-Pakete versendet werden.
+
+--- a/routing/olsrd/files/olsrd.hotplug.sh
++++ b/routing/olsrd/files/olsrd.hotplug.sh
+@@ -52,7 +52,7 @@ case "$ACTION" in
+ 	ifup)
+ 		# only work after the first normal startup
+ 		# also: no need to test, if enabled
+-		[ -e '/var/etc/olsrd.conf' ] && {
++		[ -e 'OPENNET_ALWAYS_CHECK_RESTART_THOROUGHLY/var/etc/olsrd.conf' ] && {
+ 			# INTERFACE = e.g. 'wlanadhocRADIO1' or 'cfg144d8f'
+ 			# DEVICE    = e.g. 'wlan1-1'
+ 			olsrd_interface_needs_adding && {

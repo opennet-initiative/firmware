@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Diese Datei wird beim ersten Booten ausgeführt und anschließend (bei
+# Erfolg) geloescht. Siehe /etc/init.d/boot - apply_uci_config.
+
+# cron-Logging abschalten (bis auf Fehlermeldungen)
+# siehe http://wiki.openwrt.org/doc/uci/system#system
+uci set system.@system[0].cronloglevel=9
+uci commit system
+

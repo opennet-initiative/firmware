@@ -1,4 +1,4 @@
-config 'defaults' 'defaults'
+config defaults 'defaults'
 	option	'csr_contact'	'csr@opennet-initiative.de'
 	option	'debug'		'false'
 
@@ -20,12 +20,12 @@ config 'defaults' 'defaults'
 	option	'wifi_mode'	'adhoc'
 	option	'wifi_bssid'	'02:ca:ff:ee:ba:be'
 
-config 'services'
+config services 'services'
 	option	'dns_ip_regex'	'^192\.168\.0\.[1-9][0-9]*$'
 	option	'dns_resolv_file'	/tmp/resolv.conf.auto
 	option	'ntp_ip_regex'	'^192\.168\.0\.[1-9][0-9]*$'
 
-config 'settings' 'settings'
+config settings 'settings'
 	# initially opennet-id is not set
 	# option 'on_id'	not yet set
 

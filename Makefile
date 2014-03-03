@@ -56,10 +56,11 @@ diff-menuconfig: feeds
 
 translate:
 	@find "$(CUSTOM_PACKAGES_DIR)" -mindepth 1 -maxdepth 1 -type d | while read dname; do \
-		"$(LUCI_DIR)/build/i18n-scan.pl" "$$dname" >"$(CUSTOM_PO_DIR)/templates/$$(basename "$$dname").pot"; \
-		for lang in $(LANGUAGES); do \
-			echo "$(CUSTOM_PO_DIR)/$$lang/$$(basename "$$dname").po"; \
-		 done | while read fname; do test ! -e "$$fname" && touch "$$fname" || true; done; \
+		echo "$$dname" "$(CUSTOM_PO_DIR)/templates/$$(basename "$$dname").pot"; \
+	 done | while read dname pot_filename; do \
+		"$(LUCI_DIR)/build/i18n-scan.pl" "$$dname" >"$$pot_filename"; \
+		false COMMENT: remove zero-sized pot files; \
+		test -e "$$pot_filename" -a ! -s "$$pot_filename" && rm "$$pot_filename"; \
 	 done
 	@"$(LUCI_DIR)/build/i18n-update.pl" "$(CUSTOM_PO_DIR)"
 

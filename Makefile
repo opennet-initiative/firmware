@@ -18,8 +18,11 @@ config-%:
 	$(MAKE) -C on-configs "$(patsubst config-%,%,$@)"
 
 menuconfig:
-	@echo 'For "menuconfig" please use the command "make config-ARCH" whereas ARCH is replaces by target architecture.'
-	@echo "Example: make config-ar71xx"
+	$(warning "'menuconfig' gibt es hier nicht - vielleicht meinst du eine der folgenden Aktionen?")
+	$(warning " 		make -C openwrt menuconfig")
+	$(warning " 		make config-ar71xx")
+	$(warning " 		make diff-menuconfig")
+	$(error "unbekanntes Ziel 'menuconfig'")
 
 init:
 	@# update submodules if necessary

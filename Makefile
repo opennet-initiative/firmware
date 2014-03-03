@@ -5,9 +5,25 @@ CUSTOM_PACKAGES_DIR = opennet/packages
 LANGUAGES = de
 ARCHS = ar71xx bcm43xx ixp4xx tl-wr1043nd tl-wr842nd x86
 
-.PHONY: all clean patch unpatch menuconfig feeds init
+.PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init help list-archs
 
 all: $(ARCHS)
+
+help:
+	$(info Die folgenden Ziele sind verfügbar:)
+	$(info - init			Initialisierung des opennet-Repositories)
+	$(info - all 			alle Architekturen compilieren)
+	$(info - list-archs		alle Architekturen anzeigen)
+	$(info - ARCH			eine Architektur kompilieren)
+	$(info - config-ARCH		die Konfiguration einer Architektur anwenden (dies erzeugt 'openwrt/.config'))
+	$(info - diff-menuconfig	vergleichbar mit "make -C openwrt menuconfig" - es wird jedoch anschließend ein diff der Änderungen angezeigt)
+	$(info - translate		Übersetzungsdateien (opennet/po/de/*.po) aktualisieren)
+	$(info - feeds			die Paket-Feeds (siehe openwrt/feeds.conf) neu einlesen)
+	$(info - patch			die opennet-Patches via quilt anwenden (siehe ./patches/*.patch))
+	$(info - unpatch		die opennet-Patches zurücknehmen (empfehlenswert vor jedem "git pull"))
+
+list-archs:
+	$(info $(ARCHS))
 
 $(ARCHS): feeds translate
 	@echo "Building for target architecture: $@"

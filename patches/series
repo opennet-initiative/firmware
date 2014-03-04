@@ -5,3 +5,4 @@ wifidog_iptables_long_table_names.patch
 openvpn-enable-small-config.patch
 makefile_include_opennet_packages.patch
 olsrd_hotplug_restart.patch
+ntpclient_fix_server_check.patch

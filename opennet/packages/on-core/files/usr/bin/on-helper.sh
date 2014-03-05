@@ -25,7 +25,7 @@ get_client_cn() {
 
 DEBUG=$(uci -q get on-core.defaults.debug)
 msg_debug() {
-	$DEBUG && logger -t $(basename "$0")[$$] "$1" || true
+	$DEBUG && logger -t $(basename "$2")[$$] "$1" || true
 }
 
 msg_info() {
@@ -61,7 +61,7 @@ update_dns_servers() {
 		echo "# nameservers added by opennet firmware"
 		echo "# see: uci get on-core.services.dns_ip_regex"
 		get_mesh_ips_by_regex "$dns_ip_regex" | sort | while read ip; do
-			echo "nameserver $ip	# added by on-helper/update_dns_servers"
+			echo "nameserver $ip 	# added by on-helper/update_dns_servers"
 		done
 	) | _update_file_if_changed "$dns_resolv_file" && msg_info "updating DNS entries"
 	return
@@ -78,7 +78,6 @@ update_ntp_servers() {
 	local current_servers="$(uci show ntpclient | grep "\.hostname=" | cut -f 2- -d = | sort)"
 	local new_servers="$(get_mesh_ips_by_regex "$ntp_ip_regex" | sort)"
 	local section_name=
-		set -x
 	if [ "$current_servers" != "$new_servers" ]; then
 		# delete all current servers
 		while uci -q delete ntpclient.@ntpserver[0]; do true; done
@@ -89,19 +88,39 @@ update_ntp_servers() {
 		done
 		msg_info "updating NTP entries"
 		uci commit ntpclient
-		restart_ntpclient
+		control_ntpclient restart
 	fi
+	# make sure that ntpclient is running (in case it broke before)
+	if [ -z "$(pidof ntpclient)" ]; then
+		msg_info "'ntpclient' is not running: starting it again ..."
+		control_ntpclient start
+	fi
+	return
 }
 
 # stop and start ntpclient
 # This should be used whenever the list of ntp server changes.
 # BEWARE: this function depends on internals of ntpclient's hotplug script
-restart_ntpclient() {
+control_ntpclient() {
+	local action="$1"
 	local ntpclient_script="$(find /etc/hotplug.d/iface/ -type f | grep ntpclient | head -n 1)"
-	[ -z "$ntpclient_script" ] && msg_info "error: failed to restart ntpclient" && return 0
+	[ -z "$ntpclient_script" ] && msg_info "error: failed to find ntpclient hotplug script" && return 0
 	. "$ntpclient_script"
-	stop_ntpclient
-	start_ntpclient
+	case "$action" in
+		start)
+			start_ntpclient
+			;;
+		stop)
+			stop_ntpclient
+			;;
+		restart)
+			stop_ntpclient
+			start_ntpclient
+			;;
+		*)
+			echo >&2 "ERROR: unknown action for 'control_ntpclient': $action"
+			;;
+	esac
 }
 
 get_network() {

@@ -103,15 +103,18 @@ CONFIG_PACKAGE_rpcd-mod-file=m
 CONFIG_PACKAGE_rpcd-mod-iwinfo=m
 CONFIG_PACKAGE_muninlite=m
 
-# Analyse
+# Analyse & Werkzeuge
 CONFIG_PACKAGE_bwm=m
 CONFIG_PACKAGE_ifstat=m
 CONFIG_PACKAGE_iftop=m
 CONFIG_PACKAGE_iperf=m
 CONFIG_PACKAGE_horst=m
 CONFIG_PACKAGE_mtr=m
+CONFIG_PACKAGE_screen=m
 CONFIG_PACKAGE_strace=m
 CONFIG_PACKAGE_tcpdump=m
+CONFIG_PACKAGE_vsftpd=m
+CONFIG_PACKAGE_vsftpd-tls=m
 
 # wifidog (?)
 CONFIG_PACKAGE_iptables-mod-extra=y

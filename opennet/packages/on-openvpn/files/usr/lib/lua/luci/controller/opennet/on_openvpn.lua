@@ -29,7 +29,7 @@ end
 function action_on_openvpn()
 	require ("luci.model.opennet.on_vpn_management")
 	
-	if luci.http.formvalue("restartvpn") then os.execute("/etc/init.d/openvpn down opennet_user; /etc/init.d/openvpn up opennet_user") end
+	if luci.http.formvalue("restartvpn") then os.execute("vpn_status restart opennet_user") end
 	
 	if luci.http.formvalue("upload") then upload_file("user") end
 	

@@ -52,8 +52,10 @@ print_usage()
 	echo "add_gw \$IP     - manually add a gateway"
 	echo "del_gw \$POS    - delete a existing gateway"
 	echo "move_top \$POS  - move a gateway to the top of the priority list"
+	echo "start          - start the VPN tunnel"
+	echo "stop           - stop the VPN tunnel"
+	echo "restart        - restart the VPN tunnel"
 }
-
 
 move_top()
 {
@@ -116,6 +118,16 @@ case "$1" in
 	toggle_etx|toggle_auto)
 		"$1"
 		print_status
+	;;
+	start|stop|restart)
+		INSTANCE=opennet_user
+		. "$IPKG_INSTROOT/lib/functions.sh"
+		. "$IPKG_INSTROOT/lib/functions/service.sh"
+		. /etc/init.d/openvpn
+
+		INSTANCE=opennet_user
+		[ "$1" = "restart" -o "$1" = "stop" ] && stop_instance "$INSTANCE"
+		[ "$1" = "restart" -o "$1" = "start" ] && start_instance "$INSTANCE"
 	;;
 	help|--help)
 		print_usage

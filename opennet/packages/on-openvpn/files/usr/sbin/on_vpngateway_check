@@ -97,7 +97,7 @@ test_vpngateway()
 		# check vpn-availability...
 		
 		gw_ipaddr=$(uci -q get on-openvpn.gate_$1.ipaddr);
-		# if there is no ipaddr stored than query dns for IP address
+		# if there is no ipaddr stored then query dns for IP address
 		[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns $(uci -q get on-openvpn.gate_$1.name))
 		[ -z "$gw_ipaddr" ] && return
 		
@@ -160,6 +160,7 @@ check_blacklisting()
 		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
 	fi
 }
+
 check_all_blacklisting()
 {
 	index_abl=1;
@@ -222,10 +223,7 @@ check_all_gateways()
 			
 					# set gateway information
 					uci -q set openvpn.opennet_user.remote=$gw_ipaddr
-					# commit after every change to prevent uci memory problems
-					uci commit on-openvpn
-					/etc/init.d/openvpn down opennet_user
-					/etc/init.d/openvpn up opennet_user
+					vpn_status restart opennet_user
 					better_gw_count=0
 				fi
 				uci -q set on-openvpn.@gateways[0].better_gw=$better_gw_count
@@ -235,10 +233,10 @@ check_all_gateways()
 			fi
 			found_first_gw='true'
 		fi
-		# commit after every change to prevent uci memory problems
-		uci commit on-openvpn
 		: $((index++))
 	done
+	# commit after every change to prevent uci memory problems
+	uci commit on-openvpn
 
 	# add current gateway always to list of all current gateways (even if marked as not working)
 	current_gws="${current_gws} ${current_gw_ipaddr}"
@@ -253,14 +251,14 @@ start_stop_openvpn() {
 	if [ -n "$(ip route show table $olsrd_routingTable | awk '/tap/ && $1 == "'$gw_ipaddr'"')" ]; then
 		if [ -e "/tmp/openvpn_msg.txt" ]; then
 			msg_info "stopping nonworking gateway"
-			/etc/init.d/openvpn down opennet_user
+			vpn_status stop opennet_user
 			uci -q set on-openvpn.@gateways[0].better_gw=0
 			# commit after every change to prevent uci memory problems
 			uci commit on-openvpn
 		fi
 	elif [ -n "$gw_ipaddr" ] && [ ! -e "/var/run/openvpn-opennet_user.pid" ] && [ -e "$VPN_DIR/on_aps.crt" ] && [ -e "$VPN_DIR/on_aps.key" ]; then
 		sleep 5; # wait a litte while, maybe ntp was updated and time has to be set
-		/etc/init.d/openvpn up opennet_user
+		vpn_status start opennet_user
 	fi
 }
 

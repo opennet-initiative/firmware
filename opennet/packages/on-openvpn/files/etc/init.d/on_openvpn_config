@@ -14,6 +14,11 @@
 START=21
 
 start() {
+
+	# create uci node
+	[ -e /etc/config/on-openvpn ] || touch /etc/config/on-openvpn
+
+	# firewall settings
 	if [ -z "$(uci -q get network.on_vpn)" ]; then
 		local batch
 		
@@ -37,6 +42,58 @@ start() {
 		uci set firewall.$section.dest='on_vpn'
 
 		uci commit firewall
+	fi
+
+	# openvpn connection
+	if [ -z "$(uci -q get openvpn.opennet_user)" ]; then
+		prefix=openvpn.opennet_user
+		uci set "${prefix}=openvpn"
+		uci set "${prefix}.client=1"
+		uci set "${prefix}.enable=1"
+		uci set "${prefix}.proto=udp"
+		uci set "${prefix}.dev=tun"
+		uci set "${prefix}.persist_key=1"
+		uci set "${prefix}.persist_tun=1"
+		uci set "${prefix}.ca=/etc/openvpn/opennet_user/opennet-ca.crt"
+		uci set "${prefix}.cert=/etc/openvpn/opennet_user/on_aps.crt"
+		uci set "${prefix}.key=/etc/openvpn/opennet_user/on_aps.key"
+		uci set "${prefix}.nobind=1"
+		uci set "${prefix}.comp_lzo=yes"
+		uci set "${prefix}.up=/etc/openvpn/opennet_user/opennet_up.sh"
+		uci set "${prefix}.down=/etc/openvpn/opennet_user/opennet_down.sh"
+		uci set "${prefix}.ns_cert_type=server"
+		uci set "${prefix}.rport=1600"
+		uci set "${prefix}.script_security=2 execve"
+		uci add_list "${prefix}.remote=remote"
+		uci set "${prefix}.remote=192.168.0.254"
+		uci commit
+	fi
+
+	# general on-openvpn settings (gateways, preferred order, ...)
+	if [ -z "$(uci -q get on-openvpn.gateways)" ]; then
+		prefix=on-openvpn.gateways
+		uci set "${prefix}=gateways"
+		uci set "${prefix}.better_gw=0"
+		uci set "${prefix}.current_gw="
+		uci set "${prefix}.searchmask=\$1 ~ \"^192\\.168\\.0\\.[0-9]+$\" && $1 != \"192.168.0.0\""
+		uci set "${prefix}.vpn_recheck_age=20"
+		uci set "${prefix}.vpn_nonworking_timeout=5"
+		uci set "${prefix}.vpn_bettergateway_timeout=5"
+		uci set "${prefix}.autosearch=on"
+		uci set "${prefix}.vpn_sort_criteria=etx"
+		uci commit
+	fi
+
+	# openssl certificate settings
+	if [ -z "$(uci -q get on-openvpn.openssl)" ]; then
+		prefix=on-openvpn.openssl
+		uci set "${prefix}=openssl"
+		uci set "${prefix}.countryName=de"
+		uci set "${prefix}.provinceName=Mecklenburg-Vorpommern"
+		uci set "${prefix}.localityName=Rostock"
+		uci set "${prefix}.organizationalUnitName=users"
+		uci set "${prefix}.days=3650"
+		uci commit
 	fi
 
     exit 0

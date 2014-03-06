@@ -169,8 +169,7 @@ function action_vpn_gateways()
 		cursor:set("openvpn", "opennet_user", "remote", select_gw)
 		cursor:set("on-openvpn", "gateways", "better_gw", 0)
 		cursor:commit("openvpn")
-		os.execute("/etc/init.d/openvpn down opennet_user")
-		os.execute("/etc/init.d/openvpn up opennet_user")
+		os.execute("vpn_status restart opennet_user")
 	end
 	if new_gateway or new_gateway_name or new_blacklist_gateway or new_blacklist_gateway_name or del_section or toggle_gateway_search or toggle_sort_criteria or reset_counter or select_gw then
 		cursor:commit("on-openvpn")

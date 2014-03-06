@@ -45,8 +45,8 @@ start() {
 	fi
 
 	# openvpn connection
-	if [ -z "$(uci -q get openvpn.opennet_user)" ]; then
-		prefix=openvpn.opennet_user
+	prefix=openvpn.opennet_user
+	if [ -z "$(uci -q get "$prefix")" ]; then
 		uci set "${prefix}=openvpn"
 		uci set "${prefix}.client=1"
 		uci set "${prefix}.enable=1"
@@ -66,34 +66,34 @@ start() {
 		uci set "${prefix}.script_security=2 execve"
 		uci add_list "${prefix}.remote=remote"
 		uci set "${prefix}.remote=192.168.0.254"
-		uci commit
+		uci commit "$prefix"
 	fi
 
 	# general on-openvpn settings (gateways, preferred order, ...)
-	if [ -z "$(uci -q get on-openvpn.gateways)" ]; then
-		prefix=on-openvpn.gateways
+	prefix=on-openvpn.gateways
+	if [ -z "$(uci -q get "$prefix")" ]; then
 		uci set "${prefix}=gateways"
 		uci set "${prefix}.better_gw=0"
 		uci set "${prefix}.current_gw="
-		uci set "${prefix}.searchmask=\$1 ~ \"^192\\.168\\.0\\.[0-9]+$\" && $1 != \"192.168.0.0\""
+		uci set "${prefix}.searchmask"='$1 ~ "^192\\.168\\.0\\.[0-9]+$" && $1 != "192.168.0.0"'
 		uci set "${prefix}.vpn_recheck_age=20"
 		uci set "${prefix}.vpn_nonworking_timeout=5"
 		uci set "${prefix}.vpn_bettergateway_timeout=5"
 		uci set "${prefix}.autosearch=on"
 		uci set "${prefix}.vpn_sort_criteria=etx"
-		uci commit
+		uci commit "$prefix"
 	fi
 
 	# openssl certificate settings
-	if [ -z "$(uci -q get on-openvpn.openssl)" ]; then
-		prefix=on-openvpn.openssl
+	prefix=on-openvpn.openssl
+	if [ -z "$(uci -q get "$prefix")" ]; then
 		uci set "${prefix}=openssl"
 		uci set "${prefix}.countryName=de"
 		uci set "${prefix}.provinceName=Mecklenburg-Vorpommern"
 		uci set "${prefix}.localityName=Rostock"
 		uci set "${prefix}.organizationalUnitName=users"
 		uci set "${prefix}.days=3650"
-		uci commit
+		uci commit "$prefix"
 	fi
 
     exit 0

@@ -17,6 +17,12 @@
 PID_FILE=/var/run/on_vpngateway_check.pid
 VPN_DIR=/etc/openvpn/opennet_user
 
+# do not run if there is no certificate and no key
+if ! [ -e "$VPN_DIR/on_aps.crt" ] || ! [ -e "$VPN_DIR/on_aps.key" ]; then
+	msg_debug "no VPN certificate or key found: $VPN_DIR/on_aps.(crt|key) -> exiting"
+	exit 0
+fi
+
 #################################################################################
 # initialization to prevent two instances running at the same time
 # If interrupted, remove pid-file and set a mark in log
@@ -84,9 +90,6 @@ activate_olsr_service () {
 # parameter is index to test
 test_vpngateway()
 {
-	# if there is no cert, no chance (and sense) to check the target gateways
-	[ ! -e "$VPN_DIR/on_aps.crt" ] && return
-
 	age=$(uci -q get on-openvpn.gate_$1.age)
 	if [ "$age" -ge $((recheck_age+nonworking_timeout)) ]; then
 		# if there was no vpn-availability for a dedicated time (nonworking_timeout minutes), declare vpn-status as not working
@@ -194,11 +197,6 @@ check_all_gateways()
 		# check if currently checked Gateway is blacklisted, if found then continue in loop
 		[ -n "$(check_blacklisting $index)" ] && : $((index++)) && continue
 
-		if ! [ -e "$VPN_DIR/on_aps.crt" ] || ! [ -e "$VPN_DIR/on_aps.key" ]; then
-			msg_debug "no testing, key or cert missing"
-			continue
-		fi
-
 		msg_debug "         $gw_ipaddr not blacklisted"
 
 		# check if gateway is known to work, else continue in loop
@@ -244,7 +242,7 @@ start_stop_openvpn() {
 			# commit after every change to prevent uci memory problems
 			uci commit on-openvpn
 		fi
-	elif [ -n "$gw_ipaddr" ] && [ ! -e "/var/run/openvpn-opennet_user.pid" ] && [ -e "$VPN_DIR/on_aps.crt" ] && [ -e "$VPN_DIR/on_aps.key" ]; then
+	elif [ -n "$gw_ipaddr" ] && [ ! -e "/var/run/openvpn-opennet_user.pid" ]; then
 		sleep 5; # wait a litte while, maybe ntp was updated and time has to be set
 		vpn_status start opennet_user
 	fi

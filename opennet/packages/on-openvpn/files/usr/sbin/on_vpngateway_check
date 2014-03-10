@@ -34,7 +34,7 @@ msg_debug "starting another instance ($1)"
 # check if other instance is running, if yes, kill other instance
 if [ -f "$PID_FILE" ]; then
 	msg_debug "detected '$PID_FILE'"
-	kill $(cat "$PID_FILE");
+	kill $(cat "$PID_FILE")
 fi
 
 # register that process is running
@@ -42,11 +42,11 @@ fi
 limit=30 # number of seconds to wait at most till other instance is finished.
 while [ -f "$PID_FILE" ];do
 	msg_debug "sleeping until other instance is finished"
-	sleep 1;
+	sleep 1
 	limit=$((limit-1))
 	if [ "$limit" = "0" ]; then
 		msg_debug "other instance doesn't finished in time, aborting"
-		exit;
+		exit
 	fi
 done
 echo "$$" >"$PID_FILE"
@@ -93,13 +93,13 @@ test_vpngateway()
 	age=$(uci -q get on-openvpn.gate_$1.age)
 	if [ "$age" -ge $((recheck_age+nonworking_timeout)) ]; then
 		# if there was no vpn-availability for a dedicated time (nonworking_timeout minutes), declare vpn-status as not working
-		uci -q set on-openvpn.gate_$1.status='n';
-		uci -q set on-openvpn.gate_$1.age=0;
+		uci -q set on-openvpn.gate_$1.status='n'
+		uci -q set on-openvpn.gate_$1.age=0
 		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
 	elif [ "$age" -ge "$recheck_age" ]; then
 		# check vpn-availability...
 		
-		gw_ipaddr=$(uci -q get on-openvpn.gate_$1.ipaddr);
+		gw_ipaddr=$(uci -q get on-openvpn.gate_$1.ipaddr)
 		# if there is no ipaddr stored then query dns for IP address
 		[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns $(uci -q get on-openvpn.gate_$1.name))
 		[ -z "$gw_ipaddr" ] && return
@@ -120,10 +120,10 @@ test_vpngateway()
 				print;
 				system("kill 2>/dev/null $(ps|grep \"openvpn --dev null\" |grep -v grep|cut -b 0-5)")
 			}')" ]; then
-			uci -q set on-openvpn.gate_$1.age=0;
-			uci -q set on-openvpn.gate_$1.status="y";
+			uci -q set on-openvpn.gate_$1.age=0
+			uci -q set on-openvpn.gate_$1.status="y"
 			uci commit on-openvpn;							# commit after every change to prevent uci memory problems
-			echo "vpn-availability of gw $gw_ipaddr successfully tested";
+			echo "vpn-availability of gw $gw_ipaddr successfully tested"
 		fi
 		msg_debug "finished vpn test of $gw_ipaddr"
 	elif [ "$(uci -q get on-openvpn.gate_$1.status)" == "y" ]; then
@@ -136,37 +136,38 @@ test_vpngateway()
 # parameter is index to test, echo true if blacklisted
 check_blacklisting()
 {
-	gw_ipaddr=$(uci -q get on-openvpn.gate_$1.ipaddr);
+	gw_ipaddr=$(uci -q get on-openvpn.gate_$1.ipaddr)
 	# if there is no ipaddr stored than query dns for IP address
 	[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns $(uci -q get on-openvpn.gate_$1.name))
 	[ -z "$gw_ipaddr" ] && return
 
-	blacklisted=$(uci -q get on-openvpn.gate_$1.blacklisted);
+	blacklisted=$(uci -q get on-openvpn.gate_$1.blacklisted)
 	
 	# check if currently checked Gateway is blacklisted, if found then continue in loop
-	index_bl=0;
+	index_bl=0
 	while [ -n "$(uci -q get on-openvpn.@blacklist_gateway[$index_bl])" ] ; do
 		msg_debug "check_blacklisting $index_bl"
 		if [ "$(uci -q get on-openvpn.@blacklist_gateway[$index_bl].ipaddr)" == "$gw_ipaddr" ]; then
-			uci -q set on-openvpn.gate_$1.blacklisted='true';
+			uci -q set on-openvpn.gate_$1.blacklisted='true'
 			uci commit on-openvpn;							# commit after every change to prevent uci memory problems
-			echo "gateway $gw_ipaddr is blacklisted"; return;
+			echo "gateway $gw_ipaddr is blacklisted"
+			return
 		fi
 		: $((index_bl++))
 	done
 	
 	# gateway is not blacklisted
 	if [ -n "$blacklisted" ]; then
-		uci -q delete on-openvpn.gate_$1.blacklisted;
-		uci -q delete on-openvpn.gate_$1.status;
-		uci -q delete on-openvpn.gate_$1.age;
+		uci -q delete on-openvpn.gate_$1.blacklisted
+		uci -q delete on-openvpn.gate_$1.status
+		uci -q delete on-openvpn.gate_$1.age
 		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
 	fi
 }
 
 check_all_blacklisting()
 {
-	index_abl=1;
+	index_abl=1
 	while [ -n "$(uci -q get on-openvpn.gate_$index_abl)" ] ; do
 		check_blacklisting $((index_abl++))
 	done
@@ -182,14 +183,14 @@ check_all_gateways()
 	better_gw_count=$(uci -q get on-openvpn.@gateways[0].better_gw)
 	index=1
 	while [ -n "$(uci -q get on-openvpn.gate_$index)" ]; do
-		gw_ipaddr=$(uci -q get on-openvpn.gate_$index.ipaddr);
+		gw_ipaddr=$(uci -q get on-openvpn.gate_$index.ipaddr)
 		
 		# if no age set yet than set to recheck_age to force immediate testing
 		age=$(uci -q get on-openvpn.gate_$index.age)
 		if [ "$age" ]; then
-			uci -q set on-openvpn.gate_$index.age=$((++age));
+			uci -q set on-openvpn.gate_$index.age=$((++age))
 		else
-			uci -q set on-openvpn.gate_$index.age=$recheck_age;
+			uci -q set on-openvpn.gate_$index.age=$recheck_age
 		fi
 
 		msg_debug "checking $gw_ipaddr age $age"
@@ -262,7 +263,7 @@ olsrd_routingTable=$(uci -q get olsrd.@olsrd[0].RtTable)
 
 case "$1" in
 	"refresh")
-		gateway_autosearch $1;
+		gateway_autosearch $1
 		;;
 	"check_blacklisting")
 		check_all_blacklisting

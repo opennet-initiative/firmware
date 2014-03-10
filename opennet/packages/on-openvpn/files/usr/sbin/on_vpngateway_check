@@ -175,7 +175,6 @@ check_all_blacklisting()
 check_all_gateways()
 {
 	found_first_gw=
-	all_gws=
 	current_gw_ipaddr=$(uci -q get openvpn.opennet_user.remote)
 	better_gw_count=$(uci -q get on-openvpn.@gateways[0].better_gw)
 	index=1
@@ -195,9 +194,6 @@ check_all_gateways()
 		# check if currently checked Gateway is blacklisted, if found then continue in loop
 		[ -n "$(check_blacklisting $index)" ] && : $((index++)) && continue
 
-		# add gateway to list of all (even non-working) gateways (used for dns and ntp)
-		all_gws="${all_gws} ${gw_ipaddr}"
-
 		if ! [ -e "$VPN_DIR/on_aps.crt" ] || ! [ -e "$VPN_DIR/on_aps.key" ]; then
 			msg_debug "no testing, key or cert missing"
 			continue
@@ -208,9 +204,6 @@ check_all_gateways()
 		# check if gateway is known to work, else continue in loop
 		if [ -z "$(test_vpngateway $index)" ]; then : $((index++)); continue; fi
 		
-		# add gateway to list of all current gateways (used for dns and ntp)
-		current_gws="${current_gws} ${gw_ipaddr}"
-
 		msg_debug "         $gw_ipaddr is known to work"
 		
 		# if first gateway is not found yet and route to current $gw_ipaddr exists, try if it's better to use this gateway
@@ -237,11 +230,6 @@ check_all_gateways()
 	done
 	# commit after every change to prevent uci memory problems
 	uci commit on-openvpn
-
-	# add current gateway always to list of all current gateways (even if marked as not working)
-	current_gws="${current_gws} ${current_gw_ipaddr}"
-	# if there are no working gateways (maybe no key/cert), just use any found one to have some dns/ntp
-	[ -z "${current_gws//[[:space:]]}" ] && current_gws=$all_gws
 }
 
 start_stop_openvpn() {
@@ -272,8 +260,6 @@ nonworking_timeout=$(uci -q get on-openvpn.@gateways[0].vpn_nonworking_timeout)
 bettergateway_timeout=$(uci -q get on-openvpn.@gateways[0].vpn_bettergateway_timeout)
 # olsrd routing table
 olsrd_routingTable=$(uci -q get olsrd.@olsrd[0].RtTable)
-# global variable to store currently found gateways
-current_gws=""
 
 
 case "$1" in

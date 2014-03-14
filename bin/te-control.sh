@@ -63,6 +63,7 @@ get_network_pidfiles() { find "$NETWORK_DIR" -mindepth 1 -maxdepth 1 -type f -na
 get_host_pidfile() { echo "$(get_host_dir "$1")/pid"; }
 get_host_pidfiles() { find "$HOST_DIR" -mindepth 2 -maxdepth 2 -type f -name "pid" | sort; }
 get_overlay_dir() { echo "$HOST_DIR/overlay.d"; }
+get_host_vncportfile() { echo "$(get_host_dir "$1")/vncport"; }
 
 make_overlay_image() {
 	local overlay_image="$1"
@@ -72,6 +73,15 @@ make_overlay_image() {
 	test -z "$image_root" && image_root="$(mktemp --directory)"
 	/usr/sbin/mkfs.jffs2 "--pad=$bytes" "--root=$image_root" >"$overlay_image"
 	rmdir "$image_root"
+}
+
+get_next_free_port() {
+	local port="$1"
+	while ss -l | awk '{print $4}' |grep -q ":$port\$"
+	do
+		port=$((port+1))
+	done
+	echo "$port"
 }
 
 get_qemu_bin() {
@@ -99,7 +109,6 @@ start_host() {
 	local arch="$2"
 	local rootfs="$3"
 	local kernel="$4"
-	local vm_id="$5"
 	shift 5
 	local qemu_bin="$(get_qemu_bin "$arch")"
 	local networks="$(get_network_configs 0 "$@")"
@@ -120,9 +129,12 @@ start_host() {
 	make_overlay_image "$overlay_image" $((4 * 1024 * 1024))
 	# we choose alsa - otherwise pulseaudio errors (or warnings?) will occour
 	export QEMU_AUDIO_DRV=alsa
+	local vnc_port="$(get_next_free_port 5900)"
+	echo "$vnc_port" > $(get_host_vncportfile "$name")
+	local vnc_port_offset=$((vnc_port-5900))
 	"$qemu_bin" -name "$name" \
 		-m "$HOST_MEMORY" -snapshot \
-		-display vnc=:$vm_id \
+		-display vnc=:$vnc_port_offset \
 		$networks \
 		-drive "file=$rootfs,snapshot=on" \
 		-drive "file=$overlay_image" \
@@ -275,10 +287,12 @@ EOF
 	stop-host)
 		name="$1"
 		pidfile="$(get_host_pidfile "$name")"
-		piddir="$(dirname "$pidfile")"
+		overlayfile="$(get_overlay_image "$name")"
+		vncportfile="$(get_host_vncportfile "$name")"
+		hostdir="$(dirname "$pidfile")"
 		test -e "$pidfile" && pkill --pidfile "$pidfile" || true
-		rm -f "$pidfile" "$(get_serial_socket "$name")"
-		test -d "$piddir" && rmdir --ignore-fail-on-non-empty "$piddir"
+		rm -f "$pidfile" "$vncportfile" "$overlayfile" "$(get_serial_socket "$name")"
+		test -d "$hostdir" && rmdir --ignore-fail-on-non-empty "$hostdir"
 		;;
 	start-net)
 		type="$1"

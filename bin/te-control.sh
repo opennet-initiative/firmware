@@ -138,8 +138,8 @@ start_host() {
 			$qemu_args
 
 			#-serial "unix:$(get_serial_socket "$name"),server,nowait" \
-			#-nographic \
 			#-vga none \
+			#-nographic \
 			#-spice "port=${spice_port},addr=127.0.0.1,password=$SPICE_PASSWORD" \
 }
 
@@ -173,7 +173,8 @@ create_network_virtual() {
 	local socket="$(get_network_socket "$name")"
 	mkdir -p "$(dirname "$socket")"
 	test "$(id -u)" != 0 && gain_root="$SUDO_BIN"
-	$gain_root vde_plug2tap --daemon "--sock=$socket" "--pidfile=$pidfile" "$name"
+	vde_switch --daemon "--sock=$socket" "--pidfile=$pidfile"
+	$gain_root vde_plug2tap --daemon "--sock=$socket" "$name"
 }
 
 is_remote_process_running() {

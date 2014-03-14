@@ -18,15 +18,15 @@ case "$ACTION" in
 	start)
 		"$CONTROL_BIN" start-net switch olsr1
 		"$CONTROL_BIN" start-net switch olsr2
-		"$CONTROL_BIN" start-net switch client_user
-		"$CONTROL_BIN" start-net switch client_wifidog
+		"$CONTROL_BIN" start-net switch net_user
+		"$CONTROL_BIN" start-net switch net_wifidog
 		"$CONTROL_BIN" start-net switch uplink
 		"$CONTROL_BIN" start-net capture uplink eth0
-		"$CONTROL_BIN" start-host 0 ap1.201 "$VERSION_STABLE" x86 olsr1 "DD:4B:E3:A7:98:F9" uplink "46:98:2C:8A:46:50"
+		"$CONTROL_BIN" start-host 0 ap1.201 "$VERSION_STABLE" x86 olsr1 "DD:4B:E3:A7:98:F9" uplink "46:98:2C:8A:46:50" net_wifidog "DF:37:98:BC:AA:21"
 		"$CONTROL_BIN" start-host 1 ap1.202 "$VERSION_STABLE" x86 olsr1 "5D:6E:A9:9E:AE:6F" olsr2 "FC:EF:67:F8:62:B3"
-		"$CONTROL_BIN" start-host 2 ap1.203 "$VERSION_STABLE" x86 olsr2 "23:55:74:4C:5B:C9" client_user "55:16:90:6D:7A:83"
-		"$CONTROL_BIN" start-host 3 client_user "$VERSION_STABLE" x86 client_user "DF:CB:6B:80:39:89"
-		"$CONTROL_BIN" start-host 4 client_wifidog "$VERSION_STABLE" x86 client_wifidog "A1:D8:AC:59:91:8D"
+		"$CONTROL_BIN" start-host 2 ap1.203 "$VERSION_STABLE" x86 olsr2 "23:55:74:4C:5B:C9" net_user "55:16:90:6D:7A:83"
+		"$CONTROL_BIN" start-host 3 client_user "$VERSION_STABLE" x86 net_user "DF:CB:6B:80:39:89"
+		"$CONTROL_BIN" start-host 4 client_wifidog "$VERSION_STABLE" x86 net_wifidog "A1:D8:AC:59:91:8D"
 		# wait for bootup
 		echo "Waiting for bootup ..."
 		sleep 10
@@ -46,7 +46,7 @@ case "$ACTION" in
 		for name in ap1.201 ap1.202 ap1.203 client_user client_wifidog; do
 			"$CONTROL_BIN" stop-host "$name"
 		 done
-		for net in olsr1 olsr2 client_user client_wifidog uplink; do
+		for net in olsr1 olsr2 net_user net_wifidog uplink; do
 			"$CONTROL_BIN" stop-net "$net"
 		 done
 		;;

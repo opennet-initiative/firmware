@@ -40,7 +40,7 @@ get_firmware_kernel() {
 	local version="$2"
 	local base_dir="$FW_BASE_DIR/$version/$arch"
 	test "$arch" = "x86" && echo "$base_dir/openwrt-x86-generic-vmlinuz" && return
-	test "$arch" = "ar71xx" && echo "$base_dir/openwrt-ar71xx-generic-vmlinux.bin" && return
+	test "$arch" = "ar71xx" && echo "$base_dir/openwrt-ar71xx-generic-vmlinux.elf" && return
 	echo >&2 "Unknwon architecture: $arch"
 }
 
@@ -105,7 +105,13 @@ start_host() {
 	local networks="$(get_network_configs 0 "$@")"
 	local pidfile="$(get_host_pidfile "$name")"
 	local qemu_args="$QEMU_ARGS"
-	test -e "$pidfile" && return
+	if test -e "$pidfile"; then
+		pid="$(cat "$pidfile")"
+		# the process exists -> quit silently
+		test -n "$pid" -a -d "/proc/$pid" && echo >2 "The host is already running" && return
+		# remove stale pid file
+		rm "$pidfile"
+	 fi
 	mkdir -p "$(get_host_dir "$name")"
 	local spice_port="$((SPICE_PORT_BASE+vm_id))"
 	# see http://wiki.openwrt.org/doc/howto/qemu
@@ -113,10 +119,11 @@ start_host() {
 	# create overlay directory image
 	local overlay_image="$(get_overlay_image "$name")"
 	make_overlay_image "$overlay_image" $((4 * 1024 * 1024))
+	# we choose alsa - otherwise pulseaudio errors (or warnings?) will occour
+	export QEMU_AUDIO_DRV=alsa
 	websockify "$spice_port" -- \
 		"$qemu_bin" -name "$name" \
 			-m "$HOST_MEMORY" -snapshot \
-			-daemonize \
 			-display vnc=:$vm_id \
 			$networks \
 			-drive "file=$rootfs,snapshot=on" \
@@ -128,6 +135,8 @@ start_host() {
 			-monitor chardev:monitor \
 			-pidfile "$pidfile" \
 			$qemu_args
+
+			#-daemonize \
 			#-serial "unix:$(get_serial_socket "$name"),server,nowait" \
 			#-nographic \
 			#-vga none \
@@ -316,8 +325,17 @@ EOF
 		"$0" status-nets
 		;;
 	help|--help)
-		echo "Syntax: $(basename "$0") {download|start-host|stop-host}"
-		echo "	$(basename "$0") start-host VM-ID NAME VERSION ARCH [[NET_NAME MAC] ...]"
+		echo "Syntax: $(basename "$0")"
+		echo "		download"
+		echo "		start-host	ID	NAME	VERSION	ARCH	[[NET_NAME MAC] ...]"
+		echo "		stop-host	ID"
+		echo "		prepare-host	NAME"
+		echo "		start-net	TYPE	NAME"
+		echo "		stop-net	NAME"
+		echo "		command		NAME	COMMAND"
+		echo "		apply-config	NAME	CONFIG_DIR"
+		echo "		status-hosts"
+		echo "		status-nets"
 		echo
 		;;
 	*)
@@ -328,3 +346,5 @@ EOF
 
 exit 0
 
+		type="$1"
+		name="$2"

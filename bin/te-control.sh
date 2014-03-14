@@ -134,9 +134,9 @@ start_host() {
 			-serial chardev:console \
 			-monitor chardev:monitor \
 			-pidfile "$pidfile" \
+			-daemonize \
 			$qemu_args
 
-			#-daemonize \
 			#-serial "unix:$(get_serial_socket "$name"),server,nowait" \
 			#-nographic \
 			#-vga none \
@@ -153,7 +153,6 @@ create_network_switch() {
 	vde_switch --daemon "--sock=$socket" "--pidfile=$pidfile"
 }
 
-
 create_network_capture() {
 	local name="$1"
 	local phys_if="$2"
@@ -164,6 +163,17 @@ create_network_capture() {
 	mkdir -p "$(dirname "$socket")"
 	test "$(id -u)" != 0 && gain_root="$SUDO_BIN"
 	$gain_root vde_pcapplug --daemon "--pidfile=$pidfile" "--sock=$socket" "$phys_if"
+}
+
+create_network_virtual() {
+	local name="$1"
+	local pidfile="$(get_network_pidfile "$name")"
+	local gain_root=
+	test -e "$pidfile" && return
+	local socket="$(get_network_socket "$name")"
+	mkdir -p "$(dirname "$socket")"
+	test "$(id -u)" != 0 && gain_root="$SUDO_BIN"
+	$gain_root vde_plug2tap --daemon "--sock=$socket" "--pidfile=$pidfile" "$name"
 }
 
 is_remote_process_running() {
@@ -282,6 +292,9 @@ EOF
 				;;
 			capture)
 				create_network_capture "$name" "$1"
+				;;
+			virtual)
+				create_network_virtual "$name"
 				;;
 			*)
 				echo "Invalid network type: $type"

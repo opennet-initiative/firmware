@@ -21,7 +21,7 @@ case "$ACTION" in
 		"$CONTROL_BIN" start-net switch net_user
 		"$CONTROL_BIN" start-net switch net_wifidog
 		"$CONTROL_BIN" start-net switch uplink
-		"$CONTROL_BIN" start-net switch mgmt
+		"$CONTROL_BIN" start-net virtual mgmt
 		"$CONTROL_BIN" start-net capture uplink eth0
 		"$CONTROL_BIN" start-host 0 ap1.201 "$VERSION_STABLE" x86 olsr1 "DD:4B:E3:A7:98:F9" uplink "46:98:2C:8A:46:50" net_wifidog "DF:37:98:BC:AA:21" mgmt "B6:78:93:BC:21:33"
 		"$CONTROL_BIN" start-host 1 ap1.202 "$VERSION_STABLE" x86 olsr1 "5D:6E:A9:9E:AE:6F" olsr2 "FC:EF:67:F8:62:B3" mgmt "B6:78:93:BC:21:44"

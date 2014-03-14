@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+. /lib/functions/onitest_functions.sh
+
+
+# did we already run once? Quitting ...
+onitest_is_configured && exit 0
+
+configure_onitest_node /etc/onitest.conf
+
+# apply changes during first initialization
+reboot
+

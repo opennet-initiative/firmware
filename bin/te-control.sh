@@ -113,7 +113,6 @@ start_host() {
 		rm "$pidfile"
 	 fi
 	mkdir -p "$(get_host_dir "$name")"
-	local spice_port="$((SPICE_PORT_BASE+vm_id))"
 	# see http://wiki.openwrt.org/doc/howto/qemu
 	test "$arch" = "ar71xx" && qemu_args="$qemu_args -M realview-eb-mpcore"
 	# create overlay directory image
@@ -121,26 +120,24 @@ start_host() {
 	make_overlay_image "$overlay_image" $((4 * 1024 * 1024))
 	# we choose alsa - otherwise pulseaudio errors (or warnings?) will occour
 	export QEMU_AUDIO_DRV=alsa
-	websockify "$spice_port" -- \
-		"$qemu_bin" -name "$name" \
-			-m "$HOST_MEMORY" -snapshot \
-			-display vnc=:$vm_id \
-			$networks \
-			-drive "file=$rootfs,snapshot=on" \
-			-drive "file=$overlay_image" \
-			-kernel "$kernel" -append "root=/dev/sda noapic"  \
-			-chardev "socket,id=console,path=$(get_serial_socket "$name"),server,nowait" \
-			-chardev "socket,id=monitor,path=$(get_monitor_socket "$name"),server,nowait" \
-			-serial chardev:console \
-			-monitor chardev:monitor \
-			-pidfile "$pidfile" \
-			-daemonize \
-			$qemu_args
+	"$qemu_bin" -name "$name" \
+		-m "$HOST_MEMORY" -snapshot \
+		-display vnc=:$vm_id \
+		$networks \
+		-drive "file=$rootfs,snapshot=on" \
+		-drive "file=$overlay_image" \
+		-kernel "$kernel" -append "root=/dev/sda noapic"  \
+		-chardev "socket,id=console,path=$(get_serial_socket "$name"),server,nowait" \
+		-chardev "socket,id=monitor,path=$(get_monitor_socket "$name"),server,nowait" \
+		-serial chardev:console \
+		-monitor chardev:monitor \
+		-pidfile "$pidfile" \
+		-daemonize \
+		$qemu_args
 
-			#-serial "unix:$(get_serial_socket "$name"),server,nowait" \
-			#-vga none \
-			#-nographic \
-			#-spice "port=${spice_port},addr=127.0.0.1,password=$SPICE_PASSWORD" \
+		#-serial "unix:$(get_serial_socket "$name"),server,nowait" \
+		#-vga none \
+		#-nographic \
 }
 
 

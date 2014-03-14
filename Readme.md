@@ -1,5 +1,5 @@
 Abhaengigkeiten
 ===============
 
-* aptitude install qemu mtd-utils mkfs.jffs2 sudo socat
+* aptitude install qemu mtd-utils mkfs.jffs2 sudo socat kvm
 

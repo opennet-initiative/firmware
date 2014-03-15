@@ -13,6 +13,7 @@ HOST_MEMORY=24
 RUN_DIR="$BASE_DIR/run"
 HOST_DIR="$RUN_DIR/host"
 NETWORK_DIR="$RUN_DIR/net"
+VNC_OFFSET=5900
 
 QEMU_BIN="${QEMU_BIN:-$(which qemu)}"
 QEMU_ARGS=
@@ -75,8 +76,7 @@ make_overlay_image() {
 
 get_next_free_port() {
 	local port="$1"
-	while ss -l | awk '{print $4}' |grep -q ":$port\$"
-	do
+	while ss -l | awk '{print $5}' | grep -q ":$port$"; do
 		port=$((port+1))
 	done
 	echo "$port"
@@ -131,12 +131,11 @@ start_host() {
 	make_overlay_image "$overlay_image" $((4 * 1024 * 1024))
 	# we choose alsa - otherwise pulseaudio errors (or warnings?) will occour
 	export QEMU_AUDIO_DRV=alsa
-	local vnc_port="$(get_next_free_port 5900)"
+	local vnc_port="$(get_next_free_port "$VNC_OFFSET")"
 	echo "$vnc_port" > $(get_host_vncportfile "$name")
-	local vnc_port_offset=$((vnc_port-5900))
 	"$qemu_bin" -name "$name" \
 		-m "$HOST_MEMORY" -snapshot \
-		-display vnc=:$vnc_port_offset \
+		-display "vnc=:$((vnc_port-VNC_OFFSET))" \
 		$networks \
 		-drive "file=$rootfs,snapshot=on" \
 		-drive "file=$overlay_image" \

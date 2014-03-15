@@ -13,8 +13,6 @@ HOST_MEMORY=24
 RUN_DIR="$BASE_DIR/run"
 HOST_DIR="$RUN_DIR/host"
 NETWORK_DIR="$RUN_DIR/net"
-SPICE_PORT_BASE=6100
-SPICE_PASSWORD=foo
 
 QEMU_BIN="${QEMU_BIN:-$(which qemu)}"
 QEMU_ARGS=
@@ -108,9 +106,13 @@ start_host() {
 	local name="$1"
 	local arch="$2"
 	local rootfs="$3"
+	# no binaries? try to download them ...
+	test ! -e "$rootfs" && echo >&2 "No root filesystem found ($rootfs) - trying to download ..." && "$0" download
+	test ! -e "$rootfs" && echo >&2 "Could not find the root filesystem ($roots) - aborting ..." && return 1
 	local kernel="$4"
-	shift 5
+	shift 4
 	local qemu_bin="$(get_qemu_bin "$arch")"
+	test ! -e "$qemu_bin" && echo >&2 "Could not find '$qemu_bin' - aborting ..." && return 1
 	local networks="$(get_network_configs 0 "$@")"
 	local pidfile="$(get_host_pidfile "$name")"
 	local qemu_args="$QEMU_ARGS"
@@ -275,14 +277,13 @@ EOF
 		 done
 		;;
 	start-host)
-		vm_id="$1"
-		name="$2"
-		version="$3"
-		arch="$4"
-		shift 4
+		name="$1"
+		version="$2"
+		arch="$3"
+		shift 3
 		rootfs="$(get_firmware_image "$arch" "$version")"
 		kernel="$(get_firmware_kernel "$arch" "$version")"
-		start_host "$name" "$arch" "$rootfs" "$kernel" "$vm_id" "$@"
+		start_host "$name" "$arch" "$rootfs" "$kernel" "$@"
 		;;
 	stop-host)
 		name="$1"
@@ -317,10 +318,10 @@ EOF
 	stop-net)
 		name="$1"
 		pidfile="$(get_network_pidfile "$name")"
-		piddir="$(dirname "$pidfile")"
+		netdir="$(dirname "$pidfile")"
 		test -e "$pidfile" && pkill --pidfile "$pidfile"
 		rm -f "$pidfile"
-		test -d "$piddir" && rmdir --ignore-fail-on-non-empty "$piddir"
+		test -d "$netdir" && rmdir --ignore-fail-on-non-empty "$netdir"
 		;;
 	command)
 		serial_command "$@"
@@ -334,7 +335,8 @@ EOF
 		for pidfile in $(get_host_pidfiles); do
 			pid="$(cat "$pidfile")"
 			host="$(basename "$(dirname "$pidfile")")" 
-			pgrep "qemu" | grep -q "^$pid$" && echo "Host $host running"
+			vnc_port="$(cat "$(get_host_vncportfile "$host")")"
+			pgrep "qemu" | grep -q "^$pid$" && echo "host=$host pid=$pid vnc_port=$vnc_port"
 		 done
 		;;
 	status-nets)
@@ -342,7 +344,7 @@ EOF
 			pid="$(cat "$pidfile")"
 			network="$(basename "$pidfile")" 
 			network="${network%.pid}"
-			pgrep "vde_" | grep -q "^$pid$" && echo "Net $network running"
+			pgrep "vde_" | grep -q "^$pid$" && echo "net=$network pid=$pid"
 		 done
 		;;
 	status)
@@ -352,8 +354,8 @@ EOF
 	help|--help)
 		echo "Syntax: $(basename "$0")"
 		echo "		download"
-		echo "		start-host	ID	NAME	VERSION	ARCH	[[NET_NAME MAC] ...]"
-		echo "		stop-host	ID"
+		echo "		start-host	NAME	VERSION	ARCH	[[NET_NAME MAC] ...]"
+		echo "		stop-host	NAME"
 		echo "		prepare-host	NAME"
 		echo "		start-net	TYPE	NAME"
 		echo "		stop-net	NAME"

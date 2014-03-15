@@ -5,6 +5,7 @@ set -eu
 BASE_DIR=$(cd "$(dirname "$0")/.."; pwd)
 CONTROL_BIN="$BASE_DIR/bin/te-control.sh"
 VERSION_STABLE="0.4-5"
+MGMT_NETWORK_PREFIX="172.16.137"
 
 
 ACTION=help
@@ -16,13 +17,13 @@ test $# -gt 0 && ACTION=$1 && shift
 
 case "$ACTION" in
 	start)
-		"$CONTROL_BIN" start-net switch olsr1
-		"$CONTROL_BIN" start-net switch olsr2
-		"$CONTROL_BIN" start-net switch net_user
-		"$CONTROL_BIN" start-net switch net_wifidog
-		"$CONTROL_BIN" start-net switch uplink
-		"$CONTROL_BIN" start-net virtual mgmt
-		"$CONTROL_BIN" start-net capture uplink eth0
+		"$CONTROL_BIN" start-net olsr1 switch
+		"$CONTROL_BIN" start-net olsr2 switch
+		"$CONTROL_BIN" start-net net_user switch
+		"$CONTROL_BIN" start-net net_wifidog switch
+		"$CONTROL_BIN" start-net uplink switch
+		"$CONTROL_BIN" start-net mgmt virtual "$MGMT_NETWORK_PREFIX.1" 255.255.255.0
+		"$CONTROL_BIN" start-net uplink capture eth0
 		"$CONTROL_BIN" start-host ap1.201 "$VERSION_STABLE" x86 \
 				olsr1 "DD:4B:E3:A7:98:F9" \
 				uplink "46:98:2C:8A:46:50" \
@@ -42,20 +43,29 @@ case "$ACTION" in
 		"$CONTROL_BIN" start-host client_wifidog "$VERSION_STABLE" x86 \
 				net_wifidog "A1:D8:AC:59:91:8D" \
 				mgmt "B6:78:93:BC:21:77"
-		# wait for bootup
-		echo "Waiting for bootup ..."
-		sleep 10
 		"$0" configure
 		;;
 	configure)
+		# value determined by testing - increase in case of failures
+		min_uptime=30
+		"$CONTROL_BIN" wait-host-boot ap1.201 "$min_uptime"
+		"$CONTROL_BIN" command ap1.201 "ifconfig eth3 "$MGMT_NETWORK_PREFIX.11" netmask 255.255.255.0 up"
+		"$CONTROL_BIN" wait-host-boot ap1.202 "$min_uptime"
+		"$CONTROL_BIN" command ap1.202 "ifconfig eth2 "$MGMT_NETWORK_PREFIX.12" netmask 255.255.255.0 up"
+		"$CONTROL_BIN" wait-host-boot ap1.203 "$min_uptime"
+		"$CONTROL_BIN" command ap1.203 "ifconfig eth2 "$MGMT_NETWORK_PREFIX.13" netmask 255.255.255.0 up"
+		"$CONTROL_BIN" wait-host-boot client_user "$min_uptime"
+		"$CONTROL_BIN" command client_user "ifconfig eth1 "$MGMT_NETWORK_PREFIX.14" netmask 255.255.255.0 up"
+		"$CONTROL_BIN" wait-host-boot client_wifidog "$min_uptime"
+		"$CONTROL_BIN" command client_wifidog "ifconfig eth1 "$MGMT_NETWORK_PREFIX.15" netmask 255.255.255.0 up"
 		# configure hosts
-		config_dir="$BASE_DIR/setup.d"
-		for name in ap1.201 ap1.202 ap1.203 client_user client_wifidog; do
-			echo "Configuring $name ..."
-			"$CONTROL_BIN" apply-config "$name" "$config_dir/_default"
-			"$CONTROL_BIN" apply-config "$name" "$config_dir/$name"
-			"$CONTROL_BIN" command "$name" reboot
-		 done
+		#config_dir="$BASE_DIR/setup.d"
+		#for name in ap1.201 ap1.202 ap1.203 client_user client_wifidog; do
+		#	echo "Configuring $name ..."
+		#	"$CONTROL_BIN" apply-config "$name" "$config_dir/_default"
+		#	"$CONTROL_BIN" apply-config "$name" "$config_dir/$name"
+		#	"$CONTROL_BIN" command "$name" reboot
+		# done
 		;;
 	stop)
 		for name in ap1.201 ap1.202 ap1.203 client_user client_wifidog; do

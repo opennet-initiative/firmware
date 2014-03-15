@@ -177,6 +177,8 @@ create_network_capture() {
 
 create_network_virtual() {
 	local name="$1"
+	local ip="$2"
+	local netmask="$3"
 	local pidfile="$(get_network_pidfile "$name")"
 	local gain_root=
 	test -e "$pidfile" && return
@@ -185,14 +187,7 @@ create_network_virtual() {
 	test "$(id -u)" != 0 && gain_root="$SUDO_BIN"
 	vde_switch --daemon "--sock=$socket" "--pidfile=$pidfile"
 	$gain_root vde_plug2tap --daemon "--sock=$socket" "$name"
-}
-
-is_remote_process_running() {
-	local name="$1"
-	local socket="UNIX-CONNECT:$(get_serial_socket "$name")"
-	local stdin_file=/tmp/remote_control.stdin
-	echo " test -e '$stdin_file' || echo 'not' 'found'" | socat STDIO "$socket" | grep -q "not found" && return 1
-	return 0
+	$gain_root ifconfig "$name" "$ip" netmask "$netmask" up
 }
 
 serial_command() {
@@ -201,54 +196,27 @@ serial_command() {
 	local read_stdin=
 	test $# -gt 0 && test "$1" = "-" && read_stdin=1 && shift
 	local socket="UNIX-CONNECT:$(get_serial_socket "$name")"
-	local monitor="UNIX-CONNECT:$(get_monitor_socket "$name")"
-	local stdin_file=/tmp/remote_control.stdin
-	local stdout_file=/tmp/remote_control.stdout
-	local stderr_file=/tmp/remote_control.stderr
-	echo "sendkey ctrl-c" | socat STDIO "$(get_monitor_socket "$name")" >/dev/null
-	echo " PS1=" | socat STDIO "$socket" >/dev/null
-	if test -n "$read_stdin"; then
-		cat -
-	 else
-		echo -n
- 	 fi | send_stream_to_host_file "$name" "$stdin_file"
-	echo | socat -t 0 STDIO "$socket" >/dev/null
-	echo "    $@ <'$stdin_file' >'$stdout_file' 2>'$stderr_file'; rm '$stdin_file'" \
-		| socat -t 0 STDIO "$socket" >/dev/null
-	return
-	while is_remote_process_running "$name"; do
-		sleep 0.3
-		echo -n "." >&2
-	 done
-	get_stream_from_host_file "$name" "$stdout_file"
-	get_stream_from_host_file "$name" "$stderr_file" >&2
+	# flush the current output buffer and clear the prompt
+	(
+		echo
+		echo "PS1="
+		echo
+		sleep 0.5
+	) | socat -t 0 STDIO "$socket" >/dev/null 2>/dev/null
+	(
+		if test -n "$read_stdin"; then
+			cat -
+		 else
+			echo "$@"
+		 fi
+		sleep 0.5
+	) | socat -t 0 STDIO "$socket" | sed 1d
 }
 
 copy_dir_to_host() {
 	local dir="$1"
 	local name="$2"
 	tar cf - -C "$dir" . | serial_command "$name" - "tar -C / xf -"
-}
-
-send_stream_to_host_file() {
-	local name="$1"
-	local socket="UNIX-CONNECT:$(get_serial_socket "$name")"
-	local target_file="$2"
-	local tmpfile="$(mktemp)"
-	cat >"$tmpfile"
-	local size="$(cat "$tmpfile" | wc -c)"
-	# this does not seem to work safely for special characters
-	# sadly "uudecode" is not available on the other side
-	echo " dd 'of=$target_file' bs=1 count=$size" | socat STDIO "$socket" >/dev/null
-	cat "$tmpfile" | socat STDIO "$socket" >/dev/null
-	rm -f "$tmpfile"
-}
-
-get_stream_from_host_file() {
-	local name="$1"
-	local socket="UNIX-CONNECT:$(get_serial_socket "$name")"
-	local source_file="$2"
-	echo " " "cat '$source_file'" | socat STDIO "$socket" | sed 1d
 }
 
 
@@ -275,6 +243,20 @@ EOF
 			cp -r "$1/." "$overlay_dir"
 		 done
 		;;
+	wait-host-boot)
+		# wait until a host is ready for serial commands
+		name="$1"
+		timeout="$2"
+		counter=0
+		until serial_command "$name" pwd | grep -q "^/"; do
+			sleep 1
+			counter=$((counter+1))
+			test "$counter" -ge "$timeout" && break
+		 done
+		# wait a bit - otherwise network interfaces are not available
+		uptime="$(serial_command "$name" "cat /proc/uptime" | cut -f 1 -d .)"
+		until test "$uptime" -ge "$timeout"; do sleep 1; uptime="$((uptime+1))"; done
+		;;
 	start-host)
 		name="$1"
 		version="$2"
@@ -295,8 +277,8 @@ EOF
 		test -d "$hostdir" && rmdir --ignore-fail-on-non-empty "$hostdir"
 		;;
 	start-net)
-		type="$1"
-		name="$2"
+		name="$1"
+		type="$2"
 		shift 2
 		case "$type" in
 			switch)
@@ -306,7 +288,7 @@ EOF
 				create_network_capture "$name" "$1"
 				;;
 			virtual)
-				create_network_virtual "$name"
+				create_network_virtual "$name" "$1" "$2"
 				;;
 			*)
 				echo "Invalid network type: $type"
@@ -356,8 +338,9 @@ EOF
 		echo "		start-host	NAME	VERSION	ARCH	[[NET_NAME MAC] ...]"
 		echo "		stop-host	NAME"
 		echo "		prepare-host	NAME"
-		echo "		start-net	TYPE	NAME"
+		echo "		start-net	NAME	[switch | capture INTERFACE | virtual IP NETMASK]"
 		echo "		stop-net	NAME"
+		echo "		wait-host-boot	NAME"
 		echo "		command		NAME	COMMAND"
 		echo "		apply-config	NAME	CONFIG_DIR"
 		echo "		status-hosts"
@@ -372,5 +355,3 @@ EOF
 
 exit 0
 
-		type="$1"
-		name="$2"

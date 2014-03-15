@@ -119,7 +119,7 @@ start_host() {
 	if test -e "$pidfile"; then
 		pid="$(cat "$pidfile")"
 		# the process exists -> quit silently
-		test -n "$pid" -a -d "/proc/$pid" && echo >2 "The host is already running" && return
+		test -n "$pid" -a -d "/proc/$pid" && echo >&2 "The host is already running" && return
 		# remove stale pid file
 		rm "$pidfile"
 	 fi

@@ -76,7 +76,7 @@ make_overlay_image() {
 
 get_next_free_port() {
 	local port="$1"
-	while ss -l | awk '{print $5}' | grep -q ":$port$"; do
+	while ss -l | awk '{print $4}' | grep -q ":$port$"; do
 		port=$((port+1))
 	done
 	echo "$port"

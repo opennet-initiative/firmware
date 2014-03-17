@@ -14,6 +14,7 @@ RUN_DIR="$BASE_DIR/run"
 HOST_DIR="$RUN_DIR/host"
 NETWORK_DIR="$RUN_DIR/net"
 VNC_BIN="${VNC_BIN:-ssvncviewer}"
+QEMU_KEYMAP="${QEMU_KEYMAP:-de}"
 
 QEMU_BIN="${QEMU_BIN:-$(which qemu)}"
 QEMU_ARGS=
@@ -127,6 +128,7 @@ start_host() {
 	"$qemu_bin" -name "$name" \
 		-m "$HOST_MEMORY" -snapshot \
 		-display "vnc=unix:$(get_host_vnc_socket "$name")" \
+		-k "$QEMU_KEYMAP" \
 		$networks \
 		-drive "file=$rootfs,snapshot=on" \
 		-drive "file=$overlay_image" \
@@ -137,7 +139,6 @@ start_host() {
 		-monitor chardev:monitor \
 		-pidfile "$pidfile" \
 		-daemonize \
-		-vga none \
 		$qemu_args
 	get_host_sockets "$name" | while read socket; do
 		chmod go-rwx "$socket"

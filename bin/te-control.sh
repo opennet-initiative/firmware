@@ -13,7 +13,7 @@ HOST_MEMORY=24
 RUN_DIR="$BASE_DIR/run"
 HOST_DIR="$RUN_DIR/host"
 NETWORK_DIR="$RUN_DIR/net"
-VNC_OFFSET=5900
+VNC_BIN="${VNC_BIN:-ssvncviewer}"
 
 QEMU_BIN="${QEMU_BIN:-$(which qemu)}"
 QEMU_ARGS=
@@ -53,16 +53,17 @@ get_firmware_image() {
 }
 
 get_host_dir() { echo "$HOST_DIR/$1"; }
-get_serial_socket() { echo "$(get_host_dir "$1")/serial"; }
-get_monitor_socket() { echo "$(get_host_dir "$1")/monitor"; }
-get_overlay_image() { echo "$(get_host_dir "$1")/overlay.img"; }
+get_host_serial_socket() { echo "$(get_host_dir "$1")/serial.socket"; }
+get_host_monitor_socket() { echo "$(get_host_dir "$1")/monitor.socket"; }
+get_host_overlay_image() { echo "$(get_host_dir "$1")/overlay.img"; }
+get_host_vnc_socket() { echo "$(get_host_dir "$1")/vnc.socket"; }
+get_host_sockets() { get_host_serial_socket "$1"; get_host_monitor_socket "$1"; get_host_vnc_socket "$1"; }
 get_network_socket() { echo "$NETWORK_DIR/${1}.socket"; }
 get_network_pidfile() { echo "$NETWORK_DIR/${1}.pid"; }
 get_network_pidfiles() { find "$NETWORK_DIR" -mindepth 1 -maxdepth 1 -type f -name "*.pid" | sort; }
 get_host_pidfile() { echo "$(get_host_dir "$1")/pid"; }
 get_host_pidfiles() { find "$HOST_DIR" -mindepth 2 -maxdepth 2 -type f -name "pid" | sort; }
-get_overlay_dir() { echo "$HOST_DIR/overlay.d"; }
-get_host_vncportfile() { echo "$(get_host_dir "$1")/vncport"; }
+get_host_overlay_dir() { echo "$HOST_DIR/overlay.d"; }
 
 make_overlay_image() {
 	local overlay_image="$1"
@@ -72,14 +73,6 @@ make_overlay_image() {
 	test -z "$image_root" && image_root="$(mktemp --directory)"
 	/usr/sbin/mkfs.jffs2 "--pad=$bytes" "--root=$image_root" >"$overlay_image"
 	rmdir "$image_root"
-}
-
-get_next_free_port() {
-	local port="$1"
-	while ss -l | awk '{print $4}' | grep -q ":$port$"; do
-		port=$((port+1))
-	done
-	echo "$port"
 }
 
 get_qemu_bin() {
@@ -127,30 +120,28 @@ start_host() {
 	# see http://wiki.openwrt.org/doc/howto/qemu
 	test "$arch" = "ar71xx" && qemu_args="$qemu_args -M realview-eb-mpcore"
 	# create overlay directory image
-	local overlay_image="$(get_overlay_image "$name")"
+	local overlay_image="$(get_host_overlay_image "$name")"
 	make_overlay_image "$overlay_image" $((4 * 1024 * 1024))
 	# we choose alsa - otherwise pulseaudio errors (or warnings?) will occour
 	export QEMU_AUDIO_DRV=alsa
-	local vnc_port="$(get_next_free_port "$VNC_OFFSET")"
-	echo "$vnc_port" > $(get_host_vncportfile "$name")
 	"$qemu_bin" -name "$name" \
 		-m "$HOST_MEMORY" -snapshot \
-		-display "vnc=:$((vnc_port-VNC_OFFSET))" \
+		-display "vnc=unix:$(get_host_vnc_socket "$name")" \
 		$networks \
 		-drive "file=$rootfs,snapshot=on" \
 		-drive "file=$overlay_image" \
 		-kernel "$kernel" -append "root=/dev/sda noapic"  \
-		-chardev "socket,id=console,path=$(get_serial_socket "$name"),server,nowait" \
-		-chardev "socket,id=monitor,path=$(get_monitor_socket "$name"),server,nowait" \
+		-chardev "socket,id=console,path=$(get_host_serial_socket "$name"),server,nowait" \
+		-chardev "socket,id=monitor,path=$(get_host_monitor_socket "$name"),server,nowait" \
 		-serial chardev:console \
 		-monitor chardev:monitor \
 		-pidfile "$pidfile" \
 		-daemonize \
+		-vga none \
 		$qemu_args
-
-		#-serial "unix:$(get_serial_socket "$name"),server,nowait" \
-		#-vga none \
-		#-nographic \
+	get_host_sockets "$name" | while read socket; do
+		chmod go-rwx "$socket"
+	 done
 }
 
 
@@ -195,7 +186,7 @@ serial_command() {
 	shift
 	local read_stdin=
 	test $# -gt 0 && test "$1" = "-" && read_stdin=1 && shift
-	local socket="UNIX-CONNECT:$(get_serial_socket "$name")"
+	local socket="UNIX-CONNECT:$(get_host_serial_socket "$name")"
 	# flush the current output buffer and clear the prompt
 	(
 		echo
@@ -236,7 +227,7 @@ EOF
 		;;
 	prepare-host)
 		name="$1"
-		overlay_dir="$(get_overlay_dir "$name")"
+		overlay_dir="$(get_host_overlay_dir "$name")"
 		rm -rf "$overlay_dir"
 		mkdir -p "$overlay_dir"
 		while test $# -gt 0; do
@@ -269,11 +260,13 @@ EOF
 	stop-host)
 		name="$1"
 		pidfile="$(get_host_pidfile "$name")"
-		overlayfile="$(get_overlay_image "$name")"
-		vncportfile="$(get_host_vncportfile "$name")"
+		overlayfile="$(get_host_overlay_image "$name")"
 		hostdir="$(dirname "$pidfile")"
 		test -e "$pidfile" && pkill --pidfile "$pidfile" || true
-		rm -f "$pidfile" "$vncportfile" "$overlayfile" "$(get_serial_socket "$name")"
+		rm -f "$pidfile" "$overlayfile"
+		get_host_sockets "$name" | while read socket; do
+			rm -f "$socket"
+		 done
 		test -d "$hostdir" && rmdir --ignore-fail-on-non-empty "$hostdir"
 		;;
 	start-net)
@@ -304,6 +297,10 @@ EOF
 		rm -f "$pidfile"
 		test -d "$netdir" && rmdir --ignore-fail-on-non-empty "$netdir"
 		;;
+	vnc)
+		name="$1"
+		"$VNC_BIN" "$(get_host_vnc_socket "$name")"
+		;;
 	command)
 		serial_command "$@"
 		;;
@@ -316,8 +313,8 @@ EOF
 		for pidfile in $(get_host_pidfiles); do
 			pid="$(cat "$pidfile")"
 			host="$(basename "$(dirname "$pidfile")")" 
-			vnc_port="$(cat "$(get_host_vncportfile "$host")")"
-			pgrep "qemu" | grep -q "^$pid$" && echo "host=$host pid=$pid vnc_port=$vnc_port"
+			vnc_socket="$(get_host_vnc_socket "$host")"
+			pgrep "qemu" | grep -q "^$pid$" && echo "host=$host pid=$pid vnc_socket=$vnc_socket"
 		 done
 		;;
 	status-nets)

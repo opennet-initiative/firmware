@@ -1,0 +1,4 @@
+tests/ssh_key.pub
+tests/ssh_key.sec
+.*.swp
+*.pyc

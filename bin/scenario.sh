@@ -17,13 +17,21 @@ test $# -gt 0 && ACTION=$1 && shift
 
 case "$ACTION" in
 	start)
+		uplink="$(ip route get 1.1.1.1 | head -1 | sed 's/^.* dev \([^ ]\+\) .*/\1/')"
+		if test -z "$uplink"; then
+			echo >&2 "WARNUNG: es wurde keine default-Route gefunden - hoffen wir das Beste ..."
+			uplink=eth0
+		 fi
+		echo "Ermitteltes Gateway-Interface: $uplink"
+		echo "Initialisiere die Netzwerkschnittstellen ..."
 		"$CONTROL_BIN" start-net olsr1 switch
 		"$CONTROL_BIN" start-net olsr2 switch
 		"$CONTROL_BIN" start-net net_user switch
 		"$CONTROL_BIN" start-net net_wifidog switch
 		"$CONTROL_BIN" start-net uplink switch
 		"$CONTROL_BIN" start-net mgmt virtual "$MGMT_NETWORK_PREFIX.1" 255.255.255.0
-		"$CONTROL_BIN" start-net uplink capture eth0
+		"$CONTROL_BIN" start-net uplink capture "$uplink"
+		echo "Starte die Hosts ..."
 		"$CONTROL_BIN" start-host ap1.201 "$VERSION_STABLE" x86 \
 				olsr1 "DD:4B:E3:A7:98:F9" \
 				uplink "46:98:2C:8A:46:50" \
@@ -48,6 +56,7 @@ case "$ACTION" in
 	configure)
 		# value determined by testing - increase in case of failures
 		min_uptime=40
+		echo "Konfiguriere die Verwaltungsschnittstelle der Hosts ..."
 		"$CONTROL_BIN" wait-host-boot ap1.201 "$min_uptime"
 		"$CONTROL_BIN" host-configure-management ap1.201 eth3 "$MGMT_NETWORK_PREFIX.11" 255.255.255.0
 		"$CONTROL_BIN" wait-host-boot ap1.202 "$min_uptime"
@@ -68,9 +77,11 @@ case "$ACTION" in
 		# done
 		;;
 	stop)
+		echo "Stoppe die Hosts ..."
 		for name in ap1.201 ap1.202 ap1.203 client_user client_wifidog; do
 			"$CONTROL_BIN" stop-host "$name"
 		 done
+		echo "Entferne die Netzwerkschnittstellen ..."
 		for net in olsr1 olsr2 net_user net_wifidog uplink mgmt; do
 			"$CONTROL_BIN" stop-net "$net"
 		 done

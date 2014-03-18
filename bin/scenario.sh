@@ -47,17 +47,17 @@ case "$ACTION" in
 		;;
 	configure)
 		# value determined by testing - increase in case of failures
-		min_uptime=30
+		min_uptime=40
 		"$CONTROL_BIN" wait-host-boot ap1.201 "$min_uptime"
-		"$CONTROL_BIN" command ap1.201 "ifconfig eth3 "$MGMT_NETWORK_PREFIX.11" netmask 255.255.255.0 up"
+		"$CONTROL_BIN" host-configure-management ap1.201 eth3 "$MGMT_NETWORK_PREFIX.11" 255.255.255.0
 		"$CONTROL_BIN" wait-host-boot ap1.202 "$min_uptime"
-		"$CONTROL_BIN" command ap1.202 "ifconfig eth2 "$MGMT_NETWORK_PREFIX.12" netmask 255.255.255.0 up"
+		"$CONTROL_BIN" host-configure-management ap1.202 eth2 "$MGMT_NETWORK_PREFIX.12" 255.255.255.0
 		"$CONTROL_BIN" wait-host-boot ap1.203 "$min_uptime"
-		"$CONTROL_BIN" command ap1.203 "ifconfig eth2 "$MGMT_NETWORK_PREFIX.13" netmask 255.255.255.0 up"
+		"$CONTROL_BIN" host-configure-management ap1.203 eth2 "$MGMT_NETWORK_PREFIX.13" 255.255.255.0
 		"$CONTROL_BIN" wait-host-boot client_user "$min_uptime"
-		"$CONTROL_BIN" command client_user "ifconfig eth1 "$MGMT_NETWORK_PREFIX.14" netmask 255.255.255.0 up"
+		"$CONTROL_BIN" host-configure-management client_user eth1 "$MGMT_NETWORK_PREFIX.14" 255.255.255.0
 		"$CONTROL_BIN" wait-host-boot client_wifidog "$min_uptime"
-		"$CONTROL_BIN" command client_wifidog "ifconfig eth1 "$MGMT_NETWORK_PREFIX.15" netmask 255.255.255.0 up"
+		"$CONTROL_BIN" host-configure-management client_wifidog eth1 "$MGMT_NETWORK_PREFIX.15" 255.255.255.0
 		# configure hosts
 		#config_dir="$BASE_DIR/setup.d"
 		#for name in ap1.201 ap1.202 ap1.203 client_user client_wifidog; do

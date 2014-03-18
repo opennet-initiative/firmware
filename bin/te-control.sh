@@ -23,16 +23,18 @@ test "0" != "${USE_KVM:-1}" && QEMU_ARGS="$QEMU_ARGS -enable-kvm"
 
 download_firmware() {
 	local target="$1"
-	local tmp_target="${target}.part"
 	test -e "$target" && return 0
 	# cut the last three tokens of the full filename (version/arch/filename)
 	local url_relative="$(echo "$target" | tr / '\n' | tail -3 | tr '\n' /)"
 	# remove trailing slash
 	url_relative="${url_relative%/}"
 	mkdir -p "$FW_BASE_DIR/$version/$arch"
-	wget --continue -e robots=off --user-agent=gecko -O "$tmp_target" "$FW_DOWNLOAD_BASE_URL/$url_relative"
+	local wget_options="-e robots=off --user-agent=gecko -O -"
+	if ! wget $wget_options "$FW_DOWNLOAD_BASE_URL/$url_relative" >"$target"; then
+		# alternatively try to download the compressed image (e.g. ext4.gz)
+		wget $wget_options "$FW_DOWNLOAD_BASE_URL/${url_relative}.gz" | zcat >"$target"
+	 fi
 	# delay a bit - otherwise we may get banned
-	mv "$tmp_target" "$target"
 }
 
 get_firmware_kernel() {
@@ -48,7 +50,7 @@ get_firmware_image() {
 	local arch="$1"
 	local version="$2"
 	local base_dir="$FW_BASE_DIR/$version/$arch"
-	test "$arch" = "x86" && echo "$base_dir/openwrt-x86-generic-rootfs-squashfs.img" && return
+	test "$arch" = "x86" && echo "$base_dir/openwrt-x86-generic-rootfs-ext4.img" && return
 	test "$arch" = "ar71xx" && echo "$base_dir/openwrt-ar71xx-generic-root.squashfs" && return
 	echo >&2 "Unknwon architecture: $arch"
 }
@@ -56,7 +58,6 @@ get_firmware_image() {
 get_host_dir() { echo "$HOST_DIR/$1"; }
 get_host_serial_socket() { echo "$(get_host_dir "$1")/serial.socket"; }
 get_host_monitor_socket() { echo "$(get_host_dir "$1")/monitor.socket"; }
-get_host_overlay_image() { echo "$(get_host_dir "$1")/overlay.img"; }
 get_host_vnc_socket() { echo "$(get_host_dir "$1")/vnc.socket"; }
 get_host_sockets() { get_host_serial_socket "$1"; get_host_monitor_socket "$1"; get_host_vnc_socket "$1"; }
 get_network_socket() { echo "$NETWORK_DIR/${1}.socket"; }
@@ -64,17 +65,6 @@ get_network_pidfile() { echo "$NETWORK_DIR/${1}.pid"; }
 get_network_pidfiles() { find "$NETWORK_DIR" -mindepth 1 -maxdepth 1 -type f -name "*.pid" | sort; }
 get_host_pidfile() { echo "$(get_host_dir "$1")/pid"; }
 get_host_pidfiles() { find "$HOST_DIR" -mindepth 2 -maxdepth 2 -type f -name "pid" | sort; }
-get_host_overlay_dir() { echo "$HOST_DIR/overlay.d"; }
-
-make_overlay_image() {
-	local overlay_image="$1"
-	local bytes="$2"
-	local image_root=
-	test $# -gt 2 && image_root="$3"
-	test -z "$image_root" && image_root="$(mktemp --directory)"
-	/usr/sbin/mkfs.jffs2 "--pad=$bytes" "--root=$image_root" >"$overlay_image"
-	rmdir "$image_root"
-}
 
 get_qemu_bin() {
 	local arch="$1"
@@ -102,7 +92,7 @@ start_host() {
 	local rootfs="$3"
 	# no binaries? try to download them ...
 	test ! -e "$rootfs" && echo >&2 "No root filesystem found ($rootfs) - trying to download ..." && "$0" download
-	test ! -e "$rootfs" && echo >&2 "Could not find the root filesystem ($roots) - aborting ..." && return 1
+	test ! -e "$rootfs" && echo >&2 "Could not find the root filesystem ($rootfs) - aborting ..." && return 1
 	local kernel="$4"
 	shift 4
 	local qemu_bin="$(get_qemu_bin "$arch")"
@@ -120,18 +110,15 @@ start_host() {
 	mkdir -p "$(get_host_dir "$name")"
 	# see http://wiki.openwrt.org/doc/howto/qemu
 	test "$arch" = "ar71xx" && qemu_args="$qemu_args -M realview-eb-mpcore"
-	# create overlay directory image
-	local overlay_image="$(get_host_overlay_image "$name")"
-	make_overlay_image "$overlay_image" $((4 * 1024 * 1024))
 	# we choose alsa - otherwise pulseaudio errors (or warnings?) will occour
 	export QEMU_AUDIO_DRV=alsa
 	"$qemu_bin" -name "$name" \
-		-m "$HOST_MEMORY" -snapshot \
+		-m "$HOST_MEMORY" \
+		-snapshot \
 		-display "vnc=unix:$(get_host_vnc_socket "$name")" \
 		-k "$QEMU_KEYMAP" \
 		$networks \
 		-drive "file=$rootfs,snapshot=on" \
-		-drive "file=$overlay_image" \
 		-kernel "$kernel" -append "root=/dev/sda noapic"  \
 		-chardev "socket,id=console,path=$(get_host_serial_socket "$name"),server,nowait" \
 		-chardev "socket,id=monitor,path=$(get_host_monitor_socket "$name"),server,nowait" \
@@ -182,6 +169,18 @@ create_network_virtual() {
 	$gain_root ifconfig "$name" "$ip" netmask "$netmask" up
 }
 
+configure_management_interface() {
+	local name="$1"
+	local interface="$2"
+	local ip="$3"
+	local netmask="$4"
+	# configure IP
+	serial_command "$name" "ifconfig '$interface' '$ip' netmask '$netmask' up"
+	# allow traffic
+	serial_command "$name" "iptables -I INPUT -i '$interface' -j ACCEPT"
+	serial_command "$name" "iptables -I OUTPUT -o '$interface' -j ACCEPT"
+}
+
 serial_command() {
 	local name="$1"
 	shift
@@ -226,15 +225,6 @@ case "$ACTION" in
 			x86	0.4-5
 EOF
 		;;
-	prepare-host)
-		name="$1"
-		overlay_dir="$(get_host_overlay_dir "$name")"
-		rm -rf "$overlay_dir"
-		mkdir -p "$overlay_dir"
-		while test $# -gt 0; do
-			cp -r "$1/." "$overlay_dir"
-		 done
-		;;
 	wait-host-boot)
 		# wait until a host is ready for serial commands
 		name="$1"
@@ -261,10 +251,9 @@ EOF
 	stop-host)
 		name="$1"
 		pidfile="$(get_host_pidfile "$name")"
-		overlayfile="$(get_host_overlay_image "$name")"
 		hostdir="$(dirname "$pidfile")"
 		test -e "$pidfile" && pkill --pidfile "$pidfile" || true
-		rm -f "$pidfile" "$overlayfile"
+		rm -f "$pidfile"
 		get_host_sockets "$name" | while read socket; do
 			rm -f "$socket"
 		 done
@@ -304,6 +293,13 @@ EOF
 		;;
 	command)
 		serial_command "$@"
+		;;
+	host-configure-management)
+		name="$1"
+		interface="$2"
+		ip="$3"
+		netmask="$4"
+		configure_management_interface "$name" "$interface" "$ip" "$netmask"
 		;;
 	apply-config)
 		name="$1"

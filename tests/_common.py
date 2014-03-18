@@ -89,10 +89,13 @@ class OpennetTest(unittest.TestCase):
     test_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
     auth_token_regex = r"(/luci/;stok=[0-9a-z]+/)"
 
+    def _is_auth_needed(self, browser):
+        return "Benutzernamen und Passwort" in browser.contents
+
     def _login(self, browser, passwords=None, force=False):
         if passwords is None:
             passwords = (self.default_password, self.new_password)
-        if "Abmelden" in browser.contents:
+        if not self._is_auth_needed(browser):
             if not force:
                 return True
             else:
@@ -102,7 +105,7 @@ class OpennetTest(unittest.TestCase):
             form.getControl(name="username").value = self.username
             form.getControl(name="password").value = password
             form.getControl(label="Anmelden").click()
-            if "Abmelden" in browser.contents:
+            if not self._is_auth_needed(browser):
                 return True
         else:
             return False

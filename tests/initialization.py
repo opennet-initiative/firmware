@@ -1,3 +1,5 @@
+import re
+
 import _common
 
 
@@ -55,6 +57,27 @@ class BasicSetup(_common.AllHostsTest):
             result = self._execute("uci show on-core")
             self.assertTrue(result.success and not result.stdout.is_empty(),
                     "Die uci-Einstellungen fuer on-core fehlen: %s" % self.host)
+            result = self._execute("grep -qi opennet /etc/banner")
+            self.assertTrue(result.success, "Die Datei /etc/banner " + \
+                    "enthaelt keinen Text 'opennet': %s" % self.host)
+
+    def test_20_set_opennet_id(self):
+        """ Setze die Opennet-ID (nur fuer APs) """
+        for self.host in self.hosts:
+            # Opennet-ID festlegen, falls "AP" (laut Namen)
+            ap_regex = r"^ap([0-9]\.[0-9]+)$"
+            ap_match = re.search(ap_regex, self.host.name)
+            if not ap_match:
+                continue
+            ap_id = ap_match.groups()[0]
+            browser = self.host.get_browser("/cgi-bin/luci/opennet/opennet_1/funknetz")
+            # Anmeldung
+            result = self._login(browser)
+            self.assertTrue(self._login(browser),
+                    "Anmeldung schlug fehl: %s" % self.host)
+            form = browser.getForm()
+            form.getControl(name="form_id").value = ap_id
+            form.submit()
 
 
 if __name__ in ('main', '__main__'):

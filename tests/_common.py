@@ -1,5 +1,6 @@
 import time
 import os
+import re
 import unittest
 import paramiko
 from zope.testbrowser.browser import Browser
@@ -86,20 +87,35 @@ class OpennetTest(unittest.TestCase):
     default_password = "admin"
     new_password = "oni-admin"
     test_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+    auth_token_regex = r"(/luci/;stok=[0-9a-z]+/)"
 
-    def _login(self, browser, passwords=None):
+    def _login(self, browser, passwords=None, force=False):
         if passwords is None:
             passwords = (self.default_password, self.new_password)
         if "Abmelden" in browser.contents:
-            return True
+            if not force:
+                return True
+            else:
+                browser.open("/cgi-bin/luci/admin/logout")
         for password in passwords:
             form = browser.getForm()
             form.getControl(name="username").value = self.username
             form.getControl(name="password").value = password
-            form.submit()
+            form.getControl(label="Anmelden").click()
             if "Abmelden" in browser.contents:
                 return True
-        return False
+        else:
+            return False
+
+    def open_link(self, browser, url):
+        """ Oeffne eine neue URL unter Beibehaltung des luci-auth-Tokens
+        Beispiel-URL: http://172.16.137.11/cgi-bin/luci/;stok=1c50965d5a99cc47c507cc4e5cd207ed/opennet/opennet_2/
+        """
+        token_match = re.search(self.auth_token_regex, browser.url)
+        if token_match:
+            token = token_match.groups()[0]
+            url.replace("/luci/", token)
+        browser.open(url)
 
     def _get_ssh_key_filename(self, public=True):
         suffix = "pub" if public else "sec"

@@ -17,30 +17,31 @@ class BasicSetup(_common.AllHostsTest):
     def test_05_password(self):
         """ Setze das root-Passwort """
         for self.host in self.hosts:
-            url = "/cgi-bin/luci/admin/system/admin"
-            browser = self.host.get_browser(url)
+            browser = self.host.get_browser("/cgi-bin/luci/admin/system/admin")
             self.assertTrue(self._login(browser),
                     "Anmeldung schlug fehl: %s" % self.host)
             form = browser.getForm(name="cbi")
             form.getControl(name="cbid.system._pass.pw1").value = self.new_password
             form.getControl(name="cbid.system._pass.pw2").value = self.new_password
-            form.submit(name="cbi.apply")
+            form.getControl(name="cbi.apply").click()
             self.assertTrue("erfolgreich" in browser.contents,
                     "Passwortaenderung schlug fehl: %s" % self.host)
+            login_old_pw = self._login(browser, [self.default_password], force=True)
+            self.assertFalse(login_old_pw, "Anmeldung mit altem Passwort " + \
+                    "ist immer noch moeglich: %s" % self.host)
 
     def test_10_transmit_ssh_key(self):
         """ Importiere den lokalen SSH-Schluessel """
         pub_key = self._get_ssh_pub_key()
         for self.host in self.hosts:
-            url = "/cgi-bin/luci/admin/system/admin"
-            browser = self.host.get_browser(url)
+            browser = self.host.get_browser("/cgi-bin/luci/admin/system/admin")
             # Anmeldung
             self.assertTrue(self._login(browser),
                     "Anmeldung schlug fehl: %s" % self.host)
             # Schluessel importieren
             form = browser.getForm(name="cbi")
             form.getControl(name="cbid.dropbear._keys._data").value = pub_key
-            form.submit(name="cbi.apply")
+            form.getControl(name="cbi.apply").click()
             self.assertTrue(pub_key in browser.contents,
                     "SSH-Schluessel wurde nicht gespeichert: %s" % self.host)
             # Verbindungsaufbau

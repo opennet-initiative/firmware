@@ -11,6 +11,8 @@ _IP_PREFIX = "172.16.137."
 
 class Host(object):
 
+    ap_regex = r"^ap([0-9]\.[0-9]+)$"
+
     def __init__(self, name, ip_num):
         self.name = name
         self.ip = "%s%d" % (_IP_PREFIX, ip_num)
@@ -30,6 +32,10 @@ class Host(object):
         except IOError:
             return None
 
+    def get_opennet_ap_id(self):
+        ap_match = re.search(self.ap_regex, self.name)
+        return ap_match.groups()[0] if ap_match else None
+
     def get_url(self, path=""):
         return "%s/%s" % (self._url_prefix.rstrip("/"), path.lstrip("/"))
 
@@ -47,25 +53,31 @@ def get_hosts():
 class TextResult(object):
 
     def __init__(self, file_obj):
-        self._lines = []
+        self.lines = []
         while True:
             line = file_obj.readline()
             if not line:
                 break
             # Zeilenumbruch entfernen
-            self._lines.append(line[:-1])
+            self.lines.append(line[:-1])
 
     def is_empty(self):
-        return len(self._lines) == 0
+        return len(self.lines) == 0
 
     def contains(self, token):
-        for line in self._lines:
+        for line in self.lines:
             if token in line:
                 return True
         return False
 
     def contains_line(self, line):
-        return line in self._lines
+        return line in self.lines
+
+    def __contains__(self, text):
+        return self.contains(text)
+
+    def __str__(self):
+        return os.linesep.join(self.lines)
 
 
 class ExecResult(object):
@@ -75,6 +87,9 @@ class ExecResult(object):
         self.success = self.exit_code == 0
         self.stdout = TextResult(stdout_obj)
         self.stderr = TextResult(stderr_obj)
+
+    def __contains__(self, text):
+        return text in self.stdout
 
 
 class OpennetTest(unittest.TestCase):
@@ -133,20 +148,32 @@ class OpennetTest(unittest.TestCase):
             file(keyfile_public, "w").write("ssh-rsa " + key.get_base64())
         return file(keyfile_public, "r").read()
 
+    def _get_ssh_client(self, auto_create=True):
+        if not getattr(self, "host", None):
+            # immer abbrechen, falls host noch nicht gesetzt wurde
+            return None
+        if not getattr(self, "_ssh_clients", None):
+            self._ssh_clients = {}
+        if self.host.ip in self._ssh_clients:
+            return self._ssh_clients[self.host.ip]
+        if not auto_create:
+            return None
+        client = paramiko.SSHClient()
+        sec_keyfile = self._get_ssh_key_filename(public=False)
+        # die Schluessel der virtualisierten APs sind uns egal
+        class IgnoreKeysPolicy(paramiko.MissingHostKeyPolicy):
+            missing_host_key = lambda *args: True
+        client.set_missing_host_key_policy(IgnoreKeysPolicy())
+        # Verbindungsaufbau
+        client.connect(self.host.ip, username=self.username,
+                key_filename=[sec_keyfile], allow_agent=False,
+                look_for_keys=False)
+        self._ssh_clients[self.host.ip] = client
+        return client
+
     def _execute(self, command, input_data=None):
-        if not getattr(self, "_ssh_client", None):
-            client = paramiko.SSHClient()
-            sec_keyfile = self._get_ssh_key_filename(public=False)
-            # die Schluessel der virtualisierten APs sind uns egal
-            class IgnoreKeysPolicy(paramiko.MissingHostKeyPolicy):
-                missing_host_key = lambda *args: True
-            client.set_missing_host_key_policy(IgnoreKeysPolicy())
-            # Verbindungsaufbau
-            client.connect(self.host.ip, username=self.username,
-                    key_filename=[sec_keyfile], allow_agent=False,
-                    look_for_keys=False)
-            self._ssh_client = client
-        transport = self._ssh_client.get_transport()
+        client = self._get_ssh_client()
+        transport = client.get_transport()
         channel = transport.open_channel("session")
         channel.exec_command(command)
         while input_data:
@@ -158,9 +185,33 @@ class OpennetTest(unittest.TestCase):
         return ExecResult(channel.recv_exit_status(), channel.makefile(),
                 channel.makefile_stderr())
 
+    def _get_ips(self, ip_version=4, with_mask=False):
+        regexes = {
+                4: r" inet ([0-9.]{7,15}/[0-9]+) ",
+                6: r" inet ([0-9a-f:]{7,15}/[0-9]+) ",
+        }
+        result = self._execute("ip -%d addr show" % ip_version)
+        if not result.success:
+            return []
+        #ips = re.findall(regexes[ip_version], " ".join(result.stdout.lines).lower())
+        ips = re.findall(regexes[ip_version], str(result.stdout).lower())
+        if ips:
+            if with_mask:
+                return ips
+            else:
+                return [ip.split("/")[0] for ip in ips]
+        else:
+            return []
+
+    def _has_ip(self, ip):
+        with_mask = "/" in ip
+        ip_version = 4 if "." in ip else 6
+        return ip in self._get_ips(ip_version=ip_version, with_mask=with_mask)
+
     def tearDown(self):
-        if getattr(self, "_ssh_client", None):
-            self._ssh_client.close()
+        client = self._get_ssh_client(auto_create=False)
+        if client:
+            client.close()
 
 
 class AllHostsTest(OpennetTest):

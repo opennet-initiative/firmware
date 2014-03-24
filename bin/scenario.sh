@@ -33,9 +33,9 @@ case "$ACTION" in
 		"$CONTROL_BIN" start-net uplink capture "$uplink"
 		echo "Starte die Hosts ..."
 		"$CONTROL_BIN" start-host ap1.201 "$VERSION_STABLE" x86 \
-				olsr1 "DD:4B:E3:A7:98:F9" \
+				olsr1 "C4:F5:7C:A7:98:F9" \
 				uplink "46:98:2C:8A:46:50" \
-				net_wifidog "DF:37:98:BC:AA:21" \
+				net_wifidog "BC:05:43:BC:AA:21" \
 				mgmt "B6:78:93:BC:21:33"
 		"$CONTROL_BIN" start-host ap1.202 "$VERSION_STABLE" x86 \
 				olsr1 "5D:6E:A9:9E:AE:6F" \

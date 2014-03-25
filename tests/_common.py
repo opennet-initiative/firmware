@@ -91,6 +91,10 @@ class ExecResult(object):
     def __contains__(self, text):
         return text in self.stdout
 
+    def __str__(self):
+        return "ExecResult(stdout_bytes=%d, stderr='%s', exit_code=%d)" % \
+                (len(str(self.stdout)), self.stderr, self.exit_code)
+
 
 class OpennetTest(unittest.TestCase):
     """ Basisklasse fuer alle Opennet-relevanten Tests

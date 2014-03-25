@@ -108,7 +108,8 @@ class BasicSetup(_common.AllHostsTest):
                 self.assertTrue(result.success,
                         "Das Opennet-Interface wurde nicht via uci erzeugt: %s" % self.host)
             # konfigurieren!
-            self._execute("/etc/init.d/network restart")
+            result = self._execute("/etc/init.d/network restart")
+            self.assertTrue(result.success, "Die Netzwerk-Konfiguration schlug fehl (%s): %s" % (self.host, result.stderr))
 
 
     def test_25_set_opennet_id(self):
@@ -126,8 +127,11 @@ class BasicSetup(_common.AllHostsTest):
             form = browser.getForm(action="/funknetz")
             form.getControl(name="form_id").value = ap_id
             form.submit()
+            time.sleep(2)
+            # TODO: der erforderliche network-Restart duerfte ein Bug sein
+            result = self._execute("/etc/init.d/network restart")
             # verify the new IP
-            for attempt in range(5):
+            for attempt in range(8):
                 if self._has_ip("192.168.%s" % ap_id):
                     break
                 time.sleep(1)

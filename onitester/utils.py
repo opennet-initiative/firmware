@@ -1,3 +1,4 @@
+import os
 import sys
 import ipcalc
 
@@ -7,6 +8,23 @@ def paramiko_shell(chan):
     import termios
     import tty
     import select
+    def transmit_bytes():
+        try:
+            x = chan.recv(1024)
+            if len(x) == 0:
+                print '%s*** EOF ***' % os.linesep
+                return False
+            sys.stdout.write(x)
+            sys.stdout.flush()
+        except socket.timeout:
+            pass
+        return True
+    def receive_bytes():
+        x = os.read(sys.stdin.fileno(), 1)
+        if len(x) == 0:
+            return False
+        chan.send(x)
+        return True
     oldtty = termios.tcgetattr(sys.stdin)
     try:
         tty.setraw(sys.stdin.fileno())
@@ -14,21 +32,10 @@ def paramiko_shell(chan):
         chan.settimeout(0.0)
         while True:
             r, w, e = select.select([chan, sys.stdin], [], [])
-            if chan in r:
-                try:
-                    x = chan.recv(1024)
-                    if len(x) == 0:
-                        print '%s*** EOF ***' % os.linesep
-                        break
-                    sys.stdout.write(x)
-                    sys.stdout.flush()
-                except socket.timeout:
-                    pass
-            if sys.stdin in r:
-                x = sys.stdin.read(1)
-                if len(x) == 0:
-                    break
-                chan.send(x)
+            if chan in r and not transmit_bytes():
+                break
+            if sys.stdin in r and not receive_bytes():
+                break
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
 

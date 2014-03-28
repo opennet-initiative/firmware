@@ -53,8 +53,12 @@ if __name__ == "__main__":
         if args.action == "ssh":
             params = args.extra_args[1:]
             if params:
-                # TODO: "shlex" anstelle von /" ".join()/ verwenden
-                host.execute(" ".join(params))
+                result = host.execute(" ".join(params))
+                if result.success:
+                    print result.stdout
+                else:
+                    print >>sys.stderr, result.stderr
+                    sys.exit(3)
             else:
                 host.run_ssh()
         elif args.action == "vnc":

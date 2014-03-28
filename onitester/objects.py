@@ -1,5 +1,7 @@
 import os
+import re
 import sys
+import time
 import paramiko
 from zope.testbrowser.browser import Browser
 
@@ -45,22 +47,24 @@ class Network(object):
 class Host(object):
 
     username = "root"
-
+    auth_token_regex = r"(/luci/;stok=[0-9a-z]+/)"
+    default_password = "admin"
 
     def __init__(self, name, ip, run_dir):
         self.name = name
         self.address, self.netmask = onitester.utils.parse_ip(ip)
         self._run_dir = run_dir
         self._url_prefix = "http://%s/" % self.address
+        self.browser = self.__get_browser()
         self.start = CommandQueue()
         self.stop = CommandQueue()
         self.wait = CommandQueue()
 
-    def get_browser(self, url=None):
+    def __get_browser(self, url=None):
         if url is None:
-            url = self.get_url()
+            url = self._get_url()
         elif url.startswith("/"):
-            url = self.get_url(url)
+            url = self._get_url(url)
         try:
             browser = Browser()
             # verwende deutschsprachiges Interface
@@ -70,8 +74,54 @@ class Host(object):
         except IOError:
             return None
 
-    def get_url(self, path=""):
+    def _get_url(self, path=""):
         return "%s/%s" % (self._url_prefix.rstrip("/"), path.lstrip("/"))
+
+    def _is_auth_needed(self):
+        return "Benutzernamen und Passwort" in self.browser.contents
+
+    def open_link(self, url):
+        """ Oeffne eine neue URL unter Beibehaltung des luci-auth-Tokens
+        Beispiel-URL: http://172.16.137.11/cgi-bin/luci/;stok=1c50965d5a99cc47c507cc4e5cd207ed/opennet/opennet_2/
+        """
+        token_match = re.search(self.auth_token_regex, self.browser.url)
+        if token_match:
+            token = token_match.groups()[0]
+            url.replace("/luci/", token)
+        self.browser.open(url)
+
+    def import_ssh_key(self):
+        pub_key = self._get_ssh_pub_key()
+        self.open_link("/cgi-bin/luci/admin/system/admin")
+        assert self._login(), "Anmeldung schlug fehl: %s" % self.host
+        # Schluessel importieren
+        form = self.browser.getForm(name="cbi")
+        form.getControl(name="cbid.dropbear._keys._data").value = pub_key
+        form.getControl(name="cbi.apply").click()
+        assert pub_key in self.browser.contents, \
+                "SSH-Schluessel wurde nicht gespeichert: %s" % self
+        # Verbindungsaufbau
+        result = self.execute("pwd")
+        assert result.success and result.stdout.contains_line("/root"), \
+                "Verbindungsaufbau via ssh schlug fehl: %s" % self.host
+
+    def _login(self, passwords=None, force=False):
+        if passwords is None:
+            passwords = (self.default_password, )
+        if not self._is_auth_needed():
+            if not force:
+                return True
+            else:
+                self.browser.open("/cgi-bin/luci/admin/logout")
+        for password in passwords:
+            form = self.browser.getForm()
+            form.getControl(name="username").value = self.username
+            form.getControl(name="password").value = password
+            form.getControl(label="Anmelden").click()
+            if not self._is_auth_needed():
+                return True
+        else:
+            return False
 
     def __str__(self):
         return "%s<%s>" % (self.name, self.address)

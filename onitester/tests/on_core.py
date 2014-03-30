@@ -22,7 +22,7 @@ class OnCore(OpennetTest):
                 continue
             # Leider ist es nicht leicht, die javascript-basierte Interface-Auswahl zu simulieren.
             # Also stattdessen der Weg ueber uci.
-            on_interfaces = [iface for iface, net in host.networks.iteritems() if net.is_opennet]
+            on_interfaces = [iface for iface, net in host.networks.iteritems() if net.traffic == "opennet"]
             for index, iface in enumerate(on_interfaces):
                 # alle Netzwerke von diesem Interface trennen
                 result = host.execute("uci show network | grep 'ifname=%s$'" % iface)

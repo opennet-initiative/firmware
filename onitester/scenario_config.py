@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import ConfigParser
 import subprocess
 
@@ -26,13 +27,15 @@ def get_ctl_func(*args):
     return lambda: subprocess.check_output([CTL_BIN] + list(args))
 
 
-def _get_config_file_parser(config_file):
+def __get_config_file_parser(config_file):
     parser = ConfigParser.SafeConfigParser()
     if isinstance(config_file, basestring):
         parser.read(config_file)
+        filename = config_file
     else:
         parser.readfp(config_file)
-    return parser
+        filename = config_file.name
+    return parser, filename
 
 
 def parse_environment(host_config, net_config):
@@ -46,7 +49,7 @@ def parse_environment(host_config, net_config):
 
 
 def parse_hosts(config_file, environment):
-    parser = _get_config_file_parser(config_file)
+    parser, filename = __get_config_file_parser(config_file)
     hosts = {}
     for host_name in parser.sections():
         try:
@@ -64,13 +67,13 @@ def parse_hosts(config_file, environment):
             if len(net.split("/")) != 2:
                 print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
                         "'%s': fehlerhafte Netzwerk-Definition (name/MAC) fuer Host '%s': %s" % \
-                        (config_file.name, host_name, net)
+                        (filename, host_name, net)
                 sys.exit(1)
             net_name, interface_mac = net.split("/")
             if not net_name in environment.nets:
                 print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
                         "'%s': unbekannter Netzwerk-Name bei Host '%s': %s" % \
-                        (config_file.name, host_name, net)
+                        (filename, host_name, net)
                 sys.exit(1)
             net_items.extend([net_name, interface_mac])
             if net_name == management_network:
@@ -97,7 +100,7 @@ def parse_hosts(config_file, environment):
             if management_network_index is None:
                 print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
                         "'%s': Management-Netzwerk ('%s') in Host '%s' nicht gefunden" % \
-                        (config_file.name, management_network, host_name)
+                        (filename, management_network, host_name)
                 sys.exit(1)
             address, netmask = onitester.utils.parse_ip(management_ip)
             host.wait.append(get_ctl_func("host-configure-management",
@@ -108,12 +111,12 @@ def parse_hosts(config_file, environment):
 
 
 def parse_nets(config_file, environment):
-    parser = _get_config_file_parser(config_file)
+    parser, filename = __get_config_file_parser(config_file)
     for net_name in parser.sections():
         if not parser.has_option(net_name, "type"):
             print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
                     "'%s': fehlende Typendefinition fuer Netz '%s'" % \
-                    (config_file.name, net_name)
+                    (filename, net_name)
             sys.exit(1)
         net_type = parser.get(net_name, "type").lower().strip()
         net = onitester.objects.Network(net_name)
@@ -129,19 +132,26 @@ def parse_nets(config_file, environment):
             except ConfigParser.NoOptionError:
                 print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
                         "'%s': fehlende 'local_ip' fuer virtuelles Netz '%s'" % \
-                        (config_file.name, net_name)
+                        (filename, net_name)
                 sys.exit(1)
             address, netmask = onitester.utils.parse_ip(local_ip)
             net.start.append(get_ctl_func("start-net", net_name, "virtual", address, netmask))
         else:
             print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
                     "'%s': unbekannte Typendefinition fuer Netz '%s': %s" % \
-                    (config_file.name, net_name, net["type"])
+                    (filename, net_name, net["type"])
             sys.exit(1)
         net.stop.append(get_ctl_func("stop-net", net_name))
-        if parser.has_option(net_name, "is_opennet"):
-            net.is_opennet = parser.getboolean(net_name, "is_opennet")
-        else:
-            net.is_opennet = False
+        if not parser.has_option(net_name, "traffic"):
+            print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
+                    "'%s': kein Wert fuer 'traffic' im Netz '%s' gesetzt" % \
+                    (filename, net_name)
+            sys.exit(1)
+        net.traffic = parser.get(net_name, "traffic").lower()
+        if not net.traffic in ("wan", "lan", "opennet", ""):
+            print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
+                    "'%s': unbekannter Wert von 'traffic' fuer Netz '%s': %s" % \
+                    (filename, net_name, net.traffic)
+            sys.exit(1)
         environment.nets[net_name] = net
 

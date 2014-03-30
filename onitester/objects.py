@@ -3,6 +3,7 @@ import re
 import sys
 import time
 import paramiko
+import mechanize
 from zope.testbrowser.browser import Browser
 
 import onitester.utils
@@ -40,8 +41,13 @@ class Network(object):
 
     def __init__(self, name):
         self.name = name
+        self.address = None
+        self.netmask = None
         self.start = CommandQueue()
         self.stop = CommandQueue()
+
+    def set_ip(self, ip):
+        self.address, self.netmask = onitester.utils.parse_ip(ip)
 
 
 class Host(object):
@@ -55,36 +61,43 @@ class Host(object):
         self.address, self.netmask = onitester.utils.parse_ip(ip)
         self._run_dir = run_dir
         self._url_prefix = "http://%s/" % self.address
+        self.networks = {}
+        self.default_login_passwords = [self.default_password]
         self.browser = self.__get_browser()
         self.start = CommandQueue()
         self.stop = CommandQueue()
         self.wait = CommandQueue()
 
     def __get_browser(self, url=None):
-        if url is None:
-            url = self._get_url()
-        elif url.startswith("/"):
-            url = self._get_url(url)
-        try:
-            browser = Browser()
-            # verwende deutschsprachiges Interface
-            browser.addHeader("Accept-Language", "de-DE,de")
-            browser.open(url)
-            return browser
-        except IOError:
-            return None
+        browser = Browser()
+        # verwende deutschsprachiges Interface
+        browser.addHeader("Accept-Language", "de-DE,de")
+        return browser
 
     def _get_url(self, path=""):
         return "%s/%s" % (self._url_prefix.rstrip("/"), path.lstrip("/"))
 
     def _is_auth_needed(self):
-        return "Benutzernamen und Passwort" in self.browser.contents
+        try:
+            return "Benutzernamen und Passwort" in self.browser.contents
+        except mechanize.BrowserStateError:
+            return True
 
-    def open_link(self, url):
+    def __del__(self):
+        client = self._get_ssh_client(auto_create=False)
+        if client:
+            client.close()
+
+    def open_url(self, url):
         """ Oeffne eine neue URL unter Beibehaltung des luci-auth-Tokens
         Beispiel-URL: http://172.16.137.11/cgi-bin/luci/;stok=1c50965d5a99cc47c507cc4e5cd207ed/opennet/opennet_2/
         """
-        token_match = re.search(self.auth_token_regex, self.browser.url)
+        try:
+            token_match = re.search(self.auth_token_regex, self.browser.url)
+        except mechanize.BrowserStateError:
+            token_match = None
+            # erste Verbindung oeffnen
+            self.browser.open(self._get_url("/"))
         if token_match:
             token = token_match.groups()[0]
             url.replace("/luci/", token)
@@ -92,8 +105,8 @@ class Host(object):
 
     def import_ssh_key(self):
         pub_key = self._get_ssh_pub_key()
-        self.open_link("/cgi-bin/luci/admin/system/admin")
-        assert self._login(), "Anmeldung schlug fehl: %s" % self.host
+        self.open_url("/cgi-bin/luci/admin/system/admin")
+        assert self.web_login(), "Anmeldung schlug fehl: %s" % self.host
         # Schluessel importieren
         form = self.browser.getForm(name="cbi")
         form.getControl(name="cbid.dropbear._keys._data").value = pub_key
@@ -105,9 +118,9 @@ class Host(object):
         assert result.success and result.stdout.contains_line("/root"), \
                 "Verbindungsaufbau via ssh schlug fehl: %s" % self.host
 
-    def _login(self, passwords=None, force=False):
+    def web_login(self, passwords=None, force=False):
         if passwords is None:
-            passwords = (self.default_password, )
+            passwords = self.default_login_passwords
         if not self._is_auth_needed():
             if not force:
                 return True

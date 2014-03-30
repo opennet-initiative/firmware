@@ -6,7 +6,6 @@ import argparse
 
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir))
-
 sys.path.insert(0, BASE_DIR)
 
 import onitester.scenario_config

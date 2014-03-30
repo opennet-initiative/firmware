@@ -56,10 +56,11 @@ def parse_hosts(config_file, environment):
         management_network_index = None
         net_items = []
         try:
-            networks = parser.get(host_name, "networks")
+            network_string = parser.get(host_name, "networks")
         except ConfigParser.NoOptionError:
-            networks = ""
-        for index, net in enumerate(networks.split()):
+            network_string = ""
+        networks = []
+        for index, net in enumerate(network_string.split()):
             if len(net.split("/")) != 2:
                 print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
                         "'%s': fehlerhafte Netzwerk-Definition (name/MAC) fuer Host '%s': %s" % \
@@ -74,6 +75,7 @@ def parse_hosts(config_file, environment):
             net_items.extend([net_name, interface_mac])
             if net_name == management_network:
                 management_network_index = index
+            networks.append(environment.nets[net_name])
         arch = parser.get(host_name, "arch", "x86")
         version = parser.get(host_name, "version")
         try:
@@ -82,6 +84,8 @@ def parse_hosts(config_file, environment):
             management_ip = None
         run_dir = os.path.join(BASE_DIR, "run", "host", host_name)
         host = onitester.objects.Host(host_name, management_ip, run_dir)
+        for index, network in enumerate(networks):
+            host.networks["eth%d" % index] = network
         try:
             host.ap_id = parser.get(host_name, "ap_id")
         except ConfigParser.NoOptionError:

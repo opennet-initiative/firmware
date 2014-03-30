@@ -4,6 +4,7 @@ import ipcalc
 
 
 def paramiko_shell(chan):
+    """ Diese Funktion ist noch nicht wirklich nutzbar. Irgendwie laeuft der Terminal nicht."""
     import socket
     import termios
     import tty

@@ -1,9 +1,7 @@
-import time
-
-import _common
+from onitester.tests._common import OpennetTest
 
 
-class BasicSetup(_common.OpennetTest):
+class BasicSetup(OpennetTest):
     """ Grundlegende Konfiguration der Router """
 
     def test_01_connect(self):

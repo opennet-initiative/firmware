@@ -1,7 +1,9 @@
-import _common
+import time
+
+from onitester.tests._common import OpennetTest
 
 
-class OnCore(_common.OpennetTest):
+class OnCore(OpennetTest):
 
     def test_05_on_core_settings(self):
         """ Pruefe die on-core-Einstellungen """

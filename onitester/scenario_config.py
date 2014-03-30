@@ -139,5 +139,9 @@ def parse_nets(config_file, environment):
                     (config_file.name, net_name, net["type"])
             sys.exit(1)
         net.stop.append(get_ctl_func("stop-net", net_name))
+        if parser.has_option(net_name, "is_opennet"):
+            net.is_opennet = parser.getboolean(net_name, "is_opennet")
+        else:
+            net.is_opennet = False
         environment.nets[net_name] = net
 

@@ -71,15 +71,10 @@ class BasicSetup(_common.OpennetTest):
         for host in self.get_hosts():
             if not host.ap_id:
                 continue
-            # TODO: aus der config auslesen
-            interface_dict = {
-                    "ap1.201": ("eth0", ),
-                    "ap1.202": ("eth0", "eth1"),
-                    "ap1.203": ("eth0", ),
-            }
             # Leider ist es nicht leicht, die javascript-basierte Interface-Auswahl zu simulieren.
             # Also stattdessen der Weg ueber uci.
-            for index, iface in enumerate(interface_dict[host.name]):
+            on_interfaces = [iface for iface, net in host.networks.iteritems() if net.is_opennet]
+            for index, iface in enumerate(on_interfaces):
                 # alle Netzwerke von diesem Interface trennen
                 result = host.execute("uci show network | grep 'ifname=%s$'" % iface)
                 for line in result.stdout.lines:

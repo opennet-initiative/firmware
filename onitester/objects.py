@@ -175,7 +175,7 @@ class Host(object):
         self._ssh_clients[self.address] = client
         return client
 
-    def execute(self, command, input_data=None):
+    def execute(self, command, input_data=None, quiet=False):
         client = self._get_ssh_client()
         transport = client.get_transport()
         channel = transport.open_channel("session")
@@ -186,8 +186,8 @@ class Host(object):
                 input_data = input_data[count:]
         while not channel.exit_status_ready():
             time.sleep(0.1)
-        return onitester.utils.ExecResult(channel.recv_exit_status(), channel.makefile(),
-                channel.makefile_stderr())
+        return onitester.utils.ExecResult(command, channel.recv_exit_status(), channel.makefile(),
+                channel.makefile_stderr(), quiet=quiet)
 
     def run_ssh(self):
         client = self._get_ssh_client()

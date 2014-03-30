@@ -1,6 +1,11 @@
 import os
 import sys
 import ipcalc
+import logging
+
+
+logging.basicConfig()
+log = logging
 
 
 def paramiko_shell(chan):
@@ -80,11 +85,29 @@ class TextResult(object):
 
 class ExecResult(object):
 
-    def __init__(self, exit_code, stdout_obj, stderr_obj):
+    def __init__(self, cmdline, exit_code, stdout_obj, stderr_obj, quiet=False):
         self.exit_code = exit_code
         self.success = self.exit_code == 0
         self.stdout = TextResult(stdout_obj)
         self.stderr = TextResult(stderr_obj)
+        if quiet:
+            # inhibit error handling
+            pass
+        elif not self.stderr.is_empty():
+            # success with error output
+            if self.success:
+                prefix = "Warning"
+                reporter = log.warning
+            else:
+                prefix = "Error"
+                reporter = log.error
+            reporter("%s: command execution ('%s') error output: %s" % (prefix, cmdline, self.stderr))
+        elif not self.success:
+            # failure without error output
+            log.error("Command ('%s') failed with exitcode %d" % (cmdline, self.exit_code))
+        else:
+            # everything went fine
+            pass
 
     def __contains__(self, text):
         return text in self.stdout

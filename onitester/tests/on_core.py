@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+
 import time
 
+import onitester.uci_actions
 from onitester.tests._common import OpennetTest
 
 
@@ -24,38 +27,13 @@ class OnCore(OpennetTest):
             # Also stattdessen der Weg ueber uci.
             on_interfaces = [iface for iface, net in host.networks.iteritems() if net.traffic == "opennet"]
             for index, iface in enumerate(on_interfaces):
-                # alle Netzwerke von diesem Interface trennen
-                result = host.execute("uci show network | grep 'ifname=%s$'" % iface)
-                for line in result.stdout.lines:
-                    key = line.split("=")[0]
-                    host.execute("uci set %s=none" % key)
-                # olsr-Interface setzen (falls es noch nicht existiert)
                 net_name = "on_eth_%d" % index
-                result = host.execute("uci set network.%s=interface" % net_name)
-                self.assertTrue(result.success,
-                        "Anlegen des Interface schlug fehl (%s): %s" % (host, result.stderr))
-                host.execute("uci set network.%s.ifname=%s" % (net_name, iface))
-                self.assertTrue(result.success,
-                        "Zuordnen des Interface schlug fehl (%s): %s" % (host, result.stderr))
-                host.execute("uci commit network.%s" % net_name)
-                self.assertTrue(result.success,
-                        "Bestaetigung der Interface-Aenderung schlug fehl (%s): %s" % (host, result.stderr))
-                # Interface zur openvpn-Firewall-Zone hinzufuegen
-                fw_opennet_nets = host.execute("uci get firewall.zone_opennet.network").stdout.lines[0].strip().split()
-                self.assertTrue(result.success,
-                        "Auslesen der Firewall schlug fehl (%s): %s" % (host, result.stderr))
-                if not net_name in fw_opennet_nets:
-                    fw_opennet_nets += net_name
-                    host.execute("uci set firewall.zone_opennet.network=%s" % " ".join(fw_opennet_nets))
-                    self.assertTrue(result.success,
-                            "Aktualisieren der Firewall-Zone schlug fehl (%s): %s" % (host, result.stderr))
-                    host.execute("uci commit firewall.zone_opennet")
-                    self.assertTrue(result.success,
-                            "Bestaetigen der Firewall-Aenderung schlug fehl (%s): %s" % (host, result.stderr))
-                result = host.execute("uci show network | grep -q 'on_eth_.\.ifname=%s$'" % iface)
-                # irgendetwas muss ja auch getestet werden ...
-                self.assertTrue(result.success,
-                        "Das Opennet-Interface wurde nicht via uci erzeugt: %s" % host)
+                success = onitester.uci_actions.assign_interface_to_network(host, iface, net_name)
+                self.assertTrue(success,
+                        "Das opennet-Interface '%s' wurde nicht zum Opennet-Netzwerk hinzugefügt (Host %s)" % (iface, host))
+                success = onitester.uci_actions.assign_network_to_firewall_zone(host, net_name, "opennet")
+                self.assertTrue(success,
+                        "Das Netzwerk '%s' wurde nicht zur Opennet-Firewall-Zone hinzugefügt (Host %s)" % (net_name, host))
             # konfigurieren!
             result = host.execute("/etc/init.d/network restart")
             self.assertTrue(result.success, "Die Netzwerk-Konfiguration schlug fehl (%s): %s" % (host, result.stderr))

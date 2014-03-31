@@ -25,7 +25,7 @@ class OnCore(OpennetTest):
                 continue
             # Leider ist es nicht leicht, die javascript-basierte Interface-Auswahl zu simulieren.
             # Also stattdessen der Weg ueber uci.
-            on_interfaces = [iface for iface, net in host.networks.iteritems() if net.traffic == "opennet"]
+            on_interfaces = [iface.name for iface in host.interfaces.values() if iface.role == "opennet"]
             for index, iface in enumerate(on_interfaces):
                 net_name = "on_eth_%d" % index
                 success = onitester.uci_actions.assign_interface_to_network(host, iface, net_name)

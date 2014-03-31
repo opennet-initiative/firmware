@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import onitester.uci_actions
+from onitester.utils import log
 from onitester.tests._common import OpennetTest
 
 
@@ -55,14 +56,16 @@ class BasicSetup(OpennetTest):
     def test_15_configure_lan_wan(self):
         """ Konfigurieren von LAN- und WAN-Schnittstellen """
         for host in self.get_hosts():
-            for if_name, net in host.networks.iteritems():
-                if not net.traffic in ("local", "wan"):
+            for iface in host.interfaces.values():
+                if not iface.role in ("lan", "wan"):
                     continue
-                success = onitester.uci_actions.assign_interface_to_network(host, if_name, net.name)
+                success = onitester.uci_actions.assign_interface_to_network(host, iface.name, iface.role)
                 self.assertTrue(success,
-                        "Das opennet-Interface '%s' wurde nicht zum %s-Netzwerk hinzugefügt (Host %s)" % (if_name, net.traffic, host))
-                success = onitester.uci_actions.assign_network_to_firewall_zone(host, net.name, net.traffic)
-                zone = {"lan": "local", "wan": "wan"}[net.traffic]
+                        "Das Interface '%s' wurde nicht zum %s-Netzwerk hinzugefügt (Host %s)" % (iface.name, iface.role, host))
+                zone = {"lan": "local", "wan": "wan"}[iface.role]
+                success = onitester.uci_actions.assign_network_to_firewall_zone(host, iface.role, zone)
                 self.assertTrue(success,
-                        "Das Netzwerk '%s' wurde nicht zur %s-Firewall-Zone hinzugefügt (Host %s)" % (net.name, zone, host))
+                        "Das Netzwerk '%s' wurde nicht zur %s-Firewall-Zone hinzugefügt (Host %s)" % (iface.role, zone, host))
+            result = host.execute("/etc/init.d/network restart")
+            self.assertTrue(result.success, "Die Netzwerk-Konfiguration schlug fehl (%s): %s" % (host, result.stderr))
 

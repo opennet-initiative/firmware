@@ -52,6 +52,14 @@ def parse_hosts(config_file, environment):
     parser, filename = __get_config_file_parser(config_file)
     hosts = {}
     for host_name in parser.sections():
+        arch = parser.get(host_name, "arch", "x86")
+        version = parser.get(host_name, "version")
+        try:
+            management_ip = parser.get(host_name, "management_ip")
+        except ConfigParser.NoOptionError:
+            management_ip = None
+        run_dir = os.path.join(BASE_DIR, "run", "host", host_name)
+        host = onitester.objects.Host(host_name, management_ip, run_dir)
         try:
             management_network = parser.get(host_name, "management_network")
         except ConfigParser.NoOptionError:
@@ -62,14 +70,18 @@ def parse_hosts(config_file, environment):
             network_string = parser.get(host_name, "networks")
         except ConfigParser.NoOptionError:
             network_string = ""
-        networks = []
+        network_interfaces = []
         for index, net in enumerate(network_string.split()):
-            if len(net.split("/")) != 2:
+            if len(net.split("/")) == 2:
+                net_name, interface_mac = net.split("/")
+                role = None
+            elif len(net.split("/")) == 3:
+                net_name, interface_mac, role = net.split("/")
+            else:
                 print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
                         "'%s': fehlerhafte Netzwerk-Definition (name/MAC) fuer Host '%s': %s" % \
                         (filename, host_name, net)
                 sys.exit(1)
-            net_name, interface_mac = net.split("/")
             if not net_name in environment.nets:
                 print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
                         "'%s': unbekannter Netzwerk-Name bei Host '%s': %s" % \
@@ -78,17 +90,9 @@ def parse_hosts(config_file, environment):
             net_items.extend([net_name, interface_mac])
             if net_name == management_network:
                 management_network_index = index
-            networks.append(environment.nets[net_name])
-        arch = parser.get(host_name, "arch", "x86")
-        version = parser.get(host_name, "version")
-        try:
-            management_ip = parser.get(host_name, "management_ip")
-        except ConfigParser.NoOptionError:
-            management_ip = None
-        run_dir = os.path.join(BASE_DIR, "run", "host", host_name)
-        host = onitester.objects.Host(host_name, management_ip, run_dir)
-        for index, network in enumerate(networks):
-            host.networks["eth%d" % index] = network
+            interface = onitester.objects.NetworkInterface(host,
+                    "eth%d" % index, environment.nets[net_name], role)
+            host.interfaces[interface.name] = interface
         try:
             host.ap_id = parser.get(host_name, "ap_id")
         except ConfigParser.NoOptionError:
@@ -142,16 +146,5 @@ def parse_nets(config_file, environment):
                     (filename, net_name, net["type"])
             sys.exit(1)
         net.stop.append(get_ctl_func("stop-net", net_name))
-        if not parser.has_option(net_name, "traffic"):
-            print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
-                    "'%s': kein Wert fuer 'traffic' im Netz '%s' gesetzt" % \
-                    (filename, net_name)
-            sys.exit(1)
-        net.traffic = parser.get(net_name, "traffic").lower()
-        if not net.traffic in ("wan", "lan", "opennet", ""):
-            print >>sys.stderr, "Fehler in Konfigurationsdatei " + \
-                    "'%s': unbekannter Wert von 'traffic' fuer Netz '%s': %s" % \
-                    (filename, net_name, net.traffic)
-            sys.exit(1)
         environment.nets[net_name] = net
 

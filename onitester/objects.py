@@ -37,6 +37,15 @@ class Environment(object):
             item.stop()
 
 
+class NetworkInterface(object):
+
+    def __init__(self, host, name, network, role):
+        self.host = host
+        self.name = name
+        self.network = network
+        self.role = role
+
+
 class Network(object):
 
     def __init__(self, name):
@@ -61,7 +70,7 @@ class Host(object):
         self.address, self.netmask = onitester.utils.parse_ip(ip)
         self._run_dir = run_dir
         self._url_prefix = "http://%s/" % self.address
-        self.networks = {}
+        self.interfaces = {}
         self.default_login_passwords = [self.default_password]
         self.browser = self.__get_browser()
         self.start = CommandQueue()

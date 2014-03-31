@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+import onitester.uci_actions
 from onitester.tests._common import OpennetTest
 
 
@@ -48,4 +51,18 @@ class BasicSetup(OpennetTest):
             result = host.execute("pwd")
             self.assertTrue(result.success and result.stdout.contains_line("/root"),
                     "Verbindungsaufbau via ssh schlug fehl: %s" % host)
+
+    def test_15_configure_lan_wan(self):
+        """ Konfigurieren von LAN- und WAN-Schnittstellen """
+        for host in self.get_hosts():
+            for if_name, net in host.networks.iteritems():
+                if not net.traffic in ("local", "wan"):
+                    continue
+                success = onitester.uci_actions.assign_interface_to_network(host, if_name, net.name)
+                self.assertTrue(success,
+                        "Das opennet-Interface '%s' wurde nicht zum %s-Netzwerk hinzugefügt (Host %s)" % (if_name, net.traffic, host))
+                success = onitester.uci_actions.assign_network_to_firewall_zone(host, net.name, net.traffic)
+                zone = {"lan": "local", "wan": "wan"}[net.traffic]
+                self.assertTrue(success,
+                        "Das Netzwerk '%s' wurde nicht zur %s-Firewall-Zone hinzugefügt (Host %s)" % (net.name, zone, host))
 

@@ -45,10 +45,17 @@ def assign_network_to_firewall_zone(host, net_name, fw_zone):
         if net_name in interfaces:
             while net_name in interfaces:
                 interfaces.remove(net_name)
-            host.execute("uci set '%s=%s'" % (key, " ".join(interfaces)))
+            if not interfaces:
+                host.execute("uci del %s" % key)
+            else:
+                host.execute("uci set '%s=%s'" % (key, " ".join(interfaces)))
             host.execute("uci commit %s" % key)
     # Interface zur openvpn-Firewall-Zone hinzufuegen
-    fw_zone_nets = host.execute("uci get firewall.zone_%s.network" % fw_zone).stdout.lines[0].strip().split()
+    result = host.execute("uci get firewall.zone_%s.network" % fw_zone, quiet=True)
+    if result.success and not result.stdout.is_empty():
+        fw_zone_nets = result.stdout.lines[0].strip().split()
+    else:
+        fw_zone_nets = []
     if not net_name in fw_zone_nets:
         fw_zone_nets.append(net_name)
         result = host.execute("uci set 'firewall.zone_%s.network=%s'" % (fw_zone, " ".join(fw_zone_nets)))

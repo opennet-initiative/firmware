@@ -66,6 +66,12 @@ class BasicSetup(OpennetTest):
                 success = onitester.uci_actions.assign_network_to_firewall_zone(host, iface.role, zone)
                 self.assertTrue(success,
                         "Das Netzwerk '%s' wurde nicht zur %s-Firewall-Zone hinzugefügt (Host %s)" % (iface.role, zone, host))
+                if iface.role == "wan":
+                    host.execute("uci set network.%s.proto=dhcp" % iface.role)
+                    # DNS- und Routeneinstellungen nicht ignorieren
+                    host.execute("uci delete -q network.%s.peerdns || true" % iface.role)
+                    host.execute("uci delete -q network.%s.defaultroute || true" % iface.role)
+                    host.execute("uci commit network.%s" % iface.role)
             result = host.execute("/etc/init.d/network restart")
             self.assertTrue(result.success, "Die Netzwerk-Konfiguration schlug fehl (%s): %s" % (host, result.stderr))
 

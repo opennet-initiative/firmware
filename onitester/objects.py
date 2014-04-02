@@ -115,7 +115,7 @@ class Host(object):
     def import_ssh_key(self):
         pub_key = self._get_ssh_pub_key()
         self.open_url("/cgi-bin/luci/admin/system/admin")
-        assert self.web_login(), "Anmeldung schlug fehl: %s" % self.host
+        assert self.web_login(), "Anmeldung schlug fehl: %s" % self
         # Schluessel importieren
         form = self.browser.getForm(name="cbi")
         form.getControl(name="cbid.dropbear._keys._data").value = pub_key
@@ -125,7 +125,7 @@ class Host(object):
         # Verbindungsaufbau
         result = self.execute("pwd")
         assert result.success and result.stdout.contains_line("/root"), \
-                "Verbindungsaufbau via ssh schlug fehl: %s" % self.host
+                "Verbindungsaufbau via ssh schlug fehl: %s" % self
 
     def web_login(self, passwords=None, force=False):
         if passwords is None:

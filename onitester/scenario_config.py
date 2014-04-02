@@ -109,7 +109,6 @@ def parse_hosts(config_file, environment):
             address, netmask = onitester.utils.parse_ip(management_ip)
             host.wait.append(get_ctl_func("host-configure-management",
                     host_name, "eth%d" % management_network_index, address, netmask))
-            host.wait.append(host.import_ssh_key)
         host.run_vnc = get_ctl_func("vnc", host_name)
         environment.hosts[host_name] = host
 

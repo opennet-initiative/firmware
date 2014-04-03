@@ -37,6 +37,6 @@ Detaildokumentation
 
 Hier findest du Informationen zu weiterführende Details:
 
-1. *[Struktur der Build-Umgebung] (doc/Struktur.md)*
-2. *[Enwicklungsleitfaden] (doc/Entwicklung.md)*
+1. *[Struktur der Build-Umgebung] (master/doc/Struktur.md)*
+2. *[Enwicklungsleitfaden] (master/doc/Entwicklung.md)*
 

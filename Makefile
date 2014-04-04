@@ -3,7 +3,7 @@ LUCI_DIR = luci
 CUSTOM_PO_DIR = opennet/po
 CUSTOM_PACKAGES_DIR = opennet/packages
 LANGUAGES = de
-ARCHS = ar71xx bcm43xx ixp4xx tl-wr1043nd tl-wr842nd x86
+ARCHS = ar71xx bcm47xx ixp4xx tl-wr1043nd tl-wr842nd x86
 
 .PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init help list-archs
 

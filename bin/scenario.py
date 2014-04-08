@@ -16,7 +16,7 @@ if __name__ == "__main__":
     main_group = parser.add_argument_group("Allgemeines", "Allgemeine Aktionen")
     main_group.add_argument("action", metavar="action", type=str, nargs="?",
                             default="status",
-                            choices=("start", "stop", "restart", "wait", "status", "vnc", "ssh"),
+                            choices=("start", "stop", "restart", "wait", "status", "vnc", "ssh", "show-uplink"),
                             help="Starten und Beenden der Testumgebung")
     main_group.add_argument("extra_args", nargs="*", default=[])
     main_group.add_argument("--host-config", type=argparse.FileType("r"),
@@ -33,6 +33,8 @@ if __name__ == "__main__":
         env.start()
     elif args.action == "status":
         env.status()
+    elif args.action == "show-uplink":
+        print onitester.scenario_config.get_uplink_interface()
     elif args.action == "wait":
         if args.extra_args:
             for hostname in args.extra_args:

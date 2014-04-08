@@ -68,3 +68,22 @@ class OnCore(OpennetTest):
                         "konfiguriert. Derzeit sind lediglich folgende IPs " + \
                         "auf %s gesetzt: %s" % (host, ips))
 
+    def test_20_dns_servers(self):
+        for host in self.get_hosts():
+            import sys
+            result = host.get_dns_answers("localhost")
+            self.assertTrue("127.0.0.1" in result,
+                    "DNS-Aufloaesung des Namen 'localhost' funktioniert nicht auf %s (Ergebnis: %s)" % (host, result))
+            result = host.get_dns_answers("gibt.es.nicht")
+            self.assertTrue(len(result) == 0,
+                    "DNS-Aufloesung eines ungueltigen Namen liefert auf %s ein Ergebnis: %s" % (host, result))
+            # pruefe DNS-Verfuegbarkeit von Opennet-Hosts mit einem WAN-Interface
+            # Nutzer-Hosts werden erstmal ignoriert
+            if host.ap_id:
+                for iface in host.interfaces.values():
+                    if not iface.role == "wan":
+                        continue
+                    result = host.get_dns_answers("on-i.de")
+                    self.assertTrue("46.4.52.124" in result,
+                            "DNS-Aufloesung von 'on-i.de' liefert ein unerwartetes Ergebnis auf Host %s: %s" % (host, result))
+

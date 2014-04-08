@@ -2,8 +2,10 @@ import os
 import re
 import sys
 import time
-import paramiko
 import mechanize
+
+import paramiko
+import dns.resolver
 from zope.testbrowser.browser import Browser
 
 import onitester.utils
@@ -11,13 +13,16 @@ import onitester.utils
 
 class CommandQueue(list):
 
-    def __call__(self, force=True):
+    def __call__(self, force=False):
         result = True
         for command in self:
-            result = bool(command()) and result
             if not result and not force:
                 print >>sys.stderr, "CommandQueue: nicht alle Kommandos wurden ausgefuehrt"
                 return False
+            current_result = bool(command())
+            if not current_result:
+                print >>sys.stderr, "CommandQueue: Ausfuehrung von '%s' schlug fehl" % str(command.__doc__)
+            result = current_result and result
         return result
 
 
@@ -203,4 +208,20 @@ class Host(object):
         transport = client.get_transport()
         channel = transport.open_channel("session")
         onitester.utils.paramiko_shell(channel)
+
+    def get_dns_answers(self, name, req_type=None):
+        """ liefere das Ergebnis einer DNS-Anfrage in Form einer Liste von IPs """
+        resolver = dns.resolver.Resolver(configure=False)
+        # wir erwarten keine Verzoegerung
+        resolver.timeout = 1
+        resolver.nameservers = [self.address, ]
+        resolver.retry_servfail = True
+        args = [name]
+        if not req_type is None:
+            args.append(req_type)
+        try:
+            answers = resolver.query(*args)
+        except dns.resolver.NoNameservers:
+            answers = []
+        return [str(item) for item in answers]
 

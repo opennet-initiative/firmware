@@ -24,7 +24,10 @@ def get_uplink_interface():
 
 
 def get_ctl_func(*args):
-    return lambda: subprocess.check_output([CTL_BIN] + list(args))
+    args = [CTL_BIN] + list(args)
+    func = lambda: subprocess.call(args) == 0
+    func.__doc__ = "subprocess.check_call(%s)" % args
+    return func
 
 
 def __get_config_file_parser(config_file):
@@ -126,7 +129,9 @@ def parse_nets(config_file, environment):
         if net_type == "switch":
             net.start.append(get_ctl_func("start-net", net_name, "switch"))
         elif net_type == "capture":
-            capture_interface = parser.get(net_name, "interface", get_uplink_interface())
+            capture_interface = parser.get(net_name, "interface", "").strip()
+            if not capture_interface:
+                capture_interface = get_uplink_interface()
             net.start.append(get_ctl_func("start-net", net_name, "switch"))
             net.start.append(get_ctl_func("start-net", net_name, "capture", capture_interface))
         elif net_type == "virtual":

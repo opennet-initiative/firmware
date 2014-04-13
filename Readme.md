@@ -2,7 +2,8 @@ Abhaengigkeiten
 ===============
 
 * aptitude install qemu mtd-utils mkfs.jffs2 sudo socat kvm vde2
-* aptitude install python-paramiko python-dnspython
+* aptitude install python-paramiko python-dnspython python-mechanize
+* aptitude install python-zope.testbrowser python-ipcalc
 
 Als VNC-Viewer ist ssvncviewer (Paket "ssvnc") empfehlenswert, da er Unix-Sockets (anstelle von Ports) unterstützt.
 

@@ -30,7 +30,7 @@ def get_uplink_interface():
 def get_ctl_func(*args):
     args = [CTL_BIN] + list(args)
     func = lambda: subprocess.call(args) == 0
-    func.__doc__ = "subprocess.check_call(%s)" % args
+    func.__doc__ = "subprocess.call(%s)" % args
     return func
 
 
@@ -49,8 +49,7 @@ def parse_environment(host_config, net_config):
     environment = onitester.objects.Environment()
     parse_nets(net_config, environment)
     parse_hosts(host_config, environment)
-    def show_status():
-        print get_ctl_func("status")().strip()
+    show_status = lambda: get_ctl_func("status")()
     environment.status.append(show_status)
     return environment
 

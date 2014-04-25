@@ -34,6 +34,7 @@ $(ARCHS): feeds translate
 	$(MAKE) -C "$(OPENWRT_DIR)"
 
 config-%:
+	@test -f $(OPENWRT_DIR)/feeds.conf || echo "**** FEHLER! DATEI feeds.conf FEHLT. Fuehre bitte 'make feeds' aus. ****"
 	$(MAKE) -C on-configs "$(patsubst config-%,%,$@)"
 
 menuconfig:

@@ -18,6 +18,7 @@ define Package/on-usergw/description
 endef
 
 define Package/on-usergw/install
+	# this template  is defined in ../../../openwrt/include/opennet.mk ( uses luci localisation)
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 

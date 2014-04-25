@@ -136,7 +136,7 @@ start_host() {
 create_network_switch() {
 	local name="$1"
 	local pidfile="$(get_network_pidfile "$name")"
-	test -e "$pidfile" && return
+	verify_pid_file "$pidfile" && return
 	local socket="$(get_network_socket "$name")"
 	mkdir -p "$(dirname "$socket")"
 	vde_switch --daemon "--sock=$socket" "--pidfile=$pidfile"
@@ -149,8 +149,8 @@ create_network_capture() {
 	local pidfile="$(get_network_pidfile "$name")"
 	create_network_switch "$name"
 	# the interface is not ready immediately
-	test ! -e "$pidfile" && sleep 1
-	test ! -e "$pidfile" && echo >&2 "Failed to find vde-switch for capture: $name" && return 1
+	verify_pid_file "$pidfile" || sleep 1
+	verify_pid_file "$pidfile" || { echo >&2 "Failed to find vde-switch for capture: $name" && return 1; }
 	local socket="$(get_network_socket "$name")"
 	mkdir -p "$(dirname "$socket")"
 	test "$(id -u)" != 0 && gain_root="$SUDO_BIN"
@@ -161,17 +161,25 @@ create_network_virtual() {
 	local name="$1"
 	local ip="$2"
 	local netmask="$3"
-	local pidfile="$(get_network_pidfile "$name")"
 	local gain_root=
+	local pidfile="$(get_network_pidfile "$name")"
 	create_network_switch "$name"
 	# the interface is not ready immediately
-	test ! -e "$pidfile" && sleep 1
-	test ! -e "$pidfile" && echo >&2 "Failed to find vde-switch for tap: $name" && return 1
+	verify_pid_file "$pidfile" || sleep 1
+	verify_pid_file "$pidfile" || { echo >&2 "Failed to find vde-switch for tap: $name" && return 1; }
 	local socket="$(get_network_socket "$name")"
 	mkdir -p "$(dirname "$socket")"
 	test "$(id -u)" != 0 && gain_root="$SUDO_BIN"
 	$gain_root vde_plug2tap --daemon "--sock=$socket" "$name"
 	$gain_root ifconfig "$name" "$ip" netmask "$netmask" up
+}
+
+verify_pid_file() {
+	local pid_file="$1"
+	test -e "$pid_file" || return 1
+	pgrep --pidfile "$pid_file" >/dev/null && return 0
+	rm "$pid_file"
+	return 1
 }
 
 configure_management_interface() {

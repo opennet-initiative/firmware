@@ -13,7 +13,11 @@ CTL_BIN = os.path.join(BASE_DIR, "bin", "te-control.sh")
 
 def get_uplink_interface():
     """ ermittle das Netzwerk-Interface auf das die default-Route verweist """
-    output = subprocess.check_output(["ip", "route", "get", "1.1.1.1"])
+    try:
+        output = subprocess.check_output(["ip", "route", "get", "1.1.1.1"])
+    except subprocess.CalledProcessError:
+        # keine default-Route
+        return None
     first_line = output.splitlines()[0]
     regex = r" dev ([^ ]+) "
     match = re.search(regex, first_line)
@@ -61,8 +65,8 @@ def parse_hosts(config_file, environment):
             management_ip = parser.get(host_name, "management_ip")
         except ConfigParser.NoOptionError:
             management_ip = None
-        run_dir = os.path.join(BASE_DIR, "run", "host", host_name)
-        host = onitester.objects.Host(host_name, management_ip, run_dir)
+        host_dir = os.path.join(BASE_DIR, "setup.d", "hosts.d", host_name)
+        host = onitester.objects.Host(host_name, management_ip, host_dir)
         try:
             management_network = parser.get(host_name, "management_network")
         except ConfigParser.NoOptionError:

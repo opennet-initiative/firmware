@@ -70,10 +70,10 @@ class Host(object):
     auth_token_regex = r"(/luci/;stok=[0-9a-z]+/)"
     default_password = "admin"
 
-    def __init__(self, name, ip, run_dir):
+    def __init__(self, name, ip, data_dir):
         self.name = name
         self.address, self.netmask = onitester.utils.parse_ip(ip)
-        self._run_dir = run_dir
+        self._data_dir = data_dir
         self._url_prefix = "http://%s/" % self.address
         self.interfaces = {}
         self.default_login_passwords = [self.default_password]
@@ -155,7 +155,7 @@ class Host(object):
 
     def _get_ssh_key_filename(self, public=True):
         suffix = "pub" if public else "sec"
-        return os.path.join(self._run_dir, "ssh_key.%s" % suffix)
+        return os.path.join(self._data_dir, "ssh_key.%s" % suffix)
 
     def _get_ssh_pub_key(self):
         keyfile_secret = self._get_ssh_key_filename(public=False)
@@ -224,4 +224,12 @@ class Host(object):
         except dns.resolver.NoNameservers:
             answers = []
         return [str(item) for item in answers]
+
+    def copy_file(self, source, destination):
+        if not os.path.isabs(source):
+            source = os.path.join(self._data_dir, source)
+        client = self._get_ssh_client()
+        transport = client.get_transport()
+        sftp = transport.open_sftp_client()
+        sftp.put(source, destination)
 

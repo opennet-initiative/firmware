@@ -3,7 +3,10 @@ LUCI_DIR = luci
 CUSTOM_PO_DIR = opennet/po
 CUSTOM_PACKAGES_DIR = opennet/packages
 LANGUAGES = de
-ARCHS = ar71xx bcm47xx ixp4xx tl-wr1043nd tl-wr842nd x86
+COMMON_CONFIG = common
+# list all files except Makefile, common file and hidden files
+ARCHS = $(shell ls on-configs/ | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
+
 
 .PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs
 

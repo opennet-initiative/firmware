@@ -21,6 +21,7 @@ define Package/on-openvpn/description
 endef
 
 define Package/on-openvpn/install
+	# this template  is defined in ../../../openwrt/include/opennet.mk ( uses luci localisation)
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 

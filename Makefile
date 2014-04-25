@@ -30,7 +30,7 @@ $(ARCHS): feeds translate
 	$(MAKE) "config-$@"
 	$(MAKE) -C "$(OPENWRT_DIR)"
 
-config-%:
+config-%: feeds translate
 	$(MAKE) -C on-configs "$(patsubst config-%,%,$@)"
 
 menuconfig:

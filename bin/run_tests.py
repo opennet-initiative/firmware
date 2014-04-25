@@ -16,6 +16,7 @@ if __name__ in ('main', '__main__'):
     suites = []
     suites += loader(onitester.tests.initialization.BasicSetup)
     suites += loader(onitester.tests.on_core.OnCore)
+    suites += loader(onitester.tests.on_ugw.OnUGW)
     all_tests = unittest.TestSuite(suites)
     unittest.TextTestRunner(verbosity=2).run(all_tests)
 

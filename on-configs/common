@@ -46,12 +46,12 @@ CONFIG_PACKAGE_wpa-cli=m
 CONFIG_PACKAGE_wpad-mini=y
 
 # IPv6
-CONFIG_PACKAGE_odhcp6c=m
-CONFIG_PACKAGE_odhcpd=m
+CONFIG_PACKAGE_odhcp6c=m #keep as module because of size problems
+CONFIG_PACKAGE_odhcpd=m #keep as module because of size problems
 
 # sshfs
-CONFIG_PACKAGE_kmod-fuse=m
-CONFIG_PACKAGE_sshfs=m
+CONFIG_PACKAGE_kmod-fuse=m #keep as module because of size problems
+CONFIG_PACKAGE_sshfs=m #keep as module because of size problems
 
 # Web-Interface
 CONFIG_PACKAGE_luci=y
@@ -112,7 +112,7 @@ CONFIG_PACKAGE_mtr=m
 CONFIG_PACKAGE_screen=m
 CONFIG_PACKAGE_strace=m
 CONFIG_PACKAGE_tcpdump=m
-CONFIG_PACKAGE_vsftpd=m
+CONFIG_PACKAGE_vsftpd=m #keep as module because of size problems
 CONFIG_PACKAGE_vsftpd-tls=m
 
 # wifidog (?)
@@ -128,9 +128,9 @@ CONFIG_PACKAGE_kmod-tun=y
 CONFIG_PACKAGE_ucarp=m
 
 # VOIP
-CONFIG_PACKAGE_rtpproxy=m
-CONFIG_PACKAGE_sipsak=m
-CONFIG_PACKAGE_siproxd=m
+CONFIG_PACKAGE_rtpproxy=m #keep as module because of size problems
+CONFIG_PACKAGE_sipsak=m #keep as module because of size problems
+CONFIG_PACKAGE_siproxd=m #keep as module because of size problems
 
 # Minimierung
 # CONFIG_SHADOW_PASSWORDS=n

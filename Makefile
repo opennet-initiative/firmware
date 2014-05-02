@@ -6,7 +6,7 @@ LANGUAGES = de
 COMMON_CONFIG = common
 # list all files except Makefile, common file and hidden files
 ARCHS = $(shell ls on-configs/ | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
-
+GIT_COMMIT_COUNT=$(shell git log --oneline | wc -l)
 
 .PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs
 
@@ -31,6 +31,7 @@ list-archs:
 $(ARCHS): feeds translate
 	@echo "Building for target architecture: $@"
 	$(MAKE) "config-$@"
+	@sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=$(GIT_COMMIT_COUNT)/i' $(OPENWRT_DIR)/include/opennet.mk
 	$(MAKE) -C "$(OPENWRT_DIR)"
 
 config-%:

@@ -17,7 +17,10 @@ Debian:
 Lokale Build-Umgebung einrichten
 --------------------------------
 
+    # Entweder nur lese-Zugriff mit https
     git clone https://projects.farbdev.org/opennet/on-firmware.git
+    # Oder alternativ mit Schreibrechten (commit) und Authentifizierung
+    #     git clone git@projects.farbdev.org:opennet/on-firmware.git
     cd on-firmware
     make init
 

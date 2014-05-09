@@ -39,3 +39,8 @@ if [ -f "/etc/init.d/dhcp-fwd" ]; then
 	. /etc/init.d/dhcp-fwd
 	start &
 fi
+
+# At the beginning of system start /etc/resolv.conf.auto is not available or size=0. In that case start service
+if [ ! -e "/tmp/resolv.conf.auto" -o ! -s "/tmp/resolv.conf.auto" ]; then
+        update_dns_servers                
+fi

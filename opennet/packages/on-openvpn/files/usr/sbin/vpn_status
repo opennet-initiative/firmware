@@ -32,7 +32,7 @@ print_status()
 		gw_ipaddr=$(uci -q get on-openvpn.gate_$index.ipaddr);
 		age=$(uci -q get on-openvpn.gate_$index.age);
 		status=$(uci -q get on-openvpn.gate_$index.status);
-		[ "$gw_ipaddr" == "$current_gw_ipaddr" && active="*" || active=""
+		[ "$gw_ipaddr" == "$current_gw_ipaddr" ] && active="*" || active=""
 		dist=$(awk 'BEGIN {FS="[/\x09]+"} $1=="'$gw_ipaddr'" {print $4"/"$5;}' /tmp/olsrd_txtinfo_vpnstatus.txt);
 		[ ${#dist} -lt 8 ] && dist="$dist\t"
 		echo -e "$index\t$active\t$gw_ipaddr\t$dist\t$status\t$age"
@@ -52,6 +52,7 @@ print_usage()
 	echo "add_gw \$IP     - manually add a gateway"
 	echo "del_gw \$POS    - delete a existing gateway"
 	echo "move_top \$POS  - move a gateway to the top of the priority list"
+	echo "status         - show all VPN gateways and their status"
 	echo "start          - start the VPN tunnel"
 	echo "stop           - stop the VPN tunnel"
 	echo "restart        - restart the VPN tunnel"
@@ -117,6 +118,9 @@ case "$1" in
 	;;
 	toggle_etx|toggle_auto)
 		"$1"
+		print_status
+	;;
+	status)
 		print_status
 	;;
 	start|stop|restart)

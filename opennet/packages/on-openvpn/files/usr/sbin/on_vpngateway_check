@@ -302,14 +302,7 @@ case "$1" in
 		check_all_blacklisting
 		;;
 	list)
-		printf "# ID\tIP\t\tUsable\tAge\n"
-		for gw_id in $(get_gate_ids); do
-			gw_prefix=on-openvpn.gate_$gw_id
-			age="$(uci -q get "$gw_prefix.age")"
-			status="$(uci -q get "$gw_prefix.status")"
-			ipaddr="$(uci -q get "$gw_prefix.ipaddr")"
-			printf "%s\t%s\t%s\t%s\n" "$gw_id" "$ipaddr" "$status" "$age"
-		 done
+		vpn_status status
 		;;
 	test)
 		shift

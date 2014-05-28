@@ -100,7 +100,7 @@ CONFIG_PACKAGE_collectd-mod-wireless=m
 CONFIG_PACKAGE_rpcd=m
 CONFIG_PACKAGE_rpcd-mod-file=m
 CONFIG_PACKAGE_rpcd-mod-iwinfo=m
-CONFIG_PACKAGE_muninlite=m
+CONFIG_PACKAGE_muninlite=m #keep as module
 
 # Analyse & Werkzeuge
 CONFIG_PACKAGE_bwm=m
@@ -113,7 +113,7 @@ CONFIG_PACKAGE_screen=m
 CONFIG_PACKAGE_strace=m
 CONFIG_PACKAGE_tcpdump=m
 CONFIG_PACKAGE_vsftpd=m #keep as module because of size problems
-CONFIG_PACKAGE_vsftpd-tls=m
+CONFIG_PACKAGE_vsftpd-tls=m #keep as module
 
 # wifidog (?)
 CONFIG_PACKAGE_iptables-mod-extra=y

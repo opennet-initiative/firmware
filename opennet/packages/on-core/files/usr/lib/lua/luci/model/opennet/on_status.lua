@@ -30,7 +30,7 @@ function printFirmwareTitle()
   if nixio.fs.access("/usr/sbin/on_portcalc.sh") then
     on_aps = split(luci.sys.exec("/usr/sbin/on_portcalc.sh"))[1]
   end
-  luci.http.write(luci.i18n.stringf("Opennet Firmware (next generation) version %s", on_version))
+  luci.http.write(luci.i18n.stringf("Opennet Firmware version %s", on_version))
   if on_id then
     luci.http.write(luci.i18n.stringf("-- AP %s", on_id))
   end

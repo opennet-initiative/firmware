@@ -25,11 +25,9 @@ uci -q set firewall.zone_opennet.network="$(uci get firewall.zone_opennet.networ
         awk '{ x=1; while ( x<=NF ) { if ( $x != "on_'$dev'" ) { printf $x" "; } x++ } printf "\n"}')"
 uci commit firewall
 
-#  removing on_tapX (tapX) from firewall zone opennet
+# removing on_tapX (tapX) from firewall zone opennet
 $DEBUG && logger -t opennet_ugw_down.sh "removing firewall-rules for ${dev}"
-. "$IPKG_INSTROOT/lib/functions.sh"
-. "$IPKG_INSTROOT/lib/firewall/core.sh"
-fw_reload
+/etc/init.d/firewall reload
 
 $DEBUG && logger -t opennet_ugw_down.sh "removing iterface ${dev} from config of olsrd, restarting olsrd"
 uci -q set olsrd.@Interface[0].interface="$(uci get olsrd.@Interface[0].interface | \

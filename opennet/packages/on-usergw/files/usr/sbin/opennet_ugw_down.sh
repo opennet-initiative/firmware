@@ -27,8 +27,8 @@ uci commit firewall
 
 #  removing on_tapX (tapX) from firewall zone opennet
 $DEBUG && logger -t opennet_ugw_down.sh "removing firewall-rules for ${dev}"
-. $IPKG_INSTROOT/lib/functions.sh
-. $IPKG_INSTROOT/lib/firewall/core.sh
+. "$IPKG_INSTROOT/lib/functions.sh"
+. "$IPKG_INSTROOT/lib/firewall/core.sh"
 fw_reload
 
 $DEBUG && logger -t opennet_ugw_down.sh "removing iterface ${dev} from config of olsrd, restarting olsrd"
@@ -38,6 +38,9 @@ uci commit olsrd
 /etc/init.d/olsrd restart
 
 filename=/tmp/opennet_ugw-${remote_1}.txt
-rm -f $filename    # removing running message
+rm -f "$filename"    # removing running message
 
 $DEBUG && logger -t opennet_ugw_down.sh "finished for iface ${dev}"
+
+exit 0
+

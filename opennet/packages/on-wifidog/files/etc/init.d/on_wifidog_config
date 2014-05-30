@@ -97,9 +97,9 @@ start() {
 	fi
 
 
-    if [ -n "$(grep "GatewayInterface br-lan" /etc/wifidog.conf)" ]; then
-      ln -sf /etc/etc_presets/wifidog.conf /etc/wifidog.conf;
-    fi
+	if [ -n "$(grep "GatewayInterface br-lan" /etc/wifidog.conf)" ]; then
+		ln -sf /etc/etc_presets/wifidog.conf /etc/wifidog.conf;
+	fi
 	# change current ID if starting with AP or not set
 	currentID=$(awk '{if ($1 == "GatewayID" && $2 !~ "^AP" && $2 != "OpennetWifidogNode") {print $2; exit}}' /etc/wifidog.conf)
 	if [ -z "$currentID" ] ; then
@@ -118,5 +118,5 @@ start() {
 	done
 	mv /tmp/dhcp-fwd.conf /etc/dhcp-fwd.conf
 
-    exit 0
+	exit 0
 }

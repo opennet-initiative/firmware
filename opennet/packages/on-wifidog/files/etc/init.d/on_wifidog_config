@@ -15,7 +15,7 @@ START=21
 
 start() {
 	# include this file only during "start" ("enable" or "disable" may use IPKG_INSTROOT)
-	. $IPKG_INSTROOT/usr/bin/on-helper.sh
+	. "$IPKG_INSTROOT/usr/bin/on-helper.sh"
 
 	# while reconfiguring, on_id is usually not set. Anyway, just try to read it...
 	on_id=$(uci -q get on-core.settings.on_id)
@@ -24,9 +24,9 @@ start() {
 	free_ipschema=$(uci -q get on-wifidog.defaults.free_ipschema)
 	free_netmask=$(uci -q get on-wifidog.defaults.free_netmask)	
 
-	free_ipaddr=$(get_on_ip $on_id $free_ipschema 0)
-	free_ipaddr_first=$(get_on_ip "0.1" $free_ipschema 0)
-	on_ipaddr=$(get_on_ip $on_id $on_ipschema 0)
+	free_ipaddr=$(get_on_ip "$on_id" "$free_ipschema" 0)
+	free_ipaddr_first=$(get_on_ip "0.1" "$free_ipschema" 0)
+	on_ipaddr=$(get_on_ip "$on_id" "$on_ipschema" 0)
 
 	if [ -z "$(uci -q get network.free)" ]; then
 		local batch
@@ -87,36 +87,53 @@ start() {
 			target=$(uci -q get firewall.@redirect[$no].target);
 			src_port=$(uci -q get firewall.@redirect[$no].src_port);
 			if [ "$src" == "opennet" ] && [ "$proto" == "udp" ] && [ "$src_dport" == "67" ] && [ "$target" == "DNAT" ] && [ "$src_port" == "67" ]; then
-				uci set firewall.@redirect[$no].dest_ip=${free_ipaddr}
-				uci set firewall.@redirect[$no].src_dip=${on_ipaddr}
+				uci set "firewall.@redirect[$no].dest_ip=${free_ipaddr}"
+				uci set "firewall.@redirect[$no].src_dip=${on_ipaddr}"
 				uci commit firewall
-				break;
+				break
 			fi
 			: $((no++))
 		done
 	fi
 
 
-	if [ -n "$(grep "GatewayInterface br-lan" /etc/wifidog.conf)" ]; then
-		ln -sf /etc/etc_presets/wifidog.conf /etc/wifidog.conf;
-	fi
+	# copy our template if the original wifidog.conf seems to be present
+	grep -q "GatewayInterface br-lan" /etc/wifidog.conf && cp /etc/wifidog.conf.opennet_template /etc/wifidog.conf
+
+	# There are three possibilities:
+	#  1) no GatewayID is set (wifidog is disabled - it will not start)
+	#  2) the current AP-based name is set
+	#  3) an outdated AP-based name is set
 	# change current ID if starting with AP or not set
-	currentID=$(awk '{if ($1 == "GatewayID" && $2 !~ "^AP" && $2 != "OpennetWifidogNode") {print $2; exit}}' /etc/wifidog.conf)
-	if [ -z "$currentID" ] ; then
-		awk '{if ($1 != "GatewayID") print;}' /etc/wifidog.conf >/tmp/wifidog.conf
-		echo "GatewayID AP$on_id" >>/tmp/wifidog.conf
-		rm /etc/wifidog.conf
-		mv /tmp/wifidog.conf /etc/wifidog.conf
+	conf_file=/etc/wifidog.conf
+	current_wifidog_name=$(grep "^GatewayID" "$conf_file" | awk '{print $2}')
+	wanted_wifidog_name="AP$on_id"
+
+	# do not touch the config file if the "marker" line was removed
+	if grep -q "OPENNET FIRMWARE" "$conf_file"; then
+		if [ "$current_wifidog_name" != "$wanted_wifidog_name" ]; then
+			if grep -q "GatewayID" "$conf_file"; then
+				sed -i "s/^.*GatewayID.*$/GatewayID $wanted_wifidog_name/" "$conf_file"
+			else
+				echo "GatewayID $wanted_wifidog_name" >>"$conf_file"
+			fi
+		fi
 	fi
 
-	awk '{if ($1 != "if" || $2 == "tun0" || $4 != "true") print;}' /etc/etc_presets/dhcp-fwd.conf >/tmp/dhcp-fwd.conf
+	# update the dhcp-fwd.conf file if there were changes
+	tmp_conf_file=/tmp/dhcp-fwd.conf.tmp
+	dest_conf_file=/etc/dhcp-fwd.conf
+	cp /etc/dhcp-fwd.opennet_template "$tmp_conf_file"
 	for network in $(uci -q get firewall.zone_opennet.network); do
 		ifname=$(uci -q get network.$network.ifname)
-		if [ -n "$ifname" ] && [ "$ifname" != "none" ]; then
-			echo "if $ifname false true true" >>/tmp/dhcp-fwd.conf
-		fi
+		[ -n "$ifname" -a "$ifname" != "none" ] && echo "if $ifname false true true" >>"$tmp_conf_file"
 	done
-	mv /tmp/dhcp-fwd.conf /etc/dhcp-fwd.conf
+	if cmp --quiet "$tmp_conf_file" "$dest_conf_file";
+		rm "$tmp_conf_file"
+	else
+		mv "$tmp_conf_file" "$dest_conf_file"
+	fi
 
 	exit 0
 }
+

@@ -1,0 +1,35 @@
+# ATTENTION: remove this line to prevent automatic configuration changes (OPENNET FIRMWARE)
+
+#GatewayID OpennetWifidogNode
+ExternalInterface tun0
+GatewayInterface br-free
+
+AuthServer {
+    Hostname inez.opennet-initiative.de
+    Path /
+}
+
+ClientTimeout 5
+
+FirewallRuleSet global {
+    FirewallRule block to 192.168.0.0/16
+    FirewallRule block to 172.16.0.0/16
+    FirewallRule block to 10.1.0.0/16
+    FirewallRule block to 10.2.0.0/16
+}
+
+FirewallRuleSet validating-users {
+    FirewallRule allow to 0.0.0.0/0
+}
+
+FirewallRuleSet known-users {
+    FirewallRule allow to 0.0.0.0/0
+}
+
+FirewallRuleSet unknown-users {
+}
+
+FirewallRuleSet locked-users {
+    FirewallRule block to 0.0.0.0/0
+}
+

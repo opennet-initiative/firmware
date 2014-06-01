@@ -42,5 +42,3 @@ Hier findest du Informationen zu weiterführende Details:
 
 1. *[Struktur der Build-Umgebung] (master/doc/Struktur.md)*
 2. *[Enwicklungsleitfaden] (master/doc/Entwicklung.md)*
-
-

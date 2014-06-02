@@ -1,11 +1,12 @@
 iptables hat die maximale Länge der Tabellennamen reduziert - wifidog verwendet jedoch sehr lange Tabellennamen
 --- /dev/null
 +++ b/packages/net/wifidog/patches/023-short_iptable-rules.patch
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,31 @@
 +--- a/src/fw_iptables.h        2012-10-16 23:10:31.192479217 +0200
 ++++ b/src/fw_iptables.h        2012-10-16 23:11:54.682601672 +0200
 +@@ -31,17 +31,17 @@
-+ /*@{*/
++ 
++ /*@{*/ 
 + /**Iptable table names used by WifiDog */
 +-#define TABLE_WIFIDOG_OUTGOING  "WiFiDog_$ID$_Outgoing"
 +-#define TABLE_WIFIDOG_WIFI_TO_INTERNET "WiFiDog_$ID$_WIFI2Internet"
@@ -29,4 +30,6 @@ iptables hat die maximale Länge der Tabellennamen reduziert - wifidog verwendet
 ++#define TABLE_WIFIDOG_UNKNOWN   "WD_$ID$_Unknown"
 ++#define TABLE_WIFIDOG_LOCKED    "WD_$ID$_Locked"
 ++#define TABLE_WIFIDOG_TRUSTED    "WD_$ID$_Trusted"
-+ /*@}*/
++ /*@}*/ 
++ 
++ /** Used by iptables_fw_access to select if the client should be granted of denied access */

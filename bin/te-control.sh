@@ -198,23 +198,33 @@ serial_command() {
 	local name="$1"
 	shift
 	local read_stdin=
+	local start_marker="#### 1FOOO #####"
+	local end_marker="#### 2FOOO #####"
+	local tmpfile="$(tempfile)"
+	echo >&2 "$tmpfile"
 	test $# -gt 0 && test "$1" = "-" && read_stdin=1 && shift
 	local socket="UNIX-CONNECT:$(get_host_serial_socket "$name")"
 	# flush the current output buffer and clear the prompt
 	(
 		echo
-		echo "PS1="
+		echo " PS1="
 		echo
-		sleep 0.5
 	) | socat -t 0 STDIO "$socket" >/dev/null 2>/dev/null
 	(
 		if test -n "$read_stdin"; then
 			cat -
 		 else
-			echo "$@"
+			echo " echo $start_marker"
+			echo " $@"
+			echo " echo $end_marker"
 		 fi
-		sleep 0.5
-	) | socat -t 0 STDIO "$socket" | sed 1d
+	) | socat -t 0 STDIO "$socket" >"$tmpfile"
+	until grep -q "^$end_marker" "$tmpfile"; do
+		echo "echo -n | socat -t 1 STDIO \"$socket\" >>\"$tmpfile\""
+		echo -n | socat -t 1 STDIO "$socket" >>"$tmpfile"
+	 done
+	sed "1,/$start_marker/d" "$tmpfile" | sed "/$end_marker/,$"
+	rm -f "$tmpfile"
 }
 
 copy_dir_to_host() {
@@ -250,6 +260,11 @@ EOF
 		 done
 		# wait a bit - otherwise network interfaces are not available
 		uptime="$(serial_command "$name" "cat /proc/uptime" | cut -f 1 -d .)"
+		# uptime check failed? Try again?
+		if echo "$uptime" | grep -q "^[0-9]+$"; then
+			echo >&2 "Failed to retrieve uptime from host '$name': $uptime"
+			uptime=0
+		  fi
 		until test "$uptime" -ge "$timeout"; do sleep 1; uptime="$((uptime+1))"; done
 		;;
 	start-host)

@@ -8,6 +8,7 @@ sys.path.insert(0, BASE_DIR)
 
 import onitester.tests.initialization
 import onitester.tests.on_core
+import onitester.tests.on_ugw
 
 
 if __name__ in ('main', '__main__'):

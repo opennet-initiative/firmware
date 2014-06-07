@@ -1,0 +1,68 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 82 (0x52)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=DE, ST=Mecklenburg-Vorpommern, O=Opennet Initiative e.V., CN=hog-opennet-intermediate-CA.ca.on/emailAddress=admin@opennet-initiative.de
+        Validity
+            Not Before: Apr  2 00:49:05 2013 GMT
+            Not After : Mar 31 00:49:05 2023 GMT
+        Subject: C=de, ST=Mecklenburg-Vorpommern, O=Lars Kruse, OU=users, CN=1.203.aps.on/emailAddress=lars@systemausfall.org
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:ac:fa:b3:88:d1:b3:df:df:2a:7d:c0:75:c7:ad:
+                    12:4d:48:3b:4e:c7:38:b4:f1:bf:48:58:84:3b:4e:
+                    d2:90:7a:98:bf:43:08:e5:08:0d:99:63:60:ca:75:
+                    22:a4:37:b9:49:ab:23:ba:08:ed:59:04:d6:7c:87:
+                    9a:0f:41:9c:26:43:47:65:9f:0e:50:2f:41:cf:fb:
+                    51:2e:61:60:09:f4:f8:1f:90:fa:86:87:5f:2f:54:
+                    98:37:c7:bd:f9:b3:94:74:9b:a6:86:52:e3:9f:92:
+                    41:7d:f7:a0:27:cf:d4:b3:4e:d7:bb:e0:5f:cd:d7:
+                    be:a0:88:fb:e6:e2:fd:71:c3
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            Netscape Comment: 
+                OpenSSL Generated Certificate
+            X509v3 Subject Key Identifier: 
+                56:6E:63:B8:E0:0D:5A:12:96:36:F5:AD:D1:E9:3D:C3:0F:5E:FF:6D
+            X509v3 Authority Key Identifier: 
+                keyid:08:E7:DD:BA:66:68:95:EF:04:B9:8E:CD:A4:BA:38:3C:A0:B1:A0:F5
+                DirName:/C=DE/ST=Mecklenburg-Vorpommern/L=Rostock/O=OpenNet/CN=OpenNet-CA/emailAddress=info@opennet-forum.de
+                serial:D1
+
+    Signature Algorithm: md5WithRSAEncryption
+        22:03:30:3d:cc:bd:dd:cb:90:f6:44:48:5d:3c:0c:fd:8b:11:
+        b8:d0:28:64:fa:25:b9:64:19:a9:06:af:57:c3:99:ca:80:b2:
+        48:12:ef:b8:8b:7f:82:6a:01:fc:b1:9c:53:5a:e0:1d:62:ae:
+        ab:38:24:3c:c6:53:2d:ac:44:17:0b:01:79:99:5e:79:ed:8d:
+        55:71:f4:02:6d:28:a6:2b:45:2d:d5:98:74:bf:1a:ea:30:99:
+        17:35:4d:17:67:d6:8b:60:a8:e4:43:fc:bd:13:35:0b:f6:8b:
+        f6:42:06:d9:5e:60:95:a7:75:7b:1f:a6:d5:42:5a:97:e5:31:
+        62:7c
+-----BEGIN CERTIFICATE-----
+MIIDzTCCAzagAwIBAgIBUjANBgkqhkiG9w0BAQQFADCBqDELMAkGA1UEBhMCREUx
+HzAdBgNVBAgTFk1lY2tsZW5idXJnLVZvcnBvbW1lcm4xIDAeBgNVBAoTF09wZW5u
+ZXQgSW5pdGlhdGl2ZSBlLlYuMSowKAYDVQQDEyFob2ctb3Blbm5ldC1pbnRlcm1l
+ZGlhdGUtQ0EuY2Eub24xKjAoBgkqhkiG9w0BCQEWG2FkbWluQG9wZW5uZXQtaW5p
+dGlhdGl2ZS5kZTAeFw0xMzA0MDIwMDQ5MDVaFw0yMzAzMzEwMDQ5MDVaMIGRMQsw
+CQYDVQQGEwJkZTEfMB0GA1UECBMWTWVja2xlbmJ1cmctVm9ycG9tbWVybjETMBEG
+A1UEChMKTGFycyBLcnVzZTEOMAwGA1UECxMFdXNlcnMxFTATBgNVBAMTDDEuMjAz
+LmFwcy5vbjElMCMGCSqGSIb3DQEJARYWbGFyc0BzeXN0ZW1hdXNmYWxsLm9yZzCB
+nzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEArPqziNGz398qfcB1x60STUg7Tsc4
+tPG/SFiEO07SkHqYv0MI5QgNmWNgynUipDe5SasjugjtWQTWfIeaD0GcJkNHZZ8O
+UC9Bz/tRLmFgCfT4H5D6hodfL1SYN8e9+bOUdJumhlLjn5JBffegJ8/Us07Xu+Bf
+zde+oIj75uL9ccMCAwEAAaOCARowggEWMAkGA1UdEwQCMAAwLAYJYIZIAYb4QgEN
+BB8WHU9wZW5TU0wgR2VuZXJhdGVkIENlcnRpZmljYXRlMB0GA1UdDgQWBBRWbmO4
+4A1aEpY29a3R6T3DD17/bTCBuwYDVR0jBIGzMIGwgBQI5926ZmiV7wS5js2kujg8
+oLGg9aGBk6SBkDCBjTELMAkGA1UEBhMCREUxHzAdBgNVBAgTFk1lY2tsZW5idXJn
+LVZvcnBvbW1lcm4xEDAOBgNVBAcTB1Jvc3RvY2sxEDAOBgNVBAoTB09wZW5OZXQx
+EzARBgNVBAMTCk9wZW5OZXQtQ0ExJDAiBgkqhkiG9w0BCQEWFWluZm9Ab3Blbm5l
+dC1mb3J1bS5kZYICANEwDQYJKoZIhvcNAQEEBQADgYEAIgMwPcy93cuQ9kRIXTwM
+/YsRuNAoZPoluWQZqQavV8OZyoCySBLvuIt/gmoB/LGcU1rgHWKuqzgkPMZTLaxE
+FwsBeZleee2NVXH0Am0opitFLdWYdL8a6jCZFzVNF2fWi2Co5EP8vRM1C/aL9kIG
+2V5glad1ex+m1UJal+UxYnw=
+-----END CERTIFICATE-----

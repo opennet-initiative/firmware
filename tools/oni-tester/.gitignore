@@ -1,0 +1,4 @@
+onitester/tests/ssh_key.pub
+onitester/tests/ssh_key.sec
+.*.swp
+*.pyc

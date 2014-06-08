@@ -35,7 +35,7 @@ case "$PARAM" in
     ;;
 esac
 
-# get revision numbers
+# get revision number
 step=0
 while read line; do
   case "$line" in
@@ -50,14 +50,24 @@ while read line; do
   esac
 done < "$HOME/$MK_FILE"
 [ $step -ne 2 ] && echo >&2 "error getting revision numbers from build" && exit 1
+REVISION="$VERSION-$RELEASE"
 
 # prepare export directory
-DEST_DIR="$HOME/$EXPORT_DIR/$VERSION-$RELEASE$PLATFORM"
-mkdir -p "$DEST_DIR"
+DEST_DIR="$HOME/$EXPORT_DIR/$REVISION"
+DEST_PLATFORM_DIR="$DEST_DIR$PLATFORM"
+mkdir -p "$DEST_PLATFORM_DIR"
 
 # copy build to export directory
 SRC_DIR="$HOME/$BIN_DIR$PLATFORM/"
-rsync $RSYNC_OPTIONS "$SRC_DIR"* "$DEST_DIR"
- 
+rsync $RSYNC_OPTIONS "$SRC_DIR"* "$DEST_PLATFORM_DIR"
+
+# set version number in export directories
+touch "$DEST_DIR/__${REVISION}__"
+touch "$DEST_PLATFORM_DIR/__${REVISION}__"
+
+# generate latest link
+rm -f "$HOME/$EXPORT_DIR/$LATEST_LINK"
+(cd "$HOME/$EXPORT_DIR" && ln -s "$REVISION" "$LATEST_LINK")
+
 # return
 exit 0

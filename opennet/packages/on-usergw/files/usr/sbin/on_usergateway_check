@@ -25,7 +25,7 @@ DATA_LOCK_FILE=/var/run/on_usergateway_check
 update_olsr_service () {
 	hna="$1"
 
-	current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600 to:/ {printf $10; exit}')"
+	current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
 	[ -z "$current_ugw_ipaddr" ] && return
 
 	found=""
@@ -475,7 +475,7 @@ ugw_enableForward () {
 ugw_forwardGW () {
 	msg_info "ugw_forwardGW"
 	sharing="$(uci -q get on-usergw.ugw_sharing.shareInternet)"
-	current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600 to:/ {printf $10; exit}')"
+	current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
 	if [ "$sharing" != "on" ]; then
 		ugw_disableForward
 		return

@@ -96,7 +96,7 @@ ugw_checkSpeed () {
 get_prefixed_items() {
 	local prefix="$1"
 	local nr=1
-	while uci -q get "$prefix$nr"; do echo "$((nr++))"; done
+	while uci -q get "$prefix$nr" >/dev/null; do echo "$((nr++))"; done
 }
 
 #################################################################################

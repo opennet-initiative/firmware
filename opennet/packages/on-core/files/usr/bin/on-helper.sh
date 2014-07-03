@@ -25,11 +25,11 @@ get_client_cn() {
 
 DEBUG=$(uci -q get on-core.defaults.debug)
 msg_debug() {
-	$DEBUG && logger -t $(basename "$2")[$$] "$1" || true
+	"$DEBUG" && logger -t "$(basename "$0")[$$]" "$1" || true
 }
 
 msg_info() {
-	logger -t $(basename "$0")[$$] "$1"
+	logger -t "$(basename "$0")[$$]" "$1"
 }
 
 # update a file if its content changed

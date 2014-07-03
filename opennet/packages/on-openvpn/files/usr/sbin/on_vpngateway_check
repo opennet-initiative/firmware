@@ -34,7 +34,7 @@ msg_debug "starting another instance ($1)"
 # check if other instance is running, if yes, kill other instance
 if [ -f "$PID_FILE" ]; then
 	msg_debug "detected '$PID_FILE'"
-	kill $(cat "$PID_FILE")
+	kill "$(cat "$PID_FILE")"
 fi
 
 # register that process is running

@@ -11,18 +11,20 @@
 # 	http://www.apache.org/licenses/LICENSE-2.0
 # 
 
-if [ -e /tmp/openvpn_msg.txt ]; then
-	logger -t "openvpn opennet_up" "running instance detected by /tmp/openvpn_msg.txt. stopping"
+. "$IPKG_INSTROOT/usr/bin/on-helper.sh"
+
+MSG_FILE=/tmp/openvpn_msg.txt
+
+if [ -e "$MSG_FILE" ]; then
+	msg_info "running instance detected by $MSG_FILE. stopping"
 	exit 1
 fi
-echo "vpn-tunnel active" >/tmp/openvpn_msg.txt	# a short message for the web frontend
-
-. "$IPKG_INSTROOT/usr/bin/on-helper.sh"
+echo "vpn-tunnel active" >"$MSG_FILE"	# a short message for the web frontend
 
 if [ -z "$(ip rule show | grep "lookup tun")" ];then
 	mainprio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /main/ {print $1; exit}')
-	for network in $(echo "$(uci get -q firewall.zone_local.network) $(uci get -q firewall.zone_free.network)"); do
-		networkprefix=$(get_network $network)
+	for network in $(uci get -q firewall.zone_local.network) $(uci get -q firewall.zone_free.network); do
+		networkprefix=$(get_network "$network")
 		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" table tun prio "$((mainprio+10))"
 	done
 	ip rule add iif lo table tun prio "$((mainprio+10))"

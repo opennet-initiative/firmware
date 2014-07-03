@@ -18,6 +18,7 @@
 . "$IPKG_INSTROOT/usr/bin/on-helper.sh"
 
 DATA_LOCK_FILE=/var/run/on_usergateway_check
+VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
 
 #################################################################################
 # update olsrd_nameservice plugin and spread speed information for this gateway
@@ -102,7 +103,7 @@ get_prefixed_items() {
 #################################################################################
 # check all stored Usergateways for speed
 ugw_checkSpeeds () {
-	msg_info "ugw_checkSpeeds"
+	msg_debug "ugw_checkSpeeds"
 	for test_id in $(get_prefixed_items 'on-usergw.opennet_ugw'); do ugw_checkSpeed "$test_id"; done
 }
 
@@ -142,7 +143,7 @@ ugw_checkVPN()
 
 		# check if it is possible to open tunnel to the gateway (10 sec. maximum)
 		# test-parameters; '--dev null' will be prefaced
-		openvpn_test_parameters="--client --ns-cert-type server --remote $gw_ipaddr 1600 --ca /etc/openvpn/opennet_vpntest/opennet-ca.crt --cert /etc/openvpn/opennet_vpntest/on_aps.crt --key /etc/openvpn/opennet_vpntest/on_aps.key --inactive 10 --verb 3 --nice 3 --resolv-retry 0 --ping-exit 5"
+		openvpn_test_parameters="--client --ns-cert-type server --remote $gw_ipaddr 1600 --ca $VPN_DIR_TEST/opennet-ca.crt --cert $VPN_DIR_TEST/on_aps.crt --key $VPN_DIR_TEST/on_aps.key --inactive 10 --verb 3 --nice 3 --resolv-retry 0 --ping-exit 5"
 
 		msg_debug "start vpn test of $gw_ipaddr"
 
@@ -164,7 +165,7 @@ ugw_checkVPN()
 #################################################################################
 # check all stored Usergateways for working VPN (on port 1600)
 ugw_checkVPNs () {
-	msg_info "ugw_checkVPNs"
+	msg_debug "ugw_checkVPNs"
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
 		# do VPNchecks only if WAN-Connection is established
 		if [ "$(uci -q get "on-usergw.opennet_ugw${nr}.wan")" != "ok" ]; then
@@ -253,7 +254,7 @@ ugw_checkMTU () {
 #################################################################################
 # check all stored Usergateways for working MTU
 ugw_checkMTUs () {
-	msg_info "ugw_checkMTUs"
+	msg_debug "ugw_checkMTUs"
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do ugw_checkMTU "$nr"; done
 }
 
@@ -288,7 +289,7 @@ ugw_checkWAN () {
 #################################################################################
 # check all stored Usergateways for working MTU
 ugw_checkWANs () {
-	msg_info "ugw_checkWANs"
+	msg_debug "ugw_checkWANs"
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do ugw_checkWAN "$nr"; done
 }
 
@@ -296,7 +297,7 @@ ugw_checkWANs () {
 # set or search/replace ugw-HNA in olsrd config
 # $1 == hna to set for olsr
 update_olsr_hna () {
-	msg_info "update_olsr_hna"
+	msg_debug "update_olsr_hna"
 	found=""
 	no=0
 	while uci -q get "olsrd.@Hna4[${no}]"; do
@@ -319,7 +320,7 @@ update_olsr_hna () {
 #################################################################################
 # mark usage of HNA in olsrd config (for removal by cron-daily/clean_ugw_hna.sh)
 mark_olsr_hna_used () {
-	msg_info "mark_olsr_hna_used"
+	msg_debug "mark_olsr_hna_used"
 	while ( [ -n "$(uci -q get "olsrd.@Hna4[${no}]")" ] ); do
 		if [ "$(uci -q get "olsrd.@Hna4[${no}].source")" == "ugw" ]; then
 			uci set "olsrd.@Hna4[${no}].lastused=$(date +%s)"
@@ -334,7 +335,7 @@ mark_olsr_hna_used () {
 #################################################################################
 # syncs config from on-usergw to openvpn
 ugw_syncVPNConfig () {
-	msg_info "ugw_syncVPNConfig"
+	msg_debug "ugw_syncVPNConfig"
 	# sync and check VPN config
 	lua -e "require('luci.model.opennet.on_usergw_syncconfig') checkVPNConfig()"
 }
@@ -342,7 +343,7 @@ ugw_syncVPNConfig () {
 #################################################################################
 # check if sharingInternet is temporarily blocked
 ugw_checkSharingBlocked () {
-	msg_info "ugw_checkSharingBlocked"
+	msg_debug "ugw_checkSharingBlocked"
 	on_share_internet_unblock_time=$(uci -q get on-usergw.ugw_sharing.unblock_time)
 	[ -z "$on_share_internet_unblock_time" ] && return
 	if [ "$(date +%s)" -gt "$on_share_internet_unblock_time" ]; then
@@ -378,7 +379,7 @@ ugw_checkWorking () {
 #################################################################################
 # check if sharingInternet is enabled and tunnel's are active or vice versa
 ugw_shareInternet () {
-	msg_info "ugw_shareInternet"
+	msg_debug "ugw_shareInternet"
 
 	sharing="$(uci -q get on-usergw.ugw_sharing.shareInternet)"
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
@@ -403,7 +404,7 @@ ugw_shareInternet () {
 #################################################################################
 # disable ugw forwarding, remove rules from current firewall settings
 ugw_disableForward () {
-	msg_info "ugw_disableForward"
+	msg_debug "ugw_disableForward"
 	change=""
 	nr=0
 	while uci -q get "firewall.@redirect[$nr]"; do
@@ -431,7 +432,7 @@ ugw_disableForward () {
 # enable ugw forwarding, add rules from current firewall settings and set hna
 # $1 == ip of gateway to forward to
 ugw_enableForward () {
-	msg_info "ugw_enableForward"
+	msg_debug "ugw_enableForward"
 	hna=$(lua -e "require('luci.model.opennet.on_hna_check') print(getHNA())")
 	section=$(uci add firewall redirect)
 	uci set "firewall.$section.src=opennet"
@@ -475,7 +476,7 @@ ugw_enableForward () {
 #################################################################################
 # check is done every 5 minutes, if there is a better gw then switch
 ugw_forwardGW () {
-	msg_info "ugw_forwardGW"
+	msg_debug "ugw_forwardGW"
 	sharing=$(uci -q get on-usergw.ugw_sharing.shareInternet)
 	current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
 	if [ "$sharing" != "on" ]; then
@@ -505,7 +506,7 @@ ugw_forwardGW () {
 		[ -n "$found_first_ugw" ] && continue
 
 		# try if this gateway is better than the currently active one
-		msg_info "checking first found usergw - $ugw_ipaddr"
+		msg_debug "checking first found usergw - $ugw_ipaddr"
 		if [ "$ugw_ipaddr" != "$current_ugw_ipaddr" ]; then
 			msg_debug "first found usergw - $ugw_ipaddr != $current_ugw_ipaddr"
 			if [ -z "$current_ugw_ipaddr" ] || [ $((better_ugw_count+5)) -gt "$betterusergateway_timeout" ]; then
@@ -529,7 +530,7 @@ ugw_forwardGW () {
 #################################################################################
 # do extra checks (speed, mtu) only at dedicated times
 ugw_doExtraChecks () {
-	msg_info "ugw_doExtraChecks"
+	msg_debug "ugw_doExtraChecks"
 
 	restart_time=$(($(date +%s)-$(cut -f1 -d. /proc/uptime)))
 
@@ -623,14 +624,19 @@ case "$ACTION" in
 		ugw_shareInternet
 		;;
 	*)
-		ugw_syncVPNConfig
-		ugw_checkWANs
-		ugw_checkVPNs
-		ugw_doExtraChecks
-		ugw_checkSharingBlocked
-		ugw_checkWorking
-		ugw_forwardGW
-		ugw_shareInternet
+		cert_file=$(uci -q get on-usergw.opennet_ugw.cert)
+		if [ -e "$cert_file" ]; then
+			ugw_syncVPNConfig
+			ugw_checkWANs
+			ugw_checkVPNs
+			ugw_doExtraChecks
+			ugw_checkSharingBlocked
+			ugw_checkWorking
+			ugw_forwardGW
+			ugw_shareInternet
+		 else
+			msg_info "skipping UGW checks (no certificate found: $cert_file)"
+		 fi
 		;;
 esac
 

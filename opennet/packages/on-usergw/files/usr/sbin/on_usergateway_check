@@ -13,9 +13,10 @@
 
 # Debug?
 # set -x
+set -u
 
 # include helper functions
-. "$IPKG_INSTROOT/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
 
 DATA_LOCK_FILE=/var/run/on_usergateway_check
 VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
@@ -189,45 +190,28 @@ ugw_getMTU () {
 	local pidfile="/tmp/openvpn_mtutest_$$.pid"
 	local outfile="/tmp/openvpn_mtutest_$$.out"
 	local openvpn_ugw_test_parameters="--mtu-test --remote $remote $rport --tls-client --ns-cert-type server \
-		--ca $ca --cert $cert --key $key --comp-lzo $complzo --dev tap_mtu --inactive 10 --nice 3 \
+		--ca $ca --cert $cert --key $key --dev tap_mtu --inactive 10 --nice 3 \
 		--resolv-retry 0 --ping-exit 25 --ping-restart 0 --comp-lzo --tls-exit --writepid $pidfile"
 
 	# for external debugging
 	echo "$openvpn_ugw_test_parameters" >/tmp/openvpn_ugw_test_parameters
 
 	openvpn $openvpn_ugw_test_parameters >"$outfile" 2>&1 &
-	(openvpn $openvpn_ugw_test_parameters | \
-		awk '
-			BEGIN { FS="[\]\[,]" }
-			/MTU test completed/ {
-			system("kill 2>/dev/null $(ps|grep \"openvpn --mtu-test 1\" |grep -v grep|cut -b 0-5)");
-			if ($5 <= $6 && $8 <= $9) {
-				system("uci -q set on-usergw.opennet_ugw"'$1'".mtu=ok")
-			} else {
-				system("uci -q set on-usergw.opennet_ugw"'$1'".mtu=error")
-			}
-			system("uci -q set on-usergw.opennet_ugw"'$1'".mtu_msg=\""$0"\"")
-			system("uci -q set on-usergw.opennet_ugw"'$1'".mtu_toGW_tried=\""$5"\"")
-			system("uci -q set on-usergw.opennet_ugw"'$1'".mtu_toGW_actual=\""$6"\"")
-			system("uci -q set on-usergw.opennet_ugw"'$1'".mtu_fromGW_tried=\""$8"\"")
-			system("uci -q set on-usergw.opennet_ugw"'$1'".mtu_fromGW_actual=\""$9"\"")
-			system("uci -q set on-usergw.opennet_ugw"'$1'".mtu_time=\"$(date +%s)\"")
-			system("uci -q commit on-usergw")
-		}') &
-	# this catches the pid of above line
+	# wait for openvpn to startup and write pid file
+	sleep 10
 	local pid=$(cat "$pidfile")
 	local wait_loops=20
 	local mtu_out
-	while ( [ "$wait_loops" -gt 0 ] ); do
+	while [ "$wait_loops" -gt 0 ]; do
 		# wait for one minute
 		sleep 30	
 		mtu_out=$(grep "MTU test completed" "$outfile")
 		# for example 
 		# Thu Jul  3 22:23:01 2014 NOTE: Empirical MTU test completed [Tried,Actual] local->remote=[1573,1573] remote->local=[1573,1573]
 		if [ -n "$mtu_out" ]; then
-                        # output result as one line 4 numbers and complete status output line
-			echo -n "$mtu_out" | tr '[' ',' | tr ']' ',' | cut -d , -f 5,6,8,9 --output-delimiter=" " 
-			echo " $mtu_out"
+                        # output result as one line 4 numbers and complete status output line comma separated
+			echo "$mtu_out" | tr '[' ',' | tr ']' ',' | cut -d , -f 5,6,8,9 | tr '\n' ',' 
+			echo "$mtu_out"
 			kill "$pid" >/dev/null 2>&1 || true ; rm -f "$pidfile" "$outfile"
 			return 0
 		fi
@@ -263,12 +247,12 @@ ugw_checkMTU () {
 	local result=$(ugw_getMTU "$remote")
 
 	if [ -n "$result" ]; then
-		local toGW_tried=$(echo "$result" | cut -f 1 -d " ")
-		local toGW_actual=$(echo "$result" | cut -f 2 -d " ")
-		local fromGW_tried=$(echo "$result" | cut -f 3 -d " ")
-		local fromGW_actual=$(echo "$result" | cut -f 4 -d " ")
-		local status_output=$(echo "$result" | cut -f 5- -d " ")
-				
+		local toGW_tried=$(echo "$result" | cut -f 1 -d ,)
+		local toGW_actual=$(echo "$result" | cut -f 2 -d ,)
+		local fromGW_tried=$(echo "$result" | cut -f 3 -d ,)
+		local fromGW_actual=$(echo "$result" | cut -f 4 -d ,)
+		local status_output=$(echo "$result" | cut -f 5- -d ,)
+	
 		if [ "$toGW_tried" -le "$toGW_actual" ] && [ "$fromGW_tried" -le "$fromGW_actual" ]; then
 			uci -q set "on-usergw.opennet_ugw$1.mtu=ok"
 		else
@@ -647,7 +631,7 @@ Options:
 
 [ -e "$DATA_LOCK_FILE" ] && msg_debug "parallel instance running, exit" && exit
 echo "running" >"$DATA_LOCK_FILE"
-msg_debug "starting another instance ($1)"
+msg_debug "starting another instance ($@)"
 
 
 case "$ACTION" in

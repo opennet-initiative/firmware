@@ -12,7 +12,7 @@
 # 
 
 . "$IPKG_INSTROOT/lib/functions.sh"
-. "$IPKG_INSTROOT/bin/on-helper.sh"
+. "$IPKG_INSTROOT/usr/bin/on-helper.sh"
 
 # newline
 N="

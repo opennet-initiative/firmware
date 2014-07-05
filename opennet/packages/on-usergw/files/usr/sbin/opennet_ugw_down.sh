@@ -11,7 +11,7 @@
 #   http://www.apache.org/licenses/LICENSE-2.0
 # 
 
-. "$IPKG_INSTROOT/bin/on-helper.sh"
+. "$IPKG_INSTROOT/usr/bin/on-helper.sh"
 
 msg_debug "starting for iface ${dev}"
 msg_debug "removing network config for ${dev}"

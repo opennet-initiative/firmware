@@ -177,7 +177,8 @@ EOF
 		"$ifstat_rx_fifo_errors" "$ifstat_rx_missed_errors" "$ifstat_tx_aborted_errors" "$ifstat_tx_compressed" "$ifstat_tx_fifo_errors" "$ifstat_tx_window_errors" \
 		"$ifstat_rx_bytes" "$ifstat_rx_dropped" "$ifstat_rx_frame_errors" "$ifstat_rx_over_errors" "$ifstat_tx_bytes" "$ifstat_tx_dropped" "$ifstat_tx_heartbeat_errors" \
 		"$wlan_essid" "$wlan_apmac" "$wlan_type" "$wlan_hwmode" "$wlan_mode" "$wlan_channel" "$wlan_freq" "$wlan_txpower" "$wlan_signal" "$wlan_noise" "$wlan_bitrate" \
-		"$wlan_crypt" "$wlan_vaps" "$DATABASE_VERSION" "$db_epoch" >>${DATABASE_FILE}.json.tmp
+		"$wlan_crypt" "$wlan_vaps" "$DATABASE_VERSION" "$db_epoch" | tr '\n' ' ' >>${DATABASE_FILE}.json.tmp
+	    echo >>${DATABASE_FILE}.json.tmp	
       fi
     fi
   done
@@ -280,7 +281,8 @@ EOF
 	"${sys_os_name% }" "$sys_os_rel" "$sys_os_ver" "$sys_os_arc" "$sys_os_insttime" "$on_core_ver" "$on_core_insttime" "${on_packages% }" "$on_id" "$on_olsrd_status" \
 	"$on_olsr_mainip" "$on_wifidog_status" "$on_wifidog_id" "$on_vpn_cn" "$on_vpn_status" "$on_vpn_gw" "$on_vpn_autosearch" "$on_vpn_sort" "$on_vpn_gws" \
 	"$on_vpn_blist" "$on_ugw_status" "$on_ugw_enabled" "$on_ugw_possible" "$on_ugw_tunnel" "$on_ugw_connected" "$on_ugw_presetips" "$on_ugw_presetnames" "" "" \
-	"$db_time" "$db_epoch" "$DATABASE_VERSION" "$db_epoch" >>${DATABASE_FILE}.json.tmp
+	"$db_time" "$db_epoch" "$DATABASE_VERSION" "$db_epoch" | tr '\n' ' ' >>${DATABASE_FILE}.json.tmp
+    echo >>${DATABASE_FILE}.json.tmp
     mv -f ${DATABASE_FILE}.json.tmp ${DATABASE_FILE}.json
 else
   SQL_STRING="$SQL_STRING

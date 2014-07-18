@@ -10,7 +10,7 @@ define Package/on-wifidog
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Rene Ejury <opennet@absorb.it>
   TITLE:=Wifidog extensions
-  DEPENDS+=+on-core +on-openvpn +dhcp-forwarder
+  DEPENDS+=+on-core +on-openvpn +dhcp-forwarder +wifidog
 endef
 
 define Package/on-wifidog/description

@@ -6,5 +6,6 @@
 # cron-Logging abschalten (bis auf Fehlermeldungen)
 # siehe http://wiki.openwrt.org/doc/uci/system#system
 uci set system.@system[0].cronloglevel=9
+uci set dhcp.@dnsmasq[0].rebind_protection=0
 uci commit system
 

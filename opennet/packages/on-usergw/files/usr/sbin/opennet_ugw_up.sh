@@ -11,15 +11,13 @@
 #   http://www.apache.org/licenses/LICENSE-2.0
 # 
 
-# retrieve DEBUG-state
-DEBUG=$(uci -q get on-core.defaults.debug)
-
-. $IPKG_INSTROOT/lib/functions.sh
+. "$IPKG_INSTROOT/lib/functions.sh"
+. "$IPKG_INSTROOT/usr/bin/on-helper.sh"
 
 # newline
 N="
 "
-$DEBUG && logger -t opennet_ugw_up.sh "starting for iface ${dev}"
+msg_debug "starting for iface ${dev}"
 
 local batch
 # add new network to configuration (to be recognized by olsrd)
@@ -31,7 +29,7 @@ append batch "set network.on_${dev}.ipaddr=${ifconfig_local}${N}"
 append batch "set network.on_${dev}.defaultroute=0${N}"
 append batch "set network.on_${dev}.peerdns=0${N}"
 
-$DEBUG && logger -t opennet_ugw_up.sh "adding new network config for ${dev}"
+msg_debug "adding new network config for ${dev}"
         
 echo "$batch${N}commit network" | uci batch
 
@@ -40,28 +38,27 @@ ubus call network reload
 
 zone_on_ifaces="$(uci -q get firewall.zone_opennet.network)";
 if [ -z "$(echo $zone_on_ifaces | grep on_${dev})" ]; then
-	$DEBUG && logger -t opennet_ugw_up.sh "adding iterface ${dev} to config of firewall zone opennet"
+	msg_debug "adding interface ${dev} to config of firewall zone opennet"
 	uci -q set firewall.zone_opennet.network="$(uci -q get firewall.zone_opennet.network) on_${dev}"
 	uci commit firewall
+	msg_debug "applying updated firewall rules for ${dev}"
+	/etc/init.d/firewall reload
 fi
 
-# adding on_tapX (tapX) to firewall zone opennet
-$DEBUG && logger -t opennet_ugw_down.sh "adding firewall-rules for ${dev}"
-. $IPKG_INSTROOT/lib/functions.sh
-. $IPKG_INSTROOT/lib/firewall/core.sh
-fw_reload
 
 olsrd_ifaces="$(uci -q get olsrd.@Interface[0].interface)";
 if [ -z "$(echo $olsrd_ifaces | grep on_${dev})" ]; then
-	$DEBUG && logger -t opennet_ugw_up.sh "adding iterface ${dev} to config of olsrd, restarting olsrd"
+	msg_debug "adding iterface ${dev} to config of olsrd, restarting olsrd"
 	uci -q set olsrd.@Interface[0].interface="${olsrd_ifaces} on_${dev}"
 	uci commit olsrd
+	/etc/init.d/olsrd restart
 fi
 
-# olsrd restart required because of ubus update
-/etc/init.d/olsrd restart
 
 filename=/tmp/opennet_ugw-${remote_1}.txt
-echo $dev > $filename # a short message for the web frontend
+echo "$dev" > "$filename" # a short message for the web frontend
 
-$DEBUG && logger -t opennet_ugw_up.sh "finished for iface ${dev}"
+msg_debug "finished for iface ${dev}"
+
+exit 0
+

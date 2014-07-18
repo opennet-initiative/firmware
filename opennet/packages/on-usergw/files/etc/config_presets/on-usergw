@@ -30,7 +30,7 @@ config openvpn_preset opennet_ugw
     option ca /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
     option cert /etc/openvpn/opennet_ugw/on_ugws.crt
     option key /etc/openvpn/opennet_ugw/on_ugws.key
-    option comp_lzo 1
+    option comp_lzo yes
     option up /etc/openvpn/opennet_ugw/opennet_ugw_up.sh
     option down /etc/openvpn/opennet_ugw/opennet_ugw_down.sh
     option ns_cert_type server

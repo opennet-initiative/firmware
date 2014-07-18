@@ -16,3 +16,6 @@ if [ -f "/etc/init.d/dhcp-fwd" ]; then
 	. /etc/init.d/dhcp-fwd
 	stop &
 fi
+
+exit 0
+

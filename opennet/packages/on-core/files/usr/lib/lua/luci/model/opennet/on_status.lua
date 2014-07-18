@@ -30,7 +30,7 @@ function printFirmwareTitle()
   if nixio.fs.access("/usr/sbin/on_portcalc.sh") then
     on_aps = split(luci.sys.exec("/usr/sbin/on_portcalc.sh"))[1]
   end
-  luci.http.write(luci.i18n.stringf("Opennet Firmware (next generation) version %s", on_version))
+  luci.http.write(luci.i18n.stringf("Opennet Firmware version %s", on_version))
   if on_id then
     luci.http.write(luci.i18n.stringf("-- AP %s", on_id))
   end
@@ -180,32 +180,38 @@ function printInterfaces(networks, zoneName)
   luci.http.write([[<table id='network_table_]]..zoneName..[[' class='status_page_table'><tr><th>]]..
     luci.i18n.string([[Interface]])..
     [[</th><th>]]..luci.i18n.string([[IP]])..
+    [[</th><th>]]..luci.i18n.string([[IPv6]])..
     [[</th><th>]]..luci.i18n.string([[MAC]])..
     [[</th><th>]])
   luci.http.write(luci.i18n.string([[<abbr title='start / limit / leasetime'>DHCP</abbr>]]))
   luci.http.write([[</th></tr>]])
   for network in networks:gmatch("%S+") do
-    printValues(network)
+    printNetworkInterfaceValues(network)
   end
   luci.http.write([[</table>]])
 end
 
-function printValues(network)
-  ifname = luci.sys.exec(". $IPKG_INSTROOT/lib/functions.sh; include /lib/network; scan_interfaces; config_get "..network.." ifname")
+function printNetworkInterfaceValues(network)
+  -- get physical interface name
+  ifname = luci.sys.exec(". $IPKG_INSTROOT/lib/functions.sh; include $IPKG_INSTROOT/lib/network; scan_interfaces; config_get "..network.." ifname")
   ifname = ifname.gsub(ifname, "%c+", "")
   if not ifname or ifname == "" then
     return
   end
+  -- skip alias and disabled interfaces
   if luci.sys.exec("ip link show "..ifname.." 2>/dev/null | grep UP") == "" then
     return
   end
-  output = luci.sys.exec([[ip address show label ]]..ifname..[[ | awk 'BEGIN{ mac="---";ip="---"; }  { if ($1 ~ "link") mac=$2; if ($1 ~ "inet") ip=$2; } END{ printf "<td>]]..ifname..[[</td><td>"ip"</td><td>"mac"</td>"}']])
+  output = luci.sys.exec([[ip address show label ]]..ifname..[[ | awk 'BEGIN{ mac="---";ip="---";ip6="---"; }  { if ($1 ~ /link/) mac=$2; if ($1 ~ /inet$/) ip=$2; if ($1 ~ /inet6/) ip6=$2; } END{ printf "<td>]]..ifname..[[</td><td>"ip"</td><td>"ip6"</td><td>"mac"</td>"}']])
   if output and output ~= "" then
     luci.http.write([[<tr>]]..output..[[<td>]])
+    -- add DHCP information
     local dhcp = cursor:get_all("dhcp", network)
     if dhcp and dhcp.ignore ~= "1" then
+      -- we provide DHCP for this network
       luci.http.write(dhcp.start.." / "..dhcp.limit.." / "..dhcp.leasetime)
     else 
+      -- dnsmasq does not DHCP for this network _OR_ the network is used for opennet wifidog (FREE)
       local dhcpfwd
       if (luci.sys.exec("pidof dhcp-fwd") ~= "") then
         -- check for dhcp-fwd

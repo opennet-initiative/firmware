@@ -37,7 +37,7 @@ Diesen kannst du auf der Opennet-Firmware-Mailingliste erfragen: https://list.op
 
 Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den Upstream auf die schreibfähige URL umstellen:
 
-    git remote set-url origin git@projects.farbdev.org:opennet/on-firmware.git
+    git remote set-url origin git@dev.opennet-initiative.de:on_firmware.git
 
 
 

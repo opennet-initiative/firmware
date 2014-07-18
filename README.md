@@ -18,9 +18,9 @@ Lokale Build-Umgebung einrichten
 --------------------------------
 
     # Entweder nur lese-Zugriff mit https
-    git clone https://projects.farbdev.org/opennet/on-firmware.git
+    git clone https://dev.opennet-initiative.de/git/on_firmware
     # Oder alternativ mit Schreibrechten (commit) und Authentifizierung
-    #     git clone git@projects.farbdev.org:opennet/on-firmware.git
+    #     git clone git@dev.opennet-initiative.de:on_firmware.git
     cd on-firmware
     make init
 
@@ -42,4 +42,3 @@ Hier findest du Informationen zu weiterführende Details:
 
 1. *[Struktur der Build-Umgebung] (master/doc/Struktur.md)*
 2. *[Enwicklungsleitfaden] (master/doc/Entwicklung.md)*
-

@@ -67,7 +67,7 @@ translate:
 	 done | while read dname pot_filename; do \
 		"$(LUCI_DIR)/build/i18n-scan.pl" "$$dname" >"$$pot_filename"; \
 		false COMMENT: remove zero-sized pot files; \
-		test -e "$$pot_filename" -a ! -s "$$pot_filename" && rm "$$pot_filename"; \
+		(test -e "$$pot_filename" -a ! -s "$$pot_filename" && rm "$$pot_filename") || true; \
 	 done
 	@"$(LUCI_DIR)/build/i18n-update.pl" "$(CUSTOM_PO_DIR)"
 

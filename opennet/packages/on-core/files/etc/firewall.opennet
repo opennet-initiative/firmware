@@ -17,12 +17,16 @@
 # uci-interface. Because it also lacks documentation, there are probably
 # easier ways to do the following, but I hadn't found them (yet)
 
-. $IPKG_INSTROOT/usr/bin/on-helper.sh
+. "$IPKG_INSTROOT/usr/bin/on-helper.sh"
 ##### additional configuration #########################
 
 ##### MASQERADING based on source-IP ######################################
 for network in $(uci get -q firewall.zone_local.network); do
-    networkprefix=$(get_network $network) 
+    networkprefix=$(get_network "$network") 
 #    [ -n "$networkprefix" ] && iptables -t nat -I postrouting_rule -s $networkprefix -j zone_opennet_nat
-    [ -n "$networkprefix" ] && iptables -t nat -I zone_opennet_nat -s $networkprefix -j MASQUERADE
+    [ -n "$networkprefix" ] && iptables -t nat -I zone_opennet_nat -s "$networkprefix" -j MASQUERADE
 done
+
+# do not return the exit code of the last test above
+exit 0
+

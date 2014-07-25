@@ -4,7 +4,7 @@ Firmware-NG
 
 Konfiguration initialisieren
 ----------------------------
-Im Paket *on-core* befindet sich eine Datei *etc/init.d/on_config*. Beim Booten wird *check_firmware_upgrade* durchgeführt und anschließend die Opennet-Erstkonfiguration setzt, falls kein Netwerkinterface mit dem Präfix "on_" existiert.
+Im Paket *on-core* befindet sich eine Datei *etc/init.d/on_config*. Beim Booten wird *check_firmware_upgrade* durchgeführt und anschließend die Opennet-Erstkonfiguration gesetzt, falls kein Netzwerkinterface mit dem Präfix "on_" existiert.
 
 
 check_firmware_upgrade:

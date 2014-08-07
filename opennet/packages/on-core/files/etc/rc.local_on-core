@@ -1,7 +1,7 @@
 # commands to initialize the opennet-firmware environment
 # rc.local_on-core
 
-. $IPKG_INSTROOT/usr/bin/on-helper.sh
+. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
 
 if [ -n "$(pidof olsrd)" ]; then                    # don't search for the rule if olsrd is not running
     index=5					    # wait for a maximum of 5*3 sec.

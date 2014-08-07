@@ -15,10 +15,10 @@ START=20
 
 start() {
 	# include this file only during "start" ("enable" or "disable" may use IPKG_INSTROOT)
-	. $IPKG_INSTROOT/usr/bin/on-helper.sh
+	. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
 
 	check_firmware_upgrade
-	[ -n "$(grep on_ /etc/config/network)" ] || {
+	grep -q on_ /etc/config/network || {
 		copy_config_presets force
 
 		wifi_country=$(uci -q get on-core.defaults.wifi_country)

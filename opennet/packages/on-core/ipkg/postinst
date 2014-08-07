@@ -12,13 +12,13 @@
 # 
 
 # # check if we are on real system
-if [ -z "${IPKG_INSTROOT}" ]; then
-	echo "*** opennet-firmware was installed ************"
-	echo "restart your system after installation finished"
-	echo "bitte nach Ende der Installation neu starten"
-	echo "***********************************************"
-	. $IPKG_INSTROOT/usr/bin/on-helper.sh
-	check_firmware_upgrade
+if [ -z "${IPKG_INSTROOT:-}" ]; then
+    echo "*** opennet-firmware was installed ************"
+    echo "restart your system after installation finished"
+    echo "bitte nach Ende der Installation neu starten"
+    echo "***********************************************"
+    . "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+    check_firmware_upgrade
 
     /etc/init.d/on_config enable
     exit 0

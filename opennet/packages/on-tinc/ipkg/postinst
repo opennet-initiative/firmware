@@ -12,11 +12,11 @@
 # 
 
 # # check if we are on real system
-if [ -z "${IPKG_INSTROOT}" ]; then
-	echo "*** opennet-tinc was installed ****************"
+if [ -z "${IPKG_INSTROOT:-}" ]; then
+    echo "*** opennet-tinc was installed ****************"
     echo "please configure it in /etc/init.d/on_tinc"
-	echo "restart your system after finished"
-	echo "***********************************************"
+    echo "restart your system after finished"
+    echo "***********************************************"
     /etc/init.d/on_tinc enable
     exit 0
 fi

@@ -11,8 +11,8 @@
 #   http://www.apache.org/licenses/LICENSE-2.0
 # 
 
-. "$IPKG_INSTROOT/lib/functions.sh"
-. "$IPKG_INSTROOT/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/lib/functions.sh"
+. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
 
 # newline
 N="

@@ -611,7 +611,7 @@ olsrd_routingTable=$(uci -q get olsrd.@olsrd[0].RtTable)
 
 #################################################################################
 # start here - with the menu
-ACTION="$1"
+ACTION="${1:-auto}"
 shift
 
 test "$ACTION" = "--help" && echo -e "\
@@ -646,7 +646,7 @@ case "$ACTION" in
 		ugw_forwardGW
 		ugw_shareInternet
 		;;
-	*)
+	auto|*)
 		cert_file=$(uci -q get on-usergw.opennet_ugw.cert)
 		if [ -e "$cert_file" ]; then
 			ugw_syncVPNConfig

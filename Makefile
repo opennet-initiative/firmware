@@ -31,6 +31,7 @@ list-archs:
 $(ARCHS): feeds translate
 	@echo "Building for target architecture: $@"
 	$(MAKE) "config-$@"
+	@# update the release identifier
 	@sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=$(GIT_COMMIT_COUNT)/i' $(OPENWRT_DIR)/include/opennet.mk
 	$(MAKE) -C "$(OPENWRT_DIR)"
 

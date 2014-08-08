@@ -11,6 +11,7 @@ config 'zone' 'zone_wan'
 	option 'output' 'ACCEPT'
 	option 'forward' 'REJECT'
 	option 'masq' '1'
+	option 'network' ' '
 
 config 'zone' 'zone_opennet'
 	option 'name' 'opennet'

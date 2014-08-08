@@ -92,10 +92,11 @@ update_ntp_servers() {
 		done
 		msg_info "updating NTP entries"
 		uci commit ntpclient
-		control_ntpclient restart
+		[ -n "$current_servers" ] && control_ntpclient restart
 	fi
 	# make sure that ntpclient is running (in case it broke before)
-	if [ -z "$(pidof ntpclient)" ]; then
+	# never run it if there are no servers at all
+	if [ -n "$current_servers" ] && [ -z "$(pidof ntpclient)" ]; then
 		msg_info "'ntpclient' is not running: starting it again ..."
 		control_ntpclient start
 	fi

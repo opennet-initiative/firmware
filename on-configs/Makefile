@@ -10,9 +10,9 @@ BIGCONFIG = ar71xx common ixp4xx tl-wr1043nd tl-wr842nd x86
 
 help:
 	$(info Die folgenden Ziele sind verfügbar:)
-	$(info - list			Initialisierung des opennet-Repositories)
-	$(info - list-subarchs		alle Sub-Architekturen der aktuellen Architektur anzeigen \(via 'SUBARCH=foo make ar71xx' compilieren\))
-	$(info - ARCH			eine Architektur compilieren \(inkl. aller standardmaessig aktiven Sub-Architekturen\))
+	$(info - list		Initialisierung des opennet-Repositories)
+	$(info - list-subarchs	alle Sub-Architekturen der aktuellen Architektur anzeigen (via 'SUBARCH=foo make ar71xx' compilieren))
+	$(info - ARCH		eine Architektur compilieren (inkl. aller standardmaessig aktiven Sub-Architekturen))
 
 list-archs:
 	$(info $(ARCHS))
@@ -21,7 +21,7 @@ list:
 	@echo $(SMALLCONFIG) $(BIGCONFIG) | tr " " "\n"
 
 ARCH_PREFIX=$(shell grep "^CONFIG_TARGET_" "$(CURRENT_CONFIG)" | head -1 | cut -f 1 -d =)
-list-subarch:
+list-subarchs:
 	@grep "$(ARCH_PREFIX)_" "$(CURRENT_CONFIG)" | sed 's/^.*$(ARCH_PREFIX)_//' | cut -f 1 -d " " | cut -f 1 -d "="
 
 $(BIGCONFIG) $(SMALLCONFIG):
@@ -32,7 +32,7 @@ $(BIGCONFIG) $(SMALLCONFIG):
 	@# Optionally an environment variable 'SUBARCH' may be given.
 	@# Add something like "CONFIG_TARGET_ar71xx_generic_TLWR1043=y" to
 	@# the config file if the environment variable SUBARCH is given.
-	test -n "$(SUBARCH)" && sed -i 's/^\(CONFIG_TARGET_$@_\(?:generic_\)?\)Default\(=y\)$$/\1$(SUBARCH)\2/' "$(CURRENT_CONFIG)"
+	@test -n "$(SUBARCH)" && sed -i 's/^\(CONFIG_TARGET_$@_\).*_\?Default\(=y\)$$/\1$(SUBARCH)\2/' "$(CURRENT_CONFIG)" || true
 	@$(MAKE) check-old-config
 
 save-config:

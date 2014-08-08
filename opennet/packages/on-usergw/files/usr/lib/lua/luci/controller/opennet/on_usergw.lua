@@ -71,21 +71,21 @@ function action_on_usergwNG(ugw_status)
     local select_gw = luci.http.formvalue("select_gw")
     
     if (new_gateway and new_gateway ~= "") or (new_gateway_name and new_gateway_name ~= "") then
-        cursor:set ("on-usergw", "opennet_ugw"..(ugw_status.number_of_gateways + 1), "usergateway")
-        cursor:tset ("on-usergw", "opennet_ugw"..(ugw_status.number_of_gateways + 1), { ipaddr = '', name = new_gateway_name, age = '', status = '', ping = ''})
-		ugw_status.number_of_gateways = ugw_status.number_of_gateways + 1
+        cursor:set ("on-usergw", "opennet_ugw"..(ugw_status.usergateways_no + 1), "usergateway")
+        cursor:tset ("on-usergw", "opennet_ugw"..(ugw_status.usergateways_no + 1), { ipaddr = '', name = new_gateway_name, age = '', status = '', ping = ''})
+		ugw_status.usergateways_no = ugw_status.usergateways_no + 1
     elseif down_section then
         down_section = down_section + 0
         move_gateway_down(down_section)
     elseif del_section then
-        while ((del_section + 0) < ugw_status.number_of_gateways) do   -- comparising failed if del_section wasn't forced to be int
+        while ((del_section + 0) < ugw_status.usergateways_no) do   -- comparising failed if del_section wasn't forced to be int
             move_gateway_down(del_section)
             del_section = del_section + 1
         end
         cursor:delete("on-usergw", "opennet_ugw"..del_section)
         cursor:commit("on-usergw")
         cursor:unload("on-usergw")
-		ugw_status.number_of_gateways = ugw_status.number_of_gateways - 1
+		ugw_status.usergateways_no = ugw_status.usergateways_no - 1
         require('luci.model.opennet.on_usergw_syncconfig')
         checkVPNConfig()
     elseif reset_counter then

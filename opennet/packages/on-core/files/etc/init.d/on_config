@@ -82,17 +82,22 @@ start() {
 			fi
 			wifidev="wlan${no}"
 
-			# reconfigure wifi-device - set default to opennet
-			append batch "set wireless.@wifi-iface[${no}].network=on_wifi_${no}${N}"
-			append batch "set wireless.@wifi-iface[${no}].mode=${wifi_mode}${N}"
-			append batch "set wireless.@wifi-iface[${no}].ssid=${wifi_ssid}${N}"
-			append batch "set wireless.@wifi-iface[${no}].bssid=${wifi_bssid}${N}"
-			append batch "set wireless.@wifi-iface[${no}].ifname=${wifidev}${N}"
-
-			append batch "set wireless.radio${no}.country=${wifi_country}${N}"
-			append batch "delete wireless.radio${no}.disabled${N}"
-			append batch "set wireless.radio${no}.channel=1${N}"
-
+			# reconfigure wifi-device - set default to opennet                          
+                        append batch "set wireless.@wifi-iface[${no}].network=on_wifi_${no}${N}"    
+                        append batch "set wireless.@wifi-iface[${no}].ssid=${wifi_ssid}${N}"  
+                        append batch "set wireless.@wifi-iface[${no}].bssid=${wifi_bssid}${N}"
+                        append batch "set wireless.@wifi-iface[${no}].ifname=${wifidev}${N}"
+                                                                                          
+                        radio_hwmode=$(uci -q get wireless.radio${no}.hwmode)                       
+                        # do not set "adhoc" mode and "channel=1" when 5GHz                                         
+                        if [ "$radio_hwmode" != "11a" ]; then                                       
+                                append batch "set wireless.@wifi-iface[${no}].mode=${wifi_mode}${N}"
+                                append batch "set wireless.radio${no}.channel=1${N}"      
+                        fi                                                                    
+                                                                                              
+                        append batch "set wireless.radio${no}.country=${wifi_country}${N}"
+                        append batch "delete wireless.radio${no}.disabled${N}"               
+			
 			# configure on_wifi
 			append batch "set network.on_wifi_${no}=interface${N}"
 			append batch "set network.on_wifi_${no}.proto=static${N}"

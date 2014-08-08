@@ -225,3 +225,19 @@ get_mesh_ips_by_regex() {
 	echo /route | nc localhost 2006 | grep "^[0-9\.]\+" | awk '{print $1}' | sed 's#/32$##' | grep "$regex"
 }
 
+# check if a given lock file:
+# A) exists, but it is outdated (determined by the number of seconds given as second parameter)
+# B) exists, but is fresh
+# C) does not exist
+# A + C return success and create that file
+# B return failure and do not touch that file
+aquire_lock() {
+	local lock_file=$1
+	local max_age_seconds=$2
+	[ ! -e "$lock_file" ] && touch "$lock_file" && return 0
+	local now=$(date +%s)
+	local file_timestamp=$(date --reference "$lock_file" +%s)
+	[ "$((now-file_timestamp))" -gt "$max_age_seconds" ] && touch "$lock_file" && return 0
+	return 1
+}
+

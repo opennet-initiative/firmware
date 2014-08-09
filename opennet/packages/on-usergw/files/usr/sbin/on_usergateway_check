@@ -295,7 +295,6 @@ ugw_checkWAN () {
 		msg_info "checkWAN: can't resolve $on_ugw, ignoring"
 		return
 	fi
-	set -x
 	on_ugw_targetDev=$(ip route get "$on_ugw_ip" 2>/dev/null | awk '{for (i=1; i<=NF; i++) { if ($i == "dev") print $(i+1); end}}')
 	wandev=$(uci -q get network.wan.ifname | cut -f1 -d:)
 	if [ "$on_ugw_targetDev" = "$wandev" ]; then
@@ -414,11 +413,11 @@ ugw_shareInternet () {
 
 		if [ ! -e "/var/run/openvpn-${gw_name}.pid" ] && [ "$sharing" = "on" ] && [ "$enable" = "1" ]; then
 			msg_debug "activating tunnel ${gw_name}"
-			/etc/init.d/openvpn up "${gw_name}"
+			openvpn_run_instance "${gw_name}"
 		elif [ -e /var/run/openvpn-${gw_name}.pid ] && ( [ "$sharing" = "off" ] || [ "$enable" = "0" ] ); then
 			msg_debug "disabling tunnel ${gw_name}"
 			uci -q set "openvpn.${gw_name}.enable=1"
-			/etc/init.d/openvpn down "${gw_name}"
+			openvpn_stop_instance "${gw_name}"
 			uci -q set "openvpn.${gw_name}.enable=$enable"
 			uci commit openvpn
 		fi

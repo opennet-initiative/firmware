@@ -49,7 +49,7 @@ _update_file_if_changed() {
 }
 
 # Gather the list of routable IPs specified via on-core.services.dns_ip_regex.
-# Store this list as a resolv.conf-compatible file in on-core.services.dns_resolv_file. 
+# Store this list as a resolv.conf-compatible file in on-core.services.dns_resolv_file.
 # The file is only updated in case of changes.
 update_dns_servers() {
 	local dns_ip_regex="$(uci -q get on-core.services.dns_ip_regex)"
@@ -72,7 +72,7 @@ update_dns_servers() {
 }
 
 # Gather the list of routable IPs specified via on-core.services.ntp_ip_regex.
-# Store this list as ntpclient-compatible uci settings. 
+# Store this list as ntpclient-compatible uci settings.
 # The uci settings are only updated in case of changes.
 # ntpclient is restarted in case of changes.
 update_ntp_servers() {
@@ -239,5 +239,34 @@ aquire_lock() {
 	local file_timestamp=$(date --reference "$lock_file" +%s)
 	[ "$((now-file_timestamp))" -gt "$max_age_seconds" ] && touch "$lock_file" && return 0
 	return 1
+}
+
+openvpn_run_instance() {
+	local section=$1
+	local ___function=start_instance
+	local ___type=openvpn
+	local section cfgtype
+	# copied from /lib/functions.sh (config_foreach) and /etc/init.d/openvpn (start_instance)
+	(
+		# sadly lib/functions.sh does not care about unset variables
+		set +u
+		. "${IPKG_INSTROOT:-}/lib/functions.sh"
+		. "${IPKG_INSTROOT:-}/lib/functions/procd.sh"
+		. "${IPKG_INSTROOT:-}/etc/init.d/openvpn"
+		config_load 'openvpn'
+		[ -z "$CONFIG_SECTIONS" ] && return 0
+		config_get cfgtype "$section" TYPE
+		[ -n "$___type" -a "x$cfgtype" != "x$___type" ] && continue
+		eval "$___function \"\$section\" \"\$@\""
+		set -u
+	)
+}
+
+openvpn_stop_instance() {
+	local section=$1
+	# UGLY!
+	for pid in $(pidof openvpn); do
+		ps | grep "^$pid " | grep -q "\($section\)" && kill "$pid"
+	 done
 }
 

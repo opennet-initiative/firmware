@@ -241,32 +241,3 @@ aquire_lock() {
 	return 1
 }
 
-openvpn_run_instance() {
-	local section=$1
-	local ___function=start_instance
-	local ___type=openvpn
-	local section cfgtype
-	# copied from /lib/functions.sh (config_foreach) and /etc/init.d/openvpn (start_instance)
-	(
-		# sadly lib/functions.sh does not care about unset variables
-		set +u
-		. "${IPKG_INSTROOT:-}/lib/functions.sh"
-		. "${IPKG_INSTROOT:-}/lib/functions/procd.sh"
-		. "${IPKG_INSTROOT:-}/etc/init.d/openvpn"
-		config_load 'openvpn'
-		[ -z "$CONFIG_SECTIONS" ] && return 0
-		config_get cfgtype "$section" TYPE
-		[ -n "$___type" -a "x$cfgtype" != "x$___type" ] && continue
-		eval "$___function \"\$section\" \"\$@\""
-		set -u
-	)
-}
-
-openvpn_stop_instance() {
-	local section=$1
-	# UGLY!
-	for pid in $(pidof openvpn); do
-		ps | grep "^$pid " | grep -q "\($section\)" && kill "$pid"
-	 done
-}
-

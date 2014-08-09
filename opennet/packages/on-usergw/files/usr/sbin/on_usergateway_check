@@ -344,6 +344,7 @@ update_olsr_hna () {
 # mark usage of HNA in olsrd config (for removal by cron-daily/clean_ugw_hna.sh)
 mark_olsr_hna_used () {
 	msg_debug "mark_olsr_hna_used"
+	local no=0
 	while ( [ -n "$(uci -q get "olsrd.@Hna4[${no}]")" ] ); do
 		if [ "$(uci -q get "olsrd.@Hna4[${no}].source")" == "ugw" ]; then
 			uci set "olsrd.@Hna4[${no}].lastused=$(date +%s)"
@@ -400,7 +401,7 @@ ugw_checkWorking () {
 }
 
 #################################################################################
-# check if sharingInternet is enabled and tunnel's are active or vice versa
+# check if sharingInternet is enabled and tunnels are active or vice versa
 ugw_shareInternet () {
 	msg_debug "ugw_shareInternet"
 
@@ -413,12 +414,11 @@ ugw_shareInternet () {
 
 		if [ ! -e "/var/run/openvpn-${gw_name}.pid" ] && [ "$sharing" = "on" ] && [ "$enable" = "1" ]; then
 			msg_debug "activating tunnel ${gw_name}"
-			openvpn_run_instance "${gw_name}"
+			/etc/init.d/openvpn reload
 		elif [ -e /var/run/openvpn-${gw_name}.pid ] && ( [ "$sharing" = "off" ] || [ "$enable" = "0" ] ); then
 			msg_debug "disabling tunnel ${gw_name}"
-			uci -q set "openvpn.${gw_name}.enable=1"
-			openvpn_stop_instance "${gw_name}"
-			uci -q set "openvpn.${gw_name}.enable=$enable"
+			uci -q set "openvpn.${gw_name}.enable=0"
+			/etc/init.d/openvpn reload
 			uci commit openvpn
 		fi
 	done

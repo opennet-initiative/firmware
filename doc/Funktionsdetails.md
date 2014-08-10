@@ -133,13 +133,38 @@ Minütlich läuft ein cronjob (*on_vpngateway_check*), der folgendes tut:
 Usergateway
 -----------
 Im Paket *on-usergw* sind zwei VPN-Konfigurationen (opennet_ugw, opennet_vpntest) enthalten.
-Außerdem ist ein Skript für den VPN-Aufbau, sowie für einen Geschwindigkeitstest und für das Kündigen einer alten IP vorhanden.
+Außerdem ist ein Skript für 
+* VPN-Auf- und Abbau (opennet_ugw_up.sh, opennet_ugw_down.sh)
+* Geschwindigkeitstest  (on_speed_check)
+* lösche UGW-HNA in olsrd wenn es seit mehr als einer Woche nicht mehr genutzt wurde (clean_ugw_hna.sh)
+* Skript, um alle UGW Voraussetzungen und Funktionalitäten zu testen (on_usergateway_check)
+* Luci Script zur Webseitenausgabe (ugw_status)
+
+Cronjob alle 5min:
+* rufe Script on_usergateway_check auf mit folgenden Funktionen: (solange gleiches Script nicht bereits läuft) 
+** ugw_syncVPNConfig - transfer UGW config from on-usergw to openvpn
+** ugw_checkWANs - check if routes to UGW go through WAN-device, detect ping-time
+** ugw_checkVPNs - check Vpn availability of gateway on port 1600
+** ugw_doExtraChecks - do extra checks (speed, mtu)
+** ugw_checkSharingBlocked - check if sharingInternet is temporarily blocked
+** ugw_checkWorking - check if sharingInternet is possible for every gateway and store 'enabled'-value in openvpn config
+** ugw_forwardGW - if there is a better gw then switch
+** ugw_shareInternet - start UGW-tunnels if MTU and WAN ok and sharing is enabled
+*** Starte (alle) UGWs, welche gestartet werden können. Überprüfe vorher, ob sie bereits laufen.
+*** Stoppe alle UGWs, welche noch laufen, aber in der Zwischenzeit über die Nutzeroberfläche deaktiviert wurden.
+
+Cronjob jeden Tag:
+* rufe Script clean_ugw_hna.sh (siehe oben) auf
+
+Konfiguration:
+Die Datei /etc/config_presets/on-usergw enthält default Einstellungen für die SSL UGW Zertifkate, zwei Usergateway-Server (erina und subaru) sowie alle OpenVPN Einstellungen zum Verbinden zu den Servern.
+
+Starten eines UGWs:
 
 
 **TODO**:
 
 * die genaue Funktionsweise des ugw-Skripts analysieren und beschreiben
-
 
 
 Wifidog

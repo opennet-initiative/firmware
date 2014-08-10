@@ -418,7 +418,7 @@ ugw_shareInternet () {
 		elif [ -e /var/run/openvpn-${gw_name}.pid ] && ( [ "$sharing" = "off" ] || [ "$enable" = "0" ] ); then
 			msg_debug "disabling tunnel ${gw_name}"
 			uci -q set "openvpn.${gw_name}.enable=0"
-			/etc/init.d/openvpn reload
+			/etc/init.d/openvpn stop
 			uci commit openvpn
 		fi
 	done

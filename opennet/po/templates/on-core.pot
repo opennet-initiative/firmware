@@ -3,7 +3,7 @@ msgstr "Content-Type: text/plain; charset=UTF-8"
 
 msgid ""
 "After the configuration is done, it's the beste to restart the Router once - "
-"it's still the beste way to get a clean environment"
+"it's still the best way to get a clean environment"
 msgstr ""
 
 msgid "Base"

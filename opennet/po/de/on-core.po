@@ -14,7 +14,7 @@ msgstr ""
 
 msgid ""
 "After the configuration is done, it's the beste to restart the Router once - "
-"it's still the beste way to get a clean environment"
+"it's still the best way to get a clean environment"
 msgstr ""
 "Wenn die erste Konfiguration erledigt ist, is es sinnvoll den Accesspoint "
 "neu zu starten. Das ist immer noch der beste Weg eine saubere stabile "

@@ -279,4 +279,3 @@ openwrt
 -------
 
 Die Entwicklungsdokumentation von *openwrt* ist hier zu finden: http://wiki.openwrt.org/doc/devel/start
-

@@ -75,7 +75,7 @@ activate_olsr_service () {
 	found=""
 	nr=0
 	while ( [ -n "$(uci -q get "olsrd.@LoadPlugin[$nr]")" ] ); do
-		[ "$(uci -q get "olsrd.@LoadPlugin[$nr].library" | cut -d. -f1)" == "olsrd_nameservice" ] && return
+		[ "$(uci -q get "olsrd.@LoadPlugin[$nr].library" | cut -d. -f1)" = "olsrd_nameservice" ] && return
 		: $((nr++))
 	done
 
@@ -107,10 +107,10 @@ test_vpngateway()
 		gw_ipaddr=$(uci -q get "on-openvpn.gate_$1.ipaddr")
 		# if there is no ipaddr stored then query dns for IP address
 		[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns $(uci -q get "on-openvpn.gate_$1.name"))
-		[ -z "$gw_ipaddr" ] && return
+		[ -z "$gw_ipaddr" ] && return 1
 		
 		# if gateway could only be reached over a local tunnel, dont use it - it will not work anyway
-		[ -n "$(ip route show table $olsrd_routingTable | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ] && return
+		[ -n "$(ip route show table $olsrd_routingTable | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ] && return 1
 		
 		# check if it is possible to open tunnel to the gateway (10 sec. maximum)
 		# test-parameters; '--dev null' will be prefaced
@@ -135,7 +135,12 @@ test_vpngateway()
 		#   resolv-retry: no need to be extra careful and patient
 	        openvpn_opts="$openvpn_opts --verb 3 --nice 3 --resolv-retry 0"
 
-		# if 'Initial packet' is recieved, stop waiting and accept connection
+		# prevent a real connection (otherwise we may break our current vpn tunnel):
+		#   tls-verify: force a tls handshake failure
+		#   tls-exit: stop immediately after tls handshake failure
+		openvpn_opts="$openvpn_opts --tls-verify /bin/false --tls-exit"
+
+		# if 'Initial packet' is received, stop waiting and accept connection
 		if openvpn --dev null $openvpn_opts --remote "$gw_ipaddr" 1600 --ca "$VPN_DIR/opennet-ca.crt" --cert "$VPN_DIR/on_aps.crt" --key "$VPN_DIR/on_aps.key" | grep -q "Initial packet"; then
 			uci -q set "on-openvpn.gate_$1.age=0"
 			uci -q set "on-openvpn.gate_$1.status=y"
@@ -148,51 +153,57 @@ test_vpngateway()
 			msg_debug "vpn test of $gw_ipaddr failed"
 			return 1
 		fi
-	elif [ "$(uci -q get "on-openvpn.gate_$1.status")" == "y" ]; then
+	elif [ "$(uci -q get "on-openvpn.gate_$1.status")" = "y" ]; then
 		msg_debug "vpn-availability of gw $gw_ipaddr still valid"
 		return 0
 	fi
 }
 
 #################################################################################
-# test if gateway is blacklisted, set or remove blacklisted option
-# parameter is index to test, echo true if blacklisted
+# test if gateway is blacklisted
+# side effect: set or remove blacklisting state
+# parameter is index to test
+# return success (exitcode=0) if blacklisted
 check_blacklisting()
 {
-	gw_ipaddr=$(uci -q "get on-openvpn.gate_$1.ipaddr")
-	# if there is no ipaddr stored than query dns for IP address
+	local index
+	local gw_ipaddr=$(uci -q "get on-openvpn.gate_$1.ipaddr")
+	# if there is no ipaddr stored then query dns for IP address
 	[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns "$(uci -q "get on-openvpn.gate_$1.name")")
-	[ -z "$gw_ipaddr" ] && return
+	[ -z "$gw_ipaddr" ] && return 1
 
 	blacklisted=$(uci -q get "on-openvpn.gate_$1.blacklisted")
 	
 	# check if currently checked Gateway is blacklisted, if found then continue in loop
-	index_bl=0
-	while [ -n "$(uci -q get "on-openvpn.@blacklist_gateway[$index_bl]")" ] ; do
-		msg_debug "check_blacklisting $index_bl"
-		if [ "$(uci -q get "on-openvpn.@blacklist_gateway[$index_bl].ipaddr")" == "$gw_ipaddr" ]; then
+	index=0
+	while [ -n "$(uci -q get "on-openvpn.@blacklist_gateway[$index]")" ] ; do
+		msg_debug "check_blacklisting $index"
+		if [ "$(uci -q get "on-openvpn.@blacklist_gateway[$index].ipaddr")" = "$gw_ipaddr" ]; then
 			uci -q set "on-openvpn.gate_$1.blacklisted=true"
 			uci commit on-openvpn;							# commit after every change to prevent uci memory problems
-			echo "gateway $gw_ipaddr is blacklisted"
-			return
+			return 0
 		fi
-		: $((index_bl++))
+		: $((index++))
 	done
 	
-	# gateway was blacklisted before, but no anymore (see early return above)
+	# gateway was blacklisted before, but not anymore (see early return above)
 	if [ -n "$blacklisted" ]; then
 		uci -q delete "on-openvpn.gate_$1.blacklisted"
 		uci -q delete "on-openvpn.gate_$1.status"
 		uci -q delete "on-openvpn.gate_$1.age"
 		uci commit on-openvpn;							# commit after every change to prevent uci memory problems
 	fi
+	return 1
 }
 
 check_all_blacklisting()
 {
-	index_abl=1
-	while [ -n "$(uci -q get "on-openvpn.gate_$index_abl")" ] ; do
-		check_blacklisting $((index_abl++))
+	local index=1
+	local ipaddr
+	while [ -n "$(uci -q get "on-openvpn.gate_$index")" ] ; do
+		ipaddr=$(uci -q "get on-openvpn.gate_$index.ipaddr")
+		check_blacklisting "$index" && echo "gateway $ipaddr is blacklisted"
+		: $((index++))
 	done
 }
 
@@ -226,7 +237,7 @@ check_all_gateways()
 		msg_debug "checking $gw_ipaddr age $age"
 
 		# check if currently checked Gateway is blacklisted, if found then continue in loop
-		[ -n "$(check_blacklisting "$index")" ] && continue
+		check_blacklisting "$index" && continue
 
 		msg_debug "         $gw_ipaddr not blacklisted"
 
@@ -295,10 +306,10 @@ olsrd_routingTable=$(uci -q get olsrd.@olsrd[0].RtTable)
 
 
 case "$1" in
-	"refresh")
+	refresh)
 		gateway_autosearch refresh
 		;;
-	"check_blacklisting")
+	check_blacklisting)
 		check_all_blacklisting
 		;;
 	list)

@@ -94,56 +94,23 @@ test_vpngateway()
 	local age
 	local openvpn_opts
 	local gw_ipaddr
+	local uci_prefix=on-openvpn.gate_$1
+	local gw_ipaddr=$(uci -q get "$uci_prefix.ipaddr")
 	age=$(uci -q get "on-openvpn.gate_$1.age")
 	if [ "$age" -ge $((recheck_age+nonworking_timeout)) ]; then
-		# if there was no vpn-availability for a dedicated time (nonworking_timeout minutes), declare vpn-status as not working
-		uci -q set "on-openvpn.gate_$1.status=n"
-		uci -q set "on-openvpn.gate_$1.age=0"
+		# if there was no vpn-availability for a while (nonworking_timeout minutes), declare vpn-status as not working
+		uci -q set "$uci_prefix.status=n"
+		uci -q set "$uci_prefix.age=0"
 		uci commit on-openvpn
 		return 1
 	elif [ "$age" -ge "$recheck_age" ]; then
-		# check vpn-availability...
-		
-		gw_ipaddr=$(uci -q get "on-openvpn.gate_$1.ipaddr")
-		# if there is no ipaddr stored then query dns for IP address
-		[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns $(uci -q get "on-openvpn.gate_$1.name"))
-		[ -z "$gw_ipaddr" ] && return 1
-		
-		# if gateway could only be reached over a local tunnel, dont use it - it will not work anyway
-		[ -n "$(ip route show table $olsrd_routingTable | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ] && return 1
-		
-		# check if it is possible to open tunnel to the gateway (10 sec. maximum)
-		# test-parameters; '--dev null' will be prefaced
-		
-		msg_debug "start vpn test of $gw_ipaddr"
-
-		# some openvpn options:
-		#   dev-type: excplicitly choose "tun" (the type cannot be guessed via the "null" device name)
-		#   nobind: choose random local port - otherwise late packets from previous connection tests will cause errors
-		#   ifconfig-noexec: we do not want to configure a device (and mess up routing tables)
-		#   route-nopull: ignore any advertised routes - we do not want to redirect traffic
-		openvpn_opts="--dev-type tun --client --nobind --ifconfig-noexec --route-nopull --ns-cert-type server"
-
-		# some timing options:
-		#   inactive: close connection after 10s without traffic
-		#   ping-exit: close connection after 5s without a ping from the other side (which is probably disabled)
-	        openvpn_opts="$openvpn_opts --inactive 6 retry 0 --ping-exit 2"
-
-		# other options:
-		#   verb: verbose level 3 is required for the TLS messages
-		#   nice: testing is not too important
-		#   resolv-retry: no need to be extra careful and patient
-	        openvpn_opts="$openvpn_opts --verb 3 --nice 3 --resolv-retry 0"
-
-		# prevent a real connection (otherwise we may break our current vpn tunnel):
-		#   tls-verify: force a tls handshake failure
-		#   tls-exit: stop immediately after tls handshake failure
-		openvpn_opts="$openvpn_opts --tls-verify /bin/false --tls-exit"
-
-		# if 'Initial packet' is received, stop waiting and accept connection
-		if openvpn --dev null $openvpn_opts --remote "$gw_ipaddr" 1600 --ca "$VPN_DIR/opennet-ca.crt" --cert "$VPN_DIR/on_aps.crt" --key "$VPN_DIR/on_aps.key" | grep -q "Initial packet"; then
-			uci -q set "on-openvpn.gate_$1.age=0"
-			uci -q set "on-openvpn.gate_$1.status=y"
+		if verify_vpn_connection \
+				"$uci_prefix" \
+				"$VPN_DIR/on_aps.key" \
+				"$VPN_DIR/on_aps.crt" \
+				"$VPN_DIR/opennet-ca.crt"; then
+			uci -q set "$uci_prefix.age=0"
+			uci -q set "$uci_prefix.status=y"
 			uci commit on-openvpn
 			# this output
 			msg_debug "vpn-availability of gw $gw_ipaddr successfully tested"
@@ -153,7 +120,7 @@ test_vpngateway()
 			msg_debug "vpn test of $gw_ipaddr failed"
 			return 1
 		fi
-	elif [ "$(uci -q get "on-openvpn.gate_$1.status")" = "y" ]; then
+	elif [ "$(uci -q get "$uci_prefix.status")" = "y" ]; then
 		msg_debug "vpn-availability of gw $gw_ipaddr still valid"
 		return 0
 	fi

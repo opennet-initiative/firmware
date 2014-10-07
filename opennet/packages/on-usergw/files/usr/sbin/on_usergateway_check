@@ -114,6 +114,9 @@ ugw_checkSpeeds () {
 # parameter is index to test
 ugw_checkVPN()
 {
+	local age
+	local uci_prefix=on-usergw.opennet_ugw$1
+	local gw_ipaddr=$(uci -q get "$uci_prefix.ipaddr")
 	echo "ugw_checkVPN" >"$DATA_LOCK_FILE"
 	# if no age set yet than set to recheck_age to force immediate testing
 	age=$(uci -q get "on-usergw.opennet_ugw${1}.age")
@@ -127,38 +130,24 @@ ugw_checkVPN()
 
 	if [ "$age" -ge "$((recheck_age+nonworking_timeout))" ]; then
 		# if there was no vpn-availability for a dedicated time (nonworking_timeout minutes), declare vpn-status as not working
-		uci -q set on-usergw.opennet_ugw${1}.status='n'
-		uci -q set on-usergw.opennet_ugw${1}.age=0
+		uci -q set $uci_prefix.status='n'
+		uci -q set $uci_prefix.age=0
 		# commit after every change to prevent uci memory problems
 		uci commit on-usergw
 	elif [ $age -ge $recheck_age ]; then
-		# check vpn-availability...
-
-		gw_ipaddr=$(uci -q get on-usergw.opennet_ugw${1}.ipaddr)
-		# if there is no ipaddr stored then query dns for IP address
-		[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns "$(uci -q get "on-usergw.opennet_ugw${1}.name")")
-		[ -z "$gw_ipaddr" ] && return
-
-		# if gateway could only be reached over a local tunnel, dont use it - it will not work anyway
-		[ -n "$(ip route show table "$olsrd_routingTable" | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ] && return
-
-		# check if it is possible to open tunnel to the gateway (10 sec. maximum)
-		# test-parameters; '--dev null' will be prefaced
-		openvpn_test_parameters="--client --ns-cert-type server --remote $gw_ipaddr 1600 --ca $VPN_DIR_TEST/opennet-ca.crt --cert $VPN_DIR_TEST/on_aps.crt --key $VPN_DIR_TEST/on_aps.key --inactive 10 --verb 3 --nice 3 --resolv-retry 0 --ping-exit 5"
-
-		msg_debug "start vpn test of $gw_ipaddr"
-
-		# if 'Initial packet' is recieved, stop waiting and accept connection
-		if [ -n "$(openvpn --dev null $openvpn_test_parameters | \
-				awk '/Initial packet/ { print; system("kill 2>/dev/null $(ps|grep \"openvpn --dev null\" |grep -v grep|cut -b 0-5)") }')" ]; then
-			uci -q set on-usergw.opennet_ugw${1}.age=0
-			uci -q set on-usergw.opennet_ugw${1}.status="y"
+		if verify_vpn_connection \
+				"$uci_prefix" \
+				"$VPN_DIR_TEST/on_aps.key" \
+				"$VPN_DIR_TEST/on_aps.crt" \
+				"$VPN_DIR_TEST/opennet-ca.crt"; then
+			uci -q set $uci_prefix.age=0
+			uci -q set $uci_prefix.status="y"
 			# commit after every change to prevent uci memory problems
 			uci commit on-usergw
 			msg_debug "vpn-availability of gw $gw_ipaddr successfully tested"
 		fi
 		msg_debug "finished vpn test of $gw_ipaddr"
-	elif [ "$(uci -q get on-usergw.opennet_ugw${1}.status)" == "y" ]; then
+	elif [ "$(uci -q get $uci_prefix.status)" == "y" ]; then
 		msg_debug "vpn-availability of gw $1 still valid"
 	fi
 }

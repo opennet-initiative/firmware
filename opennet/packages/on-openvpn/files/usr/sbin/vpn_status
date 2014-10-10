@@ -126,6 +126,11 @@ case "$1" in
 	status)
 		print_status
 	;;
+	get_gateway_flag)
+		# Parameter: GW-IP FLAG
+		# e.g. "age" or "status" (used by the web-interface)
+		get_gateway_value "$2" "$3"
+	;;
 	start|stop|restart)
 		# TODO rewrite stuff below because "stop_instance" is not supported anymore
 		#INSTANCE=opennet_user

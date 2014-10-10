@@ -139,8 +139,8 @@ You may obtain a copy of the License at
                         
                         
 						<% if on_keycrt_exists then %>
-						<td class="cbi-value-field"><div id="cbi-network-lan-status" status="<%=luci.sys.exec(". /usr/bin/on-helper.sh; get_gateway_value "..v.ipaddr.." status") %>">&nbsp;</div></td>
-						<td class="cbi-value-field"><div id="cbi-network-lan-age"><%=luci.sys.exec(". /usr/bin/on-helper.sh; get_gateway_value "..v.ipaddr.." age") %></div></td>
+						<td class="cbi-value-field"><div id="cbi-network-lan-status" status="<%=luci.sys.exec("vpn_status get_gateway_flag '"..v.ipaddr.."' status") %>">&nbsp;</div></td>
+						<td class="cbi-value-field"><div id="cbi-network-lan-age"><%=luci.sys.exec("vpn_status get_gateway_flag '"..v.ipaddr.."' age") %></div></td>
 						<% end %>
 						<% if not autosearch then %>
 						<td class="cbi-section-table-cell">

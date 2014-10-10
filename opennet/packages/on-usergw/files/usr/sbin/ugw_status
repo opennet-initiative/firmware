@@ -13,93 +13,88 @@
 
 print_status()
 {
-	ugw_status_centralips=$(for gw in $(uci -q get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '{if ($5 ~ "tap") print $1}' ; done)
-    ugw_status_centralips_no=$(echo $ugw_status_centralips | wc -w);
-	ugw_status_centralip_status="error";
-    if [ "$ugw_status_centralips_no" -ge "1" ]; then ugw_status_centralip_status="ok"; fi
-    
-	ugw_status_tunnel_active=$(($(ls /tmp/opennet_ugw-*.txt 2>/dev/null | wc -w)>0));
+	local ugw_status_centralips=$(for gw in $(uci -q get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '{if ($5 ~ "tap") print $1}' ; done)
+	local ugw_status_centralips_no=$(echo $ugw_status_centralips | wc -w)
+	local ugw_status_centralip_status="error"
+	[ "$ugw_status_centralips_no" -ge "1" ] && ugw_status_centralip_status="ok"
 
-    ugw_status_sharing_wan_ok="";
-    ugw_status_sharing_possible="";
-    count=1;
-    while ( [ -n "$(uci -q get openvpn.opennet_ugw$count)" ] ); do
-        onusergw_wan=$(uci -q get on-usergw.opennet_ugw$count.wan);
-		onusergw_mtu=$(uci -q get on-usergw.opennet_ugw$count.mtu);
-		if [ "$onusergw_wan" == "ok" ]; then ugw_status_sharing_wan_ok="true"; fi
-		if [ "$onusergw_wan" == "ok" ] && [ "$onusergw_mtu" == "ok" ]; then
-			ugw_status_sharing_possible="true";
-			break;
-		fi
-        : $((count++));
-    done
+	local ugw_status_tunnel_active=$(($(ls /tmp/opennet_ugw-*.txt 2>/dev/null | wc -w)>0))
 
-    ugw_status_sharing_enabled=$(uci -q get on-usergw.ugw_sharing.shareInternet);
-	ugw_status_sharing_blocked=$(uci -q get on-usergw.ugw_sharing.blockSharing);
+	local ugw_status_sharing_wan_ok=""
+	local ugw_status_sharing_possible=""
+	local count=1
+	while ( [ -n "$(uci -q get openvpn.opennet_ugw$count)" ] ); do
+		onusergw_wan=$(uci -q get on-usergw.opennet_ugw$count.wan)
+		onusergw_mtu=$(uci -q get on-usergw.opennet_ugw$count.mtu)
+		[ "$onusergw_wan" = "ok" ] && ugw_status_sharing_wan_ok="true"
+		[ "$onusergw_wan" = "ok" -a "$onusergw_mtu" = "ok" ] && ugw_status_sharing_possible="true" && break
+		: $((count++))
+	done
 
-	returnVal=$(ps | grep on_usergateway_check)
-	ugw_status_checkWANMTUrunning=$(echo $returnVal | grep checkMtu)$(echo $returnVal | grep checkWan)
+	local ugw_status_sharing_enabled=$(uci -q get on-usergw.ugw_sharing.shareInternet)
+	local ugw_status_sharing_blocked=$(uci -q get on-usergw.ugw_sharing.blockSharing)
+
+	local returnVal=$(ps | grep on_usergateway_check)
+	local ugw_status_checkWANMTUrunning=$(echo $returnVal | grep checkMtu)$(echo $returnVal | grep checkWan)
 
 
-	output="\nStatus Internet-Sharing:\n\t";
+	local output="\nStatus Internet-Sharing:\n\t"
 	if [ "$ugw_status_centralips_no" -ge "1" ]; then
-		output=$output"Internet shared (Usergateway-Tunnel active, Central Gateways connected locally)\n";
+		output=$output"Internet shared (Usergateway-Tunnel active, Central Gateways connected locally)\n"
 	elif [ $ugw_status_tunnel_active = 1 ]; then
-		output=$output"Internet not shared (Internet-Sharing enabled, Usergateway-Tunnel active)\n";
+		output=$output"Internet not shared (Internet-Sharing enabled, Usergateway-Tunnel active)\n"
 	elif [ "$ugw_status_sharing_enabled" = "ok" ]; then
-		output=$output"Internet not shared (Internet-Sharing enabled, Usergateway-Tunnel not running)\n";
+		output=$output"Internet not shared (Internet-Sharing enabled, Usergateway-Tunnel not running)\n"
 	elif [ "$ugw_status_sharing_possible" = "true" ]; then
-		output=$output"Internet not shared (Internet-Sharing possible)\n";
+		output=$output"Internet not shared (Internet-Sharing possible)\n"
 	else
-		output=$output"Internet-Sharing impossible\n";
+		output=$output"Internet-Sharing impossible\n"
 	fi
-    if [ "$ugw_status_centralips_no" = "0" ]; then
-		output=$output"\t(no central Gateway-IPs connected trough tunnel)\n";
+	if [ "$ugw_status_centralips_no" = "0" ]; then
+		output=$output"\t(no central Gateway-IPs connected trough tunnel)\n"
 	elif [ "$ugw_status_centralips_no" = "1" ]; then
-		output=$output"\t(central Gateway-IP $ugw_status_centralips connected trough tunnel)\n";
+		output=$output"\t(central Gateway-IP $ugw_status_centralips connected trough tunnel)\n"
 	else
-		output=$output"\t(central Gateway-IPs $ugw_status_centralips connected trough tunnel)\n";
+		output=$output"\t(central Gateway-IPs $ugw_status_centralips connected trough tunnel)\n"
 	fi
 
-    if [ "$ugw_status_sharing_enabled" = "on" ]; then
+	if [ "$ugw_status_sharing_enabled" = "on" ]; then
 		output=$output"\nInternet-Sharing enabled\n"
 	else
 		output=$output"\nInternet-Sharing disabled\n"
 	fi
 
-    if [ "$ugw_status_sharing_blocked" > "0" ]; then
-		output=$output"Internet-Sharing is currently disabled for $ugw_status_sharing_blocked Minutes. It will be automatically reenabled, but you can enable it manually if you like.\n";
+	if [ "$ugw_status_sharing_blocked" -gt "0" ]; then
+		output=$output"Internet-Sharing is currently disabled for $ugw_status_sharing_blocked Minutes. It will be automatically reenabled, but you can enable it manually if you like.\n"
 	fi
 	output=$output"\n\t\tWAN[1]\tPing[2]\tMTU to GW[3]\tMTU from GW[3]\tMTU[4]\tTunnel\n"
 	output=$output"\t\t      \t       \tconf \treal\tconf\treal\n"
 
-    count=1;
-    while ( [ -n "$(uci -q get openvpn.opennet_ugw$count)" ] ); do
-        onusergw_wan=$(uci -q get on-usergw.opennet_ugw$count.wan);
-		onusergw_wanping=$(uci -q get on-usergw.opennet_ugw$count.wanping);
-		onusergw_mtu_toGW_tried=$(uci -q get on-usergw.opennet_ugw$count.mtu_toGW_tried);
-		onusergw_mtu_toGW_actual=$(uci -q get on-usergw.opennet_ugw$count.mtu_toGW_actual);
-		onusergw_mtu_fromGW_tried=$(uci -q get on-usergw.opennet_ugw$count.mtu_fromGW_tried);
-		onusergw_mtu_fromGW_actual=$(uci -q get on-usergw.opennet_ugw$count.mtu_fromGW_actual);
-		onusergw_mtu=$(uci -q get on-usergw.opennet_ugw$count.mtu);
-		openvpn_remote=$(uci -q get openvpn.opennet_ugw$count.remote);
+	count=1
+	while ( [ -n "$(uci -q get openvpn.opennet_ugw$count)" ] ); do
+		onusergw_wan=$(uci -q get on-usergw.opennet_ugw$count.wan)
+		onusergw_wanping=$(uci -q get on-usergw.opennet_ugw$count.wanping)
+		onusergw_mtu_toGW_tried=$(uci -q get on-usergw.opennet_ugw$count.mtu_toGW_tried)
+		onusergw_mtu_toGW_actual=$(uci -q get on-usergw.opennet_ugw$count.mtu_toGW_actual)
+		onusergw_mtu_fromGW_tried=$(uci -q get on-usergw.opennet_ugw$count.mtu_fromGW_tried)
+		onusergw_mtu_fromGW_actual=$(uci -q get on-usergw.opennet_ugw$count.mtu_fromGW_actual)
+		onusergw_mtu=$(uci -q get on-usergw.opennet_ugw$count.mtu)
+		openvpn_remote=$(uci -q get openvpn.opennet_ugw$count.remote)
 
 		ugw_tunnel_active="------"
-		if [ -e "/tmp/opennet_ugw-${openvpn_remote}.txt" ]; then ugw_tunnel_active="active"; fi
+		[ -e "/tmp/opennet_ugw-${openvpn_remote}.txt" ] && ugw_tunnel_active="active"
 	
 		output=$output"$openvpn_remote\t$onusergw_wan\t$onusergw_wanping\t$onusergw_mtu_toGW_tried\t$onusergw_mtu_toGW_actual\t$onusergw_mtu_fromGW_tried\t$onusergw_mtu_fromGW_actual"
 		output=$output"\t$onusergw_mtu\t$ugw_tunnel_active\n"
-		: $((count++));
+		: $((count++))
 	done;		
 
-	output=$output"\n[1] Route to Gateway points trough WAN-device, this is required. If not check/reconfigure your WAN connection, maybe it is not working.\n";
+	output=$output"\n[1] Route to Gateway points trough WAN-device, this is required. If not check/reconfigure your WAN connection, maybe it is not working.\n"
 	output=$output"[2] If Gateway cannot be pinged, it is probably (temporarily) down. If Tunnel is already running it will be reused once Gateway becomes available again.\n"
 	output=$output"[3] If MTU (Maximum Transmission Unit) of packages send to the Gateway is not matching the configured value, the Gateway cannot be used. Check your WAN-Connection / your WAN-Router for MTU Problems.\n"
 	output=$output"[4] Maximum Transmission Unit - match of configured and measured values is required to share your Internet.\n"
 
-	if [ -n "$ugw_status_checkWANMTUrunning" ]; then
-		output=$output"check running, please wait for the results...\n"
-	fi
+	[ -n "$ugw_status_checkWANMTUrunning" ] && output=$output"check running, please wait for the results...\n"
 	echo -e "$output"
 }
 
@@ -118,51 +113,53 @@ ugw_suspend()
 	suspend_time=$1
 	if [ -n "$suspend_time" ]; then
 		uci -q set on-usergw.ugw_sharing.shareInternet="off"
-		uci -q set on-usergw.ugw_sharing.blockSharing=$((suspend_time+5))
+		uci -q set "on-usergw.ugw_sharing.blockSharing=$((suspend_time+5))"
 		/usr/sbin/on_usergateway_check shareInternet &
 	fi
-	uci commit on-usergw;							# commit after every change to prevent uci memory problems
+	uci commit on-usergw	# commit after every change to prevent uci memory problems
 }
 
 toggle_sharing()
 {
-	sharing=$(uci -q get on-usergw.ugw_sharing.shareInternet);
-	if [ "$sharing" == "on" ]; then sharing="off";
+	sharing=$(uci -q get on-usergw.ugw_sharing.shareInternet)
+	if [ "$sharing" = "on" ]; then
+		sharing="off"
 	else
-		sharing="on";
+		sharing="on"
 		uci -q delete on-usergw.ugw_sharing.blockSharing || true
 	fi
-	uci -q set on-usergw.ugw_sharing.shareInternet=$sharing;
-	uci commit on-usergw;							# commit after every change to prevent uci memory problems
+	uci -q set "on-usergw.ugw_sharing.shareInternet=$sharing"
+	uci commit on-usergw	# commit after every change to prevent uci memory problems
 }
 
-param2=$2
-case "$1" in
+case "${1:-}" in
 	"toggle_sharing")
-		toggle_sharing;print_status;
+		toggle_sharing
+		print_status
 	;;
 	"suspend")
-		if [ -n "$param2" ]; then
-			ugw_suspend $param2;
+		if [ $# -ge 2 -a -n "${2:-}" ]; then
+			ugw_suspend "$2"
 		else echo "ERROR: suspend requires second parameter (minutes)"
 		fi
-		print_status;
+		print_status
+	;;
+	get_ugw_flag)
+		# Parameter: GW-IP FLAG
+		# e.g. "age" or "status" (used by the web-interface)
+		get_ugw_value "$2" "$3"
 	;;
 	"checkWAN")
 		/usr/sbin/on_usergateway_check checkWan &
-		print_status;
+		print_status
 	;;
 	"checkMTU")
 		/usr/sbin/on_usergateway_check checkMtu &
-		print_status;
+		print_status
 	;;
 	*)
-		print_status;print_usage;
+		print_status
+		print_usage
 	;;
 esac
-
-
-
-
-
 

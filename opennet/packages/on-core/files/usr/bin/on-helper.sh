@@ -11,19 +11,23 @@
 #	http://www.apache.org/licenses/LICENSE-2.0
 # 
 
+GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
+UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
+DEBUG=$(uci -q get on-core.defaults.debug)
+
+
 #################################################################################
 # just to get the IP for gateways only registered by name
 # parameter is name
-query_dns() { nslookup $1 2>/dev/null | tail -n 1 | awk '{ print $3 }'; }
+query_dns() { nslookup $1 2>/dev/null | tail -n 1 | awk '{ printf "%s", $3 }'; }
 
-query_dns_reverse() { nslookup $1 2>/dev/null | tail -n 1 | awk '{ print $4 }'; }
+query_dns_reverse() { nslookup $1 2>/dev/null | tail -n 1 | awk '{ printf "%s", $4 }'; }
 
 get_client_cn() {
 	openssl x509 -in /etc/openvpn/opennet_user/on_aps.crt \
 		-subject -nameopt multiline -noout 2>/dev/null | awk '/commonName/ {print $3}'
 }
 
-DEBUG=$(uci -q get on-core.defaults.debug)
 msg_debug() {
 	"$DEBUG" && logger -t "$(basename "$0")[$$]" "$1" || true
 }
@@ -35,7 +39,7 @@ msg_info() {
 # update a file if its content changed
 # return exitcode=0 (success) if the file was updated
 # return exitcode=1 (failure) if there was no change
-_update_file_if_changed() {
+update_file_if_changed() {
 	local target_filename="$1"
 	local content="$(cat -)"
 	if [ -e "$target_filename" ] && echo "$content" | cmp -s - "$target_filename"; then
@@ -67,7 +71,7 @@ update_dns_servers() {
 		echo "$dns_servers" | sort | while read ip; do
 			echo "nameserver $ip"
 		done
-	) | _update_file_if_changed "$dns_resolv_file" && msg_info "updating DNS entries"
+	) | update_file_if_changed "$dns_resolv_file" && msg_info "updating DNS entries"
 	return
 }
 
@@ -126,6 +130,75 @@ control_ntpclient() {
 			echo >&2 "ERROR: unknown action for 'control_ntpclient': $action"
 			;;
 	esac
+}
+
+#################################################################################
+# Auslesen eines Werts aus einer Key/Value-Datei
+# Jede Zeile dieser Datei enthaelt einen Feldnamen und einen Wert - beide sind durch
+# ein beliebiges whitespace-Zeichen getrennt.
+# Wir verwenden dies beispielsweise fuer die volatilen Gateway-Zustandsdaten.
+# Parameter status_file: der Name der Key/Value-Datei
+# Parameter field: das Schluesselwort
+_get_file_dict_value() {
+	local status_file=$1
+	local field=$2
+	awk "{if (\$1 == \"${field}\") { printf \"%s\", \$2; exit 0; }}" "$status_file"
+}
+
+#################################################################################
+# Schreiben eines Werts in eine Key-Value-Datei
+# Dateiformat: siehe _get_file_dict_value
+# Parameter status_file: der Name der Key/Value-Datei
+# Parameter field: das Schluesselwort
+# Parameter value: der neue Wert
+_set_file_dict_value() {
+	local status_file=$1
+	local field=$2
+	local new_value=$3
+	# Filtere bisherige Zeilen mit dem key heraus.
+	# Fuege anschliessend die Zeile mit dem neuen Wert an.
+	# Die Sortierung sorgt fuer gute Vergleichbarkeit, um die Anzahl der
+	# Schreibvorgaenge (=Wahrscheinlichkeit von gleichzeitigem Zugriff) zu reduzieren.
+	(
+		while read fieldname value; do
+			[ "$field" != "$fieldname" ] && echo "$fieldname $value"
+		 done <"$GATEWAY_STATUS_FILE"
+		echo "$field $new_value"
+	) | sort | update_file_if_changed "$GATEWAY_STATUS_FILE" || true
+}
+
+#################################################################################
+# Auslesen einer Gateway-Information
+# Parameter ip: IP-Adresse des Gateways
+# Parameter key: Informationsschluessel ("age", "status", ...)
+get_gateway_value() {
+	_get_file_dict_value "$GATEWAY_STATUS_FILE" "${1}_${2}"
+}
+
+#################################################################################
+# Aendere eine gateway-Information
+# Parameter ip: IP-Adresse des Gateways
+# Parameter key: Informationsschluessel ("age", "status", ...)
+# Parameter value: der neue Inhalt
+set_gateway_value() {
+	_set_file_dict_value "$GATEWAY_STATUS_FILE" "${1}_${2}" "$3"
+}
+
+#################################################################################
+# Auslesen einer Gateway-Information
+# Parameter ip: IP-Adresse des Gateways
+# Parameter key: Informationsschluessel ("age", "status", ...)
+get_ugw_value() {
+	_get_file_dict_value "$UGW_STATUS_FILE" "${1}_${2}"
+}
+
+#################################################################################
+# Aendere eine gateway-Information
+# Parameter ip: IP-Adresse des Gateways
+# Parameter key: Informationsschluessel ("age", "status", ...)
+# Parameter value: der neue Inhalt
+set_ugw_value() {
+	_set_file_dict_value "$UGW_STATUS_FILE" "${1}_${2}" "$3"
 }
 
 get_network() {
@@ -243,21 +316,22 @@ aquire_lock() {
 
 # pruefe einen VPN-Verbindungsaufbau
 # Parameter:
-#   uci_prefix: z.B. "on-openvpn.gate_$INDEX" oder "on-usergw.opennet_ugw$INDEX"
+#   Gateway-IP: die announcierte IP des Gateways
+#   Gateway-Name: der Name des Gateways
 #   Schluesseldatei: z.B. $VPN_DIR/on_aps.key
 #   Zertifikatsdatei: z.B. $VPN_DIR/on_aps.crt
 #   CA-Zertifikatsdatei: z.B. $VPN_DIR/opennet-ca.crt
 # Ergebnis: Exitcode=0 bei Erfolg
 verify_vpn_connection() {
-	local uci_prefix=$1
-	local key_file=$2
-	local cert_file=$3
-	local ca_file=$4
-	local gw_ipaddr
+	local gw_ipaddr=$1
+	local gw_name=$2
+	local key_file=$3
+	local cert_file=$4
+	local ca_file=$5
+	local openvpn_opts
 
-	gw_ipaddr=$(uci -q get "$uci_prefix.ipaddr")
 	# if there is no ipaddr stored then query dns for IP address
-	[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns $(uci -q get "$uci_prefix.name"))
+	[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns "$gw_name")
 	[ -z "$gw_ipaddr" ] && return 1
 	
 	# if gateway could only be reached over a local tunnel, dont use it - it will not work anyway
@@ -295,6 +369,7 @@ verify_vpn_connection() {
 
 	# check if the output contains a magic line
 	openvpn $openvpn_opts --remote "$gw_ipaddr" 1600 --ca "$ca_file" --cert "$cert_file" --key "$key_file" \
-		| grep -q "Initial packet"
+		| grep -q "Initial packet" && return 0
+	return 1
 }
 

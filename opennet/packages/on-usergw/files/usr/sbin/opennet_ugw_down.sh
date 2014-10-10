@@ -16,7 +16,7 @@
 msg_debug "starting for iface ${dev}"
 msg_debug "removing network config for ${dev}"
 
-uci -q "delete network.on_${dev}"
+uci -q "delete network.on_${dev}" || true
 uci commit network
 
 # reload new ubus rpc interface (see http://wiki.openwrt.org/doc/techref/ubus)

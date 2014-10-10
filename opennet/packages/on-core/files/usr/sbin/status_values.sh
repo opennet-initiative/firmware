@@ -232,8 +232,8 @@ on_vpn_sort="$(uci -q get on-openvpn.gateways.vpn_sort_criteria)"
 index=1; gw_addresses="";
 while [ -n "$(uci -q get on-openvpn.gate_$index)" ] ; do
   gw_ipaddr=$(uci -q get on-openvpn.gate_$index.ipaddr);
-  age=$(uci -q get on-openvpn.gate_$index.age);
-  status=$(uci -q get on-openvpn.gate_$index.status);
+  age=$(get_gateway_value "$gw_ipaddr" age)
+  status=$(get_gateway_value "$gw_ipaddr" status)
   gw_addresses="$gw_addresses ${gw_ipaddr}:${status}:${age}"
   : $((index++))
 done

@@ -114,40 +114,35 @@ ugw_checkSpeeds () {
 # parameter is index to test
 ugw_checkVPN()
 {
-	local age
+	echo "ugw_checkVPN" >"$DATA_LOCK_FILE"
 	local uci_prefix=on-usergw.opennet_ugw$1
 	local gw_ipaddr=$(uci -q get "$uci_prefix.ipaddr")
-	echo "ugw_checkVPN" >"$DATA_LOCK_FILE"
+	local gw_name=$(uci -q get "$uci_prefix.name")
 	# if no age set yet than set to recheck_age to force immediate testing
-	age=$(uci -q get "on-usergw.opennet_ugw${1}.age")
-	if [ "$age" ]; then
+	local age=$(get_ugw_value "$gw_ipaddr" age)
+	if [ -n "$age" ]; then
 		# it's running every 5 minutes
-		uci -q set "on-usergw.opennet_ugw${1}.age=$((age+5))"
+		age=$((age+5))
 	else
-		uci -q set "on-usergw.opennet_ugw${1}.age=$recheck_age"
 		age=$recheck_age
 	fi
+	set_ugw_value "$gw_ipaddr" age "$age"
 
 	if [ "$age" -ge "$((recheck_age+nonworking_timeout))" ]; then
 		# if there was no vpn-availability for a dedicated time (nonworking_timeout minutes), declare vpn-status as not working
-		uci -q set $uci_prefix.status='n'
-		uci -q set $uci_prefix.age=0
-		# commit after every change to prevent uci memory problems
-		uci commit on-usergw
+		set_ugw_value "$gw_ipaddr" status n
+		set_ugw_value "$gw_ipaddr" age 0
 	elif [ $age -ge $recheck_age ]; then
-		if verify_vpn_connection \
-				"$uci_prefix" \
+		if verify_vpn_connection "$gw_ipaddr" "$gw_name" \
 				"$VPN_DIR_TEST/on_aps.key" \
 				"$VPN_DIR_TEST/on_aps.crt" \
 				"$VPN_DIR_TEST/opennet-ca.crt"; then
-			uci -q set $uci_prefix.age=0
-			uci -q set $uci_prefix.status="y"
-			# commit after every change to prevent uci memory problems
-			uci commit on-usergw
+			set_ugw_value "$gw_ipaddr" status y
+			set_ugw_value "$gw_ipaddr" age 0
 			msg_debug "vpn-availability of gw $gw_ipaddr successfully tested"
 		fi
 		msg_debug "finished vpn test of $gw_ipaddr"
-	elif [ "$(uci -q get $uci_prefix.status)" == "y" ]; then
+	elif [ "$(get_ugw_value "$gw_ipaddr" status)" = "y" ]; then
 		msg_debug "vpn-availability of gw $1 still valid"
 	fi
 }
@@ -212,7 +207,8 @@ ugw_getMTU () {
 		: $((wait_loops--))
 	done
 	# timer run off, kill leftover openvpn and abort test
-	kill "$pid" >/dev/null 2>&1 || true ; rm -f "$pidfile" "$outfile"
+	kill "$pid" >/dev/null 2>&1 || true
+	rm -f "$pidfile" "$outfile"
 	msg_info "timeout for ugw_checkMTU $remote. Aborting."
 	return 1
 }
@@ -275,9 +271,11 @@ ugw_checkMTUs () {
 # olsr put's it's routes in a separate table, therefore main table has only locally received routes
 # $1=nr
 ugw_checkWAN () {
+	local on_ugw=$(uci -q get "on-usergw.opennet_ugw${1}.name")
+	local on_ugw_ip=$(query_dns $on_ugw)
+	local on_ugw_targetDev
+	local wandev
 	echo "ugw_checkWAN" >"$DATA_LOCK_FILE"
-	on_ugw=$(uci -q get "on-usergw.opennet_ugw${1}.name")
-	on_ugw_ip=$(query_dns $on_ugw)
 	# store or remove stored IP
 	uci -q set "on-usergw.opennet_ugw${1}.ipaddr=$on_ugw_ip"
 	if [ -z "$on_ugw_ip" ]; then
@@ -293,8 +291,8 @@ ugw_checkWAN () {
 		msg_debug "checkWAN: $on_ugw routing through wan device: $wandev"
 		msg_debug "checkWAN: $on_ugw avg ping time: $time"
 	else
-		uci -q set "on-usergw.opennet_ugw${1}.wan=error"
-		uci -q delete "on-usergw.opennet_ugw${1}.ping"
+		uci -q set "on-usergw.opennet_ugw${1}.wan=error" || true
+		uci -q delete "on-usergw.opennet_ugw${1}.ping" || true
 	fi
 }
 
@@ -357,10 +355,10 @@ ugw_syncVPNConfig () {
 # check if sharingInternet is temporarily blocked
 ugw_checkSharingBlocked () {
 	msg_debug "ugw_checkSharingBlocked"
-	on_share_internet_unblock_time=$(uci -q get on-usergw.ugw_sharing.unblock_time)
+	local on_share_internet_unblock_time=$(uci -q get on-usergw.ugw_sharing.unblock_time)
 	[ -z "$on_share_internet_unblock_time" ] && return
 	if [ "$(date +%s)" -gt "$on_share_internet_unblock_time" ]; then
-		uci delete on-usergw.ugw_sharing.unblock_time
+		uci delete on-usergw.ugw_sharing.unblock_time || true
 		uci set on-usergw.ugw_sharing.shareInternet='on'
 	elif [ "$(uci -q get on-usergw.ugw_sharing.shareInternet)" = "on" ]; then
 		uci set on-usergw.ugw_sharing.shareInternet='off'
@@ -372,7 +370,7 @@ ugw_checkSharingBlocked () {
 # store 'enabled'-value in openvpn config
 ugw_checkWorking () {
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
-		mtu=$(uci -q get "on-usergw.opennet_ugw${nr}.mtu")
+		mtu=$(uci -q get "on-usergw.opennet_ugw${nr}.mtu") || true
 		wan=$(uci -q get "on-usergw.opennet_ugw${nr}.wan")
 		name=$(uci -q get "on-usergw.opennet_ugw${nr}.name")
 		gw_name=$(lua -e "require('luci.model.opennet.on_usergw_syncconfig') print(gw_name('${name}'))")
@@ -426,7 +424,7 @@ ugw_disableForward () {
 			src_dport="$(uci -q get "$section.src_dport")"
 			proto="$(uci -q get "$section.proto")"
 			if [ "$src_dport" == "1600" ] || [ "$src_dport" == "123" ] || [ "$src_dport" == "53" ] || [ "$proto" == "icmp" ]; then
-				uci -q delete "$section"
+				uci -q delete "$section" || true
 				change=true
 			else
 				: $((nr++))
@@ -490,8 +488,16 @@ ugw_enableForward () {
 # check is done every 5 minutes, if there is a better gw then switch
 ugw_forwardGW () {
 	msg_debug "ugw_forwardGW"
-	sharing=$(uci -q get on-usergw.ugw_sharing.shareInternet)
-	current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
+	local found_first_ugw
+	local better_ugw_count
+	local ugw_ipaddr
+	local name
+	local ugw_name
+	local ugw_enabled
+	local ugw_possible
+	local sharing=$(uci -q get on-usergw.ugw_sharing.shareInternet)
+	local current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
+
 	if [ "$sharing" != "on" ]; then
 		ugw_disableForward
 		return
@@ -507,13 +513,13 @@ ugw_forwardGW () {
 		name=$(uci -q get "on-usergw.opennet_ugw${nr}.name")
 		ugw_name=$(lua -e "require('luci.model.opennet.on_usergw_syncconfig') print(gw_name('${name}'))")
 		ugw_enabled="$(uci -q get "openvpn.${ugw_name}.enable")"
-		ugw_vpn=$(uci -q get "on-usergw.opennet_ugw${nr}.status")
+		ugw_possible=$(get_ugw_value "$ugw_ipaddr" status)
 
 		# it is not working
 		[ -z "$ugw_enabled" ] && continue
 
-		# the vpn is not established (or what does it mean?)
-		[ "$ugw_vpn" != "y" ] && continue
+		# this gateway connection is not usable
+		[ "$ugw_possible" != "y" ] && continue
 
 		# we found one before (why not look for another?)
 		[ -n "$found_first_ugw" ] && continue
@@ -526,7 +532,7 @@ ugw_forwardGW () {
 				msg_info "found a better usergateway, changing to $ugw_ipaddr"
 				ugw_disableForward
 				ugw_enableForward "$ugw_ipaddr"
-				better_gw_count=0
+				better_ugw_count=0
 			fi
 			uci -q set "on-usergw.ugw_sharing.better_ugw=$better_ugw_count"
 		else
@@ -544,8 +550,13 @@ ugw_forwardGW () {
 # do extra checks (speed, mtu) only at dedicated times
 ugw_doExtraChecks () {
 	msg_debug "ugw_doExtraChecks"
-
-	restart_time=$(($(date +%s)-$(cut -f1 -d. /proc/uptime)))
+	local nr
+	local speed_time
+	local name
+	local gw_name
+	local vpn_pid
+	local mtu_time
+	local restart_time=$(($(date +%s)-$(cut -f1 -d. /proc/uptime)))
 
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
 		# do extraChecks only if WAN-Connection is established

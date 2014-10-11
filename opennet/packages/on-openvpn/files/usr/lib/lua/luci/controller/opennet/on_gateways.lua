@@ -17,9 +17,9 @@ function index()
 	luci.i18n.loadc("on_base")
 	local i18n = luci.i18n.string
 	
-	local page  = entry({"opennet", "opennet_2", "vpn_gateways"}, call("action_vpn_gateways"), i18n("VPN Gateways"), 1)
-	page.i18n    = "on_gateways"
-	page.css     = "opennet.css"
+	local page = entry({"opennet", "opennet_2", "vpn_gateways"}, call("action_vpn_gateways"), i18n("VPN Gateways"), 1)
+	page.i18n  = "on_gateways"
+	page.css   = "opennet.css"
 end
 
 function action_vpn_gateways()
@@ -30,8 +30,8 @@ function action_vpn_gateways()
 		os.execute("logger move_gateway_down "..number)
 		local t_below = cursor:get_all("on-openvpn", "gate_"..(number + 1))
 		local t_current = cursor:get_all("on-openvpn", "gate_"..number)
-        cursor:delete ("on-openvpn", "gate_"..(number + 1))
-        cursor:delete ("on-openvpn", "gate_"..number)
+		cursor:delete ("on-openvpn", "gate_"..(number + 1))
+		cursor:delete ("on-openvpn", "gate_"..number)
 		cursor:section ("on-openvpn", "gateway", "gate_"..(number + 1), t_current)
 		cursor:section ("on-openvpn", "gateway", "gate_"..number, t_below)
 	end
@@ -58,8 +58,8 @@ function action_vpn_gateways()
 		
 		-- set offset to get smallest etx
 		cursor:set("on-openvpn", "gate_"..number, "etx_offset", math.floor(minimal_etx - selected_etx -1))
-    cursor:commit("on-openvpn")
-        cursor:unload("on-openvpn")
+		cursor:commit("on-openvpn")
+		cursor:unload("on-openvpn")
 		require ("luci.model.opennet.on_vpn_autosearch")
 	end
 	
@@ -91,8 +91,8 @@ function action_vpn_gateways()
 	local down_section = luci.http.formvalue("down_section")
 	local reset_counter = luci.http.formvalue("reset_counter")
 	local select_gw = luci.http.formvalue("select_gw")
-    local up_etx = luci.http.formvalue("up_etx")
-    local down_etx = luci.http.formvalue("down_etx")
+	local up_etx = luci.http.formvalue("up_etx")
+	local down_etx = luci.http.formvalue("down_etx")
 	
 	local number_of_gateways = 0
 	cursor:foreach ("on-openvpn", "gateway", function() number_of_gateways = number_of_gateways + 1 end)
@@ -103,46 +103,46 @@ function action_vpn_gateways()
 	elseif (new_blacklist_gateway and new_blacklist_gateway ~= "") or (new_blacklist_gateway_name and new_blacklist_gateway_name ~= "") then
 		cursor:section("on-openvpn", "blacklist_gateway", nil, { ipaddr = new_blacklist_gateway, name = new_blacklist_gateway_name })
 	elseif up_etx then
-        local etx_offset = cursor:get("on-openvpn", "gate_"..up_etx, "etx_offset")
-        if etx_offset then
-          etx_offset = etx_offset + 1
-        else
-          etx_offset = 1
-        end
-        if etx_offset ~= 0 then
-          cursor:set ("on-openvpn", "gate_"..up_etx, "etx_offset", etx_offset)
-        else
-          cursor:delete ("on-openvpn", "gate_"..up_etx, "etx_offset")
-        end
-        cursor:commit("on-openvpn")
-        cursor:unload("on-openvpn")
-        require ("luci.model.opennet.on_vpn_autosearch")
-    elseif down_etx then
-        local etx_offset = cursor:get("on-openvpn", "gate_"..down_etx, "etx_offset")
-        if etx_offset then
-          etx_offset = etx_offset - 1
-        else
-          etx_offset = -1
-        end
-        if etx_offset ~= 0 then
-          cursor:set ("on-openvpn", "gate_"..down_etx, "etx_offset", etx_offset)
-        else
-          cursor:delete ("on-openvpn", "gate_"..down_etx, "etx_offset")
-        end
-        cursor:commit("on-openvpn")
-        cursor:unload("on-openvpn")
-        require ("luci.model.opennet.on_vpn_autosearch")
-    elseif down_section then
-        down_section = down_section + 0
+		local etx_offset = cursor:get("on-openvpn", "gate_"..up_etx, "etx_offset")
+		if etx_offset then
+			etx_offset = etx_offset + 1
+		else
+			etx_offset = 1
+		end
+		if etx_offset ~= 0 then
+			cursor:set ("on-openvpn", "gate_"..up_etx, "etx_offset", etx_offset)
+		else
+			cursor:delete ("on-openvpn", "gate_"..up_etx, "etx_offset")
+		end
+		cursor:commit("on-openvpn")
+		cursor:unload("on-openvpn")
+		require ("luci.model.opennet.on_vpn_autosearch")
+	elseif down_etx then
+		local etx_offset = cursor:get("on-openvpn", "gate_"..down_etx, "etx_offset")
+		if etx_offset then
+			etx_offset = etx_offset - 1
+		else
+			etx_offset = -1
+		end
+		if etx_offset ~= 0 then
+			cursor:set ("on-openvpn", "gate_"..down_etx, "etx_offset", etx_offset)
+		else
+			cursor:delete ("on-openvpn", "gate_"..down_etx, "etx_offset")
+		end
+		cursor:commit("on-openvpn")
+		cursor:unload("on-openvpn")
+		require ("luci.model.opennet.on_vpn_autosearch")
+	elseif down_section then
+		down_section = down_section + 0
 		move_gateway_down(down_section)
 	elseif toggle_gateway_search then
 		local search = cursor:get("on-openvpn", "gateways", "autosearch")
 		if search == "on" then
-          search = "off"
-        else
-          search = "on"
-          require ("luci.model.opennet.on_vpn_autosearch")
-        end
+			search = "off"
+		else
+			search = "on"
+			require ("luci.model.opennet.on_vpn_autosearch")
+		end
 		cursor:set("on-openvpn", "gateways", "autosearch", search)
 	elseif toggle_sort_criteria then
 		local sort = cursor:get("on-openvpn", "gateways", "vpn_sort_criteria")
@@ -177,18 +177,19 @@ function action_vpn_gateways()
 	end
 
 	show_more_info = luci.http.formvalue("show_more_info")
-    
-    local offset_exists = false
-    local number = 1
-    local gws = cursor:get_all("on-openvpn", "gate_"..number)
-    while gws do
-      if gws.etx_offset then
-        offset_exists = true
-        break
-      end
-      number = number + 1
-      gws = cursor:get_all("on-openvpn", "gate_"..number)
-    end
-	
+
+	local offset_exists = false
+	local number = 1
+	local gws = cursor:get_all("on-openvpn", "gate_"..number)
+	while gws do
+		if gws.etx_offset then
+			offset_exists = true
+			break
+		end
+		number = number + 1
+		gws = cursor:get_all("on-openvpn", "gate_"..number)
+	end
+
 	luci.template.render("opennet/on_gateways", { show_more_info = show_more_info, offset_exists = offset_exists })
 end
+

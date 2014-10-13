@@ -13,6 +13,8 @@
 
 GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
+SERVICES_FILE=/var/run/services_olsr
+
 DEBUG=$(uci -q get on-core.defaults.debug)
 
 
@@ -200,6 +202,31 @@ get_ugw_value() {
 # Parameter value: der neue Inhalt
 set_ugw_value() {
 	_set_file_dict_value "$UGW_STATUS_FILE" "${1}_${2}" "$3"
+}
+
+# Parse die olsr-Service-Datei
+# Die Service-Datei enthaelt Zeilen streng definierter Form (durchgesetzt vom nameservice-Plugin).
+# Beispielhafte Eintraege:
+#   http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108         #192.168.2.15
+#   dns://192.168.10.4:53|udp|dns                                           #192.168.10.4
+# Parameter: service-Type (z.B. "gw", "ugw", "dns", "ntp"
+# Ergebnis:
+#   HOST:PORT DETAILS
+get_services() {
+	local filter_type=$1
+	local url
+	local proto
+	local service
+	local details
+	local host_port
+	# remove trailing commentary (containing the service's source IP address)
+	# use "|" and space as a separator
+	grep "^[^#]" "$SERVICE_FILE" | sed 's/ *#[^#]\+//' | IFS="| " while read url proto service details; do
+		if [ "$service" = "$filter_service" ]; then
+		       host_port=$(echo "$url" | cut -f 3 -d /)
+		       echo "$host_port" "$details"
+		fi
+	done
 }
 
 get_network() {

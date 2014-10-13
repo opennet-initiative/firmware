@@ -2,6 +2,7 @@
 Opennet Firmware
 
 Copyright 2010 Rene Ejury <opennet@absorb.it>
+Copyright 2014 Lars Kruse <devel@sumpfralle.de>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@ You may obtain a copy of the License at
 $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 ]]--
 module("luci.controller.opennet.on_gateways", package.seeall)
+require ("luci.model.opennet.on_vpn_autosearch")
 
 function index()
 	luci.i18n.loadc("on_base")
@@ -25,8 +27,20 @@ end
 function action_vpn_gateways()
 	local uci = require "luci.model.uci"
 	local cursor = uci.cursor()
-		
-	function move_gateway_down (number)
+
+	update_gateways()
+
+	function get_gate_number(ipaddr)
+		local number = 1
+		local target = cursor:get_all("on-openvpn", "gate_"..number)
+		while target and (target.ipaddr ~= ipaddr) do
+			number = number + 1
+			target = cursor:get_all("on-openvpn", "gate_"..number)
+		end
+		return number
+	end
+
+	function move_gateway_down(number)
 		os.execute("logger move_gateway_down "..number)
 		local t_below = cursor:get_all("on-openvpn", "gate_"..(number + 1))
 		local t_current = cursor:get_all("on-openvpn", "gate_"..number)
@@ -38,46 +52,30 @@ function action_vpn_gateways()
 
 	function bring_gateway_etx_top(ipaddr)
 		os.execute("logger bring_gateway_etx_top "..ipaddr)
-		local number = 1
 		local type = "etx"
 		if cursor:get("on-openvpn", "gateways", "vpn_sort_criteria") == "metric" then type = "hop" end
 		os.execute("logger bring_gateway_etx_top type "..type)
-		-- search selected gw
-		local target = cursor:get_all("on-openvpn", "gate_"..number)
-		while target and (target.ipaddr ~= ipaddr) do
-			number = number + 1
-			target = cursor:get_all("on-openvpn", "gate_"..number)
-		end
+		local number = get_gate_number(ipaddr)
 		os.execute("logger bring_gateway_etx_top number "..number)
-		local selected_etx = cursor:get("on-openvpn", "gate_"..number, type)
+		local selected_etx = get_gateway_flag(ipaddr, type)
 		
 		-- get minimal etx
-		local minimal_etx = cursor:get("on-openvpn", "gate_1", type)
-		local minimal_etx_offset = cursor:get("on-openvpn", "gate_1", "etx_offset")
+		local top_ipaddr = cursor:get("on-openvpn", "gate_1", "ipaddr")
+		local minimal_etx = get_gateway_flag(top_ipaddr, type)
+		local minimal_etx_offset = get_gateway_flag(top_ipaddr, "etx_offset")
 		if minimal_etx_offset then minimal_etx = minimal_etx + minimal_etx_offset end
 		
 		-- set offset to get smallest etx
-		cursor:set("on-openvpn", "gate_"..number, "etx_offset", math.floor(minimal_etx - selected_etx -1))
-		cursor:commit("on-openvpn")
+		set_gateway_flag(ipaddr, "etx_offset", math.floor(minimal_etx - selected_etx - 1))
 		cursor:unload("on-openvpn")
-		require ("luci.model.opennet.on_vpn_autosearch")
+		update_gateways()
 	end
 	
 	function bring_gateway_top (ipaddr)
 		os.execute("logger bring_gateway_top "..ipaddr)
-		local number = 1
-		local target = cursor:get_all("on-openvpn", "gate_"..number)
-		while target and (target.ipaddr ~= ipaddr) do
-			number = number + 1
-			target = cursor:get_all("on-openvpn", "gate_"..number)
-		end
-		
+		local number = get_gate_number(ipaddr)
 		os.execute("logger bring_gateway_top found gateway at gate_"..number)
-		
-		while (number > 1) do
-			number = number - 1
-			move_gateway_down(number)
-		end
+		os.execute("vpn-status move_top '"..number.."'")
 	end
 	
 	local new_gateway = luci.http.formvalue("new_gateway")
@@ -103,36 +101,37 @@ function action_vpn_gateways()
 	elseif (new_blacklist_gateway and new_blacklist_gateway ~= "") or (new_blacklist_gateway_name and new_blacklist_gateway_name ~= "") then
 		cursor:section("on-openvpn", "blacklist_gateway", nil, { ipaddr = new_blacklist_gateway, name = new_blacklist_gateway_name })
 	elseif up_etx then
-		local etx_offset = cursor:get("on-openvpn", "gate_"..up_etx, "etx_offset")
+		local ipaddr = cursor:get("on-openvpn", "gate_"..up_etx, "ipaddr")
+		local etx_offset = get_gateway_flag(top_ipaddr, "etx_offset", etx_offset)
 		if etx_offset then
 			etx_offset = etx_offset + 1
 		else
 			etx_offset = 1
 		end
 		if etx_offset ~= 0 then
-			cursor:set ("on-openvpn", "gate_"..up_etx, "etx_offset", etx_offset)
+			set_gateway_flag(ipaddr, "etx_offset", etx_offset)
 		else
-			cursor:delete ("on-openvpn", "gate_"..up_etx, "etx_offset")
+			delete_gateway_flag(ipaddr, "etx_offset")
 		end
-		cursor:commit("on-openvpn")
 		cursor:unload("on-openvpn")
-		require ("luci.model.opennet.on_vpn_autosearch")
+		update_gateways()
 	elseif down_etx then
-		local etx_offset = cursor:get("on-openvpn", "gate_"..down_etx, "etx_offset")
+		local ipaddr = cursor:get("on-openvpn", "gate_"..up_etx, "ipaddr")
+		local etx_offset = get_gateway_flag(ipaddr, "etx_offset")
 		if etx_offset then
 			etx_offset = etx_offset - 1
 		else
 			etx_offset = -1
 		end
 		if etx_offset ~= 0 then
-			cursor:set ("on-openvpn", "gate_"..down_etx, "etx_offset", etx_offset)
+			set_gateway_flag(ipaddr, "etx_offset", etx_offset)
 		else
-			cursor:delete ("on-openvpn", "gate_"..down_etx, "etx_offset")
+			delete_gateway_flag(ipaddr, "etx_offset")
 		end
-		cursor:commit("on-openvpn")
 		cursor:unload("on-openvpn")
-		require ("luci.model.opennet.on_vpn_autosearch")
+		update_gateways()
 	elseif down_section then
+		-- force int?
 		down_section = down_section + 0
 		move_gateway_down(down_section)
 	elseif toggle_gateway_search then
@@ -141,7 +140,8 @@ function action_vpn_gateways()
 			search = "off"
 		else
 			search = "on"
-			require ("luci.model.opennet.on_vpn_autosearch")
+			cursor:unload("on-openvpn")
+			update_gateways()
 		end
 		cursor:set("on-openvpn", "gateways", "autosearch", search)
 	elseif toggle_sort_criteria then
@@ -149,16 +149,12 @@ function action_vpn_gateways()
 		if sort == "etx" then sort = "metric" else sort = "etx" end
 		cursor:set("on-openvpn", "gateways", "vpn_sort_criteria", sort)
 	elseif del_section then
-		while ((del_section + 0) < number_of_gateways) do	-- comparising failed if del_section wasn't forced to be int
-			move_gateway_down(del_section)
-			del_section = del_section + 1
-		end
-		cursor:delete("on-openvpn", "gate_"..del_section)
+		os.execute("vpn-status del_gw '"..del_section.."'")
 	elseif del_blacklist_gw	then
 		cursor:delete("on-openvpn", del_blacklist_gw)
 	elseif reset_counter then
 		for k, v in pairs(cursor:get_all("on-openvpn")) do
-			if v[".type"] == "gateway" then cursor:set("on-openvpn", k, "age", "") end
+			if v[".type"] == "gateway" then delete_gateway_flag(cursor:get("on-openvpn", k, "ipaddr"), "age") end
 		end
 	elseif select_gw then
 		if cursor:get("on-openvpn", "gateways", "autosearch") == "off" then
@@ -182,7 +178,7 @@ function action_vpn_gateways()
 	local number = 1
 	local gws = cursor:get_all("on-openvpn", "gate_"..number)
 	while gws do
-		if gws.etx_offset then
+		if get_gateway_flag(gws.ipaddr, "etx_offset") then
 			offset_exists = true
 			break
 		end

@@ -16,6 +16,17 @@ local uci = require "luci.model.uci"
 local cursor = uci.cursor()
 
 
+--[[
+Parse eine olsr-service-Datei
+
+Beispielhafte Eintraege:
+  http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108         #192.168.2.15
+  dns://192.168.10.4:53|udp|dns                                           #192.168.10.4
+
+Das Ergebnis ist ein assoziatives Array der Form:
+  array[IP-Adresse][Schluessel] = Wert
+"Schluessel" ist dabei beispielsweise "upload"
+]]--
 function read_services()
   f = io.open("/var/run/services_olsr", "r")
   services_elem = {}
@@ -46,27 +57,39 @@ function read_services()
   return services_elem
 end
 
+function get_gateway_flag(ip, key)
+  return luci.sys.exec("vpn_status get_gateway_flag '"..ip.."' '"..key.."'")
+end
+
+function set_gateway_flag(ip, key, value)
+  luci.sys.exec("vpn_status set_gateway_flag '"..ip.."' '"..key.."' '"..value.."'")
+end
+
+function delete_gateway_flag(ip, key)
+  set_gateway_flag(ip, key, "")
+end
+
 function gw_parse(gateways, gws_access, services_olsr, line)
   local tmp_elem = {}
   line:gsub("[^:]+", function (w) table.insert(tmp_elem, w) end)
-
-  if not gws_access[tmp_elem[1]] then
+  local ipaddr = tmp_elem[1]
+  if not gws_access[ipaddr] then
     new_gw = {}
-    gws_access[tmp_elem[1]] = new_gw
-    gws_access[tmp_elem[1]].ipaddr = tmp_elem[1]
+    gws_access[ipaddr] = new_gw
+    gws_access[ipaddr].ipaddr = ipaddr
   end
-  table.insert(gateways, gws_access[tmp_elem[1]])
-  gws_access[tmp_elem[1]].hop = tmp_elem[2]
-  gws_access[tmp_elem[1]].etx = tmp_elem[3]
+  table.insert(gateways, gws_access[ipaddr])
+  set_gateway_flag(ipaddr, "hop", tmp_elem[2])
+  set_gateway_flag(ipaddr, "etx", tmp_elem[3])
   
-  if services_olsr[tmp_elem[1]] then
-    gws_access[tmp_elem[1]].upload = services_olsr[tmp_elem[1]].upload
-    gws_access[tmp_elem[1]].download = services_olsr[tmp_elem[1]].download
-    gws_access[tmp_elem[1]].ping = services_olsr[tmp_elem[1]].ping
+  if services_olsr[ipaddr] then
+    set_gateway_flag(ipaddr, "upload", services_olsr[ipaddr].upload)
+    set_gateway_flag(ipaddr, "download", services_olsr[ipaddr].download)
+    set_gateway_flag(ipaddr, "ping", services_olsr[ipaddr].ping)
   end
 
-  if not gws_access[tmp_elem[1]].etx_offset then
-    gws_access[tmp_elem[1]].etx_offset = 0
+  if not get_gateway_flag(ipaddr, "etx_offset") then
+    set_gateway_flag(ipaddr, "etx_offset", 0)
   end
 end
 
@@ -78,16 +101,26 @@ function crazy_add(a, b)
   end
 end
 
+--[[
+liefere wahr/falsch fuer die Sortierung zweier IP-Adressen
+Das primaere Sortierkriterium ist die Routing-Entfernung (etx).
+Bei Gleichheit (z.B. oft bei UGWs - da jeweils ein Hop zu erina/subaru vorliegt) wird
+je nach Paritaet (gerade/ungerade) der eigenen AP-Nummer entschieden.
+]]--
 function gw_sort(a, b)
   local val_a
   local val_b
+  local a_offset
+  local b_offset
   if cursor:get("on-openvpn", "gateways", "vpn_sort_criteria") == "etx" then
-    val_a = crazy_add(a.etx, a.etx_offset)
-    val_b = crazy_add(b.etx, b.etx_offset)
+    val_a = get_gateway_flag(a.ipaddr, "etx")
+    val_b = get_gateway_flag(b.ipaddr, "etx")
   else
-    val_a = crazy_add(a.hop, a.etx_offset)
-    val_b = crazy_add(b.hop, b.etx_offset)
+    val_a = get_gateway_flag(a.ipaddr, "hop")
+    val_b = get_gateway_flag(b.ipaddr, "hop")
   end
+  val_a = crazy_add(val_a, get_gateway_flag(a.ipaddr, "etx_offset"))
+  val_b = crazy_add(val_b, get_gateway_flag(b.ipaddr, "etx_offset"))
 
   if (val_a == val_b) then
     local order = cursor:get("on-core", "settings", "on_id")
@@ -101,7 +134,13 @@ function gw_sort(a, b)
   return (val_a < val_b)
 end
 
-function search_gateways()
+--[[
+Einlesen aktueller Gateway-Informationen (hops, etx, download, upload, ping).
+Neue Werte werden in die Datenbank ('[sg]et_gateway_flag') geschrieben.
+Abschliessend wird der uci-Namensraum "on-openvpn.gate*" mit der aktuellen Reihenfolge neu geschrieben.
+Es gibt keinen Rueckgabewert.
+]]--
+function update_gateways()
   local number = 1
   local old_gws = cursor:get_all("on-openvpn", "gate_"..number)
   -- create two tables, one numeric and one associative to access elements by ip-address
@@ -132,9 +171,9 @@ function search_gateways()
   -- add them with new order
   local index = 1
   for k,gw in pairs(gateways) do
-    if (gw.hop) then
-      if gw.etx_offset == 0 then
-        gw.etx_offset = nil
+    if (get_gateway_flag(gw.ipaddr, "hop")) then
+      if get_gateway_flag(gw.ipaddr, "etx_offset") == "0" then
+        delete_gateway_flag(gw.ipaddr, "etx_offset")
       end
       cursor:section("on-openvpn", "gateway", "gate_"..index, gw)
       index = index + 1
@@ -145,4 +184,3 @@ function search_gateways()
   cursor:commit("on-openvpn")
 end
 
-search_gateways()

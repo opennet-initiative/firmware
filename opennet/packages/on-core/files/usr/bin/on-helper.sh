@@ -221,7 +221,7 @@ get_services() {
 	local host_port
 	# remove trailing commentary (containing the service's source IP address)
 	# use "|" and space as a separator
-	grep "^[^#]" "$SERVICE_FILE" | sed 's/ *#[^#]\+//' | IFS="| " while read url proto service details; do
+	IFS='|' grep "^[^#]" "$SERVICE_FILE" | sed 's/ *#[^#]\+//' | while read url proto service details; do
 		if [ "$service" = "$filter_service" ]; then
 		       host_port=$(echo "$url" | cut -f 3 -d /)
 		       echo "$host_port" "$details"

@@ -112,6 +112,8 @@ You may obtain a copy of the License at
 						local ping=luci.sys.exec("awk 'BEGIN {FS=\"[/\\x09]+\"} \$1==\""..v.ipaddr.."\" {printf \$4; exit}' /tmp/olsrd_txtinfo.txt")
 						local etx=luci.sys.exec("awk 'BEGIN {FS=\"[/\\x09]+\"} \$1==\""..v.ipaddr.."\" {printf \$5; exit}' /tmp/olsrd_txtinfo.txt")
 						local etx_offset=luci.sys.exec("vpn-status get_gateway_flag '"..v.ipaddr.."' etx_offset")
+						-- keinen Offset einblenden, wenn er Null ist
+						if etx_offset == "" then etx_offset = nil end
 						if ping ~= "" and etx ~= "" then
                           if etx_offset and autosearch then
                             io.write(string.format("(%+d) %d / %.3f", etx_offset, ping+etx_offset, etx+etx_offset))

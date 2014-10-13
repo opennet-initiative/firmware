@@ -62,6 +62,9 @@ function get_gateway_flag(ip, key)
 end
 
 function set_gateway_flag(ip, key, value)
+  if not value then
+    value = ""
+  end
   luci.sys.exec("vpn_status set_gateway_flag '"..ip.."' '"..key.."' '"..value.."'")
 end
 
@@ -94,11 +97,13 @@ function gw_parse(gateways, gws_access, services_olsr, line)
 end
 
 function crazy_add(a, b)
-  if a and b then
-    return a+b
-  else
-    return 9999+1
+  if not a or a == "" then
+    a = 0
   end
+  if not b or b == "" then
+    b = 0
+  end
+  return a+b
 end
 
 --[[

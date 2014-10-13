@@ -163,7 +163,8 @@ _set_file_dict_value() {
 		while read fieldname value; do
 			[ "$field" != "$fieldname" ] && echo "$fieldname $value"
 		 done <"$GATEWAY_STATUS_FILE"
-		echo "$field $new_value"
+		# leerer Wert -> loeschen
+		[ -n "$new_value" ] && echo "$field $new_value"
 	) | sort | update_file_if_changed "$GATEWAY_STATUS_FILE" || true
 }
 

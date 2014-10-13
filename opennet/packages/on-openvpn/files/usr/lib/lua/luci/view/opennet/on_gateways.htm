@@ -27,7 +27,7 @@ You may obtain a copy of the License at
 			<%:Here you can configure the IP-Addresses of your choosen Gateways.%>
 			<% if show_more_info then %>
 				<br /><br />
-			<%	print(luci.i18n.string([[If you like to find more Information about the Gateways in Opennet, have a look in the Opennet-Wiki. Usually the first found Gateway in your list is the one you are going to use. The Gateway will be changed without your action, if the current Gateway does not work for around 6 minutes. Any Change of your Gateway will drop all your Internet Connections.<br />If non of the Gateways in your list are reachable or working (of if your list is empty), OpenVPN is deactivated. <br />Automated Gateway Search: The Gateways will be detected by an internal algorithm and ordered by their distance. In special cases this might nit be the best solution.<br/><br/>Additional Information about the column-values.<br/>If any Gateway is active, then the test-connection to the OpenVPN-Service of this server was successfull. If this information is missing, the test was not done before]]))
+			<%	print(luci.i18n.string([[If you like to find more Information about the Gateways in Opennet, have a look in the Opennet-Wiki. Usually the first found Gateway in your list is the one you are going to use. The Gateway will be changed without your action, if the current Gateway does not work for around 6 minutes. Any Change of your Gateway will drop all your Internet Connections.<br />If none of the Gateways in your list is reachable or working (or if your list is empty), OpenVPN is deactivated. <br />Automated Gateway Search: The Gateways will be detected by an internal algorithm and ordered by their distance. In special cases this might not be the best solution.<br/><br/>Additional Information about the column-values.<br/>If any Gateway is active, then the test-connection to the OpenVPN-Service of this server was successful. If this information is missing, the test was not done yet.]]))
 			else %>
 				<form method="post" action="<%=REQUEST_URI%>">
 					<input type="submit" name="show_more_info" class="cbi-button-plain" value="<%:...more Information...%>" />
@@ -111,11 +111,12 @@ You may obtain a copy of the License at
 						<%
 						local ping=luci.sys.exec("awk 'BEGIN {FS=\"[/\\x09]+\"} \$1==\""..v.ipaddr.."\" {printf \$4; exit}' /tmp/olsrd_txtinfo.txt")
 						local etx=luci.sys.exec("awk 'BEGIN {FS=\"[/\\x09]+\"} \$1==\""..v.ipaddr.."\" {printf \$5; exit}' /tmp/olsrd_txtinfo.txt")
+						local etx_offset=luci.sys.exec("vpn-status get_gateway_flag '"..v.ipaddr.."' etx_offset")
 						if ping ~= "" and etx ~= "" then
-                          if v.etx_offset and autosearch then
-                            io.write(string.format("(%+d) %d / %.3f",v.etx_offset,ping+v.etx_offset,etx+v.etx_offset))
+                          if etx_offset and autosearch then
+                            io.write(string.format("(%+d) %d / %.3f", etx_offset, ping+etx_offset, etx+etx_offset))
                           else
-                            io.write(string.format("%d / %.3f",ping,etx))
+                            io.write(string.format("%d / %.3f", ping, etx))
                           end
                         end
 						%>
@@ -128,11 +129,14 @@ You may obtain a copy of the License at
                         
                         
                         <td>
-                          <% if v.upload or v.download then
-                              if not v.upload then v.upload = "?" end
-                              if not v.download then v.download = "?" end
-                              local speed = v.upload.." kbps / "..v.download.." kbps"
-                              local abbr = luci.i18n.stringf([[upload to Internet %s kbit/s; download from Internet %s kbit/s]], v.upload, v.download)
+                          <%
+                            local upload=luci.sys.exec("vpn-status get_gateway_flag '"..v.ipaddr.."' upload")
+                            local download=luci.sys.exec("vpn-status get_gateway_flag '"..v.ipaddr.."' download")
+                            if upload or download then
+                              if not upload then upload = "?" end
+                              if not download then download = "?" end
+                              local speed = upload.." kbps / "..download.." kbps"
+                              local abbr = luci.i18n.stringf([[upload to Internet %s kbit/s; download from Internet %s kbit/s]], upload, download)
                               io.write([[<div class="vpn-wan-speed" name="speed" id="cbi-network-lan-speed" ><abbr title="]]..abbr..[[">]]..speed..[[</abbr></div>]])
                             end %>
                         </td>

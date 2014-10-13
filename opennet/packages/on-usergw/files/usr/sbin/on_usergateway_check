@@ -25,14 +25,15 @@ VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
 # update olsrd_nameservice plugin and spread speed information for this gateway
 # $1 is current hna
 update_olsr_service () {
-	hna="$1"
+	local hna="$1"
 
-	current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
+	local current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
+	local new_section
 	[ -z "$current_ugw_ipaddr" ] && return
 
-	found=""
+	local found=""
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
-		if [ "$(uci -q get "on-usergw.opennet_ugw${nr}.ipaddr")" == "$current_ugw_ipaddr" ]; then
+		if [ "$(uci -q get "on-usergw.opennet_ugw${nr}.ipaddr")" = "$current_ugw_ipaddr" ]; then
 			found=true
 			break
 		fi
@@ -40,18 +41,18 @@ update_olsr_service () {
 	[ -z "$found" ] && return
 
 	found=""
-	nr=0
+	local nr=0
 	while uci -q get "olsrd.@LoadPlugin[$nr]"; do
-		if [ "$(uci -q get "olsrd.@LoadPlugin[$nr].library" | cut -d. -f1)" == "olsrd_nameservice" ]; then
+		if [ "$(uci -q get "olsrd.@LoadPlugin[$nr].library" | cut -d. -f1)" = "olsrd_nameservice" ]; then
 			found=true
 			break
 		fi
 		: $((nr++))
 	done
 
-	download=$(uci -q get "on-usergw.opennet_ugw${nr}.download")
-	upload=$(uci -q get "on-usergw.opennet_ugw${nr}.upload")
-	ping=$(uci -q get "on-usergw.opennet_ugw${nr}.ping")
+	local download=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" download)
+	local upload=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" upload)
+	local ping=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" ping)
 
 	if [ -z "$found" ]; then
 		new_section="$(uci add olsrd LoadPlugin)"
@@ -70,28 +71,26 @@ update_olsr_service () {
 ugw_checkSpeed () {
 	echo "ugw_checkSpeed" >"$DATA_LOCK_FILE"
 	. "${IPKG_INSTROOT:-}/usr/sbin/on_speed_check"
-	on_ugw=$(uci -q get "on-usergw.opennet_ugw${1}.name")
-	download_speed=$(download "$on_ugw")
-	upload_speed=$(upload "$on_ugw")
-	if [ -n "$download_speed$upload_speed" ]; then
-		prev_download=$(uci -q get "on-usergw.opennet_ugw${1}.download")
-		prev_upload=$(uci -q get "on-usergw.opennet_ugw${1}.upload")
-		if [ -z "$prev_download" ] || [ "$prev_download" == "0" ]; then
-			uci -q set "on-usergw.opennet_ugw${1}.download=$download_speed"
+	local on_ugw=$(uci -q get "on-usergw.opennet_ugw${1}.name")
+	local ipaddr=$(uci -q get "on-usergw.opennet_ugw${1}.ipaddr")
+	local download_speed=$(download "$on_ugw")
+	local upload_speed=$(upload "$on_ugw")
+	# no checks if no number is available
+	[ -z "$download_speed" ] && [ -z "$upload_speed" ] && return
+	local prev_download=$(ugw_status get_ugw_flag "$ipaddr" download)
+	local prev_upload=$(ugw_status get_ugw_flag "$ipaddr" upload)
+	[ -z "$prev_download" -o "$prev_download" = "0" ] && ugw_status set_ugw_flag "$ipaddr" download "$download_speed"
+	[ -z "$prev_upload" -o "$prev_upload" = "0" ] && ugw_status set_ugw_flag "$ipaddr" upload "$upload_speed"
+	if [ -n "$prev_download" ] && [ "$prev_download" != "0" ] &&
+			[ -n "$prev_upload" ] && [ "$prev_upload" != "0" ]; then
+		ugw_status set_ugw_flag "$ipaddr" download "$(((download_speed+prev_download)/2))"
+		ugw_status set_ugw_flag "$ipaddr" upload "$(((download_speed+prev_upload)/2))"
+		# no significant change? Keep previous timestamp.
+		if [ "$((download_speed/1000))" = "$((prev_download/1000))" ] && [ "$((upload_speed/1000))" = "$((prev_upload/1000))" ]; then
+			ugw_status set_ugw_flag "$ipaddr" speed_time_prev "$(ugw_status get_ugw_flag "$ipaddr" speed_time)"
 		fi
-		if [ -z "$prev_upload" ] || [ "$prev_upload" == "0" ]; then
-			uci -q set "on-usergw.opennet_ugw${1}.upload=$upload_speed"
-		fi
-		if [ -n "$prev_download" ] && [ "$prev_download" != "0" ] &&
-				[ -n "$prev_upload" ] && [ "$prev_upload" != "0" ]; then
-			uci -q set "on-usergw.opennet_ugw${1}.download=$(((download_speed+prev_download)/2))"
-			uci -q set "on-usergw.opennet_ugw${1}.upload=$(((upload_speed+prev_upload)/2))"
-			if [ "$((download_speed/1000))" == "$((prev_download/1000))" ] && [ "$((upload_speed/1000))" == "$((prev_upload/1000))" ]; then
-				uci -q set "on-usergw.opennet_ugw${1}.speed_time_prev=$(uci -q get on-usergw.opennet_ugw${1}.speed_time)"
-			fi
-		fi
-		uci -q set "on-usergw.opennet_ugw${1}.speed_time=$(date +%s)"
 	fi
+	ugw_status set_ugw_flag "$ipaddr" speed_time "$(date +%s)"
 }
 
 #################################################################################
@@ -104,6 +103,7 @@ get_prefixed_items() {
 #################################################################################
 # check all stored Usergateways for speed
 ugw_checkSpeeds () {
+	local test_id
 	msg_debug "ugw_checkSpeeds"
 	for test_id in $(get_prefixed_items 'on-usergw.opennet_ugw'); do ugw_checkSpeed "$test_id"; done
 }
@@ -150,6 +150,7 @@ ugw_checkVPN()
 #################################################################################
 # check all stored Usergateways for working VPN (on port 1600)
 ugw_checkVPNs () {
+	local nr
 	msg_debug "ugw_checkVPNs"
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
 		# do VPNchecks only if WAN-Connection is established
@@ -287,18 +288,19 @@ ugw_checkWAN () {
 	if [ "$on_ugw_targetDev" = "$wandev" ]; then
 		uci -q set "on-usergw.opennet_ugw${1}.wan=ok"
 		time=$(ping -w 5 -q $on_ugw_ip 2>/dev/null| awk 'BEGIN{FS="[ \/]+"} /min\/avg\/max/ {print int($7+0.5)}')
-		uci -q set "on-usergw.opennet_ugw${1}.ping=$time"
+		ugw_status set_ugw_flag "$on_ugw_ip" ping "$time"
 		msg_debug "checkWAN: $on_ugw routing through wan device: $wandev"
 		msg_debug "checkWAN: $on_ugw avg ping time: $time"
 	else
 		uci -q set "on-usergw.opennet_ugw${1}.wan=error" || true
-		uci -q delete "on-usergw.opennet_ugw${1}.ping" || true
+		ugw_status set_ugw_flag "$on_ugw_ip" ping "$time" ""
 	fi
 }
 
 #################################################################################
 # check all stored Usergateways for working MTU
 ugw_checkWANs () {
+	local nr
 	msg_debug "ugw_checkWANs"
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do ugw_checkWAN "$nr"; done
 }
@@ -307,11 +309,12 @@ ugw_checkWANs () {
 # set or search/replace ugw-HNA in olsrd config
 # $1 == hna to set for olsr
 update_olsr_hna () {
+	local found=""
+	local no=0
+	local new_section
 	msg_debug "update_olsr_hna"
-	found=""
-	no=0
 	while uci -q get "olsrd.@Hna4[${no}]"; do
-		if [ "$(uci -q get "olsrd.@Hna4[${no}].source")" == "ugw" ]; then
+		if [ "$(uci -q get "olsrd.@Hna4[${no}].source")" = "ugw" ]; then
 			uci -q set "olsrd.@Hna4[${no}].netaddr=$1"
 			found=true
 			break
@@ -333,7 +336,7 @@ mark_olsr_hna_used () {
 	msg_debug "mark_olsr_hna_used"
 	local no=0
 	while ( [ -n "$(uci -q get "olsrd.@Hna4[${no}]")" ] ); do
-		if [ "$(uci -q get "olsrd.@Hna4[${no}].source")" == "ugw" ]; then
+		if [ "$(uci -q get "olsrd.@Hna4[${no}].source")" = "ugw" ]; then
 			uci set "olsrd.@Hna4[${no}].lastused=$(date +%s)"
 			break
 		fi
@@ -420,10 +423,10 @@ ugw_disableForward () {
 	nr=0
 	while uci -q get "firewall.@redirect[$nr]"; do
 		section="firewall.@redirect[$nr]"
-		if [ "$(uci -q get "$section.src")" == "opennet" ]; then
+		if [ "$(uci -q get "$section.src")" = "opennet" ]; then
 			src_dport="$(uci -q get "$section.src_dport")"
 			proto="$(uci -q get "$section.proto")"
-			if [ "$src_dport" == "1600" ] || [ "$src_dport" == "123" ] || [ "$src_dport" == "53" ] || [ "$proto" == "icmp" ]; then
+			if [ "$src_dport" = "1600" ] || [ "$src_dport" = "123" ] || [ "$src_dport" = "53" ] || [ "$proto" = "icmp" ]; then
 				uci -q delete "$section" || true
 				change=true
 			else

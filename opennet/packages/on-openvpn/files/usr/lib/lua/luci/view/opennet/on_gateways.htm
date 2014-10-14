@@ -12,6 +12,7 @@ You may obtain a copy of the License at
 -%>
 
 <% 	local uci = require "luci.model.uci"
+        require ("luci.model.opennet.on_vpn_autosearch")
 	local cursor = uci.cursor()
 	local SYSROOT = os.getenv("LUCI_SYSROOT")
 	if not SYSROOT then SYSROOT = "" end		-- SYSROOT is only used for local testing (make runhttpd in luci tree)
@@ -109,18 +110,19 @@ You may obtain a copy of the License at
 						<td class="cbi-value-field"><div id="cbi-network-lan-name"><%=name%></div></td>
 						<td class="cbi-value-field"><div id="cbi-network-lan-hopcount">
 						<%
-						local ping=luci.sys.exec("awk 'BEGIN {FS=\"[/\\x09]+\"} \$1==\""..v.ipaddr.."\" {printf \$4; exit}' /tmp/olsrd_txtinfo.txt")
+						local hop=luci.sys.exec("awk 'BEGIN {FS=\"[/\\x09]+\"} \$1==\""..v.ipaddr.."\" {printf \$4; exit}' /tmp/olsrd_txtinfo.txt")
 						local etx=luci.sys.exec("awk 'BEGIN {FS=\"[/\\x09]+\"} \$1==\""..v.ipaddr.."\" {printf \$5; exit}' /tmp/olsrd_txtinfo.txt")
-						local etx_offset=luci.sys.exec("vpn-status get_gateway_flag '"..v.ipaddr.."' etx_offset")
-						-- keinen Offset einblenden, wenn er Null ist
-						if etx_offset == "" then etx_offset = nil end
-						if ping ~= "" and etx ~= "" then
-                          if etx_offset and autosearch then
-                            io.write(string.format("(%+d) %d / %.3f", etx_offset, ping+etx_offset, etx+etx_offset))
-                          else
-                            io.write(string.format("%d / %.3f", ping, etx))
-                          end
-                        end
+						local etx_offset=get_gateway_flag(v.ipaddr, "etx_offset")
+						if hop ~= "" and etx ~= "" then
+							if etx_offset and autosearch then
+								hop = tonumber(hop)
+								etx = tonumber(etx)
+								etx_offset = tonumber(etx_offset)
+								io.write(string.format("(%+d) %d / %.3f", etx_offset, hop+etx_offset, etx+etx_offset))
+							else
+								io.write(string.format("%d / %.3f", hop, etx))
+							end
+						end
 						%>
                         <% if autosearch then %>
 						    <input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="<%=count%>" title="<%:increase offset%>" name="up_etx" />
@@ -132,11 +134,9 @@ You may obtain a copy of the License at
                         
                         <td>
                           <%
-                            local upload=luci.sys.exec("vpn-status get_gateway_flag '"..v.ipaddr.."' upload")
-                            local download=luci.sys.exec("vpn-status get_gateway_flag '"..v.ipaddr.."' download")
+                            local upload=get_gateway_flag(v.ipaddr, "upload") or "?"
+                            local download=get_gateway_flag(v.ipaddr, "download") or "?"
                             if upload or download then
-                              if not upload then upload = "?" end
-                              if not download then download = "?" end
                               local speed = upload.." kbps / "..download.." kbps"
                               local abbr = luci.i18n.stringf([[upload to Internet %s kbit/s; download from Internet %s kbit/s]], upload, download)
                               io.write([[<div class="vpn-wan-speed" name="speed" id="cbi-network-lan-speed" ><abbr title="]]..abbr..[[">]]..speed..[[</abbr></div>]])
@@ -145,8 +145,8 @@ You may obtain a copy of the License at
                         
                         
 						<% if on_keycrt_exists then %>
-						<td class="cbi-value-field"><div id="cbi-network-lan-status" status="<%=luci.sys.exec("vpn_status get_gateway_flag '"..v.ipaddr.."' status") %>">&nbsp;</div></td>
-						<td class="cbi-value-field"><div id="cbi-network-lan-age"><%=luci.sys.exec("vpn_status get_gateway_flag '"..v.ipaddr.."' age") %></div></td>
+							<td class="cbi-value-field"><div id="cbi-network-lan-status" status="<%=get_gateway_flag(v.ipaddr, "status") %>">&nbsp;</div></td>
+							<td class="cbi-value-field"><div id="cbi-network-lan-age"><%=get_gateway_flag(v.ipaddr, "age") %></div></td>
 						<% end %>
 						<% if not autosearch then %>
 						<td class="cbi-section-table-cell">

@@ -52,18 +52,17 @@ function action_vpn_gateways()
 
 	function bring_gateway_etx_top(ipaddr)
 		os.execute("logger bring_gateway_etx_top "..ipaddr)
-		local type = "etx"
-		if cursor:get("on-openvpn", "gateways", "vpn_sort_criteria") == "metric" then type = "hop" end
-		os.execute("logger bring_gateway_etx_top type "..type)
+		local vtype = "etx"
+		if cursor:get("on-openvpn", "gateways", "vpn_sort_criteria") == "metric" then vtype = "hop" end
+		os.execute("logger bring_gateway_etx_top type "..vtype)
 		local number = get_gate_number(ipaddr)
 		os.execute("logger bring_gateway_etx_top number "..number)
-		local selected_etx = get_gateway_flag(ipaddr, type)
+		local selected_etx = get_gateway_flag(ipaddr, vtype) or 0
 		
 		-- get minimal etx
 		local top_ipaddr = cursor:get("on-openvpn", "gate_1", "ipaddr")
-		local minimal_etx = get_gateway_flag(top_ipaddr, type)
-		local minimal_etx_offset = get_gateway_flag(top_ipaddr, "etx_offset")
-		if minimal_etx_offset then minimal_etx = minimal_etx + minimal_etx_offset end
+		local minimal_etx_offset = get_gateway_flag(top_ipaddr, "etx_offset") or 0
+		local minimal_etx = (get_gateway_flag(top_ipaddr, vtype) or 0) + minimal_etx_offset
 		
 		-- set offset to get smallest etx
 		set_gateway_flag(ipaddr, "etx_offset", math.floor(minimal_etx - selected_etx - 1))
@@ -100,28 +99,13 @@ function action_vpn_gateways()
 		cursor:tset ("on-openvpn", "gate_"..(number_of_gateways + 1), { ipaddr = new_gateway, name = new_gateway_name, age = '', status = '', route = ''})
 	elseif (new_blacklist_gateway and new_blacklist_gateway ~= "") or (new_blacklist_gateway_name and new_blacklist_gateway_name ~= "") then
 		cursor:section("on-openvpn", "blacklist_gateway", nil, { ipaddr = new_blacklist_gateway, name = new_blacklist_gateway_name })
-	elseif up_etx then
-		local ipaddr = cursor:get("on-openvpn", "gate_"..up_etx, "ipaddr")
-		local etx_offset = get_gateway_flag(top_ipaddr, "etx_offset", etx_offset)
-		if etx_offset then
+	elseif (up_etx or down_etx) then
+		local ipaddr = cursor:get("on-openvpn", "gate_"..(up_etx or down_etx), "ipaddr")
+		local etx_offset = get_gateway_flag(ipaddr, "etx_offset", etx_offset) or 0
+		if up_etx then
 			etx_offset = etx_offset + 1
 		else
-			etx_offset = 1
-		end
-		if etx_offset ~= 0 then
-			set_gateway_flag(ipaddr, "etx_offset", etx_offset)
-		else
-			delete_gateway_flag(ipaddr, "etx_offset")
-		end
-		cursor:unload("on-openvpn")
-		update_gateways()
-	elseif down_etx then
-		local ipaddr = cursor:get("on-openvpn", "gate_"..up_etx, "ipaddr")
-		local etx_offset = get_gateway_flag(ipaddr, "etx_offset")
-		if etx_offset then
 			etx_offset = etx_offset - 1
-		else
-			etx_offset = -1
 		end
 		if etx_offset ~= 0 then
 			set_gateway_flag(ipaddr, "etx_offset", etx_offset)

@@ -58,7 +58,12 @@ function read_services()
 end
 
 function get_gateway_flag(ip, key)
-  return luci.sys.exec("vpn_status get_gateway_flag '"..ip.."' '"..key.."'")
+  local result = luci.sys.exec("vpn_status get_gateway_flag '"..ip.."' '"..key.."'")
+  if result == "" then
+    return nil
+  else
+    return result
+  end
 end
 
 function set_gateway_flag(ip, key, value)
@@ -90,20 +95,10 @@ function gw_parse(gateways, gws_access, services_olsr, line)
     set_gateway_flag(ipaddr, "download", services_olsr[ipaddr].download)
     set_gateway_flag(ipaddr, "ping", services_olsr[ipaddr].ping)
   end
-
-  if not get_gateway_flag(ipaddr, "etx_offset") then
-    set_gateway_flag(ipaddr, "etx_offset", 0)
-  end
 end
 
 function crazy_add(a, b)
-  if not a or a == "" then
-    a = 0
-  end
-  if not b or b == "" then
-    b = 0
-  end
-  return a+b
+  return (a or 0) + (b or 0)
 end
 
 --[[
@@ -117,15 +112,14 @@ function gw_sort(a, b)
   local val_b
   local a_offset
   local b_offset
+  local vtype
   if cursor:get("on-openvpn", "gateways", "vpn_sort_criteria") == "etx" then
-    val_a = get_gateway_flag(a.ipaddr, "etx")
-    val_b = get_gateway_flag(b.ipaddr, "etx")
+    vtype = "etx"
   else
-    val_a = get_gateway_flag(a.ipaddr, "hop")
-    val_b = get_gateway_flag(b.ipaddr, "hop")
+    vtype = "hop"
   end
-  val_a = crazy_add(val_a, get_gateway_flag(a.ipaddr, "etx_offset"))
-  val_b = crazy_add(val_b, get_gateway_flag(b.ipaddr, "etx_offset"))
+  val_a = crazy_add(get_gateway_flag(a.ipaddr, vtype), get_gateway_flag(a.ipaddr, "etx_offset"))
+  val_b = crazy_add(get_gateway_flag(b.ipaddr, vtype), get_gateway_flag(b.ipaddr, "etx_offset"))
 
   if (val_a == val_b) then
     local order = cursor:get("on-core", "settings", "on_id")

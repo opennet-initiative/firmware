@@ -1,3 +1,52 @@
+Firmware 0.5
+============
+
+DNS
+---
+
+Alle DNS-Server verteilen via olsrd-nameservice-Plugin einen Eintrag ähnlich dem folgenden:
+
+::
+
+  dns://192.168.0.247:53|udp|dns
+
+
+Konfiguration der DNS-Anbieter
+##############################
+
+Die folgenden Voraussetzungen müssen von DNS-Servern im Opennet erfüllt werden:
+
+1. der DNS-Port (üblicherweise UDP-Port 53) ist vom Opennet aus erreichbar
+2. DNS-Abfragen werden nicht geloggt (Datensparsamkeit gegenüber den Nutzenden)
+3. der lokale olsrd-Dienst verteilt via ``nameservice`` die URL des DNS-Servers
+
+
+Der entsprechende ``nameservice``-Block in der ``olsrd.conf`` des DNS-Servers kann folgendermaßen aussehen:
+
+::
+
+  LoadPlugin "olsrd_nameservice.so.0.3"
+  {
+      PlParam "service" "dns://192.168.0.247:53|udp|dns" 
+  }
+
+**Wichtig**: Die angegebene IP muss unbedingt auf einem der von olsr verwalteten Netzwerk-Interfaces konfiguriert sein. Andernfalls wird das ``nameservice``-Plugin stillschweigend die Verteilung unterlassen. In der ``/var/run/services_olsr`` auf dem Host ist sofort zu erkennen, ob der Dienst-Eintrag verteilt wird.
+
+Integration auf den APs
+#######################
+
+Die Funktion ``update_dns_servers`` in der ``/usr/bin/on-helper.sh`` wird im 5-Minuten-Takt mittels des cron-Jobs ``on_update-dns-ntp`` ausgeführt.
+In dessen Verlauf wird sichergestellt, dass die uci-Variable ``dhcp.@dnsmasq[0].serversfile`` gesetzt ist. Falls dies nicht der Fall ist, wird die Datei ``/var/run/dnsmasq.servers`` eingetragen.
+Anschließend werden alle ``dns``-Einträge aus der Datei ``/var/run/services_olsr`` ausgelesen und im passenden Format in die obige dnsmasq-Datei geschrieben.
+Abschließend wird dem ``dnsmasq``-Prozess ein HUP-Signal gesendet, um ein erneutes Einlesen der Konfigurationsdateien auszulösen.
+
+Folgende Voraussetzungen müssen gegeben sein:
+
+* ``dnsmasq`` läuft
+* das Plugin ``nameservice`` ist aktiviert
+* das ``dnsmasq``-init-Skript ist gepatcht, um die ``servers-file``-Option zu beachten
+
+
 Firmware-NG
 ===========
 

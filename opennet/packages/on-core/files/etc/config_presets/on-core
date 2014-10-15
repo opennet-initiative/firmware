@@ -21,9 +21,8 @@ config defaults 'defaults'
 	option	'wifi_bssid'	'02:ca:ff:ee:ba:be'
 
 config services 'services'
-	option	'dns_ip_regex'	'^192\.168\.0\.[1-9][0-9]*$'
-	option	'dns_resolv_file'	/tmp/resolv.conf.auto
-	option	'ntp_ip_regex'	'^192\.168\.0\.[1-9][0-9]*$'
+	option	'use_olsrd_dns'	'1'
+	option	'use_olsrd_ntp'	'1'
 
 config settings 'settings'
 	# initially opennet-id is not set

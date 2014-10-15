@@ -1,8 +1,8 @@
 Firmware 0.5
 ============
 
-DNS
----
+DNS - Namensauflösung
+---------------------
 
 Alle DNS-Server verteilen via olsrd-nameservice-Plugin einen Eintrag ähnlich dem folgenden:
 
@@ -45,6 +45,29 @@ Folgende Voraussetzungen müssen gegeben sein:
 * ``dnsmasq`` läuft
 * das Plugin ``nameservice`` ist aktiviert
 * das ``dnsmasq``-init-Skript ist gepatcht, um die ``servers-file``-Option zu beachten
+
+
+NTP - Zeitsynchronisation
+-------------------------
+
+Alle NTP-Server verteilen via olsrd-nameservice-Plugin einen Eintrag ähnlich dem folgenden:
+
+::
+
+  ntp://192.168.0.247:123|udp|ntp
+
+Konfiguration der NTP-Anbieter
+##############################
+
+//analog zur Konfiguration der DNS-Anbieter//
+
+Integration auf den APs
+#######################
+
+Die Funktion ``update_ntp_servers`` in der ``/usr/bin/on-helper.sh`` wird im 5-Minuten-Takt mittels des cron-Jobs ``on_update-dns-ntp`` ausgeführt.
+Dabei werden alle ``dns``-Einträge aus der Datei ``/var/run/services_olsr`` ausgelesen. Im Falle von Änderungen der Server-Liste wird diese in die uci-Variablen ``ntpclient.@ntpserver[*]`` übertragen. Anschließend wird der ntp-Dienst neugestartet.
+
+
 
 
 Firmware-NG
@@ -154,11 +177,12 @@ Die Datei *etc/firewall.opennet* fügt anscheinend eine relevante Masquerade-Reg
 
 Nutzer-VPN
 ----------
-Im Paket *on-openvpn* ist das config-preset *on-openvpn* enthalten, das die Suchmaske fuer gateway-IPs festlegt (192.168.0.x), sowie konfigurierbar festlegt, dass alle Gateways als ntp- und DNS-Server verwendet werden sollen.
+Im Paket *on-openvpn* ist das config-preset *on-openvpn* enthalten, das konfigurierbar festlegt, ob alle Gateways als ntp- und DNS-Server verwendet werden sollen.
 Außerdem sind in diesem config_preset die Vorgaben für Nutzer-Zertifikate eingetragen.
 
 Das config_preset *openvpn* überschreibt das Original des openvpn-Pakets.
 
+Das lua-Skript `/usr/lib/lua/luci/model/opennet/on_vpn_autosearch.lua` wird via cron-Job im Minuten-Takt ausgeführt. Außerdem wird es beim Bearbeiten der Gateway-Einstellungen im Web-Interface gestartet. Seine Aufgabe ist die Neuberechnung der Wertigkeit aller erreichbaren Gateways, sowie die Sortierung der Gateway-Liste in den uci-Sektionen `on-openvpn.gate_*`.
 
 Minütlich läuft ein cronjob (*on_vpngateway_check*), der folgendes tut:
 

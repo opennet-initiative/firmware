@@ -3,6 +3,7 @@
 # Opennet Firmware
 # 
 # Copyright 2010 Rene Ejury <opennet@absorb.it>
+# Copyright 2014 Lars Kruse <devel@sumpfralle.de>
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,20 +55,25 @@ update_file_if_changed() {
 	fi
 }
 
-# Gather the list of routable IPs specified via on-core.services.dns_ip_regex.
-# Store this list as a resolv.conf-compatible file in on-core.services.dns_resolv_file.
+uci_is_false() {
+	local token=$1
+	[ "$token" = "0" -o "$token" = "no" -o "$token" = "off" -o "$token" = "false" ] && return 0
+	return 1
+}
+
+# Gather the list of hosts announcing a NTP services.
+# Store this list as a dnsmasq 'server-file'.
 # The file is only updated in case of changes.
 update_dns_servers() {
+	local use_dns="$(uci -q get on-core.services.use_olsrd_dns)"
+	# return if we should not use DNS servers provided via olsrd
+	uci_is_false "$use_dns" && return
 	local servers_file=$(uci -q get "dhcp.@dnsmasq[0].serversfile")
 	if [ -z "$servers_file" ]; then
 	       servers_file=$DNSMASQ_SERVERS_FILE_DEFAULT
 	       uci set "dhcp.@dnsmasq[0].serversfile=$servers_file"
 	       uci commit "dhcp.@dnsmasq[0]"
 	fi
-	local use_dns="$(uci -q get on-core.services.use_olsrd_dns)"
-	# return if we should not use DNS servers provided via olsrd
-	[ "$use_dns" = "0" -o "$use_dns" = "no" -o "$use_dns" = "off" -o "$use_dns" = "false" ] && return 1
-	# create temporary servers file
 	# replace ":" with "#" (dnsmasq expects this port separator)
 	get_services dns | sed 's/^\([0-9\.]\+\):/\1#/' | sort | while read host other; do
 		echo "server=$host"
@@ -77,32 +83,35 @@ update_dns_servers() {
 	return
 }
 
-# Gather the list of routable IPs specified via on-core.services.ntp_ip_regex.
+# Gather the list of hosts announcing a NTP services.
 # Store this list as ntpclient-compatible uci settings.
 # The uci settings are only updated in case of changes.
 # ntpclient is restarted in case of changes.
 update_ntp_servers() {
-	local ntp_ip_regex="$(uci -q get on-core.services.ntp_ip_regex)"
-	# quit if no regex is given
-	[ -z "$ntp_ip_regex" ] && return 1
-	local current_servers="$(uci show ntpclient | grep "\.hostname=" | cut -f 2- -d = | sort)"
-	local new_servers="$(get_mesh_ips_by_regex "$ntp_ip_regex" | sort)"
+	local use_ntp="$(uci -q get on-core.services.use_olsrd_ntp)"
+	# return if we should not use NTP servers provided via olsrd
+	uci_is_false "$use_ntp" && return
+	# separate host and port with whitespace
+	local ntp_services=$(get_services ntp | sed 's/^\([0-9\.]\+\):/\1 /')
+	local new_servers=$(echo "$ntp_services" | awk '{print $1}' | sort)
+	local old_servers=$(uci show ntpclient | grep "\.hostname=" | cut -f 2- -d = | sort)
 	local section_name=
-	if [ "$current_servers" != "$new_servers" ]; then
+	if [ "$new_servers" != "$old_servers" ]; then
 		# delete all current servers
 		while uci -q delete ntpclient.@ntpserver[0]; do true; done
-		for ip in $new_servers; do
+		echo "$ntp_services" | while read host port other; do
 			section_name="$(uci add ntpclient ntpserver)"
-			uci set "ntpclient.${section_name}.hostname=$ip"
-			uci set "ntpclient.${section_name}.port=123"
+			uci set "ntpclient.${section_name}.hostname=$host"
+			uci set "ntpclient.${section_name}.port=$port"
 		done
 		msg_info "updating NTP entries"
 		uci commit ntpclient
-		[ -n "$current_servers" ] && control_ntpclient restart
+		# restart if there were servers available before
+		[ -n "$old_servers" ] && control_ntpclient restart
 	fi
 	# make sure that ntpclient is running (in case it broke before)
 	# never run it if there are no servers at all
-	if [ -n "$current_servers" ] && [ -z "$(pidof ntpclient)" ]; then
+	if [ -n "$new_servers" ] && [ -z "$(pidof ntpclient)" ]; then
 		msg_info "'ntpclient' is not running: starting it again ..."
 		control_ntpclient start
 	fi
@@ -119,14 +128,16 @@ control_ntpclient() {
 	. "$ntpclient_script"
 	case "$action" in
 		start)
-			start_ntpclient
+			# keine Ausgabe der Zeitserver-Informationen
+			start_ntpclient >/dev/null
 			;;
 		stop)
 			stop_ntpclient
 			;;
 		restart)
 			stop_ntpclient
-			start_ntpclient
+			# keine Ausgabe der Zeitserver-Informationen
+			start_ntpclient >/dev/null
 			;;
 		*)
 			echo >&2 "ERROR: unknown action for 'control_ntpclient': $action"

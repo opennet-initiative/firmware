@@ -45,6 +45,7 @@ config 'rule'
 
 config 'include'
 	option 'path' '/etc/firewall.opennet'
+	option 'reload' '1'
 
 config 'include'
 	option 'path' '/etc/firewall.user'

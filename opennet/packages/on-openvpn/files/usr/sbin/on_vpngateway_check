@@ -213,7 +213,7 @@ check_all_gateways()
 
 		# if first gateway is not found yet and route to current $gw_ipaddr exists, try if it's better to use this gateway
 		if [ -z "$found_first_gw" ] && [ -n "$(ip route show table "$olsrd_routingTable" | awk '$1 == "'$gw_ipaddr'"')" ]; then
-			msg_info "checking first found gw - $gw_ipaddr"
+			msg_debug "checking first found gw - $gw_ipaddr"
 			if [ "$gw_ipaddr" != "$current_gw_ipaddr" ]; then
 				msg_debug "first found gw - $gw_ipaddr != $current_gw_ipaddr"
 				if [ -z "$current_gw_ipaddr" ] || [ $((better_gw_count++)) -gt $bettergateway_timeout ]; then

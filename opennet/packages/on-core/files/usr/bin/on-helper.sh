@@ -16,6 +16,7 @@ GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 SERVICES_FILE=/var/run/services_olsr
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
+OLSR_POLICY_DEFAULT_PRIORITY=65535
 
 DEBUG=$(uci -q get on-core.defaults.debug)
 
@@ -189,6 +190,61 @@ enforce_olsrd_settings() {
 		uci commit olsrd
 		/etc/init.d/olsrd restart >/dev/null
 	fi
+}
+
+
+# Aktion fuer die initiale Policy-Routing-Initialisierung nach dem System-Boot
+initialize_olsrd_policy_routing() {
+	# TODO: diese Funktion sollten wir durch netzwerk-Konfigurationen (ubus?) triggern lassen
+
+	local wait_count
+	local olsr_prio
+	local main_prio
+	local network
+
+	# Ermittle die Prioritaet der olsr-Regeln im Policy-Routing
+	# Die Suche wird fehlschlagen, wenn olsrd nicht laeuft
+	if [ -n "$(pidof olsrd)" ]; then
+		wait_count=15
+		while [ -z "$olsr_prio" ] && [ "$wait_count" != "0" ]; do
+			olsr_prio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /olsrd/ {print $1; exit}')
+			sleep 1
+			: $((wait_count--))
+		done
+	fi
+
+	# Policy-Regel setzen, falls sie fehlen sollte
+	if [ -z "$olsr_prio" ]; then
+		olsr_prio=$OLSR_POLICY_DEFAULT_PRIORITY
+		ip rule add table olsrd prio "$olsr_prio"
+		ip rule add table olsrd-default prio "$((olsr_prio+10))"
+	fi
+
+	# "main"-Regel fuer lokale Quell-Pakete prioritisieren (opennet-Routing soll lokales Routing nicht beeinflussen)
+	# "main"-Regel fuer alle anderen Pakete nach hinten schieben (weniger wichtig als olsr)
+	main_prio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /main/ {print $1; exit}')
+	for network in $(echo "$(uci get -q firewall.zone_local.network)"); do
+		networkprefix=$(get_network "$network")
+		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" table main prio "$main_prio"
+	done
+	ip rule add from all iif lo table main prio "$main_prio"
+	ip rule del table main
+	ip rule add table main prio "$((olsr_prio+20))"
+
+	# Pakete fuer opennet-IP-Bereiche sollen nicht in der main-Tabelle (lokale Interfaces) behandelt werden
+	# Falls spezifischere Interfaces vorhanden sind (z.B. 192.168.1.0/24), dann greift die "throw"-Regel natuerlich nicht.
+	for networkprefix in $(uci get on-core.defaults.on_network); do
+		ip route prepend throw "$networkprefix" table main
+	done
+
+	# Pakete in Richtung lokaler Netzwerke (sowie "free") werden nicht von olsrd behandelt.
+	# TODO: koennen wir uns darauf verlassen, dass olsrd diese Regeln erhaelt?
+	for network in $(uci get -q firewall.zone_local.network) $(uci get -q firewall.zone_free.network); do
+		networkprefix=$(get_network "$network")
+		[ -n "$networkprefix" ] && ip route add throw "$networkprefix" table olsrd
+		[ -n "$networkprefix" ] && ip route add throw "$networkprefix" table olsrd-default
+	done
+	return 0
 }
 
 

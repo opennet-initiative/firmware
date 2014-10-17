@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# regelmaessige Pruefung relevanter Einstellungen, sowie deren Wiederherstellung
+#
+
+OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
+
+
+. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+
+enforce_olsrd_settings
+

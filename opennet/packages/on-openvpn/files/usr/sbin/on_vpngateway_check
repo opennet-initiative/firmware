@@ -66,8 +66,6 @@ echo "$$" >"$PID_FILE"
 # and sort them dependent on their ETX or Metric distance
 gateway_autosearch()
 {
-	activate_olsr_service
-	
 	# only do this if explicitely requested (param refresh) or activated in config
 	if [ "${1:-}" != "refresh" ] && [ "$(uci -q get on-openvpn.@gateways[0].autosearch)" != "on" ]; then return; fi
 	
@@ -76,22 +74,6 @@ gateway_autosearch()
 	echo "require('luci.model.opennet.on_vpn_autosearch'); update_gateways()" | lua
 }
 
-#################################################################################
-# check olsrd config for activated nameservice plugin
-# if not found activate, required for speed of gateways
-activate_olsr_service () {
-	local found=""
-	local nr=0
-	while ( [ -n "$(uci -q get "olsrd.@LoadPlugin[$nr]")" ] ); do
-		[ "$(uci -q get "olsrd.@LoadPlugin[$nr].library" | cut -d. -f1)" = "olsrd_nameservice" ] && return
-		: $((nr++))
-	done
-
-	new_section="$(uci add olsrd LoadPlugin)"
-	uci set "olsrd.$new_section.library=olsrd_nameservice.so.0.3"
-	uci commit olsrd
-	/etc/init.d/olsrd restart >/dev/null
-}
 
 #################################################################################
 # try to establish openvpn tunnel

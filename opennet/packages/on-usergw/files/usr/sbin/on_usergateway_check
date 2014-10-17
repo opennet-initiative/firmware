@@ -21,48 +21,52 @@ set -u
 DATA_LOCK_FILE=/var/run/on_usergateway_check
 VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
 
-#################################################################################
-# update olsrd_nameservice plugin and spread speed information for this gateway
-# $1 is current hna
-update_olsr_service () {
-	local hna="$1"
 
+#################################################################################
+# Verkuende den lokalen UGW-Dienst inkl. Geschwindigkeitsdaten via olsr nameservice
+# Parameter: die aktuell announcierte HNA-Adresse des lokalen UGW
+announce_ugw_service_ugw() {
+	local uci_prefix=
+	local gw_found=
+	local index=0
+	local hna="$1"
 	local current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
-	local new_section
 	[ -z "$current_ugw_ipaddr" ] && return
 
-	local found=""
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
 		if [ "$(uci -q get "on-usergw.opennet_ugw${nr}.ipaddr")" = "$current_ugw_ipaddr" ]; then
-			found=true
+			gw_found=true
 			break
 		fi
 	done
-	[ -z "$found" ] && return
-
-	found=""
-	local nr=0
-	while uci -q get "olsrd.@LoadPlugin[$nr]"; do
-		if [ "$(uci -q get "olsrd.@LoadPlugin[$nr].library" | cut -d. -f1)" = "olsrd_nameservice" ]; then
-			found=true
-			break
-		fi
-		: $((nr++))
-	done
+	[ -z "$gw_found" ] && return
 
 	local download=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" download)
 	local upload=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" upload)
 	local ping=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" ping)
 
-	if [ -z "$found" ]; then
-		new_section="$(uci add olsrd LoadPlugin)"
-		uci set "olsrd.$new_section.library=olsrd_nameservice.so.0.3"
-	else
-		new_section="@LoadPlugin[$nr]"
-	fi
+	# stelle sicher dass das nameservice-Plugin aktiv ist
+	enforce_olsrd_settings
+	# finde das nameservice-Plugin
+	while uci -q get "olsrd.@LoadPlugin[$index]"; do
+		if [ "$(uci -q get "olsrd.@LoadPlugin[$index].library" | cut -d . -f 1)" = "olsrd_nameservice" ]; then
+			uci_prefix=olsrd.@LoadPlugin[$index].library
+			break
+		fi
+		: $((index++))
+	done
 
-	uci set "olsrd.$new_section.service=http://${hna}:8080|tcp|ugw upload:$upload download:$download ping:$ping"
-	uci commit olsrd
+	[ -z "$uci_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && return 1
+
+	# announce our ugw service
+	uci set "${uci_prefix}.service=http://${hna}:8080|tcp|ugw upload:$upload download:$download ping:$ping"
+
+	# commit and restart olsrd if necessary
+	if [ -n "$(uci changes olsrd)" ]; then
+		uci commit olsrd
+		/etc/init.d/olsrd restart >/dev/null
+	fi
+	return 0
 }
 
 #################################################################################
@@ -482,7 +486,7 @@ ugw_enableForward () {
 	uci commit firewall
 	/etc/init.d/firewall restart >/dev/null
 	update_olsr_hna "$hna"
-	update_olsr_service "$hna"
+	announce_olsr_service_ugw "$hna"
 	msg_info "ugw_enableForward restarting olsrd"
 	/etc/init.d/olsrd restart >/dev/null
 }

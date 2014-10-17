@@ -61,6 +61,7 @@ uci_is_false() {
 	return 1
 }
 
+
 # Gather the list of hosts announcing a NTP services.
 # Store this list as a dnsmasq 'server-file'.
 # The file is only updated in case of changes.
@@ -144,6 +145,51 @@ control_ntpclient() {
 			;;
 	esac
 }
+
+
+# sicherstellen, dass notwendige olsr-Einstellungen gesetzt sind (via cronjob)
+enforce_olsrd_settings() {
+	# fuer NTP, DNS und die Gateway-Auswahl benoetigen wir das nameservice-Plugin
+	local index=0
+	local nameservice_lib
+	local new_section
+	local uci_prefix
+	local current_trigger
+	while uci -q get "olsrd.@LoadPlugin[$index]" >/dev/null; do
+		if uci -q get "olsrd.@LoadPlugin[$index].library" | grep -q "^olsrd_nameservice\.so"; then
+			uci_prefix=olsrd.@LoadPlugin[$index]
+			break
+		fi
+		: $((index++))
+	done
+
+	# nameservice-Plugin-Eintrag bei Bedarf erzeugen
+	if [ -z "$uci_prefix" ]; then
+		new_section=$(uci add olsrd LoadPlugin)
+		uci_prefix=olsrd.${new_section}
+		nameservice_lib=$(find /usr/lib -type f -name "olsrd_nameservice.so.*")
+		if [ -z "$nameservice_lib" ]; then
+			msg_info "FATAL ERROR: Failed to find olsrd nameservice plugin. Most Opennet services will fail."
+		else
+			uci set "${uci_prefix}.library=$(basename "$nameservice_lib")"
+		fi
+	fi
+
+	# moeglicherweise vorhandenen 'ignore'-Parameter abschalten
+	[ -n "$(uci -q get "${uci_prefix}.ignore")" ] && uci set "${uci_prefix}.ignore=0"
+
+	# Option 'services-change-script' setzen
+	current_trigger=$(uci -q get "${uci_prefix}.services_change_script")
+	[ -n "$current_trigger" ] && [ "$current_trigger" != "$OLSR_NAMESERVICE_SERVICE_TRIGGER" ] && msg_info "WARNING: overwriting 'services-change-script' option of olsrd nameservice plugin with custom value. You should place a script below /etc/olsrd/nameservice.d/ instead."
+	uci set "${uci_prefix}.services_change_script=$OLSR_NAMESERVICE_SERVICE_TRIGGER"
+
+	# Aenderungen aktivieren
+	if [ -n "$(uci changes olsrd)" ]; then
+		uci commit olsrd
+		/etc/init.d/olsrd restart >/dev/null
+	fi
+}
+
 
 #################################################################################
 # Auslesen eines Werts aus einer Key/Value-Datei

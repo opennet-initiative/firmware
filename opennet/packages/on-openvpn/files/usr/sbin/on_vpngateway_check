@@ -17,7 +17,10 @@
 
 
 PID_FILE=/var/run/on_vpngateway_check.pid
-VPN_DIR=/etc/openvpn/opennet_user
+VPN_NAME=opennet_user
+VPN_DIR=/etc/openvpn/$VPN_NAME
+VPN_PID_FILE=/var/run/openvpn-${VPN_NAME}.pid
+OVPN_MSG_FILE=/tmp/openvpn_msg.txt
 
 
 # do not run if there is no certificate and no key
@@ -175,14 +178,13 @@ check_all_blacklisting()
 #################################################################################
 # test if gateway is blacklisted, set or remove blacklisted option
 # parameter is index to test, echo true if blacklisted
-check_all_gateways()
+find_and_select_best_gateway()
 {
-	local found_first_gw
 	local current_gw_ipaddr
 	local better_gw_count
 	local next_index
 	local index
-	found_first_gw=
+	local selected_gw=
 	current_gw_ipaddr=$(uci -q get openvpn.opennet_user.remote)
 	better_gw_count=$(uci -q get on-openvpn.@gateways[0].better_gw)
 	next_index=1
@@ -201,7 +203,7 @@ check_all_gateways()
 
 		msg_debug "checking $gw_ipaddr age $age"
 
-		# check if currently checked Gateway is blacklisted, if found then continue in loop
+		# check if currently checked gateway is blacklisted, if found then continue in loop
 		check_blacklisting "$index" && continue
 
 		msg_debug "         $gw_ipaddr not blacklisted"
@@ -212,7 +214,7 @@ check_all_gateways()
 		msg_debug "         $gw_ipaddr is known to work"
 
 		# if first gateway is not found yet and route to current $gw_ipaddr exists, try if it's better to use this gateway
-		if [ -z "$found_first_gw" ] && [ -n "$(ip route show table "$olsrd_routingTable" | awk '$1 == "'$gw_ipaddr'"')" ]; then
+		if [ -z "$selected_gw" ] && [ -n "$(ip route show table "$olsrd_routingTable" | awk '$1 == "'$gw_ipaddr'"')" ]; then
 			msg_debug "checking first found gw - $gw_ipaddr"
 			if [ "$gw_ipaddr" != "$current_gw_ipaddr" ]; then
 				msg_debug "first found gw - $gw_ipaddr != $current_gw_ipaddr"
@@ -223,36 +225,42 @@ check_all_gateways()
 					uci -q set "openvpn.opennet_user.remote=$gw_ipaddr"
 					vpn_status restart opennet_user
 					better_gw_count=0
+					selected_gw=$gw_ipaddr
+				else
+					selected_gw=$current_gw_ipaddr
 				fi
 				uci -q set "on-openvpn.@gateways[0].better_gw=$better_gw_count"
 			else
 				msg_debug "first found gw - $gw_ipaddr == $current_gw_ipaddr"
 				uci -q set on-openvpn.@gateways[0].better_gw=0
+				selected_gw=$gw_ipaddr
 			fi
-			found_first_gw='true'
+			uci commit on-openvpn
 		fi
 	done
-	# commit after every change to prevent uci memory problems
-	uci commit on-openvpn
+	echo "$gw_ipaddr"
 }
 
+
+# detect broken tunnels and ensure that openvpn is running
 start_stop_openvpn() {
+	local gw_ipaddr=$1
 	# stop vpn-tunnel if its not working because route goes trough ugw-tunnel
 	# this might be a problem on usergateways: before the ugw-tunnel is working, the user-vpn-gateway is reachable
 	# later, if all gateways best reached via the ugw-tunnel, the user-tunnel runs forever complaining about not to work.
 	if [ -n "$(ip route show table "$olsrd_routingTable" | awk '/tap/ && $1 == "'$gw_ipaddr'"')" ]; then
-		if [ -e "/tmp/openvpn_msg.txt" ]; then
+		if [ -e "$OVPN_MSG_FILE" ]; then
 			msg_info "stopping nonworking gateway"
 			vpn_status stop opennet_user
 			uci -q set on-openvpn.@gateways[0].better_gw=0
 			# commit after every change to prevent uci memory problems
 			uci commit on-openvpn
 		fi
-	elif [ -n "$gw_ipaddr" ] && [ ! -e "/var/run/openvpn-opennet_user.pid" ]; then
-		sleep 5; # wait a litte while, maybe ntp was updated and time has to be set
+	elif [ -n "$gw_ipaddr" ] && [ ! -e "$VPN_PID_FILE" ]; then
 		vpn_status start opennet_user
 	fi
 }
+
 
 get_gate_ids() {
 	uci -q show on-openvpn | grep "^on-openvpn\.gate_[0-9]\+\.ipaddr" | cut -f 2 -d "." | cut -f 2 -d "_"
@@ -318,8 +326,8 @@ case "${1:-}" in
 		;;
 	*)
 		gateway_autosearch
-		check_all_gateways
-		start_stop_openvpn
+		selected_gateway=$(find_and_select_best_gateway)
+		start_stop_openvpn "$selected_gateway"
 		;;
 esac
 

@@ -48,11 +48,11 @@ create_tinc_config() {
 start() {
     on_id_preset=$(uci get on-core.defaults.on_id_preset)
     if [ -z "$on_id" ] || [ "$on_id" == "$on_id_preset" ]; then
-      logger -n tinc "not starting, on_id not configured"
+      logger -t tinc "not starting, on_id not configured"
       return
     fi
     if [ -z "$TINC_ADDRESS" ]; then
-      logger -n tinc "not starting, TINC_ADDRESS in /etc/init.d/on_tinc not configured"
+      logger -t tinc "not starting, TINC_ADDRESS in /etc/init.d/on_tinc not configured"
       return
     fi
     if [ ! -d /etc/tinc/$NETWORK_NAME ]; then

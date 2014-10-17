@@ -128,7 +128,7 @@ start() {
 		ifname=$(uci -q get network.$network.ifname)
 		[ -n "$ifname" -a "$ifname" != "none" ] && echo "if $ifname false true true" >>"$tmp_conf_file"
 	done
-	if cmp --quiet "$tmp_conf_file" "$dest_conf_file";
+	if cmp --quiet "$tmp_conf_file" "$dest_conf_file"; then
 		rm "$tmp_conf_file"
 	else
 		mv "$tmp_conf_file" "$dest_conf_file"

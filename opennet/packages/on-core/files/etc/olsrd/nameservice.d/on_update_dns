@@ -1,0 +1,6 @@
+#!/bin/sh
+
+. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+
+update_dns_servers
+

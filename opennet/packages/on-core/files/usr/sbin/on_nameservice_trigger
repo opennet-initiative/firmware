@@ -1,0 +1,4 @@
+#!/bin/sh
+
+run-parts /etc/olsrd/nameservice.d/
+

@@ -2,6 +2,5 @@
 
 . "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
 
-update_dns_servers
 update_ntp_servers
 

@@ -3,6 +3,9 @@
 
 . "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
 
+# pruefe auf notwendige Aenderungen nach Updates
+/usr/sbin/on_migrations
+
 initialize_olsrd_policy_routing
 enforce_olsrd_settings
 

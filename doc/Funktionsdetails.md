@@ -47,6 +47,7 @@ Folgende Voraussetzungen müssen gegeben sein:
 * das ``dnsmasq``-init-Skript ist gepatcht, um die ``servers-file``-Option zu beachten
 
 
+
 NTP - Zeitsynchronisation
 -------------------------
 
@@ -68,6 +69,13 @@ Die Funktion ``update_ntp_servers`` in der ``/usr/bin/on-helper.sh`` wird im 5-M
 Dabei werden alle ``dns``-Einträge aus der Datei ``/var/run/services_olsr`` ausgelesen. Im Falle von Änderungen der Server-Liste wird diese in die uci-Variablen ``ntpclient.@ntpserver[*]`` übertragen. Anschließend wird der ntp-Dienst neugestartet.
 
 
+Gateway-Auswahl
+---------------
+
+* minütlich:
+ * Auslesen aus /var/run/services_olsr
+ * Sortieren nach Entfernung (falls automatisch)
+ * Ändern, falls fünf Minuten lang ein anderer GW als der aktuelle der Beste ist
 
 
 Firmware-NG

@@ -264,7 +264,7 @@ initialize_olsrd_policy_routing() {
 	# "main"-Regel fuer lokale Quell-Pakete prioritisieren (opennet-Routing soll lokales Routing nicht beeinflussen)
 	# "main"-Regel fuer alle anderen Pakete nach hinten schieben (weniger wichtig als olsr)
 	main_prio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /main/ {print $1; exit}')
-	for network in $(echo "$(uci get -q firewall.zone_local.network)"); do
+	for network in $(uci_get firewall.zone_local.network); do
 		networkprefix=$(get_network "$network")
 		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" table main prio "$main_prio"
 	done
@@ -274,16 +274,17 @@ initialize_olsrd_policy_routing() {
 
 	# Pakete fuer opennet-IP-Bereiche sollen nicht in der main-Tabelle (lokale Interfaces) behandelt werden
 	# Falls spezifischere Interfaces vorhanden sind (z.B. 192.168.1.0/24), dann greift die "throw"-Regel natuerlich nicht.
-	for networkprefix in $(uci get on-core.defaults.on_network); do
+	for networkprefix in $(uci_get on-core.defaults.on_network); do
 		ip route prepend throw "$networkprefix" table main
 	done
 
 	# Pakete in Richtung lokaler Netzwerke (sowie "free") werden nicht von olsrd behandelt.
 	# TODO: koennen wir uns darauf verlassen, dass olsrd diese Regeln erhaelt?
-	for network in $(uci get -q firewall.zone_local.network) $(uci get -q firewall.zone_free.network); do
+	for network in $(uci_get firewall.zone_local.network) $(uci_get firewall.zone_free.network); do
 		networkprefix=$(get_network "$network")
-		[ -n "$networkprefix" ] && ip route add throw "$networkprefix" table olsrd
-		[ -n "$networkprefix" ] && ip route add throw "$networkprefix" table olsrd-default
+		[ -z "$networkprefix" ] && continue
+		ip route add throw "$networkprefix" table olsrd
+		ip route add throw "$networkprefix" table olsrd-default
 	done
 	return 0
 }

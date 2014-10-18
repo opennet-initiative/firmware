@@ -21,7 +21,7 @@
 ##### additional configuration #########################
 
 ##### MASQERADING based on source-IP ######################################
-for network in $(uci get -q firewall.zone_local.network); do
+for network in $(uci_get firewall.zone_local.network); do
     networkprefix=$(get_network "$network") 
     [ -n "$networkprefix" ] && iptables -t nat -I zone_opennet_postrouting -s "$networkprefix" -j MASQUERADE
 done

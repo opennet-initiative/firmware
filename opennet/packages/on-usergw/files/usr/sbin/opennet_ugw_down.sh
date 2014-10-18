@@ -22,8 +22,8 @@ uci commit network
 # reload new ubus rpc interface (see http://wiki.openwrt.org/doc/techref/ubus)
 ubus call network reload
 
-msg_debug "removing iterface ${dev} from config of firewall zone opennet"
-uci -q set firewall.zone_opennet.network="$(uci get firewall.zone_opennet.network | \
+msg_debug "removing interface ${dev} from config of firewall zone opennet"
+uci -q set firewall.zone_opennet.network="$(uci_get firewall.zone_opennet.network | \
         awk '{ x=1; while ( x<=NF ) { if ( $x != "on_'$dev'" ) { printf $x" "; } x++ } printf "\n"}')"
 uci commit firewall
 
@@ -31,8 +31,8 @@ uci commit firewall
 msg_debug "removing firewall-rules for ${dev}"
 /etc/init.d/firewall reload
 
-msg_debug "removing iterface ${dev} from config of olsrd, restarting olsrd"
-uci -q set olsrd.@Interface[0].interface="$(uci get olsrd.@Interface[0].interface | \
+msg_debug "removing interface ${dev} from config of olsrd, restarting olsrd"
+uci -q set olsrd.@Interface[0].interface="$(uci_get olsrd.@Interface[0].interface | \
         awk '{ x=1; while ( x<=NF ) { if ( $x != "on_'$dev'" ) { printf $x" "; } x++ } printf "\n"}')"
 uci commit olsrd
 /etc/init.d/olsrd restart

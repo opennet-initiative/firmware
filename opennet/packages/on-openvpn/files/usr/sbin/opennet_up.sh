@@ -23,7 +23,7 @@ echo "vpn-tunnel active" >"$MSG_FILE"	# a short message for the web frontend
 
 if [ -z "$(ip rule show | grep "lookup tun")" ];then
 	mainprio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /main/ {print $1; exit}')
-	for network in $(uci get -q firewall.zone_local.network) $(uci get -q firewall.zone_free.network); do
+	for network in $(uci_get firewall.zone_local.network) $(uci_get firewall.zone_free.network); do
 		networkprefix=$(get_network "$network")
 		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" table tun prio "$((mainprio+10))"
 	done
@@ -32,7 +32,7 @@ fi
 
 ip route flush table tun
 # prefer olsrd-routes for main and tunnel network
-for network in $(uci get on-core.defaults.on_network); do
+for network in $(uci_get on-core.defaults.on_network); do
 	ip route prepend throw "$network" table tun
 done
 ip route add default via "$route_vpn_gateway" table tun

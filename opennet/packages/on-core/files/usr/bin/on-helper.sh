@@ -222,10 +222,6 @@ configure_olsrd_for_opennet() {
 		uci set "${uci_prefix}.services_change_script=$OLSR_NAMESERVICE_SERVICE_TRIGGER"
 	fi
 
-	# Opennet-Datensammlung
-	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "ondataservice")
-	[ -z "$uci_prefix" ] && msg_info "Failed to find olsrd_ondataservice plugin"
-
 	# Aenderungen aktivieren
 	if [ -n "$(uci changes olsrd)" ]; then
 		uci commit olsrd
@@ -404,8 +400,9 @@ get_network() {
 }
 
 check_firmware_upgrade() {
-	old_version=$(awk '{if (/opennet-firmware-ng/) print $4}' /etc/banner)
-	cur_version=$(opkg status on-core | awk '{if (/Version/) print $2;}')
+	local uci_prefix
+	local old_version=$(awk '{if (/opennet-firmware-ng/) print $4}' /etc/banner)
+	local cur_version=$(opkg status on-core | awk '{if (/Version/) print $2;}')
 	if [ "$old_version" != "$cur_version" ]; then
 		copy_etc_presets
 		# copy banner, somehow this has to be done explicit (at least) for 0.4-2
@@ -416,11 +413,10 @@ check_firmware_upgrade() {
 	fi
 	if [ -z "$(uci show olsrd | grep ondataservice)" ]; then
 		# add and activate ondataservice plugin
-		section=$(uci add olsrd LoadPlugin)
-		uci set olsrd.$section.library=olsrd_ondataservice_light.so.0.1
-		uci set olsrd.$section.interval=10800
-		uci set olsrd.$section.inc_interval=5
-		uci set olsrd.$section.database=/tmp/database.json
+		uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "olsrd_ondataservice_light")
+		uci set "${uci_prefix}=10800"
+		uci set "${uci_prefix}=5"
+		uci set "${uci_prefix}=/tmp/database.json"
 		uci commit olsrd
 	fi
 }

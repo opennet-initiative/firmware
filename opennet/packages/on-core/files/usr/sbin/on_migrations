@@ -29,7 +29,7 @@ coerce_openvpn_comp_lzo() {
 		uci set "$key=$new_value"
 	done
 	uci commit on-usergw
-	uci commit opennet
+	uci commit openvpn
 }
 
 

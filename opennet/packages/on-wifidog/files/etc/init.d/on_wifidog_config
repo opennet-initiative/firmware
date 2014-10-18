@@ -123,7 +123,7 @@ start() {
 	# update the dhcp-fwd.conf file if there were changes
 	tmp_conf_file=/tmp/dhcp-fwd.conf.tmp
 	dest_conf_file=/etc/dhcp-fwd.conf
-	cp /etc/dhcp-fwd.opennet_template "$tmp_conf_file"
+	cp /etc/dhcp-fwd.conf.opennet_template "$tmp_conf_file"
 	for network in $(uci -q get firewall.zone_opennet.network); do
 		ifname=$(uci -q get network.$network.ifname)
 		[ -n "$ifname" -a "$ifname" != "none" ] && echo "if $ifname false true true" >>"$tmp_conf_file"

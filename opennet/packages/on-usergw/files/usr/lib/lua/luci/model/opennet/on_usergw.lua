@@ -338,6 +338,8 @@ function change_hna()
 end
 
 
+-- aufgerufen via /etc/uci-defaults/on-usergw-vpn-transfer
+-- TODO: Fuer welchen Versionssprung war das relevant? Kann das weg?
 function upgrade()
   -- set hna_mask if not yet set to preset
   if not cursor:get("on-usergw", "ugwng_hna_mask") then

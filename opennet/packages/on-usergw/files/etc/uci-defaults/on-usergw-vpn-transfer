@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -eu
+
+# Allem Anschein nach tut diese Funktion folgendes:
+# 1) die Konfigurationsvariable "on-usergw.ugwng_hna_mask" auf den Wert 192.168.0 setzen
+# 2) openvpn-uci-Konfigurationen (z.B. openvpn.opennet_ugw_erina_on_i_de) werden nach on-usergw.opennet_ugw* übertragen
+lua -e "require('luci.model.opennet.on_usergw') upgrade()" 2>/dev/null
+

@@ -4,7 +4,11 @@
 # Alle Funktionen muessen idempotent sein.
 #
 
+
+# lieber strikte Fehlerpruefungen - wir wollen nix kaputtmachen, wenn es nicht den Erwartungen entspricht
 set -eu
+
+. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
 
 
 # bis Version v0.4-5: openvpn.opennet_user.comp_lzo=1
@@ -19,17 +23,22 @@ set -eu
 coerce_openvpn_comp_lzo() {
 	local new_value
 	local key
-	local ugw_state=$(uci -q get on-usergw.opennet_ugw.comp_lzo)
+	local changed=
+	local ugw_state=$(uci -q get on-usergw.opennet_ugw.comp_lzo || true)
 	[ "$ugw_state" = 1 ] && uci set on-usergw.opennet_ugw.comp_lzo=yes
 	[ "$ugw_state" = 0 ] && uci set on-usergw.opennet_ugw.comp_lzo=no
 	uci show openvpn | grep "\.comp_lzo=[01]$" | while read line; do
+		[ -z "$changed" ] && msg_info "MIGRATION: coerce_openvpn_comp_lzo"
+		changed=1
 		new_value=no
 		echo "$line" | grep -q "1$" && new_value=yes
 		key=$(echo "$line" | cut -f 1 -d =)
 		uci set "$key=$new_value"
 	done
-	uci commit on-usergw
-	uci commit openvpn
+	if [ -n "$changed" ]; then
+		uci commit on-usergw
+		uci commit openvpn
+	fi
 }
 
 
@@ -39,6 +48,7 @@ coerce_openvpn_comp_lzo() {
 fix_passwd_broken_symlink() {
 	local target=/etc/passwd
 	if [ -h "$target" -a ! -e "$target" ]; then
+		msg_info "MIGRATION: fix_passwd_broken_symlink"
 		rm "$target"
 		# ein huebscheres here-Document mit Tabulator-Bereinigung ("<<-") funktioniert leider nicht mit busybox
 		cat >"$target" << EOF
@@ -48,10 +58,46 @@ ftp:*:55:55:ftp:/home/ftp:/bin/false
 network:*:101:101:network:/var:/bin/false
 nobody:*:65534:65534:nobody:/var:/bin/false
 EOF
+		# Ein paar Dienste schlugen aufgrund der fehlenden Nutzerdatenbank fehl.
+		# Ein reboot waere schoen - aber kann zukuenftig eventuell irgendwann zu einer Schleife fuehren.
+		# Also: manuell einzelne Dienste neu starten.
+		/etc/init.d/dnsmasq restart
 	fi
+}
+
+
+# bis Version v0.4-5: "firewall reload" fuehrte auch die "include"-Dateien aus (z.B. /etc/firewall.opennet)
+# Ab Version v0.5 passiert dies nur noch, falls der include-Eintrag via uci mit dem Parameter 'reload' markiert wird.
+# Beispiel (v0.4-5):
+#  uci show firewall | grep @include
+#  firewall.@include[0]=include
+#  firewall.@include[0].path=/etc/firewall.opennet
+#  firewall.@include[1]=include
+#  firewall.@include[1].path=/etc/firewall.user
+fix_firewall_reload() {
+	local key
+	local value
+	local reload_key
+	local old_value
+	uci show firewall | grep "@include\[[0-9]\+\]\.path=" | while read line; do
+		key=$(echo "$line" | cut -f 1 -d =)
+		value=$(echo "$line" | cut -f 2- -d =)
+		[ "$value" != "/etc/firewall.opennet" ] && continue
+		reload_key=${key%.path}.reload
+		old_value=$(uci -q get "$reload_key" || true)
+		[ -z "$old_value" ] && old_value=0
+		if uci_is_false "$old_value"; then
+			msg_info "MIGRATION: fix_firewall_reload"
+			uci set "$reload_key=1"
+			uci commit firewall
+			/etc/init.d/firewall reload
+			break
+		fi
+	done
 }
 
 
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
+fix_firewall_reload
 

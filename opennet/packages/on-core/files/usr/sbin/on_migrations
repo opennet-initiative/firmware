@@ -86,7 +86,8 @@ fix_firewall_reload() {
 			msg_info "MIGRATION: fix_firewall_reload"
 			uci set "$reload_key=1"
 			uci commit firewall
-			/etc/init.d/firewall reload
+			# Firewall neustarten; keine unnoetigen Ausgaben (siehe /etc/init.d/firewall)
+			QUIET=-q /etc/init.d/firewall reload
 			break
 		fi
 	done

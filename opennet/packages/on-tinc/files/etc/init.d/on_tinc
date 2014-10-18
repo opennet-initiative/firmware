@@ -1,8 +1,9 @@
 #!/bin/sh /etc/rc.common
-# Copyright (C) 2008 OpenWrt.org
+
+. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
 
 START=42
-on_id=$(uci get -q on-core.settings.on_id)
+on_id=$(uci_get on-core.settings.on_id)
 
 NETWORK_NAME="oni-media"
 # you have to configure your tinc network address here.
@@ -10,60 +11,71 @@ NETWORK_NAME="oni-media"
 # TINC_ADDRESS="10.42.1.X"
 TINC_ADDRESS=""
 TINC_NETMASK="255.255.255.0"
+TINC_PORT=655
 # you might like to change your node name here
 # The name should consist only of alfanumeric and underscore characters (a-z, A-Z, 0-9 and _)
 NODE_NAME="oni_${on_id/./_}"
+FIREWALL_FILE=/etc/firewall.tinc
 
 
 ### create a new tinc config, generate keys and setup initial configuration
 create_tinc_config() {
-  mkdir -p /etc/tinc/$NETWORK_NAME/hosts
-  echo -e "Mode=switch\nName=$NODE_NAME\n\n#change this to connect and add key to hosts dir\n#ConnectTo = <name>" >/etc/tinc/$NETWORK_NAME/tinc.conf
-  echo -e "\n\n" | tincd -n $NETWORK_NAME -K
+	local index
+	local section
+	local tinc_dir=/etc/tinc/$NETWORK_NAME
+	mkdir -p "$tinc_dir/hosts"
+	cat >"$tinc_dir/tinc.conf" << EOF
+Mode=switch
+Name=$NODE_NAME
+Port=$TINC_PORT
+# change this to connect and add key to hosts dir
+#ConnectTo = <name>
+EOF
+	cat > "$tinc_dir/hosts/$NODE_NAME" << EOF
+Address=$TINC_ADDRESS $TINC_PORT
+Compression=9
+EOF
+	tincd -n "$NETWORK_NAME" --generate-keys=4096 </dev/null
 
-  echo -e "\nCompression=9" >> /etc/tinc/$NETWORK_NAME/hosts/$NODE_NAME
-  echo -e "\nAddress=$TINC_ADDRESS" >> /etc/tinc/$NETWORK_NAME/hosts/$NODE_NAME
+	cat > "$tinc_dir/tinc-up" << EOF
+#!/bin/sh
+ifconfig "\$INTERFACE" $TINC_ADDRESS netmask $TINC_NETMASK"
+EOF
+	chmod +x "$tinc_dir/tinc-up"
 
-  echo -e "#!/bin/sh\nifconfig \$INTERFACE $TINC_ADDRESS netmask $TINC_NETMASK" >/etc/tinc/$NETWORK_NAME/tinc-up
-  chmod +x /etc/tinc/$NETWORK_NAME/tinc-up
+	# Netzwerke hinzufuegen
+	cat >>/etc/firewall.tinc << EOF
+iptables -I input_rule -p udp --dport $TINC_PORT -j ACCEPT
+iptables -I input_rule -p tcp --dport $TINC_PORT -j ACCEPT
+iptables -I input_rule -i $NETWORK_NAME -j ACCEPT
+iptables -I output_rule -o $NETWORK_NAME -j ACCEPT
+EOF
 
-  echo "# special firewall rules to allow tinc to work across all interfaces" >/etc/firewall.tinc
-  echo "iptables -I input_rule -p udp --dport 655 -j ACCEPT" >>/etc/firewall.tinc
-  echo "iptables -I input_rule -p tcp --dport 655 -j ACCEPT" >>/etc/firewall.tinc
-  echo "iptables -I input_rule -i $NETWORK_NAME -j ACCEPT" >>/etc/firewall.tinc
-  echo "iptables -I output_rule -o $NETWORK_NAME -j ACCEPT" >>/etc/firewall.tinc
-
-  no=0;
-  while [ -n "$(uci -q get firewall.@include[${no}])" ]; do
-    if [ "$(uci -q get firewall.@include[0].path)" == "/etc/firewall.tinc" ]; then
-      return
-    fi
-    : $((no++))
-  done
-  section=$(uci add firewall include)
-  uci set firewall.$section.path=/etc/firewall.tinc
-  uci commit firewall
+	index=0
+	while [ -n "$(uci_get firewall.@include[$index])" ]; do
+		[ "$(uci_get firewall.@include[$index].path)" = "$FIREWALL_FILE" ] && return
+		: $((index++))
+	done
+	# die Datei wurde noch nicht konfiguriert
+	section=$(uci add firewall include)
+	uci set "firewall.${section}.path=$FIREWALL_FILE"
+	uci commit firewall
 }
 
 start() {
-    on_id_preset=$(uci get on-core.defaults.on_id_preset)
-    if [ -z "$on_id" ] || [ "$on_id" == "$on_id_preset" ]; then
-      logger -t tinc "not starting, on_id not configured"
-      return
-    fi
-    if [ -z "$TINC_ADDRESS" ]; then
-      logger -t tinc "not starting, TINC_ADDRESS in /etc/init.d/on_tinc not configured"
-      return
-    fi
-    if [ ! -d /etc/tinc/$NETWORK_NAME ]; then
-      create_tinc_config
-    fi
-	tincd -n $NETWORK_NAME
+	local on_id_preset=$(uci_get on-core.defaults.on_id_preset)
+	[ -z "$on_id" -o "$on_id" = "$on_id_preset" ] && msg_info "not starting, on_id not configured" && return
+	[ -z "$TINC_ADDRESS" ] && msg_info "not starting, TINC_ADDRESS in /etc/init.d/on_tinc not configured" && return
+	[ ! -d "/etc/tinc/$NETWORK_NAME" ] && create_tinc_config
+	tincd -n "$NETWORK_NAME"
 }
+
 stop() {
-	killall tincd
+	tincd -n "$NETWORK_NAME" -k
 }
+
 restart() {
 	stop
 	start
 }
+

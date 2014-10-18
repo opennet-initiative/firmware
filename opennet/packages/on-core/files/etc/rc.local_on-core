@@ -7,7 +7,7 @@
 /usr/sbin/on_migrations
 
 initialize_olsrd_policy_routing
-enforce_olsrd_settings
+configure_olsrd_for_opennet
 
 exit 0
 

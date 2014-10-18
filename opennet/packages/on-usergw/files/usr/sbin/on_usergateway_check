@@ -45,17 +45,7 @@ announce_ugw_service_ugw() {
 	local upload=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" upload)
 	local ping=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" ping)
 
-	# stelle sicher dass das nameservice-Plugin aktiv ist
-	enforce_olsrd_settings
-	# finde das nameservice-Plugin
-	while uci -q get "olsrd.@LoadPlugin[$index]"; do
-		if [ "$(uci -q get "olsrd.@LoadPlugin[$index].library" | cut -d . -f 1)" = "olsrd_nameservice" ]; then
-			uci_prefix=olsrd.@LoadPlugin[$index].library
-			break
-		fi
-		: $((index++))
-	done
-
+	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	[ -z "$uci_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && return 1
 
 	# announce our ugw service

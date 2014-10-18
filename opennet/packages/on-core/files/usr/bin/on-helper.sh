@@ -18,7 +18,8 @@ SERVICES_FILE=/var/run/services_olsr
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 OLSR_POLICY_DEFAULT_PRIORITY=65535
 
-DEBUG=$(uci -q get on-core.defaults.debug)
+DEBUG=$(uci -q get on-core.defaults.debug || echo false)
+
 
 #################################################################################
 # just to get the IP for gateways only registered by name
@@ -56,10 +57,37 @@ update_file_if_changed() {
 	fi
 }
 
+
+uci_is_true() {
+	uci_is_false "$1" && return 1
+	return 0
+}
+
+
 uci_is_false() {
 	local token=$1
 	[ "$token" = "0" -o "$token" = "no" -o "$token" = "off" -o "$token" = "false" ] && return 0
 	return 1
+}
+
+
+# "uci -q get ..." endet mit einem Fehlercode falls das Objekt nicht existiert
+# Dies erschwert bei strikter Fehlerpruefung (set -e) die Abfrage von uci-Werten.
+# Die Funktion "uci_get" liefert bei fehlenden Objekten einen leeren String zurueck
+# oder den gegebenen Standardwert zurueck.
+# Der Exitcode signalisiert immer Erfolg.
+# Syntax:
+#   uci_get firewall.zone_free.masq 1
+# Der abschließende Standardwert (zweiter Parameter) ist optional.
+uci_get() {
+	local key=$1
+	local default=${2:-}
+	if uci -q "$key"; then
+		return 0
+	else
+		[ -n "$default" ] && echo "$default"
+		return 0
+	fi
 }
 
 
@@ -149,41 +177,54 @@ control_ntpclient() {
 }
 
 
-# sicherstellen, dass notwendige olsr-Einstellungen gesetzt sind (via cronjob)
-enforce_olsrd_settings() {
-	# fuer NTP, DNS und die Gateway-Auswahl benoetigen wir das nameservice-Plugin
-	local index=0
-	local nameservice_lib
+get_and_enable_olsrd_library_uci_prefix() {
 	local new_section
-	local uci_prefix
-	local current_trigger
-	while uci -q get "olsrd.@LoadPlugin[$index]" >/dev/null; do
-		if uci -q get "olsrd.@LoadPlugin[$index].library" | grep -q "^olsrd_nameservice\.so"; then
-			uci_prefix=olsrd.@LoadPlugin[$index]
-			break
-		fi
-		: $((index++))
-	done
-
-	# nameservice-Plugin-Eintrag bei Bedarf erzeugen
-	if [ -z "$uci_prefix" ]; then
+	local lib_file
+	local uci_prefix=
+	local library=$1
+	local current=$(uci show olsrd | grep -q "^olsrd\.@LoadPlugin\[[0-9]\+\]\.library=$library\.so")
+	if [ -n "$current"]; then
+		uci_prefix=$(echo "$current" | cut -f 1 -d = | sed 's/\.library$//')
+	else
 		new_section=$(uci add olsrd LoadPlugin)
 		uci_prefix=olsrd.${new_section}
-		nameservice_lib=$(find /usr/lib -type f -name "olsrd_nameservice.so.*")
-		if [ -z "$nameservice_lib" ]; then
-			msg_info "FATAL ERROR: Failed to find olsrd nameservice plugin. Most Opennet services will fail."
+		lib_file=$(find /usr/lib -type f -name "${library}.*")
+		if [ -z "$lib_file" ]; then
+			msg_info "FATAL ERROR: Failed to find olsrd '$library' plugin. Some Opennet services will fail."
 		else
-			uci set "${uci_prefix}.library=$(basename "$nameservice_lib")"
+			uci set "${uci_prefix}.library=$(basename "$lib_file")"
 		fi
 	fi
+	# Plugin aktivieren; Praefix ausgeben
+	if [ -n "$uci_prefix" ]; then
+		# moeglicherweise vorhandenen 'ignore'-Parameter abschalten
+		uci_is_true "$(uci_get "${uci_prefix}.ignore" 0)" && uci set "${uci_prefix}.ignore=0"
+		echo "$uci_prefix"
+	fi
+	return 0
+}
 
-	# moeglicherweise vorhandenen 'ignore'-Parameter abschalten
-	[ -n "$(uci -q get "${uci_prefix}.ignore")" ] && uci set "${uci_prefix}.ignore=0"
 
-	# Option 'services-change-script' setzen
-	current_trigger=$(uci -q get "${uci_prefix}.services_change_script")
-	[ -n "$current_trigger" ] && [ "$current_trigger" != "$OLSR_NAMESERVICE_SERVICE_TRIGGER" ] && msg_info "WARNING: overwriting 'services-change-script' option of olsrd nameservice plugin with custom value. You should place a script below /etc/olsrd/nameservice.d/ instead."
-	uci set "${uci_prefix}.services_change_script=$OLSR_NAMESERVICE_SERVICE_TRIGGER"
+# sicherstellen, dass gewuenschte olsr-Einstellungen gesetzt sind (z.B. beim Booten)
+configure_olsrd_for_opennet() {
+	local current_trigger
+	local uci_prefix
+
+	# fuer NTP, DNS und die Gateway-Auswahl benoetigen wir das nameservice-Plugin
+	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
+	if [ -z "$uci_prefix" ]; then
+	       msg_info "Failed to find olsrd_nameservice plugin"
+	else
+		# Option 'services-change-script' setzen
+		current_trigger=$(uci -q get "${uci_prefix}.services_change_script" || true)
+		[ -n "$current_trigger" ] && [ "$current_trigger" != "$OLSR_NAMESERVICE_SERVICE_TRIGGER" ] && \
+			msg_info "WARNING: overwriting 'services-change-script' option of olsrd nameservice plugin with custom value. You should place a script below /etc/olsrd/nameservice.d/ instead."
+		uci set "${uci_prefix}.services_change_script=$OLSR_NAMESERVICE_SERVICE_TRIGGER"
+	fi
+
+	# Opennet-Datensammlung
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "ondataservice")
+	[ -z "$uci_prefix" ] && msg_info "Failed to find olsrd_ondataservice plugin"
 
 	# Aenderungen aktivieren
 	if [ -n "$(uci changes olsrd)" ]; then

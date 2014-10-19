@@ -16,6 +16,7 @@ set -eu
 
 GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
+ON_DEFAULTS_FILE=/usr/share/opennet/defaults.txt
 SERVICES_FILE=/var/run/services_olsr
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 OLSR_POLICY_DEFAULT_PRIORITY=65535
@@ -97,10 +98,10 @@ uci_get() {
 # Store this list as a dnsmasq 'server-file'.
 # The file is only updated in case of changes.
 update_dns_servers() {
-	local use_dns="$(uci -q get on-core.services.use_olsrd_dns)"
+	local use_dns="$(uci_get on-core.services.use_olsrd_dns)"
 	# return if we should not use DNS servers provided via olsrd
 	uci_is_false "$use_dns" && return
-	local servers_file=$(uci -q get "dhcp.@dnsmasq[0].serversfile")
+	local servers_file=$(uci_get "dhcp.@dnsmasq[0].serversfile")
 	if [ -z "$servers_file" ]; then
 	       servers_file=$DNSMASQ_SERVERS_FILE_DEFAULT
 	       uci set "dhcp.@dnsmasq[0].serversfile=$servers_file"
@@ -121,7 +122,7 @@ update_dns_servers() {
 # The uci settings are only updated in case of changes.
 # ntpclient is restarted in case of changes.
 update_ntp_servers() {
-	local use_ntp="$(uci -q get on-core.services.use_olsrd_ntp)"
+	local use_ntp="$(uci_get on-core.services.use_olsrd_ntp)"
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
 	# separate host and port with whitespace
@@ -320,6 +321,15 @@ _set_file_dict_value() {
 	) | sort | update_file_if_changed "$GATEWAY_STATUS_FILE" || true
 }
 
+
+# hole einen der default-Werte der aktuellen Firmware
+# Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
+# Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfuegbar.
+get_on_default() {
+	_get_file_dict_value "$ON_DEFAULTS_FILE" "$1"
+}
+
+
 #################################################################################
 # Auslesen einer Gateway-Information
 # Parameter ip: IP-Adresse des Gateways
@@ -382,10 +392,10 @@ get_services() {
 }
 
 get_network() {
-# 	if [ "$(uci -q get network.$1.type)" == "bridge" ]; then
+# 	if [ "$(uci_get network.$1.type)" == "bridge" ]; then
 # 		ifname="br-$1"
 # 	else
-# 		ifname=$(uci -q get network.$1.ifname)
+# 		ifname=$(uci_get network.$1.ifname)
 # 	fi
 	. "${IPKG_INSTROOT:-}/lib/functions.sh"
 	include "${IPKG_INSTROOT:-}/lib/network"
@@ -404,7 +414,7 @@ get_on_firmware_version() {
 
 
 update_olsr_interfaces() {
-	uci set -q "olsrd.@Interface[0].interface=$(uci -q get firewall.zone_opennet.network)"
+	uci set -q "olsrd.@Interface[0].interface=$(uci_get firewall.zone_opennet.network)"
 	uci commit olsrd
 	/etc/init.d/olsrd restart
 }

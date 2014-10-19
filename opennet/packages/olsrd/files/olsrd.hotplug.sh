@@ -1,12 +1,14 @@
 #!/bin/sh
 
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
 olsrd_list_configured_interfaces()
 {
 	local i=0
 	local interface
 
-	while interface="$( uci -q get $OLSRD.@Interface[$i].interface )"; do {
-		case "$( uci -q get $OLSRD.@Interface[$i].ignore )" in
+	while interface="$(uci_get "$OLSRD.@Interface[$i].interface")"; do {
+		case "$(uci_get "$OLSRD.@Interface[$i].ignore")" in
 			1|on|true|enabled|yes)
 				# is disabled
 			;;

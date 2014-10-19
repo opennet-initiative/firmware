@@ -83,7 +83,7 @@ fix_firewall_reload() {
 		value=$(echo "$line" | cut -f 2- -d =)
 		[ "$value" != "/etc/firewall.opennet" ] && continue
 		reload_key=${key%.path}.reload
-		old_value=$(uci -q get "$reload_key" || true)
+		old_value=$(uci_get "$reload_key")
 		[ -z "$old_value" ] && old_value=0
 		if uci_is_false "$old_value"; then
 			msg_info "MIGRATION: fix_firewall_reload"

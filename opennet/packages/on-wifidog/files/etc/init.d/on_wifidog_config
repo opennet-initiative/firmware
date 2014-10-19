@@ -18,17 +18,16 @@ start() {
 	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 	# while reconfiguring, on_id is usually not set. Anyway, just try to read it...
-	on_id=$(uci -q get on-core.settings.on_id)
-	if [ -z "$on_id" ]; then on_id=$(uci -q get on-core.defaults.on_id_preset); fi
-	on_ipschema=$(uci -q get on-core.defaults.on_ipschema)
-	free_ipschema=$(uci -q get on-wifidog.defaults.free_ipschema)
-	free_netmask=$(uci -q get on-wifidog.defaults.free_netmask)	
+	on_id=$(uci_get on-core.settings.on_id "$(uci_get on-core.defaults.on_id_preset)")
+	on_ipschema=$(uci_get on-core.defaults.on_ipschema)
+	free_ipschema=$(uci_get on-wifidog.defaults.free_ipschema)
+	free_netmask=$(uci_get on-wifidog.defaults.free_netmask)	
 
 	free_ipaddr=$(get_on_ip "$on_id" "$free_ipschema" 0)
 	free_ipaddr_first=$(get_on_ip "0.1" "$free_ipschema" 0)
 	on_ipaddr=$(get_on_ip "$on_id" "$on_ipschema" 0)
 
-	if [ -z "$(uci -q get network.free)" ]; then
+	if [ -z "$(uci_get network.free)" ]; then
 		local batch
 		
 		# configure opennet dhcp/wifidog wifi
@@ -80,12 +79,12 @@ start() {
 		uci commit firewall
 	else	# fix pre 0.3-6 version bug
 		no=0
-		while [ -n "$(uci -q get firewall.@redirect[$no])" ]; do
-			src=$(uci -q get firewall.@redirect[$no].src);
-			proto=$(uci -q get firewall.@redirect[$no].proto);
-			src_dport=$(uci -q get firewall.@redirect[$no].src_dport);
-			target=$(uci -q get firewall.@redirect[$no].target);
-			src_port=$(uci -q get firewall.@redirect[$no].src_port);
+		while [ -n "$(uci_get firewall.@redirect[$no])" ]; do
+			src=$(uci_get firewall.@redirect[$no].src);
+			proto=$(uci_get firewall.@redirect[$no].proto);
+			src_dport=$(uci_get firewall.@redirect[$no].src_dport);
+			target=$(uci_get firewall.@redirect[$no].target);
+			src_port=$(uci_get firewall.@redirect[$no].src_port);
 			if [ "$src" == "opennet" ] && [ "$proto" == "udp" ] && [ "$src_dport" == "67" ] && [ "$target" == "DNAT" ] && [ "$src_port" == "67" ]; then
 				uci set "firewall.@redirect[$no].dest_ip=${free_ipaddr}"
 				uci set "firewall.@redirect[$no].src_dip=${on_ipaddr}"
@@ -124,8 +123,8 @@ start() {
 	tmp_conf_file=/tmp/dhcp-fwd.conf.tmp
 	dest_conf_file=/etc/dhcp-fwd.conf
 	cp /etc/dhcp-fwd.conf.opennet_template "$tmp_conf_file"
-	for network in $(uci -q get firewall.zone_opennet.network); do
-		ifname=$(uci -q get network.$network.ifname)
+	for network in $(uci_get firewall.zone_opennet.network); do
+		ifname=$(uci_get network.$network.ifname)
 		[ -n "$ifname" -a "$ifname" != "none" ] && echo "if $ifname false true true" >>"$tmp_conf_file"
 	done
 	if cmp -s "$tmp_conf_file" "$dest_conf_file"; then

@@ -35,7 +35,7 @@ enable_nameservice() {
 	       msg_info "Failed to find olsrd_nameservice plugin"
 	else
 		# Option 'services-change-script' setzen
-		current_trigger=$(uci -q get "${uci_prefix}.services_change_script" || true)
+		current_trigger=$(uci_get "${uci_prefix}.services_change_script" || true)
 		[ -n "$current_trigger" ] && [ "$current_trigger" != "$OLSR_NAMESERVICE_SERVICE_TRIGGER" ] && \
 			msg_info "WARNING: overwriting 'services-change-script' option of olsrd nameservice plugin with custom value. You should place a script below /etc/olsrd/nameservice.d/ instead."
 		uci set "${uci_prefix}.services_change_script=$OLSR_NAMESERVICE_SERVICE_TRIGGER"

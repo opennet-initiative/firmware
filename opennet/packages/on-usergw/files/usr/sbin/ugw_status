@@ -11,9 +11,11 @@
 # 	http://www.apache.org/licenses/LICENSE-2.0
 # 
 
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
 print_status()
 {
-	local ugw_status_centralips=$(for gw in $(uci -q get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '{if ($5 ~ "tap") print $1}' ; done)
+	local ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '{if ($5 ~ "tap") print $1}' ; done)
 	local ugw_status_centralips_no=$(echo $ugw_status_centralips | wc -w)
 	local ugw_status_centralip_status="error"
 	[ "$ugw_status_centralips_no" -ge "1" ] && ugw_status_centralip_status="ok"
@@ -23,16 +25,16 @@ print_status()
 	local ugw_status_sharing_wan_ok=""
 	local ugw_status_sharing_possible=""
 	local count=1
-	while ( [ -n "$(uci -q get openvpn.opennet_ugw$count)" ] ); do
-		onusergw_wan=$(uci -q get on-usergw.opennet_ugw$count.wan)
-		onusergw_mtu=$(uci -q get on-usergw.opennet_ugw$count.mtu)
+	while ( [ -n "$(uci_get openvpn.opennet_ugw$count)" ] ); do
+		onusergw_wan=$(uci_get on-usergw.opennet_ugw$count.wan)
+		onusergw_mtu=$(uci_get on-usergw.opennet_ugw$count.mtu)
 		[ "$onusergw_wan" = "ok" ] && ugw_status_sharing_wan_ok="true"
 		[ "$onusergw_wan" = "ok" -a "$onusergw_mtu" = "ok" ] && ugw_status_sharing_possible="true" && break
 		: $((count++))
 	done
 
-	local ugw_status_sharing_enabled=$(uci -q get on-usergw.ugw_sharing.shareInternet)
-	local ugw_status_sharing_blocked=$(uci -q get on-usergw.ugw_sharing.blockSharing)
+	local ugw_status_sharing_enabled=$(uci_get on-usergw.ugw_sharing.shareInternet)
+	local ugw_status_sharing_blocked=$(uci_get on-usergw.ugw_sharing.blockSharing)
 
 	local returnVal=$(ps | grep on_usergateway_check)
 	local ugw_status_checkWANMTUrunning=$(echo $returnVal | grep checkMtu)$(echo $returnVal | grep checkWan)
@@ -71,15 +73,15 @@ print_status()
 	output=$output"\t\t      \t       \tconf \treal\tconf\treal\n"
 
 	count=1
-	while ( [ -n "$(uci -q get openvpn.opennet_ugw$count)" ] ); do
-		onusergw_wan=$(uci -q get on-usergw.opennet_ugw$count.wan)
-		onusergw_wanping=$(uci -q get on-usergw.opennet_ugw$count.wanping)
-		onusergw_mtu_toGW_tried=$(uci -q get on-usergw.opennet_ugw$count.mtu_toGW_tried)
-		onusergw_mtu_toGW_actual=$(uci -q get on-usergw.opennet_ugw$count.mtu_toGW_actual)
-		onusergw_mtu_fromGW_tried=$(uci -q get on-usergw.opennet_ugw$count.mtu_fromGW_tried)
-		onusergw_mtu_fromGW_actual=$(uci -q get on-usergw.opennet_ugw$count.mtu_fromGW_actual)
-		onusergw_mtu=$(uci -q get on-usergw.opennet_ugw$count.mtu)
-		openvpn_remote=$(uci -q get openvpn.opennet_ugw$count.remote)
+	while ( [ -n "$(uci_get openvpn.opennet_ugw$count)" ] ); do
+		onusergw_wan=$(uci_get on-usergw.opennet_ugw$count.wan)
+		onusergw_wanping=$(uci_get on-usergw.opennet_ugw$count.wanping)
+		onusergw_mtu_toGW_tried=$(uci_get on-usergw.opennet_ugw$count.mtu_toGW_tried)
+		onusergw_mtu_toGW_actual=$(uci_get on-usergw.opennet_ugw$count.mtu_toGW_actual)
+		onusergw_mtu_fromGW_tried=$(uci_get on-usergw.opennet_ugw$count.mtu_fromGW_tried)
+		onusergw_mtu_fromGW_actual=$(uci_get on-usergw.opennet_ugw$count.mtu_fromGW_actual)
+		onusergw_mtu=$(uci_get on-usergw.opennet_ugw$count.mtu)
+		openvpn_remote=$(uci_get openvpn.opennet_ugw$count.remote)
 
 		ugw_tunnel_active="------"
 		[ -e "/tmp/opennet_ugw-${openvpn_remote}.txt" ] && ugw_tunnel_active="active"
@@ -121,7 +123,7 @@ ugw_suspend()
 
 toggle_sharing()
 {
-	sharing=$(uci -q get on-usergw.ugw_sharing.shareInternet)
+	sharing=$(uci_get on-usergw.ugw_sharing.shareInternet)
 	if [ "$sharing" = "on" ]; then
 		sharing="off"
 	else

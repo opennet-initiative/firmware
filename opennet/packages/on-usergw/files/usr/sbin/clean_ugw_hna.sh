@@ -14,13 +14,15 @@
 # if UGW-HNA announced in olsrd is not used for more than one week,
 # HNA will be set free (in olsrd-config and on-usergw-config)
 
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
 maxage=604800	# max HNA age is one week (in seconds)
 time=$(date +%s)
 
 found=""; no=0;
-while ( [ -n "$(uci -q get olsrd.@Hna4[${no}])" ] ); do
-	if [ "$(uci -q get olsrd.@Hna4[${no}].source)" == "ugw" ]; then
-		lastused=$(uci -q get olsrd.@Hna4[${no}].lastused)
+while ( [ -n "$(uci_get olsrd.@Hna4[${no}])" ] ); do
+	if [ "$(uci_get olsrd.@Hna4[${no}].source)" = "ugw" ]; then
+		lastused=$(uci_get olsrd.@Hna4[${no}].lastused)
 		if [ -z "$lastused" ] || [ $lastused -lt $((time-maxage)) ]; then
 			uci del olsrd.@Hna4[${no}]
 			uci commit olsrd

@@ -36,17 +36,17 @@ echo "$batch${N}commit network" | uci batch
 # reload new ubus rpc interface (see http://wiki.openwrt.org/doc/techref/ubus)
 ubus call network reload
 
-zone_on_ifaces="$(uci -q get firewall.zone_opennet.network)";
+zone_on_ifaces="$(uci_get firewall.zone_opennet.network)";
 if [ -z "$(echo $zone_on_ifaces | grep on_${dev})" ]; then
 	msg_debug "adding interface ${dev} to config of firewall zone opennet"
-	uci -q set firewall.zone_opennet.network="$(uci -q get firewall.zone_opennet.network) on_${dev}"
+	uci -q set firewall.zone_opennet.network="$(uci_get firewall.zone_opennet.network) on_${dev}"
 	uci commit firewall
 	msg_debug "applying updated firewall rules for ${dev}"
 	/etc/init.d/firewall reload
 fi
 
 
-olsrd_ifaces="$(uci -q get olsrd.@Interface[0].interface)";
+olsrd_ifaces="$(uci_get olsrd.@Interface[0].interface)";
 if [ -z "$(echo $olsrd_ifaces | grep on_${dev})" ]; then
 	msg_debug "adding iterface ${dev} to config of olsrd, restarting olsrd"
 	uci -q set olsrd.@Interface[0].interface="${olsrd_ifaces} on_${dev}"

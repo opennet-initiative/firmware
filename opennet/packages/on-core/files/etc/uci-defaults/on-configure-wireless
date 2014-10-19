@@ -81,7 +81,7 @@ add_interface_to_zone() {
 
 configure_olsr_interfaces() {
 	local on_id=$(uci_get on-core.settings.on_id "$(uci_get on-core.defaults.on_id_preset)")
-	local on_ipschema=$(uci -q get on-core.defaults.on_ipschema)
+	local on_ipschema=$(uci_get on-core.defaults.on_ipschema)
 	local on_netmask=$(uci_get on-core.defaults.on_netmask)
 	local on_ipaddr
 	local iface_phys

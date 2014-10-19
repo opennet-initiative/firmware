@@ -14,12 +14,13 @@
 START=21
 
 start() {
+	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 	# create uci node
 	[ -e /etc/config/on-openvpn ] || touch /etc/config/on-openvpn
 
 	# firewall settings
-	if [ -z "$(uci -q get network.on_vpn)" ]; then
+	if [ -z "$(uci_get network.on_vpn)" ]; then
 		local batch
 		
 		# add new network to configuration (to be recognized by olsrd)
@@ -46,7 +47,7 @@ start() {
 
 	# openvpn connection
 	prefix=openvpn.opennet_user
-	if [ -z "$(uci -q get "$prefix")" ]; then
+	if [ -z "$(uci_get "$prefix")" ]; then
 		uci set "${prefix}=openvpn"
 		uci set "${prefix}.client=1"
 		uci set "${prefix}.enable=1"
@@ -71,7 +72,7 @@ start() {
 
 	# general on-openvpn settings (gateways, preferred order, ...)
 	prefix=on-openvpn.gateways
-	if [ -z "$(uci -q get "$prefix")" ]; then
+	if [ -z "$(uci_get "$prefix")" ]; then
 		uci set "${prefix}=gateways"
 		uci set "${prefix}.better_gw=0"
 		uci set "${prefix}.current_gw="
@@ -86,7 +87,7 @@ start() {
 
 	# openssl certificate settings
 	prefix=on-openvpn.openssl
-	if [ -z "$(uci -q get "$prefix")" ]; then
+	if [ -z "$(uci_get "$prefix")" ]; then
 		uci set "${prefix}=openssl"
 		uci set "${prefix}.countryName=de"
 		uci set "${prefix}.provinceName=Mecklenburg-Vorpommern"

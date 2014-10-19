@@ -18,21 +18,21 @@
 
 print_status()
 {
-	local autosearch=$(uci -q get on-openvpn.gateways.autosearch)
-	local current_gw_ipaddr=$(uci -q get openvpn.opennet_user.remote)
+	local autosearch=$(uci_get on-openvpn.gateways.autosearch)
+	local current_gw_ipaddr=$(uci_get openvpn.opennet_user.remote)
 	local index=1
 	local gw_ipaddr
 	local age
 	local status
 
 	echo -n "autosearch: $autosearch"
-	[ "$autosearch" = "on" ] && echo -e -n "\tsort by: $(uci -q get on-openvpn.gateways.vpn_sort_criteria)"
+	[ "$autosearch" = "on" ] && echo -e -n "\tsort by: $(uci_get on-openvpn.gateways.vpn_sort_criteria)"
 	echo
 	echo
 	echo -e "\nno.\tactive\tIP\t\tDist/ETX\tVPN\tAge"
 	echo '/route' | nc localhost 2006 > /tmp/olsrd_txtinfo_vpnstatus.txt
-	while [ -n "$(uci -q get on-openvpn.gate_$index)" ] ; do
-		gw_ipaddr=$(uci -q get on-openvpn.gate_$index.ipaddr);
+	while [ -n "$(uci_get on-openvpn.gate_$index)" ] ; do
+		gw_ipaddr=$(uci_get on-openvpn.gate_$index.ipaddr);
 		age=$(get_gateway_value "$gw_ipaddr" age)
 		status=$(get_gateway_value "$gw_ipaddr" status)
 		[ "$gw_ipaddr" = "$current_gw_ipaddr" ] && active="*" || active=""
@@ -79,7 +79,7 @@ add_gw()
 {
 	local ipaddr=$1
 	local index=1;
-	while uci -q get "on-openvpn.gate_$((index++))"; do true; done
+	while [ -n "$(uci_get "on-openvpn.gate_$((index++))")" ]; do true; done
 	uci -q set on-openvpn.gate_${index}=gateway;
 	uci -q set on-openvpn.gate_${index}.ipaddr=$ipaddr;
 	# commit after every change to prevent uci memory problems
@@ -90,7 +90,7 @@ del_gw()
 {
 	local position=$1
 	uci -q del on-openvpn.gate_$position;
-	while uci -q get "on-openvpn.gate_$((++position))"; do
+	while [ -n "$(uci_get "on-openvpn.gate_$((++position))")" ]; do
 		uci -q rename "on-openvpn.gate_$position=gate_$((position-1))"
 	done
 	# commit after every change to prevent uci memory problems
@@ -99,7 +99,7 @@ del_gw()
 
 toggle_etx()
 {
-	local sort_by_etx=$(uci -q get on-openvpn.gateways.vpn_sort_criteria);
+	local sort_by_etx=$(uci_get on-openvpn.gateways.vpn_sort_criteria);
 	[ "$sort_by_etx" = "etx" ] && sort_by_etx="metric" || sort_by_etx="etx"
 	uci -q set on-openvpn.gateways.vpn_sort_criteria=$sort_by_etx;
 	# commit after every change to prevent uci memory problems
@@ -107,7 +107,7 @@ toggle_etx()
 }
 
 toggle_autosearch() {
-	local autosearch=$(uci -q get on-openvpn.gateways.autosearch)
+	local autosearch=$(uci_get on-openvpn.gateways.autosearch)
 	[ "$autosearch" = "on" ] && autosearch="off" || autosearch="on"
 	uci -q set on-openvpn.gateways.autosearch=$autosearch
 	# commit after every change to prevent uci memory problems

@@ -11,14 +11,16 @@
 #   http://www.apache.org/licenses/LICENSE-2.0
 # 
 
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
 DATABASE_VERSION="0.2"          # we start with 0.2 to have space for the old firmware database, which is 0.1
 DATABASE_FILE="/tmp/database"   # ".json" will be added if it is exported as JSON
 EXPORT_JSON="1"                 # export as JSON-file, does not require sqlite3/libsqlite
                                 # if you change this, ensure that sqlite3 is installed
 
 create_database() {
-  if [ -f "$DATABASE_FILE" ];then return; fi
-  if [ "$EXPORT_JSON" == "1" ];then return; fi
+  [ -f "$DATABASE_FILE" ] && return
+  [ "$EXPORT_JSON" = "1" ] && return
   
   SQL_STRING="$SQL_STRING 
     CREATE TABLE nodes
@@ -58,7 +60,7 @@ print_interfaces_2_6() {
   for if_name in $(ls /sys/class/net/ | awk '!/lo/ {print $0}'); do
     iface_up=$(cat /sys/class/net/${if_name}/operstate)
 	# sometimes the up-state is not recognized by /sys, than check with 'ip link'
-	if [ "$iface_up" == "unknown" ] && [ -n "$(ip link show $if_name | awk '{if ($2 == "'$if_name':" && $3 ~ "UP") print $0}')" ]; then
+	if [ "$iface_up" = "unknown" ] && [ -n "$(ip link show $if_name | awk '{if ($2 == "'$if_name':" && $3 ~ "UP") print $0}')" ]; then
 		iface_up="up"
 	fi
 #     if_type_bridge=$(ls /sys/class/net/${if_name}/brif 2>/dev/null)                      # is bridge interface, list bridged interfaces
@@ -66,7 +68,7 @@ print_interfaces_2_6() {
     ip_addr=$(ip address show $if_name | awk 'BEGIN{ORS=" "} /inet/ {print $2}')  #   contains additional whitespace
     if_type_bridgedif=$([ "$(ls /sys/class/net/${if_name}/brport 2>/dev/null)" ] && echo "1")    # is bridged interface
       
-    if [ "$iface_up" == "up" ] && ([ -n "$ip_addr" ] || [ -n "$if_type_bridgedif" ]) || [ -n "$if_type_bridge" ]; then
+    if [ "$iface_up" = "up" ] && ([ -n "$ip_addr" ] || [ -n "$if_type_bridgedif" ]) || [ -n "$if_type_bridge" ]; then
       wlan=$(ls /sys/class/net/${if_name}/wireless/ 2>/dev/null)
       if [ -n "$wlan" ]; then
         iwinfo=$(iwinfo $if_name info | awk '{print $0"{newline}"}')
@@ -120,7 +122,7 @@ print_interfaces_2_6() {
       all_networks=$(uci -q show network | awk 'BEGIN{FS="="} /network\..*\.ifname/ {if ($2 == "'${if_name##br-}'") {gsub("network.",""); gsub(".ifname",""); print$1;}}')
       on_networks=""; on_zones=""; lastnetwork="";
       for network in $all_networks; do
-        if [ -n "$network" ] && [ "$(uci -q get network.$network.proto)" != "none" ]; then
+        if [ -n "$network" ] && [ "$(uci_get network.$network.proto)" != "none" ]; then
           on_networks="$on_networks $network"
           lastnetwork="$network"
           zone=$(uci -q show firewall | awk 'BEGIN{FS="="} /firewall.zone_.*\.network/ {if ($2 ~ "'$network'") {sub("firewall.zone_","");sub(".network","");print $1}}')
@@ -131,10 +133,10 @@ print_interfaces_2_6() {
         zone=$(uci -q show firewall | awk 'BEGIN{FS="="} /firewall.zone_.*\.network/ {if ($2 == "'${if_name##br-}'") {sub("firewall.zone_","");sub(".network","");print $1}}')
         on_zones="$on_zones $zone"
       fi
-      dhcpignore="$(uci -q get dhcp.${lastnetwork}.ignore)"
-      dhcp_start="$([ "$dhcpignore" == "1" ] || uci -q get dhcp.${lastnetwork}.start)"
-      dhcp_limit="$([ "$dhcpignore" == "1" ] || uci -q get dhcp.${lastnetwork}.limit)"
-      dhcp_leasetime="$([ "$dhcpignore" == "1" ] || uci -q get dhcp.${lastnetwork}.leasetime)"
+      dhcpignore="$(uci_get dhcp.${lastnetwork}.ignore)"
+      dhcp_start="$([ "$dhcpignore" = "1" ] || uci_get dhcp.${lastnetwork}.start)"
+      dhcp_limit="$([ "$dhcpignore" = "1" ] || uci_get dhcp.${lastnetwork}.limit)"
+      dhcp_leasetime="$([ "$dhcpignore" = "1" ] || uci_get dhcp.${lastnetwork}.leasetime)"
 
       dhcp_fwd="$dhcpfwd $(awk 'BEGIN{out=0} {if ($1 == "if" && $2 == "'$if_name'" && $3 == "true") out=1;
                 if (out == 1 && $1 == "server" && $2 == "ip") printf $3}' /etc/dhcp-fwd.conf)"
@@ -159,7 +161,7 @@ print_interfaces_2_6() {
         '$wlan_bitrate', '$wlan_crypt', '$wlan_vaps', '$DATABASE_VERSION', '$db_epoch');"
       printed_interfaces="$printed_interfaces $if_name";
 
-      if [ "$EXPORT_JSON" == "1" ];then
+      if [ "$EXPORT_JSON" = "1" ];then
         JSON=$(cat <<EOF
 {"ifaces":{"originator":"%s","on_olsr_mainip":"%s","if_name":"%s","if_type_bridge":"%s","if_type_bridgedif":"%s","if_hwaddr":"%s",\
 "ip_label":"%s","ip_addr":"%s","ip_broadcast":"%s","on_networks":"%s","on_zones":"%s","on_olsr":"%s","dhcp_start":"%s","dhcp_limit":"%s","dhcp_leasetime":"%s",\
@@ -187,7 +189,7 @@ EOF
 SQL_STRING=""
 create_database
 
-on_id="$(uci -q get on-core.settings.on_id)"
+on_id="$(uci_get on-core.settings.on_id)"
 on_olsr_mainip="$(echo \"/config\" | nc localhost 2006 2>/dev/null | awk '/MainIp/ {print $2}')"
 db_epoch="$(date +%s)"
 
@@ -225,13 +227,13 @@ on_wifidog_id="$(awk '{if ($1 == "GatewayID") print $2}' /etc/wifidog.conf 2>/de
 
 on_vpn_status="$([ -e /tmp/openvpn_msg.txt ] && echo 1 || echo 0)"
 on_vpn_cn="$(. \"${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh\"; get_client_cn)"
-on_vpn_gw="$(uci -q get openvpn.opennet_user.remote)"
-on_vpn_autosearch="$([ "$(uci -q get on-openvpn.gateways.autosearch)" == "on" ] && echo "1" || echo "0")"
-on_vpn_sort="$(uci -q get on-openvpn.gateways.vpn_sort_criteria)"
+on_vpn_gw="$(uci_get openvpn.opennet_user.remote)"
+on_vpn_autosearch="$([ "$(uci_get on-openvpn.gateways.autosearch)" = "on" ] && echo "1" || echo "0")"
+on_vpn_sort="$(uci_get on-openvpn.gateways.vpn_sort_criteria)"
 
 index=1; gw_addresses="";
-while [ -n "$(uci -q get on-openvpn.gate_$index)" ] ; do
-  gw_ipaddr=$(uci -q get on-openvpn.gate_$index.ipaddr);
+while [ -n "$(uci_get on-openvpn.gate_$index)" ] ; do
+  gw_ipaddr=$(uci_get on-openvpn.gate_$index.ipaddr);
   age=$(get_gateway_value "$gw_ipaddr" age)
   status=$(get_gateway_value "$gw_ipaddr" status)
   gw_addresses="$gw_addresses ${gw_ipaddr}:${status}:${age}"
@@ -240,34 +242,34 @@ done
 on_vpn_gws="${gw_addresses## }"
 
 index=0; gw_blacklist_addresses="";
-while [ -n "$(uci -q get on-openvpn.@blacklist_gateway[$index])" ] ; do
-  ipaddr=$(uci -q get on-openvpn.@blacklist_gateway[$index].ipaddr);
-  name=$(uci -q get on-openvpn.@blacklist_gateway[$index].name);
+while [ -n "$(uci_get on-openvpn.@blacklist_gateway[$index])" ] ; do
+  ipaddr=$(uci_get on-openvpn.@blacklist_gateway[$index].ipaddr);
+  name=$(uci_get on-openvpn.@blacklist_gateway[$index].name);
   gw_blacklist_addresses="$gw_blacklist_addresses ${ipaddr}:${name}"
   : $((index++))
 done
 on_vpn_blist="${gw_blacklist_addresses## }"
 
-ugw_status_centralips=$(for gw in $(uci -q get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '/dev tap/ {printf $1" "}'; done)
+ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '/dev tap/ {printf $1" "}'; done)
 on_ugw_status="$([ "$(echo $ugw_status_centralips | wc -w)" -ge "1" ] && echo "1" || echo "0")"
-on_ugw_enabled="$([ "$(uci -q get on-usergw.ugw_sharing.shareInternet)" == "on" ] && echo "1" || echo "0")"
+on_ugw_enabled="$([ "$(uci_get on-usergw.ugw_sharing.shareInternet)" = "on" ] && echo "1" || echo "0")"
 
 index=1; ugw_status_sharing_possible=0;
-while [ -n "$(uci -q get on-usergw.opennet_ugw${index})" ]; do
-  wan=$(uci -q get on-usergw.opennet_ugw${index}.wan)
-  mtu=$(uci -q get on-usergw.opennet_ugw${index}.mtu)
-  [ "$wan" == "ok" ] && [ "$mtu" == "ok" ] && ugw_status_sharing_possible=1 && break
+while [ -n "$(uci_get on-usergw.opennet_ugw${index})" ]; do
+  wan=$(uci_get on-usergw.opennet_ugw${index}.wan)
+  mtu=$(uci_get on-usergw.opennet_ugw${index}.mtu)
+  [ "$wan" = "ok" ] && [ "$mtu" = "ok" ] && ugw_status_sharing_possible=1 && break
   : $((index++))
 done
 on_ugw_possible="$ugw_status_sharing_possible"
 on_ugw_tunnel="$([ "$(ls /tmp/opennet_ugw*.txt 2>/dev/null)" ] && echo "1" || echo "0")"
 on_ugw_connected="${ugw_status_centralips# }"
-on_ugw_presetips="$(uci -q get on-usergw.@usergw[0].centralIP)"
-on_ugw_presetnames="$(uci -q get on-usergw.@usergw[0].name)"
+on_ugw_presetips="$(uci_get on-usergw.@usergw[0].centralIP)"
+on_ugw_presetnames="$(uci_get on-usergw.@usergw[0].name)"
 
 db_time="$(date)"
 
-if [ "$EXPORT_JSON" == "1" ];then
+if [ "$EXPORT_JSON" = "1" ];then
 	JSON=$(cat <<EOF
 {"nodes":{"originator":"%s","on_olsr_mainip":"%s","sys_ver":"%s","sys_board":"%s","sys_cpu":"%s","sys_mem":"%s","sys_uptime":"%s","sys_load":"%s",\
 "sys_free":"%s","sys_watchdog":"%s","sys_os_type":"%s","sys_os_name":"%s","sys_os_rel":"%s","sys_os_ver":"%s","sys_os_arc":"%s","sys_os_insttime":"%s",\

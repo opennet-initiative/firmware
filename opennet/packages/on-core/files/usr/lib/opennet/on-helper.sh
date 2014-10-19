@@ -12,6 +12,8 @@
 #	http://www.apache.org/licenses/LICENSE-2.0
 # 
 
+set -eu
+
 GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 SERVICES_FILE=/var/run/services_olsr

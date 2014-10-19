@@ -1,5 +1,6 @@
 config defaults 'defaults'
 	option	'csr_contact'	'csr@opennet-initiative.de'
+	option	'csr_url'	'http://ca.opennet-initiative.de/csr/'
 	option	'debug'		'false'
 
 	option	'lan_ipaddr'	'172.16.0.1'
@@ -16,9 +17,15 @@ config defaults 'defaults'
 	list	'on_network'	'10.2.0.0/16'
 
 	option	'wifi_country'	'DE'
+
 	option	'wifi_ssid'	'olsr.opennet-initiative.de'
 	option	'wifi_mode'	'adhoc'
 	option	'wifi_bssid'	'02:ca:ff:ee:ba:be'
+	option	'wifi_channel'	'1'
+
+	option	'wifi_ssid_5ghz'	'test.opennet-initiative.de'
+	option	'wifi_mode_5ghz'	'ap'
+	option	'wifi_channel_5ghz'	'36'
 
 config services 'services'
 	option	'use_olsrd_dns'	'1'

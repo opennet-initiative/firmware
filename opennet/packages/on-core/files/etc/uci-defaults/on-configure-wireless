@@ -1,0 +1,136 @@
+#!/bin/sh
+#
+# Konfiguriere uebliche Opennet-Interfaces sowie ein lokales Interface.
+#
+# Dieses Skript wird nur ein einziges Mal nach einem Upgrade oder der Erstinstallation ausgefuehrt:
+#   http://wiki.openwrt.org/doc/uci#defaults
+#
+
+set -eu
+
+
+. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+
+
+configure_olsr_radio() {
+	local iface_index=$1
+	local iface_logical=$2
+	local iface_phys=$3
+
+	local uci_wifi=wireless.@wifi-iface[$iface_index]
+	local uci_radio=wireless.$(uci_get "${uci_wifi}.device")
+	local radio_hwmode=$(uci_get "${uci_radio}.hwmode")
+
+	uci set "${uci_wifi}.network=$iface_logical"
+	uci set "${uci_wifi}.ifname=$iface_phys"
+
+	uci set "wireless.radio${iface_index}.country=$(uci_get on-core.defaults.wifi_country)"
+	uci -q delete "wireless.radio${iface_index}.disabled" || true
+
+	# typ-spezifische Attribute
+	if echo "$radio_hwmode" | grep -q "a"; then
+		# 5 GHz: kein Mesh-Modus verfuegbar
+		uci set "${uci_wifi}.ssid=$(uci_get on-core.defaults.wifi_ssid_5ghz)"
+		uci set "${uci_wifi}.mode=$(uci_get on-core.defaults.wifi_mode_5ghz)"
+		uci set "${uci_radio}.channel=$(uci_get on-core.defaults.wifi_channel_5ghz)"
+		uci set "${uci_wifi}.isolate=1"
+	else
+		# 2,4 GHz: Ad-hoc-Modus
+		uci set "${uci_wifi}.ssid=$(uci_get on-core.defaults.wifi_ssid)"
+		uci set "${uci_wifi}.mode=$(uci_get on-core.defaults.wifi_mode)"
+		[ -n "$wifi_bssid" ] && uci set "${uci_wifi}.bssid=$(uci_get on-core.defaults.wifi_bssid)"
+		uci set "${uci_radio}.channel=$(uci_get on-core.defaults.wifi_channel)"
+	fi
+	return
+}
+
+
+configure_olsr_single_interface() {
+	local iface_logical=$1
+	local iface_addr=$2
+	local iface_netmask=$3
+	local iface_phys=$4
+
+	# configure on_wifi
+	uci set "network.${iface_logical}=interface"
+	uci set "network.${iface_logical}.proto=static"
+	uci set "network.${iface_logical}.ifname=$iface_phys"
+	uci set "network.${iface_logical}.netmask=$iface_netmask"
+	uci set "network.${iface_logical}.defaultroute=0"
+	uci set "network.${iface_logical}.peerdns=0"
+	uci set "network.${iface_logical}.ipaddr=$iface_addr"
+
+	# disable dhcp on on_wifi
+	uci set "dhcp.${iface_logical}=dhcp"
+	uci set "dhcp.${iface_logical}.interface=${iface_logical}"
+	uci set "dhcp.${iface_logical}.dynamicdhcp=0"
+	uci set "dhcp.${iface_logical}.ignore=1"
+}
+
+
+add_interface_to_zone() {
+	local iface=$1
+	local zone=$2
+	local ifaces=$(uci_get "firewall.zone_${zone}.network")
+	# ist die Zone bereits enthalten?
+	echo " $ifaces " | grep -q "\s$iface\s" && return
+	# Zone hinzufuegen
+	uci set "firewall.zone_${zone}.network=$ifaces $iface"
+}
+
+
+configure_olsr_interfaces() {
+	local on_id=$(uci_get on-core.settings.on_id "$(uci_get on-core.defaults.on_id_preset)")
+	local on_ipschema=$(uci -q get on-core.defaults.on_ipschema)
+	local on_netmask=$(uci_get on-core.defaults.on_netmask)
+	local on_ipaddr
+	local iface_phys
+	local iface_logical
+
+	# Suche nach WLAN-Interfaces
+	/sbin/wifi detect > /etc/config/wireless
+
+	iface_index=0
+	while [ -n "$(uci_get "wireless.@wifi-iface[${iface_index}]")" ]; do
+		on_ipaddr=$(get_on_ip "$on_id" "$on_ipschema" "$iface_index")
+		iface_phys=wlan$iface_index
+		iface_logical=on_wifi_$iface_index
+
+		configure_olsr_single_interface "$iface_logical" "$on_ipaddr" "$on_netmask" "$iface_phys"
+		configure_olsr_radio "$iface_index" "$iface_logical" "$iface_phys"
+
+		add_interface_to_zone "$iface_logical" opennet
+
+		: $((iface_index++))
+	done
+
+	on_ipaddr=$(get_on_ip "$on_id" "$on_ipschema" "$iface_index")
+	iface_phys=""
+	iface_logical=on_eth_$iface_index
+	configure_olsr_single_interface "$iface_logical" "$on_ipaddr" "$on_netmask" "$iface_phys"
+	add_interface_to_zone "$iface_logical" opennet
+}
+
+
+configure_lan_interface() {
+	local lan_ipaddr=$(uci_get on-core.defaults.lan_ipaddr)
+	local lan_netmask=$(uci_get on-core.defaults.lan_netmask)
+	local uci_prefix=network.lan
+
+	# reconfigure lan
+	uci -q delete ".type" || true
+	uci set "${uci_prefix}.proto=static"
+	uci set "${uci_prefix}.ipaddr=$lan_ipaddr"
+	uci set "${uci_prefix}.netmask=$lan_netmask"
+	uci set "${uci_prefix}.defaultroute=0"
+	uci set "${uci_prefix}.peerdns=0"
+}
+
+
+if [ -z "$(uci show network.on_wifi_0)" ]; then
+	configure_olsr_interfaces
+	configure_lan_interface
+fi
+
+exit 0
+

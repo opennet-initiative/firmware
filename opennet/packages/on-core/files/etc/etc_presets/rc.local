@@ -1,8 +1,0 @@
-# Put your custom commands here that should be executed once
-# the system init finished.
-
-# execute potential opennet configuration parts
-[ -f /etc/rc.local_on-core ] && sh /etc/rc.local_on-core
-[ -f /etc/rc.local_user ] && sh /etc/rc.local_user && uci set luci.flash_keep.rclocaluser=/etc/rc.local_user && uci commit
-
-exit 0

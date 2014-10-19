@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# Dieses Skript wird nur ein einziges Mal nach einem Upgrade oder der Erstinstallation ausgefuehrt:
+#   http://wiki.openwrt.org/doc/uci#defaults
+#
 
 set -eu
 

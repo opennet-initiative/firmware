@@ -11,128 +11,26 @@
 #	http://www.apache.org/licenses/LICENSE-2.0
 # 
 
-START=20
+# wir verwenden procd fuer die Ueberwachung der firewall-Zone
+USE_PROCD=1
+
+START=30
+
+service_triggers() {
+	# firewall: relevant fuer die Interface-Liste von olsrd
+	# network: relevant fuer das policy-Routing von olsrd
+	# Bei Aenderungen wird die Aktion "reload", bzw. "stop" und "start" ausgeloest.
+	procd_add_reload_trigger firewall network
+}
+
 
 start() {
-	# include this file only during "start" ("enable" or "disable" may use IPKG_INSTROOT)
 	. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
 
-	check_firmware_upgrade
-	grep -q on_ /etc/config/network || {
-		copy_config_presets force
+	# neue OLSR interfaces?
+	update_olsr_interfaces
 
-		wifi_country=$(uci -q get on-core.defaults.wifi_country)
-		wifi_ssid=$(uci -q get on-core.defaults.wifi_ssid)
-		wifi_mode=$(uci -q get on-core.defaults.wifi_mode)
-		wifi_bssid=$(uci -q get on-core.defaults.wifi_bssid)
-
-		lan_ipaddr=$(uci -q get on-core.defaults.lan_ipaddr)
-		lan_netmask=$(uci -q get on-core.defaults.lan_netmask)
-		on_ipschema=$(uci -q get on-core.defaults.on_ipschema)
-		on_netmask=$(uci -q get on-core.defaults.on_netmask)
-
-		local batch
-
-		# reconfigure lan
-		append batch "delete network.lan.type${N}"
-		append batch "set network.lan.proto=static${N}"
-		append batch "set network.lan.ipaddr=${lan_ipaddr}${N}"
-		append batch "set network.lan.netmask=${lan_netmask}${N}"
-		append batch "set network.lan.defaultroute=0${N}"
-		append batch "set network.lan.peerdns=0${N}"
-		
-		# preconfigure some interfaces - not activated
-		# configure local wan
-		append batch "set network.on_eth_0=interface${N}"
-		append batch "set network.on_eth_0.ifname=none${N}"
-		append batch "set network.on_eth_0.proto=none${N}"
-		append batch "set network.on_eth_0.defaultroute=0${N}"
-		append batch "set network.on_eth_0.peerdns=0${N}"
-		# disable dhcp on on_eth
-		append batch "set dhcp.on_eth_0=dhcp${N}"
-		append batch "set dhcp.on_eth_0.interface=on_eth${N}"
-		append batch "set dhcp.on_eth_0.dynamicdhcp=0${N}"
-		append batch "set dhcp.on_eth_0.ignore=1${N}"
-		# configure local wan
-		append batch "set network.wan=interface${N}"
-		append batch "set network.wan.proto=none${N}"
-		append batch "set network.wan.ifname=none${N}"
-		append batch "set network.wan.defaultroute=0${N}"
-		append batch "set network.wan.peerdns=0${N}"
-		# configure local wifi
-		append batch "set network.wifi=interface${N}"
-		append batch "set network.wifi.proto=none${N}"
-		append batch "set network.wifi.ifname=none${N}"
-		append batch "set network.wifi.defaultroute=0${N}"
-		append batch "set network.wifi.peerdns=0${N}"
-
-		# while reconfiguring, on_id is usually not set. Anyway, just read it...
-		on_id=$(uci -q get on-core.settings.on_id)
-		if [ -z "$on_id" ]; then on_id=$(uci -q get on-core.defaults.on_id_preset);
-			else append batch "set system.@system[0].hostname=$(get_on_ip $on_id AP-${on_id_1}-${on_id_2})${N}"; fi
-		
-		/sbin/wifi detect > /etc/config/wireless
-
-		# use 'no' variable to count interfaces, starting from 0 - this is default in presets
-		no=0;
-		while [ -n "$(uci -q get wireless.@wifi-iface[${no}])" ]; do
-			on_ipaddr=$(get_on_ip $on_id $on_ipschema $no)
-			if [ "$no" = "0" ]; then
-				append batch "set olsrd.@olsrd[0].MainIp=${on_ipaddr}${N}"
-			fi
-			wifidev="wlan${no}"
-
-			# reconfigure wifi-device - set default to opennet                          
-                        append batch "set wireless.@wifi-iface[${no}].network=on_wifi_${no}${N}"    
-                        append batch "set wireless.@wifi-iface[${no}].ssid=${wifi_ssid}${N}"  
-                        append batch "set wireless.@wifi-iface[${no}].bssid=${wifi_bssid}${N}"
-                        append batch "set wireless.@wifi-iface[${no}].ifname=${wifidev}${N}"
-                                                                                          
-                        radio_hwmode=$(uci -q get wireless.radio${no}.hwmode)                       
-                        # do not set "adhoc" mode and "channel=1" when 5GHz                                         
-                        if [ "$radio_hwmode" != "11a" ]; then                                       
-                                append batch "set wireless.@wifi-iface[${no}].mode=${wifi_mode}${N}"
-                                append batch "set wireless.radio${no}.channel=1${N}"      
-                        fi                                                                    
-                                                                                              
-                        append batch "set wireless.radio${no}.country=${wifi_country}${N}"
-                        append batch "delete wireless.radio${no}.disabled${N}"               
-			
-			# configure on_wifi
-			append batch "set network.on_wifi_${no}=interface${N}"
-			append batch "set network.on_wifi_${no}.proto=static${N}"
-			append batch "set network.on_wifi_${no}.ifname=${wifidev}${N}"
-			append batch "set network.on_wifi_${no}.netmask=${on_netmask}${N}"
-			append batch "set network.on_wifi_${no}.defaultroute=0${N}"
-			append batch "set network.on_wifi_${no}.peerdns=0${N}"
-			append batch "set network.on_wifi_${no}.ipaddr=${on_ipaddr}${N}"
-
-			# disable dhcp on on_wifi
-			append batch "set dhcp.on_wifi_${no}=dhcp${N}"
-			append batch "set dhcp.on_wifi_${no}.interface=on_wifi_${no}${N}"
-			append batch "set dhcp.on_wifi_${no}.dynamicdhcp=0${N}"
-			append batch "set dhcp.on_wifi_${no}.ignore=1${N}"
-
-			# add networks to firewall
-			zoneOpennet="${zoneOpennet} on_wifi_${no}"
-
-			: $((no++))
-		done;
-
-		append batch "set firewall.zone_opennet.network='${zoneOpennet## } on_eth_0'${N}"
-
-		logger -t on_config "applying opennet-config to switch ..."
-		echo "$batch${N}commit network${N}commit dhcp${N}commit firewall${N}commit wireless${N}commit system" | uci -q batch
-
-		# hack to get rid of the bridge on avila-boards
-		brctl delif br-lan $(uci -q get network.lan.ifname) 2>/dev/null
-		ifconfig br-lan down 2>/dev/null; ifup lan 2>/dev/null
-	}
-
-	# let olsrd run on all opennet interfaces
-	uci set -q olsrd.@Interface[0].interface="$(uci -q get firewall.zone_opennet.network)"
-	uci commit olsrd
-
-	exit 0
+	# neue lokale Interfaces?
+	initialize_olsrd_policy_routing
 }
 

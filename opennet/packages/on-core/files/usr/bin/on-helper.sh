@@ -177,6 +177,27 @@ control_ntpclient() {
 }
 
 
+add_banner_event() {
+	local event=$1
+	local timestamp=$(date)
+	local line_suffix=" - $event -------"
+	local line=" - $timestamp "
+	local length=$((54-${#line_suffix}))
+	(
+		# Steht unser Text schon im Banner? Ansonsten hinzufuegen ...
+		if grep -q 'clean_restart_log' /etc/banner; then
+			true
+		else
+			echo " ----- clean this log with 'clean_restart_log' -------"
+			echo " ------ restart times: (possibly by watchdog) --------"
+		fi
+		while [ "${#line}" -lt "$length" ]; do line="$line-"; done
+		echo "$line$line_suffix"
+	) >>/etc/banner
+	sync
+}
+
+
 get_and_enable_olsrd_library_uci_prefix() {
 	local new_section
 	local lib_file
@@ -202,31 +223,6 @@ get_and_enable_olsrd_library_uci_prefix() {
 		echo "$uci_prefix"
 	fi
 	return 0
-}
-
-
-# sicherstellen, dass gewuenschte olsr-Einstellungen gesetzt sind (z.B. beim Booten)
-configure_olsrd_for_opennet() {
-	local current_trigger
-	local uci_prefix
-
-	# fuer NTP, DNS und die Gateway-Auswahl benoetigen wir das nameservice-Plugin
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	if [ -z "$uci_prefix" ]; then
-	       msg_info "Failed to find olsrd_nameservice plugin"
-	else
-		# Option 'services-change-script' setzen
-		current_trigger=$(uci -q get "${uci_prefix}.services_change_script" || true)
-		[ -n "$current_trigger" ] && [ "$current_trigger" != "$OLSR_NAMESERVICE_SERVICE_TRIGGER" ] && \
-			msg_info "WARNING: overwriting 'services-change-script' option of olsrd nameservice plugin with custom value. You should place a script below /etc/olsrd/nameservice.d/ instead."
-		uci set "${uci_prefix}.services_change_script=$OLSR_NAMESERVICE_SERVICE_TRIGGER"
-	fi
-
-	# Aenderungen aktivieren
-	if [ -n "$(uci changes olsrd)" ]; then
-		uci commit olsrd
-		/etc/init.d/olsrd restart >/dev/null
-	fi
 }
 
 
@@ -399,66 +395,22 @@ get_network() {
 	fi
 }
 
-check_firmware_upgrade() {
-	local uci_prefix
-	local old_version=$(awk '{if (/opennet-firmware-ng/) print $4}' /etc/banner)
-	local cur_version=$(opkg status on-core | awk '{if (/Version/) print $2;}')
-	if [ "$old_version" != "$cur_version" ]; then
-		copy_etc_presets
-		# copy banner, somehow this has to be done explicit (at least) for 0.4-2
-		cp /rom/etc/banner /etc/banner
-		add_banner
-		# this only triggers if on-usergw is installed, great
-		lua -e "require('luci.model.opennet.on_usergw') upgrade()" 2>/dev/null
-	fi
-	if [ -z "$(uci show olsrd | grep ondataservice)" ]; then
-		# add and activate ondataservice plugin
-		uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "olsrd_ondataservice_light")
-		uci set "${uci_prefix}=10800"
-		uci set "${uci_prefix}=5"
-		uci set "${uci_prefix}=/tmp/database.json"
-		uci commit olsrd
-	fi
+
+get_on_firmware_version() {
+	opkg status on-core | awk '{if (/Version/) print $2;}'
 }
 
-copy_etc_presets() {
-	# set root password
-	echo "root:admin" | chpasswd
-	ln -sf /etc/etc_presets/rc.local /etc/rc.local
-	ln -sf /etc/etc_presets/watchdog /etc/init.d/watchdog
+
+update_olsr_interfaces() {
+	uci set -q "olsrd.@Interface[0].interface=$(uci -q get firewall.zone_opennet.network)"
+	uci commit olsrd
+	/etc/init.d/olsrd restart
 }
 
-copy_config_presets() {
-	for preset in /etc/config_presets/*; do
-		if [ "$1" == "force" ]; then
-			cp $preset /etc/config/${preset#/*/*/};
-		else
-			[ -f /etc/config/${preset#/*/*/} ] || cp $preset /etc/config/${preset#/*/*/};
-		fi
-	done
-}
-
-add_banner() {
-	version=$(opkg status on-core | awk '{if (/Version/) print $2;}')
-	version_line=" ---- with opennet-firmware-ng "$version" "
-	empty_line=" "
-	while [ ${#version_line} -lt 54 ]; do version_line="$version_line-"; done
-	while [ ${#empty_line} -lt 54 ]; do empty_line="$empty_line-"; done
-
-	awk '
-		BEGIN{ tagged=0 }
-		{
-			if ($0 ~ /opennet-firmware/) {
-			tagged=1; print "'"$version_line"'";
-		}
-			else print $0
-		}
-		END{ if (tagged == 0) print "'"$version_line"'\n'"$empty_line"'"}' /etc/banner >/tmp/banner
-
-	mv /tmp/banner /etc/banner
-}
 
 # $1 is on_id, $2 is on_ipschema, $3 is no
+# ACHTUNG: manche Aufrufende verlassen sich darauf, dass on_id_1 und
+# on_id_2 nach dem Aufruf verfuegbar sind (also _nicht_ "local")
 get_on_ip() {
 	on_id=$1
 	on_ipschema=$2

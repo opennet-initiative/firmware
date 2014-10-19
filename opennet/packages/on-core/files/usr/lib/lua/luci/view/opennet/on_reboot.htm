@@ -16,6 +16,10 @@ local uci = require "luci.model.uci"
 local cursor = uci.cursor()
 local reboot = luci.http.formvalue("reboot")
 local reconfigure = luci.http.formvalue("reconfigure")
+
+function get_on_core_default(key)
+	return luci.sys.exec(". \"${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh\"; get_on_core_default '"..key.."'")
+end
 %>
 
 <%+header%>
@@ -31,11 +35,12 @@ local reconfigure = luci.http.formvalue("reconfigure")
 		<div class="cbi-map">
 			<fieldset class="cbi-section">
 <%				cursor:set_confdir("/etc/config_presets")
-                lan_ipaddr = cursor:get("on-core", "defaults", "lan_ipaddr")
-				lan_netmask = cursor:get("on-core", "defaults", "lan_netmask")
-				on_ipschema = cursor:get("on-core", "defaults", "on_ipschema")
-				on_netmask = cursor:get("on-core", "defaults", "on_netmask")
-				on_id = cursor:get("on-core", "defaults", "on_id_preset")
+				lan_ipaddr = get_on_core_default("csr_contact")
+				lan_ipaddr = get_on_core_default("lan_ipaddr")
+				lan_netmask = get_on_core_default("lan_netmask")
+				on_ipschema = get_on_core_default("on_ipschema")
+				on_netmask = get_on_core_default("on_netmask")
+				on_id = get_on_core_default("on_id_preset")
 				on_ipaddr = luci.sys.exec(". \"${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh\"; get_on_ip '"..on_id.."' '"..on_ipschema.."' '0'")
 
 				print("<p>"..luci.i18n.stringf([[Remove current configuration and redetect and reconfigure device interfaces again. After reboot, local LAN-device will be at %s/%s. A probably disabled DHCP-Server on LAN will not be reenabled - you should do this by hand. Opennet devices (WLAN) will be configured to start with %s/%s and follow the rules for multiple interfaces. If this is not enough for you, you can try a complete reset at the <a href='%s/admin/system/flashops/'>system backup page</a>, but be aware that you will loose all keys and certs than too.]], lan_ipaddr, lan_netmask, on_ipaddr, on_netmask, controller).."</p>")

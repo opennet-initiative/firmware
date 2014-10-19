@@ -82,7 +82,7 @@ You may obtain a copy of the License at
 				<% if certstatus.on_keycsr_ok and (not(certstatus.on_crt_exists) or not(certstatus.on_keycrt_ok)) then 
 					local uci = require "luci.model.uci"
 					local cursor = uci.cursor()
-					local contact_email = cursor:get("on-core", "defaults", "csr_contact")
+					local contact_email = luci.sys.exec(". \"${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh\"; get_on_core_default csr_contact")
 					local on_id = cursor:get("on-core", "settings", "on_id")
 					if not on_id then on_id = "" end
 					%><div class="ifacebox"><%

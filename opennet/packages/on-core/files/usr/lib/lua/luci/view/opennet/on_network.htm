@@ -21,6 +21,13 @@ local form_id = luci.http.formvalue("form_id")
 local on_id = cursor:get("on-core", "settings", "on_id")
 local devices = { "on_eth_", "on_wifi_" }
 
+function get_on_core_default(key)
+	return luci.sys.exec(". \"${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh\"; get_on_core_default '"..key.."'")
+end
+function get_on_wifidog_default(key)
+	return luci.sys.exec(". \"${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh\"; get_on_wifidog_default '"..key.."'")
+end
+
 if (form_id) then
 	function split(str)
 		local t = { }
@@ -43,8 +50,8 @@ if (form_id) then
     end
     
     if replace_id then
-        on_ipschema = cursor:get("on-core", "defaults", "on_ipschema")
-        on_netmask = cursor:get("on-core", "defaults", "on_netmask")
+        on_ipschema = get_on_core_default("on_ipschema")
+        on_netmask = get_on_core_default("on_netmask")
         
         local addrcount = 0
         local on_base_address = luci.sys.exec("on_id_1="..t[1].."; on_id_2="..t[2].."; no="..addrcount.."; eval echo "..on_ipschema)
@@ -72,8 +79,8 @@ if (form_id) then
 			end
 		end
 
-		free_ipschema = cursor:get("on-wifidog", "defaults", "free_ipschema")
-        free_netmask = cursor:get("on-wifidog", "defaults", "free_netmask")
+		free_ipschema = get_on_wifidog_default("free_ipschema")
+		free_netmask = get_on_wifidog_default("free_netmask")
 
 		if free_ipschema then
 			free_ipaddr = luci.sys.exec("on_id_1="..t[1].."; on_id_2="..t[2].."; no=0; eval echo "..free_ipschema)

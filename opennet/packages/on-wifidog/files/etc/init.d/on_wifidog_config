@@ -18,10 +18,10 @@ start() {
 	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 	# while reconfiguring, on_id is usually not set. Anyway, just try to read it...
-	on_id=$(uci_get on-core.settings.on_id "$(uci_get on-core.defaults.on_id_preset)")
-	on_ipschema=$(uci_get on-core.defaults.on_ipschema)
-	free_ipschema=$(uci_get on-wifidog.defaults.free_ipschema)
-	free_netmask=$(uci_get on-wifidog.defaults.free_netmask)	
+	on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
+	on_ipschema=$(get_on_core_default on_ipschema)
+	free_ipschema=$(get_on_wifidog_default free_ipschema)
+	free_netmask=$(get_on_wifidog_default free_netmask)
 
 	free_ipaddr=$(get_on_ip "$on_id" "$free_ipschema" 0)
 	free_ipaddr_first=$(get_on_ip "0.1" "$free_ipschema" 0)

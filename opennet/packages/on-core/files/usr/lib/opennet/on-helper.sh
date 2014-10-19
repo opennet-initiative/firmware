@@ -16,7 +16,8 @@ set -eu
 
 GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
-ON_DEFAULTS_FILE=/usr/share/opennet/defaults.txt
+ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
+ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
 SERVICES_FILE=/var/run/services_olsr
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 OLSR_POLICY_DEFAULT_PRIORITY=65535
@@ -269,7 +270,7 @@ initialize_olsrd_policy_routing() {
 
 	# Pakete fuer opennet-IP-Bereiche sollen nicht in der main-Tabelle (lokale Interfaces) behandelt werden
 	# Falls spezifischere Interfaces vorhanden sind (z.B. 192.168.1.0/24), dann greift die "throw"-Regel natuerlich nicht.
-	for networkprefix in $(uci_get on-core.defaults.on_network); do
+	for networkprefix in $(get_on_core_default on_network); do
 		ip route prepend throw "$networkprefix" table main
 	done
 
@@ -325,9 +326,8 @@ _set_file_dict_value() {
 # hole einen der default-Werte der aktuellen Firmware
 # Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
 # Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfuegbar.
-get_on_default() {
-	_get_file_dict_value "$ON_DEFAULTS_FILE" "$1"
-}
+get_on_core_default() { _get_file_dict_value "$ON_CORE_DEFAULTS_FILE" "$1"; }
+get_on_wifidog_default() { _get_file_dict_value "$ON_WIFIDOG_DEFAULTS_FILE" "$1"; }
 
 
 #################################################################################

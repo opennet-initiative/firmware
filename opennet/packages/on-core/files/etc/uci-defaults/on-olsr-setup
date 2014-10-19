@@ -45,9 +45,9 @@ enable_nameservice() {
 
 set_main_ip() {
 	# Auslesen der aktuellen, bzw. der Standard-IP
-	local on_id=$(uci_get on-core.settings.on_id "$(uci_get on-core.defaults.on_id_preset)")
-	local on_ipschema=$(uci_get on-core.defaults.on_ipschema)
-	local on_netmask=$(uci_get on-core.defaults.on_netmask)
+	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
+	local on_ipschema=$(get_on_core_default on_ipschema)
+	local on_netmask=$(get_on_core_default on_netmask)
 
 	# die Main-IP ist die erste IP dieses Geraets
 	uci set "olsrd.@olsrd[0].MainIp=$(get_on_ip "$on_id" "$on_ipschema" 0)"

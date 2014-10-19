@@ -1,32 +1,3 @@
-config defaults 'defaults'
-	option	'csr_contact'	'csr@opennet-initiative.de'
-	option	'csr_url'	'http://ca.opennet-initiative.de/csr/'
-	option	'debug'		'false'
-
-	option	'lan_ipaddr'	'172.16.0.1'
-	option	'lan_netmask'	'255.255.255.0'
-
-	# no is the numer of the interface, starting from 0
-	# check /etc/init.d/on_config for usage
-	# on_id_1 is the upper part, on_id_2 the lower part of the opennet id
-	option	'on_id_preset'	'33.127'
-	option	'on_ipschema'	'"192.168."$((no*10+on_id_1))"."$on_id_2'
-	option	'on_netmask'	'255.255.0.0'
-
-	list	'on_network'	'192.168.0.0/16'
-	list	'on_network'	'10.2.0.0/16'
-
-	option	'wifi_country'	'DE'
-
-	option	'wifi_ssid'	'olsr.opennet-initiative.de'
-	option	'wifi_mode'	'adhoc'
-	option	'wifi_bssid'	'02:ca:ff:ee:ba:be'
-	option	'wifi_channel'	'1'
-
-	option	'wifi_ssid_5ghz'	'test.opennet-initiative.de'
-	option	'wifi_mode_5ghz'	'ap'
-	option	'wifi_channel_5ghz'	'36'
-
 config services 'services'
 	option	'use_olsrd_dns'	'1'
 	option	'use_olsrd_ntp'	'1'

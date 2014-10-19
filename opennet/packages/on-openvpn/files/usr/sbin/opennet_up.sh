@@ -32,7 +32,7 @@ fi
 
 ip route flush table tun
 # prefer olsrd-routes for main and tunnel network
-for network in $(uci_get on-core.defaults.on_network); do
+for network in $(get_on_core_default on_network); do
 	ip route prepend throw "$network" table tun
 done
 ip route add default via "$route_vpn_gateway" table tun

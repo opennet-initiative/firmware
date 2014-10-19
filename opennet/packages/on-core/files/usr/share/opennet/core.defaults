@@ -1,0 +1,28 @@
+csr_contact	csr@opennet-initiative.de
+csr_url		http://ca.opennet-initiative.de/csr/
+debug		false
+
+lan_ipaddr	172.16.0.1
+lan_netmask	255.255.255.0
+
+# no is the numer of the interface, starting from 0
+# check /etc/init.d/on_config for usage
+# on_id_1 is the upper part, on_id_2 the lower part of the opennet id
+on_id_preset	33.127
+on_ipschema	"192.168."$((no*10+on_id_1))"."$on_id_2
+on_netmask	255.255.0.0
+
+on_network	192.168.0.0/16 10.2.0.0/16
+
+wifi_country	DE
+
+wifi_ssid	olsr.opennet-initiative.de
+wifi_mode	adhoc
+wifi_bssid	02:ca:ff:ee:ba:be
+wifi_channel	1
+
+wifi_ssid_5ghz	test.opennet-initiative.de
+wifi_mode_5ghz	ap
+wifi_channel_5ghz	36
+
+

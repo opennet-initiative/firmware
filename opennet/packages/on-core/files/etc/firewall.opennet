@@ -17,7 +17,7 @@
 # uci-interface. Because it also lacks documentation, there are probably
 # easier ways to do the following, but I hadn't found them (yet)
 
-. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 ##### additional configuration #########################
 
 ##### MASQERADING based on source-IP ######################################

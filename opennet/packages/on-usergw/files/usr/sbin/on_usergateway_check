@@ -16,7 +16,7 @@
 set -u
 
 # include helper functions
-. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 DATA_LOCK_FILE=/var/run/on_usergateway_check
 VPN_DIR_TEST=/etc/openvpn/opennet_vpntest

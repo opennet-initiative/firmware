@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 # Ist OLSR zwischenzeitlich abgestuerzt?
 if [ -z "$(pidof olsrd)" ]; then

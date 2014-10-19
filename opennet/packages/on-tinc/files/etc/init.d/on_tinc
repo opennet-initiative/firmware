@@ -1,6 +1,6 @@
 #!/bin/sh /etc/rc.common
 
-. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 START=42
 on_id=$(uci_get on-core.settings.on_id)

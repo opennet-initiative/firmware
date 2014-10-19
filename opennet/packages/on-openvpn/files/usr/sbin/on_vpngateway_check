@@ -13,7 +13,7 @@
 
 
 # include helper functions
-. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
 PID_FILE=/var/run/on_vpngateway_check.pid

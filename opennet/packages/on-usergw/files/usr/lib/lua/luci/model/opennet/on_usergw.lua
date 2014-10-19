@@ -262,8 +262,8 @@ function get_vpn()
   local count = path[#path]  
   luci.http.prepare_content("text/plain")
   local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
-  local v_age = luci.sys.exe(". /usr/bin/on-helper.sh; get_ugw_value "..v.ipaddr.." age")
-  local v_status = luci.sys.exe(". /usr/bin/on-helper.sh; get_ugw_value "..v.ipaddr.." status")
+  local v_age = luci.sys.exe(". /usr/lib/opennet/on-helper.sh; get_ugw_value "..v.ipaddr.." age")
+  local v_status = luci.sys.exe(". /usr/lib/opennet/on-helper.sh; get_ugw_value "..v.ipaddr.." status")
   if not v_age then v_age = "" end
   if v_status then
     luci.http.write([[<div id="cbi-network-lan-status" name="vpn" status="]]..v_status..[["><abbr title="]]

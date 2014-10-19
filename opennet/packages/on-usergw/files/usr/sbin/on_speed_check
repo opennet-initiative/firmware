@@ -8,7 +8,7 @@
 # (while true; do nc -l -n -p 22222 -q 0 2>&1 >/dev/null; sleep 2; done) &
 # 
 
-. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 UPLOAD_PORT=22222
 WANDEV=$(uci_get network.wan.ifname | cut -f1 -d:)

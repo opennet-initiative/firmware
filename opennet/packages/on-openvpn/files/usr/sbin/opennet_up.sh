@@ -11,7 +11,7 @@
 # 	http://www.apache.org/licenses/LICENSE-2.0
 # 
 
-. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 MSG_FILE=/tmp/openvpn_msg.txt
 

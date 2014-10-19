@@ -15,7 +15,7 @@ START=21
 
 start() {
 	# include this file only during "start" ("enable" or "disable" may use IPKG_INSTROOT)
-	. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 	# while reconfiguring, on_id is usually not set. Anyway, just try to read it...
 	on_id=$(uci -q get on-core.settings.on_id)

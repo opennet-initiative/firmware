@@ -11,7 +11,7 @@
 # lieber strikte Fehlerpruefungen - wir wollen nix kaputtmachen, wenn es nicht den Erwartungen entspricht
 set -eu
 
-. "${IPKG_INSTROOT:-}/usr/bin/on-helper.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
 # bis Version v0.4-5: openvpn.opennet_user.comp_lzo=1

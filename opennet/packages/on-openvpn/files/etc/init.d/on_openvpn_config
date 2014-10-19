@@ -11,7 +11,7 @@
 #   http://www.apache.org/licenses/LICENSE-2.0
 # 
 
-START=21
+START=31
 
 start() {
 	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"

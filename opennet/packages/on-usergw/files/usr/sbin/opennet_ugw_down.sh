@@ -29,7 +29,7 @@ uci commit firewall
 
 # removing on_tapX (tapX) from firewall zone opennet
 msg_debug "removing firewall-rules for ${dev}"
-/etc/init.d/firewall reload
+QUIET=-q /etc/init.d/firewall reload
 
 msg_debug "removing interface ${dev} from config of olsrd, restarting olsrd"
 uci -q set olsrd.@Interface[0].interface="$(uci_get olsrd.@Interface[0].interface | \

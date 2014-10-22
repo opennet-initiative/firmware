@@ -12,6 +12,9 @@
 # 
 
 . "${IPKG_INSTROOT:-}/lib/functions.sh"
+
+# die obige "lib/functions.sh" vertraegt keinen strikten Modus
+set -eu
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 # newline
@@ -42,7 +45,7 @@ if [ -z "$(echo $zone_on_ifaces | grep on_${dev})" ]; then
 	uci -q set firewall.zone_opennet.network="$(uci_get firewall.zone_opennet.network) on_${dev}"
 	uci commit firewall
 	msg_debug "applying updated firewall rules for ${dev}"
-	/etc/init.d/firewall reload
+	QUIET=-q /etc/init.d/firewall reload
 fi
 
 

@@ -24,7 +24,12 @@ service_triggers() {
 }
 
 
-start() {
+reload_service() {
+	start_service
+}
+
+
+start_service() {
 	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 	# neue OLSR interfaces?

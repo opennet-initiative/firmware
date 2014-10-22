@@ -78,8 +78,8 @@ gateway_autosearch()
 
 #################################################################################
 # try to establish openvpn tunnel
-# return a string, if it works (else return nothing)
-# parameter is index to test
+# return exitcode=0 if this gateway seems to work
+# Parameter: Index des Gateway (siehe uci show on-openvpn.gate_*)
 test_vpngateway()
 {
 	local uci_prefix=on-openvpn.gate_$1
@@ -108,6 +108,9 @@ test_vpngateway()
 	elif [ "$(get_gateway_value "$gw_ipaddr" status)" = "y" ]; then
 		msg_debug "vpn-availability of gw $gw_ipaddr still valid"
 		return 0
+	else
+		# gateway is currently known to be broken
+		return 1
 	fi
 }
 
@@ -201,7 +204,13 @@ find_and_select_best_gateway()
 			msg_debug "checking first found gw - $gw_ipaddr"
 			if [ "$gw_ipaddr" != "$current_gw_ipaddr" ]; then
 				msg_debug "first found gw - $gw_ipaddr != $current_gw_ipaddr"
-				if [ -z "$current_gw_ipaddr" ] || [ $((better_gw_count++)) -gt $bettergateway_timeout ]; then
+				# Gateway wechseln, falls:
+				# 1) bisher kein Gateway aktiv war
+				# 2) der aktuelle Gateway kaputt ist
+				# 3) der aktuelle Gateway eine gewisse Zeit lang schlechter war als der aktuell beste
+				if [ -z "$current_gw_ipaddr" ] || \
+						[ "$(get_gateway_value "$current_gw_ipaddr" status)" != "y" ] || \
+						[ $((better_gw_count++)) -gt $bettergateway_timeout ]; then
 					msg_info "found a better gateway, changing to $gw_ipaddr"
 			
 					# set gateway information

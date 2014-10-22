@@ -20,7 +20,7 @@ ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
 ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
 SERVICES_FILE=/var/run/services_olsr
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
-OLSR_POLICY_DEFAULT_PRIORITY=65535
+OLSR_POLICY_DEFAULT_PRIORITY=20000
 
 DEBUG=$(uci -q get on-core.defaults.debug || echo false)
 
@@ -86,7 +86,7 @@ uci_is_false() {
 uci_get() {
 	local key=$1
 	local default=${2:-}
-	if uci -q "$key"; then
+	if uci -q get "$key"; then
 		return 0
 	else
 		[ -n "$default" ] && echo "$default"
@@ -230,59 +230,86 @@ get_and_enable_olsrd_library_uci_prefix() {
 }
 
 
-# Aktion fuer die initiale Policy-Routing-Initialisierung nach dem System-Boot
-initialize_olsrd_policy_routing() {
-	# TODO: diese Funktion sollten wir durch netzwerk-Konfigurationen (ubus?) triggern lassen
+# Entferne alle Policy-Routing-Regeln die dem gegebenen Ausdruck entsprechen.
+# Es erfolgt keine Fehlerausgabe und keine Fehlermeldungen.
+delete_policy_rule() {
+	while ip rule del "$@"; do true; done 2>/dev/null
+}
 
-	local wait_count
-	local olsr_prio
-	local main_prio
+
+# Entferne alle throw-Regeln aus einer Tabelle
+# Parameter: Tabelle
+delete_throw_routes() {
+	local table=$1
+	ip route show table "$table" | grep "^throw " | while read throw pattern; do
+		ip route del table "$table" $pattern
+	done
+}
+
+
+# erzeuge Policy-Rules fuer den IP-Bereich eines Netzwerkinterface
+# Parameter: logisches Netzwerkinterface
+# weitere Parameter: Rule-Spezifikation
+add_zone_policy_rules() {
+	local zone=$1
+	shift
 	local network
+	local networkprefix
+	for network in $(uci_get "firewall.zone_${zone}.network"); do
+		networkprefix=$(get_network "$network")
+		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" "$@"
+	done
+}
 
-	# Ermittle die Prioritaet der olsr-Regeln im Policy-Routing
-	# Die Suche wird fehlschlagen, wenn olsrd nicht laeuft
-	if [ -n "$(pidof olsrd)" ]; then
-		wait_count=15
-		while [ -z "$olsr_prio" ] && [ "$wait_count" != "0" ]; do
-			olsr_prio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /olsrd/ {print $1; exit}')
-			sleep 1
-			: $((wait_count--))
-		done
-	fi
 
-	# Policy-Regel setzen, falls sie fehlen sollte
-	if [ -z "$olsr_prio" ]; then
-		olsr_prio=$OLSR_POLICY_DEFAULT_PRIORITY
-		ip rule add table olsrd prio "$olsr_prio"
-		ip rule add table olsrd-default prio "$((olsr_prio+10))"
-	fi
+# Aktion fuer die initiale Policy-Routing-Initialisierung nach dem System-Boot
+# Folgende Seiteneffekte treten ein:
+#  * alle throw-Routen aus den Tabellen olsrd/olsrd-default/main werden geloescht
+#  * alle Policy-Rules mit Bezug zu den Tabellen olsrd/olsrd-default/main werden geloescht
+#  * die neuen Policy-Rules fuer die obigen Tabellen werden an anderer Stelle erzeugt
+# Kurz gesagt: alle bisherigen Policy-Rules sind hinterher kaputt
+initialize_olsrd_policy_routing() {
+	local network
+	local networkprefix
+	local priority=$OLSR_POLICY_DEFAULT_PRIORITY
+
+	delete_policy_rule table olsrd
+	ip rule add table olsrd prio "$((priority++))"
+
+	delete_policy_rule table olsrd-default
+	ip rule add table olsrd-default prio "$((priority++))"
 
 	# "main"-Regel fuer lokale Quell-Pakete prioritisieren (opennet-Routing soll lokales Routing nicht beeinflussen)
 	# "main"-Regel fuer alle anderen Pakete nach hinten schieben (weniger wichtig als olsr)
-	main_prio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /main/ {print $1; exit}')
-	for network in $(uci_get firewall.zone_local.network); do
-		networkprefix=$(get_network "$network")
-		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" table main prio "$main_prio"
-	done
-	ip rule add from all iif lo table main prio "$main_prio"
-	ip rule del table main
-	ip rule add table main prio "$((olsr_prio+20))"
+	delete_policy_rule table main
+	add_zone_policy_rules local table main prio "$((priority++))"
+	ip rule add iif lo table main prio "$((priority++))"
+	ip rule add table main prio "$((priority++))"
+
+	# Uplinks folgen erst nach main
+	delete_policy_rule table tun
+	add_zone_policy_rules local table tun prio "$((priority++))"
+	add_zone_policy_rules free table tun prio "$((priority++))"
+	ip rule add iif lo table tun prio "$((priority++))"
+
 
 	# Pakete fuer opennet-IP-Bereiche sollen nicht in der main-Tabelle (lokale Interfaces) behandelt werden
 	# Falls spezifischere Interfaces vorhanden sind (z.B. 192.168.1.0/24), dann greift die "throw"-Regel natuerlich nicht.
+	delete_throw_routes main
 	for networkprefix in $(get_on_core_default on_network); do
 		ip route prepend throw "$networkprefix" table main
 	done
 
 	# Pakete in Richtung lokaler Netzwerke (sowie "free") werden nicht von olsrd behandelt.
 	# TODO: koennen wir uns darauf verlassen, dass olsrd diese Regeln erhaelt?
+	delete_throw_routes olsrd
+	delete_throw_routes olsrd-default
 	for network in $(uci_get firewall.zone_local.network) $(uci_get firewall.zone_free.network); do
 		networkprefix=$(get_network "$network")
 		[ -z "$networkprefix" ] && continue
 		ip route add throw "$networkprefix" table olsrd
 		ip route add throw "$networkprefix" table olsrd-default
 	done
-	return 0
 }
 
 
@@ -397,10 +424,15 @@ get_network() {
 # 	else
 # 		ifname=$(uci_get network.$1.ifname)
 # 	fi
-	. "${IPKG_INSTROOT:-}/lib/functions.sh"
-	include "${IPKG_INSTROOT:-}/lib/network"
-	scan_interfaces
-	ifname="$(config_get $1 ifname)"
+	local ifname=$(
+		# Kurzzeitig den evenutellen strikten Modus abschalten.
+		# (lib/functions.sh kommt mit dem strikten Modus nicht zurecht)
+		set +eu
+		. "${IPKG_INSTROOT:-}/lib/functions.sh"; 
+		include "${IPKG_INSTROOT:-}/lib/network"
+		scan_interfaces
+		config_get "$1" ifname
+	)
 	if [ -n "$ifname" ] && [ "$ifname" != "none" ]; then
 		ipaddr="$(ip address show label "$ifname" | awk '/inet/ {print $2; exit}')"
 		[ -z "$ipaddr" ] || { eval $(ipcalc -p -n "$ipaddr"); echo $NETWORK/$PREFIX; }
@@ -416,7 +448,8 @@ get_on_firmware_version() {
 update_olsr_interfaces() {
 	uci set -q "olsrd.@Interface[0].interface=$(uci_get firewall.zone_opennet.network)"
 	uci commit olsrd
-	/etc/init.d/olsrd restart
+	/etc/init.d/olsrd reload
+	QUIET=-q /etc/init.d/firewall reload
 }
 
 

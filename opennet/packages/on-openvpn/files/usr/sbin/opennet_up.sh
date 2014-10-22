@@ -21,20 +21,11 @@ if [ -e "$MSG_FILE" ]; then
 fi
 echo "vpn-tunnel active" >"$MSG_FILE"	# a short message for the web frontend
 
-if [ -z "$(ip rule show | grep "lookup tun")" ];then
-	mainprio=$(ip rule show | awk 'BEGIN{FS="[: ]"} /main/ {print $1; exit}')
-	for network in $(uci_get firewall.zone_local.network) $(uci_get firewall.zone_free.network); do
-		networkprefix=$(get_network "$network")
-		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" table tun prio "$((mainprio+10))"
-	done
-	ip rule add iif lo table tun prio "$((mainprio+10))"
-fi
 
-ip route flush table tun
-# prefer olsrd-routes for main and tunnel network
-for network in $(get_on_core_default on_network); do
-	ip route prepend throw "$network" table tun
-done
+# wir muessen nicht mehr streng sein
+set +e
+
+/etc/init.d/on_config reload
 ip route add default via "$route_vpn_gateway" table tun
 
 # start dhcp-fwd early

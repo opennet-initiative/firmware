@@ -1,0 +1,10 @@
+#!/bin/sh
+
+case "$ACTION" in
+        ifup)
+		. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+		update_olsr_interfaces || true
+		initialize_olsrd_policy_routing || true
+		;;
+esac
+

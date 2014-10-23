@@ -12,7 +12,23 @@ set -eu
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
+configure_opennet_zone() {
+	local uci_prefix=firewall.zone_$zone
+	# Zone existiert? Keine Aenderungen ...
+	uci show firewall | grep -q "^firewall\.zone_$zone\." && return 0
+	uci set "$uci_prefix=zone"
+	# Opennet-APs bieten ueblicherweise keine privaten Dienste an
+	uci set "$uci_prefix.input=ACCEPT"
+	# ausgehende Pakete sind OK
+	uci set "$uci_prefix.output=ACCEPT"
+	# Verkehr aus dem opennet-Netz darf nicht in lokale oder tunnel-Netze
+	uci set "$uci_prefix.forward=REJECT"
+	# TODO: masq_src ist ein Ersatz fuer /etc/firewall.opennet
+}
+
+
 configure_olsr_radio() {
+	trap "error_trap configure_olsr_radio $@" $GUARD_TRAPS
 	local iface_index=$1
 	local iface_logical=$2
 	local iface_phys=$3
@@ -131,9 +147,21 @@ configure_lan_interface() {
 }
 
 
-if [ -z "$(uci show network.on_wifi_0)" ]; then
+if uci show network | grep -q "^network\.on_wifi_0\."; then
+	# der AP ist bereits konfiguriert
+	true
+else
+	# Konfiguration aller Netzwerk-Interfaces
+	configure_opennet_zone
 	configure_olsr_interfaces
 	configure_lan_interface
+	uci commit network
+	uci commit wireless
+	uci commit dhcp
+	uci commit firewall
+	# loese via procd alle erforderlichen Dienste-Reloads aus
+	# Fehler duerfen hier passieren
+	reload_config || true
 fi
 
 exit 0

@@ -672,7 +672,7 @@ case "$ACTION" in
 			ugw_forwardGW
 			ugw_shareInternet
 		 else
-			msg_info "skipping UGW checks (no certificate found: $cert_file)"
+			msg_debug "skipping UGW checks (no certificate found: $cert_file)"
 		 fi
 		;;
 esac

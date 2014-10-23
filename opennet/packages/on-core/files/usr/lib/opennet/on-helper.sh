@@ -22,7 +22,7 @@ SERVICES_FILE=/var/run/services_olsr
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 OLSR_POLICY_DEFAULT_PRIORITY=20000
 
-DEBUG=$(uci -q get on-core.defaults.debug || echo false)
+DEBUG=
 
 
 #################################################################################
@@ -38,7 +38,8 @@ get_client_cn() {
 }
 
 msg_debug() {
-	"$DEBUG" && logger -t "$(basename "$0")[$$]" "$1" || true
+	[ -z "$DEBUG" ] && DEBUG=$(get_on_core_default debug)
+	uci_is_true "$DEBUG" && logger -t "$(basename "$0")[$$]" "$1" || true
 }
 
 msg_info() {

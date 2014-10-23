@@ -100,3 +100,27 @@ olsr_set_main_ip() {
 	uci set "olsrd.@olsrd[0].MainIp=$(get_on_ip "$on_id" "$on_ipschema" 0)"
 }
 
+
+# Ermittle welche olsr-Module konfiguriert sind, ohne dass die Library vorhanden ist.
+# Deaktiviere diese Module - fuer ein sauberes boot-Log.
+disable_missing_olsr_modules() {
+	local libpath=/usr/lib
+	local libline
+	local libfile
+	local uci_prefix
+	uci show olsrd | grep "^olsrd.@LoadPlugin\[[0-9]\+\].library=" | while read libline; do
+		uci_prefix=$(echo "$libline" | cut -f 1,2 -d .)
+		libfile=$(echo "$libline" | cut -f 2- -d =)
+		uci_is_true "$(uci_get "${uci_prefix}.ignore")" && continue
+		if [ ! -e "$libpath/$libfile" ]; then
+			msg_info "Disabling missing olsr module '$libfile'"
+			uci set "${uci_prefix}.ignore=1"
+		fi
+	done
+	if [ -n "$(uci changes olsrd)" ]; then
+		uci commit olsrd
+		/etc/init.d/olsrd restart >/dev/null || true
+	fi
+	return 0
+}
+

@@ -14,6 +14,7 @@ set -eu
 # erwuenschte Einstellungen setzen
 enable_ondataservice
 enable_nameservice
+disable_missing_olsr_modules
 set_main_ip
 
 uci commit olsrd

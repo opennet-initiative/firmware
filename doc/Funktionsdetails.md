@@ -12,7 +12,7 @@ Alle DNS-Server verteilen via olsrd-nameservice-Plugin einen Eintrag ähnlich de
 
 
 Konfiguration der DNS-Anbieter
-##############################
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Die folgenden Voraussetzungen müssen von DNS-Servern im Opennet erfüllt werden:
 
@@ -33,7 +33,7 @@ Der entsprechende ``nameservice``-Block in der ``olsrd.conf`` des DNS-Servers ka
 **Wichtig**: Die angegebene IP muss unbedingt auf einem der von olsr verwalteten Netzwerk-Interfaces konfiguriert sein. Andernfalls wird das ``nameservice``-Plugin stillschweigend die Verteilung unterlassen. In der ``/var/run/services_olsr`` auf dem Host ist sofort zu erkennen, ob der Dienst-Eintrag verteilt wird.
 
 Integration auf den APs
-#######################
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Die Funktion ``update_dns_servers`` in der ``/usr/bin/on-helper.sh`` wird im 5-Minuten-Takt mittels des cron-Jobs ``on_update-dns-ntp`` ausgeführt.
 In dessen Verlauf wird sichergestellt, dass die uci-Variable ``dhcp.@dnsmasq[0].serversfile`` gesetzt ist. Falls dies nicht der Fall ist, wird die Datei ``/var/run/dnsmasq.servers`` eingetragen.
@@ -58,12 +58,12 @@ Alle NTP-Server verteilen via olsrd-nameservice-Plugin einen Eintrag ähnlich de
   ntp://192.168.0.247:123|udp|ntp
 
 Konfiguration der NTP-Anbieter
-##############################
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 //analog zur Konfiguration der DNS-Anbieter//
 
 Integration auf den APs
-#######################
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Die Funktion ``update_ntp_servers`` in der ``/usr/bin/on-helper.sh`` wird im 5-Minuten-Takt mittels des cron-Jobs ``on_update-dns-ntp`` ausgeführt.
 Dabei werden alle ``dns``-Einträge aus der Datei ``/var/run/services_olsr`` ausgelesen. Im Falle von Änderungen der Server-Liste wird diese in die uci-Variablen ``ntpclient.@ntpserver[*]`` übertragen. Anschließend wird der ntp-Dienst neugestartet.
@@ -76,6 +76,17 @@ Gateway-Auswahl
  * Auslesen aus /var/run/services_olsr
  * Sortieren nach Entfernung (falls automatisch)
  * Ändern, falls fünf Minuten lang ein anderer GW als der aktuelle der Beste ist
+
+
+Datensammlung: ondataservice
+----------------------------
+
+Das //ondataservice//-Plugin verteilt via //olsrd// detaillierte Informationen über den AP im Netz.
+
+Konfiguration auf dem AP
+^^^^^^^^^^^^^^^^^^^^^^^^
+Das Initialisierungsskript /etc/uci-defaults/on-olsr-setup wird bei der Erstinstallation oder beim Firmware-Upgrade ausgeführt.
+Es aktiviert da ondataservice-Plugin.
 
 
 Firmware-NG

@@ -233,34 +233,6 @@ add_banner_event() {
 }
 
 
-get_and_enable_olsrd_library_uci_prefix() {
-	local new_section
-	local lib_file
-	local uci_prefix=
-	local library=$1
-	local current=$(uci show olsrd | grep -q "^olsrd\.@LoadPlugin\[[0-9]\+\]\.library=$library\.so")
-	if [ -n "$current"]; then
-		uci_prefix=$(echo "$current" | cut -f 1 -d = | sed 's/\.library$//')
-	else
-		new_section=$(uci add olsrd LoadPlugin)
-		uci_prefix=olsrd.${new_section}
-		lib_file=$(find /usr/lib -type f -name "${library}.*")
-		if [ -z "$lib_file" ]; then
-			msg_info "FATAL ERROR: Failed to find olsrd '$library' plugin. Some Opennet services will fail."
-		else
-			uci set "${uci_prefix}.library=$(basename "$lib_file")"
-		fi
-	fi
-	# Plugin aktivieren; Praefix ausgeben
-	if [ -n "$uci_prefix" ]; then
-		# moeglicherweise vorhandenen 'ignore'-Parameter abschalten
-		uci_is_true "$(uci_get "${uci_prefix}.ignore" 0)" && uci set "${uci_prefix}.ignore=0"
-		echo "$uci_prefix"
-	fi
-	return 0
-}
-
-
 # Entferne alle Policy-Routing-Regeln die dem gegebenen Ausdruck entsprechen.
 # Es erfolgt keine Fehlerausgabe und keine Fehlermeldungen.
 delete_policy_rule() {
@@ -478,14 +450,6 @@ get_network() {
 
 get_on_firmware_version() {
 	opkg status on-core | awk '{if (/Version/) print $2;}'
-}
-
-
-update_olsr_interfaces() {
-	uci set -q "olsrd.@Interface[0].interface=$(uci_get firewall.zone_opennet.network)"
-	uci commit olsrd
-	/etc/init.d/olsrd reload
-	QUIET=-q /etc/init.d/firewall reload
 }
 
 

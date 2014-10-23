@@ -8,50 +8,7 @@
 
 set -eu
 
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-
-
-enable_ondataservice() {
-	local uci_prefix
-
-	# schon vorhanden? Unberuehrt lassen ...
-	[ -n "$(uci show olsrd | grep ondataservice)" ] && return
-
-	# add and activate ondataservice plugin
-	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "olsrd_ondataservice_light")
-	uci set "${uci_prefix}=10800"
-	uci set "${uci_prefix}=5"
-	uci set "${uci_prefix}=/tmp/database.json"
-}
-
-
-enable_nameservice() {
-	local current_trigger
-	local uci_prefix
-
-	# fuer NTP, DNS und die Gateway-Auswahl benoetigen wir das nameservice-Plugin
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	if [ -z "$uci_prefix" ]; then
-	       msg_info "Failed to find olsrd_nameservice plugin"
-	else
-		# Option 'services-change-script' setzen
-		current_trigger=$(uci_get "${uci_prefix}.services_change_script" || true)
-		[ -n "$current_trigger" ] && [ "$current_trigger" != "$OLSR_NAMESERVICE_SERVICE_TRIGGER" ] && \
-			msg_info "WARNING: overwriting 'services-change-script' option of olsrd nameservice plugin with custom value. You should place a script below /etc/olsrd/nameservice.d/ instead."
-		uci set "${uci_prefix}.services_change_script=$OLSR_NAMESERVICE_SERVICE_TRIGGER"
-	fi
-}
- 
-
-set_main_ip() {
-	# Auslesen der aktuellen, bzw. der Standard-IP
-	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
-	local on_ipschema=$(get_on_core_default on_ipschema)
-	local on_netmask=$(get_on_core_default on_netmask)
-
-	# die Main-IP ist die erste IP dieses Geraets
-	uci set "olsrd.@olsrd[0].MainIp=$(get_on_ip "$on_id" "$on_ipschema" 0)"
-}
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/olsr.sh"
 
 
 # erwuenschte Einstellungen setzen

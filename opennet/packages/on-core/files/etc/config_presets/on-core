@@ -1,8 +1,0 @@
-config services 'services'
-	option	'use_olsrd_dns'	'1'
-	option	'use_olsrd_ntp'	'1'
-
-config settings 'settings'
-	# initially opennet-id is not set
-	# option 'on_id'	not yet set
-

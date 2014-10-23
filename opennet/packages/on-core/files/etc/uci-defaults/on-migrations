@@ -91,7 +91,18 @@ fix_firewall_reload() {
 }
 
 
+# Die Einstellungen "use_olsrd_dns" und "use_olsrd_ntp" sind mit v0.5 hinzugekommen.
+add_use_settings() {
+	for setting in use_olsrd_dns use_olsrd_ntp; do
+		uci show on-core | grep -q "^on-core\.services\.$setting=" && continue
+		uci set "on-core.services.$setting=1"
+	done
+	return 0
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_firewall_reload
+add_use_settings
 

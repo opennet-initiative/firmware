@@ -46,6 +46,7 @@ configure_olsr_radio() {
 
 
 configure_olsr_single_interface() {
+	trap "error_trap configure_olsr_single_interface $@" $GUARD_TRAPS
 	local iface_logical=$1
 	local iface_addr=$2
 	local iface_netmask=$3
@@ -69,17 +70,19 @@ configure_olsr_single_interface() {
 
 
 add_interface_to_zone() {
+	trap "error_trap add_interface_to_zone $@" $GUARD_TRAPS
 	local iface=$1
 	local zone=$2
 	local ifaces=$(uci_get "firewall.zone_${zone}.network")
 	# ist die Zone bereits enthalten?
 	echo " $ifaces " | grep -q "\s$iface\s" && return
-	# Zone hinzufuegen
+	# Interface zur Zone hinzufuegen
 	uci set "firewall.zone_${zone}.network=$ifaces $iface"
 }
 
 
 configure_olsr_interfaces() {
+	trap "error_trap configure_olsr_interfaces $@" $GUARD_TRAPS
 	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
 	local on_ipschema=$(get_on_core_default on_ipschema)
 	local on_netmask=$(get_on_core_default on_netmask)
@@ -113,6 +116,7 @@ configure_olsr_interfaces() {
 
 
 configure_lan_interface() {
+	trap "error_trap configure_lan_interface $@" $GUARD_TRAPS
 	local lan_ipaddr=$(get_on_core_default lan_ipaddr)
 	local lan_netmask=$(get_on_core_default lan_netmask)
 	local uci_prefix=network.lan

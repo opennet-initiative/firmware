@@ -66,6 +66,7 @@ echo "$$" >"$PID_FILE"
 # and sort them dependent on their ETX or Metric distance
 gateway_autosearch()
 {
+	trap "error_trap gateway_autosearch $@" $GUARD_TRAP$GUARD_TRAPS
 	# only do this if explicitely requested (param refresh) or activated in config
 	local autosearch=$(uci_get on-openvpn.@gateways[0].autosearch)
 	[ "${1:-}" != "refresh" ] && uci_is_false "$autosearch" && return
@@ -82,6 +83,7 @@ gateway_autosearch()
 # Parameter: Index des Gateway (siehe uci show on-openvpn.gate_*)
 test_vpngateway()
 {
+	trap "error_trap test_vpngateway $@" $GUARD_TRAP$GUARD_TRAPS
 	local uci_prefix=on-openvpn.gate_$1
 	local gw_ipaddr=$(uci_get "$uci_prefix.ipaddr")
 	local gw_name=$(uci_get "$uci_prefix.name")
@@ -121,6 +123,7 @@ test_vpngateway()
 # return success (exitcode=0) if blacklisted
 check_blacklisting()
 {
+	trap "error_trap check_blacklisting $@" $GUARD_TRAP$GUARD_TRAPS
 	local index
 	local blacklisted
 	local gw_ipaddr=$(uci_get "on-openvpn.gate_$1.ipaddr")
@@ -152,6 +155,7 @@ check_blacklisting()
 
 check_all_blacklisting()
 {
+	trap "error_trap check_all_blacklisting $@" $GUARD_TRAP$GUARD_TRAPS
 	local index=1
 	local ipaddr
 	while [ -n "$(uci_get "on-openvpn.gate_$index")" ] ; do
@@ -166,6 +170,7 @@ check_all_blacklisting()
 # parameter is index to test, echo true if blacklisted
 find_and_select_best_gateway()
 {
+	trap "error_trap find_and_select_best_gateway $@" $GUARD_TRAP$GUARD_TRAPS
 	local current_gw_ipaddr
 	local better_gw_count
 	local next_index
@@ -236,6 +241,7 @@ find_and_select_best_gateway()
 
 # detect broken tunnels and ensure that openvpn is running
 start_stop_openvpn() {
+	trap "error_trap start_stop_openvpn $@" $GUARD_TRAP$GUARD_TRAPS
 	local gw_ipaddr=$1
 	# stop vpn-tunnel if its not working because route goes trough ugw-tunnel
 	# this might be a problem on usergateways: before the ugw-tunnel is working, the user-vpn-gateway is reachable

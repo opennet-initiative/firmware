@@ -60,5 +60,5 @@ enable_nameservice
 set_main_ip
 
 uci commit olsrd
-/etc/init.d/olsrd restart >/dev/null
+/etc/init.d/olsrd restart >/dev/null || true
 

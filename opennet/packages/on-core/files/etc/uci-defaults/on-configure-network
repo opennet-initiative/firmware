@@ -23,7 +23,8 @@ configure_opennet_zone() {
 	uci set "$uci_prefix.output=ACCEPT"
 	# Verkehr aus dem opennet-Netz darf nicht in lokale oder tunnel-Netze
 	uci set "$uci_prefix.forward=REJECT"
-	# TODO: masq_src ist ein Ersatz fuer /etc/firewall.opennet
+	# via "masq_src" ersetzen wir die ehemalige "/etc/firewall.opennet" fuer Quell-basiertes Masquerading
+	update_opennet_zone_masquerading
 }
 
 

@@ -1,16 +1,16 @@
 #!/bin/sh
 #
 # Opennet Firmware
-# 
+#
 # Copyright 2010 Rene Ejury <opennet@absorb.it>
 # Copyright 2014 Lars Kruse <devel@sumpfralle.de>
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #	http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 
 # Abbruch bei:
 #  u = undefinierten Variablen
@@ -233,6 +233,25 @@ add_banner_event() {
 }
 
 
+# Das Masquerading in die Opennet-Zone soll nur fuer bestimmte Quell-Netze erfolgen.
+# Diese Funktion wird bei hotplug-Netzwerkaenderungen ausgefuehrt.
+update_opennet_zone_masquerading() {
+	local network
+	local networkprefix
+	local uci_prefix=firewall.zone_opennet
+	uci -q delete firewall.zone_opennet || true
+	for network in $(uci_get firewall.zone_local.network); do
+		networkprefix=$(get_network "$network")
+		uci add_list "firewall.zone_opennet.masq_src=$networkprefix"
+	done
+	if [ -n "$(uci changes)" ]; then
+		uci commit firewall
+		reload_config || true
+	fi
+	return 0
+}
+
+
 # Entferne alle Policy-Routing-Regeln die dem gegebenen Ausdruck entsprechen.
 # Es erfolgt keine Fehlerausgabe und keine Fehlermeldungen.
 delete_policy_rule() {
@@ -436,7 +455,7 @@ get_network() {
 		# Kurzzeitig den eventuellen strikten Modus abschalten.
 		# (lib/functions.sh kommt mit dem strikten Modus nicht zurecht)
 		set +eu
-		. "${IPKG_INSTROOT:-}/lib/functions.sh"; 
+		. "${IPKG_INSTROOT:-}/lib/functions.sh"
 		include "${IPKG_INSTROOT:-}/lib/network"
 		scan_interfaces
 		config_get "$1" ifname

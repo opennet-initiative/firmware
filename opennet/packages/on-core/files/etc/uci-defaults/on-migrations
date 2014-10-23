@@ -66,7 +66,7 @@ EOF
 
 
 # bis Version v0.4-5: "firewall reload" fuehrte auch die "include"-Dateien aus (z.B. /etc/firewall.opennet)
-# Ab Version v0.5 passiert dies nur noch, falls der include-Eintrag via uci mit dem Parameter 'reload' markiert wird.
+# Ab Version v0.5 verwenden wir diese Datei nicht mehr.
 # Beispiel (v0.4-5):
 #  uci show firewall | grep @include
 #  firewall.@include[0]=include
@@ -74,26 +74,20 @@ EOF
 #  firewall.@include[1]=include
 #  firewall.@include[1].path=/etc/firewall.user
 fix_firewall_reload() {
+	local filename=/etc/firewall.opennet
 	local key
 	local value
-	local reload_key
-	local old_value
 	uci show firewall | grep "@include\[[0-9]\+\]\.path=" | while read line; do
 		key=$(echo "$line" | cut -f 1 -d =)
 		value=$(echo "$line" | cut -f 2- -d =)
-		[ "$value" != "/etc/firewall.opennet" ] && continue
-		reload_key=${key%.path}.reload
-		old_value=$(uci_get "$reload_key")
-		[ -z "$old_value" ] && old_value=0
-		if uci_is_false "$old_value"; then
-			msg_info "MIGRATION: fix_firewall_reload"
-			uci set "$reload_key=1"
-			uci commit firewall
-			# Firewall neustarten; keine unnoetigen Ausgaben (siehe /etc/init.d/firewall)
-			QUIET=-q /etc/init.d/firewall reload
-			break
-		fi
+		[ "$value" != "$filename" ] && continue
+		uci delete "${key%.path}"
+		uci commit firewall
+		rm -f "$filename"
+		reload_config || true
+		break
 	done
+	return 0
 }
 
 

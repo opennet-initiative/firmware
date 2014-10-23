@@ -259,6 +259,7 @@ add_zone_policy_rules() {
 		networkprefix=$(get_network "$network")
 		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" "$@"
 	done
+	return 0
 }
 
 

@@ -26,15 +26,15 @@ set -eu
 coerce_openvpn_comp_lzo() {
 	local new_value
 	local key
-	(uci show openvpn; uci show on-usergw) | grep "\.comp_lzo=[01]$" | while read line; do
+	(uci show openvpn; uci show) | grep "^on-usergw\..*\.comp_lzo=[01]$" | while read line; do
 		new_value=no
 		echo "$line" | grep -q "1$" && new_value=yes
 		key=$(echo "$line" | cut -f 1 -d =)
 		uci set "$key=$new_value"
 	done
-	if [ -n "$(uci changes openvpn)" -o -n "$(uci changes on-usergw)" ]; then
+	if [ -n "$(uci changes openvpn)" -o -n "$(uci changes | grep "^on-usergw\.")" ]; then
 		msg_info "MIGRATION: coerce_openvpn_comp_lzo"
-		uci commit on-usergw
+		uci show | grep -q "^on-usergw" && uci commit on-usergw
 		uci commit openvpn
 		/etc/init.d/openvpn restart
 	fi
@@ -93,6 +93,10 @@ fix_firewall_reload() {
 
 # Die Einstellungen "use_olsrd_dns" und "use_olsrd_ntp" sind mit v0.5 hinzugekommen.
 add_use_settings() {
+	# on-core-Konfiguration erzeugen, falls noetig
+	[ -e /etc/config/on-core ] || touch /etc/config/on-core
+	# erzeuge die services-Node, falls noetig
+	uci show | grep -q "^on-core\.services\." || uci set "on-core.services=services"
 	for setting in use_olsrd_dns use_olsrd_ntp; do
 		uci show on-core | grep -q "^on-core\.services\.$setting=" && continue
 		uci set "on-core.services.$setting=1"

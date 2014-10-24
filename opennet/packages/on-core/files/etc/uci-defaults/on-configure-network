@@ -13,6 +13,7 @@ set -eu
 
 
 configure_opennet_zone() {
+	local zone=opennet
 	local uci_prefix=firewall.zone_$zone
 	# Zone existiert? Keine Aenderungen ...
 	uci show firewall | grep -q "^firewall\.zone_$zone\." && return 0

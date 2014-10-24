@@ -108,10 +108,12 @@ disable_missing_olsr_modules() {
 	local libline
 	local libfile
 	local uci_prefix
+	local ignore
 	uci show olsrd | grep "^olsrd.@LoadPlugin\[[0-9]\+\].library=" | while read libline; do
 		uci_prefix=$(echo "$libline" | cut -f 1,2 -d .)
 		libfile=$(echo "$libline" | cut -f 2- -d =)
-		uci_is_true "$(uci_get "${uci_prefix}.ignore")" && continue
+		ignore=$(uci_get "${uci_prefix}.ignore")
+		[ -n "$ignore" ] && uci_is_true "$ignore" && continue
 		if [ ! -e "$libpath/$libfile" ]; then
 			msg_info "Disabling missing olsr module '$libfile'"
 			uci set "${uci_prefix}.ignore=1"

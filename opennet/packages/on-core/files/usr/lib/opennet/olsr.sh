@@ -13,7 +13,7 @@ OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 # Anschliessend wird olsr und die firewall neugestartet.
 # Dieses Skript sollte via hotplug bei Aenderungen der Netzwerkkonfiguration ausgefuehrt werden.
 update_olsr_interfaces() {
-	trap "error_trap update_olsr_interfaces $@" $GUARD_TRAPS
+	trap "error_trap update_olsr_interfaces $*" $GUARD_TRAPS
 	uci set -q "olsrd.@Interface[0].interface=$(uci_get firewall.zone_opennet.network)"
 	uci commit olsrd
 	/etc/init.d/olsrd reload
@@ -24,7 +24,7 @@ update_olsr_interfaces() {
 # Pruefe das angegebene olsrd-Plugin aktiv ist und aktiviere es, falls dies nicht der Fall sein sollte.
 # Das Ergebnis ist die uci-Sektion (z.B. "olsrd.@LoadPlugin[1]") als String.
 get_and_enable_olsrd_library_uci_prefix() {
-	trap "error_trap get_and_enable_olsrd_library_uci_prefix $@" $GUARD_TRAPS
+	trap "error_trap get_and_enable_olsrd_library_uci_prefix $*" $GUARD_TRAPS
 	local new_section
 	local lib_file
 	local uci_prefix=
@@ -53,7 +53,7 @@ get_and_enable_olsrd_library_uci_prefix() {
 
 
 enable_ondataservice() {
-	trap "error_trap enable_ondataservice $@" $GUARD_TRAPS
+	trap "error_trap enable_ondataservice $*" $GUARD_TRAPS
 	local uci_prefix
 
 	# schon vorhanden? Unberuehrt lassen ...
@@ -68,7 +68,7 @@ enable_ondataservice() {
 
 
 enable_nameservice() {
-	trap "error_trap enable_nameservice $@" $GUARD_TRAPS
+	trap "error_trap enable_nameservice $*" $GUARD_TRAPS
 	local current_trigger
 	local uci_prefix
 
@@ -90,7 +90,7 @@ enable_nameservice() {
 # Notfall: waehle die Standard-IP
 # Setze die olsr-Konfigurationsvariable "MainIp" mit diesem Wert.
 olsr_set_main_ip() {
-	trap "error_trap olsr_set_main_ip $@" $GUARD_TRAPS
+	trap "error_trap olsr_set_main_ip $*" $GUARD_TRAPS
 	# Auslesen der aktuellen, bzw. der Standard-IP
 	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
 	local on_ipschema=$(get_on_core_default on_ipschema)

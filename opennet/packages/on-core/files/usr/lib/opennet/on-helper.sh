@@ -32,17 +32,17 @@ GUARD_TRAPS=EXIT
 DEBUG=
 
 
-trap "error_trap __main__ $@" $GUARD_TRAPS
+trap "error_trap __main__ $*" $GUARD_TRAPS
 
 
 # Schreibe eine log-Nachricht bei fehlerhaftem Skript-Abbruch
 # Uebliche Parameter sind der aktuelle Funktionsname, sowie Parameter der aufgerufenen Funktion.
 # Jede nicht-triviale Funktion sollte zu Beginn folgende Zeile enthalten:
-#    trap "error_trap FUNKTIONSNAME_HIER_EINTRAGEN $@" $GUARD_TRAPS
+#    trap "error_trap FUNKTIONSNAME_HIER_EINTRAGEN $*" $GUARD_TRAPS
 error_trap() {
 	# dies ist der Exitcode des Skripts (im Falle der EXIT trap)
 	local exitcode=$?
-	local message="ERROR [trapped]: $@"
+	local message="ERROR [trapped]: $*"
 	[ "$exitcode" = 0 ] && exit 0
 	msg_info "$message"
 	echo >&2 "$message"
@@ -75,7 +75,7 @@ msg_info() {
 # return exitcode=0 (success) if the file was updated
 # return exitcode=1 (failure) if there was no change
 update_file_if_changed() {
-	trap "error_trap update_file_if_changed $@" $GUARD_TRAPS
+	trap "error_trap update_file_if_changed $*" $GUARD_TRAPS
 	local target_filename="$1"
 	local content="$(cat -)"
 	if [ -e "$target_filename" ] && echo "$content" | cmp -s - "$target_filename"; then
@@ -126,7 +126,7 @@ uci_get() {
 # Store this list as a dnsmasq 'server-file'.
 # The file is only updated in case of changes.
 update_dns_servers() {
-	trap "error_trap update_dns_servers $@" $GUARD_TRAPS
+	trap "error_trap update_dns_servers $*" $GUARD_TRAPS
 	local use_dns="$(uci_get on-core.services.use_olsrd_dns)"
 	# return if we should not use DNS servers provided via olsrd
 	uci_is_false "$use_dns" && return
@@ -151,7 +151,7 @@ update_dns_servers() {
 # The uci settings are only updated in case of changes.
 # ntpclient is restarted in case of changes.
 update_ntp_servers() {
-	trap "error_trap update_ntp_servers $@" $GUARD_TRAPS
+	trap "error_trap update_ntp_servers $*" $GUARD_TRAPS
 	local use_ntp="$(uci_get on-core.services.use_olsrd_ntp)"
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
@@ -186,7 +186,7 @@ update_ntp_servers() {
 # This should be used whenever the list of ntp server changes.
 # BEWARE: this function depends on internals of ntpclient's hotplug script
 control_ntpclient() {
-	trap "error_trap control_ntpclient $@" $GUARD_TRAPS
+	trap "error_trap control_ntpclient $*" $GUARD_TRAPS
 	local action="$1"
 	local ntpclient_script="$(find /etc/hotplug.d/iface/ -type f | grep ntpclient | head -n 1)"
 	[ -z "$ntpclient_script" ] && msg_info "error: failed to find ntpclient hotplug script" && return 0
@@ -212,7 +212,7 @@ control_ntpclient() {
 
 
 add_banner_event() {
-	trap "error_trap add_banner_event $@" $GUARD_TRAPS
+	trap "error_trap add_banner_event $*" $GUARD_TRAPS
 	local event=$1
 	local timestamp=$(date)
 	local line_suffix=" - $event -------"
@@ -273,7 +273,7 @@ delete_throw_routes() {
 # Parameter: logisches Netzwerkinterface
 # weitere Parameter: Rule-Spezifikation
 add_zone_policy_rules() {
-	trap "error_trap add_zone_policy_rules $@" $GUARD_TRAPS
+	trap "error_trap add_zone_policy_rules $*" $GUARD_TRAPS
 	local zone=$1
 	shift
 	local network
@@ -293,7 +293,7 @@ add_zone_policy_rules() {
 #  * die neuen Policy-Rules fuer die obigen Tabellen werden an anderer Stelle erzeugt
 # Kurz gesagt: alle bisherigen Policy-Rules sind hinterher kaputt
 initialize_olsrd_policy_routing() {
-	trap "error_trap initialize_olsrd_policy_routing $@" $GUARD_TRAPS
+	trap "error_trap initialize_olsrd_policy_routing $*" $GUARD_TRAPS
 	local network
 	local networkprefix
 	local priority=$OLSR_POLICY_DEFAULT_PRIORITY
@@ -425,7 +425,7 @@ set_ugw_value() {
 # Ergebnis:
 #   HOST:PORT DETAILS
 get_services() {
-	trap "error_trap get_services $@" $GUARD_TRAPS
+	trap "error_trap get_services $*" $GUARD_TRAPS
 	local filter_service=$1
 	local url
 	local proto
@@ -450,7 +450,7 @@ get_network() {
 # 	else
 # 		ifname=$(uci_get network.$1.ifname)
 # 	fi
-	trap "error_trap get_network $@" $GUARD_TRAPS
+	trap "error_trap get_network $*" $GUARD_TRAPS
 	local ifname=$(
 		# Kurzzeitig den eventuellen strikten Modus abschalten.
 		# (lib/functions.sh kommt mit dem strikten Modus nicht zurecht)
@@ -521,7 +521,7 @@ aquire_lock() {
 #   CA-Zertifikatsdatei: z.B. $VPN_DIR/opennet-ca.crt
 # Ergebnis: Exitcode=0 bei Erfolg
 verify_vpn_connection() {
-	trap "error_trap verify_vpn_connection $@" $GUARD_TRAPS
+	trap "error_trap verify_vpn_connection $*" $GUARD_TRAPS
 	local gw_ipaddr=$1
 	local gw_name=$2
 	local key_file=$3

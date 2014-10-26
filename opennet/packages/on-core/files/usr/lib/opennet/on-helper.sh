@@ -135,7 +135,7 @@ update_dns_servers() {
 	       servers_file=$DNSMASQ_SERVERS_FILE_DEFAULT
 	       uci set "dhcp.@dnsmasq[0].serversfile=$servers_file"
 	       uci commit "dhcp.@dnsmasq[0]"
-	       /etc/init.d/dnsmasq restart
+	       reload_config
 	fi
 	# replace ":" with "#" (dnsmasq expects this port separator)
 	get_services dns | sed 's/^\([0-9\.]\+\):/\1#/' | sort | while read host other; do

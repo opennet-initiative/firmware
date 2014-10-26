@@ -122,6 +122,34 @@ uci_get() {
 }
 
 
+# Funktion ist vergleichbar mit "uci add_list". Es werden jedoch keine doppelten Einträge erzeugt.
+# Somit entfällt die Prüfung auf Vorhandensein des Eintrags.
+# Parameter: uci-Pfad
+# Parameter: neuer Eintrag
+uci_add_list() {
+	local uci_path=$1
+	local new_item=$2
+	local old_items=$(uci_get "$uci_path")
+	# ist der Eintrag bereits vorhanden?
+	echo " $old_items " | grep -q "\s$new_item\s" && return
+	uci add_list "$uci_path=$new_item"
+}
+
+
+uci_del_list() {
+	local uci_path=$1
+	local remove_item=$2
+	local old_values=$(uci_get "$uci_path")
+	local value
+	uci delete "$uci_path"
+	for value in $old_values; do
+		[ "$value" = "$remove_item" ] && continue
+		uci add_list "$uci_path=$value"
+	done
+	return 0
+}
+
+
 # Gather the list of hosts announcing a NTP services.
 # Store this list as a dnsmasq 'server-file'.
 # The file is only updated in case of changes.

@@ -257,6 +257,56 @@ Konfigurationsänderungen betrachten
 Zur verbesserten Überschaubarkeit von Einstellungsänderungen ist in dem meta-Makefile ein Target namens `diff-menuconfig` integriert. Es zeigt dir nach dem Ausführen des gewohnten `make -C openwrt menuconfig` den Unterschied zwischen der vorherigen und der gespeicherten Konfiguration in Form eines diffs an.
 
 
+Entwicklungshinweise
+====================
+
+Shell-Skripte
+-------------
+
+Einbindung der Bibliotheken
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Unter ``/usr/lib/opennet/`` liegen mehrere Dateien, die Shell-Funktionen beinhalten.
+Alle Funktionen werden durch die folgende Zeile im globalen Namensraum verfügbar gemacht:
+
+  . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+Fehlerbehandlung
+^^^^^^^^^^^^^^^^
+
+Die optionale strikte Fehlerbehandlung durch die Shell erleichtert das Debugging.
+Sie lässt sich global in der Datei ``/usr/lib/opennet/on-helper.sh`` mit folgender Zeile aktivieren:
+
+  set -eu
+
+In allen Skripten sollten Fehler-Traps aktiviert werden, um den Ort der Entstehung von Problemem leichter zu ermitteln.
+Folgende Zeile ist im Kopf von nicht-trivialen Funktionen einzutragen, wobei der Funktionsname zu ersetzen ist:
+
+  trap "error_trap NAME_DER_FUNKTION $*" $GUARD_TRAPS
+
+Leider ist es in der ash-Shell nicht möglich, reine Fehler (siehe ``set -e``) abzufangen (siehe ``echo 'trap "echo klappt" ERR' ash``).
+Daher müssen wir die in der ash-Shell vorhandene allgemeinere ``EXIT``-trap verwenden.
+Dies führt leider dazu, dass wir gewünschte Fehler (z.B.: ``return 1`` in einer Wahrheitswert-Funktion) von ungewünschten Fehlern (durch ``set -e`` abgefangen) explizit unterscheiden müssen.
+In jeder Funktion, die explizit ein ``false``-Ergebnis zurückliefern möchte (und die traps verwendet), muss folgende Zeile anstelle von ``return 1`` (bzw. anderen Fehlercodes) eingesetzt werden:
+
+  trap "" $GUARD_TRAPS && return 1
+
+Im System-Log (``logread``) lassen sich ausgelöste traps finden:
+
+  logread | grep trapped
+
+
+uci-Funktionen
+^^^^^^^^^^^^^^
+
+Da der typische uci-Aufruf ``uci -q get CONFIG_KEY`` bei nicht-existenten Schlüsseln einen Fehlercode zurückliefert, müsste hier jeder Aufruf von unübersichtlichem boilerplate-Code umgeben werden, um mit strikter Shell-Fehlerbehandlung zu funktionieren.
+Alternativ steht diese Funktion zur Verfügung:
+
+  uci_get CONFIG_KEY
+
+Das Ergebnis ist ein leerer String, falls der config-Wert nicht vorhanden oder leer ist. Andernfalls wird der Inhalt zurückgeliefert.
+
 
 Externe Dokumentationen
 =======================

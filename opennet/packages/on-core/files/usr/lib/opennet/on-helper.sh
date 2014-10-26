@@ -29,6 +29,7 @@ GUARD_TRAPS=EXIT
 
 DEBUG=
 
+# siehe Entwicklungsdokumentation (Entwicklungshinweise -> Shell-Skripte -> Fehlerbehandlung)
 trap "error_trap __main__ $*" $GUARD_TRAPS
 
 
@@ -237,7 +238,7 @@ _find_zone_forward() {
 	local source=$1
 	local dest=$2
 	uci show firewall|grep "^firewall\.@forwarding\[[0-9]\+\]=forwarding" | cut -f 1 -d = | while read prefix; do
-		[ "$(uci_get "$prefix.src")" != "$local" ] && continue
+		[ "$(uci_get "$prefix.src")" != "$source" ] && continue
 		[ "$(uci_get "$prefix.dest")" != "$dest" ] && continue
 		# gefunden!
 		echo "$prefix"

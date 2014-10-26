@@ -254,13 +254,14 @@ _find_zone_forward() {
 add_zone_forward() {
 	local source=$1
 	local dest=$2
+	local section
 	local uci_prefix=$(_find_zone_forward "$source" "$dest")
 	# die Weiterleitungsregel existiert bereits -> Ende
 	[ -n "$uci_prefix" ] && return 0
 	# neue Regel erstellen
-	uci_prefix=$(uci add firewall forwardings)
-	uci set "$uci_prefix.src=$source"
-	uci set "$uci_prefix.dest=$dest"
+	section=$(uci add firewall forwardings)
+	uci set "firewall.${section}.src=$source"
+	uci set "firewall.${section}.dest=$dest"
 }
 
 

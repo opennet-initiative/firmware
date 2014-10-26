@@ -183,59 +183,17 @@ update_ntp_servers() {
 	local use_ntp="$(uci_get on-core.services.use_olsrd_ntp)"
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
-	# separate host and port with whitespace
-	local ntp_services=$(get_services ntp | sed 's/^\([0-9\.]\+\):/\1 /')
-	local new_servers=$(echo "$ntp_services" | awk '{print $1}' | sort)
-	local old_servers=$(uci show ntpclient | grep "\.hostname=" | cut -f 2- -d = | sort)
-	local section_name=
-	if [ "$new_servers" != "$old_servers" ]; then
-		# delete all current servers
-		while uci -q delete ntpclient.@ntpserver[0]; do true; done
-		echo "$ntp_services" | while read host port other; do
-			section_name="$(uci add ntpclient ntpserver)"
-			uci set "ntpclient.${section_name}.hostname=$host"
-			uci set "ntpclient.${section_name}.port=$port"
-		done
+	# schreibe die Liste der NTP-Server neu
+	uci delete system.ntp.server
+	get_services ntp | sed 's/^\([0-9\.]\+\):/\1 /' | while read host port other; do
+		[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
+		uci add_list "system.ntp.server=$host"
+	done
+	if [ -n "$(uci changes system)" ]; then
 		msg_info "updating NTP entries"
-		uci commit ntpclient
-		# restart if there were servers available before
-		[ -n "$old_servers" ] && control_ntpclient restart
+		uci commit system
+		reload_config
 	fi
-	# make sure that ntpclient is running (in case it broke before)
-	# never run it if there are no servers at all
-	if [ -n "$new_servers" ] && [ -z "$(pidof ntpclient)" ]; then
-		msg_info "'ntpclient' is not running: starting it again ..."
-		control_ntpclient start
-	fi
-	return
-}
-
-# stop and start ntpclient
-# This should be used whenever the list of ntp server changes.
-# BEWARE: this function depends on internals of ntpclient's hotplug script
-control_ntpclient() {
-	trap "error_trap control_ntpclient $*" $GUARD_TRAPS
-	local action="$1"
-	local ntpclient_script="$(find /etc/hotplug.d/iface/ -type f | grep ntpclient | head -n 1)"
-	[ -z "$ntpclient_script" ] && msg_info "error: failed to find ntpclient hotplug script" && return 0
-	. "$ntpclient_script"
-	case "$action" in
-		start)
-			# keine Ausgabe der Zeitserver-Informationen
-			start_ntpclient >/dev/null
-			;;
-		stop)
-			stop_ntpclient
-			;;
-		restart)
-			stop_ntpclient
-			# keine Ausgabe der Zeitserver-Informationen
-			start_ntpclient >/dev/null
-			;;
-		*)
-			echo >&2 "ERROR: unknown action for 'control_ntpclient': $action"
-			;;
-	esac
 }
 
 

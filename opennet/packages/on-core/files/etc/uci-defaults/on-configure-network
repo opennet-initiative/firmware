@@ -91,14 +91,11 @@ add_interface_to_zone() {
 	trap "error_trap add_interface_to_zone $*" $GUARD_TRAPS
 	local iface=$1
 	local zone=$2
-	local result=
 	local ifaces=$(uci_get "firewall.zone_${zone}.network")
 	# ist die Zone bereits enthalten?
 	echo " $ifaces " | grep -q "\s$iface\s" && return
-	# Leerzeichen entfernen
-	result=$(echo $ifaces $iface | sed 's/^ *//; s/ *$//')
 	# Interface zur Zone hinzufuegen
-	uci set "firewall.zone_${zone}.network=$result"
+	uci add_list "firewall.zone_${zone}.network=$iface"
 }
 
 

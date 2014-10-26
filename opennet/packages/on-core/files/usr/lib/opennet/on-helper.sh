@@ -75,7 +75,6 @@ msg_info() {
 # return exitcode=0 (success) if the file was updated
 # return exitcode=1 (failure) if there was no change
 update_file_if_changed() {
-	trap "error_trap update_file_if_changed $*" $GUARD_TRAPS
 	local target_filename="$1"
 	local content="$(cat -)"
 	if [ -e "$target_filename" ] && echo "$content" | cmp -s - "$target_filename"; then
@@ -577,10 +576,10 @@ verify_vpn_connection() {
 
 	# if there is no ipaddr stored then query dns for IP address
 	[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns "$gw_name")
-	[ -z "$gw_ipaddr" ] && return 1
+	[ -z "$gw_ipaddr" ] && trap "" $GUARD_TRAPS && return 1
 	
 	# if gateway could only be reached over a local tunnel, dont use it - it will not work anyway
-	[ -n "$(ip route show table $olsrd_routingTable | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ] && return 1
+	[ -n "$(ip route show table $olsrd_routingTable | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ] && trap "" $GUARD_TRAPS && return 1
 	
 	msg_debug "start vpn test of $gw_ipaddr"
 
@@ -615,6 +614,6 @@ verify_vpn_connection() {
 	# check if the output contains a magic line
 	openvpn $openvpn_opts --remote "$gw_ipaddr" 1600 --ca "$ca_file" --cert "$cert_file" --key "$key_file" \
 		| grep -q "Initial packet" && return 0
-	return 1
+	trap "" $GUARD_TRAPS && return 1
 }
 

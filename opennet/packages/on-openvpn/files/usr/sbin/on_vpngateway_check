@@ -92,7 +92,7 @@ test_vpngateway()
 		# if there was no vpn-availability for a while (nonworking_timeout minutes), declare vpn-status as not working
 		set_gateway_value "$gw_ipaddr" age 0
 		set_gateway_value "$gw_ipaddr" status n
-		return 1
+		trap "" $GUARD_TRAPS && return 1
 	elif [ -z "$age" ] || [ "$age" -ge "$recheck_age" ]; then
 		if verify_vpn_connection "$gw_ipaddr" "$gw_name" \
 				"$VPN_DIR/on_aps.key" \
@@ -105,14 +105,14 @@ test_vpngateway()
 		else
 			# "age" will grow until it exceeds "recheck_age + nonworking_timeout" -> no need to do anything now
 			msg_debug "vpn test of $gw_ipaddr failed"
-			return 1
+			trap "" $GUARD_TRAPS && return 1
 		fi
 	elif [ "$(get_gateway_value "$gw_ipaddr" status)" = "y" ]; then
 		msg_debug "vpn-availability of gw $gw_ipaddr still valid"
 		return 0
 	else
 		# gateway is currently known to be broken
-		return 1
+		trap "" $GUARD_TRAPS && return 1
 	fi
 }
 
@@ -129,7 +129,7 @@ check_blacklisting()
 	local gw_ipaddr=$(uci_get "on-openvpn.gate_$1.ipaddr")
 	# if there is no ipaddr stored then query dns for IP address
 	[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns "$(uci -q "get on-openvpn.gate_$1.name")")
-	[ -z "$gw_ipaddr" ] && return 1
+	[ -z "$gw_ipaddr" ] && trap "" $GUARD_TRAPS && return 1
 
 	blacklisted=$(uci_get "on-openvpn.gate_$1.blacklisted")
 	
@@ -150,7 +150,7 @@ check_blacklisting()
 		uci -q delete "on-openvpn.gate_$1.blacklisted" || true
 		uci commit on-openvpn;			# commit after every change to prevent uci memory problems
 	fi
-	return 1
+	trap "" $GUARD_TRAPS && return 1
 }
 
 check_all_blacklisting()

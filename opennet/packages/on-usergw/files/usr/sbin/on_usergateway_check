@@ -47,7 +47,7 @@ announce_ugw_service_ugw() {
 	local ping=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" ping)
 
 	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	[ -z "$uci_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && return 1
+	[ -z "$uci_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && trap "" $GUARD_TRAPS && return 1
 
 	# announce our ugw service
 	uci set "${uci_prefix}.service=http://${hna}:8080|tcp|ugw upload:$upload download:$download ping:$ping"
@@ -201,7 +201,7 @@ ugw_getMTU () {
 		if [ ! -d "/proc/$pid" ]; then
 			msg_info "test for ugw_checkMTU $remote impossible. Aborting."
 			kill "$pid" >/dev/null 2>&1 || true ; rm -f "$pidfile" "$outfile"
-			return 1
+			trap "" $GUARD_TRAPS && return 1
 		fi
 		: $((wait_loops--))
 	done
@@ -209,7 +209,7 @@ ugw_getMTU () {
 	kill "$pid" >/dev/null 2>&1 || true
 	rm -f "$pidfile" "$outfile"
 	msg_info "timeout for ugw_checkMTU $remote. Aborting."
-	return 1
+	trap "" $GUARD_TRAPS && return 1
 }
 
 #################################################################################

@@ -36,7 +36,7 @@ get_and_enable_olsrd_library_uci_prefix() {
 		lib_file=$(find /usr/lib -type f -name "${library}.*")
 		if [ -z "$lib_file" ]; then
 			msg_info "FATAL ERROR: Failed to find olsrd '$library' plugin. Some Opennet services will fail."
-			return 1
+			trap "" $GUARD_TRAPS && return 1
 		fi
 		new_section=$(uci add olsrd LoadPlugin)
 		uci_prefix=olsrd.${new_section}

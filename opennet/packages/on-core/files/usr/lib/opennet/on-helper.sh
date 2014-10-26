@@ -233,13 +233,59 @@ add_banner_event() {
 }
 
 
+# ermittle das uci-Praefix fuer eine Quell-Ziel-Weiterleitung der firewall
+_find_zone_forward() {
+	local source=$1
+	local dest=$2
+	uci show firewall|grep "^firewall\.@forwarding\[[0-9]\+\]=forwarding" | cut -f 1 -d = | while read prefix; do
+		[ "$(uci_get "$prefix.src")" != "$local" ] && continue
+		[ "$(uci_get "$prefix.dest")" != "$dest" ] && continue
+		# gefunden!
+		echo "$prefix"
+		return 0
+	done
+	return 0
+}
+
+
+# Lege eine Weiterleitungsregel fuer die firewall an (firewall.@forwarding[?]=...)
+# WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
+# Parameter: Quell-Zone und Ziel-Zone
+add_zone_forward() {
+	local source=$1
+	local dest=$2
+	local uci_prefix=$(_find_zone_forward "$source" "$dest")
+	# die Weiterleitungsregel existiert bereits -> Ende
+	[ -n "$uci_prefix" ] && return 0
+	# neue Regel erstellen
+	uci_prefix=$(uci add firewall forwardings)
+	uci set "$uci_prefix.src=$source"
+	uci set "$uci_prefix.dest=$dest"
+}
+
+
+# Loesche eine Weiterleitungsregel fuer die firewall (Quelle -> Ziel)
+# WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
+# Parameter: Quell-Zone und Ziel-Zone
+delete_zone_forward() {
+	local source=$1
+	local dest=$2
+	local uci_prefix=$(_find_zone_forward "$source" "$dest")
+	# die Weiterleitungsregel existiert nicht -> Ende
+	[ -z "$uci_prefix" ] && return 0
+	# Regel loeschen
+	uci delete "$uci_prefix"
+}
+
+
 # Das Masquerading in die Opennet-Zone soll nur fuer bestimmte Quell-Netze erfolgen.
 # Diese Funktion wird bei hotplug-Netzwerkaenderungen ausgefuehrt.
 update_opennet_zone_masquerading() {
 	local network
 	local networkprefix
 	local uci_prefix=firewall.zone_opennet
-	uci -q delete firewall.zone_opennet || true
+	# keine Zone? Abbruch ...
+	uci show firewall | grep -q "^firewall\.zone_opennet\." || return 0
 	for network in $(uci_get firewall.zone_local.network); do
 		networkprefix=$(get_network "$network")
 		uci add_list "firewall.zone_opennet.masq_src=$networkprefix"

@@ -11,7 +11,6 @@ set -eu
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
-
 configure_opennet_zone() {
 	local zone=opennet
 	local uci_prefix=firewall.zone_$zone
@@ -25,6 +24,7 @@ configure_opennet_zone() {
 	# Verkehr aus dem opennet-Netz darf nicht in lokale oder tunnel-Netze
 	uci set "$uci_prefix.forward=REJECT"
 	# via "masq_src" ersetzen wir die ehemalige "/etc/firewall.opennet" fuer Quell-basiertes Masquerading
+	add_zone_forward local "$zone"
 	update_opennet_zone_masquerading
 }
 
@@ -91,16 +91,23 @@ add_interface_to_zone() {
 	trap "error_trap add_interface_to_zone $*" $GUARD_TRAPS
 	local iface=$1
 	local zone=$2
+	local result=
 	local ifaces=$(uci_get "firewall.zone_${zone}.network")
 	# ist die Zone bereits enthalten?
 	echo " $ifaces " | grep -q "\s$iface\s" && return
+	# Leerzeichen entfernen
+	result=$(echo $ifaces $iface | sed 's/^ *//; s/ *$//')
 	# Interface zur Zone hinzufuegen
-	uci set "firewall.zone_${zone}.network=${ifaces# } ${iface% }"
+	uci set "firewall.zone_${zone}.network=$result"
 }
 
 
 configure_olsr_interfaces() {
 	trap "error_trap configure_olsr_interfaces $*" $GUARD_TRAPS
+
+	# diese Aktion ist bereits abgeschlossen
+	uci show network | grep -q "^network\.on_eth0_0\." && return 0
+
 	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
 	local on_ipschema=$(get_on_core_default on_ipschema)
 	local on_netmask=$(get_on_core_default on_netmask)
@@ -133,38 +140,18 @@ configure_olsr_interfaces() {
 }
 
 
-configure_lan_interface() {
-	trap "error_trap configure_lan_interface $*" $GUARD_TRAPS
-	local lan_ipaddr=$(get_on_core_default lan_ipaddr)
-	local lan_netmask=$(get_on_core_default lan_netmask)
-	local uci_prefix=network.lan
+# jede Funktion sollte selbst pruefen, ob ihre Aktion bereits abgeschlossen ist
+configure_opennet_zone
+configure_olsr_interfaces
 
-	# reconfigure lan
-	uci -q delete ".type" || true
-	uci set "${uci_prefix}.proto=static"
-	uci set "${uci_prefix}.ipaddr=$lan_ipaddr"
-	uci set "${uci_prefix}.netmask=$lan_netmask"
-	uci set "${uci_prefix}.defaultroute=0"
-	uci set "${uci_prefix}.peerdns=0"
-}
-
-
-if uci show network | grep -q "^network\.on_wifi_0\."; then
-	# der AP ist bereits konfiguriert
-	true
-else
-	# Konfiguration aller Netzwerk-Interfaces
-	configure_opennet_zone
-	configure_olsr_interfaces
-	configure_lan_interface
-	uci commit network
-	uci commit wireless
-	uci commit dhcp
-	uci commit firewall
-	# loese via procd alle erforderlichen Dienste-Reloads aus
-	# Fehler duerfen hier passieren
-	reload_config || true
-fi
+# schreibe alle ui-Anederungen
+uci commit network
+uci commit wireless
+uci commit dhcp
+uci commit firewall
+# loese via procd alle erforderlichen Dienste-Reloads aus
+# Fehler duerfen hier passieren
+reload_config || true
 
 exit 0
 

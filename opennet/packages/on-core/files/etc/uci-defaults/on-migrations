@@ -81,7 +81,8 @@ fix_firewall_reload() {
 		key=$(echo "$line" | cut -f 1 -d =)
 		value=$(echo "$line" | cut -f 2- -d =)
 		[ "$value" != "$filename" ] && continue
-		uci delete "${key%.path}"
+		# gesamte "include"-Abzweigung loeschen
+		uci_delete "${key%.path}"
 		uci commit firewall
 		rm -f "$filename"
 		reload_config || true

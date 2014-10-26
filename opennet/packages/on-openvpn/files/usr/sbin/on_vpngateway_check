@@ -147,7 +147,7 @@ check_blacklisting()
 	
 	# gateway was blacklisted before, but not anymore (see early return above)
 	if [ -n "$blacklisted" ]; then
-		uci -q delete "on-openvpn.gate_$1.blacklisted" || true
+		uci_delete "on-openvpn.gate_$1.blacklisted"
 		uci commit on-openvpn;			# commit after every change to prevent uci memory problems
 	fi
 	trap "" $GUARD_TRAPS && return 1

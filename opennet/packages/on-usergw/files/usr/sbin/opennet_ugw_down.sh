@@ -16,7 +16,7 @@
 msg_debug "starting for iface ${dev}"
 msg_debug "removing network config for ${dev}"
 
-uci -q "delete network.on_${dev}" || true
+uci delete "network.on_${dev}"
 uci commit network
 
 # reload new ubus rpc interface (see http://wiki.openwrt.org/doc/techref/ubus)
@@ -29,7 +29,7 @@ uci commit firewall
 
 # removing on_tapX (tapX) from firewall zone opennet
 msg_debug "removing firewall-rules for ${dev}"
-QUIET=-q /etc/init.d/firewall reload
+reload_config
 
 msg_debug "removing interface ${dev} from config of olsrd, restarting olsrd"
 uci -q set olsrd.@Interface[0].interface="$(uci_get olsrd.@Interface[0].interface | \

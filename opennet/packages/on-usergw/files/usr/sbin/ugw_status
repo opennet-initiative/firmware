@@ -128,7 +128,7 @@ toggle_sharing()
 		sharing="off"
 	else
 		sharing="on"
-		uci -q delete on-usergw.ugw_sharing.blockSharing || true
+		uci_delete on-usergw.ugw_sharing.blockSharing
 	fi
 	uci -q set "on-usergw.ugw_sharing.shareInternet=$sharing"
 	uci commit on-usergw	# commit after every change to prevent uci memory problems

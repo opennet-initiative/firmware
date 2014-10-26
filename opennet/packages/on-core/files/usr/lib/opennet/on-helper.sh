@@ -141,12 +141,17 @@ uci_del_list() {
 	local remove_item=$2
 	local old_values=$(uci_get "$uci_path")
 	local value
-	uci delete "$uci_path"
+	uci_delete "$uci_path"
 	for value in $old_values; do
 		[ "$value" = "$remove_item" ] && continue
 		uci add_list "$uci_path=$value"
 	done
 	return 0
+}
+
+
+uci_delete() {
+	uci -q delete "$1" || true
 }
 
 
@@ -184,7 +189,7 @@ update_ntp_servers() {
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
 	# schreibe die Liste der NTP-Server neu
-	uci delete system.ntp.server
+	uci_delete system.ntp.server
 	get_services ntp | sed 's/^\([0-9\.]\+\):/\1 /' | while read host port other; do
 		[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
 		uci add_list "system.ntp.server=$host"
@@ -261,7 +266,7 @@ delete_zone_forward() {
 	# die Weiterleitungsregel existiert nicht -> Ende
 	[ -z "$uci_prefix" ] && return 0
 	# Regel loeschen
-	uci delete "$uci_prefix"
+	uci_delete "$uci_prefix"
 }
 
 

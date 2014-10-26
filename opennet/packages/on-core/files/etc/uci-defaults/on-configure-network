@@ -43,7 +43,7 @@ configure_olsr_radio() {
 	uci set "${uci_wifi}.ifname=$iface_phys"
 
 	uci set "wireless.radio${iface_index}.country=$(get_on_core_default wifi_country)"
-	uci -q delete "wireless.radio${iface_index}.disabled" || true
+	uci_delete "wireless.radio${iface_index}.disabled"
 
 	# typ-spezifische Attribute
 	if echo "$radio_hwmode" | grep -q "a"; then

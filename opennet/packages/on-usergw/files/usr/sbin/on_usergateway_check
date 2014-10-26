@@ -364,7 +364,7 @@ ugw_checkSharingBlocked () {
 	local on_share_internet_unblock_time=$(uci_get on-usergw.ugw_sharing.unblock_time)
 	[ -z "$on_share_internet_unblock_time" ] && return
 	if [ "$(date +%s)" -gt "$on_share_internet_unblock_time" ]; then
-		uci delete on-usergw.ugw_sharing.unblock_time || true
+		uci_delete on-usergw.ugw_sharing.unblock_time
 		uci set on-usergw.ugw_sharing.shareInternet='on'
 	elif [ "$(uci_get on-usergw.ugw_sharing.shareInternet)" = "on" ]; then
 		uci set on-usergw.ugw_sharing.shareInternet='off'
@@ -433,7 +433,7 @@ ugw_disableForward () {
 			src_dport="$(uci_get "$section.src_dport")"
 			proto="$(uci_get "$section.proto")"
 			if [ "$src_dport" = "1600" ] || [ "$src_dport" = "123" ] || [ "$src_dport" = "53" ] || [ "$proto" = "icmp" ]; then
-				uci -q delete "$section" || true
+				uci_delete "$section"
 				change=true
 			else
 				: $((nr++))

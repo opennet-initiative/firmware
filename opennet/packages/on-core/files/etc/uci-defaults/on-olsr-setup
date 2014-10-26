@@ -8,7 +8,7 @@
 
 set -eu
 
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/olsr.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
 # erwuenschte Einstellungen setzen

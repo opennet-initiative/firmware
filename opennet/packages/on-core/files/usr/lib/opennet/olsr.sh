@@ -1,12 +1,8 @@
 # opennet-Funktionen rund im den OLSR-Dienst
+# wird durch "on-helper" eingebunden
 
 
 OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
-
-
-# helper-Skript nur laden, falls es noch nicht im Namensraum verfuegbar ist
-[ -z "${ON_HELPER_LOADED:-}" ] && . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-
 
 
 # uebertrage die Netzwerke, die derzeit der Zone "opennet" zugeordnet sind, in die olsr-Konfiguration

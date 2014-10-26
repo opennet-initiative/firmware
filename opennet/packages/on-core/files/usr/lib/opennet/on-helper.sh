@@ -24,15 +24,15 @@ ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
 SERVICES_FILE=/var/run/services_olsr
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 OLSR_POLICY_DEFAULT_PRIORITY=20000
-# Markierung fuer andere Skripte
-ON_HELPER_LOADED=y
 # leider, leider unterstuetzt die busybox-ash kein trap "ERR"
 GUARD_TRAPS=EXIT
 
 DEBUG=
 
-
 trap "error_trap __main__ $*" $GUARD_TRAPS
+
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/olsr.sh"
 
 
 # Schreibe eine log-Nachricht bei fehlerhaftem Skript-Abbruch

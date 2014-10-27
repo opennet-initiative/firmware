@@ -175,10 +175,10 @@ update_dns_servers() {
 	# replace ":" with "#" (dnsmasq expects this port separator)
 	get_services dns | sed 's/^\([0-9\.]\+\):/\1#/' | sort | while read host other; do
 		echo "server=$host"
-	done | update_file_if_changed "$servers_file" \
-		&& msg_info "updating DNS servers" \
-		&& killall -s HUP dnsmasq	# reload config
-	return
+	done | update_file_if_changed "$servers_file" || return 0
+	# es gab eine Aenderung
+	msg_info "updating DNS servers"
+	killall -s HUP dnsmasq	# reload config
 }
 
 # Gather the list of hosts announcing a NTP services.

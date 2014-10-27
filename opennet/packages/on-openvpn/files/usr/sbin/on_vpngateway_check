@@ -171,14 +171,12 @@ check_all_blacklisting()
 find_and_select_best_gateway()
 {
 	trap "error_trap find_and_select_best_gateway $*" $GUARD_TRAPS
-	local current_gw_ipaddr
-	local better_gw_count
-	local next_index
 	local index
+	local gw_ipaddr=
 	local selected_gw=
-	current_gw_ipaddr=$(uci_get openvpn.opennet_user.remote)
-	better_gw_count=$(uci_get on-openvpn.@gateways[0].better_gw)
-	next_index=1
+	local current_gw_ipaddr=$(uci_get openvpn.opennet_user.remote)
+	local better_gw_count=$(uci_get on-openvpn.@gateways[0].better_gw)
+	local next_index=1
 	while [ -n "$(uci_get "on-openvpn.gate_$next_index")" ]; do
 		index=$next_index
 		: $((next_index++))

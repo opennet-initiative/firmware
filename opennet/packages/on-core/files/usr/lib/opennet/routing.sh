@@ -65,10 +65,10 @@ initialize_olsrd_policy_routing() {
 	ip rule add table main prio "$((priority++))"
 
 	# Uplinks folgen erst nach main
-	delete_policy_rule table tun
-	add_zone_policy_rules local table tun prio "$((priority++))"
-	add_zone_policy_rules free table tun prio "$((priority++))"
-	ip rule add iif lo table tun prio "$((priority++))"
+	delete_policy_rule table "$ROUTE_RULE_ON"
+	add_zone_policy_rules local table "$ROUTE_RULE_ON" prio "$((priority++))"
+	add_zone_policy_rules free table "$ROUTE_RULE_ON" prio "$((priority++))"
+	ip rule add iif lo table "$ROUTE_RULE_ON" prio "$((priority++))"
 
 
 	# Pakete fuer opennet-IP-Bereiche sollen nicht in der main-Tabelle (lokale Interfaces) behandelt werden

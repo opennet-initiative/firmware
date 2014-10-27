@@ -26,6 +26,7 @@ DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 OLSR_POLICY_DEFAULT_PRIORITY=20000
 # leider, leider unterstuetzt die busybox-ash kein trap "ERR"
 GUARD_TRAPS=EXIT
+ROUTE_RULE_ON=on-tunnel
 
 DEBUG=
 

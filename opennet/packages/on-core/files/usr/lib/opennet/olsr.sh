@@ -12,8 +12,7 @@ update_olsr_interfaces() {
 	trap "error_trap update_olsr_interfaces $*" $GUARD_TRAPS
 	uci set -q "olsrd.@Interface[0].interface=$(uci_get firewall.zone_opennet.network)"
 	uci commit olsrd
-	/etc/init.d/olsrd reload
-	QUIET=-q /etc/init.d/firewall reload
+	/etc/init.d/olsrd restart || true
 }
 
 

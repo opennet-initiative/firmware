@@ -4,7 +4,7 @@
 
 # Ist OLSR zwischenzeitlich abgestuerzt?
 if [ -z "$(pidof olsrd)" ]; then
-    /etc/init.d/olsrd start >/dev/null
+    /etc/init.d/olsrd start >/dev/null || { msg_info "olsrd restart failed"; trap "" $GUARD_TRAPS && exit 1; }
     sleep 1
     [ -n "$(pidof olsrd)" ] && add_banner_event "olsrd restart"
 fi

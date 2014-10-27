@@ -26,7 +26,7 @@ VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
 # Verkuende den lokalen UGW-Dienst inkl. Geschwindigkeitsdaten via olsr nameservice
 # Parameter: die aktuell announcierte HNA-Adresse des lokalen UGW
 announce_ugw_service_ugw() {
-	trap "error_trap announce_ugw_service_ugw $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap announce_ugw_service_ugw $*" $GUARD_TRAPS
 	local uci_prefix=
 	local gw_found=
 	local index=0
@@ -64,7 +64,7 @@ announce_ugw_service_ugw() {
 # check Usergateway for speed
 # $1=nr
 ugw_checkSpeed () {
-	trap "error_trap ugw_checkSpeed $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_checkSpeed $*" $GUARD_TRAPS
 	echo "ugw_checkSpeed" >"$DATA_LOCK_FILE"
 	. "${IPKG_INSTROOT:-}/usr/sbin/on_speed_check"
 	local on_ugw=$(uci_get "on-usergw.opennet_ugw${1}.name")
@@ -110,7 +110,7 @@ ugw_checkSpeeds () {
 # parameter is index to test
 ugw_checkVPN()
 {
-	trap "error_trap ugw_checkVPN $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_checkVPN $*" $GUARD_TRAPS
 	echo "ugw_checkVPN" >"$DATA_LOCK_FILE"
 	local uci_prefix=on-usergw.opennet_ugw$1
 	local gw_ipaddr=$(uci_get "$uci_prefix.ipaddr")
@@ -164,7 +164,7 @@ ugw_checkVPNs () {
 # 
 # 
 ugw_getMTU () {
-	trap "error_trap ugw_getMTU $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_getMTU $*" $GUARD_TRAPS
 	local remote=$1
 	local rport=$(uci_get on-usergw.opennet_ugw.rport)
 	local ca=$(uci_get on-usergw.opennet_ugw.ca)
@@ -218,7 +218,7 @@ ugw_getMTU () {
 # recognizing a ugw as working...
 # $1=nr
 ugw_checkMTU () {
-	trap "error_trap ugw_checkMTU $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_checkMTU $*" $GUARD_TRAPS
 	echo "ugw_checkMTU" >"$DATA_LOCK_FILE"
 	if [ "$(uci_get "on-usergw.opennet_ugw${1}.wan")" != "ok" ]; then
 		msg_debug "ugw_checkMTU for ugw$1 skipped, please check WAN first"
@@ -271,7 +271,7 @@ ugw_checkMTUs () {
 # olsr put's it's routes in a separate table, therefore main table has only locally received routes
 # $1=nr
 ugw_checkWAN () {
-	trap "error_trap ugw_checkWAN $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_checkWAN $*" $GUARD_TRAPS
 	local on_ugw=$(uci_get "on-usergw.opennet_ugw${1}.name")
 	local on_ugw_ip=$(query_dns $on_ugw)
 	local on_ugw_targetDev
@@ -309,7 +309,7 @@ ugw_checkWANs () {
 # set or search/replace ugw-HNA in olsrd config
 # $1 == hna to set for olsr
 update_olsr_hna () {
-	trap "error_trap update_olsr_hna $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap update_olsr_hna $*" $GUARD_TRAPS
 	local found=""
 	local no=0
 	local new_section
@@ -334,7 +334,7 @@ update_olsr_hna () {
 #################################################################################
 # mark usage of HNA in olsrd config (for removal by cron-daily/clean_ugw_hna.sh)
 mark_olsr_hna_used () {
-	trap "error_trap mark_olsr_hna_used $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap mark_olsr_hna_used $*" $GUARD_TRAPS
 	msg_debug "mark_olsr_hna_used"
 	local no=0
 	while ( [ -n "$(uci_get "olsrd.@Hna4[${no}]")" ] ); do
@@ -359,7 +359,7 @@ ugw_syncVPNConfig () {
 #################################################################################
 # check if sharingInternet is temporarily blocked
 ugw_checkSharingBlocked () {
-	trap "error_trap ugw_checkSharingBlocked $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_checkSharingBlocked $*" $GUARD_TRAPS
 	msg_debug "ugw_checkSharingBlocked"
 	local on_share_internet_unblock_time=$(uci_get on-usergw.ugw_sharing.unblock_time)
 	[ -z "$on_share_internet_unblock_time" ] && return
@@ -375,7 +375,7 @@ ugw_checkSharingBlocked () {
 # check if sharingInternet is possible for every gateway and
 # store 'enabled'-value in openvpn config
 ugw_checkWorking () {
-	trap "error_trap ugw_checkWorking $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_checkWorking $*" $GUARD_TRAPS
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
 		mtu=$(uci_get "on-usergw.opennet_ugw${nr}.mtu") || true
 		wan=$(uci_get "on-usergw.opennet_ugw${nr}.wan")
@@ -397,7 +397,7 @@ ugw_checkWorking () {
 #################################################################################
 # check if sharingInternet is enabled and tunnels are active or vice versa
 ugw_shareInternet () {
-	trap "error_trap ugw_shareInternet $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_shareInternet $*" $GUARD_TRAPS
 	msg_debug "ugw_shareInternet"
 
 	sharing="$(uci_get on-usergw.ugw_sharing.shareInternet)"
@@ -423,7 +423,7 @@ ugw_shareInternet () {
 #################################################################################
 # disable ugw forwarding, remove rules from current firewall settings
 ugw_disableForward () {
-	trap "error_trap ugw_disableForward $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_disableForward $*" $GUARD_TRAPS
 	msg_debug "ugw_disableForward"
 	change=""
 	nr=0
@@ -452,7 +452,7 @@ ugw_disableForward () {
 # enable ugw forwarding, add rules from current firewall settings and set hna
 # $1 == ip of gateway to forward to
 ugw_enableForward () {
-	trap "error_trap ugw_enableForward $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_enableForward $*" $GUARD_TRAPS
 	msg_debug "ugw_enableForward"
 	hna=$(lua -e "require('luci.model.opennet.on_hna_check') print(getHNA())")
 	section=$(uci add firewall redirect)
@@ -497,7 +497,7 @@ ugw_enableForward () {
 #################################################################################
 # check is done every 5 minutes, if there is a better gw then switch
 ugw_forwardGW () {
-	trap "error_trap ugw_forwardGW $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_forwardGW $*" $GUARD_TRAPS
 	msg_debug "ugw_forwardGW"
 	local found_first_ugw
 	local better_ugw_count
@@ -560,7 +560,7 @@ ugw_forwardGW () {
 #################################################################################
 # do extra checks (speed, mtu) only at dedicated times
 ugw_doExtraChecks () {
-	trap "error_trap ugw_doExtraChecks $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap ugw_doExtraChecks $*" $GUARD_TRAPS
 	msg_debug "ugw_doExtraChecks"
 	local nr
 	local speed_time

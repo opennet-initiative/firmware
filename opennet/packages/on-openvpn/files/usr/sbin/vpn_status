@@ -65,7 +65,7 @@ print_usage()
 # Nur relevant bei manueller Gateway-Sortierung.
 move_top()
 {
-	trap "error_trap move_top $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap move_top $*" $GUARD_TRAPS
 	local position=$1
 	uci -q rename on-openvpn.gate_$position="gate_MOVETOP";
 	while [ $((position--)) -ge 1 ] ; do
@@ -78,7 +78,7 @@ move_top()
 
 add_gw()
 {
-	trap "error_trap add_gw $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap add_gw $*" $GUARD_TRAPS
 	local ipaddr=$1
 	local index=1;
 	while [ -n "$(uci_get "on-openvpn.gate_$((index++))")" ]; do true; done
@@ -90,7 +90,7 @@ add_gw()
 
 del_gw()
 {
-	trap "error_trap del_gw $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap del_gw $*" $GUARD_TRAPS
 	local position=$1
 	uci -q del on-openvpn.gate_$position;
 	while [ -n "$(uci_get "on-openvpn.gate_$((++position))")" ]; do
@@ -102,7 +102,7 @@ del_gw()
 
 toggle_etx()
 {
-	trap "error_trap toggle_etx $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap toggle_etx $*" $GUARD_TRAPS
 	local sort_by_etx=$(uci_get on-openvpn.gateways.vpn_sort_criteria);
 	[ "$sort_by_etx" = "etx" ] && sort_by_etx="metric" || sort_by_etx="etx"
 	uci -q set on-openvpn.gateways.vpn_sort_criteria=$sort_by_etx;
@@ -111,7 +111,7 @@ toggle_etx()
 }
 
 toggle_autosearch() {
-	trap "error_trap toggle_autosearch $*" $GUARD_TRAP$GUARD_TRAPS
+	trap "error_trap toggle_autosearch $*" $GUARD_TRAPS
 	local autosearch=$(uci_get on-openvpn.gateways.autosearch)
 	[ "$autosearch" = "on" ] && autosearch="off" || autosearch="on"
 	uci -q set on-openvpn.gateways.autosearch=$autosearch

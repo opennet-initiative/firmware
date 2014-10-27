@@ -100,7 +100,7 @@ configure_olsr_interfaces() {
 	trap "error_trap configure_olsr_interfaces $*" $GUARD_TRAPS
 
 	# diese Aktion ist bereits abgeschlossen
-	uci show network | grep -q "^network\.on_eth0_0\." && return 0
+	uci show network | grep -q "^network\.on_eth_0\." && return 0
 
 	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
 	local on_ipschema=$(get_on_core_default on_ipschema)
@@ -128,7 +128,7 @@ configure_olsr_interfaces() {
 
 	on_ipaddr=$(get_on_ip "$on_id" "$on_ipschema" "$iface_index")
 	iface_phys=""
-	iface_logical=on_eth_$iface_index
+	iface_logical=on_eth_0
 	configure_olsr_single_interface "$iface_logical" "$on_ipaddr" "$on_netmask" "$iface_phys"
 	add_interface_to_zone "$iface_logical" opennet
 }

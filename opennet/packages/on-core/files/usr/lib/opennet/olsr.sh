@@ -1,4 +1,4 @@
-# opennet-Funktionen rund im den OLSR-Dienst
+# opennet-Funktionen rund um den OLSR-Dienst
 # wird durch "on-helper" eingebunden
 
 
@@ -118,6 +118,28 @@ disable_missing_olsr_modules() {
 	if [ -n "$(uci changes olsrd)" ]; then
 		uci commit olsrd
 		/etc/init.d/olsrd restart >/dev/null || true
+	fi
+	return 0
+}
+
+
+# erzeuge und konfiguriere separate Routing-Tabellen für die olsr-Einträge
+olsr_set_routing_tables() {
+	local rt_common=$1
+	local rt_default=$2
+	local rt_common_id=$(uci_get "olsrd.@olsrd[0].RtTable")
+	local rt_default_id=$(uci_get "olsrd.@olsrd[0].RtTableDefault")
+	if [ -z "$rt_common_id" ]; then
+		rt_common_id=$(get_or_add_routing_table "$rt_common")
+		uci set "olsrd.@olsrd[0].RtTable=$rt_common_id"
+	fi
+	if [ -z "$rt_default_id" ]; then
+		rt_default_id=$(get_or_add_routing_table "$rt_default")
+		uci set "olsrd.@olsrd[0].RtTableDefault=$rt_default_id"
+	fi
+	if [ -n "$(uci changes olsrd)" ]; then
+		uci commit olsrd
+		/etc/init.d/olsrd restart || true
 	fi
 	return 0
 }

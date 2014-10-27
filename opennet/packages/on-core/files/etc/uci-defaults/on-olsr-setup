@@ -16,6 +16,7 @@ enable_ondataservice
 enable_nameservice
 disable_missing_olsr_modules
 olsr_set_main_ip
+olsr_set_routing_tables olsrd olsrd-default
 
 uci commit olsrd
 /etc/init.d/olsrd restart >/dev/null || true

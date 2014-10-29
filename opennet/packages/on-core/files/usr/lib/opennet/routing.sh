@@ -31,7 +31,7 @@ add_zone_policy_rules() {
 	shift
 	local network
 	local networkprefix
-	for network in $(uci_get "firewall.zone_${zone}.network"); do
+	for network in $(get_zone_interfaces "$zone"); do
 		networkprefix=$(get_network "$network")
 		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" "$@"
 	done
@@ -60,14 +60,14 @@ initialize_olsrd_policy_routing() {
 	# "main"-Regel fuer lokale Quell-Pakete prioritisieren (opennet-Routing soll lokales Routing nicht beeinflussen)
 	# "main"-Regel fuer alle anderen Pakete nach hinten schieben (weniger wichtig als olsr)
 	delete_policy_rule table main
-	add_zone_policy_rules local table main prio "$((priority++))"
+	add_zone_policy_rules "$ZONE_LOCAL" table main prio "$((priority++))"
 	ip rule add iif lo table main prio "$((priority++))"
 	ip rule add table main prio "$((priority++))"
 
 	# Uplinks folgen erst nach main
 	delete_policy_rule table "$ROUTE_RULE_ON"
-	add_zone_policy_rules local table "$ROUTE_RULE_ON" prio "$((priority++))"
-	add_zone_policy_rules free table "$ROUTE_RULE_ON" prio "$((priority++))"
+	add_zone_policy_rules "$ZONE_LOCAL" table "$ROUTE_RULE_ON" prio "$((priority++))"
+	add_zone_policy_rules "$ZONE_FREE" table "$ROUTE_RULE_ON" prio "$((priority++))"
 	ip rule add iif lo table "$ROUTE_RULE_ON" prio "$((priority++))"
 
 
@@ -82,7 +82,7 @@ initialize_olsrd_policy_routing() {
 	# TODO: koennen wir uns darauf verlassen, dass olsrd diese Regeln erhaelt?
 	delete_throw_routes olsrd
 	delete_throw_routes olsrd-default
-	for network in $(uci_get firewall.zone_local.network) $(uci_get firewall.zone_free.network); do
+	for network in $(get_zone_interfaces "$ZONE_LOCAL") $(get_zone_interfaces "$ZONE_FREE"); do
 		networkprefix=$(get_network "$network")
 		[ -z "$networkprefix" ] && continue
 		ip route add throw "$networkprefix" table olsrd

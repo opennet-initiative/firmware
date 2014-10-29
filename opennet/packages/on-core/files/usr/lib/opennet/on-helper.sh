@@ -27,6 +27,12 @@ OLSR_POLICY_DEFAULT_PRIORITY=20000
 # leider, leider unterstuetzt die busybox-ash kein trap "ERR"
 GUARD_TRAPS=EXIT
 ROUTE_RULE_ON=on-tunnel
+ZONE_LOCAL=lan
+ZONE_MESH=on_mesh
+ZONE_TUNNEL=on_vpn
+ZONE_FREE=free
+NETWORK_TUNNEL=on_vpn
+NETWORK_FREE=free
 
 DEBUG=
 
@@ -129,7 +135,7 @@ update_ntp_servers() {
 	uci_delete system.ntp.server
 	get_services ntp | sed 's/^\([0-9\.]\+\):/\1 /' | while read host port other; do
 		[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
-		uci add_list "system.ntp.server=$host"
+		uci_add_list "system.ntp.server" "$host"
 	done
 	if [ -n "$(uci changes system)" ]; then
 		msg_info "updating NTP entries"
@@ -168,11 +174,11 @@ add_zone_forward() {
 	local source=$1
 	local dest=$2
 	local section
-	local uci_prefix=$(find_uci_section firewall forwardings "src=$source" "dest=$dest")
+	local uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
 	# die Weiterleitungsregel existiert bereits -> Ende
 	[ -n "$uci_prefix" ] && return 0
 	# neue Regel erstellen
-	section=$(uci add firewall forwardings)
+	section=$(uci add firewall forwarding)
 	uci set "firewall.${section}.src=$source"
 	uci set "firewall.${section}.dest=$dest"
 }
@@ -184,7 +190,7 @@ add_zone_forward() {
 delete_zone_forward() {
 	local source=$1
 	local dest=$2
-	local uci_prefix=$(find_uci_section firewall forwardings "src=$source" "dest=$dest")
+	local uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
 	# die Weiterleitungsregel existiert nicht -> Ende
 	[ -z "$uci_prefix" ] && return 0
 	# Regel loeschen
@@ -197,12 +203,15 @@ delete_zone_forward() {
 update_opennet_zone_masquerading() {
 	local network
 	local networkprefix
-	local uci_prefix=firewall.zone_opennet
-	# keine Zone? Abbruch ...
-	uci show firewall | grep -q "^firewall\.zone_opennet\." || return 0
-	for network in $(uci_get firewall.zone_local.network); do
+	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
+	# Abbruch, falls die Zone fehlt
+	[ -z "$uci_prefix" ] && msg_info "failed to find opennet mesh zone ($ZONE_MESH)" && return 0
+	# alle masquerade-Netzwerke entfernen
+	uci_delete "${uci_prefix}.masq_src"
+	# aktuelle Netzwerke wieder hinzufuegen
+	for network in $(get_zone_interfaces "$ZONE_LOCAL"); do
 		networkprefix=$(get_network "$network")
-		uci add_list "firewall.zone_opennet.masq_src=$networkprefix"
+		uci_add_list "${uci_prefix}.masq_src" "$networkprefix"
 	done
 	apply_changes firewall
 }

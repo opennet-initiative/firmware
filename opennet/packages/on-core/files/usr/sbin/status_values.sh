@@ -125,12 +125,12 @@ print_interfaces_2_6() {
         if [ -n "$network" ] && [ "$(uci_get network.$network.proto)" != "none" ]; then
           on_networks="$on_networks $network"
           lastnetwork="$network"
-          zone=$(uci -q show firewall | awk 'BEGIN{FS="="} /firewall.zone_.*\.network/ {if ($2 ~ "'$network'") {sub("firewall.zone_","");sub(".network","");print $1}}')
+          zone=$(get_zone_of_interface "$network")
           on_zones="$on_zones $zone"
         fi
       done
       if [ -n "$if_type_bridge" ]; then
-        zone=$(uci -q show firewall | awk 'BEGIN{FS="="} /firewall.zone_.*\.network/ {if ($2 == "'${if_name##br-}'") {sub("firewall.zone_","");sub(".network","");print $1}}')
+        zone=$(get_zone_of_interface "${if_name##br-}")
         on_zones="$on_zones $zone"
       fi
       dhcpignore="$(uci_get dhcp.${lastnetwork}.ignore)"

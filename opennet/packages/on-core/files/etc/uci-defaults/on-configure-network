@@ -11,12 +11,14 @@ set -eu
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
+
 configure_opennet_zone() {
-	local zone=opennet
-	local uci_prefix=firewall.zone_$zone
+	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
 	# Zone existiert? Keine Aenderungen ...
-	uci show firewall | grep -q "^firewall\.zone_$zone\." && return 0
+	[ -n "$uci_prefix" ] && return 0
+	uci_prefix=firewall.$(uci add firewall zone)
 	uci set "$uci_prefix=zone"
+	uci set "$uci_prefix.name=$ZONE_MESH"
 	# Opennet-APs bieten ueblicherweise keine privaten Dienste an
 	uci set "$uci_prefix.input=ACCEPT"
 	# ausgehende Pakete sind OK
@@ -24,7 +26,7 @@ configure_opennet_zone() {
 	# Verkehr aus dem opennet-Netz darf nicht in lokale oder tunnel-Netze
 	uci set "$uci_prefix.forward=REJECT"
 	# via "masq_src" ersetzen wir die ehemalige "/etc/firewall.opennet" fuer Quell-basiertes Masquerading
-	add_zone_forward local "$zone"
+	add_zone_forward local "$ZONE_MESH"
 	update_opennet_zone_masquerading
 }
 

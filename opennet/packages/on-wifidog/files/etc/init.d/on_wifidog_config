@@ -47,18 +47,19 @@ start() {
 		append batch "set network.0.ipaddr=${free_ipaddr_first}${N}"
 		append batch "set network.0.netmask=${free_netmask}${N}"
 
-		append batch "set firewall.zone_free=zone${N}"
-		append batch "set firewall.zone_free.name=free${N}"
-		append batch "set firewall.zone_free.network=free${N}"
-		append batch "set firewall.zone_free.forward=ACCEPT${N}"
-		append batch "set firewall.zone_free.input=ACCEPT${N}"
-		append batch "set firewall.zone_free.output=ACCEPT${N}"
-
 		append batch "set dhcp.@dnsmasq[0].nonwildcard=1${N}"
 
 		append batch "set luci.flash_keep.wifidog=/etc/wifidog.conf${N}"
 
 		echo "$batch${N}commit network${N}commit dhcp${N}commit luci${N}" | uci -q batch
+
+		# Firewall-Zone fuer das offene Netzwerk einrichten
+		uci_prefix=firewall.$(uci add firewall zone)
+		uci_set "${uci_prefix}.name=$ZONE_FREE"
+		uci_set "${uci_prefix}.network=$NETWORK_FREE"
+		uci_set "${uci_prefix}.forward=REJECT"
+		uci_set "${uci_prefix}.input=ACCEPT"
+		uci_set "${uci_prefix}.output=ACCEPT"
 
 		section=$(uci add firewall forwarding)
 		uci set firewall.$section.src='free'
@@ -123,8 +124,9 @@ start() {
 	tmp_conf_file=/tmp/dhcp-fwd.conf.tmp
 	dest_conf_file=/etc/dhcp-fwd.conf
 	cp /etc/dhcp-fwd.conf.opennet_template "$tmp_conf_file"
-	for network in $(uci_get firewall.zone_opennet.network); do
-		ifname=$(uci_get network.$network.ifname)
+	uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
+	for network in $(uci_get "${uci_prefix}.network"); do
+		ifname=$(uci_get "network.$network.ifname")
 		[ -n "$ifname" -a "$ifname" != "none" ] && echo "if $ifname false true true" >>"$tmp_conf_file"
 	done
 	if cmp -s "$tmp_conf_file" "$dest_conf_file"; then

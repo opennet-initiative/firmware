@@ -27,20 +27,20 @@ start() {
 		append batch "set network.on_vpn=interface${N}"
 		append batch "set network.on_vpn.proto=none${N}"
 		append batch "set network.on_vpn.ifname=tun0${N}"
-
-		append batch "set firewall.zone_on_vpn=zone${N}"
-		append batch "set firewall.zone_on_vpn.name=on_vpn${N}"
-		append batch "set firewall.zone_on_vpn.network=on_vpn${N}"
-		append batch "set firewall.zone_on_vpn.forward=ACCEPT${N}"
-		append batch "set firewall.zone_on_vpn.input=ACCEPT${N}"
-		append batch "set firewall.zone_on_vpn.output=ACCEPT${N}"
-		append batch "set firewall.zone_on_vpn.masq=1${N}"
-
 		echo "$batch${N}commit network${N}" | uci -q batch
 
-		section=$(uci add firewall forwarding)
-		uci set firewall.$section.src='local'
-		uci set firewall.$section.dest='on_vpn'
+		local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_TUNNEL")
+		[ -z "$uci_prefix" ] && uci_prefix="firewall.$(uci add firewall zone)"
+		uci set "${uci_prefix}.name=$ZONE_TUNNEL"
+		uci set "${uci_prefix}.network=$NETWORK_TUNNEL"
+		uci set "${uci_prefix}.forward=REJECT"
+		uci set "${uci_prefix}.input=REJECT"
+		uci set "${uci_prefix}.output=ACCEPT"
+		uci set "${uci_prefix}.masq=1"
+
+		local section=$(uci add firewall forwarding)
+		uci set "firewall.${section}.src=local"
+		uci set "firewall.${section}.dest=on_vpn"
 
 		uci commit firewall
 	fi
@@ -65,7 +65,7 @@ start() {
 		uci set "${prefix}.ns_cert_type=server"
 		uci set "${prefix}.rport=1600"
 		uci set "${prefix}.script_security=2 execve"
-		uci add_list "${prefix}.remote=remote"
+		uci_add_list "${prefix}.remote" remote
 		uci set "${prefix}.remote=192.168.0.254"
 		uci commit "$prefix"
 	fi

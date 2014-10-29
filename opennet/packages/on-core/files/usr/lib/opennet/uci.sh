@@ -70,7 +70,7 @@ uci_delete() {
 # Parameter config: Name der uci-config-Datei
 # Parameter stype: Typ der Sektion (z.B. "zone" oder "LoadPlugin")
 # Parameter Bedingugen:
-find_uci_section() {
+find_all_uci_sections() {
 	local config=$1
 	local stype=$2
 	local section
@@ -83,8 +83,11 @@ find_uci_section() {
 		done
 		# alle Bedingungen trafen zu
 		echo "$config.$section"
-		break
 	done
 	return 0
+}
+
+find_first_uci_section() {
+	find_all_uci_sections "$@" | head -1
 }
 

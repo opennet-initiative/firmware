@@ -421,21 +421,14 @@ ugw_shareInternet () {
 ugw_disableForward () {
 	trap "error_trap ugw_disableForward $*" $GUARD_TRAPS
 	msg_debug "ugw_disableForward"
-	change=""
-	nr=0
-	while [ -n "$(uci_get "firewall.@redirect[$nr]")" ]; do
-		section="firewall.@redirect[$nr]"
-		if [ "$(uci_get "$section.src")" = "opennet" ]; then
-			src_dport="$(uci_get "$section.src_dport")"
-			proto="$(uci_get "$section.proto")"
-			if [ "$src_dport" = "1600" ] || [ "$src_dport" = "123" ] || [ "$src_dport" = "53" ] || [ "$proto" = "icmp" ]; then
-				uci_delete "$section"
-				change=true
-			else
-				: $((nr++))
-			fi
-		else
-			: $((nr++))
+	local uci_prefix
+	local src_dport
+	local proto
+	find_all_uci_sections redirect "src=$ZONE_MESH" | while read uci_prefix; do
+		src_dport="$(uci_get "${uci_prefix}.src_dport")"
+		proto="$(uci_get "${uci_prefix}.proto")"
+		if [ "$src_dport" = "1600" ] || [ "$src_dport" = "123" ] || [ "$src_dport" = "53" ] || [ "$proto" = "icmp" ]; then
+			uci_delete "$section"
 		fi
 	done
 	apply_changes firewall

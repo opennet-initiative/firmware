@@ -14,4 +14,6 @@ uci commit system
 # die Namensaufloesung im Opennet generiert auch 192.168er-Adressen - diese werden durch "rebind_protection" blockiert
 uci set "dhcp.@dnsmasq[0].rebind_protection=0"
 uci commit dhcp
+# dnsmasq neustarten
+reload_config
 

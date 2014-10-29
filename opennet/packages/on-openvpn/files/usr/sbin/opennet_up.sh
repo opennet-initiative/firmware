@@ -25,15 +25,11 @@ echo "vpn-tunnel active" >"$MSG_FILE"	# a short message for the web frontend
 # wir muessen nicht mehr streng sein
 set +e
 
-/etc/init.d/on_config reload
-ip route add default via "$route_vpn_gateway" table tun
+ip route add default via "$route_vpn_gateway" table "$ROUTE_RULE_ON"
 
 # start dhcp-fwd early
 # TODO: why? It should run automatically anyway ...
 [ -f "/etc/init.d/dhcp-fwd" ] && /etc/init.d/dhcp-fwd start
-
-# Empty or non-existing nameserver file? Discover opennet nameservers immediately ...
-[ ! -s "/tmp/resolv.conf.auto" ] && update_dns_servers
 
 # always finish with success
 exit 0

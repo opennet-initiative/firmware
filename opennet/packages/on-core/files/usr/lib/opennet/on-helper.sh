@@ -36,6 +36,7 @@ trap "error_trap __main__ $*" $GUARD_TRAPS
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/olsr.sh"
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/routing.sh"
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/uci.sh"
 
 
 # Schreibe eine log-Nachricht bei fehlerhaftem Skript-Abbruch
@@ -88,72 +89,6 @@ update_file_if_changed() {
 		echo "$content" > "$target_filename"
 		return 0
 	fi
-}
-
-
-uci_is_true() {
-	uci_is_false "$1" && return 1
-	return 0
-}
-
-
-uci_is_false() {
-	local token=$1
-	[ "$token" = "0" -o "$token" = "no" -o "$token" = "off" -o "$token" = "false" ] && return 0
-	return 1
-}
-
-
-# "uci -q get ..." endet mit einem Fehlercode falls das Objekt nicht existiert
-# Dies erschwert bei strikter Fehlerpruefung (set -e) die Abfrage von uci-Werten.
-# Die Funktion "uci_get" liefert bei fehlenden Objekten einen leeren String zurueck
-# oder den gegebenen Standardwert zurueck.
-# Der Exitcode signalisiert immer Erfolg.
-# Syntax:
-#   uci_get firewall.zone_free.masq 1
-# Der abschließende Standardwert (zweiter Parameter) ist optional.
-uci_get() {
-	local key=$1
-	local default=${2:-}
-	if uci -q get "$key"; then
-		return 0
-	else
-		[ -n "$default" ] && echo "$default"
-		return 0
-	fi
-}
-
-
-# Funktion ist vergleichbar mit "uci add_list". Es werden jedoch keine doppelten Einträge erzeugt.
-# Somit entfällt die Prüfung auf Vorhandensein des Eintrags.
-# Parameter: uci-Pfad
-# Parameter: neuer Eintrag
-uci_add_list() {
-	local uci_path=$1
-	local new_item=$2
-	local old_items=$(uci_get "$uci_path")
-	# ist der Eintrag bereits vorhanden?
-	echo " $old_items " | grep -q "\s$new_item\s" && return
-	uci add_list "$uci_path=$new_item"
-}
-
-
-uci_del_list() {
-	local uci_path=$1
-	local remove_item=$2
-	local old_values=$(uci_get "$uci_path")
-	local value
-	uci_delete "$uci_path"
-	for value in $old_values; do
-		[ "$value" = "$remove_item" ] && continue
-		uci add_list "$uci_path=$value"
-	done
-	return 0
-}
-
-
-uci_delete() {
-	uci -q delete "$1" || true
 }
 
 
@@ -226,21 +161,6 @@ add_banner_event() {
 }
 
 
-# ermittle das uci-Praefix fuer eine Quell-Ziel-Weiterleitung der firewall
-_find_zone_forward() {
-	local source=$1
-	local dest=$2
-	uci show firewall|grep "^firewall\.@forwarding\[[0-9]\+\]=forwarding" | cut -f 1 -d = | while read prefix; do
-		[ "$(uci_get "$prefix.src")" != "$source" ] && continue
-		[ "$(uci_get "$prefix.dest")" != "$dest" ] && continue
-		# gefunden!
-		echo "$prefix"
-		return 0
-	done
-	return 0
-}
-
-
 # Lege eine Weiterleitungsregel fuer die firewall an (firewall.@forwarding[?]=...)
 # WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
 # Parameter: Quell-Zone und Ziel-Zone
@@ -248,7 +168,7 @@ add_zone_forward() {
 	local source=$1
 	local dest=$2
 	local section
-	local uci_prefix=$(_find_zone_forward "$source" "$dest")
+	local uci_prefix=$(find_uci_section firewall forwardings "src=$source" "dest=$dest")
 	# die Weiterleitungsregel existiert bereits -> Ende
 	[ -n "$uci_prefix" ] && return 0
 	# neue Regel erstellen
@@ -264,7 +184,7 @@ add_zone_forward() {
 delete_zone_forward() {
 	local source=$1
 	local dest=$2
-	local uci_prefix=$(_find_zone_forward "$source" "$dest")
+	local uci_prefix=$(find_uci_section firewall forwardings "src=$source" "dest=$dest")
 	# die Weiterleitungsregel existiert nicht -> Ende
 	[ -z "$uci_prefix" ] && return 0
 	# Regel loeschen

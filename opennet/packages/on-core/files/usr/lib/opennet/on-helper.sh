@@ -496,3 +496,64 @@ get_file_age_seconds() {
 	return 0
 }
 
+
+get_zone_interfaces() {
+	local zone=$1
+	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
+	# keine Zone -> keine Interfaces
+	[ -z "$uci_prefix" ] && return 0
+	uci_get "${uci_prefix}.network"
+	return 0
+}
+
+
+add_interface_to_zone() {
+	local zone=$1
+	local interface=$2
+	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
+	[ -z "$uci_prefix" ] && msg_debug "failed to add interface '$interface' to non-existing zone '$zone'" && return 1
+	uci_add_list "${uci_prefix}.network" "$interface"
+}
+
+
+del_interface_from_zone() {
+	local zone=$1
+	local interface=$2
+	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
+	[ -z "$uci_prefix" ] && msg_debug "failed to remove interface '$interface' from non-existing zone '$zone'" && return 1
+	uci_del_list "${uci_prefix}.network" "$interface"
+}
+
+
+apply_changes() {
+	local config=$1
+	# keine Aenderungen
+	[ -z "$(uci changes "$config")" ] && return 0
+	uci commit "$config"
+	case "$config" in
+		network|firewall)
+			reload_config || true
+			;;
+		olsrd)
+			/etc/init.d/olsrd restart || true
+			;;
+		*)
+			msg_info "no handler defined for applying config changes for '$config'"
+			;;
+	esac
+	return 0
+}
+
+
+get_zone_of_interface() {
+	local interface=$1
+	local prefix
+	local networks
+	local zone
+	uci show firewall | grep "^firewall\.@zone\[[0-9]\+\]\.network=" | sed 's/=/ /' | while read prefix networks; do
+	zone=$(uci_get "${prefix%.network}.name")
+		echo " $networks " | grep -q "[ \t]$interface[ \t]" && echo "$zone" && return 0
+	done
+	return 1
+}
+

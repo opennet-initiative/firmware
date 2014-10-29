@@ -87,15 +87,6 @@ configure_olsr_single_interface() {
 }
 
 
-add_interface_to_zone() {
-	trap "error_trap add_interface_to_zone $*" $GUARD_TRAPS
-	local iface=$1
-	local zone=$2
-	# Interface zur Zone hinzufuegen
-	uci_add_list "firewall.zone_${zone}.network" "$iface"
-}
-
-
 configure_olsr_interfaces() {
 	trap "error_trap configure_olsr_interfaces $*" $GUARD_TRAPS
 

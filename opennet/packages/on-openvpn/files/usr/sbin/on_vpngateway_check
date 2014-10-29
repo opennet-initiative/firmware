@@ -39,9 +39,15 @@ msg_debug "starting another instance ($@)"
 # echo "starting another instance"
 # check if other instance is running, if yes, kill other instance
 if [ -f "$PID_FILE" ]; then
-	msg_debug "detected '$PID_FILE'"
-	# remove pid file is process is finished
-	kill "$(cat "$PID_FILE")" 2>/dev/null || rm "$PID_FILE"
+	if [ "$(get_file_age_seconds "$PID_FILE")" -lt 180 ]; then
+		# wir geben jedem Prozess mindestens drei Minuten
+		msg_info "older $(basename "$0") process discovered, but it is too young: leaving it alone"
+		exit 0
+	else
+		msg_debug "detected outdated '$PID_FILE': killing presumably stale process"
+		# alten Prozess toeten und PID-Datei entfernen
+		kill "$(cat "$PID_FILE")" 2>/dev/null && rm "$PID_FILE"
+	fi
 fi
 
 # register that process is running

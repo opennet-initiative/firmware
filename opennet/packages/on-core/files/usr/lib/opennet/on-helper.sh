@@ -485,3 +485,14 @@ get_port_forwards() {
 	echo "$client_cn $targetports $((targetports+9))"
 }
 
+
+# ermittle das Alter (vergangene Sekunden seit der letzten Aenderung) einer Datei
+get_file_age_seconds() {
+	local filename=$1
+	[ -e "$filename" ] || return 1
+	local filestamp=$(date --reference "$filename" +%s)
+	local now=$(date +%s)
+	echo $((now - filestamp))
+	return 0
+}
+

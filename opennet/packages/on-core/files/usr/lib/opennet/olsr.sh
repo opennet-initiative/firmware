@@ -10,9 +10,8 @@ OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 # Dieses Skript sollte via hotplug bei Aenderungen der Netzwerkkonfiguration ausgefuehrt werden.
 update_olsr_interfaces() {
 	trap "error_trap update_olsr_interfaces $*" $GUARD_TRAPS
-	uci set -q "olsrd.@Interface[0].interface=$(uci_get firewall.zone_opennet.network)"
-	uci commit olsrd
-	/etc/init.d/olsrd restart || true
+	uci set -q "olsrd.@Interface[0].interface=$(get_zone_interfaces "$ZONE_MESH")"
+	apply_changes olsrd
 }
 
 
@@ -114,11 +113,7 @@ disable_missing_olsr_modules() {
 			uci set "${uci_prefix}.ignore=1"
 		fi
 	done
-	if [ -n "$(uci changes olsrd)" ]; then
-		uci commit olsrd
-		/etc/init.d/olsrd restart >/dev/null || true
-	fi
-	return 0
+	apply_changes olsrd
 }
 
 
@@ -136,10 +131,6 @@ olsr_set_routing_tables() {
 		rt_default_id=$(get_or_add_routing_table "$rt_default")
 		uci set "olsrd.@olsrd[0].RtTableDefault=$rt_default_id"
 	fi
-	if [ -n "$(uci changes olsrd)" ]; then
-		uci commit olsrd
-		/etc/init.d/olsrd restart || true
-	fi
-	return 0
+	apply_changes olsrd
 }
 

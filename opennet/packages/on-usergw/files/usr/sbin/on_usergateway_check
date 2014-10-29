@@ -53,11 +53,7 @@ announce_ugw_service_ugw() {
 	uci set "${uci_prefix}.service=http://${hna}:8080|tcp|ugw upload:$upload download:$download ping:$ping"
 
 	# commit and restart olsrd if necessary
-	if [ -n "$(uci changes olsrd)" ]; then
-		uci commit olsrd
-		/etc/init.d/olsrd restart >/dev/null
-	fi
-	return 0
+	apply_changes olsrd
 }
 
 #################################################################################
@@ -442,10 +438,7 @@ ugw_disableForward () {
 			: $((nr++))
 		fi
 	done
-	if [ -n "$change" ]; then
-		uci commit firewall
-		/etc/init.d/firewall restart >/dev/null
-	fi
+	apply_changes firewall
 }
 
 #################################################################################
@@ -486,11 +479,11 @@ ugw_enableForward () {
 	uci set "firewall.$section.target=DNAT"
 	uci set "firewall.$section.src_dip=$hna"
 	uci set "firewall.$section.dest_ip=$(uci_get olsrd.@olsrd[0].MainIp)"
-	uci commit firewall
-	/etc/init.d/firewall restart >/dev/null
+	apply_changes firewall
 	update_olsr_hna "$hna"
 	announce_olsr_service_ugw "$hna"
 	msg_info "ugw_enableForward restarting olsrd"
+	# TODO: was hat olsrd hier zu tun?
 	/etc/init.d/olsrd restart >/dev/null
 }
 

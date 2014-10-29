@@ -204,11 +204,7 @@ update_opennet_zone_masquerading() {
 		networkprefix=$(get_network "$network")
 		uci add_list "firewall.zone_opennet.masq_src=$networkprefix"
 	done
-	if [ -n "$(uci changes)" ]; then
-		uci commit firewall
-		reload_config || true
-	fi
-	return 0
+	apply_changes firewall
 }
 
 

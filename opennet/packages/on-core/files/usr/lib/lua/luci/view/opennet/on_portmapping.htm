@@ -64,7 +64,7 @@ You may obtain a copy of the License at
 		str:gsub("%S+", function (w) table.insert(t, w) end)
 		return t
 	end
-	data = split(luci.sys.exec("/usr/sbin/on_portcalc.sh"))
+	data = split(luci.sys.exec("/usr/bin/on-function get_port_forwards"))
 	%>
 	<div class="cbi-map">
 		<fieldset class="cbi-section">

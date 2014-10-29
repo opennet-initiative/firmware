@@ -26,10 +26,7 @@ end
 function printFirmwareTitle()
   local on_version = luci.sys.exec("opkg status on-core | awk '{if (/Version/) print $2;}'")
   local on_id = cursor:get("on-core", "settings", "on_id")
-  local on_aps = ""
-  if nixio.fs.access("/usr/sbin/on_portcalc.sh") then
-    on_aps = split(luci.sys.exec("/usr/sbin/on_portcalc.sh"))[1]
-  end
+  local on_aps = split(luci.sys.exec("/usr/bin/on-function get_port_forwards"))[1]
   luci.http.write(luci.i18n.stringf("Opennet Firmware version %s", on_version))
   if on_id then
     luci.http.write(luci.i18n.stringf("-- AP %s", on_id))

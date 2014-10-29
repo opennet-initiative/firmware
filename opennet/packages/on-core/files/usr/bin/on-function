@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Wrapper fuer den Aufruf von Hilfsfunktionen aus den shell-Bibliotheken
+#
+# Aufruf: on-function FUNCTION_NAME [PARAMETER]
+#
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+# "ash" liefert leider nicht den korrekten Wert "function" nach einem Aufruf von "type -t".
+# Also verwenden wir die Textausgabe von "type".
+if echo "$(type "$1")" | grep -q "function$"; then
+	"$@"
+	exit $?
+else
+	echo >&2 "on-function: '$1' is not a function"
+	exit 1
+fi
+

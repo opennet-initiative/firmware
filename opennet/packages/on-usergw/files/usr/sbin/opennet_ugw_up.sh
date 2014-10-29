@@ -33,30 +33,15 @@ append batch "set network.on_${dev}.defaultroute=0${N}"
 append batch "set network.on_${dev}.peerdns=0${N}"
 
 msg_debug "adding new network config for ${dev}"
-        
-echo "$batch${N}commit network" | uci batch
 
-# reload new ubus rpc interface (see http://wiki.openwrt.org/doc/techref/ubus)
-ubus call network reload
+echo "$batch" | uci batch
+apply_changes network
 
-zone_on_ifaces="$(uci_get firewall.zone_opennet.network)";
-if [ -z "$(echo $zone_on_ifaces | grep on_${dev})" ]; then
-	msg_debug "adding interface ${dev} to config of firewall zone opennet"
-	uci -q set firewall.zone_opennet.network="$(uci_get firewall.zone_opennet.network) on_${dev}"
-	uci commit firewall
-	msg_debug "applying updated firewall rules for ${dev}"
-	QUIET=-q /etc/init.d/firewall reload
-fi
+# Interface zur opennet-mesh-Zone hinzufuegen
+add_interface_to_zone "$ZONE_MESH" "on_$dev"
+apply_changes firewall
 
-
-olsrd_ifaces="$(uci_get olsrd.@Interface[0].interface)";
-if [ -z "$(echo $olsrd_ifaces | grep on_${dev})" ]; then
-	msg_debug "adding iterface ${dev} to config of olsrd, restarting olsrd"
-	uci -q set olsrd.@Interface[0].interface="${olsrd_ifaces} on_${dev}"
-	uci commit olsrd
-	/etc/init.d/olsrd restart
-fi
-
+update_olsr_interfaces
 
 filename=/tmp/opennet_ugw-${remote_1}.txt
 echo "$dev" > "$filename" # a short message for the web frontend

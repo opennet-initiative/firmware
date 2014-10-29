@@ -17,25 +17,14 @@ msg_debug "starting for iface ${dev}"
 msg_debug "removing network config for ${dev}"
 
 uci delete "network.on_${dev}"
-uci commit network
-
-# reload new ubus rpc interface (see http://wiki.openwrt.org/doc/techref/ubus)
-ubus call network reload
+apply_changes network
 
 msg_debug "removing interface ${dev} from config of firewall zone opennet"
-uci -q set firewall.zone_opennet.network="$(uci_get firewall.zone_opennet.network | \
-        awk '{ x=1; while ( x<=NF ) { if ( $x != "on_'$dev'" ) { printf $x" "; } x++ } printf "\n"}')"
-uci commit firewall
-
-# removing on_tapX (tapX) from firewall zone opennet
-msg_debug "removing firewall-rules for ${dev}"
-reload_config
+del_interface_from_zone "$ZONE_MESH" "on_$dev"
+apply_changes firewall
 
 msg_debug "removing interface ${dev} from config of olsrd, restarting olsrd"
-uci -q set olsrd.@Interface[0].interface="$(uci_get olsrd.@Interface[0].interface | \
-        awk '{ x=1; while ( x<=NF ) { if ( $x != "on_'$dev'" ) { printf $x" "; } x++ } printf "\n"}')"
-uci commit olsrd
-/etc/init.d/olsrd restart
+update_olsr_interfaces
 
 filename=/tmp/opennet_ugw-${remote_1}.txt
 rm -f "$filename"    # removing running message

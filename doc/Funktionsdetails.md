@@ -75,7 +75,11 @@ Gateway-Auswahl
 * minütlich:
  * Auslesen aus /var/run/services_olsr
  * Sortieren nach Entfernung (falls automatisch)
- * Ändern, falls fünf Minuten lang ein anderer GW als der aktuelle der Beste ist
+
+Gateway-Wechsel
+^^^^^^^^^^^^^^^
+
+Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann erhäht er den Wert der Gateway-Variable "common/better_gw". Sobald dieser Variable den Wert fünf erreicht hat, wird die neue Gateway-IP in die openvpn-Konfiguration übertragen und openvpn neu gestartet.
 
 
 Datensammlung: ondataservice

@@ -272,6 +272,19 @@ Alle Funktionen werden durch die folgende Zeile im globalen Namensraum verfügba
   . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
+Funktionen ausprobieren
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Alle Funktionen aus den shell-Bibliotheken lassen sich folgendermaßen prüfen:
+
+  on-function get_zone_interfaces on_mesh
+
+Dabei ist zu debug-Zwecken auch die ausführliche Ausführungsprotokollierung verfügbar:
+
+  ON_DEBUG=1 on-function get_zone_interfaces on_mesh
+
+
+
 Fehlerbehandlung
 ^^^^^^^^^^^^^^^^
 
@@ -306,6 +319,43 @@ Alternativ steht diese Funktion zur Verfügung:
   uci_get CONFIG_KEY
 
 Das Ergebnis ist ein leerer String, falls der config-Wert nicht vorhanden oder leer ist. Andernfalls wird der Inhalt zurückgeliefert.
+
+Außerdem ist eine verbesserte Version von ``uci add_list`` verfügbar, die - im Unterschied zum Original - bereits vorhandene Einträge nicht erneut hinzufügt:
+
+  uci_add_list CONFIG_KEY=NEW_VALUE
+
+Die Funktion ``uci_delete`` entspricht ihrem Äquivalent (``uci delete``) bis auf die fehlende Fehlermeldung und der Fehlercode im Falle der Löschung eines nicht vorhandenen Knotens:
+
+  uci_delete CONFIG_KEY
+
+
+lua-Skripte
+-----------
+
+Das openwrt-Web-Interface basiert auf lua-Skripten. Der grundlegende Code sollte in den shell-Bibliotheken untergebracht werden - lediglich die für die Darstellung notwendige Logik gehört in die lua-Skripte.
+
+
+Funktionen
+^^^^^^^^^^
+
+Ein paar wenige Funktionen werden von mehreren lua-Skripten verwendet.
+Diese liegen derzeit in der Datei ``on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua``.
+
+Folgende Funktionen sind allgemein verwendbar:
+
+* get_gateway_flag
+* set_gateway_flag
+
+
+Hotplug-System
+--------------
+
+openwrt verwendet ``procd`` für die Behandlung von hotplug-Ereignissen.
+Skripte liegen unter ``/etc/hotplug.d/``. Für unsere netzwerkbasierten Ereignisse (z.B. Hinzufügen neuer olsrd-Interfaces) verwenden wir den hotplug-Typ ``ifcace``.
+
+Der Aufruf von hotplug-Skripten lässt sich folgendermaßen emulieren:
+
+  ACTION=ifup hotplug-call iface
 
 
 Externe Dokumentationen

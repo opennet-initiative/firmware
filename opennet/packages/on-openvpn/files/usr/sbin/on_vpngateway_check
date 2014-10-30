@@ -181,7 +181,8 @@ find_and_select_best_gateway()
 	local gw_ipaddr=
 	local selected_gw=
 	local current_gw_ipaddr=$(uci_get openvpn.opennet_user.remote)
-	local better_gw_count=$(uci_get on-openvpn.@gateways[0].better_gw)
+	local better_gw_count=$(get_gateway_value common better_gw)
+	[ -z "$better_gw_count" ] && better_gw_count=0
 	local next_index=1
 	while [ -n "$(uci_get "on-openvpn.gate_$next_index")" ]; do
 		index=$next_index
@@ -209,7 +210,7 @@ find_and_select_best_gateway()
 		msg_debug "         $gw_ipaddr is known to work"
 
 		# if first gateway is not found yet and route to current $gw_ipaddr exists, try if it's better to use this gateway
-		if [ -z "$selected_gw" ] && [ -n "$(ip route show table "$olsrd_routingTable" | awk '$1 == "'$gw_ipaddr'"')" ]; then
+		if [ -z "$selected_gw" ] && [ -n "$(ip route show table "$ROUTING_TABLE_MESH" | awk '$1 == "'$gw_ipaddr'"')" ]; then
 			msg_debug "checking first found gw - $gw_ipaddr"
 			if [ "$gw_ipaddr" != "$current_gw_ipaddr" ]; then
 				msg_debug "first found gw - $gw_ipaddr != $current_gw_ipaddr"
@@ -219,7 +220,7 @@ find_and_select_best_gateway()
 				# 3) der aktuelle Gateway eine gewisse Zeit lang schlechter war als der aktuell beste
 				if [ -z "$current_gw_ipaddr" ] || \
 						[ "$(get_gateway_value "$current_gw_ipaddr" status)" != "y" ] || \
-						[ $((better_gw_count++)) -gt $bettergateway_timeout ]; then
+						[ "$better_gw_count" -ge "$bettergateway_timeout" ]; then
 					msg_info "found a better gateway, changing to $gw_ipaddr"
 			
 					# set gateway information
@@ -229,14 +230,14 @@ find_and_select_best_gateway()
 					selected_gw=$gw_ipaddr
 				else
 					selected_gw=$current_gw_ipaddr
+					: $((better_gw++))
 				fi
-				uci -q set "on-openvpn.@gateways[0].better_gw=$better_gw_count"
 			else
 				msg_debug "first found gw - $gw_ipaddr == $current_gw_ipaddr"
-				uci -q set on-openvpn.@gateways[0].better_gw=0
+				better_gw_count=0
 				selected_gw=$gw_ipaddr
 			fi
-			uci commit on-openvpn
+			set_gateway_value common better_gw "$better_gw_count"
 		fi
 	done
 	echo "$gw_ipaddr"
@@ -250,13 +251,11 @@ start_stop_openvpn() {
 	# stop vpn-tunnel if its not working because route goes trough ugw-tunnel
 	# this might be a problem on usergateways: before the ugw-tunnel is working, the user-vpn-gateway is reachable
 	# later, if all gateways best reached via the ugw-tunnel, the user-tunnel runs forever complaining about not to work.
-	if [ -n "$(ip route show table "$olsrd_routingTable" | awk '/tap/ && $1 == "'$gw_ipaddr'"')" ]; then
+	if [ -n "$(ip route show table "$ROUTING_TABLE_MESH" | awk '/tap/ && $1 == "'$gw_ipaddr'"')" ]; then
 		if [ -e "$OVPN_MSG_FILE" ]; then
 			msg_info "stopping nonworking gateway"
 			vpn_status stop opennet_user
-			uci -q set on-openvpn.@gateways[0].better_gw=0
-			# commit after every change to prevent uci memory problems
-			uci commit on-openvpn
+			set_gateway_value common better_gw 0
 		fi
 	elif [ -n "$gw_ipaddr" ] && [ ! -e "$VPN_PID_FILE" ]; then
 		vpn_status start opennet_user
@@ -271,13 +270,11 @@ get_gate_ids() {
 #################################################################################
 # check is usually done every minute, therefore values are equal to minutes
 # after how many times gateway-vpn-function should rechecked
-recheck_age=$(uci_get on-openvpn.@gateways[0].vpn_recheck_age)
+recheck_age=$(get_on_openvpn_default vpn_recheck_age)
 # how often it will be tried to establish a connection till gateway is declared as not to work
-nonworking_timeout=$(uci_get on-openvpn.@gateways[0].vpn_nonworking_timeout)
+nonworking_timeout=$(get_on_openvpn_default vpn_nonworking_timeout)
 # how long the current gateway will be kept if a better one is found (small values might result in gateway-flipping)
-bettergateway_timeout=$(uci_get on-openvpn.@gateways[0].vpn_bettergateway_timeout)
-# olsrd routing table
-olsrd_routingTable=$(uci_get olsrd.@olsrd[0].RtTable)
+bettergateway_timeout=$(get_on_openvpn_default vpn_bettergateway_timeout)
 
 
 case "${1:-}" in

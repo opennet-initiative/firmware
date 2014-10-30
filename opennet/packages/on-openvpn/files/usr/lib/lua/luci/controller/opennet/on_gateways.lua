@@ -148,8 +148,8 @@ function action_vpn_gateways()
 			bring_gateway_etx_top(select_gw)
 		end
 		cursor:set("openvpn", "opennet_user", "remote", select_gw)
-		cursor:set("on-openvpn", "gateways", "better_gw", 0)
 		cursor:commit("openvpn")
+		set_gateway_flag("common", "better_gw", "0")
 		os.execute("vpn_status restart opennet_user")
 	end
 	if new_gateway or new_gateway_name or new_blacklist_gateway or new_blacklist_gateway_name or del_section or toggle_gateway_search or toggle_sort_criteria or reset_counter or select_gw then

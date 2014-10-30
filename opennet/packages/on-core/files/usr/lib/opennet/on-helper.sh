@@ -20,6 +20,8 @@ set -eu
 GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
+ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
+ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
 SERVICES_FILE=/var/run/services_olsr
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
@@ -33,6 +35,8 @@ ZONE_TUNNEL=on_vpn
 ZONE_FREE=free
 NETWORK_TUNNEL=on_vpn
 NETWORK_FREE=free
+ROUTING_TABLE_MESH=olsrd
+ROUTING_TABLE_MESH_DEFAULT=olsrd-default
 
 DEBUG=
 
@@ -258,6 +262,8 @@ _set_file_dict_value() {
 # Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
 # Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfuegbar.
 get_on_core_default() { _get_file_dict_value "$ON_CORE_DEFAULTS_FILE" "$1"; }
+get_on_openvpn_default() { _get_file_dict_value "$ON_OPENVPN_DEFAULTS_FILE" "$1"; }
+get_on_usergw_default() { _get_file_dict_value "$ON_USERGW_DEFAULTS_FILE" "$1"; }
 get_on_wifidog_default() { _get_file_dict_value "$ON_WIFIDOG_DEFAULTS_FILE" "$1"; }
 
 

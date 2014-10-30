@@ -185,7 +185,7 @@ You may obtain a copy of the License at
 				<% end %>
 				</table>
 				</form>
-				<% local better_gw=cursor:get("on-openvpn", "gateways", "better_gw")
+				<% local better_gw=get_gateway_flag("common", "better_gw")
 				if  ( better_gw and better_gw ~= "0") then 
 					print(luci.i18n.stringf([[The first reachable and not blocked Gateway is not the current active one. The Tunnel will be restarted and the Gateway will be changed in about %s minutes. The changes will be shown after a reload of this page.]], 6-better_gw))
 				end %>

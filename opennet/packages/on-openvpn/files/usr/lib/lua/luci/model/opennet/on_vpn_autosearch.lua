@@ -51,7 +51,7 @@ function read_services()
         end
       end
       )
-    end  
+    end
     f:close()
   end
   return services_elem
@@ -77,20 +77,24 @@ function delete_gateway_flag(ip, key)
   set_gateway_flag(ip, key, "")
 end
 
+--[[
+Lies eine Zeile (aus dem olsr-Status) ein: IP HOP_COUNT ETX
+ignoriere alle IPs, die nicht in dem services-Array vorhanden sind
+]]--
 function gw_parse(gateways, gws_access, services_olsr, line)
   local tmp_elem = {}
   line:gsub("[^:]+", function (w) table.insert(tmp_elem, w) end)
   local ipaddr = tmp_elem[1]
-  if not gws_access[ipaddr] then
-    new_gw = {}
-    gws_access[ipaddr] = new_gw
-    gws_access[ipaddr].ipaddr = ipaddr
-  end
-  table.insert(gateways, gws_access[ipaddr])
-  set_gateway_flag(ipaddr, "hop", tmp_elem[2])
-  set_gateway_flag(ipaddr, "etx", tmp_elem[3])
-  
   if services_olsr[ipaddr] then
+    if not gws_access[ipaddr] then
+      new_gw = {}
+      gws_access[ipaddr] = new_gw
+      gws_access[ipaddr].ipaddr = ipaddr
+    end
+    table.insert(gateways, gws_access[ipaddr])
+    set_gateway_flag(ipaddr, "hop", tmp_elem[2])
+    set_gateway_flag(ipaddr, "etx", tmp_elem[3])
+
     set_gateway_flag(ipaddr, "upload", services_olsr[ipaddr].upload)
     set_gateway_flag(ipaddr, "download", services_olsr[ipaddr].download)
     set_gateway_flag(ipaddr, "ping", services_olsr[ipaddr].ping)
@@ -129,7 +133,7 @@ function gw_sort(a, b)
       return a.ipaddr > b.ipaddr
     end
   end
-  
+
   return (val_a < val_b)
 end
 
@@ -145,7 +149,7 @@ function update_gateways()
   -- create two tables, one numeric and one associative to access elements by ip-address
   local gateways = {}
   local gws_access = {}
-  
+
   -- build table of all gateways indexed by ip-address
   while old_gws do
 --     table.insert(gateways, old_gws)
@@ -153,18 +157,17 @@ function update_gateways()
     number = number + 1
     old_gws = cursor:get_all("on-openvpn", "gate_"..number)
   end
-  
-  gw_filter = cursor:get("on-openvpn", "gateways", "searchmask")
-  cmd = "echo \"/route\" | nc localhost 2006 | awk 'BEGIN {FS=\"[/\\x09]+\"} "..gw_filter.." {print $1\":\"$4\":\"$5}'"
-  local new_gws = luci.sys.exec(cmd)
-  
+
+  cmd = "echo \"/route\" | nc localhost 2006 | awk 'BEGIN {FS=\"[/\\x09]+\"} "^[0-9]" {print $1\":\"$4\":\"$5}'"
+  local host_routes = luci.sys.exec(cmd)
+
   local services_olsr = read_services()
-  
+
   -- add found gateways to table
-  new_gws:gsub("%S+", function (w) gw_parse(gateways, gws_access, services_olsr, w) end)
-  
+  host_routes:gsub("%S+", function (w) gw_parse(gateways, gws_access, services_olsr, w) end)
+
   table.sort(gateways, function(a,b) return gw_sort(a, b, criteria,order) end)
-  
+
   -- remove all gateways
   cursor:delete_all("on-openvpn", "gateway")
   -- add them with new order
@@ -179,7 +182,7 @@ function update_gateways()
     end
 --     print("k=" , k , "gw=", gw.ipaddr, " hop=", gw.hop, " etx=", gw.etx, " offset=", gw.etx_offset, " status=", gw.status, " age=", gw.age)
   end
-  
+
   cursor:commit("on-openvpn")
 end
 

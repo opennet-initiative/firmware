@@ -12,7 +12,7 @@ You may obtain a copy of the License at
 -%>
 
 <% 	local uci = require "luci.model.uci"
-        require ("luci.model.opennet.on_vpn_autosearch")
+	require("luci.model.opennet.funcs")
 	local cursor = uci.cursor()
 	local SYSROOT = os.getenv("LUCI_SYSROOT")
 	if not SYSROOT then SYSROOT = "" end		-- SYSROOT is only used for local testing (make runhttpd in luci tree)

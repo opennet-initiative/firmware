@@ -57,26 +57,6 @@ function read_services()
   return services_elem
 end
 
-function get_gateway_flag(ip, key)
-  local result = luci.sys.exec("vpn_status get_gateway_flag '"..ip.."' '"..key.."'")
-  if result == "" then
-    return nil
-  else
-    return result
-  end
-end
-
-function set_gateway_flag(ip, key, value)
-  if not value then
-    value = ""
-  end
-  luci.sys.exec("vpn_status set_gateway_flag '"..ip.."' '"..key.."' '"..value.."'")
-end
-
-function delete_gateway_flag(ip, key)
-  set_gateway_flag(ip, key, "")
-end
-
 --[[
 Lies eine Zeile (aus dem olsr-Status) ein: IP HOP_COUNT ETX
 ignoriere alle IPs, die nicht in dem services-Array vorhanden sind

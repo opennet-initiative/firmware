@@ -12,6 +12,7 @@ You may obtain a copy of the License at
 $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 ]]--
 module("luci.controller.opennet.on_usergw", package.seeall)
+require("luci.model.opennet.funcs")
 
 function index()
 	luci.i18n.loadc("on_base")

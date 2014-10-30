@@ -84,48 +84,6 @@ function check_cert_status(type, certstatus)
 	certstatus.on_keycsr_ok = certstatus.on_key_exists and certstatus.on_csr_exists and (certstatus.on_key_modulus == certstatus.on_csr_modulus)
 end
 
-function fill_openssl(uciconfig, openssl)
-	local uci = require "luci.model.uci"
-	local cursor = uci.cursor()
-	openssl.countryName = cursor:get(uciconfig, "openssl", "countryName")
-	openssl.provinceName = cursor:get(uciconfig, "openssl", "provinceName")
-	openssl.localityName = cursor:get(uciconfig, "openssl", "localityName")
-	openssl.organizationalUnitName = cursor:get(uciconfig, "openssl", "organizationalUnitName")
-	openssl.organizationName = luci.http.formvalue("openssl.organizationName")
-    openssl.commonName = luci.http.formvalue("openssl.commonName")
-    if not openssl.commonName then
-        on_id = cursor:get("on-core", "settings", "on_id")
-        if not on_id then on_id = "X.XX" end
-        if (uciconfig == "on-openvpn") then	
-            openssl.commonName = on_id..".aps.on"
-        else
-            openssl.commonName = on_id..".ugw.on"
-        end
-    end
-	openssl.EmailAddress = luci.http.formvalue("openssl.EmailAddress")
-	openssl.days = cursor:get(uciconfig, "openssl", "days")
-end
-
-function generate_csr(type, openssl)
-	local filename = "on_aps"
-	if type == "ugw" then filename = "on_ugws" end
-	if openssl.organizationName and openssl.commonName and openssl.EmailAddress then
-		local command = "export openssl_countryName='"..openssl.countryName.."'; "..
-						"export openssl_provinceName='"..openssl.provinceName.."'; "..
-						"export openssl_localityName='"..openssl.localityName.."'; "..
-						"export openssl_organizationalUnitName='"..openssl.organizationalUnitName.."'; "..
-						"export openssl_organizationName='"..openssl.organizationName.."'; "..
-						"export openssl_commonName='"..openssl.commonName.."'; "..
-						"export openssl_EmailAddress='"..openssl.EmailAddress.."'; "..
-						"openssl req -config /etc/ssl/on_openssl.cnf -batch -nodes -new -days "..openssl.days..
-							" -keyout "..SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".key"..
-							" -out "..SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".csr >/tmp/ssl.out"
-		os.execute(command)
-		nixio.fs.chmod(SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".key", 600)
-		nixio.fs.chmod(SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".csr", 600)
-	end
-end
-
 SYSROOT = os.getenv("LUCI_SYSROOT")
 if not SYSROOT then SYSROOT = "" end		-- SYSROOT is only used for local testing (make runhttpd in luci tree)
 tmpfile = SYSROOT.."/tmp/key.file"

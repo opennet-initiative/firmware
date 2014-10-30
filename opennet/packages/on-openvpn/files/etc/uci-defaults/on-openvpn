@@ -1,0 +1,96 @@
+#!/bin/sh
+
+set -eu
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+configure_tunnel_network() {
+	local uci_prefix=network.on_vpn
+
+	# Abbruch falls das Netzwerk schon vorhanden ist
+	[ -n "$(uci show "$uci_prefix")" ] && return
+
+	# add new network to configuration (to be recognized by olsrd)
+	uci set "${uci_prefix}=interface"
+	uci set "${uci_prefix}.proto=none"
+	uci set "${uci_prefix}.ifname=tun0"
+
+	apply_changes network
+}
+
+
+configure_tunnel_firewall() {
+	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_TUNNEL")
+
+	# Abbruch falls die Zone bereits vorhanden ist
+	[ -n "$(uci show "$uci_prefix")" ] && return
+
+	# Zone fuer ausgehenden Verkehr definieren
+	# TODO: genuegt nicht einfach die WAN-Zone?
+	uci_prefix=firewall.$(uci add firewall zone)
+	uci set "${uci_prefix}.name=$ZONE_TUNNEL"
+	uci set "${uci_prefix}.network=$NETWORK_TUNNEL"
+	uci set "${uci_prefix}.forward=REJECT"
+	uci set "${uci_prefix}.input=REJECT"
+	uci set "${uci_prefix}.output=ACCEPT"
+	uci set "${uci_prefix}.masq=1"
+
+	# Weiterleitung aus dem lokalen Netzwerk heraus erlauben
+	uci_prefix=firewall.$(uci add firewall forwarding)
+	uci set "firewall.${section}.src=$ZONE_LOCAL"
+	uci set "firewall.${section}.dest=$ZONE_TUNNEL"
+
+	apply_changes firewall
+}
+
+
+configure_tunnel_openvpn_settings() {
+	local uci_prefix=openvpn.opennet_user
+
+	# Abbruch falls die Einstellungen bereits definiert sind
+	[ -n "$(uci show "$uci_prefix")" ] && return
+
+	uci set "${uci_prefix}=openvpn"
+	uci set "${uci_prefix}.client=1"
+	uci set "${uci_prefix}.enable=1"
+	uci set "${uci_prefix}.proto=udp"
+	uci set "${uci_prefix}.dev=tun"
+	uci set "${uci_prefix}.persist_key=1"
+	uci set "${uci_prefix}.persist_tun=1"
+	uci set "${uci_prefix}.ca=/etc/openvpn/opennet_user/opennet-ca.crt"
+	uci set "${uci_prefix}.cert=/etc/openvpn/opennet_user/on_aps.crt"
+	uci set "${uci_prefix}.key=/etc/openvpn/opennet_user/on_aps.key"
+	uci set "${uci_prefix}.nobind=1"
+	uci set "${uci_prefix}.comp_lzo=yes"
+	uci set "${uci_prefix}.up=/etc/openvpn/opennet_user/opennet_up.sh"
+	uci set "${uci_prefix}.down=/etc/openvpn/opennet_user/opennet_down.sh"
+	uci set "${uci_prefix}.ns_cert_type=server"
+	uci set "${uci_prefix}.rport=1600"
+	uci set "${uci_prefix}.script_security=2 execve"
+	uci_add_list "${uci_prefix}.remote" remote
+	uci set "${uci_prefix}.remote=192.168.0.254"
+	uci commit "$uci_prefix"
+}
+
+
+configure_on_openvpn_settings() {
+	local uci_prefix=on-openvpn.gateways
+	local uci_file=/etc/config/on-openvpn
+
+	# Abbruch falls bereits Einstellungen vorhanden sind
+	[ -e "$uci_file" ] && return
+
+	touch "$uci_file"
+	uci set "${uci_prefix}=gateways"
+	uci set "${uci_prefix}.autosearch=on"
+	uci set "${uci_prefix}.vpn_sort_criteria=etx"
+	uci commit "$uci_prefix"
+}
+
+
+configure_tunnel_network
+configure_tunnel_firewall
+configure_tunnel_openvpn_settings
+configure_on_openvpn_settings
+

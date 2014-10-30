@@ -51,11 +51,11 @@ initialize_olsrd_policy_routing() {
 	local networkprefix
 	local priority=$OLSR_POLICY_DEFAULT_PRIORITY
 
-	delete_policy_rule table olsrd
-	ip rule add table olsrd prio "$((priority++))"
+	delete_policy_rule table "$ROUTING_TABLE_MESH"
+	ip rule add table "$ROUTING_TABLE_MESH" prio "$((priority++))"
 
-	delete_policy_rule table olsrd-default
-	ip rule add table olsrd-default prio "$((priority++))"
+	delete_policy_rule table "$ROUTING_TABLE_MESH_DEFAULT"
+	ip rule add table "$ROUTING_TABLE_MESH_DEFAULT" prio "$((priority++))"
 
 	# "main"-Regel fuer lokale Quell-Pakete prioritisieren (opennet-Routing soll lokales Routing nicht beeinflussen)
 	# "main"-Regel fuer alle anderen Pakete nach hinten schieben (weniger wichtig als olsr)
@@ -80,13 +80,13 @@ initialize_olsrd_policy_routing() {
 
 	# Pakete in Richtung lokaler Netzwerke (sowie "free") werden nicht von olsrd behandelt.
 	# TODO: koennen wir uns darauf verlassen, dass olsrd diese Regeln erhaelt?
-	delete_throw_routes olsrd
-	delete_throw_routes olsrd-default
+	delete_throw_routes "$ROUTING_TABLE_MESH"
+	delete_throw_routes "$ROUTING_TABLE_MESH_DEFAULT"
 	for network in $(get_zone_interfaces "$ZONE_LOCAL") $(get_zone_interfaces "$ZONE_FREE"); do
 		networkprefix=$(get_network "$network")
 		[ -z "$networkprefix" ] && continue
-		ip route add throw "$networkprefix" table olsrd
-		ip route add throw "$networkprefix" table olsrd-default
+		ip route add throw "$networkprefix" table "$ROUTING_TABLE_MESH"
+		ip route add throw "$networkprefix" table "$ROUTING_TABLE_MESH_DEFAULT"
 	done
 }
 

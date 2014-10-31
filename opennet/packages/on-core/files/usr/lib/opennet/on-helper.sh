@@ -473,7 +473,7 @@ get_port_forwards() {
 	local portbase
 	local targetports
 
-	[ -z "$client_cn" ] && echo >&2 "$(basename "$0"): failed to get Common Name - maybe there is no certificate?" && return 0
+	[ -z "$client_cn" ] && msg_debug "$(basename "$0"): failed to get Common Name - maybe there is no certificate?" && return 0
 
 	if echo "$client_cn" | grep -q '^\(\(1\.\)\?[0-9][0-9]\?[0-9]\?\.aps\.on\)$'; then
 		portbase=10000
@@ -493,7 +493,7 @@ get_port_forwards() {
 	fi
 
 	if [ -z "$cn_address" ] || [ "$cn_address" -lt 1 ] || [ "$cn_address" -gt 255 ]; then
-		echo >&2 "$(basename "$0"): invalidate certificate Common Name ($client_cn)"
+		msg_info "$(basename "$0"): invalidate certificate Common Name ($client_cn)"
 		return 1
 	fi
 

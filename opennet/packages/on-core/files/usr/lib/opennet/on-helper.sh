@@ -210,6 +210,8 @@ update_opennet_zone_masquerading() {
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
 	# Abbruch, falls die Zone fehlt
 	[ -z "$uci_prefix" ] && msg_info "failed to find opennet mesh zone ($ZONE_MESH)" && return 0
+	# masquerading aktiveren (nur fuer die obigen Quell-Adressen)
+	uci set "${uci_prefix}.masq=1"
 	# alle masquerade-Netzwerke entfernen
 	uci_delete "${uci_prefix}.masq_src"
 	# aktuelle Netzwerke wieder hinzufuegen

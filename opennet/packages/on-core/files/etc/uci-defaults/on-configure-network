@@ -114,7 +114,7 @@ configure_olsr_interfaces() {
 		configure_olsr_single_interface "$iface_logical" "$on_ipaddr" "$on_netmask" "$iface_phys"
 		configure_olsr_radio "$iface_index" "$iface_logical" "$iface_phys"
 
-		add_interface_to_zone "$iface_logical" opennet
+		add_interface_to_zone "$ZONE_MESH" "$iface_logical"
 
 		: $((iface_index++))
 	done
@@ -123,7 +123,7 @@ configure_olsr_interfaces() {
 	iface_phys=""
 	iface_logical=on_eth_0
 	configure_olsr_single_interface "$iface_logical" "$on_ipaddr" "$on_netmask" "$iface_phys"
-	add_interface_to_zone "$iface_logical" opennet
+	add_interface_to_zone "$ZONE_MESH" "$iface_logical"
 }
 
 

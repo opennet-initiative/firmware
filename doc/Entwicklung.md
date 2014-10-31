@@ -347,6 +347,14 @@ Folgende Funktionen sind allgemein verwendbar:
 * set_gateway_flag
 
 
+luci-Webinterface
+-----------------
+
+Zum Debuggen von Fehlern im Web-Interface sind folgende Kommandos sinnvoll:
+
+  killall -9 uhttpd; sleep 1; uhttpd -h /www -p 80 -f
+
+
 Hotplug-System
 --------------
 

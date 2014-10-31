@@ -1,4 +1,4 @@
-# no is the numer of the interface, starting from 0
+# no is the number of the interface, starting from 0
 # check /etc/init.d/on_config for usage
 # on_id_1 is the upper part, on_id_2 the lower part of the opennet id
 free_ipschema	"10.3."$((no*10+on_id_1))"."$on_id_2

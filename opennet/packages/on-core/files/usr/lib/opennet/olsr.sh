@@ -80,13 +80,16 @@ enable_nameservice() {
 }
 
 
-# Ermittle die aktuell konfigurierte Main-IP des AP.
-# Notfall: waehle die Standard-IP
-# Setze die olsr-Konfigurationsvariable "MainIp" mit diesem Wert.
+# Setze die Einstellung MainIP in der olsr-Konfiguration:
+# Quelle 1: der erste Parameter
+# Quelle 2: on-core.settings.on_id
+# Quelle 3: die vorkonfigurierte Standard-IP
+# Anschliessend ist "apply_changes olsrd" erforderlich.
 olsr_set_main_ip() {
 	trap "error_trap olsr_set_main_ip $*" $GUARD_TRAPS
 	# Auslesen der aktuellen, bzw. der Standard-IP
-	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
+	local on_id=${1:-}
+	[ -z "$on_id" ] && on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
 	local on_ipschema=$(get_on_core_default on_ipschema)
 	local on_netmask=$(get_on_core_default on_netmask)
 

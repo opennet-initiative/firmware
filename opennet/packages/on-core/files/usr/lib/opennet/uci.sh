@@ -91,3 +91,16 @@ find_first_uci_section() {
 	find_all_uci_sections "$@" | head -1
 }
 
+
+# Erzeuge die notwendigen on-core-Einstellungen fuer uci, falls sie noch nicht existieren.
+# Jede Funktion, die im on-core-Namensraum Einstellungen schreiben moechte, moege diese
+# Funktion zuvor aufrufen.
+prepare_on_uci_settings() {
+	local section
+	# on-core-Konfiguration erzeugen, falls noetig
+	[ -e /etc/config/on-core ] || touch /etc/config/on-core
+	for section in services settings; do
+		uci show | grep -q "^on-core\.${section}\." || uci set "on-core.${section}=$section"
+	done
+}
+

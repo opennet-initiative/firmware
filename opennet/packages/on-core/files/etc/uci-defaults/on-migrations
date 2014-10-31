@@ -94,10 +94,8 @@ fix_firewall_reload() {
 
 # Die Einstellungen "use_olsrd_dns" und "use_olsrd_ntp" sind mit v0.5 hinzugekommen.
 add_use_settings() {
-	# on-core-Konfiguration erzeugen, falls noetig
-	[ -e /etc/config/on-core ] || touch /etc/config/on-core
+	prepare_on_uci_settings
 	# erzeuge die services-Node, falls noetig
-	uci show | grep -q "^on-core\.services\." || uci set "on-core.services=services"
 	for setting in use_olsrd_dns use_olsrd_ntp; do
 		uci show on-core | grep -q "^on-core\.services\.$setting=" && continue
 		uci set "on-core.services.$setting=1"

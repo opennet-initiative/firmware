@@ -36,8 +36,8 @@ function get_ugw_status(ugw_status)
     ugw_status.tunnel_active = (number >= 1)
     
     -- if the forward is set, the sharing is active
-    ugw_status.forwarded_ip = luci.sys.exec("iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS=\"[ :]+\"} /udp dpt:1600 to:/ {printf \$5; exit}'")
-    ugw_status.forwarded_gw = luci.sys.exec("iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS=\"[ :]+\"} /udp dpt:1600 to:/ {printf \$10; exit}'")
+    ugw_status.forwarded_ip = luci.sys.exec("on-function get_ugw_portforward | cut -f 1")
+    ugw_status.forwarded_gw = luci.sys.exec("on-function get_ugw_portforward | cut -f 2")
     
     -- sharing possible
     ugw_status.sharing_wan_ok = false
@@ -296,7 +296,7 @@ function get_forward_active(count)
   local ipaddr = cursor:get("on-usergw", "opennet_ugw"..count, "ipaddr")
   local returnValue = "irrelevant"
   if ipaddr then
-    local forwarded_gw = luci.sys.exec("iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS=\"[ :]+\"} /udp dpt:1600 to:/ {printf \$10; exit}'")
+    local forwarded_gw = luci.sys.exec("on-function get_ugw_portforward | cut -f 2")
     if forwarded_gw == ipaddr then returnValue = "ok" end
   end
   return returnValue

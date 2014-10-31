@@ -31,7 +31,7 @@ announce_ugw_service_ugw() {
 	local gw_found=
 	local index=0
 	local hna="$1"
-	local current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
+	local current_ugw_ipaddr=$(get_ugw_portforward | cut -f 2)
 	[ -z "$current_ugw_ipaddr" ] && return
 
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
@@ -493,7 +493,7 @@ ugw_forwardGW () {
 	local ugw_enabled
 	local ugw_possible
 	local sharing=$(uci_get on-usergw.ugw_sharing.shareInternet)
-	local current_ugw_ipaddr="$(iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600/ {printf $3; exit}')"
+	local current_ugw_ipaddr=$(get_ugw_portforward | cut -f 2)
 
 	if [ "$sharing" != "on" ]; then
 		ugw_disableForward

@@ -87,8 +87,8 @@ function printUserGW()
   -- sharing enabled
   ugw_status.sharing_enabled = (cursor:get("on-usergw", "ugw_sharing", "shareInternet") == "on")
   -- forwarding enabled
-  ugw_status.forwarded_ip = luci.sys.exec("iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS=\"[ :]+\"} /udp dpt:1600 to:/ {printf \$5; exit}'")
-  ugw_status.forwarded_gw = luci.sys.exec("iptables -L zone_opennet_prerouting -t nat -n | awk 'BEGIN{FS=\"[ :]+\"} /udp dpt:1600 to:/ {printf \$10; exit}'")
+  ugw_status.forwarded_ip = luci.sys.exec("on-function get_ugw_portforward | cut -f 1")
+  ugw_status.forwarded_gw = luci.sys.exec("on-function get_ugw_portforward | cut -f 2")
 
   
   if ugw_status.sharing_enabled or ugw_status.sharing_possible then

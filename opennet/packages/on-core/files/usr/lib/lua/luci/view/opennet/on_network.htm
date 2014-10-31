@@ -50,66 +50,7 @@ if (form_id) then
     end
     
     if replace_id then
-        on_ipschema = get_on_core_default("on_ipschema")
-        on_netmask = get_on_core_default("on_netmask")
-        
-        local addrcount = 0
-        local on_base_address = luci.sys.exec("on_id_1="..t[1].."; on_id_2="..t[2].."; no="..addrcount.."; eval echo "..on_ipschema)
-        for index = 1, #devices do
-			local count = 0
-			while (cursor:get_all("network", devices[index]..count)) do
-				if (cursor:get("network", devices[index]..count, "ifname") ~= "none") then
-					if addrcount == 0 then on_ipaddr = on_base_address
-					else on_ipaddr = luci.sys.exec("on_id_1="..t[1].."; on_id_2="..t[2].."; no="..addrcount.."; eval echo "..on_ipschema)
-					end
-					cursor:set("network", devices[index]..count, "proto", "static")
-					cursor:set("network", devices[index]..count, "ipaddr", on_ipaddr)
-					cursor:set("network", devices[index]..count, "netmask", on_netmask)
-					addrcount = addrcount + 1
-				end
-				count = count + 1
-			end
-		end
-        
-		olsrd = cursor:get_all("olsrd")
-		for k, v in pairs(olsrd) do
-			if v.RtTableDefault then	-- just to find the right section, it also contains RtTableDefault
-				cursor:set("olsrd", k, "MainIp", on_base_address)
-				break
-			end
-		end
-
-		free_ipschema = get_on_wifidog_default("free_ipschema")
-		free_netmask = get_on_wifidog_default("free_netmask")
-
-		if free_ipschema then
-			free_ipaddr = luci.sys.exec("on_id_1="..t[1].."; on_id_2="..t[2].."; no=0; eval echo "..free_ipschema)
-			cursor:set("network", "free", "proto", "static")
-			cursor:set("network", "free", "ipaddr", free_ipaddr)
-			cursor:set("network", "free", "netmask", free_netmask)			
-		end
-		
-		redirects = cursor:get_all("firewall")
-		for k, v in pairs(redirects) do
-			if v.src == "opennet" and v.proto == "udp" and v.src_dport == "67" and v.target == "DNAT" and v.src_port == "67" then
-				cursor:set("firewall", k, "dest_ip", free_ipaddr)
-				cursor:set("firewall", k, "src_dip", on_base_address)
-			end
-		end
-		
-        cursor:set("on-core", "settings", "on_id", t[1].."."..t[2])
-        cursor:foreach("system", "system", function(s)
-			cursor:set("system", s[".name"], "hostname", "AP-"..t[1].."-"..t[2])
-		end)
-        cursor:commit("network")
-        cursor:commit("firewall")
-        cursor:commit("olsrd")
-        cursor:commit("on-core")
-        cursor:commit("system")
-
-        configs = { "network", "olsrd", "firewall", "on-core", "system" }
-        cbi_apply_xhr('uci-apply', configs)
-
+	luci.sys.exec("on-function set_opennet_id '"..form_id.."'")
     else
         form_id = on_id
     end

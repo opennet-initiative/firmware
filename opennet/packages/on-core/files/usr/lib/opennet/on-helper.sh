@@ -574,6 +574,106 @@ get_zone_of_interface() {
 }
 
 
+# Liefere die sortierte Liste der Opennet-Interfaces.
+# Prioritaeten:
+# 1. dem Netzwerk ist ein Geraet zugeordnet
+# 2. Netzwerkname beginnend mit "on_wifi", "on_eth", ...
+# 3. alphabetische Sortierung der Netzwerknamen
+get_sorted_opennet_interfaces() {
+	local uci_prefix
+	local order
+	# wir vergeben einfach statische Ordnungsnummern:
+	#   10 - nicht konfigurierte Interfaces
+	#   20 - konfigurierte Interfaces
+	# Offsets basierend auf dem Netzwerknamen:
+	#   1 - on_wifi*
+	#   2 - on_eth*
+	#   3 - alle anderen
+	for network in $(get_zone_interfaces "$ZONE_MESH"); do
+		uci_prefix=network.$network
+		order=20
+		[ "$(uci_get "${uci_prefix}.ifname")" == "none" ] && order=10
+		if [ "${network#on_wifi}" != "$network" ]; then
+			order=$((order+1))
+		elif [ "${network#on_eth}" != "$network" ]; then
+			order=$((order+2))
+		else
+			order=$((order+3))
+		fi
+		echo "$order $network"
+	done | sort -n | cut -f 2 -d " "
+}
+
+
+# Setzen einer Opennet-ID.
+# 1) Hostnamen setzen
+# 2) IPs fuer alle Opennet-Interfaces setzen
+# 3) Main-IP in der olsr-Konfiguration setzen
+# 4) IP des Interface "free" setzen
+# 5) DHCP-Redirect fuer wifidog setzen
+set_opennet_id() {
+	local new_id=$1
+	local network
+	local uci_prefix
+	local ipaddr
+	local main_ipaddr
+	local free_ipaddr
+	local ipschema
+	local netmask
+	local if_counter=0
+	# ID normalisieren (AP7 -> AP1.7)
+	echo "$new_id" | grep -q "\." || new_id=1.$new_id
+	# ON_ID in on-core-Settings setzen
+	prepare_on_uci_settings
+	uci set "on-core.settings.on_id=$new_id"
+	# Hostnamen konfigurieren
+	find_all_uci_sections system system | while read uci_prefix; do
+		uci set "${uci_prefix}.hostname=AP-$(echo "$new_id" | tr . -)"
+	done
+	apply_changes system
+	# IP-Adressen konfigurieren
+	ipschema=$(get_on_core_default on_ipschema)
+	netmask=$(get_on_core_default on_netmask)
+	main_ipaddr=$(get_on_ip "$new_id" "$ipschema" 0)
+	for network in $(get_sorted_opennet_interfaces); do
+		uci_prefix=network.$network
+		[ "$(uci_get "${uci_prefix}.proto")" != "static" ] && continue
+		ipaddr=$(get_on_ip "$new_id" "$ipschema" "$if_counter")
+		uci set "${uci_prefix}.ipaddr=$ipaddr"
+		uci set "${uci_prefix}.netmask=$netmask"
+		: $((if_counter++))
+	done
+	# OLSR-MainIP konfigurieren
+	olsr_set_main_ip "$if_counter"
+	apply_changes olsrd
+	# wifidog-Interface konfigurieren
+	ipschema=$(get_on_wifidog_default free_ipschema)
+	netmask=$(get_on_wifidog_default free_netmask)
+	free_ipaddr=$(get_on_ip "$new_id" "$ipschema" 0)
+	uci_prefix=network.$NETWORK_FREE
+	uci set "${uci_prefix}.proto=static"
+	uci set "${uci_prefix}.ipaddr=$free_ipaddr"
+	uci set "${uci_prefix}.netmask=$netmask"
+	apply_changes network
+	# DHCP-Forwards fuer wifidog
+	# Ziel ist beispielsweise folgendes Setup:
+	#   firewall.@redirect[0]=redirect
+	#   firewall.@redirect[0].src=opennet
+	#   firewall.@redirect[0].proto=udp
+	#   firewall.@redirect[0].src_dport=67
+	#   firewall.@redirect[0].target=DNAT
+	#   firewall.@redirect[0].src_port=67
+	#   firewall.@redirect[0].dest_ip=10.3.1.210
+	#   firewall.@redirect[0].src_dip=192.168.1.210
+	find_all_uci_sections firewall redirect "src=$ZONE_MESH" proto=udp src_dport=67 src_port=67 target=DNAT | while read uci_prefix; do
+		uci set "${uci_prefix}.name=DHCP-Forward Opennet"
+		uci set "${uci_prefix}.dest_ip=$free_ipaddr"
+		uci set "${uci_prefix}.src_dip=$main_ipaddr"
+	done
+	apply_changes firewall
+}
+
+
 # Ermittle den aktuell definierten UGW-Portforward.
 # Ergebnis (tab-separiert fuer leichte 'cut'-Behandlung des Output):
 #   lokale IP-Adresse fuer UGW-Forward

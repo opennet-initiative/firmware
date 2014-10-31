@@ -43,10 +43,12 @@ fuelle die extern definierte Variable "openssl" mit Werten aus den Konfiguration
 "domain" ist "on-openvpn" oder "on-usergw" (siehe auch "get_default_value")
 ]]--
 function fill_openssl(domain, openssl)
-	openssl.countryName = get_default_value(domain, "openssl", "countryName")
-	openssl.provinceName = get_default_value(domain, "openssl", "provinceName")
-	openssl.localityName = get_default_value(domain, "openssl", "localityName")
-	openssl.organizationalUnitName = get_default_value(uciconfig, "openssl", "organizationalUnitName")
+	local uci = require("luci.model.uci")
+	local cursor = uci.cursor()
+	openssl.countryName = get_default_value(domain, "certificate_countryName")
+	openssl.provinceName = get_default_value(domain, "certificate_provinceName")
+	openssl.localityName = get_default_value(domain, "certificate_localityName")
+	openssl.organizationalUnitName = get_default_value(domain, "certificate_organizationalUnitName")
 	openssl.organizationName = luci.http.formvalue("openssl.organizationName")
 	openssl.commonName = luci.http.formvalue("openssl.commonName")
 	if not openssl.commonName then
@@ -59,7 +61,7 @@ function fill_openssl(domain, openssl)
 		end
 	end
 	openssl.EmailAddress = luci.http.formvalue("openssl.EmailAddress")
-	openssl.days = cursor:get(uciconfig, "openssl", "days")
+	openssl.days = get_default_value(domain, "certificate_days")
 end
 
 

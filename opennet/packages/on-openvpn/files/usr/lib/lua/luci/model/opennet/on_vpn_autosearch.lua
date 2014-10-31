@@ -34,7 +34,7 @@ function read_services()
     for line in f:lines() do
       line:gsub("^http://.*", function (w)
         ipaddr = nil
-        w:gsub("[%d\.]+", function(z) ipaddr = z end, 1)
+        w:gsub("[%d.]+", function(z) ipaddr = z end, 1)
         if not services_elem[ipaddr] then
           services_elem[ipaddr] = {}
           w:gsub("[%a]+:[%d]+", function(z)
@@ -138,7 +138,7 @@ function update_gateways()
     old_gws = cursor:get_all("on-openvpn", "gate_"..number)
   end
 
-  cmd = "echo \"/route\" | nc localhost 2006 | awk 'BEGIN {FS=\"[/\\x09]+\"} "^[0-9]" {print $1\":\"$4\":\"$5}'"
+  cmd = "echo '/route' | nc localhost 2006 | awk 'BEGIN {FS=\"[/\\x09]+\"} '^[0-9]' {print $1\":\"$4\":\"$5}'"
   local host_routes = luci.sys.exec(cmd)
 
   local services_olsr = read_services()

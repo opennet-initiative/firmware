@@ -359,7 +359,10 @@ get_on_firmware_version() {
 }
 
 
-# $1 is on_id, $2 is on_ipschema, $3 is no
+# Parameter:
+#   on_id: die ID des AP - z.B. "1.96" oder "2.54"
+#   on_ipschema: siehe "get_on_core_default on_ipschema"
+#   interface_number: 0..X
 # ACHTUNG: manche Aufrufende verlassen sich darauf, dass on_id_1 und
 # on_id_2 nach dem Aufruf verfuegbar sind (also _nicht_ "local")
 get_on_ip() {
@@ -367,10 +370,10 @@ get_on_ip() {
 	on_ipschema=$2
 	no=$3
 	# split into two seperate fields
-	on_id_1=$(echo $on_id | cut -d"." -f1)
-	on_id_2=$(echo $on_id | cut -d"." -f2)
+	on_id_1=$(echo "$on_id" | cut -d . -f 1)
+	on_id_2=$(echo "$on_id" | cut -d . -f 2)
 	if [ -z "$on_id_2" ]; then
-		on_id_2=on_id_1
+		on_id_2=$on_id_1
 		on_id_1=1
 	fi
 	echo $(eval echo $on_ipschema)

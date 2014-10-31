@@ -1,7 +1,14 @@
 # Standard-IP-Adresse
+CONFIG_IMAGEOPT=y
+CONFIG_PREINITOPT=y
 CONFIG_TARGET_PREINIT_IP="172.16.0.1"
 CONFIG_TARGET_PREINIT_NETMASK="255.255.255.0"
 CONFIG_TARGET_PREINIT_BROADCAST="172.16.0.255"
+CONFIG_VERSIONOPT=y
+# TODO: die URL funktioniert noch nicht und muss final diskutiert werden
+CONFIG_VERSION_REPO="http://downloads.opennet-initiative.de/openwrt/testing/%V-%R/%T/packages"
+CONFIG_VERSION_MANUFACTURER="Opennet Initiative Rostock"
+
 
 CONFIG_BUSYBOX_CUSTOM=y
 CONFIG_BUSYBOX_CONFIG_ARP=y

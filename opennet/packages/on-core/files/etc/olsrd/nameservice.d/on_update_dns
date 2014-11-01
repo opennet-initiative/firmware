@@ -1,6 +1,4 @@
 #!/bin/sh
 
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-
-update_dns_servers
+on-function update_dns_servers
 

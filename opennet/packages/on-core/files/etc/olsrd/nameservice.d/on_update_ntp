@@ -1,6 +1,4 @@
 #!/bin/sh
 
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-
-update_ntp_servers
+on-function update_ntp_servers
 

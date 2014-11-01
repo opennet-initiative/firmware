@@ -226,7 +226,7 @@ on_wifidog_status="$(pidof wifidog >/dev/null && echo "1" || echo "0")"
 on_wifidog_id="$(awk '{if ($1 == "GatewayID") print $2}' /etc/wifidog.conf 2>/dev/null)"
 
 on_vpn_status="$([ -e /tmp/openvpn_msg.txt ] && echo 1 || echo 0)"
-on_vpn_cn="$(. \"${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh\"; get_client_cn)"
+on_vpn_cn="$(get_client_cn)"
 on_vpn_gw="$(uci_get openvpn.opennet_user.remote)"
 on_vpn_autosearch="$([ "$(uci_get on-openvpn.gateways.autosearch)" = "on" ] && echo "1" || echo "0")"
 on_vpn_sort="$(uci_get on-openvpn.gateways.vpn_sort_criteria)"

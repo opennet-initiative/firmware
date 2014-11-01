@@ -4,5 +4,5 @@ set -eu
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
-get_or_add_routing_table "$ROUTE_RULE_ON"
+get_or_add_routing_table "$ROUTE_RULE_ON" >/dev/null
 

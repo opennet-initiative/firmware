@@ -370,16 +370,12 @@ get_on_firmware_version() {
 # ACHTUNG: manche Aufrufende verlassen sich darauf, dass on_id_1 und
 # on_id_2 nach dem Aufruf verfuegbar sind (also _nicht_ "local")
 get_on_ip() {
-	on_id=$1
-	on_ipschema=$2
-	no=$3
-	# split into two seperate fields
+	local on_id=$1
+	local on_ipschema=$2
+	local no=$3
+	echo "$on_id" | grep -q "\." || on_id=1.$on_id
 	on_id_1=$(echo "$on_id" | cut -d . -f 1)
 	on_id_2=$(echo "$on_id" | cut -d . -f 2)
-	if [ -z "$on_id_2" ]; then
-		on_id_2=$on_id_1
-		on_id_1=1
-	fi
 	echo $(eval echo $on_ipschema)
 }
 
@@ -557,6 +553,9 @@ apply_changes() {
 		olsrd)
 			/etc/init.d/olsrd restart || true
 			;;
+		openvpn)
+			/etc/init.d/openvpn reload || true
+			;;
 		*)
 			msg_info "no handler defined for applying config changes for '$config'"
 			;;
@@ -648,7 +647,7 @@ set_opennet_id() {
 		: $((if_counter++))
 	done
 	# OLSR-MainIP konfigurieren
-	olsr_set_main_ip "$if_counter"
+	olsr_set_main_ip "$main_ipaddr"
 	apply_changes olsrd
 	# wifidog-Interface konfigurieren
 	ipschema=$(get_on_wifidog_default free_ipschema)

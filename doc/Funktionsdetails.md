@@ -147,6 +147,29 @@ Das Initialisierungsskript /etc/uci-defaults/on-olsr-setup wird bei der Erstinst
 Es aktiviert da ondataservice-Plugin.
 
 
+Erstkonfiguration
+-----------------
+
+Nach einer frischen Installation, sowie im Anschluss an ein Firmware-Upgrade wird eine Reihe von Skripten zur Initialisierung ausgeführt.
+Openwrt stellt hierfür den //uci-defaults//-Mechanismus bereit:
+
+  http://wiki.openwrt.org/doc/uci#defaults
+
+Für alle Aktivitäten, die nach der Installation oder einem Upgrade notwendig sind, existieren in den Opennet-Paketen Dateien unterhalb von ``/usr/lib/opennet/init/``.
+Diese Skripte werden als Symlink unter ``/etc/uci-defaults/`` bereitgestellt.
+Nach dem Booten prüft ein openwrt-init-Skript, ob sich Dateien unterhalb von ``/etc/uci-defaults/`` befindet.
+Jede aufgefundene Datei wird ausgeführt und bei Erfolg anschließend gelöscht.
+
+Die Existenz einer Datei in diesem Verzeichnis deutet also auf ein Konfigurationsproblem hin, das gelöst werden sollte.
+
+Standard-IP setzen
+^^^^^^^^^^^^^^^^^^
+
+Das Skript ``/etc/uci-defaults/on-configure-network`` prüft, ob der uci-Wert ``on-core.settings.default_ip_configured`` gesetzt ist.
+Sollte dies nicht der Fall sein, dann wird die IP-Adresse aus der //on-core//-Defaults-Datei ausgelesen und konfiguriert.
+Anschließend wird das obige uci-Flag gesetzt, um eine erneute Konfiguration anch einem Update zu verhindern.
+
+
 Firmware-NG
 ===========
 

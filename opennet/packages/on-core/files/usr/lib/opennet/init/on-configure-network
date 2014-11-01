@@ -12,6 +12,21 @@ set -eu
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
+configure_local_network() {
+	local uci_prefix=network.lan
+	local flag_uci_key=on-core.settings.default_ip_configured
+	prepare_on_uci_settings
+	# das Netzwerk wurde bereits konfiguriert
+	[ -n "$(uci_get "$flag_uci_key")" ] && return 0
+	uci set "${uci_prefix}.ipaddr=$(get_on_core_defaults lan_ipaddr)"
+	uci set "${uci_prefix}.netmask=$(get_on_core_defaults lan_netmask)"
+	apply_changes network
+	# diese Aktion soll nur ein einziges Mal stattfinden
+	uci set "$flag_uci_key=1"
+	uci commit on-core
+}
+
+
 configure_opennet_zone() {
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
 	# Zone existiert? Keine Aenderungen ...
@@ -128,6 +143,7 @@ configure_olsr_interfaces() {
 
 
 # jede Funktion sollte selbst pruefen, ob ihre Aktion bereits abgeschlossen ist
+configure_local_network
 configure_opennet_zone
 configure_olsr_interfaces
 

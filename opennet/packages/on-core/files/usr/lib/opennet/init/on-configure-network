@@ -18,8 +18,8 @@ configure_local_network() {
 	prepare_on_uci_settings
 	# das Netzwerk wurde bereits konfiguriert
 	[ -n "$(uci_get "$flag_uci_key")" ] && return 0
-	uci set "${uci_prefix}.ipaddr=$(get_on_core_defaults lan_ipaddr)"
-	uci set "${uci_prefix}.netmask=$(get_on_core_defaults lan_netmask)"
+	uci set "${uci_prefix}.ipaddr=$(get_on_core_default lan_ipaddr)"
+	uci set "${uci_prefix}.netmask=$(get_on_core_default lan_netmask)"
 	apply_changes network
 	# diese Aktion soll nur ein einziges Mal stattfinden
 	uci set "$flag_uci_key=1"

@@ -42,9 +42,9 @@ announce_ugw_service_ugw() {
 	done
 	[ -z "$gw_found" ] && return
 
-	local download=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" download)
-	local upload=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" upload)
-	local ping=$(ugw_status get_ugw_flag "$current_ugw_ipaddr" ping)
+	local download=$(get_ugw_value "$current_ugw_ipaddr" download)
+	local upload=$(get_ugw_value "$current_ugw_ipaddr" upload)
+	local ping=$(get_ugw_value "$current_ugw_ipaddr" ping)
 
 	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	[ -z "$uci_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && trap "" $GUARD_TRAPS && return 1
@@ -69,20 +69,20 @@ ugw_checkSpeed () {
 	local upload_speed=$(upload "$on_ugw")
 	# no checks if no number is available
 	[ -z "$download_speed" ] && [ -z "$upload_speed" ] && return
-	local prev_download=$(ugw_status get_ugw_flag "$ipaddr" download)
-	local prev_upload=$(ugw_status get_ugw_flag "$ipaddr" upload)
-	[ -z "$prev_download" -o "$prev_download" = "0" ] && ugw_status set_ugw_flag "$ipaddr" download "$download_speed"
-	[ -z "$prev_upload" -o "$prev_upload" = "0" ] && ugw_status set_ugw_flag "$ipaddr" upload "$upload_speed"
+	local prev_download=$(get_ugw_value "$ipaddr" download)
+	local prev_upload=$(get_ugw_value "$ipaddr" upload)
+	[ -z "$prev_download" -o "$prev_download" = "0" ] && set_ugw_value "$ipaddr" download "$download_speed"
+	[ -z "$prev_upload" -o "$prev_upload" = "0" ] && set_ugw_value "$ipaddr" upload "$upload_speed"
 	if [ -n "$prev_download" ] && [ "$prev_download" != "0" ] &&
 			[ -n "$prev_upload" ] && [ "$prev_upload" != "0" ]; then
-		ugw_status set_ugw_flag "$ipaddr" download "$(((download_speed+prev_download)/2))"
-		ugw_status set_ugw_flag "$ipaddr" upload "$(((download_speed+prev_upload)/2))"
+		set_ugw_value "$ipaddr" download "$(((download_speed+prev_download)/2))"
+		set_ugw_value "$ipaddr" upload "$(((download_speed+prev_upload)/2))"
 		# no significant change? Keep previous timestamp.
 		if [ "$((download_speed/1000))" = "$((prev_download/1000))" ] && [ "$((upload_speed/1000))" = "$((prev_upload/1000))" ]; then
-			ugw_status set_ugw_flag "$ipaddr" speed_time_prev "$(ugw_status get_ugw_flag "$ipaddr" speed_time)"
+			set_ugw_value "$ipaddr" speed_time_prev "$(get_ugw_value "$ipaddr" speed_time)"
 		fi
 	fi
-	ugw_status set_ugw_flag "$ipaddr" speed_time "$(date +%s)"
+	set_ugw_value "$ipaddr" speed_time "$(date +%s)"
 }
 
 #################################################################################
@@ -144,14 +144,17 @@ ugw_checkVPN()
 # check all stored Usergateways for working VPN (on port 1600)
 ugw_checkVPNs () {
 	local nr
+	local ipaddr
 	msg_debug "ugw_checkVPNs"
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
+		ipaddr=$(uci_get "on-usergw.opennet_ugw${nr}.ipaddr")
 		# do VPNchecks only if WAN-Connection is established
-		if [ "$(uci_get "on-usergw.opennet_ugw${nr}.wan")" != "ok" ]; then
-			msg_info "ugw_checkVPNs skipped for gw $((nr++)), not connected trough WAN"
+		if [ "$(get_ugw_value "$ipaddr" wan)" != "ok" ]; then
+			msg_info "ugw_checkVPNs skipped for gw $nr ($ipaddr), not connected trough WAN"
 		else
-			ugw_checkVPN "$((nr++))"
+			ugw_checkVPN "$nr"
 		fi
+		: $((nr++))
 	done
 }
 
@@ -166,6 +169,7 @@ ugw_getMTU () {
 	local ca=$(uci_get on-usergw.opennet_ugw.ca)
 	local cert=$(uci_get on-usergw.opennet_ugw.cert)
 	local key=$(uci_get on-usergw.opennet_ugw.key)
+	[ ! -e "$cert" ] && msg_debug "Skipping ugw_getMTU due to missing certificacte" && return 0
 	local pidfile="/tmp/openvpn_mtutest_$$.pid"
 	local outfile="/tmp/openvpn_mtutest_$$.out"
 	local openvpn_ugw_test_parameters="--mtu-test --remote $remote $rport --tls-client --ns-cert-type server \
@@ -215,13 +219,15 @@ ugw_getMTU () {
 # $1=nr
 ugw_checkMTU () {
 	trap "error_trap ugw_checkMTU $*" $GUARD_TRAPS
+	local uci_prefix=on-usergw.opennet_ugw$1
+	local ipaddr=$(uci_get "${uci_prefix}.ipaddr" ipaddr)
 	echo "ugw_checkMTU" >"$DATA_LOCK_FILE"
-	if [ "$(uci_get "on-usergw.opennet_ugw${1}.wan")" != "ok" ]; then
+	if [ "$(get_ugw_value "$ipaddr" wan)" != "ok" ]; then
 		msg_debug "ugw_checkMTU for ugw$1 skipped, please check WAN first"
 		return
 	fi
 	
-	remote=$(uci_get on-usergw.opennet_ugw${1}.name)
+	remote=$(uci_get "${uci_prefix}.name")
 	msg_debug "starting ugw_checkMTU for ugw${1}, $remote"
 	msg_debug "ugw_checkMTU will take around 5 minutes per gateway"
 
@@ -235,22 +241,21 @@ ugw_checkMTU () {
 		local status_output=$(echo "$result" | cut -f 5- -d ,)
 	
 		if [ "$toGW_tried" -le "$toGW_actual" ] && [ "$fromGW_tried" -le "$fromGW_actual" ]; then
-			uci -q set "on-usergw.opennet_ugw${1}.mtu=ok"
+			set_ugw_value "$ipaddr" mtu ok
 		else
-			uci -q set "on-usergw.opennet_ugw${1}.mtu=error"
+			set_ugw_value "$ipaddr" mtu error
 		fi
 
-		uci -q set "on-usergw.opennet_ugw${1}.mtu_msg=$status_output"
-		uci -q set "on-usergw.opennet_ugw${1}.mtu_toGW_tried=$toGW_tried"
-		uci -q set "on-usergw.opennet_ugw${1}.mtu_toGW_actual=$toGW_actual"
-		uci -q set "on-usergw.opennet_ugw${1}.mtu_fromGW_tried=$fromGW_tried"
-		uci -q set "on-usergw.opennet_ugw${1}.mtu_fromGW_actual=$fromGW_actual"
-		uci -q set "on-usergw.opennet_ugw${1}.mtu_time=$(date +%s)"
-		uci -q commit on-usergw
-	fi	
+		set_ugw_value "$ipaddr" mtu_msg "$status_output"
+		set_ugw_value "$ipaddr" mtu_toGW_tried "$toGW_tried"
+		set_ugw_value "$ipaddr" mtu_toGW_actual "$toGW_actual"
+		set_ugw_value "$ipaddr" mtu_fromGW_tried "$fromGW_tried"
+		set_ugw_value "$ipaddr" mtu_fromGW_actual "$fromGW_actual"
+		set_ugw_value "$ipaddr" mtu_time "$(date +%s)"
+	fi
 
-	local mtu=$(uci_get on-usergw.opennet_ugw${1}.mtu)
-	local mtu_msg=$(uci_get on-usergw.opennet_ugw${1}.mtu_msg)
+	local mtu=$(get_ugw_value "$ipaddr" mtu)
+	local mtu_msg=$(get_ugw_value "$ipaddr" mtu_msg)
 	msg_debug "$mtu: ugw_checkMTU for ugw${1}, $remote done"
 	msg_debug "$mtu: $mtu_msg"
 }
@@ -268,28 +273,29 @@ ugw_checkMTUs () {
 # $1=nr
 ugw_checkWAN () {
 	trap "error_trap ugw_checkWAN $*" $GUARD_TRAPS
+	echo "ugw_checkWAN" >"$DATA_LOCK_FILE"
 	local on_ugw=$(uci_get "on-usergw.opennet_ugw${1}.name")
-	local on_ugw_ip=$(query_dns $on_ugw)
 	local on_ugw_targetDev
 	local wandev
-	echo "ugw_checkWAN" >"$DATA_LOCK_FILE"
+	local on_ugw_ip=$(query_dns "$on_ugw")
 	# store or remove stored IP
-	uci -q set "on-usergw.opennet_ugw${1}.ipaddr=$on_ugw_ip"
 	if [ -z "$on_ugw_ip" ]; then
 		msg_info "checkWAN: can't resolve $on_ugw, ignoring"
 		return
 	fi
+	uci -q set "on-usergw.opennet_ugw${1}.ipaddr=$on_ugw_ip"
+	uci -q commit on-usergw
 	on_ugw_targetDev=$(ip route get "$on_ugw_ip" 2>/dev/null | awk '{for (i=1; i<=NF; i++) { if ($i == "dev") print $(i+1); end}}')
 	wandev=$(uci_get network.wan.ifname | cut -f1 -d:)
 	if [ "$on_ugw_targetDev" = "$wandev" ]; then
-		uci -q set "on-usergw.opennet_ugw${1}.wan=ok"
-		time=$(ping -w 5 -q $on_ugw_ip 2>/dev/null| awk 'BEGIN{FS="[ \/]+"} /min\/avg\/max/ {print int($7+0.5)}')
-		ugw_status set_ugw_flag "$on_ugw_ip" ping "$time"
+		set_ugw_value "$on_ugw_ip" wan ok
+		time=$(ping -w 5 -q "$on_ugw_ip" 2>/dev/null| awk 'BEGIN{FS="[ \/]+"} /min\/avg\/max/ {print int($7+0.5)}')
+		set_ugw_value "$on_ugw_ip" ping "$time"
 		msg_debug "checkWAN: $on_ugw routing through wan device: $wandev"
 		msg_debug "checkWAN: $on_ugw avg ping time: $time"
 	else
-		uci -q set "on-usergw.opennet_ugw${1}.wan=error" || true
-		ugw_status set_ugw_flag "$on_ugw_ip" ping "$time" ""
+		set_ugw_value "$on_ugw_ip" wan error
+		set_ugw_value "$on_ugw_ip" ping "$time" ""
 	fi
 }
 
@@ -357,7 +363,7 @@ ugw_syncVPNConfig () {
 ugw_checkSharingBlocked () {
 	trap "error_trap ugw_checkSharingBlocked $*" $GUARD_TRAPS
 	msg_debug "ugw_checkSharingBlocked"
-	local on_share_internet_unblock_time=$(uci_get on-usergw.ugw_sharing.unblock_time)
+	local on_share_internet_unblock_time=$(on-usergw.ugw_sharing.unblock_time)
 	[ -z "$on_share_internet_unblock_time" ] && return
 	if [ "$(date +%s)" -gt "$on_share_internet_unblock_time" ]; then
 		uci_delete on-usergw.ugw_sharing.unblock_time
@@ -371,11 +377,18 @@ ugw_checkSharingBlocked () {
 # check if sharingInternet is possible for every gateway and
 # store 'enabled'-value in openvpn config
 ugw_checkWorking () {
+	local mtu
+	local wan
+	local ipaddr
+	local name
+	local gw_name
+	local enable
 	trap "error_trap ugw_checkWorking $*" $GUARD_TRAPS
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
-		mtu=$(uci_get "on-usergw.opennet_ugw${nr}.mtu") || true
-		wan=$(uci_get "on-usergw.opennet_ugw${nr}.wan")
-		name=$(uci_get "on-usergw.opennet_ugw${nr}.name")
+		ipaddr=$(get_ugw_value "on-usergw.opennet_ugw${nr}.ipaddr")
+		mtu=$(get_ugw_value "$ipaddr" mtu)
+		wan=$(get_ugw_value "$ipaddr" wan)
+		name=$(get_ugw_value "$ipaddr" name)
 		gw_name=$(lua -e "require('luci.model.opennet.on_usergw_syncconfig') print(gw_name('${name}'))")
 
 		enable=$(uci_get "openvpn.${gw_name}.enable")
@@ -405,13 +418,12 @@ ugw_shareInternet () {
 
 		if [ ! -e "/var/run/openvpn-${gw_name}.pid" ] && [ "$sharing" = "on" ] && [ "$enable" = "1" ]; then
 			msg_debug "activating tunnel ${gw_name}"
-			/etc/init.d/openvpn reload
+			apply_changes openvpn
 		elif [ -e /var/run/openvpn-${gw_name}.pid ] && ( [ "$sharing" = "off" ] || [ "$enable" = "0" ] ); then
 			msg_debug "disabling tunnel ${gw_name}"
 			uci -q set "openvpn.${gw_name}.enable=0"
 			# reload all OpenVPN sessions. All deactivated sessions will stay down.
-			/etc/init.d/openvpn reload
-			uci commit openvpn
+			apply_changes openvpn
 		fi
 	done
 }
@@ -635,19 +647,14 @@ case "$ACTION" in
 		ugw_shareInternet
 		;;
 	auto|*)
-		cert_file=$(uci_get on-usergw.opennet_ugw.cert)
-		if [ -e "$cert_file" ]; then
-			ugw_syncVPNConfig
-			ugw_checkWANs
-			ugw_checkVPNs
-			ugw_doExtraChecks
-			ugw_checkSharingBlocked
-			ugw_checkWorking
-			ugw_forwardGW
-			ugw_shareInternet
-		 else
-			msg_debug "skipping UGW checks (no certificate found: $cert_file)"
-		 fi
+		ugw_syncVPNConfig
+		ugw_checkWANs
+		ugw_checkVPNs
+		ugw_doExtraChecks
+		ugw_checkSharingBlocked
+		ugw_checkWorking
+		ugw_forwardGW
+		ugw_shareInternet
 		;;
 esac
 

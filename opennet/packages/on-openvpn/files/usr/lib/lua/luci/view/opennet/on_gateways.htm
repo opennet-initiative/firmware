@@ -96,7 +96,7 @@ You may obtain a copy of the License at
 						if v.name then name = v.name else name = "..." end
 						local active
 						local cur_gw = cursor:get("openvpn", "opennet_user", "remote")
-						if v.ipaddr == cur_gw or v.ipaddr == cur_gw[1] then
+						if cur_gw and (v.ipaddr == cur_gw or v.ipaddr == cur_gw[1]) then
 							if (nixio.fs.access("/tmp/openvpn_msg.txt")) then active="y" else active="n" end
 						end
 						%>

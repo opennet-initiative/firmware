@@ -146,15 +146,6 @@ case "${1:-}" in
 		fi
 		print_status
 	;;
-	set_ugw_flag)
-		# Parameter: GW-IP FLAG VALUE
-		set_ugw_value "$2" "$3" "$4"
-	;;
-	get_ugw_flag)
-		# Parameter: GW-IP FLAG
-		# e.g. "age" or "status" (used by the web-interface)
-		get_ugw_value "$2" "$3"
-	;;
 	"checkWAN")
 		/usr/sbin/on_usergateway_check checkWan &
 		print_status

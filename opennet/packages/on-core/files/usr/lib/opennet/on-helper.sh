@@ -141,11 +141,7 @@ update_ntp_servers() {
 		[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
 		uci_add_list "system.ntp.server" "$host"
 	done
-	if [ -n "$(uci changes system)" ]; then
-		msg_info "updating NTP entries"
-		uci commit system
-		reload_config
-	fi
+	apply_changes system
 }
 
 
@@ -312,7 +308,7 @@ set_ugw_value() {
 # Beispielhafte Eintraege:
 #   http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108         #192.168.2.15
 #   dns://192.168.10.4:53|udp|dns                                           #192.168.10.4
-# Parameter: service-Type (z.B. "gw", "ugw", "dns", "ntp"
+# Parameter: service-Type (z.B. "gw", "ugw", "dns", "ntp")
 # Ergebnis:
 #   HOST:PORT DETAILS
 get_services() {
@@ -547,7 +543,7 @@ apply_changes() {
 	[ -z "$(uci changes "$config")" ] && return 0
 	uci commit "$config"
 	case "$config" in
-		network|firewall)
+		system|network|firewall)
 			reload_config || true
 			;;
 		olsrd)

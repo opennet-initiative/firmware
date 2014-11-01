@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Dieses Skript wird nur ein einziges Mal nach einem Upgrade oder der Erstinstallation ausgefuehrt:
+#   http://wiki.openwrt.org/doc/uci#defaults
+#
+
+set -eu
+
+# cron-Logging abschalten (bis auf Fehlermeldungen)
+# siehe http://wiki.openwrt.org/doc/uci/system#system
+uci set "system.@system[0].cronloglevel=9"
+uci commit system
+
+# die Namensaufloesung im Opennet generiert auch 192.168er-Adressen - diese werden durch "rebind_protection" blockiert
+uci set "dhcp.@dnsmasq[0].rebind_protection=0"
+uci commit dhcp
+# dnsmasq neustarten
+reload_config
+

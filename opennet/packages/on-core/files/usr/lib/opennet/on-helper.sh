@@ -233,6 +233,8 @@ update_opennet_zone_masquerading() {
 _get_file_dict_value() {
 	local status_file=$1
 	local field=$2
+	# fehlende Datei -> kein Ergebnis
+	[ -e "$status_file" ] || return 0
 	awk "{if (\$1 == \"${field}\") { printf \"%s\", \$2; exit 0; }}" "$status_file"
 }
 
@@ -246,6 +248,8 @@ _set_file_dict_value() {
 	local status_file=$1
 	local field=$2
 	local new_value=$3
+	# fehlende Datei? Leer erzeugen ...
+	[ -e "$status_file" ] || touch "$status_file"
 	# Filtere bisherige Zeilen mit dem key heraus.
 	# Fuege anschliessend die Zeile mit dem neuen Wert an.
 	# Die Sortierung sorgt fuer gute Vergleichbarkeit, um die Anzahl der

@@ -35,20 +35,10 @@ fi
 USER_INTERRUPT=13
 trap "rm -f $PID_FILE; logger -t on_vpngateway_check[$$] was killed by another instance; exit $USER_INTERRUPT" TERM INT
 
+# check if other instance is running, if yes, kill other instance (after a grace period for long running processes)
 msg_debug "starting another instance ($@)"
-# echo "starting another instance"
-# check if other instance is running, if yes, kill other instance
-if [ -f "$PID_FILE" ]; then
-	if [ "$(get_file_age_seconds "$PID_FILE")" -lt 180 ]; then
-		# wir geben jedem Prozess mindestens drei Minuten
-		msg_info "older $(basename "$0") process discovered, but it is too young: leaving it alone"
-		exit 0
-	else
-		msg_debug "detected outdated '$PID_FILE': killing presumably stale process"
-		# alten Prozess toeten und PID-Datei entfernen
-		kill "$(cat "$PID_FILE")" 2>/dev/null && rm "$PID_FILE"
-	fi
-fi
+clean_stale_pid_file "$PID_FILE"
+aquire_lock "$PID_FILE" 180 || { msg_info "older $(basename "$0") process discovered, but it is too young: leaving it alone"; exit 0; }
 
 # register that process is running
 # wait till other process is finished
@@ -62,6 +52,7 @@ while [ -f "$PID_FILE" ]; do
 		msg_debug "other instance doesn't finished in time, aborting"
 		exit
 	fi
+	clean_stale_pid_file "$PID_FILE"
 done
 echo "$$" >"$PID_FILE"
 #################################################################################
@@ -165,7 +156,7 @@ check_all_blacklisting()
 	local index=1
 	local ipaddr
 	while [ -n "$(uci_get "on-openvpn.gate_$index")" ] ; do
-		ipaddr=$(uci -q "get on-openvpn.gate_$index.ipaddr")
+		ipaddr=$(uci_get "on-openvpn.gate_${index}.ipaddr")
 		check_blacklisting "$index" && echo "gateway $ipaddr is blacklisted"
 		: $((index++))
 	done

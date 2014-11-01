@@ -398,6 +398,18 @@ aquire_lock() {
 	return 1
 }
 
+
+clean_stale_pid_file() {
+	local pidfile=$1
+	local pid
+	[ -e "$pidfile" ] | return 0
+	pid=$(cat "$pidfile" | sed 's/[^0-9]//g')
+	[ -z "$pid" ] && msg_debug "removing broken PID file: $pidfile" && rm "$pidfile" && return 0
+	[ ! -e "/proc/$pid" ] && msg_debug "removing stale PID file: $pidfile" && rm "$pidfile" && return 0
+	return 0
+}
+
+
 # pruefe einen VPN-Verbindungsaufbau
 # Parameter:
 #   Gateway-IP: die announcierte IP des Gateways

@@ -589,25 +589,13 @@ ugw_doExtraChecks () {
 #################################################################################
 # values are equal to minutes (check is usually done every 5 minutes)
 # time after the gateway is switched when found not working in minutes
-betterusergateway_timeout=$(uci_get on-usergw.@usergw[0].vpn_bettergateway_timeout)
-if [ -z "$betterusergateway_timeout" ]; then
-	betterusergateway_timeout=$(uci -c /etc/config_presets -q get on-usergw.@usergw[0].vpn_bettergateway_timeout)
-	uci -q set "on-usergw.@usergw[0].vpn_bettergateway_timeout=$betterusergateway_timeout"
-fi
+betterusergateway_timeout=$(get_on_usergw_default vpn_bettergateway_timeout)
+
 # after how many times gateway-vpn-function should rechecked
-recheck_age=$(uci_get on-usergw.@usergw[0].vpn_recheck_age)
-if [ -z "$recheck_age" ]; then
-	recheck_age=$(uci -c /etc/config_presets -q get on-usergw.@usergw[0].vpn_recheck_age)
-	uci -q set "on-usergw.@usergw[0].vpn_recheck_age=$recheck_age"
-fi
+recheck_age=$(get_on_usergw_default vpn_recheck_age)
+
 # how often it will be tried to establish a connection till gateway is declared as not to work
-nonworking_timeout=$(uci_get on-usergw.@usergw[0].vpn_nonworking_timeout)
-if [ -z "$nonworking_timeout" ]; then
-	nonworking_timeout=$(uci -c /etc/config_presets -q get on-usergw.@usergw[0].vpn_nonworking_timeout)
-	uci -q set "on-usergw.@usergw[0].vpn_nonworking_timeout=$nonworking_timeout"
-fi
-# olsrd routing table
-olsrd_routingTable=$(uci_get olsrd.@olsrd[0].RtTable)
+nonworking_timeout=$(get_on_usergw_default vpn_nonworking_timeout)
 
 #################################################################################
 # start here - with the menu

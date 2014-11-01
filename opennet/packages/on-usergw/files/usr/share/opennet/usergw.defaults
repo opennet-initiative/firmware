@@ -1,0 +1,9 @@
+vpn_recheck_age			30
+vpn_nonworking_timeout		10
+vpn_bettergateway_timeout	10
+
+certificate_countryName		de
+certificate_provinceName	Mecklenburg-Vorpommern
+certificate_localityName	Rostock
+certificate_organizationalUnitName	user gateways
+certificate_days		3650

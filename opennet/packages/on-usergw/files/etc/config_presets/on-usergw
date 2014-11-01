@@ -1,18 +1,8 @@
-config 'openssl' 'openssl'
-	option 'countryName'	'de'
-	option 'provinceName'	'Mecklenburg-Vorpommern'
-	option 'localityName' 	'Rostock'
-	option 'organizationalUnitName'	'user gateways'
-	option 'days'	'3650'
-
 config 'usergw'
       list 'name'     'erina.on-i.de'
       list 'name'     'subaru.on-i.de'
       list 'centralIP'        '192.168.0.247'
       list 'centralIP'        '192.168.0.248'
-      option 'vpn_recheck_age' '30'
-      option 'vpn_nonworking_timeout' '10'
-      option 'vpn_bettergateway_timeout' '10'
 
 config '192.168.0' 'ugwng_hna_mask'
 

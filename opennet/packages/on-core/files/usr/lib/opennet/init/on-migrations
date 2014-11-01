@@ -26,7 +26,8 @@ set -eu
 coerce_openvpn_comp_lzo() {
 	local new_value
 	local key
-	(uci show openvpn; uci show) | grep "^on-usergw\..*\.comp_lzo=[01]$" | while read line; do
+	# wir wissen nicht genau, ob on-usergw und openvpn existiert - also lieber vorsichtig fragen
+	(uci -q show openvpn; uci -q show on-usergw) | grep "\.comp_lzo=[01]$" | while read line; do
 		new_value=no
 		echo "$line" | grep -q "1$" && new_value=yes
 		key=$(echo "$line" | cut -f 1 -d =)
@@ -34,9 +35,8 @@ coerce_openvpn_comp_lzo() {
 	done
 	if [ -n "$(uci changes openvpn)" -o -n "$(uci changes | grep "^on-usergw\.")" ]; then
 		msg_info "MIGRATION: coerce_openvpn_comp_lzo"
-		uci show | grep -q "^on-usergw" && uci commit on-usergw
-		uci commit openvpn
-		/etc/init.d/openvpn restart
+		uci changes | grep -q "^on-usergw\." && uci commit on-usergw
+		apply_changes openvpn
 	fi
 }
 

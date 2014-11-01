@@ -1,5 +1,5 @@
 function get_gateway_flag(ip, key)
-  local result = luci.sys.exec("on-functions get_gateway_value '"..ip.."' '"..key.."'")
+  local result = luci.sys.exec("on-function get_gateway_value '"..ip.."' '"..key.."'")
   if result == "" then
     return nil
   else
@@ -12,7 +12,7 @@ function set_gateway_flag(ip, key, value)
   if not value then
     value = ""
   end
-  luci.sys.exec("on-functions set_gateway_value '"..ip.."' '"..key.."' '"..value.."'")
+  luci.sys.exec("on-function set_gateway_value '"..ip.."' '"..key.."' '"..value.."'")
 end
 
 function delete_gateway_flag(ip, key)
@@ -29,7 +29,7 @@ function get_default_value(domain, key)
 	else
 		return nil
 	end
-	local result = luci.sys.exec("on-functions '"..func_name.."' '"..ip.."' '"..key.."'")
+	local result = luci.sys.exec("on-function '"..func_name.."' '"..key.."'")
 	if result == "" then
 		return nil
 	else
@@ -54,7 +54,7 @@ function fill_openssl(domain, openssl)
 	if not openssl.commonName then
 		on_id = cursor:get("on-core", "settings", "on_id")
 		if not on_id then on_id = "X.XX" end
-		if (uciconfig == "on-openvpn") then	
+		if (domain == "on-openvpn") then
 			openssl.commonName = on_id..".aps.on"
 		else
 			openssl.commonName = on_id..".ugw.on"

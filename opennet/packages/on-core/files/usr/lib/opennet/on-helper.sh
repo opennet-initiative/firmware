@@ -348,7 +348,8 @@ get_network() {
 		config_get "$1" ifname
 	)
 	if [ -n "$ifname" ] && [ "$ifname" != "none" ]; then
-		ipaddr="$(ip address show label "$ifname" | awk '/inet/ {print $2; exit}')"
+		# TODO: aktuell nur IPv4
+		ipaddr="$(ip address show label "$ifname" | awk '/inet / {print $2; exit}')"
 		[ -z "$ipaddr" ] || { eval $(ipcalc -p -n "$ipaddr"); echo $NETWORK/$PREFIX; }
 	fi
 }

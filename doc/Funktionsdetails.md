@@ -81,6 +81,60 @@ Gateway-Wechsel
 
 Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann erhäht er den Wert der Gateway-Variable "common/better_gw". Sobald dieser Variable den Wert fünf erreicht hat, wird die neue Gateway-IP in die openvpn-Konfiguration übertragen und openvpn neu gestartet.
 
+Datenspeicherung
+^^^^^^^^^^^^^^^^
+
+Für jeden Gateway werden dauerhafte und wechselhafte Eigenschaften gespeichert.
+
+Die dauerhaften Eigenschaften werden via uci unterhalb von ``on-openvpn.gate_*`` gespeichert. Folgende Attribute sind dauerhafter Natur:
+
+* ipaddr
+* name (TODO)
+
+Die wechselhaften Eigenschaften werden im temporären Dateisystem (also im RAM) gespeichert. Dies reduziert Flash-Schreibzugriffe. Die wechselhaften Eigenschaften sind folgende:
+
+* download
+* upload
+* etx
+* hop
+* ping
+
+
+Internet-Freigabe (Usergateways)
+--------------------------------
+
+Datenspeicherung
+^^^^^^^^^^^^^^^^
+
+Für jeden externen Gateway werden dauerhafte und wechselhafte Eigenschaften gespeichert.
+
+Die dauerhaften Eigenschaften werden via uci unterhalb von ``on-usergw.opennet_ugw*`` gespeichert. Folgende Attribute sind dauerhafter Natur:
+
+* ipaddr
+* name
+* rport
+* ca
+* cert
+* key
+
+Die wechselhaften Eigenschaften werden im temporären Dateisystem (also im RAM) gespeichert. Dies reduziert Flash-Schreibzugriffe. Die wechselhaften Eigenschaften sind folgende:
+
+* age
+* download
+* enable
+* mtu_msg
+* mtu_toGW_tried
+* mtu_toGW_actual
+* mtu_fromGW_tried
+* mtu_fromGW_actual
+* mtu_time
+* ping
+* speed_time
+* speed_time_prev
+* status
+* upload
+* wan
+
 
 Datensammlung: ondataservice
 ----------------------------
@@ -127,15 +181,6 @@ Opennet-Erstkonfiguration:
   * on-core: IP- und Netzwerkkonfiguration entsprechend den Opennet-Konventionen, sowie csr-Mailadresse, debug und on_id
 
 
-**TODO**:
-
-* /etc/passwd darf nicht spontan ueberschrieben werden - dabei gehen Nutzeraccounts (z.B.: von anderen Paketen) verloren
-  * stattdessen lediglich das root-Passwort setzen
-* firewall: nicht selbst schreiben, sondern vorhandenes anpassen (unklar, inwieweit sich die Struktur bei openwrt verändert hat)
-  * Hinzufügen der opennet-Zone sollte genügen
-* olsrd-Konfiguration: es genügt wahrscheinlich, nameservice hinzuzufügen, anstelle die komplette Datei zu überschreiben
-* rc.local unveraendert lassen; stattdessen policy-routing in separates init-Skript und local_user weglassen
-
 
 Zeit synchroniseren
 -------------------
@@ -149,22 +194,12 @@ Als NTP-Server sind derzeit (via */etc/config_presets/ntpclient*) folgende konfi
 * 192.168.0.248
 * 192.168.0.254
 
-**TODO**:
-
-* NTP-Server via ntpd konfigurieren (`uci show system.ntp.server`)
-* NTP-Server aus Gateway-Liste (192.168.0.x) ermitteln?
-* Funktion *update_ntp_from_gws* aus *on-openvpn/files/usr/bin/on_vpngateway_check* herausziehen
-
 
 DNS-Server
 ----------
 
 Im Paket *on-openvpn* wird mittels des Skripts *on-openvpn/files/usr/bin/on_vpngateway_check* mit der Funktion *update_dns_from_gws* die Liste der DNS-Server in */tmp/resolv.conf.auto* gepflegt.
 
-
-**TODO**:
-
-* Funktionalität von *on-openvpn* nach *on-core* verschieben
 
 
 ondataservice-Plugin
@@ -192,12 +227,6 @@ Die Zonen-Konfiguration von openwrt wird durch das Paket *on-core* von uns über
 Die Datei *etc/firewall.opennet* fügt anscheinend eine relevante Masquerade-Regel zu den üblichen Regeln hinzu, die mit den normalen uci-Regeln nicht nachgebildet werden kann.
 
 
-**TODO**:
-
-* Datei *etc/firewall.opennet* in eine übliche uci-Firewall-Regel umwandeln
-
-
-
 Nutzer-VPN
 ----------
 Im Paket *on-openvpn* ist das config-preset *on-openvpn* enthalten, das konfigurierbar festlegt, ob alle Gateways als ntp- und DNS-Server verwendet werden sollen.
@@ -215,15 +244,10 @@ Minütlich läuft ein cronjob (*on_vpngateway_check*), der folgendes tut:
   * das ist fuer die automatische gateway-Suche noetig, da die Gateways einen nameservice-Eintrag verteilen
 
 
-
 **TODO**:
 
-* die Einstellung *gw_ntp* (Gateways als NTP-Server nutzen) sollte nicht Teil des on-openvpn-Pakets sein, sondern zu *on-core* verschoben werden
 * prüfen, ob sich die Konfiguration "unseres" OpenVPN-Servers als separate Konfiguration hinzufügen lässt (anstatt die komplette openvpn-Konfiguration zu überschreiben)
 * der Seiteneffekt der nameservice-Plugin-Aktivierung sollte explizit angewiesen werden
-* Verbindungsaufbau wird mit allen vorhandenen Gateways versucht
-  * jeweils nur kurze Verbindungen (via OpenVPN-Parameter 'inactive=10')
-
 
 
 Usergateway
@@ -258,17 +282,12 @@ Die Datei /etc/config_presets/on-usergw enthält default Einstellungen für die 
 Starten eines UGWs:
 
 
-**TODO**:
-
-* die genaue Funktionsweise des ugw-Skripts analysieren und beschreiben
-
-
 Wifidog
 -------
 Das allgemeine Wifidog-Konzept wird unter https://wiki.opennet-initiative.de/wiki/Projekt_Wifidog#DHCP-Ablauf_der_Wifidog-Implementierung
 beschrieben. 
 * Für Wifidog-Knoten ist der 10.3. / 16 Bereich reserviert (config_presets/on-wifidog).
-* Als Authentifizierungsserver wird inez.opennet-initiative.de genutzt. Hier können Nutzer gemanagt/geblockt/... werden. (wifidog.conf.opennet_template).
+* Als Authentifizierungsserver wird inez.opennet-initiative.de genutzt. Hier können Nutzer gemanaged/geblockt/... werden. (wifidog.conf.opennet_template).
 * Alle DHCP Anfragen werden an die 10.1.0.1 und somit inez.on-i.de weitergeleitet (dhcp-fwd.conf.opennet_template).
 * Beim Start (init.d/on_wifidog_config) wird ein *free* Netzwerk erzeugt falls es nicht bereits vorhanden ist.
 

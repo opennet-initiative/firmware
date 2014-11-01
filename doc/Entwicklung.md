@@ -352,7 +352,7 @@ luci-Webinterface
 
 Zum Debuggen von Fehlern im Web-Interface sind folgende Kommandos sinnvoll:
 
-  killall -9 uhttpd; sleep 1; uhttpd -h /www -p 80 -f
+  killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-*; uhttpd -h /www -p 80 -f
 
 
 Hotplug-System

@@ -9,7 +9,7 @@ configure_tunnel_network() {
 	local uci_prefix=network.on_vpn
 
 	# Abbruch falls das Netzwerk schon vorhanden ist
-	[ -n "$(uci show "$uci_prefix")" ] && return
+	[ -n "$(uci_get "$uci_prefix")" ] && return
 
 	# add new network to configuration (to be recognized by olsrd)
 	uci set "${uci_prefix}=interface"
@@ -24,7 +24,7 @@ configure_tunnel_firewall() {
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_TUNNEL")
 
 	# Abbruch falls die Zone bereits vorhanden ist
-	[ -n "$(uci show "$uci_prefix")" ] && return
+	[ -n "$(uci_get "$uci_prefix")" ] && return
 
 	# Zone fuer ausgehenden Verkehr definieren
 	# TODO: genuegt nicht einfach die WAN-Zone?
@@ -49,7 +49,7 @@ configure_tunnel_openvpn_settings() {
 	local uci_prefix=openvpn.opennet_user
 
 	# Abbruch falls die Einstellungen bereits definiert sind
-	[ -n "$(uci show "$uci_prefix")" ] && return
+	[ -n "$(uci_get "$uci_prefix")" ] && return
 
 	uci set "${uci_prefix}=openvpn"
 	uci set "${uci_prefix}.client=1"

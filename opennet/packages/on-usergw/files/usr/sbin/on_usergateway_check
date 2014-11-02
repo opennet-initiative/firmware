@@ -24,13 +24,14 @@ VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
 
 #################################################################################
 # Verkuende den lokalen UGW-Dienst inkl. Geschwindigkeitsdaten via olsr nameservice
-# Parameter: die aktuell announcierte HNA-Adresse des lokalen UGW
-announce_ugw_service_ugw() {
+# Parameter: die aktuell announcierte Service-Adresse des lokalen UGW
+# TODO: Port uebergeben?
+announce_olsr_service_ugw() {
 	trap "error_trap announce_ugw_service_ugw $*" $GUARD_TRAPS
 	local uci_prefix=
 	local gw_found=
 	local index=0
-	local hna="$1"
+	local service_ip=$1
 	local current_ugw_ipaddr=$(get_ugw_portforward | cut -f 2)
 	[ -z "$current_ugw_ipaddr" ] && return
 
@@ -50,7 +51,7 @@ announce_ugw_service_ugw() {
 	[ -z "$uci_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && trap "" $GUARD_TRAPS && return 1
 
 	# announce our ugw service
-	uci set "${uci_prefix}.service=http://${hna}:8080|tcp|ugw upload:$upload download:$download ping:$ping"
+	uci set "${uci_prefix}.service=http://${service_ip}:8080|tcp|ugw upload:$upload download:$download ping:$ping"
 
 	# commit and restart olsrd if necessary
 	apply_changes olsrd
@@ -307,48 +308,6 @@ ugw_checkWANs () {
 	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do ugw_checkWAN "$nr"; done
 }
 
-#################################################################################
-# set or search/replace ugw-HNA in olsrd config
-# $1 == hna to set for olsr
-update_olsr_hna () {
-	trap "error_trap update_olsr_hna $*" $GUARD_TRAPS
-	local found=""
-	local no=0
-	local new_section
-	msg_debug "update_olsr_hna"
-	while [ -n "$(uci_get "olsrd.@Hna4[${no}]")" ]; do
-		if [ "$(uci_get "olsrd.@Hna4[${no}].source")" = "ugw" ]; then
-			uci -q set "olsrd.@Hna4[${no}].netaddr=$1"
-			found=true
-			break
-		fi
-		: $((no++))
-	done
-	if [ -z "$found" ]; then
-		new_section="$(uci add olsrd Hna4)"
-		uci set "olsrd.$new_section.netmask=255.255.255.255"
-		uci set "olsrd.$new_section.netaddr=$1"
-		uci set "olsrd.$new_section.source=ugw"
-	fi
-	uci commit olsrd
-}
-
-#################################################################################
-# mark usage of HNA in olsrd config (for removal by cron-daily/clean_ugw_hna.sh)
-mark_olsr_hna_used () {
-	trap "error_trap mark_olsr_hna_used $*" $GUARD_TRAPS
-	msg_debug "mark_olsr_hna_used"
-	local no=0
-	while ( [ -n "$(uci_get "olsrd.@Hna4[${no}]")" ] ); do
-		if [ "$(uci_get "olsrd.@Hna4[${no}].source")" = "ugw" ]; then
-			uci set "olsrd.@Hna4[${no}].lastused=$(date +%s)"
-			break
-		fi
-		: $((no++))
-	done
-	uci commit olsrd
-}
-
 
 #################################################################################
 # syncs config from on-usergw to openvpn
@@ -447,32 +406,32 @@ ugw_disableForward () {
 }
 
 #################################################################################
-# enable ugw forwarding, add rules from current firewall settings and set hna
+# enable ugw forwarding, add rules from current firewall settings and set service string
 # $1 == ip of gateway to forward to
 ugw_enableForward () {
 	trap "error_trap ugw_enableForward $*" $GUARD_TRAPS
 	msg_debug "ugw_enableForward"
-	hna=$(lua -e "require('luci.model.opennet.on_hna_check') print(getHNA())")
+	local main_ip=$(get_main_ip)
 	section=$(uci add firewall redirect)
 	uci set "firewall.$section.src=opennet"
 	uci set "firewall.$section.proto=udp"
 	uci set "firewall.$section.src_dport=1600"
 	uci set "firewall.$section.target=DNAT"
-	uci set "firewall.$section.src_dip=$hna"
+	uci set "firewall.$section.src_dip=$main_ip"
 	uci set "firewall.$section.dest_ip=$1"
 	section=$(uci add firewall redirect)
 	uci set "firewall.$section.src=opennet"
 	uci set "firewall.$section.proto=udp"
 	uci set "firewall.$section.src_dport=123"
 	uci set "firewall.$section.target=DNAT"
-	uci set "firewall.$section.src_dip=$hna"
+	uci set "firewall.$section.src_dip=$main_ip"
 	uci set "firewall.$section.dest_ip=$1"
 	section=$(uci add firewall redirect)
 	uci set "firewall.$section.src=opennet"
 	uci set "firewall.$section.proto=udp"
 	uci set "firewall.$section.src_dport=53"
 	uci set "firewall.$section.target=DNAT"
-	uci set "firewall.$section.src_dip=$hna"
+	uci set "firewall.$section.src_dip=$main_ip"
 	# currently DNS-querys are answered by the usergateway Accesspoint DNS
 	uci set firewall.$section.dest_ip="$(uci_get olsrd.@olsrd[0].MainIp)"
 	# change into thisone if DNS should be forwarded to ugw
@@ -482,14 +441,12 @@ ugw_enableForward () {
 	uci set "firewall.$section.src=opennet"
 	uci set "firewall.$section.proto=icmp"
 	uci set "firewall.$section.target=DNAT"
-	uci set "firewall.$section.src_dip=$hna"
+	uci set "firewall.$section.src_dip=$main_ip"
 	uci set "firewall.$section.dest_ip=$(uci_get olsrd.@olsrd[0].MainIp)"
 	apply_changes firewall
-	update_olsr_hna "$hna"
-	announce_olsr_service_ugw "$hna"
+	announce_olsr_service_ugw "$main_ip"
 	msg_info "ugw_enableForward restarting olsrd"
-	# TODO: was hat olsrd hier zu tun?
-	/etc/init.d/olsrd restart >/dev/null
+	apply_changes olsrd
 }
 
 #################################################################################
@@ -511,8 +468,6 @@ ugw_forwardGW () {
 		ugw_disableForward
 		return
 	fi
-
-	mark_olsr_hna_used
 
 	found_first_ugw=
 	better_ugw_count=$(uci_get on-usergw.ugw_sharing.better_ugw)

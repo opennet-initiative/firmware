@@ -35,7 +35,6 @@ function index()
     entry({"opennet", "opennet_2", "ugw_tunnel", "get_vpn"}, call("get_vpn"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "get_name_button"}, call("get_name_button"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "check_running"}, call("check_running"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "change_hna"}, call("change_hna"), nil).leaf = true
 end
 
 function action_on_usergwNG(ugw_status)
@@ -102,7 +101,7 @@ function action_on_usergwNG(ugw_status)
         os.execute("/etc/init.d/usergw up opennet_user")
     end
     
-    if new_gateway_name or down_section or reset_counter or select_gw or new_hna then
+    if new_gateway_name or down_section or reset_counter or select_gw then
         cursor:commit("on-usergw")
         cursor:unload("on-usergw") -- just to get the real values for del-buttons
     end

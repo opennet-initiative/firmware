@@ -4,8 +4,6 @@ config 'usergw'
       list 'centralIP'        '192.168.0.247'
       list 'centralIP'        '192.168.0.248'
 
-config '192.168.0' 'ugwng_hna_mask'
-
 config 'sharing'    'ugw_sharing'
         option 'shareInternet'  'off'
 #        option 'blockSharing'   '0'

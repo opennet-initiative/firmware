@@ -19,18 +19,6 @@ You may obtain a copy of the License at
 
 <script type="text/javascript">//<![CDATA[
 
-function change_hna() {
-//   if (confirm("<%:Change announced Address (useful if collisions arise).%>"))
-  var hna_xhr = new XHR();
-  hna_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/change_hna', null,
-    function(x) {
-      if (x.responseText)
-        document.getElementById("hna").innerHTML = x.responseText;
-    }
-  );
-  return false;
-}
-
 function check_ugw_status() {
   var run_xhr = new XHR();
   run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/check_ugw_status/', null,

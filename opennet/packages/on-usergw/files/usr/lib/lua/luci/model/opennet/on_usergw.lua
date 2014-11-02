@@ -99,18 +99,6 @@ function check_ugw_status()
     luci.http.write(luci.i18n.string([[Internet-Sharing impossible]]))
   end
   luci.http.write([[</h4></td></tr>]])
-  if cursor:get("on-usergw", "ugwng_hna") then
-    luci.http.write([[<tr><td><h4 class="on_ugw-ugws-status">]])
-    luci.http.write(luci.i18n.string([[<abbr title='Annouced Address, which stands for the local Gateway. This address might be changed automatically if it is announced by some other Gateway in the network'>Usergateway-Address</abbr>:]]))
-    luci.http.write(" <span id='hna'>"..cursor:get("on-usergw", "ugwng_hna").."</span> ")
-    if not ugw_status.sharing_enabled then
-      luci.http.write([[<input id="update_hna_address" class="cbi-button" type="submit" title="]]..luci.i18n.string([[Change announced HNA Address]])..
-        [[" value="]]..luci.i18n.string([[change Address]])..[[" onclick="return change_hna();" ]])
-      if autocheck_running then luci.http.write([[disabled="true"]]) end
-      luci.http.write([[  />]])
-    end
-    luci.http.write([[</h4></td></tr>]])
-  end
   if ugw_status.tunnel_active then
     luci.http.write([[<tr class="cbi-section-table-titles"><td /><td colspan="1"><label class="cbi-value-ugwstatus">]])
     if ugw_status.centralips_no == 0 then
@@ -331,23 +319,9 @@ function check_running()
   end
 end
 
-function change_hna()
-  require('luci.model.opennet.on_hna_check')
-  luci.http.prepare_content("text/plain")
-  luci.http.write(changeHNA())
-end
-
-
 -- aufgerufen via /etc/uci-defaults/on-usergw-vpn-transfer
 -- TODO: Fuer welchen Versionssprung war das relevant? Kann das weg?
 function upgrade()
-  -- set hna_mask if not yet set to preset
-  if not cursor:get("on-usergw", "ugwng_hna_mask") then
-    local preset_cursor = uci.cursor()
-    preset_cursor:set_confdir("/etc/config_presets")
-    cursor:set("on-usergw", "ugwng_hna_mask", preset_cursor:get("on-usergw", "ugwng_hna_mask"))
-  end
-
   -- transfer all openvpn-remote-names back to on-usergw and remove openvpn entries
   local count = 1
   local number_of_gateways = 0

@@ -18,10 +18,8 @@
 set -eu
 
 GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
-UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
 ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
-ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
 SERVICES_FILE=/var/run/services_olsr
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
@@ -44,9 +42,11 @@ DEBUG=
 trap "error_trap __main__ $*" $GUARD_TRAPS
 
 
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/olsr.sh"
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/routing.sh"
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/uci.sh"
+# Module laden
+for fname in olsr.sh routing.sh uci.sh on-usergw.sh; do
+	fname=${IPKG_INSTROOT:-}/usr/lib/opennet/$fname
+	[ -e "$fname" ] && . "$fname"
+done
 
 
 # Schreibe eine log-Nachricht bei fehlerhaftem Skript-Abbruch
@@ -265,7 +265,6 @@ _set_file_dict_value() {
 # Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfuegbar.
 get_on_core_default() { _get_file_dict_value "$ON_CORE_DEFAULTS_FILE" "$1"; }
 get_on_openvpn_default() { _get_file_dict_value "$ON_OPENVPN_DEFAULTS_FILE" "$1"; }
-get_on_usergw_default() { _get_file_dict_value "$ON_USERGW_DEFAULTS_FILE" "$1"; }
 get_on_wifidog_default() { _get_file_dict_value "$ON_WIFIDOG_DEFAULTS_FILE" "$1"; }
 
 
@@ -284,23 +283,6 @@ get_gateway_value() {
 # Parameter value: der neue Inhalt
 set_gateway_value() {
 	_set_file_dict_value "$GATEWAY_STATUS_FILE" "${1}_${2}" "$3"
-}
-
-#################################################################################
-# Auslesen einer Gateway-Information
-# Parameter ip: IP-Adresse des Gateways
-# Parameter key: Informationsschluessel ("age", "status", ...)
-get_ugw_value() {
-	_get_file_dict_value "$UGW_STATUS_FILE" "${1}_${2}"
-}
-
-#################################################################################
-# Aendere eine gateway-Information
-# Parameter ip: IP-Adresse des Gateways
-# Parameter key: Informationsschluessel ("age", "status", ...)
-# Parameter value: der neue Inhalt
-set_ugw_value() {
-	_set_file_dict_value "$UGW_STATUS_FILE" "${1}_${2}" "$3"
 }
 
 # Parse die olsr-Service-Datei
@@ -683,17 +665,5 @@ set_opennet_id() {
 		uci set "${uci_prefix}.src_dip=$main_ipaddr"
 	done
 	apply_changes firewall
-}
-
-
-# Ermittle den aktuell definierten UGW-Portforward.
-# Ergebnis (tab-separiert fuer leichte 'cut'-Behandlung des Output):
-#   lokale IP-Adresse fuer UGW-Forward
-#   externer Gateway
-# TODO: siehe auch http://dev.on-i.de/ticket/49 - wir duerfen uns nicht auf die iptables-Ausgabe verlassen
-get_ugw_portforward() {
-	local chain=zone_${ZONE_MESH}_prerouting
-	# TODO: vielleicht lieber den uci-Portforward mit einem Namen versehen?
-	iptables -L "$chain" -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600 to:/ {printf $3 "\t" $5 "\t" $10; exit}'
 }
 

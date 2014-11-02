@@ -358,12 +358,14 @@ get_on_ip() {
 	echo $(eval echo $on_ipschema)
 }
 
-# find all routes matching a given regex
-# remove trailing "/32"
-get_mesh_ips_by_regex() {
-	local regex="$1"
-	echo /route | nc localhost 2006 | grep "^[0-9\.]\+" | awk '{print $1}' | sed 's#/32$##' | grep "$regex"
+
+# Liefere die aktuell konfigurierte Main-IP zurueck
+get_main_ip() {
+	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
+	local ipschema=$(get_on_core_default on_ipschema)
+	get_on_ip "$on_id" "$ipschema" 0
 }
+
 
 # check if a given lock file:
 # A) exists, but it is outdated (determined by the number of seconds given as second parameter)

@@ -88,15 +88,11 @@ enable_nameservice() {
 olsr_set_main_ip() {
 	trap "error_trap olsr_set_main_ip $*" $GUARD_TRAPS
 	# Auslesen der aktuellen, bzw. der Standard-IP
-	local on_id
-	local on_ipschema
 	local main_ip
 	if [ $# -eq 1 ]; then
 		main_ip=$1
 	else
-		on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
-		on_ipschema=$(get_on_core_default on_ipschema)
-		main_ip=$(get_on_ip "$on_id" "$on_ipschema" 0)
+		main_ip=$(get_main_ip)
 	fi
 
 	# die Main-IP ist die erste IP dieses Geraets

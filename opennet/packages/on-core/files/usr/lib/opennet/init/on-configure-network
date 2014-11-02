@@ -135,7 +135,7 @@ configure_olsr_interfaces() {
 	done
 
 	on_ipaddr=$(get_on_ip "$on_id" "$on_ipschema" "$iface_index")
-	iface_phys=""
+	iface_phys=none
 	iface_logical=on_eth_0
 	configure_olsr_single_interface "$iface_logical" "$on_ipaddr" "$on_netmask" "$iface_phys"
 	add_interface_to_zone "$ZONE_MESH" "$iface_logical"

@@ -1,0 +1,29 @@
+= v0.5 - ??.11.2014 =
+
+== Sichtbare Änderungen ==
+* weniger Flash-Belastung für Nutzergeräte (mit VPN-Tunnel) -> weniger Ausfälle
+* gelegentliche Verbindungsverluste von UGW-Routern korrigiert
+* 5-GHz-Kanäle (auch Outdoor) sind nun im Master-Modus verfügbar (zuvor nur indoor-Kanäle)
+* Unterstützung vieler neuer Geräte (aktuelle Versionen von TL-WR1043nd, Nanostations, ...)
+* bessere Voreinstellung der Netzwerkkonfiguration von 5-GHz-Geräten
+* Client-Isolation ist automatisch aktiviert
+* Firewall-Konfiguration für Zugänglichkeit vom VPN-Gateway und Nachbarknoten aus korrigiert
+
+== Technikdetails ==
+* VPN-Tunnel-Statistiken werden nicht mehr mehrmals pro Minute im Flash gespeichert
+** http://dev.on-i.de/changeset/f31d724437b255d18f90b74bc56f9f97e542b508/on_firmware
+* keine HNA-Veröffentlichung durch Gateway-Server und UGW-Router
+** ???
+** stattdessen reine Announcierung via olsrd-Nameservice
+* DNS-Konfiguration via olsrs-nameservice-Announcements:
+** http://dev.on-i.de/changeset/079254f4b8ab7dd0757bfdd39af84637f7bbbceb/on_firmware
+** es gibt nun keine gegenseitigen DNS-Anfragen der UGWs untereinander mehr
+* verbesserte NTP-Konfiguration via olsrs-nameservice-Announcements:
+** http://dev.on-i.de/changeset/df96edf2e7ca4e8ef060c2f608d91e8c02a48eff/on_firmware
+** NTP-Server werden nun auch ohne VPN-Zertifikat gefunden
+* Verwendung des uci-defaults-Mechanismus für Erst- oder Upgrade-Konfiguration:
+** http://wiki.openwrt.org/doc/uci#defaults
+** explizite Versionsmigrationen (für Firmware-Upgrades)
+* Umstieg von ntpclient auf busybox-NTP-Server:
+** http://dev.on-i.de/changeset/de91609d66b99e7d33f33fd85988fb2047c90c8a/on_firmware
+

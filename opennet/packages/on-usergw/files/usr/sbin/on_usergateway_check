@@ -58,16 +58,16 @@ announce_olsr_service_ugw() {
 }
 
 #################################################################################
-# check Usergateway for speed
+# Geschwindigkeitsmessung gegen die konfigurierten UGWs
+# Eintragen der Ergebnisse in die Status-Datei fuer UGWs.
 # $1=nr
 ugw_checkSpeed () {
 	trap "error_trap ugw_checkSpeed $*" $GUARD_TRAPS
 	echo "ugw_checkSpeed" >"$DATA_LOCK_FILE"
-	. "${IPKG_INSTROOT:-}/usr/sbin/on_speed_check"
 	local on_ugw=$(uci_get "on-usergw.opennet_ugw${1}.name")
 	local ipaddr=$(uci_get "on-usergw.opennet_ugw${1}.ipaddr")
-	local download_speed=$(download "$on_ugw")
-	local upload_speed=$(upload "$on_ugw")
+	local download_speed=$(measure_download_speed "$on_ugw")
+	local upload_speed=$(measure_upload_speed "$on_ugw")
 	# no checks if no number is available
 	[ -z "$download_speed" ] && [ -z "$upload_speed" ] && return
 	local prev_download=$(get_ugw_value "$ipaddr" download)

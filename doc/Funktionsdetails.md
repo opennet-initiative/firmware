@@ -135,6 +135,22 @@ Die wechselhaften Eigenschaften werden im temporären Dateisystem (also im RAM) 
 * upload
 * wan
 
+Geschwindigkeitstests
+^^^^^^^^^^^^^^^^^^^^^
+
+Zu allen UGWs wird in der UGW-Übersicht eine Abschätzung der Upload- und Download-Bandbreite angezeigt.
+Diese wird durch den Download von der URL http://UGW_HOSTNAME/.big und den Upload via netcat zu Port 2222 auf dem UGW-Host ermittelt.
+
+Diese Prüfung wird im Tagestakt innerhalb der ugw-Funktion ``ugw_doExtraChecks`` durchgeführt.
+
+Konfiguration des UGW-Servers:
+
+* Bereitstellung einer beliebigen Datei (> 100 MByte), die unter der URL http://UGW_HOST/.big erreichbar ist
+* Betrieb eines netcat-Listeners:
+
+ * iptables -I INPUT -p tcp --dport 22222 -j ACCEPT
+ * (while true; do nc -l -n -p 22222 -q 0 2>&1 >/dev/null; sleep 2; done) &
+
 
 Datensammlung: ondataservice
 ----------------------------

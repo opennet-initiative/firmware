@@ -1,6 +1,8 @@
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
+SPEEDTEST_UPLOAD_PORT=22222
+SPEEDTEST_SECONDS=20
 
 
 # hole einen der default-Werte der aktuellen Firmware
@@ -138,5 +140,47 @@ update_ugw_services() {
 			msg_info "update_ugw_services: unbekannter ugw-Service: $service_description"
 		fi
 	done
+}
+
+
+get_wan_device() {
+	uci_get network.wan.ifname | cut -f 1 -d :
+}
+
+
+# Messung des durchschnittlichen Verkehrs ueber ein Netzwerkinterface innerhalb einer gewaehlten Zeitspanne.
+# Parameter: physisches Netzwerkinterface (z.B. eth0)
+# Parameter: Anzahl von Sekunden der Messung
+# Ergebnis (tab-separiert):
+#   RX TX
+# (empfangene|gesendete KBytes/s)
+get_device_traffic() {
+	local device=$1
+	local seconds=$2
+	ifstat -q -b -i "$(get_wan_device)" "$seconds" 1 | tail -n 1 | awk '{print int($1 + 0.5) "\t" int($2 + 0.5)}'
+}
+
+
+# Pruefe Bandbreite durch kurzen Download-Datenverkehr
+measure_download_speed() {
+	local host=$1
+	wget -q -O /dev/null "http://$host/.big" &
+	local pid=$!
+	sleep 3
+	[ ! -d "/proc/$pid" ] && return
+	get_device_traffic "$(get_wan_device)" "$SPEEDTEST_SECONDS" | cut -f 1
+	kill "$pid" 2>/dev/null || true
+}
+
+
+# Pruefe Bandbreite durch kurzen Upload-Datenverkehr
+measure_upload_speed() {
+	local host=$1
+	nc "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
+	local pid=$!
+	sleep 3
+	[ ! -d "/proc/$nc_pid" ] && return
+	get_device_traffic "$(get_wan_device)" "$SPEEDTEST_SECONDS" | cut -f 2
+	kill "$pid" 2>/dev/null || true
 }
 

@@ -561,6 +561,9 @@ apply_changes() {
 		openvpn)
 			/etc/init.d/openvpn reload || true
 			;;
+		on-usergw)
+			update_openvpn_ugw_settings
+			;;
 		*)
 			msg_info "no handler defined for applying config changes for '$config'"
 			;;
@@ -679,5 +682,30 @@ set_opennet_id() {
 		uci set "${uci_prefix}.src_dip=$main_ipaddr"
 	done
 	apply_changes firewall
+}
+
+
+# Liefere alle IPs fuer diesen Namen zurueck
+resolve_hostname() {
+	nslookup "$1" | sed '1,/^Name:/d' | awk '{print $3}' | sort -n
+}
+
+
+# Durchsuche eine Schluessel-Wert-Liste nach einem Schluessel und liefere den dazugehoerigen Wert zurueck.
+# Beispiel:
+#   foo=bar baz=nux
+# Der Separator ist konfigurierbar - standardmaessig wird das Gleichheitszeichen verwendet.
+# Die Liste wird auf der Standardeingabe erwartet.
+# Der erste und einzige Parameter ist der gewuenschte Schluessel.
+get_from_key_value_list() {
+	local search_key=$1
+	local separator=${2:-=}
+	local key_value
+	local key
+	sed 's/[ \t]\+/\n/g' | while read key_value; do
+		key=$(echo "$key_value" | cut -f 1 -d "$separator")
+		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break
+	done
+	return 0
 }
 

@@ -310,14 +310,6 @@ ugw_checkWANs () {
 
 
 #################################################################################
-# syncs config from on-usergw to openvpn
-ugw_syncVPNConfig () {
-	msg_debug "ugw_syncVPNConfig"
-	# sync and check VPN config
-	lua -e "require('luci.model.opennet.on_usergw_syncconfig') checkVPNConfig()"
-}
-
-#################################################################################
 # check if sharingInternet is temporarily blocked
 ugw_checkSharingBlocked () {
 	trap "error_trap ugw_checkSharingBlocked $*" $GUARD_TRAPS
@@ -336,6 +328,7 @@ ugw_checkSharingBlocked () {
 # check if sharingInternet is possible for every gateway and
 # store 'enabled'-value in openvpn config
 ugw_checkWorking () {
+	local nr
 	local mtu
 	local wan
 	local ipaddr
@@ -574,7 +567,6 @@ Usage: on_usergateway_check [OPTION]...
 	usually called by cron every 5 minutes
 Options:
 	(no option)	do regular 5-minutely check
-	syncVPNConfig	transfer UGW config from on-usergw to openvpn
 	checkWan	check if routes to UGW go through WAN-device, detect ping-time
 	checkMtu	check if MTU of WAN-UGW-Tunnel is ok
 			this test will last ~5 minutes per tunnel
@@ -590,7 +582,6 @@ msg_debug "starting another instance ($@)"
 
 
 case "$ACTION" in
-	"syncVPNConfig")	ugw_syncVPNConfig;;
 	"checkWan")		if [ $# -gt 0]; then ugw_checkWAN "$@"; else ugw_checkWANs; fi;;
 	"checkMtu")		if [ $# -gt 0]; then ugw_checkMTU "$@"; else ugw_checkMTUs; fi;;
 	"checkVpn")		if [ $# -gt 0]; then ugw_checkVPN "$@"; else ugw_checkVPNs; fi;;
@@ -602,7 +593,6 @@ case "$ACTION" in
 		ugw_shareInternet
 		;;
 	auto|*)
-		ugw_syncVPNConfig
 		ugw_checkWANs
 		ugw_checkVPNs
 		ugw_doExtraChecks

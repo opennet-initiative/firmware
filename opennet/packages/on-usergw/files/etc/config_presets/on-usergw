@@ -8,20 +8,3 @@ config 'sharing'    'ugw_sharing'
         option 'shareInternet'  'off'
 #        option 'blockSharing'   '0'
 
-config openvpn_preset opennet_ugw
-    option client 1
-    option enable 0
-    option proto udp
-    option dev tap
-    option persist_key 1
-    option persist_tun 1
-    option ca /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
-    option cert /etc/openvpn/opennet_ugw/on_ugws.crt
-    option key /etc/openvpn/opennet_ugw/on_ugws.key
-    option comp_lzo yes
-    option up /etc/openvpn/opennet_ugw/opennet_ugw_up.sh
-    option down /etc/openvpn/opennet_ugw/opennet_ugw_down.sh
-    option ns_cert_type server
-    option script_security "2 execve"
-    option rport 1602
-    option nobind 1

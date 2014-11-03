@@ -66,9 +66,11 @@ rebuild_openvpn_ugw_config() {
 # Ziel: openvpn.on_ugw_*
 update_openvpn_ugw_settings() {
 	local config_file
+	local config_name
 	local uci_prefix
 	find_all_uci_sections on-usergw uplink type=openvpn | while read uci_prefix; do
 		rebuild_openvpn_ugw_config "$uci_prefix"
+		config_name=$(uci_get "${uci_prefix}.name")
 		# uci-Konfiguration setzen
 		uci set "openvpn.${config_name}=openvpn"
 		uci set "openvpn.${config_name}.config=$config_file"
@@ -111,11 +113,14 @@ add_openvpn_ugw_service() {
 	uci set "${uci_prefix}.template=$template"
 	uci set "${uci_prefix}.port=$port"
 	uci set "${uci_prefix}.details=$details"
+	# Zeitstempel auffrischen
+	set_ugw_value "$config_name" last_seen "$(date +%s)"
 	apply_changes on-usergw
 }
 
 
 # Parse die Liste der via olsrd-nameservice announcierten ugw-Dienste.
+# Falls keine UGW-Dienste gefunden werden, bzw. vorher konfiguriert waren, werden die Standard-Opennet-Server eingetragen.
 # Speichere diese Liste als on-user.@uplink-Liste.
 # Anschliessend werden eventuell Dienste (z.B. openvpn) neu konfiguriert.
 update_ugw_services() {
@@ -139,6 +144,25 @@ update_ugw_services() {
 		else
 			msg_info "update_ugw_services: unbekannter ugw-Service: $service_description"
 		fi
+	done
+	# pruefe ob keine UGWs konfiguriert sind - erstelle andernfalls die Standard-UGWs von Opennet
+	[ -z "$(find_all_uci_sections on-usergw uplink)" ] && add_default_openvpn_ugw_services
+}
+
+
+# Lies die vorkonfigurierten Opennet-UGW-Server ein und uebertrage sie in die on-usergw-Konfiguration.
+# Diese Aktion sollte nur ausgefuehrt werden, wenn keine UGWs eintragen sind (z.B. weil der Nutzende sie versehentlich geloescht hat).
+add_default_openvpn_ugw_services() {
+	local index=1
+	local hostname
+	local port
+	local proto
+	local details
+	while [ -n "$(get_on_ugw_default "openvpn_ugw_preset_$index")" ]; do
+		get_on_ugw_default "openvpn_ugw_preset_$index" | while read hostname port proto details; do
+			add_openvpn_ugw_service "$hostname" "$port" "$proto" "$details"
+		done
+		: $((index++))
 	done
 }
 

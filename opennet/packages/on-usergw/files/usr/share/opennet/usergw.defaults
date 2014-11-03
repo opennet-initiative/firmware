@@ -7,3 +7,7 @@ certificate_provinceName	Mecklenburg-Vorpommern
 certificate_localityName	Rostock
 certificate_organizationalUnitName	user gateways
 certificate_days		3650
+
+openvpn_ugw_preset_1	erina.opennet-initiative.de 1602 udp
+openvpn_ugw_preset_2	subaru.opennet-initiative.de 1602 udp
+

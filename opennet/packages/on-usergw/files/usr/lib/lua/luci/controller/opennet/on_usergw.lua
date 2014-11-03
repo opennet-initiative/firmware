@@ -78,7 +78,7 @@ function action_on_usergwNG(ugw_status)
         down_section = down_section + 0
         move_gateway_down(down_section)
     elseif del_section then
-        while ((del_section + 0) < ugw_status.usergateways_no) do   -- comparising failed if del_section wasn't forced to be int
+        while ((del_section + 0) < ugw_status.usergateways_no) do   -- comparing failed if del_section wasn't forced to be int
             move_gateway_down(del_section)
             del_section = del_section + 1
         end
@@ -86,8 +86,7 @@ function action_on_usergwNG(ugw_status)
         cursor:commit("on-usergw")
         cursor:unload("on-usergw")
 		ugw_status.usergateways_no = ugw_status.usergateways_no - 1
-        require('luci.model.opennet.on_usergw_syncconfig')
-        checkVPNConfig()
+		os.execute("on-function update_openvpn_ugw_settings")
     elseif reset_counter then
         for k, v in pairs(cursor:get_all("on-usergw")) do
             if v[".type"] == "usergateway" then cursor:set("on-usergw", k, "age", "") end

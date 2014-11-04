@@ -135,7 +135,7 @@ update_ugw_services() {
 	local details
 	local hostname
 	local service_description
-	get_services mesh | cut -f 1,2,3,5,7 | while read scheme ipaddr port proto details; do
+	get_olsr_services mesh | cut -f 1,2,3,5,7 | while read scheme ipaddr port proto details; do
 		service_description="$scheme://$ipaddr:$port ($proto) $details"
 		if [ "$scheme" = "openvpn" ]; then
 			hostname=$(echo "$details" | get_from_key_value_list hostname :)

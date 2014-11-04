@@ -139,3 +139,57 @@ olsr_set_routing_tables() {
 	apply_changes olsrd
 }
 
+
+# Einlesen eines olsrd-Nameservice-Service.
+# Details zum Eingabe- und Ausgabeformat: siehe "get_olsr_services".
+parse_olsr_service_definition() {
+	local url
+	local proto
+	local service
+	local details
+	local scheme
+	local host
+	local port
+	local path
+	# verwende "|" und Leerzeichen als Separatoren
+	IFS='| '
+	while read url proto service details; do
+		scheme=$(echo "$url" | cut -f 1 -d :)
+		host=$(echo "$url" | cut -f 3 -d / | cut -f 1 -d :)
+		port=$(echo "$url" | cut -f 3 -d / | cut -f 2 -d :)
+		path=/$(echo "$url" | cut -f 4- -d /)
+		echo -e "$scheme\t$host\t$port\t$path\t$proto\t$service\t$details"
+	done
+}
+
+
+# Parse die olsr-Service-Datei
+# Die Service-Datei enthaelt Zeilen streng definierter Form (durchgesetzt vom nameservice-Plugin).
+# Beispielhafte Eintraege:
+#   http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108         #192.168.2.15
+#   dns://192.168.10.4:53|udp|dns                                           #192.168.10.4
+# Parameter: service-Type (z.B. "gw", "ugw", "dns", "ntp")
+# Ergebnis (tab-separiert):
+#   SCHEME IP PORT PATH PROTO SERVICE DETAILS
+# Im Fall von "http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108" entspricht dies:
+#   http   192.168.0.15   8080   tcp   ugw   upload:3 download:490 ping:108
+get_olsr_services() {
+	trap "error_trap get_olsr_services $*" $GUARD_TRAPS
+	local filter_service=$1
+	local url
+	local proto
+	local service
+	local details
+	local scheme
+	local host
+	local port
+	local path
+	[ -e "$SERVICES_FILE" ] || return
+	# remove trailing commentary (containing the service's source IP address)
+	grep "^[^#]" "$SERVICES_FILE" | \
+		sed 's/[\t ]\+#[^#]\+//' | \
+		parse_olsr_service_definitions | \
+		awk "{ if (\$6 == \"$filter_service\") print \$0; }"
+	done
+}
+

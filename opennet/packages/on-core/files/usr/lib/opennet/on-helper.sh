@@ -122,7 +122,7 @@ update_dns_servers() {
 	       reload_config
 	fi
 	# replace ":" with "#" (dnsmasq expects this port separator)
-	get_services dns | cut -f 2,3 | sort | while read host port; do
+	get_olsr_services dns | cut -f 2,3 | sort | while read host port; do
 		echo "server=$host#$port"
 	done | update_file_if_changed "$servers_file" || return 0
 	# es gab eine Aenderung
@@ -143,7 +143,7 @@ update_ntp_servers() {
 	uci_is_false "$use_ntp" && return
 	# schreibe die Liste der NTP-Server neu
 	uci_delete system.ntp.server
-	get_services ntp | cut -f 2,3 | while read host port; do
+	get_olsr_services ntp | cut -f 2,3 | while read host port; do
 		[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
 		uci_add_list "system.ntp.server" "$host"
 	done
@@ -291,41 +291,6 @@ set_gateway_value() {
 	_set_file_dict_value "$GATEWAY_STATUS_FILE" "${1}_${2}" "$3"
 }
 
-# Parse die olsr-Service-Datei
-# Die Service-Datei enthaelt Zeilen streng definierter Form (durchgesetzt vom nameservice-Plugin).
-# Beispielhafte Eintraege:
-#   http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108         #192.168.2.15
-#   dns://192.168.10.4:53|udp|dns                                           #192.168.10.4
-# Parameter: service-Type (z.B. "gw", "ugw", "dns", "ntp")
-# Ergebnis (tab-separiert):
-#   SCHEME IP PORT PATH PROTO SERVICE DETAILS
-# Im Fall von "http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108" entspricht dies:
-#   http   192.168.0.15   8080   tcp   ugw   upload:3 download:490 ping:108
-get_services() {
-	trap "error_trap get_services $*" $GUARD_TRAPS
-	local filter_service=$1
-	local url
-	local proto
-	local service
-	local details
-	local scheme
-	local host
-	local port
-	local path
-	[ -e "$SERVICES_FILE" ] || return
-	# remove trailing commentary (containing the service's source IP address)
-	# use "|" and space as a separator
-	IFS='| '
-	grep "^[^#]" "$SERVICES_FILE" | sed 's/[\t ]\+#[^#]\+//' | while read url proto service details; do
-		if [ "$service" = "$filter_service" ]; then
-			scheme=$(echo "$url" | cut -f 1 -d :)
-			host=$(echo "$url" | cut -f 3 -d / | cut -f 1 -d :)
-			port=$(echo "$url" | cut -f 3 -d / | cut -f 2 -d :)
-			path=/$(echo "$url" | cut -f 4- -d /)
-			echo -e "$scheme\t$host\t$port\t$path\t$proto\t$service\t$details"
-		fi
-	done
-}
 
 get_network() {
 # 	if [ "$(uci_get network.$1.type)" == "bridge" ]; then

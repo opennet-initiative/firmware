@@ -5,6 +5,33 @@ RT_FILE=/etc/iproute2/rt_tables
 RT_START_ID=11
 
 
+# Pruefe ob der uebegebene Text eine IPv4-Adresse ist
+is_ipv4() {
+	echo "$target" | grep -q -E "^[0-9]+(\.[0-9]+){3}$"
+}
+
+
+# Pruefe ob der uebegebene Text eine IPv6-Adresse ist
+# Achtung: der Test ist recht oberflaechlich und kann falsche Positive liefern.
+is_ipv6() {
+	echo "$target" | grep -q "^[0-9a-fA-F:]\+$"
+}
+
+
+# Ermittle das Netzwerkinterface, ueber den der Verkehr zu einem Ziel laufen wuerde.
+# Falls erforderlich, findet eine Namensaufloesung statt.
+get_target_route_interface() {
+	local target
+	local ipaddr
+	if is_ipv4 "$target" || is_ipv6 "$target"; then
+		ipaddr=$target
+	else
+		ipaddr=$(query_dns "$target" | head -1)
+	fi
+	ip route get "$ipaddr" | head -1 | awk '{print $5}'
+}
+
+
 # Entferne alle Policy-Routing-Regeln die dem gegebenen Ausdruck entsprechen.
 # Es erfolgt keine Fehlerausgabe und keine Fehlermeldungen.
 delete_policy_rule() {

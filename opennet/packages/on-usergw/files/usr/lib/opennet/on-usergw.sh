@@ -5,6 +5,7 @@ SPEEDTEST_UPLOAD_PORT=22222
 SPEEDTEST_SECONDS=20
 UGW_FIREWALL_RULE_NAME=opennet_ugw
 UGW_LOCAL_SERVICE_PORT_START=5100
+UGW_SERVICE_CREATOR=ugw_service
 
 
 # hole einen der default-Werte der aktuellen Firmware
@@ -215,22 +216,63 @@ measure_upload_speed() {
 }
 
 
-# Abschalten aller Portweiterleitungen
-# Alle Firewall-Regeln, die von ugw-Weiterleitungen stammen, werden geloescht.
+# Abschalten eines UGW-Dienstes
+# Die Firewall-Regel, die von der ugw-Weiterleitung stammt, wird geloescht.
 # olsrd-nameservice-Ankuendigungen werden entfernt.
+# Es wird kein "uci commit" oder "apply_changes olsrd" durchgefuehrt.
+disable_ugw_service() {
+	local config_name=$1
+	local uci_prefix
+	local service
+	# Portweiterleitung loeschen
+	uci_prefix=$(uci_get "$(find_first_uci_section on-usergw uplink "name=$config_name").firewall_rule")
+	[ -n "$uci_prefix" ] && uci_delete "$uci_prefix"
+	service=$(uci_get "on-usergw.${config_name}.olsr_service")
+	if [ -n "$service" ]; then
+		uci_prefix=$(get_and_enable_olsrd_library_uci_prefix nameservice)
+		uci del_list "${uci_prefix}.service=$service"
+	fi
+	uci set "openvpn.${config_name}.enabled=0"
+}
+
+
+# Pruefe ob eine olsr-Nameservice-Beschreibung zu einem aktiven ugw-Service gehoert.
+# Diese Pruefung ist nuetzlich fuer die Entscheidung, ob ein nameservice-Announcement entfernt
+# werden kann.
+_is_ugw_service_in_use() {
+	local wanted_service=$1
+	local uci_prefix
+	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
+		[ "${uci_prefix}.service" = "$wanted_service" ] && return 0
+	done
+	return 1
+}
 
 # Abschaltung aller Portweiterleitungen, die keinen UGW-Diensten zugeordnet sind.
 # Die ugw-Portweiterleitungen werden an ihrem Namen erkannt.
 # Es wird kein "uci commit" durchgefuehrt.
-disable_stale_ugw_forwards () {
+disable_stale_ugw_services () {
 	trap "error_trap ugw_disable_forwards $*" $GUARD_TRAPS
 	local uci_prefix
 	local ugw_config
+	local service
+	local creator
+	# Portweiterleitungen entfernen
 	find_all_uci_sections redirect "name=$UGW_FIREWALL_RULE_NAME" | while read uci_prefix; do
 		ugw_config=$(find_first_uci_section on-usergw uplink "firewall_rule=$uci_prefix")
-		[ -n "$ugw_config" ] && [ -n "$(uci_get "$ugw_config")" && continue
+		[ -n "$ugw_config" ] && [ -n "$(uci_get "$ugw_config")" ] && continue
 		uci_delete "$uci_prefix"
 	done
+	# olsr-Nameservice-Beschreibungen entfernen
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix nameservice)
+	uci_get_list olsrd service | while read service; do
+		creator=$(echo "$service" | parse_olsr_service_definition | cut -f 7 | get_from_key_value_list "creator" :)
+		# ausschliesslich Eintrage mit unserem "creator"-Stempel beachten
+		[ "$creator" = "$UGW_SERVICE_CREATOR" ] || continue
+		# unbenutzte Eintraege entfernen
+		_is_ugw_service_in_use "$service" || uci del_list "${uci_prefix}.service=$service"
+	done
+	return 0
 }
 
 
@@ -250,7 +292,7 @@ _is_local_ugw_port_unused() {
 # Liefere den Port zurueck, der einer Dienst-Weiterleitung lokal zugewiesen wurde.
 # Falls noch kein Port definiert ist, dann waehle einen neuen Port.
 # Parameter: config_name
-# uci-Aenderungen werden committed.
+# commit findet nicht statt
 get_local_ugw_service_port() {
 	local config_name=$1
 	local port=$(uci_get "on-usergw.${config_name}.local_port")
@@ -270,10 +312,12 @@ get_local_ugw_service_port() {
 #################################################################################
 # enable ugw forwarding, add rules from current firewall settings and set service string
 # Parameter: config_name
+# commit findet nicht statt
 enable_ugw_service () {
 	trap "error_trap enable_ugw_service $*" $GUARD_TRAPS
 	local config_name=$1
 	local main_ip=$(get_main_ip)
+	local hostname
 	local uci_prefix=$(uci_get "on-usergw.${config_name}.firewall_rule")
 	[ -z "$uci_prefix" ] && uci_prefix=$(uci add firewall redirect)
 	# der Name ist wichtig fuer spaetere Aufraeumaktionen
@@ -284,8 +328,87 @@ enable_ugw_service () {
 	uci set "${uci_prefix}.src_dport=$(get_local_ugw_service_port "$config_name")"
 	uci set "${uci_prefix}.target=DNAT"
 	uci set "${uci_prefix}.src_dip=$main_ip"
-	uci set "${uci_prefix}.dest_ip=$(resolv_hostname "$(uci_get "on-usergw.${config_name}.hostname")")"
+	hostname=$(uci_get "$(find_first_uci_section on-usergw uplink "name=$config_name").hostname")
+	# wir verwenden nur die erste aufgeloeste IP (TODO: dies beschraenkt uns aktuell auf IPv4)
+	uci set "${uci_prefix}.dest_ip=$(query_dns "$hostname" | head -1)"
+	# olsr-nameservice-Announcement
+	announce_olsr_service_ugw "$config_name"
+	# VPN-Verbindung
+	uci set "openvpn.${config_name}.enabled=1"
+}
+
+
+# Verkuende den lokalen UGW-Dienst inkl. Geschwindigkeitsdaten via olsr nameservice
+# Parameter: config_name
+# kein commit
+announce_olsr_service_ugw() {
+	trap "error_trap announce_ugw_service_ugw $*" $GUARD_TRAPS
+	local config_name=$1
+	local main_ip=$(get_main_ip)
+	local port
+	local ugw_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
+	local olsr_prefix
+	local service_description
+
+	local download=$(get_ugw_value "$config_name" download)
+	local upload=$(get_ugw_value "$config_name" upload)
+	local ping=$(get_ugw_value "$config_name" ping)
+
+	local olsr_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
+	[ -z "$olsr_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && trap "" $GUARD_TRAPS && return 1
+
+	port=$(uci_get "${ugw_prefix}.local_port")
+
+	# announce our ugw service
+	# TODO: Anpassung an verschiedene Dienste
+	if [ "$(uci_get "${ugw_prefix}.type")" = "openvpn" ]; then
+		service_description="openvpn://${main_ip}:$port|udp|ugw upload:$upload download:$download ping:$ping creator:$UGW_SERVICE_CREATOR"
+	else
+	fi
+	uci set "${ugw_prefix}.service=$service_description"
+	# vorsorglich loeschen (Vermeidung doppelter Eintraege)
+	uci -q del_list "${olsr_prefix}.service=$service_description" || true
+	uci add_list "${olsr_prefix}.service=$service_description"
+}
+
+
+# Pruefe regelmaessig, ob Weiterleitungen zu allen bekannten UGW-Servern existieren.
+# Fehlende Weiterleitungen oder olsr-Announcements werden angelegt.
+update_ugw_service_state () {
+	trap "error_trap update_ugw_service_state $*" $GUARD_TRAPS
+	local name
+	local ugw_name
+	local ugw_enabled
+	local ugw_possible
+	local uci_prefix
+	local sharing=$(uci_get on-usergw.ugw_sharing.shareInternet)
+
+	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
+		config_name=$(uci_get "${uci_prefix}.name")
+		ugw_enabled=$(uci_get "on-usergw.${config_name}.enable")
+		ugw_possible=$(get_ugw_value "$ugw_ipaddr" status)
+
+		# this gateway connection is not usable
+		if uci_is_true "$sharing" && [ -n "$ugw_enabled" ] && [ "$ugw_possible" = "y" ]; then
+			enable_ugw_service "$config_name"
+		else
+			disable_ugw_service "$config_name"
+		fi
+	done
+	disable_stale_ugw_services
+	apply_changes openvpn
+	apply_changes on-usergw
 	apply_changes firewall
-	announce_olsr_service_ugw "$main_ip"
+	apply_changes olsrd
+}
+
+
+prepare_on_usergw_uci_settings() {
+	local section
+	# on-usergw-Konfiguration erzeugen, falls noetig
+	[ -e /etc/config/on-usergw ] || touch /etc/config/on-usergw
+	for section in ugw_sharing; do
+		uci show | grep -q "^on-usergw\.${section}\." || uci set "on-usergw${section}=$section"
+	done
 }
 

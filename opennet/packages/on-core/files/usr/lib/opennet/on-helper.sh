@@ -493,6 +493,17 @@ get_zone_interfaces() {
 }
 
 
+is_interface_in_zone() {
+	local in_interface=$1
+	local zone=$2
+	for interface in $(get_zone_interfaces "$2"); do
+		# Entferne den Teil nach Doppelpunkten - fuer Alias-Interfaces
+		[ "$in_interface" = "$(echo "$interface" | cut -f 1 -d :)" ] && return 0
+	done
+	return 1
+}
+
+
 add_interface_to_zone() {
 	local zone=$1
 	local interface=$2
@@ -528,6 +539,9 @@ apply_changes() {
 			;;
 		on-usergw)
 			update_openvpn_ugw_settings
+			apply_changes openvpn
+			apply_changes olsrd
+			apply_changes firewall
 			;;
 		*)
 			msg_info "no handler defined for applying config changes for '$config'"

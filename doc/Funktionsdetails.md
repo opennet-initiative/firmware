@@ -108,38 +108,40 @@ Datenspeicherung
 
 Für jeden externen Gateway werden dauerhafte und wechselhafte Eigenschaften gespeichert.
 
-Die dauerhaften Eigenschaften werden via uci unterhalb von ``on-usergw.opennet_ugw*`` gespeichert. Folgende Attribute sind dauerhafter Natur:
+Die dauerhaften Eigenschaften werden via uci unterhalb von ``on-usergw.@uplink[*]`` gespeichert. Folgende Attribute sind dauerhafter Natur:
 
-* ipaddr
-* name
-* rport
-* ca
-* cert
-* key
+* name - eindeutiger Name dieses UGW-Servers (wird beispielsweise als Name für die openvpn-Instanz verwendet)
+* type - z.B. "openvpn"
+* hostname - DNS-Name des UGW-Servers
+* port - Portnummer des UGW-Servers
+* template - die zu verwendende Konfigurationsvorlage (z.B. /usr/share/opennet/ugw-openvpn-udp.template)
 
 Die wechselhaften Eigenschaften werden im temporären Dateisystem (also im RAM) gespeichert. Dies reduziert Flash-Schreibzugriffe. Die wechselhaften Eigenschaften sind folgende:
 
-* age
-* download
-* enable
-* mtu_msg
-* mtu_toGW_tried
-* mtu_toGW_actual
-* mtu_fromGW_tried
-* mtu_fromGW_actual
-* mtu_time
-* ping
-* speed_time
-* speed_time_prev
-* status
-* upload
-* wan
+* age - Alter des Eintrags (TODO: durch "last_seen" ersetzen)
+* details - eventuelle Zusatzinformationen, die aus einem olsrd-nameservice-Announcement entnommen wurden (z.B. Bandbreite)
+* download - letzte ermittelte Download-Bandbreite (kBytes/s)
+* mtu - Status des MTU-Test ("ok" oder "error")
+* mtu_msg - vollständige Status-Ausgabe von openvpn infolge des MTU-Tests
+* mtu_toGW_tried - Startwert für die MTU-Prüfung (ausgehend)
+* mtu_toGW_actual - Resultat der MTU-Prüfung (ausgehend)
+* mtu_fromGW_tried - Startwert für die MTU-Prüfung (eingehend)
+* mtu_fromGW_actual - Resultat der MTU-Prüfung (eingehend)
+* mtu_time - Zeitstempel (epoch) des letzten MTU-Tests
+* ping - Ping-Laufzeit zum UGW-Server
+* speed_time - Zeitstempel (epoch) des letzten UGW-Tests
+* speed_time_prev - Zeitstempel (epoch) der anzeigt, seit wann die aktuelle Geschwindigkeitsmessung grob konstant blieb
+* status - Zusammenfassung: Gateway ist erreichbar ("ok" oder "error")
+* upload - letzte ermittelte Upload-Bandbreite (kBytes/s)
+* wan - Status des WAN-Tests ("ok" oder "error")
 
 Geschwindigkeitstests
 ^^^^^^^^^^^^^^^^^^^^^
 
 Zu allen UGWs wird in der UGW-Übersicht eine Abschätzung der Upload- und Download-Bandbreite angezeigt.
 Diese wird durch den Download von der URL http://UGW_HOSTNAME/.big und den Upload via netcat zu Port 2222 auf dem UGW-Host ermittelt.
+
+Die Geschwindigkeiten werden nach jeder Messung mit den vorherigen Werten gemittelt gespeichert. Änderungen setzen sich also nur langsam durch.
 
 Diese Prüfung wird im Tagestakt innerhalb der ugw-Funktion ``ugw_doExtraChecks`` durchgeführt.
 

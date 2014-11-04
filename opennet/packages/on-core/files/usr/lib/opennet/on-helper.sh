@@ -65,11 +65,13 @@ error_trap() {
 
 
 #################################################################################
-# just to get the IP for gateways only registered by name
-# parameter is name
-query_dns() { nslookup $1 2>/dev/null | tail -n 1 | awk '{ printf "%s", $3 }'; }
+# Liefere alle IPs fuer diesen Namen zurueck
+query_dns() {
+	nslookup "$1" | sed '1,/^Name:/d' | awk '{print $3}' | sort -n
+}
 
-query_dns_reverse() { nslookup $1 2>/dev/null | tail -n 1 | awk '{ printf "%s", $4 }'; }
+
+query_dns_reverse() { nslookup "$1" 2>/dev/null | tail -n 1 | awk '{ printf "%s", $4 }'; }
 
 get_client_cn() {
 	openssl x509 -in /etc/openvpn/opennet_user/on_aps.crt \
@@ -682,12 +684,6 @@ set_opennet_id() {
 		uci set "${uci_prefix}.src_dip=$main_ipaddr"
 	done
 	apply_changes firewall
-}
-
-
-# Liefere alle IPs fuer diesen Namen zurueck
-resolve_hostname() {
-	nslookup "$1" | sed '1,/^Name:/d' | awk '{print $3}' | sort -n
 }
 
 

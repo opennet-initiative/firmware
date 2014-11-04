@@ -382,23 +382,21 @@ clean_stale_pid_file() {
 #   Zertifikatsdatei: z.B. $VPN_DIR/on_aps.crt
 #   CA-Zertifikatsdatei: z.B. $VPN_DIR/opennet-ca.crt
 # Ergebnis: Exitcode=0 bei Erfolg
+# TODO: Port und udp/tcp hinzufuegen
 verify_vpn_connection() {
 	trap "error_trap verify_vpn_connection $*" $GUARD_TRAPS
-	local gw_ipaddr=$1
+	local hostname=$1
 	local gw_name=$2
 	local key_file=$3
 	local cert_file=$4
 	local ca_file=$5
+	local wan_dev
 	local openvpn_opts
 
-	# if there is no ipaddr stored then query dns for IP address
-	[ -z "$gw_ipaddr" ] && gw_ipaddr=$(query_dns "$gw_name")
-	[ -z "$gw_ipaddr" ] && trap "" $GUARD_TRAPS && return 1
+	wan_dev=$(get_target_route_interface "$hostname")
+	echo "$wan_dev" | grep -q -E "^(tun|tap)" && trap "" $GUARD_TRAPS && return 1
 	
-	# if gateway could only be reached over a local tunnel, dont use it - it will not work anyway
-	[ -n "$(ip route show table $olsrd_routingTable | awk '/tap|tun/ && $1 == "'$gw_ipaddr'"')" ] && trap "" $GUARD_TRAPS && return 1
-	
-	msg_debug "start vpn test of $gw_ipaddr"
+	msg_debug "start vpn test of $hostname"
 
 	# check if it is possible to open tunnel to the gateway (10 sec. maximum)
 	# Assembling openvpn parameters ...
@@ -429,7 +427,7 @@ verify_vpn_connection() {
 	openvpn_opts="$openvpn_opts --tls-verify /bin/false --tls-exit --ns-cert-type server"
 
 	# check if the output contains a magic line
-	openvpn $openvpn_opts --remote "$gw_ipaddr" 1600 --ca "$ca_file" --cert "$cert_file" --key "$key_file" \
+	openvpn $openvpn_opts --remote "$hostname" 1600 --ca "$ca_file" --cert "$cert_file" --key "$key_file" \
 		| grep -q "Initial packet" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }

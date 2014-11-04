@@ -380,127 +380,42 @@ ugw_shareInternet () {
 	done
 }
 
-#################################################################################
-# disable ugw forwarding, remove rules from current firewall settings
-ugw_disableForward () {
-	trap "error_trap ugw_disableForward $*" $GUARD_TRAPS
-	msg_debug "ugw_disableForward"
-	local uci_prefix
-	local src_dport
-	local proto
-	find_all_uci_sections redirect "src=$ZONE_MESH" | while read uci_prefix; do
-		src_dport="$(uci_get "${uci_prefix}.src_dport")"
-		proto="$(uci_get "${uci_prefix}.proto")"
-		if [ "$src_dport" = "1600" ] || [ "$src_dport" = "123" ] || [ "$src_dport" = "53" ] || [ "$proto" = "icmp" ]; then
-			uci_delete "$section"
-		fi
-	done
-	apply_changes firewall
-}
 
 #################################################################################
-# enable ugw forwarding, add rules from current firewall settings and set service string
-# $1 == ip of gateway to forward to
-ugw_enableForward () {
-	trap "error_trap ugw_enableForward $*" $GUARD_TRAPS
-	msg_debug "ugw_enableForward"
-	local main_ip=$(get_main_ip)
-	section=$(uci add firewall redirect)
-	uci set "firewall.$section.src=opennet"
-	uci set "firewall.$section.proto=udp"
-	uci set "firewall.$section.src_dport=1600"
-	uci set "firewall.$section.target=DNAT"
-	uci set "firewall.$section.src_dip=$main_ip"
-	uci set "firewall.$section.dest_ip=$1"
-	section=$(uci add firewall redirect)
-	uci set "firewall.$section.src=opennet"
-	uci set "firewall.$section.proto=udp"
-	uci set "firewall.$section.src_dport=123"
-	uci set "firewall.$section.target=DNAT"
-	uci set "firewall.$section.src_dip=$main_ip"
-	uci set "firewall.$section.dest_ip=$1"
-	section=$(uci add firewall redirect)
-	uci set "firewall.$section.src=opennet"
-	uci set "firewall.$section.proto=udp"
-	uci set "firewall.$section.src_dport=53"
-	uci set "firewall.$section.target=DNAT"
-	uci set "firewall.$section.src_dip=$main_ip"
-	# currently DNS-querys are answered by the usergateway Accesspoint DNS
-	uci set firewall.$section.dest_ip="$(uci_get olsrd.@olsrd[0].MainIp)"
-	# change into thisone if DNS should be forwarded to ugw
-	# uci set "firewall.$section.dest_ip=$1"
-
-	section=$(uci add firewall redirect)
-	uci set "firewall.$section.src=opennet"
-	uci set "firewall.$section.proto=icmp"
-	uci set "firewall.$section.target=DNAT"
-	uci set "firewall.$section.src_dip=$main_ip"
-	uci set "firewall.$section.dest_ip=$(uci_get olsrd.@olsrd[0].MainIp)"
-	apply_changes firewall
-	announce_olsr_service_ugw "$main_ip"
-	msg_info "ugw_enableForward restarting olsrd"
-	apply_changes olsrd
-}
-
-#################################################################################
-# check is done every 5 minutes, if there is a better gw then switch
+# Pruefe regelmaessig, ob Weiterleitungen zu allen bekannten UGW-Servern existieren.
+# Fehlende Weiterleitungen werden angelegt.
 ugw_forwardGW () {
 	trap "error_trap ugw_forwardGW $*" $GUARD_TRAPS
 	msg_debug "ugw_forwardGW"
-	local found_first_ugw
-	local better_ugw_count
-	local ugw_ipaddr
 	local name
 	local ugw_name
 	local ugw_enabled
 	local ugw_possible
+	local uci_prefix
 	local sharing=$(uci_get on-usergw.ugw_sharing.shareInternet)
 	local current_ugw_ipaddr=$(get_ugw_portforward | cut -f 2)
 
 	if [ "$sharing" != "on" ]; then
-		ugw_disableForward
+		ugw_disable_forwards
 		return
 	fi
 
 	found_first_ugw=
 	better_ugw_count=$(uci_get on-usergw.ugw_sharing.better_ugw)
 
-	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
-		ugw_ipaddr="$(uci_get "on-usergw.opennet_ugw${nr}.ipaddr")"
-		name=$(uci_get "on-usergw.opennet_ugw${nr}.name")
-		ugw_name=$(lua -e "require('luci.model.opennet.on_usergw_syncconfig') print(gw_name('${name}'))")
-		ugw_enabled="$(uci_get "openvpn.${ugw_name}.enable")"
+	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
+		config_name=$(uci_get "${uci_prefix}.name")
+		ugw_enabled=$(get_ugw_value "$ugw_ipaddr" enable)
 		ugw_possible=$(get_ugw_value "$ugw_ipaddr" status)
 
-		# it is not working
-		[ -z "$ugw_enabled" ] && continue
-
 		# this gateway connection is not usable
-		[ "$ugw_possible" != "y" ] && continue
-
-		# we found one before (why not look for another?)
-		[ -n "$found_first_ugw" ] && continue
-
-		# try if this gateway is better than the currently active one
-		msg_debug "checking first found usergw - $ugw_ipaddr"
-		if [ "$ugw_ipaddr" != "$current_ugw_ipaddr" ]; then
-			msg_debug "first found usergw - $ugw_ipaddr != $current_ugw_ipaddr"
-			if [ -z "$current_ugw_ipaddr" ] || [ $((better_ugw_count+5)) -gt "$betterusergateway_timeout" ]; then
-				msg_info "found a better usergateway, changing to $ugw_ipaddr"
-				ugw_disableForward
-				ugw_enableForward "$ugw_ipaddr"
-				better_ugw_count=0
-			fi
-			uci -q set "on-usergw.ugw_sharing.better_ugw=$better_ugw_count"
+		if [ -n "$ugw_enabled" ] && [ "$ugw_possible" = "y" ]; then
+			enable_ugw_service "$ugw_ipaddr"
 		else
-			msg_debug "first found gw - $ugw_ipaddr == $current_ugw_ipaddr"
-			uci -q set on-usergw.ugw_sharing.better_ugw=0
+			disable_ugw_service "$ugw_ipaddr"
 		fi
-		found_first_ugw=true
 	done
-	# disable forward if no working gateway was found at all
-	[ -z "$found_first_ugw" ] && ugw_disableForward
-	return
+	disable_stale_ugw_forwards
 }
 
 #################################################################################
@@ -510,39 +425,40 @@ ugw_doExtraChecks () {
 	msg_debug "ugw_doExtraChecks"
 	local nr
 	local speed_time
+	local speed_time_prev
 	local name
 	local gw_name
 	local vpn_pid
 	local mtu_time
+	local config_name
 	local restart_time=$(($(date +%s)-$(cut -f1 -d. /proc/uptime)))
 
-	for nr in $(get_prefixed_items 'on-usergw.opennet_ugw'); do
+	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
+		config_name=$(uci_get "${uci_prefix}.name")
 		# do extraChecks only if WAN-Connection is established
-		[ "$(uci_get "on-usergw.opennet_ugw${nr}.wan")" != "ok" ] && continue
+		[ "$(get_ugw_value "$config_name" "wan")" != "ok" ] && continue
 
 		# speedCheck
-		speed_time=$(uci_get "on-usergw.opennet_ugw${nr}.speed_time")
+		speed_time=$(get_ugw_value "$config_name" "speed_time")
 		[ -z "$speed_time" ] && speed_time=0
 		# never checked since restart
 		if [ "$((speed_time-restart_time))" -lt 0 ]; then
-			uci -q set "on-usergw.opennet_ugw${nr}.speed_time="
-			uci -q set "on-usergw.opennet_ugw${nr}.speed_time_prev="
+			set_ugw_value "$config_name" "speed_time" ""
+			set_ugw_value "$config_name" "speed_time_prev" ""
 		fi
-		speed_time=$(uci_get "on-usergw.opennet_ugw${nr}.speed_time")
-		speed_time_prev=$(uci_get "on-usergw.opennet_ugw${nr}.speed_time_prev")
+		speed_time=$(get_ugw_value "$config_name" "speed_time")
+		speed_time_prev=$(get_ugw_value "$config_name" "speed_time_prev")
 		if [ -z "$speed_time" ] ||
 				# last (successful) check older than 1 day and no two successful checks had been done
 				( [ "$(($(date +%s)-speed_time))" -gt 86400 ] && [ -z "$speed_time_prev" ] ); then
-			ugw_checkSpeed "$nr"
+			ugw_checkSpeed "$config_name"
 		fi
 
 		# mtuCheck
 		# if last mtucheck is older than 1 day and ugw is not running
-		name=$(uci_get "on-usergw.opennet_ugw${nr}.name")
-		gw_name=$(lua -e "require('luci.model.opennet.on_usergw_syncconfig') print(gw_name('${name}'))")
-		vpn_pid=$(cat "/var/run/openvpn-${gw_name}.pid" 2>/dev/null)
-		mtu_time=$(uci_get "on-usergw.opennet_ugw${nr}.mtu_time")
-		([ -z "$vpn_pid" ] || [ ! -d "/proc/$vpn_pid" ]) && [ "$(($(date +%s)-mtu_time))" -gt 86400 ] && ugw_checkMTU "$nr"
+		vpn_pid=$(cat "/var/run/openvpn-${config_name}.pid" 2>/dev/null)
+		mtu_time=$(get_ugw_value "$config_name" "mtu_time")
+		[ -z "$vpn_pid" -o ! -d "/proc/$vpn_pid" ] && [ "$(($(date +%s)-mtu_time))" -gt 86400 ] && ugw_checkMTU "$config_name"
 	done
 }
 

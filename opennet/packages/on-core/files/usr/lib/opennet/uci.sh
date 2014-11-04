@@ -46,20 +46,6 @@ uci_add_list() {
 }
 
 
-uci_del_list() {
-	local uci_path=$1
-	local remove_item=$2
-	local old_values=$(uci_get "$uci_path")
-	local value
-	uci_delete "$uci_path"
-	for value in $old_values; do
-		[ "$value" = "$remove_item" ] && continue
-		uci add_list "$uci_path=$value"
-	done
-	return 0
-}
-
-
 uci_delete() {
 	uci -q delete "$1" || true
 }
@@ -83,7 +69,7 @@ find_all_uci_sections() {
 		done
 		# alle Bedingungen trafen zu
 		echo "$config.$section"
-	done
+	done | sort
 	return 0
 }
 

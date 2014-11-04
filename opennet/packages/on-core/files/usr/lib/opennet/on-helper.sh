@@ -542,7 +542,7 @@ del_interface_from_zone() {
 	local interface=$2
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "failed to remove interface '$interface' from non-existing zone '$zone'" && return 1
-	uci_del_list "${uci_prefix}.network" "$interface"
+	uci del_list "${uci_prefix}.network=$interface"
 }
 
 

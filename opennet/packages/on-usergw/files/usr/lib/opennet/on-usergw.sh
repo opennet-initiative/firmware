@@ -3,6 +3,8 @@ ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
 SPEEDTEST_UPLOAD_PORT=22222
 SPEEDTEST_SECONDS=20
+UGW_FIREWALL_RULE_NAME=opennet_ugw
+UGW_LOCAL_SERVICE_PORT_START=5100
 
 
 # hole einen der default-Werte der aktuellen Firmware
@@ -82,6 +84,7 @@ update_openvpn_ugw_settings() {
 
 # Erzeuge einen neuen ugw-Service.
 # Ignoriere doppelte Eintraege.
+# Es wird _kein_ "uci commit" durchgefuehrt.
 add_openvpn_ugw_service() {
 	local hostname=$1
 	local port=$2
@@ -112,10 +115,10 @@ add_openvpn_ugw_service() {
 	uci set "${uci_prefix}.hostname=$hostname"
 	uci set "${uci_prefix}.template=$template"
 	uci set "${uci_prefix}.port=$port"
-	uci set "${uci_prefix}.details=$details"
 	# Zeitstempel auffrischen
 	set_ugw_value "$config_name" last_seen "$(date +%s)"
-	apply_changes on-usergw
+	# Details koennen sich haeufig aendern (z.B. Geschwindigkeiten)
+	set_ugw_value "$config_name" details "$details"
 }
 
 
@@ -147,6 +150,9 @@ update_ugw_services() {
 	done
 	# pruefe ob keine UGWs konfiguriert sind - erstelle andernfalls die Standard-UGWs von Opennet
 	[ -z "$(find_all_uci_sections on-usergw uplink)" ] && add_default_openvpn_ugw_services
+	# Portweiterleitungen aktivieren
+	# kein "apply_changes" - andernfalls koennten Loops entstehen
+	uci commit on-usergw
 }
 
 
@@ -206,5 +212,80 @@ measure_upload_speed() {
 	[ ! -d "/proc/$nc_pid" ] && return
 	get_device_traffic "$(get_wan_device)" "$SPEEDTEST_SECONDS" | cut -f 2
 	kill "$pid" 2>/dev/null || true
+}
+
+
+# Abschalten aller Portweiterleitungen
+# Alle Firewall-Regeln, die von ugw-Weiterleitungen stammen, werden geloescht.
+# olsrd-nameservice-Ankuendigungen werden entfernt.
+
+# Abschaltung aller Portweiterleitungen, die keinen UGW-Diensten zugeordnet sind.
+# Die ugw-Portweiterleitungen werden an ihrem Namen erkannt.
+# Es wird kein "uci commit" durchgefuehrt.
+disable_stale_ugw_forwards () {
+	trap "error_trap ugw_disable_forwards $*" $GUARD_TRAPS
+	local uci_prefix
+	local ugw_config
+	find_all_uci_sections redirect "name=$UGW_FIREWALL_RULE_NAME" | while read uci_prefix; do
+		ugw_config=$(find_first_uci_section on-usergw uplink "firewall_rule=$uci_prefix")
+		[ -n "$ugw_config" ] && [ -n "$(uci_get "$ugw_config")" && continue
+		uci_delete "$uci_prefix"
+	done
+}
+
+
+# Pruefung ob ein lokaler Port bereits fuer einen ugw-Dienst weitergeleitet wird
+_is_local_ugw_port_unused() {
+	local port=$1
+	local uci_prefix
+	# Suche nach einer Kollision
+	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
+		[ "$port" = "$(uci_get "${uci_prefix}.local_port")" ] && return 1
+	done
+	# keine Kollision entdeckt
+	return 0
+}
+
+
+# Liefere den Port zurueck, der einer Dienst-Weiterleitung lokal zugewiesen wurde.
+# Falls noch kein Port definiert ist, dann waehle einen neuen Port.
+# Parameter: config_name
+# uci-Aenderungen werden committed.
+get_local_ugw_service_port() {
+	local config_name=$1
+	local port=$(uci_get "on-usergw.${config_name}.local_port")
+	if [ -z "$port" ]; then
+		# suche einen unbenutzten lokalen Port
+		port=$UGW_LOCAL_SERVICE_PORT_START
+		until _is_local_ugw_port_unused "$port"; do
+			: $((port++))
+		done
+		uci set "on-usergw.${config_name}.local_port=$port"
+		apply_changes on-usergw
+	fi
+	echo "$port"
+}
+
+
+#################################################################################
+# enable ugw forwarding, add rules from current firewall settings and set service string
+# Parameter: config_name
+enable_ugw_service () {
+	trap "error_trap enable_ugw_service $*" $GUARD_TRAPS
+	local config_name=$1
+	local main_ip=$(get_main_ip)
+	local uci_prefix=$(uci_get "on-usergw.${config_name}.firewall_rule")
+	[ -z "$uci_prefix" ] && uci_prefix=$(uci add firewall redirect)
+	# der Name ist wichtig fuer spaetere Aufraeumaktionen
+	uci set "${uci_prefix}.name=$UGW_FIREWALL_RULE_NAME"
+	uci set "${uci_prefix}.src=$MESH_ZONE"
+	# der Einfachheit halber leiten wir tcp und udp weiter (die konkrete Notwendigkeit ist schwer zu ermitteln)
+	uci set "${uci_prefix}.proto=tcpudp"
+	uci set "${uci_prefix}.src_dport=$(get_local_ugw_service_port "$config_name")"
+	uci set "${uci_prefix}.target=DNAT"
+	uci set "${uci_prefix}.src_dip=$main_ip"
+	uci set "${uci_prefix}.dest_ip=$(resolv_hostname "$(uci_get "on-usergw.${config_name}.hostname")")"
+	apply_changes firewall
+	announce_olsr_service_ugw "$main_ip"
 }
 

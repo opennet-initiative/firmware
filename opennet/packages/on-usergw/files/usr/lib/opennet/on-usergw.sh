@@ -94,11 +94,14 @@ add_openvpn_ugw_service() {
 	local uci_prefix
 	local ipaddr
 	local template
+	local config_dir
+	local config_file
 	local config_name
 	local safe_hostname
 	local config_prefix
 	if [ "$protocol" = "udp" ]; then
 		template=/usr/share/opennet/ugw-openvpn-udp.template
+		config_dir=$OPENVPN_CONFIG_BASEDIR
 		config_prefix=on_ugw
 	else
 		msg_info "failed to add openvpn service for UGW due to invalid protocol ($protocol)"
@@ -106,15 +109,17 @@ add_openvpn_ugw_service() {
 	fi
 	[ "$protocol" != "tcp" -a "$protocol" != "udp" ] && \
 		msg_info "failed to set up openvpn settings for invalid protocol ($protocol)" && return 1
-	# Hostnamen anhaengen
+	# config-Schluessel erstellen
 	safe_hostname=$(echo "$hostname" | sed 's/[^a-zA-Z0-9]/_/g')
 	config_name=openvpn_${config_prefix}_${safe_hostname}_${protocol}_${port}
+	config_file=$config_dir/${config_name}.conf
 	uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	[ -z "$uci_prefix" ] && uci_prefix=on-usergw.$(uci add on-usergw uplink)
 	uci set "${uci_prefix}.name=$config_name"
 	uci set "${uci_prefix}.type=openvpn"
 	uci set "${uci_prefix}.hostname=$hostname"
 	uci set "${uci_prefix}.template=$template"
+	uci set "${uci_prefix}.config_file=$config_file"
 	uci set "${uci_prefix}.port=$port"
 	# Zeitstempel auffrischen
 	set_ugw_value "$config_name" last_seen "$(date +%s)"
@@ -165,8 +170,10 @@ add_default_openvpn_ugw_services() {
 	local port
 	local proto
 	local details
-	while [ -n "$(get_on_ugw_default "openvpn_ugw_preset_$index")" ]; do
-		get_on_ugw_default "openvpn_ugw_preset_$index" | while read hostname port proto details; do
+	while [ -n "$(get_on_usergw_default "openvpn_ugw_preset_$index")" ]; do
+		# stelle sicher, dass ein Newline vorliegt - sonst liest "read" nix
+		(get_on_usergw_default "openvpn_ugw_preset_$index"; echo) | while read hostname port proto details; do
+			[ -z "$hostname" ] && break
 			add_openvpn_ugw_service "$hostname" "$port" "$proto" "$details"
 		done
 		: $((index++))
@@ -188,7 +195,7 @@ get_wan_device() {
 get_device_traffic() {
 	local device=$1
 	local seconds=$2
-	ifstat -q -b -i "$(get_wan_device)" "$seconds" 1 | tail -n 1 | awk '{print int($1 + 0.5) "\t" int($2 + 0.5)}'
+	ifstat -q -b -i "$device" "$seconds" 1 | tail -n 1 | awk '{print int($1 + 0.5) "\t" int($2 + 0.5)}'
 }
 
 
@@ -210,7 +217,7 @@ measure_upload_speed() {
 	nc "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
 	local pid=$!
 	sleep 3
-	[ ! -d "/proc/$nc_pid" ] && return
+	[ ! -d "/proc/$pid" ] && return
 	get_device_traffic "$(get_wan_device)" "$SPEEDTEST_SECONDS" | cut -f 2
 	kill "$pid" 2>/dev/null || true
 }
@@ -323,8 +330,7 @@ enable_ugw_service () {
 	# der Name ist wichtig fuer spaetere Aufraeumaktionen
 	uci set "${uci_prefix}.name=$UGW_FIREWALL_RULE_NAME"
 	uci set "${uci_prefix}.src=$MESH_ZONE"
-	# der Einfachheit halber leiten wir tcp und udp weiter (die konkrete Notwendigkeit ist schwer zu ermitteln)
-	uci set "${uci_prefix}.proto=tcpudp"
+	uci set "${uci_prefix}.proto=$(uci_get "on-usergw.${config_name}.protocol")"
 	uci set "${uci_prefix}.src_dport=$(get_local_ugw_service_port "$config_name")"
 	uci set "${uci_prefix}.target=DNAT"
 	uci set "${uci_prefix}.src_dip=$main_ip"
@@ -363,7 +369,6 @@ announce_olsr_service_ugw() {
 	# TODO: Anpassung an verschiedene Dienste
 	if [ "$(uci_get "${ugw_prefix}.type")" = "openvpn" ]; then
 		service_description="openvpn://${main_ip}:$port|udp|ugw upload:$upload download:$download ping:$ping creator:$UGW_SERVICE_CREATOR"
-	else
 	fi
 	uci set "${ugw_prefix}.service=$service_description"
 	# vorsorglich loeschen (Vermeidung doppelter Eintraege)
@@ -374,8 +379,8 @@ announce_olsr_service_ugw() {
 
 # Pruefe regelmaessig, ob Weiterleitungen zu allen bekannten UGW-Servern existieren.
 # Fehlende Weiterleitungen oder olsr-Announcements werden angelegt.
-update_ugw_service_state () {
-	trap "error_trap update_ugw_service_state $*" $GUARD_TRAPS
+ugw_update_service_state () {
+	trap "error_trap ugw_update_service_state $*" $GUARD_TRAPS
 	local name
 	local ugw_name
 	local ugw_enabled
@@ -403,6 +408,8 @@ update_ugw_service_state () {
 }
 
 
+# Anlegen der on-usergw-Konfiguration, sowie Erzeugung ueblicher Sektionen.
+# Diese Funktion sollte vor Scheibzugriffen in diesem Bereich aufgerufen werden.
 prepare_on_usergw_uci_settings() {
 	local section
 	# on-usergw-Konfiguration erzeugen, falls noetig

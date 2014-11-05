@@ -35,8 +35,9 @@ NETWORK_TUNNEL=on_vpn
 NETWORK_FREE=free
 ROUTING_TABLE_MESH=olsrd
 ROUTING_TABLE_MESH_DEFAULT=olsrd-default
+VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
 
-DEBUG=
+DEBUG=${DEBUG:-}
 
 # siehe Entwicklungsdokumentation (Entwicklungshinweise -> Shell-Skripte -> Fehlerbehandlung)
 trap "error_trap __main__ $*" $GUARD_TRAPS
@@ -237,7 +238,9 @@ _get_file_dict_value() {
 	local field=$2
 	# fehlende Datei -> kein Ergebnis
 	[ -e "$status_file" ] || return 0
-	awk "{if (\$1 == \"${field}\") { printf \"%s\", \$2; exit 0; }}" "$status_file"
+	while read key value; do
+		[ "$field" = "$key" ] && echo -n "$value" && return
+	done < "$status_file"
 }
 
 #################################################################################
@@ -259,10 +262,10 @@ _set_file_dict_value() {
 	(
 		while read fieldname value; do
 			[ "$field" != "$fieldname" ] && echo "$fieldname $value"
-		 done <"$GATEWAY_STATUS_FILE"
+		 done <"$status_file"
 		# leerer Wert -> loeschen
 		[ -n "$new_value" ] && echo "$field $new_value"
-	) | sort | update_file_if_changed "$GATEWAY_STATUS_FILE" || true
+	) | sort | update_file_if_changed "$status_file" || true
 }
 
 
@@ -496,9 +499,11 @@ get_zone_interfaces() {
 is_interface_in_zone() {
 	local in_interface=$1
 	local zone=$2
-	for interface in $(get_zone_interfaces "$2"); do
-		# Entferne den Teil nach Doppelpunkten - fuer Alias-Interfaces
-		[ "$in_interface" = "$(echo "$interface" | cut -f 1 -d :)" ] && return 0
+	for log_interface in $(get_zone_interfaces "$2"); do
+		for phys_interface in $(uci_get "network.${log_interface}.ifname"); do
+			# Entferne den Teil nach Doppelpunkten - fuer Alias-Interfaces
+			[ "$in_interface" = "$(echo "$phys_interface" | cut -f 1 -d :)" ] && return 0
+		done
 	done
 	return 1
 }

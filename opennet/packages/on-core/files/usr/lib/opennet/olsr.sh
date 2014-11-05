@@ -142,7 +142,7 @@ olsr_set_routing_tables() {
 
 # Einlesen eines olsrd-Nameservice-Service.
 # Details zum Eingabe- und Ausgabeformat: siehe "get_olsr_services".
-parse_olsr_service_definition() {
+parse_olsr_service_definitions() {
 	local url
 	local proto
 	local service
@@ -190,6 +190,5 @@ get_olsr_services() {
 		sed 's/[\t ]\+#[^#]\+//' | \
 		parse_olsr_service_definitions | \
 		awk "{ if (\$6 == \"$filter_service\") print \$0; }"
-	done
 }
 

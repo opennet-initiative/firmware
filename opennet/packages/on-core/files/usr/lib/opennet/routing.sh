@@ -21,7 +21,7 @@ is_ipv6() {
 # Ermittle das Netzwerkinterface, ueber den der Verkehr zu einem Ziel laufen wuerde.
 # Falls erforderlich, findet eine Namensaufloesung statt.
 get_target_route_interface() {
-	local target
+	local target=$1
 	local ipaddr
 	if is_ipv4 "$target" || is_ipv6 "$target"; then
 		ipaddr=$target

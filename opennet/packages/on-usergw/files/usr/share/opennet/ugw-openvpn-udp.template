@@ -1,8 +1,8 @@
 ca /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
 cert /etc/openvpn/opennet_ugw/on_ugws.crt
 key /etc/openvpn/opennet_ugw/on_ugws.key
-proto udp
 dev tap
+dev-type tap
 persist-key 1
 persist-tun 1
 comp-lzo yes

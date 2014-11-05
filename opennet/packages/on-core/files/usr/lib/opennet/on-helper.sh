@@ -379,20 +379,18 @@ clean_stale_pid_file() {
 
 # pruefe einen VPN-Verbindungsaufbau
 # Parameter:
-#   Gateway-IP: die announcierte IP des Gateways
-#   Gateway-Name: der Name des Gateways
+#   openvpn-Konfigurationsdatei
+# optionale zusaetzliche Parameter:
 #   Schluesseldatei: z.B. $VPN_DIR/on_aps.key
 #   Zertifikatsdatei: z.B. $VPN_DIR/on_aps.crt
 #   CA-Zertifikatsdatei: z.B. $VPN_DIR/opennet-ca.crt
 # Ergebnis: Exitcode=0 bei Erfolg
-# TODO: Port und udp/tcp hinzufuegen
 verify_vpn_connection() {
 	trap "error_trap verify_vpn_connection $*" $GUARD_TRAPS
-	local hostname=$1
-	local gw_name=$2
-	local key_file=$3
-	local cert_file=$4
-	local ca_file=$5
+	local config_file=$1
+	local key_file=${2:-}
+	local cert_file=${3:-}
+	local ca_file=${4:-}
 	local wan_dev
 	local openvpn_opts
 
@@ -406,11 +404,9 @@ verify_vpn_connection() {
 	openvpn_opts="--dev null"
 	
 	# some openvpn options:
-	#   dev-type: excplicitly choose "tun" (the type cannot be guessed via the "null" device name)
-	#   nobind: choose random local port - otherwise late packets from previous connection tests will cause errors
 	#   ifconfig-noexec: we do not want to configure a device (and mess up routing tables)
 	#   route-nopull: ignore any advertised routes - we do not want to redirect traffic
-	openvpn_opts="$openvpn_opts --dev-type tun --client --nobind --ifconfig-noexec --route-nopull"
+	openvpn_opts="$openvpn_opts --ifconfig-noexec --route-nopull"
 
 	# some timing options:
 	#   inactive: close connection after 10s without traffic
@@ -429,9 +425,12 @@ verify_vpn_connection() {
 	#   ns-cert-type: enforce a connection against a server certificate (instead of peer-to-peer)
 	openvpn_opts="$openvpn_opts --tls-verify /bin/false --tls-exit --ns-cert-type server"
 
+	[ -n "$key_file" ] && openvpn_opts="$openvpn_opts --key \"$key_file\""
+	[ -n "$cert_file" ] && openvpn_opts="$openvpn_opts --cert \"$cert_file\""
+	[ -n "$ca_file" ] && openvpn_opts="$openvpn_opts --ca \"$ca_file\""
+
 	# check if the output contains a magic line
-	openvpn $openvpn_opts --remote "$hostname" 1600 --ca "$ca_file" --cert "$cert_file" --key "$key_file" \
-		| grep -q "Initial packet" && return 0
+	openvpn --config "$config_file" $openvpn_opts | grep -q "Initial packet" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

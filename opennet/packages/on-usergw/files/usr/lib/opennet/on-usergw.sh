@@ -52,14 +52,17 @@ rebuild_openvpn_ugw_config() {
 	local config_name=$(uci_get "${uci_prefix}.name")
 	local hostname=$(uci_get "${uci_prefix}.hostname")
 	local port=$(uci_get "${uci_prefix}.port")
+	local protocol=$(uci_get "${uci_prefix}.protocol")
+	[ "$protocol" = "tcp" ] && protocol=tcp-client
 	local template=$(uci_get "${uci_prefix}.template")
-	local config_file=$OPENVPN_CONFIG_BASEDIR/${config_name}.conf
+	local config_file=$(uci_get "${uci_prefix}.config_file")
 	# Konfigurationsdatei neu schreiben
 	mkdir -p "$(dirname "$config_file")"
 	(
-		for ipaddr in $(resolve_hostname "$(uci_get "${uci_prefix}.hostname")"); do
+		for ipaddr in $(query_dns "$(uci_get "${uci_prefix}.hostname")"); do
 			echo "remote $ipaddr $port"
 		done
+		echo "proto $protocol"
 		cat "$template"
 	) >"$config_file"
 }
@@ -121,6 +124,7 @@ add_openvpn_ugw_service() {
 	uci set "${uci_prefix}.template=$template"
 	uci set "${uci_prefix}.config_file=$config_file"
 	uci set "${uci_prefix}.port=$port"
+	uci set "${uci_prefix}.protocol=$protocol"
 	# Zeitstempel auffrischen
 	set_ugw_value "$config_name" last_seen "$(date +%s)"
 	# Details koennen sich haeufig aendern (z.B. Geschwindigkeiten)

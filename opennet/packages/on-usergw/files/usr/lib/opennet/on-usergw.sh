@@ -243,7 +243,11 @@ disable_ugw_service() {
 		uci_prefix=$(get_and_enable_olsrd_library_uci_prefix nameservice)
 		uci del_list "${uci_prefix}.service=$service"
 	fi
-	uci set "openvpn.${config_name}.enabled=0"
+	uci set "openvpn.${config_name}.enable=0"
+	apply_changes openvpn
+	apply_changes on-usergw
+	apply_changes firewall
+	apply_changes olsrd
 }
 
 
@@ -344,7 +348,11 @@ enable_ugw_service () {
 	# olsr-nameservice-Announcement
 	announce_olsr_service_ugw "$config_name"
 	# VPN-Verbindung
-	uci set "openvpn.${config_name}.enabled=1"
+	uci set "openvpn.${config_name}.enable=1"
+	apply_changes openvpn
+	apply_changes on-usergw
+	apply_changes firewall
+	apply_changes olsrd
 }
 
 
@@ -390,7 +398,6 @@ ugw_update_service_state () {
 	local ugw_enabled
 	local ugw_possible
 	local uci_prefix
-	local sharing=$(uci_get on-usergw.ugw_sharing.shareInternet)
 
 	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
 		config_name=$(uci_get "${uci_prefix}.name")
@@ -398,7 +405,7 @@ ugw_update_service_state () {
 		ugw_possible=$(get_ugw_value "$ugw_ipaddr" status)
 
 		# this gateway connection is not usable
-		if uci_is_true "$sharing" && [ -n "$ugw_enabled" ] && [ "$ugw_possible" = "y" ]; then
+		if [ -n "$ugw_enabled" ] && [ "$ugw_possible" = "y" ]; then
 			enable_ugw_service "$config_name"
 		else
 			disable_ugw_service "$config_name"

@@ -233,30 +233,15 @@ ugw_update_wan_status () {
 
 
 #################################################################################
-# check if sharingInternet is temporarily blocked
-ugw_checkSharingBlocked () {
-	trap "error_trap ugw_checkSharingBlocked $*" $GUARD_TRAPS
-	local on_share_internet_unblock_time=$(on-usergw.ugw_sharing.unblock_time)
-	[ -z "$on_share_internet_unblock_time" ] && return
-	if [ "$(date +%s)" -gt "$on_share_internet_unblock_time" ]; then
-		uci_delete on-usergw.ugw_sharing.unblock_time
-		uci set on-usergw.ugw_sharing.shareInternet='on'
-	elif [ "$(uci_get on-usergw.ugw_sharing.shareInternet)" = "on" ]; then
-		uci set on-usergw.ugw_sharing.shareInternet='off'
-	fi
-}
-
-#################################################################################
-# check if sharingInternet is possible for every gateway and
-# store 'enable'-value in openvpn config
-ugw_checkWorking () {
+# openvpn-Konfigurieren und eventuell 
+ugw_adjust_state () {
 	local uci_prefix
 	local config_name
 	local mtu
 	local wan
 	local name
 	local enable
-	trap "error_trap ugw_checkWorking $*" $GUARD_TRAPS
+	trap "error_trap ugw_adjust_state $*" $GUARD_TRAPS
 	find_all_uci_sections on-usergw uplink "type=openvpn" | while read uci_prefix; do
 		config_name=$(uci_get "${uci_prefix}.name")
 		mtu=$(get_ugw_value "$config_name" mtu)
@@ -270,32 +255,6 @@ ugw_checkWorking () {
 		elif [ "$mtu" != "ok" -o "$wan" != "ok" ] && uci_is_true "$enable"; then
 			disable_ugw_service "$config_name"
 		fi
-	done
-	apply_changes on-usergw
-}
-
-#################################################################################
-# check if sharingInternet is enabled and tunnels are active or vice versa
-ugw_shareInternet () {
-	trap "error_trap ugw_shareInternet $*" $GUARD_TRAPS
-	local config_name
-	local enable
-
-	sharing="$(uci_get on-usergw.ugw_sharing.shareInternet)"
-	[ -z "$sharing" ] && sharing=0
-	find_all_uci_sections on-usergw uplink "type=openvpn" | while read uci_prefix; do
-		config_name=$(uci_get "${uci_prefix}.name")
-		enable=$(uci_get openvpn.${config_name}.enable)
-		[ -z "$enable" ] && enable=1
-
-		if [ ! -e "/var/run/openvpn-${config_name}.pid" ] && uci_is_true "$sharing" && uci_is_true "$enable"; then
-			msg_info "activating tunnel ${config_name}"
-			enable_ugw_service "$config_name"
-		elif [ -e /var/run/openvpn-${config_name}.pid ] && ( uci_is_false "$sharing" || uci_is_false "$enable" ); then
-			msg_info "disabling tunnel ${config_name}"
-			disable_ugw_service "$config_name"
-		fi
-		apply_changes on-usergw
 	done
 }
 
@@ -360,7 +319,6 @@ Options:
 			results will be stored in on-usergw config
 	checkVpn	check Vpn availability of gateway on port 1600
 	checkSpeed	check Speed of Gateway
-	shareInternet	start UGW-tunnels if MTU and WAN ok and sharing is enabled
 	--help		this help" && exit 0
 
 aquire_lock "$DATA_LOCK_FILE" 600 || { msg_debug "parallel instance running, exit" && exit; }
@@ -380,19 +338,11 @@ case "$ACTION" in
 			run_for_all_openvpn_ugw "$func"
 		fi
 		;;
-	"shareInternet")
-		ugw_checkSharingBlocked
-		ugw_checkWorking
-		ugw_update_service_state
-		ugw_shareInternet
-		;;
 	auto|*)
 		run_for_all_openvpn_ugw ugw_update_wan_status ugw_update_vpn_status
 		ugw_doExtraChecks
-		ugw_checkSharingBlocked
-		ugw_checkWorking
+		ugw_adjust_state
 		ugw_update_service_state
-		ugw_shareInternet
 		;;
 esac
 

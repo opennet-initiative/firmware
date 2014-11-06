@@ -7,9 +7,6 @@
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
-# fuer Entwicklungszwecke: uebermaessig ausfuehrliche Ausgabe aktivieren
-[ "${ON_DEBUG:-}" = "1" ] && set -x
-
 
 # "ash" liefert leider nicht den korrekten Wert "function" nach einem Aufruf von "type -t".
 # Also verwenden wir die Textausgabe von "type".

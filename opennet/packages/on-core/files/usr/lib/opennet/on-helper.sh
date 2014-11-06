@@ -17,6 +17,10 @@
 #  e = Fehler
 set -eu
 
+# fuer Entwicklungszwecke: uebermaessig ausfuehrliche Ausgabe aktivieren
+[ "${ON_DEBUG:-}" = "1" ] && set -x
+
+
 GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
 ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
 ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults

@@ -12,7 +12,7 @@
 # 
 
 # Debug?
-set -x
+#set -x
 set -u
 
 # include helper functions
@@ -131,12 +131,10 @@ ugw_getMTU () {
 	openvpn --config "$config_file" --writepid "$pidfile" --mtu-test >"$outfile" 2>&1 &
 	# wait for openvpn to startup and write pid file
 	sleep 10
-	local pid=$(cat "$pidfile")
-	local wait_loops=20
+	local pid=$(cat "$pidfile" || true)
+	local wait_loops=40
 	local mtu_out
 	while [ "$wait_loops" -gt 0 ]; do
-		# wait for one minute
-		sleep 30	
 		mtu_out=$(grep "MTU test completed" "$outfile")
 		# for example 
 		# Thu Jul  3 22:23:01 2014 NOTE: Empirical MTU test completed [Tried,Actual] local->remote=[1573,1573] remote->local=[1573,1573]
@@ -147,17 +145,19 @@ ugw_getMTU () {
 			kill "$pid" >/dev/null 2>&1 || true ; rm -f "$pidfile" "$outfile"
 			return 0
 		fi
-		if [ ! -d "/proc/$pid" ]; then
-			msg_info "test for ugw_update_mtu $hostname impossible. Aborting."
-			kill "$pid" >/dev/null 2>&1 || true ; rm -f "$pidfile" "$outfile"
+		if [ -z "$pid" -o ! -d "/proc/$pid" ]; then
+			msg_info "test for ugw_getMTU $hostname impossible. Aborting."
+			[ -n "$pid" ] && kill "$pid" >/dev/null 2>&1 || true
+			rm -f "$pidfile" "$outfile"
 			trap "" $GUARD_TRAPS && return 1
 		fi
+		sleep 10
 		: $((wait_loops--))
 	done
 	# timer run off, kill leftover openvpn and abort test
 	kill "$pid" >/dev/null 2>&1 || true
 	rm -f "$pidfile" "$outfile"
-	msg_info "timeout for ugw_update_mtu $hostname Aborting."
+	msg_info "timeout for ugw_getMTU $hostname Aborting."
 	trap "" $GUARD_TRAPS && return 1
 }
 
@@ -179,7 +179,7 @@ ugw_update_mtu() {
 	msg_debug "starting ugw_update_mtu for '$hostname'"
 	msg_debug "ugw_update_mtu will take around 5 minutes per gateway"
 
-	local result=$(ugw_update_mtu "$config_name")
+	local result=$(ugw_getMTU "$config_name")
 
 	if [ -n "$result" ]; then
 		local toGW_tried=$(echo "$result" | cut -f 1 -d ,)
@@ -256,6 +256,7 @@ ugw_adjust_state () {
 			disable_ugw_service "$config_name"
 		fi
 	done
+	return 0
 }
 
 
@@ -296,10 +297,11 @@ ugw_doExtraChecks () {
 
 		# mtuCheck
 		# if last mtucheck is older than 1 day and ugw is not running
-		vpn_pid=$(cat "/var/run/openvpn-${config_name}.pid" 2>/dev/null)
+		vpn_pid=$(cat "/var/run/openvpn-${config_name}.pid" 2>/dev/null || true)
 		mtu_time=$(get_ugw_value "$config_name" "mtu_time")
-		[ -z "$vpn_pid" -o ! -d "/proc/$vpn_pid" ] && [ "$(($(date +%s)-mtu_time))" -gt 86400 ] && ugw_checkMTU "$config_name"
+		[ -z "$vpn_pid" -o ! -d "/proc/$vpn_pid" ] && [ "$(($(date +%s)-mtu_time))" -gt 86400 ] && ugw_update_mtu "$config_name"
 	done
+	return 0
 }
 
 
@@ -322,7 +324,7 @@ Options:
 	--help		this help" && exit 0
 
 aquire_lock "$DATA_LOCK_FILE" 600 || { msg_debug "parallel instance running, exit" && exit; }
-echo "running" >"$DATA_LOCK_FILE"
+echo "running: $ACTION $@" >"$DATA_LOCK_FILE"
 msg_debug "starting another instance ($@)"
 
 
@@ -345,10 +347,6 @@ case "$ACTION" in
 		ugw_update_service_state
 		;;
 esac
-
-#################################################################################
-# commit changes, otherwise they will slow down the whole system significantly
-uci commit on-usergw
 
 rm -f "$DATA_LOCK_FILE"
 msg_debug "finishing another instance"

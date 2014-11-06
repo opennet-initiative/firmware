@@ -547,6 +547,9 @@ apply_changes() {
 			apply_changes olsrd
 			apply_changes firewall
 			;;
+		on-core)
+			# nichts zu tun
+			;;
 		*)
 			msg_info "no handler defined for applying config changes for '$config'"
 			;;
@@ -620,6 +623,7 @@ set_opennet_id() {
 	# ON_ID in on-core-Settings setzen
 	prepare_on_uci_settings
 	uci set "on-core.settings.on_id=$new_id"
+	apply_changes on-core
 	# Hostnamen konfigurieren
 	find_all_uci_sections system system | while read uci_prefix; do
 		uci set "${uci_prefix}.hostname=AP-$(echo "$new_id" | tr . -)"

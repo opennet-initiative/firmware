@@ -74,6 +74,7 @@ update_openvpn_ugw_settings() {
 	local config_file
 	local config_name
 	local uci_prefix
+	prepare_on_usergw_uci_settings
 	find_all_uci_sections on-usergw uplink type=openvpn | while read uci_prefix; do
 		rebuild_openvpn_ugw_config "$uci_prefix"
 		config_name=$(uci_get "${uci_prefix}.name")
@@ -116,6 +117,7 @@ add_openvpn_ugw_service() {
 	safe_hostname=$(echo "$hostname" | sed 's/[^a-zA-Z0-9]/_/g')
 	config_name=openvpn_${config_prefix}_${safe_hostname}_${protocol}_${port}
 	config_file=$config_dir/${config_name}.conf
+	prepare_on_usergw_uci_settings
 	uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	[ -z "$uci_prefix" ] && uci_prefix=on-usergw.$(uci add on-usergw uplink)
 	uci set "${uci_prefix}.name=$config_name"
@@ -159,6 +161,7 @@ update_ugw_services() {
 		fi
 	done
 	# pruefe ob keine UGWs konfiguriert sind - erstelle andernfalls die Standard-UGWs von Opennet
+	prepare_on_usergw_uci_settings
 	[ -z "$(find_all_uci_sections on-usergw uplink)" ] && add_default_openvpn_ugw_services
 	# Portweiterleitungen aktivieren
 	# kein "apply_changes" - andernfalls koennten Loops entstehen
@@ -272,6 +275,7 @@ disable_stale_ugw_services () {
 	local ugw_config
 	local service
 	local creator
+	prepare_on_usergw_uci_settings
 	# Portweiterleitungen entfernen
 	find_all_uci_sections redirect "name=$UGW_FIREWALL_RULE_NAME" | while read uci_prefix; do
 		ugw_config=$(find_first_uci_section on-usergw uplink "firewall_rule=$uci_prefix")
@@ -295,6 +299,7 @@ disable_stale_ugw_services () {
 _is_local_ugw_port_unused() {
 	local port=$1
 	local uci_prefix
+	prepare_on_usergw_uci_settings
 	# Suche nach einer Kollision
 	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
 		[ "$port" = "$(uci_get "${uci_prefix}.local_port")" ] && return 1
@@ -364,9 +369,11 @@ announce_olsr_service_ugw() {
 	local config_name=$1
 	local main_ip=$(get_main_ip)
 	local port
-	local ugw_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
+	local ugw_prefix
 	local olsr_prefix
 	local service_description
+	prepare_on_usergw_uci_settings
+	ugw_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 
 	local download=$(get_ugw_value "$config_name" download)
 	local upload=$(get_ugw_value "$config_name" upload)
@@ -399,6 +406,7 @@ ugw_update_service_state () {
 	local ugw_possible
 	local uci_prefix
 
+	prepare_on_usergw_uci_settings
 	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
 		config_name=$(uci_get "${uci_prefix}.name")
 		ugw_enabled=$(uci_get "on-usergw.${config_name}.enable")
@@ -426,7 +434,7 @@ prepare_on_usergw_uci_settings() {
 	# on-usergw-Konfiguration erzeugen, falls noetig
 	[ -e /etc/config/on-usergw ] || touch /etc/config/on-usergw
 	for section in ugw_sharing; do
-		uci show | grep -q "^on-usergw\.${section}\." || uci set "on-usergw${section}=$section"
+		uci show | grep -q "^on-usergw\.${section}\." || uci set "on-usergw.${section}=$section"
 	done
 }
 

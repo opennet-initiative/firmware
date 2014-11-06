@@ -1,0 +1,9 @@
+#!/bin/sh /etc/rc.common
+
+START=31
+
+start() {
+	# stelle sicher, dass immer mindestens die beiden Standard-UGWs vorhanden sind
+	on-function update_ugw_services
+}
+

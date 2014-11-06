@@ -580,16 +580,16 @@ get_sorted_opennet_interfaces() {
 	local uci_prefix
 	local order
 	# wir vergeben einfach statische Ordnungsnummern:
-	#   10 - nicht konfigurierte Interfaces
-	#   20 - konfigurierte Interfaces
+	#   10 - konfigurierte Interfaces
+	#   20 - nicht konfigurierte Interfaces
 	# Offsets basierend auf dem Netzwerknamen:
 	#   1 - on_wifi*
 	#   2 - on_eth*
 	#   3 - alle anderen
 	for network in $(get_zone_interfaces "$ZONE_MESH"); do
 		uci_prefix=network.$network
-		order=20
-		[ "$(uci_get "${uci_prefix}.ifname")" == "none" ] && order=10
+		order=10
+		[ "$(uci_get "${uci_prefix}.ifname")" == "none" ] && order=20
 		if [ "${network#on_wifi}" != "$network" ]; then
 			order=$((order+1))
 		elif [ "${network#on_eth}" != "$network" ]; then

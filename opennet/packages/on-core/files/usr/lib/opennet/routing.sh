@@ -26,9 +26,13 @@ get_target_route_interface() {
 	if is_ipv4 "$target" || is_ipv6 "$target"; then
 		ipaddr=$target
 	else
-		ipaddr=$(query_dns "$target" | head -1)
+		ipaddr=$(query_dns "$target")
 	fi
-	ip route get "$ipaddr" | head -1 | awk '{print $5}'
+	# "failed_policy" wird von ipv6 fuer nicht-zustellbare Adressen zurueckgeliefert
+	# falls ein Hostname mehrere IP-Adressen ergibt (z.B. ipv4 und ipv6), dann werden beide probiert
+	for item in $ipaddr; do
+		ip route get "$item" | grep -v ^failed_policy | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
+	done | head -1
 }
 
 

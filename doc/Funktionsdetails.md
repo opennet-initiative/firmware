@@ -114,6 +114,7 @@ Die dauerhaften Eigenschaften werden via uci unterhalb von ``on-usergw.@uplink[*
 * type - z.B. "openvpn"
 * hostname - DNS-Name des UGW-Servers
 * port - Portnummer des UGW-Servers
+* protocol - "tcp" oder "udp"
 * template - die zu verwendende Konfigurationsvorlage (z.B. /usr/share/opennet/ugw-openvpn-udp.template)
 
 Die wechselhaften Eigenschaften werden im temporären Dateisystem (also im RAM) gespeichert. Dies reduziert Flash-Schreibzugriffe. Die wechselhaften Eigenschaften sind folgende:
@@ -152,6 +153,30 @@ Konfiguration des UGW-Servers:
 
  * iptables -I INPUT -p tcp --dport 22222 -j ACCEPT
  * (while true; do nc -l -n -p 22222 -q 0 2>&1 >/dev/null; sleep 2; done) &
+
+
+Liste der Gegenstellen
+^^^^^^^^^^^^^^^^^^^^^^
+
+In der Firmware sind zwei öffentliche VPN-Server angegebene, die den Zugang zum Opennet-Mesh ermöglichen.
+Diese sind in der Datei ``/usr/share/opennet/usergw.defaults`` zu finden (siehe ``openvpn_ugw_preset_X``).
+
+Neben den vordefinierten Hosts werden Zugangsmöglichkeiten auch via olsrd-Nameservice veröffentlicht (Service-Typ: "mesh").
+Bei jeder Änderung der lokalen Services-Liste (``/var/run/services_olsr``) wird somit das Skript ``/etc/olsrd/nameservice.d/on_update_usergw`` ausgeführt, welches eventuell neu announcierte Hosts parst und speichert.
+
+Die bekannten Host-Einträge werden im uci-Namensraum ``on-usergw`` in der anonymen Liste ``uplink`` gespeichert. Hier sind alle für den Verbindungsaufbau notwendigen Daten abgelegt. Folgende Attribute sind dort beispielsweise zu finden:
+
+  on-usergw.@uplink[0]=uplink
+  on-usergw.@uplink[0].enable=1
+  on-usergw.@uplink[0].name=openvpn_on_ugw_erina_opennet_initiative_de_udp_1602
+  on-usergw.@uplink[0].type=openvpn
+  on-usergw.@uplink[0].hostname=erina.opennet-initiative.de
+  on-usergw.@uplink[0].template=/usr/share/opennet/ugw-openvpn-udp.template
+  on-usergw.@uplink[0].config_file=/var/etc/openvpn/openvpn_on_ugw_erina_opennet_initiative_de_udp_1602.conf
+  on-usergw.@uplink[0].port=1602
+  on-usergw.@uplink[0].protocol=udp
+
+Nach jedem Booten wird einmal das via olsr-nameservice getriggerte Skript ausgeführt - dies führt implizit dazu, dass im Falle einer leeren Hostliste (nach der Erst-Installation) die zwei vorkonfigurierten Gegenstellene eingetragen werden.
 
 
 Datensammlung: ondataservice

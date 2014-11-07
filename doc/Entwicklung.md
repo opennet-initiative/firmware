@@ -366,6 +366,16 @@ Der Aufruf von hotplug-Skripten lässt sich folgendermaßen emulieren:
   ACTION=ifup hotplug-call iface
 
 
+Upgrade-Tests
+=============
+
+Allgemeine Hinweise
+-------------------
+
+Bei RAM-Mangel (erkennbar am spontanen reboot ohne Änderungen nach dem Upload der neuen Firmware-Datei) kann folgende Kommandozeile wahrscheinlich genügend Platz schaffen:
+
+  for a in collectd dnsmasq sysntpd olsrd cron; do /etc/init.d/$a stop; done; wifi down
+
 Externe Dokumentationen
 =======================
 

@@ -43,7 +43,7 @@ apply_changes firewall
 
 update_olsr_interfaces
 
-filename=/tmp/opennet_ugw-${remote_1}.txt
+filename=/tmp/opennet_ugw-$(get_safe_filename "${remote_1:-}${remote_2:-}${remote_3:-}${remote_4:-}").txt
 echo "$dev" > "$filename" # a short message for the web frontend
 
 msg_debug "finished for iface ${dev}"

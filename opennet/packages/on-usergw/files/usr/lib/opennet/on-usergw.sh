@@ -59,9 +59,7 @@ rebuild_openvpn_ugw_config() {
 	# Konfigurationsdatei neu schreiben
 	mkdir -p "$(dirname "$config_file")"
 	(
-		for ipaddr in $(query_dns "$(uci_get "${uci_prefix}.hostname")" | filter_routable_addresses); do
-			echo "remote $ipaddr $port"
-		done
+		echo "remote $(uci_get "${uci_prefix}.hostname") $port"
 		echo "proto $protocol"
 		echo "writepid /var/run/${config_name}.pid"
 		cat "$template"
@@ -126,7 +124,7 @@ add_openvpn_ugw_service() {
 	uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	[ -z "$uci_prefix" ] && uci_prefix=on-usergw.$(uci add on-usergw uplink)
 	# neuer Eintrag? Dann moege er aktiv sein.
-	[ -z "${uci_prefix}.enable" ] && uci set "{uci_prefix}.enable=1"
+	[ -z "$(uci_get "${uci_prefix}.enable")" ] && uci set "${uci_prefix}.enable=1"
 	uci set "${uci_prefix}.name=$config_name"
 	uci set "${uci_prefix}.type=openvpn"
 	uci set "${uci_prefix}.hostname=$hostname"
@@ -253,6 +251,8 @@ disable_ugw_service() {
 	update_one_openvpn_ugw_setup "$config_name"
 	uci set "openvpn.${config_name}.enable=0"
 	apply_changes openvpn
+	# unabhaengig von moeglichen Aenderungen: laufende Dienste stoppen
+	/etc/init.d/openvpn reload
 	apply_changes on-usergw
 	apply_changes firewall
 	apply_changes olsrd
@@ -364,6 +364,8 @@ enable_ugw_service () {
 	update_one_openvpn_ugw_setup "$config_name"
 	uci set "openvpn.${config_name}.enable=1"
 	apply_changes openvpn
+	# unabhaengig von moeglichen Aenderungen: fehlende Dienste neu starten
+	/etc/init.d/openvpn reload
 	apply_changes on-usergw
 	apply_changes firewall
 	apply_changes olsrd
@@ -414,27 +416,40 @@ ugw_update_service_state () {
 	local name
 	local ugw_name
 	local ugw_enabled
-	local ugw_possible
 	local uci_prefix
+	local mtu_test
+	local wan_test
+	local openvpn_test
 	local cert_available
-
+	local sharing_enabled=$(uci_get on-usergw.ugw_sharing.shareInternet)
+	[ -z "$sharing_enabled" ] && sharing_enabled=0
 	prepare_on_usergw_uci_settings
 	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
 		config_name=$(uci_get "${uci_prefix}.name")
 		ugw_enabled=$(uci_get "${uci_prefix}.enable")
-		ugw_possible=$(get_ugw_value "$config_name" status)
-		cert_available=$(openvpn_has_cert "$config_name" && echo y || echo n)
+		openvpn_enable=$(uci_get "openvpn.${config_name}.enable")
+		[ -z "$openvpn_enable" ] && openvpn_enable=1
+		mtu_test=$(get_ugw_value "$config_name" mtu)
+		wan_test=$(get_ugw_value "$config_name" wan)
+		openvpn_test=$(get_ugw_value "$config_name" status)
+		cert_available=$(openvpn_has_certificate "$config_name" && echo y || echo n)
 
-		# TODO: pruefen, was genau dies tun soll? Menschliche Einstellung ueberschreiben? Zielzustand herstellen?
-		# this gateway connection is not usable
-		if uci_is_true "$cert_available" && uci_is_true "$ugw_enabled" && uci_is_true "$ugw_possible"; then
-			enable_ugw_service "$config_name"
-		elif uci_is_false "$ugw_enabled"; then
-			# keine Aenderung -> weiterhin abgeschaltet
-			true
+		# Ziel ist die Aktivierung der openvpn-Verbindung, sowie die Announcierung des Dienstes
+		# und die Einrichtung der Port-Weiterleitungen
+		if uci_is_false "$openvpn_enable"; then
+			# openvpn-Setup ist abgeschaltet - soll es aktiviert werden?
+			if [ "$mtu_test" = "ok" -a "$wan_test" = "ok" ] && \
+					uci_is_true "$openvpn_test" && \
+					uci_is_true "$sharing_enabled"; then
+				enable_ugw_service "$config_name"
+			fi
 		else
-			# Abschaltung des UGW-Dienstes
-			disable_ugw_service "$config_name"
+			# openvpn-Setup ist aktiviert - muss es abgeschaltet werden?
+			if [ "$mtu_test" != "ok" -o "$wan_test" != "ok" ] || \
+					uci_is_false "$openvpn_test" || \
+					uci_is_false "$sharing_enabled"; then
+				disable_ugw_service "$config_name"
+			fi
 		fi
 	done
 	disable_stale_ugw_services

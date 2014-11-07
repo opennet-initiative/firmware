@@ -398,11 +398,10 @@ verify_vpn_connection() {
 	local ca_file=${4:-}
 	local wan_dev
 	local openvpn_opts
+	local hostname
+	local status_output
 
-	wan_dev=$(get_target_route_interface "$hostname")
-	echo "$wan_dev" | grep -q -E "^(tun|tap)" && trap "" $GUARD_TRAPS && return 1
-	
-	msg_debug "start vpn test of $hostname"
+	msg_debug "start vpn test of <$config_file>"
 
 	# check if it is possible to open tunnel to the gateway (10 sec. maximum)
 	# Assembling openvpn parameters ...
@@ -416,13 +415,13 @@ verify_vpn_connection() {
 	# some timing options:
 	#   inactive: close connection after 10s without traffic
 	#   ping-exit: close connection after 5s without a ping from the other side (which is probably disabled)
-	openvpn_opts="$openvpn_opts --inactive 6 retry 0 --ping-exit 2"
+	openvpn_opts="$openvpn_opts --inactive 6 retry 2 --ping-exit 2"
 
 	# other options:
 	#   verb: verbose level 3 is required for the TLS messages
 	#   nice: testing is not too important
-	#   resolv-retry: no need to be extra careful and patient
-	openvpn_opts="$openvpn_opts --verb 3 --nice 3 --resolv-retry 0"
+	#   resolv-retry: fuer ipv4/ipv6-Tests sollten wir mehrere Versuche zulassen
+	openvpn_opts="$openvpn_opts --verb 3 --nice 3 --resolv-retry 3"
 
 	# prevent a real connection (otherwise we may break our current vpn tunnel):
 	#   tls-verify: force a tls handshake failure
@@ -435,7 +434,8 @@ verify_vpn_connection() {
 	[ -n "$ca_file" ] && openvpn_opts="$openvpn_opts --ca \"$ca_file\""
 
 	# check if the output contains a magic line
-	openvpn --config "$config_file" $openvpn_opts | grep -q "Initial packet" && return 0
+	status_output=$(openvpn --config "$config_file" $openvpn_opts || true)
+	echo "$status_output" | grep -q "Initial packet" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 
@@ -700,7 +700,7 @@ get_from_key_value_list() {
 # Falls der Ort der Zertifikatsdatei nicht zweifelsfrei ermittelt werden kann, dann liefert die
 # Funktion "wahr" zurueck.
 # Parameter: Name der Openvpn-Konfiguration (uci show openvpn.*)
-openvpn_has_cert() {
+openvpn_has_certificate() {
 	local uci_prefix="openvpn.$1"
 	local cert_file
 	local config_file=$(uci_get "${uci_prefix}.config")

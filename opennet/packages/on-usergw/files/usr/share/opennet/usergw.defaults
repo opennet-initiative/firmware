@@ -1,5 +1,5 @@
-vpn_recheck_age			30
-vpn_nonworking_timeout		10
+vpn_recheck_age			15
+vpn_nonworking_timeout		15
 vpn_bettergateway_timeout	10
 
 certificate_countryName		de

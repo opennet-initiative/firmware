@@ -7,7 +7,7 @@ uci_is_true() {
 
 uci_is_false() {
 	local token=$1
-	[ "$token" = "0" -o "$token" = "no" -o "$token" = "off" -o "$token" = "false" ] && return 0
+	[ "$token" = "0" -o "$token" = "no" -o "$token" = "n" -o "$token" = "off" -o "$token" = "false" ] && return 0
 	return 1
 }
 

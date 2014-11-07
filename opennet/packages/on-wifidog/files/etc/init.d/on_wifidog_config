@@ -55,11 +55,11 @@ start() {
 
 		# Firewall-Zone fuer das offene Netzwerk einrichten
 		uci_prefix=firewall.$(uci add firewall zone)
-		uci_set "${uci_prefix}.name=$ZONE_FREE"
-		uci_set "${uci_prefix}.network=$NETWORK_FREE"
-		uci_set "${uci_prefix}.forward=REJECT"
-		uci_set "${uci_prefix}.input=ACCEPT"
-		uci_set "${uci_prefix}.output=ACCEPT"
+		uci set "${uci_prefix}.name=$ZONE_FREE"
+		uci set "${uci_prefix}.network=$NETWORK_FREE"
+		uci set "${uci_prefix}.forward=REJECT"
+		uci set "${uci_prefix}.input=ACCEPT"
+		uci set "${uci_prefix}.output=ACCEPT"
 
 		section=$(uci add firewall forwarding)
 		uci set firewall.$section.src='free'

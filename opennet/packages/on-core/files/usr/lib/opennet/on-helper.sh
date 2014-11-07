@@ -245,6 +245,7 @@ _get_file_dict_value() {
 	while read key value; do
 		[ "$field" = "$key" ] && echo -n "$value" && return
 	done < "$status_file"
+	return 0
 }
 
 #################################################################################
@@ -373,7 +374,7 @@ aquire_lock() {
 clean_stale_pid_file() {
 	local pidfile=$1
 	local pid
-	[ -e "$pidfile" ] | return 0
+	[ -e "$pidfile" ] || return 0
 	pid=$(cat "$pidfile" | sed 's/[^0-9]//g')
 	[ -z "$pid" ] && msg_debug "removing broken PID file: $pidfile" && rm "$pidfile" && return 0
 	[ ! -e "/proc/$pid" ] && msg_debug "removing stale PID file: $pidfile" && rm "$pidfile" && return 0
@@ -692,5 +693,39 @@ get_from_key_value_list() {
 		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break
 	done
 	return 0
+}
+
+
+# Pruefe ob die angegebene Openvpn-Konfiguration auf ein Zertifikat verweist, das nicht existiert.
+# Falls der Ort der Zertifikatsdatei nicht zweifelsfrei ermittelt werden kann, dann liefert die
+# Funktion "wahr" zurueck.
+# Parameter: Name der Openvpn-Konfiguration (uci show openvpn.*)
+openvpn_has_cert() {
+	local uci_prefix="openvpn.$1"
+	local cert_file
+	local config_file=$(uci_get "${uci_prefix}.config")
+	if [ -n "$config_file" ]; then
+		# Verweis auf lokale config-Datei (keine uci-basierte Konfiguration)
+		if [ -e "$config_file" ]; then
+			cert_file=$(grep "^cert[ \t]" "$config_file" | while read key value; do echo "$value"; done)
+		else
+			# im Zweifelsfall: unklar
+			cert_file=
+		fi
+	else
+		# Konfiguration liegt in uci
+		cert_file=$(uci_get "${uci_prefix}.cert")
+	fi
+	# das Zertifikat scheint irgendwie anders konfiguriert zu sein - im Zeifelsfall: OK
+	[ -z "$cert_file" ] && return 0
+	# existiert die Datei?
+	[ ! -e "$cert_file" ] && return 1
+	return 0
+}
+
+
+# Wandle einen uebergebenene Parameter in eine Zeichenkette um, die sicher als Dateiname verwendet werden kann
+get_safe_filename() {
+	echo "$1" | sed 's/[^a-zA-Z0-9._\-]/_/g'
 }
 

@@ -130,8 +130,7 @@ ugw_getMTU () {
 
 	openvpn --config "$config_file" --writepid "$pidfile" --mtu-test >"$outfile" 2>&1 &
 	# wait for openvpn to startup and write pid file
-	sleep 10
-	local pid=$(cat "$pidfile" || true)
+	local pid=$(cat "$pidfile" 2>/dev/null || true)
 	local wait_loops=40
 	local mtu_out
 	while [ "$wait_loops" -gt 0 ]; do
@@ -226,6 +225,8 @@ ugw_update_wan_status () {
 		msg_debug "checkWAN: $hostname routing through wan device: $on_ugw_targetDev"
 		msg_debug "checkWAN: $hostname avg ping time: $time"
 	else
+		# ausfuehrliche Erklaerung, falls das Routing eben noch akzeptabel war
+		[ "$(get_ugw_value "$config_name" "wan")" = "ok" ] && msg_info "Routing switched away from WAN interface to <$on_ugw_targetDev>"
 		set_ugw_value "$config_name" wan error
 		set_ugw_value "$config_name" ping ""
 	fi
@@ -269,7 +270,7 @@ ugw_doExtraChecks () {
 	local speed_time
 	local speed_time_prev
 	local name
-	local vpn_pid
+	local vpn_pidfile
 	local mtu_time
 	local config_name
 	local restart_time=$(($(date +%s)-$(cut -f1 -d. /proc/uptime)))
@@ -297,9 +298,15 @@ ugw_doExtraChecks () {
 
 		# mtuCheck
 		# if last mtucheck is older than 1 day and ugw is not running
-		vpn_pid=$(cat "/var/run/openvpn-${config_name}.pid" 2>/dev/null || true)
+		vpn_pidfile="/var/run/${config_name}.pid"
+		clean_stale_pid_file "$vpn_pidfile"
+		# VPN laeuft -> kein MTU-Test
+		[ -e "$vpn_pidfile" ] && continue
 		mtu_time=$(get_ugw_value "$config_name" "mtu_time")
-		[ -z "$vpn_pid" -o ! -d "/proc/$vpn_pid" ] && [ "$(($(date +%s)-mtu_time))" -gt 86400 ] && ugw_update_mtu "$config_name"
+		[ -z "$mtu_time" ] && mtu_time=0
+		if [ "$(($(date +%s)-mtu_time))" -gt 86400 ]; then
+			ugw_update_mtu "$config_name"
+		fi
 	done
 	return 0
 }

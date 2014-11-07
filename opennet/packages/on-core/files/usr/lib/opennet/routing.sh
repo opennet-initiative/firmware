@@ -18,6 +18,16 @@ is_ipv6() {
 }
 
 
+# Lies IP-Addressen via stdin ein und gib alle Adressen aus, die (laut "ip route get") erreichbar sind.
+# Dies bedeutet nicht, dass wir mit den Adressen kommunizieren koennen - es geht lediglich um lokale Routing-Regeln.
+filter_routable_addresses() {
+	while read ip; do
+		[ -n "$(get_target_route_interface "$ip")" ] && echo "$ip"
+	done
+	return 0
+}
+
+
 # Ermittle das Netzwerkinterface, ueber den der Verkehr zu einem Ziel laufen wuerde.
 # Falls erforderlich, findet eine Namensaufloesung statt.
 get_target_route_interface() {

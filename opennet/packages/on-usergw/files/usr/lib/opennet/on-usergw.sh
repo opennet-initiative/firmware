@@ -48,8 +48,8 @@ get_ugw_portforward() {
 # Schreibe eine openvpn-Konfigurationsdatei fuer eine mesh-Anbindung.
 # Der erste und einzige Parameter ist ein uci-Praefix unterhalb von "on-usergw" (on-usergw.@uplink[x])
 rebuild_openvpn_ugw_config() {
-	local uci_prefix=$1
-	local config_name=$(uci_get "${uci_prefix}.name")
+	local config_name="$1"
+	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	local hostname=$(uci_get "${uci_prefix}.hostname")
 	local port=$(uci_get "${uci_prefix}.port")
 	local protocol=$(uci_get "${uci_prefix}.protocol")
@@ -59,10 +59,11 @@ rebuild_openvpn_ugw_config() {
 	# Konfigurationsdatei neu schreiben
 	mkdir -p "$(dirname "$config_file")"
 	(
-		for ipaddr in $(query_dns "$(uci_get "${uci_prefix}.hostname")"); do
+		for ipaddr in $(query_dns "$(uci_get "${uci_prefix}.hostname")" | filter_routable_addresses); do
 			echo "remote $ipaddr $port"
 		done
 		echo "proto $protocol"
+		echo "writepid /var/run/${config_name}.pid"
 		cat "$template"
 	) >"$config_file"
 }
@@ -71,18 +72,22 @@ rebuild_openvpn_ugw_config() {
 # Quelle: on-usergw.@uplink[x]
 # Ziel: openvpn.on_ugw_*
 update_openvpn_ugw_settings() {
-	local config_file
-	local config_name
-	local uci_prefix
-	prepare_on_usergw_uci_settings
 	find_all_uci_sections on-usergw uplink type=openvpn | while read uci_prefix; do
-		rebuild_openvpn_ugw_config "$uci_prefix"
-		config_name=$(uci_get "${uci_prefix}.name")
-		# uci-Konfiguration setzen
-		uci set "openvpn.${config_name}=openvpn"
-		uci set "openvpn.${config_name}.config=$config_file"
-		# das Attribut "enable" belassen wir unveraendert
+		update_one_openvpn_ugw_setup "$(uci_get "${uci_prefix}.name")"
 	done
+}
+
+
+update_one_openvpn_ugw_setup() {
+	local config_name="$1"
+	prepare_on_usergw_uci_settings
+	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
+	local config_file=$(uci_get "${uci_prefix}.config_file")
+	rebuild_openvpn_ugw_config "$config_name"
+	# uci-Konfiguration setzen
+	# das Attribut "enable" belassen wir unveraendert
+	uci set "openvpn.${config_name}=openvpn"
+	uci set "openvpn.${config_name}.config=$config_file"
 	apply_changes openvpn
 }
 
@@ -120,6 +125,8 @@ add_openvpn_ugw_service() {
 	prepare_on_usergw_uci_settings
 	uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	[ -z "$uci_prefix" ] && uci_prefix=on-usergw.$(uci add on-usergw uplink)
+	# neuer Eintrag? Dann moege er aktiv sein.
+	[ -z "${uci_prefix}.enable" ] && uci set "{uci_prefix}.enable=1"
 	uci set "${uci_prefix}.name=$config_name"
 	uci set "${uci_prefix}.type=openvpn"
 	uci set "${uci_prefix}.hostname=$hostname"
@@ -241,11 +248,9 @@ disable_ugw_service() {
 	# Portweiterleitung loeschen
 	uci_prefix=$(uci_get "$(find_first_uci_section on-usergw uplink "name=$config_name").firewall_rule")
 	[ -n "$uci_prefix" ] && uci_delete "$uci_prefix"
-	service=$(uci_get "on-usergw.${config_name}.olsr_service")
-	if [ -n "$service" ]; then
-		uci_prefix=$(get_and_enable_olsrd_library_uci_prefix nameservice)
-		uci del_list "${uci_prefix}.service=$service"
-	fi
+	service=$(uci_get "${uci_prefix}.olsr_service")
+	[ -n "$service" ] && uci del_list "$(get_and_enable_olsrd_library_uci_prefix nameservice).service=$service"
+	update_one_openvpn_ugw_setup "$config_name"
 	uci set "openvpn.${config_name}.enable=0"
 	apply_changes openvpn
 	apply_changes on-usergw
@@ -277,7 +282,7 @@ disable_stale_ugw_services () {
 	local creator
 	prepare_on_usergw_uci_settings
 	# Portweiterleitungen entfernen
-	find_all_uci_sections redirect "name=$UGW_FIREWALL_RULE_NAME" | while read uci_prefix; do
+	find_all_uci_sections firewall redirect "name=$UGW_FIREWALL_RULE_NAME" | while read uci_prefix; do
 		ugw_config=$(find_first_uci_section on-usergw uplink "firewall_rule=$uci_prefix")
 		[ -n "$ugw_config" ] && [ -n "$(uci_get "$ugw_config")" ] && continue
 		uci_delete "$uci_prefix"
@@ -285,7 +290,7 @@ disable_stale_ugw_services () {
 	# olsr-Nameservice-Beschreibungen entfernen
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix nameservice)
 	uci_get_list olsrd service | while read service; do
-		creator=$(echo "$service" | parse_olsr_service_definition | cut -f 7 | get_from_key_value_list "creator" :)
+		creator=$(echo "$service" | parse_olsr_service_definitions | cut -f 7 | get_from_key_value_list "creator" :)
 		# ausschliesslich Eintrage mit unserem "creator"-Stempel beachten
 		[ "$creator" = "$UGW_SERVICE_CREATOR" ] || continue
 		# unbenutzte Eintraege entfernen
@@ -315,14 +320,15 @@ _is_local_ugw_port_unused() {
 # commit findet nicht statt
 get_local_ugw_service_port() {
 	local config_name=$1
-	local port=$(uci_get "on-usergw.${config_name}.local_port")
+	local usergw_uci=$(find_first_uci_section on-usergw uplink "name=$config_name")
+	local port=$(uci_get "${usergw_uci}.local_port")
 	if [ -z "$port" ]; then
 		# suche einen unbenutzten lokalen Port
 		port=$UGW_LOCAL_SERVICE_PORT_START
 		until _is_local_ugw_port_unused "$port"; do
 			: $((port++))
 		done
-		uci set "on-usergw.${config_name}.local_port=$port"
+		uci set "${usergw_uci}.local_port=$port"
 		apply_changes on-usergw
 	fi
 	echo "$port"
@@ -337,22 +343,25 @@ enable_ugw_service () {
 	trap "error_trap enable_ugw_service $*" $GUARD_TRAPS
 	local config_name=$1
 	local main_ip=$(get_main_ip)
+	local usergw_uci=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	local hostname
-	local uci_prefix=$(uci_get "on-usergw.${config_name}.firewall_rule")
-	[ -z "$uci_prefix" ] && uci_prefix=$(uci add firewall redirect)
+	local uci_prefix=$(uci_get "${usergw_uci}.firewall_rule")
+	[ -z "$uci_prefix" ] && uci_prefix=firewall.$(uci add firewall redirect)
 	# der Name ist wichtig fuer spaetere Aufraeumaktionen
 	uci set "${uci_prefix}.name=$UGW_FIREWALL_RULE_NAME"
-	uci set "${uci_prefix}.src=$MESH_ZONE"
-	uci set "${uci_prefix}.proto=$(uci_get "on-usergw.${config_name}.protocol")"
+	uci set "${uci_prefix}.src=$ZONE_MESH"
+	uci set "${uci_prefix}.proto=$(uci_get "${usergw_uci}.protocol")"
 	uci set "${uci_prefix}.src_dport=$(get_local_ugw_service_port "$config_name")"
 	uci set "${uci_prefix}.target=DNAT"
 	uci set "${uci_prefix}.src_dip=$main_ip"
-	hostname=$(uci_get "$(find_first_uci_section on-usergw uplink "name=$config_name").hostname")
-	# wir verwenden nur die erste aufgeloeste IP (TODO: dies beschraenkt uns aktuell auf IPv4)
-	uci set "${uci_prefix}.dest_ip=$(query_dns "$hostname" | head -1)"
+	hostname=$(uci_get "${usergw_uci}.hostname")
+	# wir verwenden nur die erste aufgeloeste IP, zu welcher wir eine Route haben.
+	# z.B. faellt IPv6 aus, falls wir kein derartiges Uplink-Interface sehen
+	uci set "${uci_prefix}.dest_ip=$(query_dns "$hostname" | filter_routable_addresses | head -n 1)"
 	# olsr-nameservice-Announcement
 	announce_olsr_service_ugw "$config_name"
 	# VPN-Verbindung
+	update_one_openvpn_ugw_setup "$config_name"
 	uci set "openvpn.${config_name}.enable=1"
 	apply_changes openvpn
 	apply_changes on-usergw
@@ -382,12 +391,14 @@ announce_olsr_service_ugw() {
 	local olsr_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	[ -z "$olsr_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && trap "" $GUARD_TRAPS && return 1
 
-	port=$(uci_get "${ugw_prefix}.local_port")
+	port=$(get_local_ugw_service_port "$config_name")
 
 	# announce our ugw service
 	# TODO: Anpassung an verschiedene Dienste
 	if [ "$(uci_get "${ugw_prefix}.type")" = "openvpn" ]; then
 		service_description="openvpn://${main_ip}:$port|udp|ugw upload:$upload download:$download ping:$ping creator:$UGW_SERVICE_CREATOR"
+	else
+		service_description=
 	fi
 	uci set "${ugw_prefix}.service=$service_description"
 	# vorsorglich loeschen (Vermeidung doppelter Eintraege)
@@ -405,17 +416,24 @@ ugw_update_service_state () {
 	local ugw_enabled
 	local ugw_possible
 	local uci_prefix
+	local cert_available
 
 	prepare_on_usergw_uci_settings
 	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
 		config_name=$(uci_get "${uci_prefix}.name")
-		ugw_enabled=$(uci_get "on-usergw.${config_name}.enable")
-		ugw_possible=$(get_ugw_value "$ugw_ipaddr" status)
+		ugw_enabled=$(uci_get "${uci_prefix}.enable")
+		ugw_possible=$(get_ugw_value "$config_name" status)
+		cert_available=$(openvpn_has_cert "$config_name" && echo y || echo n)
 
+		# TODO: pruefen, was genau dies tun soll? Menschliche Einstellung ueberschreiben? Zielzustand herstellen?
 		# this gateway connection is not usable
-		if [ -n "$ugw_enabled" ] && [ "$ugw_possible" = "y" ]; then
+		if uci_is_true "$cert_available" && uci_is_true "$ugw_enabled" && uci_is_true "$ugw_possible"; then
 			enable_ugw_service "$config_name"
+		elif uci_is_false "$ugw_enabled"; then
+			# keine Aenderung -> weiterhin abgeschaltet
+			true
 		else
+			# Abschaltung des UGW-Dienstes
 			disable_ugw_service "$config_name"
 		fi
 	done

@@ -89,8 +89,12 @@ CONFIG_PACKAGE_olsrd-mod-txtinfo=y
 CONFIG_PACKAGE_on-core=y
 CONFIG_PACKAGE_on-openvpn=m
 CONFIG_PACKAGE_on-usergw=m
-CONFIG_PACKAGE_on-wifidog=m
+#CONFIG_PACKAGE_on-wifidog=m #first deactivate it. finally delete it.
 CONFIG_PACKAGE_on-tinc=m
+CONFIG_PACKAGE_on-nodogsplash=m
+
+# Captive Portal
+CONFIG_PACKAGE_nodogsplash=m
 
 # openvpn
 CONFIG_OPENVPN_openssl_ENABLE_SERVER=n
@@ -121,15 +125,6 @@ CONFIG_PACKAGE_strace=m
 CONFIG_PACKAGE_tcpdump=m
 CONFIG_PACKAGE_vsftpd=m #keep as module because of size problems
 CONFIG_PACKAGE_vsftpd-tls=m #keep as module
-
-# wifidog (?)
-CONFIG_PACKAGE_iptables-mod-extra=y
-CONFIG_PACKAGE_iptables-mod-ipopt=y
-CONFIG_PACKAGE_iptables-mod-nat-extra=y
-CONFIG_PACKAGE_kmod-ipt-extra=y
-CONFIG_PACKAGE_kmod-ipt-ipopt=y
-CONFIG_PACKAGE_kmod-ipt-nat-extra=y
-CONFIG_PACKAGE_kmod-tun=y
 
 # IP-Redundanz
 CONFIG_PACKAGE_ucarp=m

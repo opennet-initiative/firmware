@@ -32,7 +32,7 @@ $(ARCHS): feeds translate
 	@echo "Building for target architecture: $@"
 	$(MAKE) "config-$@"
 	@# update the release identifier
-	@sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=$(GIT_COMMIT_COUNT)/i' $(OPENWRT_DIR)/include/opennet.mk
+	@sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=$(GIT_COMMIT_COUNT)/i' $(OPENWRT_DIR)/include/opennet-version.mk
 	$(MAKE) -C "$(OPENWRT_DIR)"
 
 config-%:
@@ -83,7 +83,7 @@ patch:
 unpatch:
 	@# revert all patches if there are applied ones
 	@# first reset a local change
-	@sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=1/i' $(OPENWRT_DIR)/include/opennet.mk
+	@sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=1/i' $(OPENWRT_DIR)/include/opennet-version.mk
 	@# now make unpatch
 	@test -n "$(shell quilt applied 2>/dev/null)" && quilt pop -a || true
 

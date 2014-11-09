@@ -1,0 +1,23 @@
+change URL for package download using opennet server
+Index: on_firmware/openwrt/include/version.mk
+===================================================================
+--- on_firmware.orig/openwrt/include/version.mk	2014-09-18 22:22:15.556604988 +0200
++++ on_firmware/openwrt/include/version.mk	2014-11-09 18:56:38.429742844 +0100
+@@ -8,6 +8,8 @@
+ # Substituted by SDK, do not remove
+ # REVISION:=x
+ 
++include $(INCLUDE_DIR)/opennet-version.mk
++
+ PKG_CONFIG_DEPENDS += \
+ 	CONFIG_VERSION_NUMBER \
+ 	CONFIG_VERSION_NICK \
+@@ -30,7 +32,7 @@
+ VERSION_NICK:=$(if $(VERSION_NICK),$(VERSION_NICK),$(RELEASE))
+ 
+ VERSION_REPO:=$(call qstrip_escape,$(CONFIG_VERSION_REPO))
+-VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),http://downloads.openwrt.org/snapshots/trunk/%T/packages)
++VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),https://downloads.opennet-initiative.de/openwrt/testing/$(PKG_VERSION)-$(PKG_RELEASE)/packages)
+ 
+ VERSION_DIST:=$(call qstrip_escape,$(CONFIG_VERSION_DIST))
+ VERSION_DIST:=$(if $(VERSION_DIST),$(VERSION_DIST),OpenWrt)

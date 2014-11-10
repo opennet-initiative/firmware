@@ -40,6 +40,7 @@ NETWORK_FREE=free
 ROUTING_TABLE_MESH=olsrd
 ROUTING_TABLE_MESH_DEFAULT=olsrd-default
 VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
+OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
 
 DEBUG=${DEBUG:-}
 
@@ -727,5 +728,58 @@ openvpn_has_certificate() {
 # Wandle einen uebergebenene Parameter in eine Zeichenkette um, die sicher als Dateiname verwendet werden kann
 get_safe_filename() {
 	echo "$1" | sed 's/[^a-zA-Z0-9._\-]/_/g'
+}
+
+
+# Schreibe eine openvpn-Konfigurationsdatei.
+# Parameter: ein uci-Praefix unterhalb von "on-openvpn" (on-openvpn.@gateway[x]) oder "on-usergw" (on-usergw.\@uplink[x]
+# Parameter: uci-Konfiguration (on-openvpn oder on-usergw)
+# Parameter: uci-Liste (z.B. "server" oder "uplink")
+rebuild_openvpn_config() {
+	local config_name="$1"
+	local config_domain="$2"
+	local config_branch="$3"
+	local uci_prefix=$(find_first_uci_section "$config_domain" "$config_branch" "name=$config_name")
+	local hostname=$(uci_get "${uci_prefix}.hostname")
+	local port=$(uci_get "${uci_prefix}.port")
+	local protocol=$(uci_get "${uci_prefix}.protocol")
+	[ "$protocol" = "tcp" ] && protocol=tcp-client
+	local template=$(uci_get "${uci_prefix}.template")
+	local config_file=$(uci_get "${uci_prefix}.config_file")
+	# Konfigurationsdatei neu schreiben
+	mkdir -p "$(dirname "$config_file")"
+	(
+		echo "remote $(uci_get "${uci_prefix}.hostname") $port"
+		echo "proto $protocol"
+		echo "writepid /var/run/${config_name}.pid"
+		cat "$template"
+	) >"$config_file"
+}
+
+
+update_one_openvpn_setup() {
+	local config_name="$1"
+	local uci_domain="$2"
+	local uci_branch="$3"
+	local uci_prefix=$(find_first_uci_section "$uci_domain" "$uci_branch" "name=$config_name")
+	local config_file=$(uci_get "${uci_prefix}.config_file")
+	rebuild_openvpn_config "$config_name" "$uci_domain" "$uci_branch"
+	# uci-Konfiguration setzen
+	# das Attribut "enable" belassen wir unveraendert
+	uci set "openvpn.${config_name}=openvpn"
+	uci set "openvpn.${config_name}.config=$config_file"
+	apply_changes openvpn
+}
+
+
+# Pruefe alle openvpn-Konfigurationen fuer MIG- oder UGW-Verbindungen.
+# Quelle: on-openvpn.@server[x] oder on-usergw.@uplink[x]
+# Ziel: openvpn.on_mig_* oder openvpn.on_ugw_*
+update_openvpn_settings() {
+	local uci_domain="$1"
+	local uci_branch="$2"
+	find_all_uci_sections on-usergw uplink type=openvpn | while read uci_prefix; do
+		update_one_openvpn_setup "$(uci_get "${uci_prefix}.name")" "$uci_domain" "$uci_branch"
+	done
 }
 

@@ -174,6 +174,8 @@ find_and_select_best_gateway()
 	local current_gw_ipaddr=$(uci_get openvpn.opennet_user.remote)
 	local better_gw_count=$(get_gateway_value common better_gw)
 	[ -z "$better_gw_count" ] && better_gw_count=0
+	# how long the current gateway will be kept if a better one is found (small values might result in gateway-flipping)
+	local bettergateway_timeout=$(get_on_openvpn_default vpn_bettergateway_timeout)
 	local next_index=1
 	while [ -n "$(uci_get "on-openvpn.gate_$next_index")" ]; do
 		index=$next_index
@@ -264,8 +266,6 @@ get_gate_ids() {
 recheck_age=$(get_on_openvpn_default vpn_recheck_age)
 # how often it will be tried to establish a connection till gateway is declared as not to work
 nonworking_timeout=$(get_on_openvpn_default vpn_nonworking_timeout)
-# how long the current gateway will be kept if a better one is found (small values might result in gateway-flipping)
-bettergateway_timeout=$(get_on_openvpn_default vpn_bettergateway_timeout)
 
 
 case "${1:-}" in
@@ -320,10 +320,6 @@ case "${1:-}" in
 		start_stop_openvpn "$selected_gateway"
 		;;
 esac
-
-
-# commit changes, otherwise they will slow down the whole system significantly
-# uci commit on-openvpn - already done before
 
 # remove registration
 rm -f "$PID_FILE"

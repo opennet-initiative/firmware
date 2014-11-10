@@ -1,6 +1,5 @@
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
-OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
 SPEEDTEST_UPLOAD_PORT=22222
 SPEEDTEST_SECONDS=20
 UGW_FIREWALL_RULE_NAME=opennet_ugw
@@ -45,54 +44,10 @@ get_ugw_portforward() {
 }
 
 
-# Schreibe eine openvpn-Konfigurationsdatei fuer eine mesh-Anbindung.
-# Der erste und einzige Parameter ist ein uci-Praefix unterhalb von "on-usergw" (on-usergw.@uplink[x])
-rebuild_openvpn_ugw_config() {
-	local config_name="$1"
-	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
-	local hostname=$(uci_get "${uci_prefix}.hostname")
-	local port=$(uci_get "${uci_prefix}.port")
-	local protocol=$(uci_get "${uci_prefix}.protocol")
-	[ "$protocol" = "tcp" ] && protocol=tcp-client
-	local template=$(uci_get "${uci_prefix}.template")
-	local config_file=$(uci_get "${uci_prefix}.config_file")
-	# Konfigurationsdatei neu schreiben
-	mkdir -p "$(dirname "$config_file")"
-	(
-		echo "remote $(uci_get "${uci_prefix}.hostname") $port"
-		echo "proto $protocol"
-		echo "writepid /var/run/${config_name}.pid"
-		cat "$template"
-	) >"$config_file"
-}
-
-# Pruefe alle openvpn-Konfigurationen fuer UGW-Verbindungen.
-# Quelle: on-usergw.@uplink[x]
-# Ziel: openvpn.on_ugw_*
-update_openvpn_ugw_settings() {
-	find_all_uci_sections on-usergw uplink type=openvpn | while read uci_prefix; do
-		update_one_openvpn_ugw_setup "$(uci_get "${uci_prefix}.name")"
-	done
-}
-
-
-update_one_openvpn_ugw_setup() {
-	local config_name="$1"
-	prepare_on_usergw_uci_settings
-	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
-	local config_file=$(uci_get "${uci_prefix}.config_file")
-	rebuild_openvpn_ugw_config "$config_name"
-	# uci-Konfiguration setzen
-	# das Attribut "enable" belassen wir unveraendert
-	uci set "openvpn.${config_name}=openvpn"
-	uci set "openvpn.${config_name}.config=$config_file"
-	apply_changes openvpn
-}
-
-
 # Erzeuge einen neuen ugw-Service.
 # Ignoriere doppelte Eintraege.
 # Es wird _kein_ "uci commit" durchgefuehrt.
+# TODO: nahezu identisch mit add_openvpn_mig_service
 add_openvpn_ugw_service() {
 	local hostname=$1
 	local port=$2
@@ -107,7 +62,7 @@ add_openvpn_ugw_service() {
 	local safe_hostname
 	local config_prefix
 	if [ "$protocol" = "udp" ]; then
-		template=/usr/share/opennet/ugw-openvpn-udp.template
+		template=/usr/share/opennet/openvpn-ugw-udp.template
 		config_dir=$OPENVPN_CONFIG_BASEDIR
 		config_prefix=on_ugw
 	else
@@ -141,7 +96,7 @@ add_openvpn_ugw_service() {
 
 # Parse die Liste der via olsrd-nameservice announcierten ugw-Dienste.
 # Falls keine UGW-Dienste gefunden werden, bzw. vorher konfiguriert waren, werden die Standard-Opennet-Server eingetragen.
-# Speichere diese Liste als on-user.@uplink-Liste.
+# Speichere diese Liste als on-userugw.@uplink-Liste.
 # Anschliessend werden eventuell Dienste (z.B. openvpn) neu konfiguriert.
 update_ugw_services() {
 	trap "error_trap update_ugw_services $*" $GUARD_TRAPS
@@ -248,7 +203,7 @@ disable_ugw_service() {
 	[ -n "$uci_prefix" ] && uci_delete "$uci_prefix"
 	service=$(uci_get "${uci_prefix}.olsr_service")
 	[ -n "$service" ] && uci del_list "$(get_and_enable_olsrd_library_uci_prefix nameservice).service=$service"
-	update_one_openvpn_ugw_setup "$config_name"
+	update_one_openvpn_setup "$config_name" "on-usergw" "uplink"
 	uci set "openvpn.${config_name}.enable=0"
 	apply_changes openvpn
 	# unabhaengig von moeglichen Aenderungen: laufende Dienste stoppen

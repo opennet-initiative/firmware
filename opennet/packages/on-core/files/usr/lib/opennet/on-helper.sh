@@ -117,7 +117,7 @@ update_dns_servers() {
 	trap "error_trap update_dns_servers $*" $GUARD_TRAPS
 	local host
 	local port
-	local use_dns="$(uci_get on-core.services.use_olsrd_dns)"
+	local use_dns="$(uci_get on-core.settings.use_olsrd_dns)"
 	# return if we should not use DNS servers provided via olsrd
 	uci_is_false "$use_dns" && return
 	local servers_file=$(uci_get "dhcp.@dnsmasq[0].serversfile")
@@ -144,7 +144,7 @@ update_ntp_servers() {
 	trap "error_trap update_ntp_servers $*" $GUARD_TRAPS
 	local host
 	local port
-	local use_ntp="$(uci_get on-core.services.use_olsrd_ntp)"
+	local use_ntp="$(uci_get on-core.settings.use_olsrd_ntp)"
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
 	# schreibe die Liste der NTP-Server neu

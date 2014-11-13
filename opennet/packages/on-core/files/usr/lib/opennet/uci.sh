@@ -102,7 +102,7 @@ prepare_on_uci_settings() {
 	local section
 	# on-core-Konfiguration erzeugen, falls noetig
 	[ -e /etc/config/on-core ] || touch /etc/config/on-core
-	for section in services settings; do
+	for section in settings; do
 		uci show | grep -q "^on-core\.${section}\." || uci set "on-core.${section}=$section"
 	done
 }

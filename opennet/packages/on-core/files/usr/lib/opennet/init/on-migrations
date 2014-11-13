@@ -97,8 +97,8 @@ add_use_settings() {
 	prepare_on_uci_settings
 	# erzeuge die services-Node, falls noetig
 	for setting in use_olsrd_dns use_olsrd_ntp; do
-		uci show on-core | grep -q "^on-core\.services\.$setting=" && continue
-		uci set "on-core.services.$setting=1"
+		uci show on-core | grep -q "^on-core\.settings\.$setting=" && continue
+		uci set "on-core.settings.$setting=1"
 	done
 	return 0
 }

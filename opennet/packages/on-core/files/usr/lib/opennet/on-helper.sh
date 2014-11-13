@@ -241,6 +241,8 @@ update_opennet_zone_masquerading() {
 _get_file_dict_value() {
 	local status_file=$1
 	local field=$2
+	local key
+	local value
 	# fehlende Datei -> kein Ergebnis
 	[ -e "$status_file" ] || return 0
 	while read key value; do
@@ -248,6 +250,23 @@ _get_file_dict_value() {
 	done < "$status_file"
 	return 0
 }
+
+
+# Liefere alle Schluessel aus einer Key/Value-Datei, die mit dem mitgelieferten "keystart"
+# beginnen.
+_get_file_dict_keys() {
+	local status_file=$1
+	local keystart=$2
+	local key
+	local value
+	# fehlende Datei -> kein Ergebnis
+	[ -e "$status_file" ] || return 0
+	while read key value; do
+		[ "${key#$keystart}" != "$key" ] && echo "${key#$keystart}"
+	done < "$status_file"
+	return 0
+}
+
 
 #################################################################################
 # Schreiben eines Werts in eine Key-Value-Datei
@@ -259,6 +278,8 @@ _set_file_dict_value() {
 	local status_file=$1
 	local field=$2
 	local new_value=$3
+	local fieldname
+	local value
 	# fehlende Datei? Leer erzeugen ...
 	[ -e "$status_file" ] || touch "$status_file"
 	# Filtere bisherige Zeilen mit dem key heraus.

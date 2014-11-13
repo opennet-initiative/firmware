@@ -4,6 +4,11 @@
 RT_FILE=/etc/iproute2/rt_tables
 RT_START_ID=11
 
+# hier speichern wir die Routing-Informationen zwischenzeitlich
+# Dabei gehen wir davon aus, dass dieser Prozess nicht lange laeuft, da
+# die Werte nur ein einziges Mal pro Programmstart eingelesen werden.
+ROUTE_INFO=
+
 
 # Pruefe ob der uebegebene Text eine IPv4-Adresse ist
 is_ipv4() {
@@ -146,5 +151,13 @@ get_or_add_routing_table() {
 	done
 	echo "$table_id      $table" >> "$RT_FILE"
 	echo "$table_id"
+}
+
+
+get_routing_distance() {
+	local target="$1"
+	# verwende den letzten gecachten Wert, falls vorhanden
+	[ -z "$ROUTE_INFO" ] && ROUTE_INFO=$(echo /routes | nc localhost 2006 | grep "^[0-9]" | sed 's#/32##')
+	echo "$ROUTE_INFO" | awk '{ if ($1 == "'$target'") { print $4; exit; } }'
 }
 

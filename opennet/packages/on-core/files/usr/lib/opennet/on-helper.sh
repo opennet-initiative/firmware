@@ -49,7 +49,7 @@ trap "error_trap __main__ $*" $GUARD_TRAPS
 
 
 # Module laden
-for fname in olsr.sh routing.sh uci.sh on-usergw.sh; do
+for fname in olsr.sh routing.sh uci.sh services.sh on-usergw.sh; do
 	fname=${IPKG_INSTROOT:-}/usr/lib/opennet/$fname
 	[ -e "$fname" ] && . "$fname"
 done

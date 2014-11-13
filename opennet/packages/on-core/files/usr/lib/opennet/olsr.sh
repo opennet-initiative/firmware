@@ -175,7 +175,7 @@ parse_olsr_service_definitions() {
 #   http   192.168.0.15   8080   tcp   ugw   upload:3 download:490 ping:108
 get_olsr_services() {
 	trap "error_trap get_olsr_services $*" $GUARD_TRAPS
-	local filter_service=$1
+	local filter_service
 	local url
 	local proto
 	local service
@@ -189,6 +189,23 @@ get_olsr_services() {
 	grep "^[^#]" "$SERVICES_FILE" | \
 		sed 's/[\t ]\+#[^#]\+//' | \
 		parse_olsr_service_definitions | \
-		awk "{ if (\$6 == \"$filter_service\") print \$0; }"
+		# filtere die Ergebnisse nach einem Service-Typ, falls selbiger als erster Parameter angegeben wurde
+		if [ "$#" -ge 1 ]; then awk "{ if (\$6 == \"$1\") print \$0; }"; else cat -; fi
+	return 0
+}
+
+
+update_olsr_services() {
+	local scheme
+	local ip
+	local port
+	local path
+	local proto
+	local service
+	local details
+	get_olsr_services | while read scheme ip port path proto service details; do
+		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "$details"
+	done
+	apply_changes on-core
 }
 

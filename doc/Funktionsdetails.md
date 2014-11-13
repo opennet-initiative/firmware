@@ -1,6 +1,28 @@
 Firmware 0.5
 ============
 
+Datenbank der Dienste
+---------------------
+
+Auf jedem AP wird eine Datenbank von Diensten gepflegt. Die typische Quelle fuer diese Datenbank ist der olsrd-Nameservice.
+
+Die Dienste werden mittels eines olsrd-nameservice-Trigger-Skripts aktualisiert (``/etc/olsrd/nameservice.d/on_update_services``).
+
+Die Aktion des Trigger-Skripts lässt sich manuell auslösen:
+
+  on-function update_olsr_services
+
+Die Ergebnisse sind in uci als ``services``-Sektionen unter ``on-core`` zu finden:
+
+  uci show on-core
+
+Außerdem befinden sich volatile Detail-Attribute in der Services-Datenbank im tmpfs (``/var/on-services.status``).
+
+Die menschenfreundliche Ausgabe ist recht übersichtlich:
+
+  on-function print_services
+
+
 DNS - Namensauflösung
 ---------------------
 
@@ -72,14 +94,25 @@ Dabei werden alle ``dns``-Einträge aus der Datei ``/var/run/services_olsr`` aus
 Gateway-Auswahl
 ---------------
 
+Gateway-Liste
+^^^^^^^^^^^^^
+
+Minütlich wird via cronjob die Datei ``/usr/sbin/on_vpngateway_check`` ausgeführt. Diese ruft die lua-Funktion ``update_gateways`` auf:
+
+  require('luci.model.opennet.on_vpn_autosearch'); update_gateways()
+
+
 * minütlich:
  * Auslesen aus /var/run/services_olsr
+
+Gateway-Auswahl
+^^^^^^^^^^^^^^^
  * Sortieren nach Entfernung (falls automatisch)
 
 Gateway-Wechsel
 ^^^^^^^^^^^^^^^
 
-Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann erhäht er den Wert der Gateway-Variable "common/better_gw". Sobald dieser Variable den Wert fünf erreicht hat, wird die neue Gateway-IP in die openvpn-Konfiguration übertragen und openvpn neu gestartet.
+Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann erhält er den Wert der Gateway-Variable "common/better_gw". Sobald dieser Variable den Wert fünf erreicht hat, wird die neue Gateway-IP in die openvpn-Konfiguration übertragen und openvpn neu gestartet.
 
 Datenspeicherung
 ^^^^^^^^^^^^^^^^
@@ -175,6 +208,8 @@ Die bekannten Host-Einträge werden im uci-Namensraum ``on-usergw`` in der anony
   on-usergw.@uplink[0].config_file=/var/etc/openvpn/openvpn_on_ugw_erina_opennet_initiative_de_udp_1602.conf
   on-usergw.@uplink[0].port=1602
   on-usergw.@uplink[0].protocol=udp
+  on-usergw.@uplink[0].local_port=5100
+  on-usergw.@uplink[0].service=openvpn://192.168.1.203:5100|udp|ugw upload:4 download:4704 ping: creator:ugw_service
 
 Nach jedem Booten wird einmal das via olsr-nameservice getriggerte Skript ausgeführt - dies führt implizit dazu, dass im Falle einer leeren Hostliste (nach der Erst-Installation) die zwei vorkonfigurierten Gegenstellene eingetragen werden.
 
@@ -211,6 +246,14 @@ Standard-IP setzen
 Das Skript ``/etc/uci-defaults/on-configure-network`` prüft, ob der uci-Wert ``on-core.settings.default_ip_configured`` gesetzt ist.
 Sollte dies nicht der Fall sein, dann wird die IP-Adresse aus der //on-core//-Defaults-Datei ausgelesen und konfiguriert.
 Anschließend wird das obige uci-Flag gesetzt, um eine erneute Konfiguration anch einem Update zu verhindern.
+
+
+Debugging
+---------
+
+Jedes Skript und jede Funktionalität lässt sich folgendermaßen im Detail debuggen:
+
+  ON_DEBUG=1 on_usergateway_check
 
 
 Firmware-NG

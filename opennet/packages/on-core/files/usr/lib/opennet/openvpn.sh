@@ -119,6 +119,12 @@ verify_vpn_connection() {
 	#   resolv-retry: fuer ipv4/ipv6-Tests sollten wir mehrere Versuche zulassen
 	openvpn_opts="$openvpn_opts --verb 3 --nice 3 --resolv-retry 3"
 
+	# wohl nur fuer tcp-Verbindungen
+	#   connect-retry: Sekunden Wartezeit zwischen Versuchen
+	#   connect-timeout: Dauer eines Versuchs
+	#   connect-retry-max: Anzahl moeglicher Wiederholungen
+	openvpn_opts="$openvpn_opts connect-retry=1 connect-timeout=12 connect-retry-max=1"
+
 	# prevent a real connection (otherwise we may break our current vpn tunnel):
 	#   tls-verify: force a tls handshake failure
 	#   tls-exit: stop immediately after tls handshake failure
@@ -129,13 +135,13 @@ verify_vpn_connection() {
 	sed -i "/^writepid/d" "$temp_config_file"
 
 	[ -n "$key_file" ] && \
-		openvpn_opts="$openvpn_opts --key \"$key_file\"" && \
+		openvpn_opts="$openvpn_opts --key $key_file" && \
 		sed -i "/^key/d" "$temp_config_file"
 	[ -n "$cert_file" ] && \
-		openvpn_opts="$openvpn_opts --cert \"$cert_file\"" && \
+		openvpn_opts="$openvpn_opts --cert $cert_file" && \
 		sed -i "/^cert/d" "$temp_config_file"
 	[ -n "$ca_file" ] && \
-		openvpn_opts="$openvpn_opts --ca \"$ca_file\"" && \
+		openvpn_opts="$openvpn_opts --ca $ca_file" && \
 		sed -i "/^ca/d" "$temp_config_file"
 
 	# check if the output contains a magic line

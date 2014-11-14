@@ -6,11 +6,14 @@ client
 nobind
 comp-lzo yes
 
+# sanfte Abmeldung vom Server
+explicit-exit-notify 1
+
 dev tap
 dev-type tap
 
-persist-key 1
-persist-tun 1
+persist-key
+persist-tun
 
 ns-cert-type server
 script-security 2 execve

@@ -6,6 +6,9 @@ client
 nobind
 comp-lzo yes
 
+# sanfte Abmeldung vom Server
+explicit-exit-notify 1
+
 dev tun
 dev-type tun
 

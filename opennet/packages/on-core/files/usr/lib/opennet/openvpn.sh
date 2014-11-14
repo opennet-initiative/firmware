@@ -109,9 +109,9 @@ verify_vpn_connection() {
 	openvpn_opts="$openvpn_opts --ifconfig-noexec --route-nopull"
 
 	# some timing options:
-	#   inactive: close connection after 10s without traffic
-	#   ping-exit: close connection after 5s without a ping from the other side (which is probably disabled)
-	openvpn_opts="$openvpn_opts --inactive 6 retry 2 --ping-exit 2"
+	#   inactive: close connection after 15s without traffic
+	#   ping-exit: close connection after 15s without a ping from the other side (which is probably disabled)
+	openvpn_opts="$openvpn_opts --inactive 15 1000000 --ping-exit 15"
 
 	# other options:
 	#   verb: verbose level 3 is required for the TLS messages
@@ -123,7 +123,7 @@ verify_vpn_connection() {
 	#   connect-retry: Sekunden Wartezeit zwischen Versuchen
 	#   connect-timeout: Dauer eines Versuchs
 	#   connect-retry-max: Anzahl moeglicher Wiederholungen
-	openvpn_opts="$openvpn_opts connect-retry=1 connect-timeout=12 connect-retry-max=1"
+	openvpn_opts="$openvpn_opts connect-retry=1 connect-timeout=15 connect-retry-max=1"
 
 	# prevent a real connection (otherwise we may break our current vpn tunnel):
 	#   tls-verify: force a tls handshake failure

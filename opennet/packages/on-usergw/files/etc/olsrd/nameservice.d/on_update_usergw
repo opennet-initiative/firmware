@@ -1,4 +1,5 @@
 #!/bin/sh
 
-on-function update_ugw_services
+# olsrd ist single-threaded und wartet auf dieses Script - wir duerfen kein Lock riskieren
+on-function update_ugw_services &
 

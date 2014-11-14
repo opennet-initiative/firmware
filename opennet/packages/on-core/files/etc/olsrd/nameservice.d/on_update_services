@@ -1,4 +1,5 @@
 #!/bin/sh
 
-on-function update_olsr_services
+# unbedingt im Hintegrund ausfuehren - sonst stockt der single-thread olsrd-Prozess (v0.5.x?)
+on-function update_olsr_services &
 

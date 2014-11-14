@@ -1,4 +1,0 @@
-#!/bin/sh
-
-on-function update_dns_servers
-

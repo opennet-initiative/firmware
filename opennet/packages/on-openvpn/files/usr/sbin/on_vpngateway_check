@@ -90,7 +90,6 @@ case "${1:-}" in
 		echo
 		;;
 	*)
-		update_mig_services
 		# do not run if there is no certificate and no key
 		if ! [ -e "$VPN_DIR/on_aps.crt" ] || ! [ -e "$VPN_DIR/on_aps.key" ]; then
 			msg_debug "no VPN certificate or key found: $VPN_DIR/on_aps.(crt|key) -> exiting"

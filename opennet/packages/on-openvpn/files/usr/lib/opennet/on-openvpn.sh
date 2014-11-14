@@ -1,21 +1,3 @@
-# Parse die Liste der via olsrd-nameservice announcierten ug- und ugw-Dienste.
-# Falls keine UGW-Dienste gefunden werden, bzw. vorher konfiguriert waren, werden die Standard-Opennet-Server eingetragen.
-# Anschliessend werden eventuell Dienste (z.B. openvpn) neu konfiguriert.
-update_mig_services() {
-	trap "error_trap update_mig_services $*" $GUARD_TRAPS
-	local scheme
-	get_sorted_services gw ugw | while read service_name; do
-		local scheme=$(get_service_value "$service_name" "scheme")
-		if [ "$scheme" = "openvpn" ]; then
-			update_mig_service "$service_name"
-		else
-			msg_info "update_ugw_services: unbekanntes uplink-Protokoll-Schema: $scheme"
-		fi
-	done
-	apply_changes on-core
-}
-
-
 # Erzeuge oder aktualisiere einen mig-Service.
 # Ignoriere doppelte Eintraege.
 # Anschliessend muss "on-core" comitted werden.
@@ -37,6 +19,8 @@ test_mig_connection()
 {
 	trap "error_trap test_mig_connection $*" $GUARD_TRAPS
 	local service_name="$1"
+	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
+	update_mig_service "$service_name"
 	local host=$(get_service_value "$service_name" "host")
 	local config_file=$(get_service_value "$service_name" "config_file")
 	local timestamp=$(set_service_value "$service_name" "timestamp_connection_test")

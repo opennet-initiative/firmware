@@ -26,4 +26,7 @@
 ** explizite Versionsmigrationen (für Firmware-Upgrades)
 * Umstieg von ntpclient auf busybox-NTP-Server:
 ** http://dev.on-i.de/changeset/de91609d66b99e7d33f33fd85988fb2047c90c8a/on_firmware
+* Folgende Features wurden entfernt:
+** konfigurierbares Sortier-Kriterium fuer Gateways (on-openvpn.gateways.vpn_sort_criteria=etx|hop)
+** konfigurierbare Gateway-Suche (on-openvpn.gateway.autosearch)
 

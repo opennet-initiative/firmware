@@ -22,6 +22,8 @@ Die menschenfreundliche Ausgabe ist recht übersichtlich:
 
   on-function print_services
 
+Dienste werden durch einen eindeutigen Namen (zusammengesetzt aus URL, Schema, Hostname, Port, usw.) referenziert. Siehe auch das Attribut ``name`` unter ``on-core.@settings[x]``.
+
 
 DNS - Namensauflösung
 ---------------------
@@ -57,7 +59,7 @@ Der entsprechende ``nameservice``-Block in der ``olsrd.conf`` des DNS-Servers ka
 Integration auf den APs
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Die Funktion ``update_dns_servers`` in der ``/usr/bin/on-helper.sh`` wird im 5-Minuten-Takt mittels des cron-Jobs ``on_update-dns-ntp`` ausgeführt.
+Die Funktion ``update_dns_servers`` in der ``/usr/bin/on-helper.sh`` wird bei jeder Service-Aktualisierung (siehe oben) aufgerufen.
 In dessen Verlauf wird sichergestellt, dass die uci-Variable ``dhcp.@dnsmasq[0].serversfile`` gesetzt ist. Falls dies nicht der Fall ist, wird die Datei ``/var/run/dnsmasq.servers`` eingetragen.
 Anschließend werden alle ``dns``-Einträge aus der Datei ``/var/run/services_olsr`` ausgelesen und im passenden Format in die obige dnsmasq-Datei geschrieben.
 Abschließend wird dem ``dnsmasq``-Prozess ein HUP-Signal gesendet, um ein erneutes Einlesen der Konfigurationsdateien auszulösen.

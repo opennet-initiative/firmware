@@ -187,7 +187,7 @@ get_olsr_services() {
 	local host
 	local port
 	local path
-	[ -e "$SERVICES_FILE" ] || return
+	[ ! -e "$SERVICES_FILE" ] && msg_debug "no olsr-services file found: $SERVICES_FILE" && return 0
 	# remove trailing commentary (containing the service's source IP address)
 	grep "^[^#]" "$SERVICES_FILE" | \
 		sed 's/[\t ]\+#[^#]\+//' | \

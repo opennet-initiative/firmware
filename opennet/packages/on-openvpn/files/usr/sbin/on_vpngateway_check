@@ -17,9 +17,6 @@
 
 
 PID_FILE=/var/run/on_vpngateway_check.pid
-VPN_NAME=opennet_user
-VPN_DIR=/etc/openvpn/$VPN_NAME
-VPN_PID_FILE=/var/run/openvpn-${VPN_NAME}.pid
 OVPN_MSG_FILE=/tmp/openvpn_msg.txt
 
 
@@ -67,7 +64,7 @@ case "${1:-}" in
 			get_sorted_services ug ugw | filter_enabled_services
 		fi | filter_enabled_services | while read service_name; do
 			description=$(get_service_description "$service_name")
-			echo -n "Testing Gateway: $description"
+			echo "Testing Gateway: $description"
 			# forciere den Test durch Loeschen des Zeitstempels
 			set_service_value "$service_name" "timestamp_connection_test" ""
 			test_mig_connection "$service_name" && echo "OK" || echo "FEHLER"
@@ -89,10 +86,14 @@ case "${1:-}" in
 		echo "		usually called via cronjob: update gateways, test all gateways and restart openvpn"
 		echo
 		;;
-	*)
-		# do not run if there is no certificate and no key
-		if ! [ -e "$VPN_DIR/on_aps.crt" ] || ! [ -e "$VPN_DIR/on_aps.key" ]; then
-			msg_debug "no VPN certificate or key found: $VPN_DIR/on_aps.(crt|key) -> exiting"
+	auto|*)
+		# teste alle VPN-Verbindungen (falls noetig und moeglich)
+		get_sorted_services ug ugw | filter_enabled_services | while read service_name; do
+			test_mig_connection "$service_name" || true
+		done
+		# die Gateway-Auswahl ist nur relevant, falls ein Schluessel vorhanden ist
+		if ! [ -e "$MIG_VPN_DIR/on_aps.crt" ] || ! [ -e "$MIG_VPN_DIR/on_aps.key" ]; then
+			msg_debug "no VPN certificate or key found: $MIG_VPN_DIR/on_aps.(crt|key) -> exiting"
 			exit 0
 		fi
 		find_and_select_best_gateway

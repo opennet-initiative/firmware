@@ -28,11 +28,5 @@ function index()
 	page.i18n = "on_network"
 	page.css = "opennet.css"
 
-	local page = entry({"opennet", "opennet_1", "restart"}, template("opennet/on_reboot"), i18n("Reboot"), 5)
-	page.i18n = "on_reboot"
-	page.css = "opennet.css"
-
-	local page = entry({"opennet", "opennet_1", "passwd"}, cbi("opennet/passwd"), i18n("Password"), 2)
-    
     page.css = "opennet.css"
 end

@@ -311,7 +311,7 @@ Options:
 	checkSpeed	check Speed of Gateway
 	--help		this help" && exit 0
 
-aquire_lock "$DATA_LOCK_FILE" 600 || { msg_debug "parallel instance running, exit" && exit; }
+aquire_lock "$DATA_LOCK_FILE" 10 || { msg_debug "parallel instance running, exit" && exit; }
 echo "running: $ACTION $@" >"$DATA_LOCK_FILE"
 msg_debug "starting another instance ($@)"
 

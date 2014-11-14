@@ -32,7 +32,7 @@ trap "rm -f $PID_FILE; logger -t on_vpngateway_check[$$] was killed by another i
 # check if other instance is running, if yes, kill other instance (after a grace period for long running processes)
 msg_debug "starting another instance ($@)"
 clean_stale_pid_file "$PID_FILE"
-aquire_lock "$PID_FILE" 180 || { msg_info "older $(basename "$0") process discovered, but it is too young: leaving it alone"; exit 0; }
+aquire_lock "$PID_FILE" 3 || { msg_info "older $(basename "$0") process discovered, but it is too young: leaving it alone"; exit 0; }
 
 # register that process is running
 # wait till other process is finished

@@ -387,18 +387,19 @@ get_main_ip() {
 
 
 # check if a given lock file:
-# A) exists, but it is outdated (determined by the number of seconds given as second parameter)
+# A) exists, but it is outdated (determined by the number of minutes given as second parameter)
 # B) exists, but is fresh
 # C) does not exist
 # A + C return success and create that file
 # B return failure and do not touch that file
 aquire_lock() {
 	local lock_file=$1
-	local max_age_seconds=$2
+	local max_age_minutes=$2
 	[ ! -e "$lock_file" ] && touch "$lock_file" && return 0
-	local now=$(date +%s)
 	local file_timestamp=$(date --reference "$lock_file" +%s)
-	[ "$((now-file_timestamp))" -gt "$max_age_seconds" ] && touch "$lock_file" && return 0
+	# too old? We claim it for ourself.
+	is_timestamp_older_minutes "$file_timestamp" "$max_age_minutes" && touch "$lock_file" && return 0
+	# lockfile is too young
 	return 1
 }
 
@@ -450,17 +451,6 @@ get_port_forwards() {
 
 	targetports=$((portbase + (cn_address-1)*port_count))
 	echo "$client_cn $targetports $((targetports+9))"
-}
-
-
-# ermittle das Alter (vergangene Sekunden seit der letzten Aenderung) einer Datei
-get_file_age_seconds() {
-	local filename=$1
-	[ -e "$filename" ] || return 1
-	local filestamp=$(date --reference "$filename" +%s)
-	local now=$(date +%s)
-	echo $((now - filestamp))
-	return 0
 }
 
 
@@ -708,5 +698,25 @@ get_safe_filename() {
 # multipliziere eine nicht-ganze Zahl mit einem Faktor und liefere das ganzzahlige Ergebnis zurueck
 get_int_multiply() {
 	awk '{print int('$1'*$0)}'
+}
+
+
+get_time_minute() {
+	date +%s | awk '{print int($1/60)}'
+}
+
+
+# Achtung: Zeitstempel aus der Zukunft gelten immer als veraltet.
+is_timestamp_older_minutes() {
+	local timestamp_minute="$1"
+	local difference="$2"
+	local now="$(get_time_minute)"
+	# it is older
+	[ "$now" -ge "$((timestamp_minute+difference))" ] && return 0
+	# timestamp in future -> invalid -> let's claim it is too old
+	[ "$now" -lt "$timestamp_minute" ] && \
+		msg_info "WARNING: Timestamp from future found: $timestamp_minute (minutes since epoch)" && \
+		return 0
+	return 1
 }
 

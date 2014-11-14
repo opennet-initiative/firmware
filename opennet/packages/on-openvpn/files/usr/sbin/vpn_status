@@ -27,14 +27,18 @@ print_status()
 	local hop_count
 	local offset
 	local quality
-	local now=$(date +%s)
+	local now=$(get_time_minute)
 	local format_string="%6s %-16s %18s %7s %4s\n"
 
 	printf "$format_string" "active" "IP" "Distance/ETX" "VPN" "Age"
 	get_sorted_services gw ugw | while read service_name; do
 		host=$(get_service_value "$service_name" "host")
 		timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
-		age=$((timestamp))
+		if [ -n "$timestamp" ]; then
+			age=$((now-timestamp))
+		else
+			age=
+		fi
 		status=$(get_service_value "$service_name" "status")
 		distance=$(get_service_value "$service_name" "distance")
 		hop_count=$(get_service_value "$service_name" "hop_count")

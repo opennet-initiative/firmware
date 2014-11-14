@@ -1,3 +1,7 @@
+MIG_VPN_DIR=/etc/openvpn/opennet_user
+MIG_TEST_VPN_DIR=/etc/openvpn/opennet_vpntest
+
+
 # Erzeuge oder aktualisiere einen mig-Service.
 # Ignoriere doppelte Eintraege.
 # Anschliessend muss "on-core" comitted werden.
@@ -23,20 +27,20 @@ test_mig_connection()
 	update_mig_service "$service_name"
 	local host=$(get_service_value "$service_name" "host")
 	local config_file=$(get_service_value "$service_name" "config_file")
-	local timestamp=$(set_service_value "$service_name" "timestamp_connection_test")
-	local now=$(date +%s)
+	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
 	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)
+	local now=$(get_time_minute)
 	local nonworking_timeout=$(get_on_openvpn_default vpn_nonworking_timeout)
-	if [ -n "$timestamp" ] && [ "$now" -ge "$((timestamp+nonworking_timeout))" ]; then
+	if [ -n "$timestamp" ] && is_timestamp_older_minutes "$timestamp" "$nonworking_timeout"; then
 		# if there was no vpn-availability for a while (nonworking_timeout minutes), declare vpn-status as not working
 		set_service_value "$service_name" "timestamp_connection_test" "$now"
 		set_service_value "$service_name" "status" "n"
 		trap "" $GUARD_TRAPS && return 1
-	elif [ -z "$timestamp" ] || [ "$now" -ge "$((timestamp+recheck_age))" ]; then
+	elif [ -z "$timestamp" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age"; then
 		if verify_vpn_connection "$service_name" "true" \
-				"$VPN_DIR/on_aps.key" \
-				"$VPN_DIR/on_aps.crt" \
-				"$VPN_DIR/opennet-ca.crt"; then
+				"$MIG_TEST_VPN_DIR/on_aps.key" \
+				"$MIG_TEST_VPN_DIR/on_aps.crt" \
+				"$MIG_TEST_VPN_DIR/opennet-ca.crt"; then
 			set_service_value "$service_name" "timestamp_connection_test" "$now"
 			set_service_value "$service_name" "status" "y"
 			msg_debug "vpn-availability of gw $host successfully tested"
@@ -78,7 +82,7 @@ find_and_select_best_gateway() {
 	local last_priority
 	local best_priority
 	local switch_candidate_timestamp
-	local now=$(date +%s)
+	local now=$(get_time_minute)
 	local bettergateway_timeout=$(get_on_openvpn_default vpn_bettergateway_timeout)
 	# suche nach dem besten und dem bisher verwendeten Gateway
 	# Ignoriere dabei alle nicht-verwendbaren Gateways.
@@ -105,9 +109,9 @@ find_and_select_best_gateway() {
 		if [ "$best_gateway" != "$last_gateway" ]; then
 			# Zaehle hoch bis 
 			switch_candidate_timestamp=$(get_service_value "$one_service" "switch_candidate_timestamp")
-			[ -z "$switch_candidate_timestamp" ] && switch_candidate_timestamp=$(now)
-			[ "$now" -lt "$((switch_candidate_timestamp+bettergateway_timeout))" ] && \
-				# erstmal noch nicht wechseln
+			[ -z "$switch_candidate_timestamp" ] && switch_candidate_timestamp="$now"
+			# noch nicht alt genug fuer den Wechsel?
+			is_timestamp_older_minutes "$switch_candidate_timestamp" "$bettergateway_timeout" || \
 				best_gateway="$last_gateway"
 		fi
 	fi

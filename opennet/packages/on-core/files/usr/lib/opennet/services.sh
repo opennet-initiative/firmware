@@ -26,7 +26,7 @@ notify_service() {
 	local path="$6"
 	local details="$7"
 	local service_name=$(_get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
-	local now=$(date +%s)
+	local now=$(get_time_minute)
 	set_service_value "$service_name" "service" "$service"
 	set_service_value "$service_name" "scheme" "$scheme"
 	set_service_value "$service_name" "host" "$host"

@@ -297,7 +297,7 @@ _set_file_dict_value() {
 	# Schreibvorgaenge (=Wahrscheinlichkeit von gleichzeitigem Zugriff) zu reduzieren.
 	(
 		while read fieldname value; do
-			[ "$field" != "$fieldname" ] && echo "$fieldname $value"
+			[ "$field" != "$fieldname" -a -n "$fieldname" ] && echo "$fieldname $value"
 		 done <"$status_file"
 		# leerer Wert -> loeschen
 		[ -n "$new_value" ] && echo "$field $new_value"
@@ -346,6 +346,7 @@ get_network() {
 		include "${IPKG_INSTROOT:-}/lib/network"
 		scan_interfaces
 		config_get "$1" ifname
+		set +eu
 	)
 	if [ -n "$ifname" ] && [ "$ifname" != "none" ]; then
 		# TODO: aktuell nur IPv4

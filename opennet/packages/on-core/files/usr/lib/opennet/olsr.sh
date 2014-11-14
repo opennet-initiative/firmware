@@ -160,7 +160,8 @@ parse_olsr_service_definitions() {
 		path=/$(echo "$url" | cut -f 4- -d /)
 		# Firmware-Versionen bis v0.4-5 veroeffentlichten folgendes Format:
 		#    http://192.168.0.40:8080|tcp|ugw upload:50 download:15300 ping:23
-		[ "$scheme" = "http" -a "$port" = "8080" ] && scheme=openvpn && port=1600
+		[ "$scheme" = "http" -a "$port" = "8080" -a "$proto" = "tcp" ] && \
+			[ "$service" = "gw" -o "$service" = "ugw" ] && scheme=openvpn && port=1600 && proto=udp
 		echo -e "$scheme\t$host\t$port\t$path\t$proto\t$service\t$details"
 	done
 }

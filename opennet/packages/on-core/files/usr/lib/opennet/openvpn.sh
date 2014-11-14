@@ -57,9 +57,9 @@ get_openvpn_config() {
 	local use_sender="$2"
 	local remote
 	if uci_is_true "$use_sender"; then
-		remote=$(get_service_value "$service_name" "details" | get_from_key_value_list "hostname")
-	else
 		remote=$(get_service_value "$service_name" "host")
+	else
+		remote=$(get_service_value "$service_name" "details" | get_from_key_value_list "hostname")
 	fi
 	local port=$(get_service_value "$service_name" "port")
 	local protocol=$(get_service_value "$service_name" "protocol")
@@ -85,7 +85,7 @@ get_openvpn_config() {
 # Ergebnis: Exitcode=0 bei Erfolg
 verify_vpn_connection() {
 	trap "error_trap verify_vpn_connection $*" $GUARD_TRAPS
-	local service_name=$1
+	local service_name="$1"
 	local use_sender="$2"
 	local key_file=${3:-}
 	local cert_file=${4:-}

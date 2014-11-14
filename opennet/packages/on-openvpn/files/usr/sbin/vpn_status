@@ -11,39 +11,41 @@
 # 	http://www.apache.org/licenses/LICENSE-2.0
 # 
 
-#set -x
-
 # include helper functions
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 print_status()
 {
-	local autosearch=$(uci_get on-openvpn.gateways.autosearch)
-	local current_gw_ipaddr=$(uci_get openvpn.opennet_user.remote)
-	local index=1
-	local gw_ipaddr
+	local current_gw
+	local service_name
+	local host
 	local age
 	local status
+	local timestamp
+	local active
+	local distance
+	local hop_count
+	local offset
+	local quality
+	local now=$(date +%s)
+	local format_string="%6s %-16s %18s %7s %4s\n"
 
-	echo -n "autosearch: $autosearch"
-	[ "$autosearch" = "on" ] && echo -e -n "\tsort by: $(uci_get on-openvpn.gateways.vpn_sort_criteria)"
-	echo
-	echo
-	echo -e "\nno.\tactive\tIP\t\tDist/ETX\tVPN\tAge"
-	echo '/route' | nc localhost 2006 > /tmp/olsrd_txtinfo_vpnstatus.txt
-	while [ -n "$(uci_get on-openvpn.gate_$index)" ] ; do
-		gw_ipaddr=$(uci_get on-openvpn.gate_$index.ipaddr);
-		age=$(get_gateway_value "$gw_ipaddr" age)
-		status=$(get_gateway_value "$gw_ipaddr" status)
-		[ "$gw_ipaddr" = "$current_gw_ipaddr" ] && active="*" || active=""
-		dist=$(awk 'BEGIN {FS="[/\x09]+"} $1=="'$gw_ipaddr'" {print $4"/"$5;}' /tmp/olsrd_txtinfo_vpnstatus.txt);
-		[ ${#dist} -lt 8 ] && dist="$dist\t"
-		echo -e "$index\t$active\t$gw_ipaddr\t$dist\t$status\t$age"
-		: $((index++))
+	printf "$format_string" "active" "IP" "Distance/ETX" "VPN" "Age"
+	get_sorted_services gw ugw | while read service_name; do
+		host=$(get_service_value "$service_name" "host")
+		timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
+		age=$((timestamp))
+		status=$(get_service_value "$service_name" "status")
+		distance=$(get_service_value "$service_name" "distance")
+		hop_count=$(get_service_value "$service_name" "hop_count")
+		offset=$(get_service_value "$service_name" "offset")
+		quality="$distance / $hop_count"
+		[ -z "$offset" ] && offset=0
+		[ "$offset" -gt 0 ] && offset="+$offset"
+		[ "$offset" -ne 0 ] && quality="($offset) $quality"
+		active=$(is_openvpn_service_active "$service_name" && echo "*" || true)
+		printf "$format_string" "$active" "$host" "$quality" "$status" "$age"
 	done
-	echo
-
-	rm /tmp/olsrd_txtinfo_vpnstatus.txt
 }
 
 print_usage()
@@ -125,12 +127,9 @@ ACTION=help
 
 case "$ACTION" in
 	move_top|add_gw|del_gw)
+		# TODO: auf neues Service-Konzept umstellen
 		[ $# -ne 2 ] && echo >&2 "ERROR: '$ACTION' requires one more parameter" && exit 1
 		"$ACTION" "$2"
-		print_status
-	;;
-	toggle_etx|toggle_auto)
-		"$ACTION"
 		print_status
 	;;
 	status)

@@ -161,3 +161,11 @@ get_routing_distance() {
 	echo "$ROUTE_INFO" | awk '{ if ($1 == "'$target'") { print $4; exit; } }'
 }
 
+
+get_hop_count() {
+	local target="$1"
+	# verwende den letzten gecachten Wert, falls vorhanden
+	[ -z "$ROUTE_INFO" ] && ROUTE_INFO=$(echo /routes | nc localhost 2006 | grep "^[0-9]" | sed 's#/32##')
+	echo "$ROUTE_INFO" | awk '{ if ($1 == "'$target'") { print $3; exit; } }'
+}
+

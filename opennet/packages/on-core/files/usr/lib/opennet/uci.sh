@@ -72,13 +72,28 @@ uci_get_list() {
 # Parameter stype: Typ der Sektion (z.B. "zone" oder "LoadPlugin")
 # Parameter Bedingugen:
 find_all_uci_sections() {
-	local config=$1
-	local stype=$2
+	_find_uci_sections 0 "$@"
+}
+
+
+# Ermittle den ersten Treffer einer uci-Sektionssuche (siehe find_all_uci_sections)
+find_first_uci_section() {
+	_find_uci_sections 1 "$@"
+}
+
+
+# Aus Performance-Gruenden brechen wir frueh ab, falls die gewuenschte Anzahl an Ergebnissen erreicht ist.
+# Die meisten Anfragen suchen nur einen Treffen ("find_first_uci_section") - daher koennen wir hier viel Zeit sparen.
+_find_uci_sections() {
+	local max_num=$1
+	local config=$2
+	local stype=$3
+	shift 3
+	local counter=0
 	local section
 	local condition
 	# dieser Cache beschleunigt den Vorgang wesentlich
 	local uci_cache=$(uci -X show "$config")
-	shift 2
 	echo "$uci_cache" | grep "^$config\.cfg[^.]\+=$stype$" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
 		for condition in "$@"; do
 			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt
@@ -86,12 +101,11 @@ find_all_uci_sections() {
 		done
 		# alle Bedingungen trafen zu
 		echo "$config.$section"
+		: $((counter++))
+		[ "$max_num" = 0 ] && continue
+		[ "$counter" -ge "$max_num" ] && break
 	done | sort
 	return 0
-}
-
-find_first_uci_section() {
-	find_all_uci_sections "$@" | head -1
 }
 
 

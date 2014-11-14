@@ -1,0 +1,20 @@
+ca /etc/openvpn/opennet_user/opennet-ca.crt
+cert /etc/openvpn/opennet_user/on_aps.crt
+key /etc/openvpn/opennet_user/on_aps.key
+
+client
+nobind
+comp-lzo yes
+
+dev tun
+dev-type tun
+
+persist-key
+persist-tun
+
+ns-cert-type server
+script-security 2 execve
+
+up /etc/openvpn/opennet_user/opennet_up.sh
+down /etc/openvpn/opennet_user/opennet_down.sh
+

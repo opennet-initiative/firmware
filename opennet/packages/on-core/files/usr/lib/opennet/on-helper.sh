@@ -49,7 +49,7 @@ trap "error_trap __main__ $*" $GUARD_TRAPS
 
 
 # Module laden
-for fname in olsr.sh routing.sh uci.sh services.sh on-usergw.sh; do
+for fname in olsr.sh routing.sh uci.sh services.sh openvpn.sh on-openvpn.sh on-usergw.sh; do
 	fname=${IPKG_INSTROOT:-}/usr/lib/opennet/$fname
 	[ -e "$fname" ] && . "$fname"
 done
@@ -117,19 +117,24 @@ update_dns_servers() {
 	trap "error_trap update_dns_servers $*" $GUARD_TRAPS
 	local host
 	local port
+	local service
 	local use_dns="$(uci_get on-core.settings.use_olsrd_dns)"
 	# return if we should not use DNS servers provided via olsrd
 	uci_is_false "$use_dns" && return
 	local servers_file=$(uci_get "dhcp.@dnsmasq[0].serversfile")
+	# aktiviere die "dnsmasq-serversfile"-Direktive, falls noch nicht vorhanden
 	if [ -z "$servers_file" ]; then
 	       servers_file=$DNSMASQ_SERVERS_FILE_DEFAULT
 	       uci set "dhcp.@dnsmasq[0].serversfile=$servers_file"
 	       uci commit "dhcp.@dnsmasq[0]"
 	       reload_config
 	fi
-	# replace ":" with "#" (dnsmasq expects this port separator)
-	get_olsr_services dns | cut -f 2,3 | sort | while read host port; do
-		echo "server=$host#$port"
+	# wir sortieren alphabetisch - Naehe ist uns egal
+	get_sorted_services dns | filter_enabled_services | sort | while read service; do
+		host=$(get_service_value "$service" "host")
+		port=$(get_service_value "$service" "port")
+		[ -n "$port" -a "$port" != "53" ] && host="$host#$port"
+		echo "server=$host"
 	done | update_file_if_changed "$servers_file" || return 0
 	# es gab eine Aenderung
 	msg_info "updating DNS servers"
@@ -144,12 +149,16 @@ update_ntp_servers() {
 	trap "error_trap update_ntp_servers $*" $GUARD_TRAPS
 	local host
 	local port
+	local service
 	local use_ntp="$(uci_get on-core.settings.use_olsrd_ntp)"
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
 	# schreibe die Liste der NTP-Server neu
 	uci_delete system.ntp.server
-	get_olsr_services ntp | cut -f 2,3 | while read host port; do
+	# wir sortieren alphabetisch - Naehe ist uns egal
+	get_sorted_services ntp | filter_enabled_services | sort | while read service; do
+		host=$(get_service_value "$service" "host")
+		port=$(get_service_value "$service" "port")
 		[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
 		uci_add_list "system.ntp.server" "$host"
 	done
@@ -404,64 +413,6 @@ clean_stale_pid_file() {
 }
 
 
-# pruefe einen VPN-Verbindungsaufbau
-# Parameter:
-#   openvpn-Konfigurationsdatei
-# optionale zusaetzliche Parameter:
-#   Schluesseldatei: z.B. $VPN_DIR/on_aps.key
-#   Zertifikatsdatei: z.B. $VPN_DIR/on_aps.crt
-#   CA-Zertifikatsdatei: z.B. $VPN_DIR/opennet-ca.crt
-# Ergebnis: Exitcode=0 bei Erfolg
-verify_vpn_connection() {
-	trap "error_trap verify_vpn_connection $*" $GUARD_TRAPS
-	local config_file=$1
-	local key_file=${2:-}
-	local cert_file=${3:-}
-	local ca_file=${4:-}
-	local wan_dev
-	local openvpn_opts
-	local hostname
-	local status_output
-
-	msg_debug "start vpn test of <$config_file>"
-
-	# check if it is possible to open tunnel to the gateway (10 sec. maximum)
-	# Assembling openvpn parameters ...
-	openvpn_opts="--dev null"
-	
-	# some openvpn options:
-	#   ifconfig-noexec: we do not want to configure a device (and mess up routing tables)
-	#   route-nopull: ignore any advertised routes - we do not want to redirect traffic
-	openvpn_opts="$openvpn_opts --ifconfig-noexec --route-nopull"
-
-	# some timing options:
-	#   inactive: close connection after 10s without traffic
-	#   ping-exit: close connection after 5s without a ping from the other side (which is probably disabled)
-	openvpn_opts="$openvpn_opts --inactive 6 retry 2 --ping-exit 2"
-
-	# other options:
-	#   verb: verbose level 3 is required for the TLS messages
-	#   nice: testing is not too important
-	#   resolv-retry: fuer ipv4/ipv6-Tests sollten wir mehrere Versuche zulassen
-	openvpn_opts="$openvpn_opts --verb 3 --nice 3 --resolv-retry 3"
-
-	# prevent a real connection (otherwise we may break our current vpn tunnel):
-	#   tls-verify: force a tls handshake failure
-	#   tls-exit: stop immediately after tls handshake failure
-	#   ns-cert-type: enforce a connection against a server certificate (instead of peer-to-peer)
-	openvpn_opts="$openvpn_opts --tls-verify /bin/false --tls-exit --ns-cert-type server"
-
-	[ -n "$key_file" ] && openvpn_opts="$openvpn_opts --key \"$key_file\""
-	[ -n "$cert_file" ] && openvpn_opts="$openvpn_opts --cert \"$cert_file\""
-	[ -n "$ca_file" ] && openvpn_opts="$openvpn_opts --ca \"$ca_file\""
-
-	# check if the output contains a magic line
-	status_output=$(openvpn --config "$config_file" $openvpn_opts || true)
-	echo "$status_output" | grep -q "Initial packet" && return 0
-	trap "" $GUARD_TRAPS && return 1
-}
-
-
 # jeder AP bekommt einen Bereich von zehn Ports fuer die Port-Weiterleitung zugeteilt
 # Parameter (optional): common name des Nutzer-Zertifikats
 get_port_forwards() {
@@ -575,7 +526,8 @@ apply_changes() {
 			apply_changes firewall
 			;;
 		on-core)
-			# nichts zu tun
+			update_ntp_servers
+			update_dns_servers
 			;;
 		*)
 			msg_info "no handler defined for applying config changes for '$config'"
@@ -752,55 +704,8 @@ get_safe_filename() {
 }
 
 
-# Schreibe eine openvpn-Konfigurationsdatei.
-# Parameter: ein uci-Praefix unterhalb von "on-openvpn" (on-openvpn.@gateway[x]) oder "on-usergw" (on-usergw.\@uplink[x]
-# Parameter: uci-Konfiguration (on-openvpn oder on-usergw)
-# Parameter: uci-Liste (z.B. "server" oder "uplink")
-rebuild_openvpn_config() {
-	local config_name="$1"
-	local config_domain="$2"
-	local config_branch="$3"
-	local uci_prefix=$(find_first_uci_section "$config_domain" "$config_branch" "name=$config_name")
-	local hostname=$(uci_get "${uci_prefix}.hostname")
-	local port=$(uci_get "${uci_prefix}.port")
-	local protocol=$(uci_get "${uci_prefix}.protocol")
-	[ "$protocol" = "tcp" ] && protocol=tcp-client
-	local template=$(uci_get "${uci_prefix}.template")
-	local config_file=$(uci_get "${uci_prefix}.config_file")
-	# Konfigurationsdatei neu schreiben
-	mkdir -p "$(dirname "$config_file")"
-	(
-		echo "remote $(uci_get "${uci_prefix}.hostname") $port"
-		echo "proto $protocol"
-		echo "writepid /var/run/${config_name}.pid"
-		cat "$template"
-	) >"$config_file"
-}
-
-
-update_one_openvpn_setup() {
-	local config_name="$1"
-	local uci_domain="$2"
-	local uci_branch="$3"
-	local uci_prefix=$(find_first_uci_section "$uci_domain" "$uci_branch" "name=$config_name")
-	local config_file=$(uci_get "${uci_prefix}.config_file")
-	rebuild_openvpn_config "$config_name" "$uci_domain" "$uci_branch"
-	# uci-Konfiguration setzen
-	# das Attribut "enable" belassen wir unveraendert
-	uci set "openvpn.${config_name}=openvpn"
-	uci set "openvpn.${config_name}.config=$config_file"
-	apply_changes openvpn
-}
-
-
-# Pruefe alle openvpn-Konfigurationen fuer MIG- oder UGW-Verbindungen.
-# Quelle: on-openvpn.@server[x] oder on-usergw.@uplink[x]
-# Ziel: openvpn.on_mig_* oder openvpn.on_ugw_*
-update_openvpn_settings() {
-	local uci_domain="$1"
-	local uci_branch="$2"
-	find_all_uci_sections on-usergw uplink type=openvpn | while read uci_prefix; do
-		update_one_openvpn_setup "$(uci_get "${uci_prefix}.name")" "$uci_domain" "$uci_branch"
-	done
+# multipliziere eine nicht-ganze Zahl mit einem Faktor und liefere das ganzzahlige Ergebnis zurueck
+get_int_multiply() {
+	awk '{print int('$1'*$0)}'
 }
 

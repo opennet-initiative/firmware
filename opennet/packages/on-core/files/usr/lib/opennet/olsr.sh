@@ -158,6 +158,9 @@ parse_olsr_service_definitions() {
 		host=$(echo "$url" | cut -f 3 -d / | cut -f 1 -d :)
 		port=$(echo "$url" | cut -f 3 -d / | cut -f 2 -d :)
 		path=/$(echo "$url" | cut -f 4- -d /)
+		# Firmware-Versionen bis v0.4-5 veroeffentlichten folgendes Format:
+		#    http://192.168.0.40:8080|tcp|ugw upload:50 download:15300 ping:23
+		[ "$scheme" = "http" -a "$port" = "8080" ] && scheme=openvpn && port=1600
 		echo -e "$scheme\t$host\t$port\t$path\t$proto\t$service\t$details"
 	done
 }

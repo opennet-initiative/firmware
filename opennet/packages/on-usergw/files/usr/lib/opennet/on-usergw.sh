@@ -426,3 +426,12 @@ prepare_on_usergw_uci_settings() {
 	done
 }
 
+
+# Liefere die aktiven VPN-Verbindungen (mit Mesh-Hubs) zurueck.
+# Diese Funktion bracht recht viel Zeit.
+get_active_ugw_connections() {
+	get_sorted_services mesh | while read one_service; do
+		is_openvpn_service_active "$one_service" && echo "$one_service"
+	done
+}
+

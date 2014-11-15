@@ -119,3 +119,12 @@ find_and_select_best_gateway() {
 	select_mig_connection "$best_gateway"
 }
 
+
+# Liefere die aktiven VPN-Verbindungen (mit Mesh-Internet-Gateways) zurueck.
+# Diese Funktion bracht recht viel Zeit.
+get_active_mig_connections() {
+	get_sorted_services gw ugw | while read one_service; do
+		is_openvpn_service_active "$one_service" && echo "$one_service"
+	done
+}
+

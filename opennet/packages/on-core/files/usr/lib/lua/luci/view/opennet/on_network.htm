@@ -21,12 +21,6 @@ local form_id = luci.http.formvalue("form_id")
 local on_id = cursor:get("on-core", "settings", "on_id")
 local devices = { "on_eth_", "on_wifi_" }
 
-function get_on_core_default(key)
-	return luci.sys.exec("on-function get_on_core_default '"..key.."'")
-end
-function get_on_wifidog_default(key)
-	return luci.sys.exec("on-function get_on_wifidog_default '"..key.."'")
-end
 
 if (form_id) then
 	function split(str)

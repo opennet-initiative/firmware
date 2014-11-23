@@ -1,5 +1,5 @@
-function get_gateway_flag(ip, key)
-  local result = luci.sys.exec("on-function get_gateway_value '"..ip.."' '"..key.."'")
+function get_service_value(ip, key)
+  local result = luci.sys.exec("on-function get_service_value '"..ip.."' '"..key.."'")
   if result == "" then
     return nil
   else
@@ -8,15 +8,15 @@ function get_gateway_flag(ip, key)
 end
 
 
-function set_gateway_flag(ip, key, value)
+function set_service_value(ip, key, value)
   if not value then
     value = ""
   end
-  luci.sys.exec("on-function set_gateway_value '"..ip.."' '"..key.."' '"..value.."'")
+  luci.sys.exec("on-function set_service_value '"..ip.."' '"..key.."' '"..value.."'")
 end
 
-function delete_gateway_flag(ip, key)
-  set_gateway_flag(ip, key, "")
+function delete_service_value(ip, key)
+  set_service_value(ip, key, "")
 end
 
 
@@ -26,6 +26,8 @@ function get_default_value(domain, key)
 		func_name = "get_on_openvpn_default"
 	elseif domain == "on-usergw" then
 		func_name = "get_on_usergw_default"
+	elseif domain == "on-wifidog" then
+		func_name = "get_on_wifidog_default"
 	else
 		return nil
 	end

@@ -67,21 +67,23 @@ print_usage()
 	echo "restart        - restart the VPN tunnel"
 }
 
-# Bewege ein Gateway an die Spitze der Liste
-# Nur relevant bei manueller Gateway-Sortierung.
-move_top()
-{
-	trap "error_trap move_top $*" $GUARD_TRAPS
-	local position=$1
-	uci -q rename on-openvpn.gate_$position="gate_MOVETOP";
-	while [ $((position--)) -ge 1 ] ; do
-		uci -q rename on-openvpn.gate_$position="gate_"$((position+1));
-	done
-	uci -q rename on-openvpn.gate_MOVETOP="gate_1"
-	# commit after every change to prevent uci memory problems
-	uci commit on-openvpn
+
+_get_gateway_service_from_ip() {
+	local service_name
+	service_name=$(find_first_uci_section on-core services "service=ugw" "host=$host")
+	[ -z "$service_name" ] && service_name=$(find_first_uci_section on-core services "service=gw" "host=$host")
+	echo "$service_name"
+
 }
 
+
+# Bewege ein Gateway in der Liste
+move_top()	{ move_service_top	"$1" gw ugw; }
+move_up()	{ move_service_up	"$1" gw ugw; }
+move_down()	{ move_service_down	"$1" gw ugw; }
+
+
+#TODO: neues Service-Konzept
 add_gw()
 {
 	trap "error_trap add_gw $*" $GUARD_TRAPS
@@ -94,6 +96,8 @@ add_gw()
 	uci commit on-openvpn
 }
 
+
+#TODO: neues Service-Konzept
 del_gw()
 {
 	trap "error_trap del_gw $*" $GUARD_TRAPS
@@ -130,8 +134,17 @@ ACTION=help
 [ $# -ge 1 ] && ACTION=$1
 
 case "$ACTION" in
-	move_top|add_gw|del_gw)
-		# TODO: auf neues Service-Konzept umstellen
+	move_top|move_up|move_down)
+		[ $# -ne 2 ] && echo >&2 "ERROR: '$ACTION' requires one more parameter" && exit 1
+		host="$2"
+		service_name=$(_get_gateway_service_from_ip "$host")
+		if [ -n "$service_name" ]; then
+			"$ACTION" "$service_name"
+		else
+			echo >&2 "No gateway service related to host '$host' found."
+		fi
+	;;
+	add_gw|del_gw)
 		[ $# -ne 2 ] && echo >&2 "ERROR: '$ACTION' requires one more parameter" && exit 1
 		"$ACTION" "$2"
 		print_status

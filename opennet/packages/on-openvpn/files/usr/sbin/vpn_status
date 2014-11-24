@@ -69,10 +69,10 @@ print_usage()
 
 
 _get_gateway_service_from_ip() {
-	local service_name
-	service_name=$(find_first_uci_section on-core services "service=ugw" "host=$host")
-	[ -z "$service_name" ] && service_name=$(find_first_uci_section on-core services "service=gw" "host=$host")
-	echo "$service_name"
+	local host="$1"
+	local uci_prefix=$(find_first_uci_section on-core services "service=ugw" "host=$host")
+	[ -z "$uci_prefix" ] && uci_prefix=$(find_first_uci_section on-core services "service=gw" "host=$host")
+	uci_get "${uci_prefix}.name"
 
 }
 

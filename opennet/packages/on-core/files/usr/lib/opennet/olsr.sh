@@ -3,6 +3,7 @@
 
 
 OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
+SERVICES_FILE=/var/run/services_olsr
 
 
 # uebertrage die Netzwerke, die derzeit der Zone "opennet" zugeordnet sind, in die olsr-Konfiguration

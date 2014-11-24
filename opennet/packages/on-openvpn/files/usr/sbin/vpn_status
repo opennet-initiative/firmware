@@ -52,19 +52,19 @@ print_status()
 	done
 }
 
+
 print_usage()
 {
 	echo
-	echo "*** vpn_status supports the following options: ***"
-	echo "toggle_auto    - toggle the autosearch mode"
-	echo "toggle_etx     - toggle sort by etx or hops"
-	echo "add_gw \$IP     - manually add a gateway"
-	echo "del_gw \$POS    - delete a existing gateway"
-	echo "move_top \$POS  - move a gateway to the top of the priority list"
-	echo "status         - show all VPN gateways and their status"
-	echo "start          - start the VPN tunnel"
-	echo "stop           - stop the VPN tunnel"
-	echo "restart        - restart the VPN tunnel"
+	echo "*** vpn_status supports the following actions: ***"
+	echo "add_gw IP [PORT] - manually add a gateway"
+	echo "move_top IP      - move a gateway to the top of the priority list"
+	echo "move_up IP       - move a gateway one step up"
+	echo "move_down IP     - move a gateway one step down"
+	echo "status           - show all VPN gateways and their status"
+	echo "start            - start the VPN tunnel"
+	echo "stop             - stop the VPN tunnel"
+	echo "restart          - restart the VPN tunnel"
 }
 
 
@@ -84,49 +84,12 @@ move_down()	{ move_service_down	"$1" gw ugw; }
 
 
 #TODO: neues Service-Konzept
-add_gw()
-{
+add_gw() {
 	trap "error_trap add_gw $*" $GUARD_TRAPS
-	local ipaddr=$1
-	local index=1;
-	while [ -n "$(uci_get "on-openvpn.gate_$((index++))")" ]; do true; done
-	uci -q set on-openvpn.gate_${index}=gateway;
-	uci -q set on-openvpn.gate_${index}.ipaddr=$ipaddr;
-	# commit after every change to prevent uci memory problems
-	uci commit on-openvpn
-}
-
-
-#TODO: neues Service-Konzept
-del_gw()
-{
-	trap "error_trap del_gw $*" $GUARD_TRAPS
-	local position=$1
-	uci -q del on-openvpn.gate_$position;
-	while [ -n "$(uci_get "on-openvpn.gate_$((++position))")" ]; do
-		uci -q rename "on-openvpn.gate_$position=gate_$((position-1))"
-	done
-	# commit after every change to prevent uci memory problems
-	uci commit on-openvpn
-}
-
-toggle_etx()
-{
-	trap "error_trap toggle_etx $*" $GUARD_TRAPS
-	local sort_by_etx=$(uci_get on-openvpn.gateways.vpn_sort_criteria);
-	[ "$sort_by_etx" = "etx" ] && sort_by_etx="metric" || sort_by_etx="etx"
-	uci -q set on-openvpn.gateways.vpn_sort_criteria=$sort_by_etx;
-	# commit after every change to prevent uci memory problems
-	uci commit on-openvpn
-}
-
-toggle_autosearch() {
-	trap "error_trap toggle_autosearch $*" $GUARD_TRAPS
-	local autosearch=$(uci_get on-openvpn.gateways.autosearch)
-	[ "$autosearch" = "on" ] && autosearch="off" || autosearch="on"
-	uci -q set on-openvpn.gateways.autosearch=$autosearch
-	# commit after every change to prevent uci memory problems
-	uci commit on-openvpn
+	local ipaddr="$1"
+	local port="${2:-1600}"
+	notify_service gw openvpn "$ipaddr" "$port" udp / "" manual
+	uci commit on-core
 }
 
 
@@ -144,10 +107,11 @@ case "$ACTION" in
 			echo >&2 "No gateway service related to host '$host' found."
 		fi
 	;;
-	add_gw|del_gw)
-		[ $# -ne 2 ] && echo >&2 "ERROR: '$ACTION' requires one more parameter" && exit 1
-		"$ACTION" "$2"
-		print_status
+	add_gw)
+		[ $# -ge 2 ] && echo >&2 "ERROR: '$ACTION' requires one more parameter" && exit 1
+		shift
+		# Uebergabeparameter sind der Hostname und (optional) der Port
+		"$ACTION" "$@"
 	;;
 	status)
 		print_status

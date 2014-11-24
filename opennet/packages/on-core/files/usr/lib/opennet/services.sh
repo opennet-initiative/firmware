@@ -1,6 +1,6 @@
 SERVICES_STATUS_FILE=/tmp/on-services.status
 # fuer die Sortierung von Gegenstellen benoetigen wir ein lokales Salz, um strukturelle Bevorzugungen (z.B. von UGW-Hosts) zu vermeiden.
-LOCAL_BIAS_NUMBER=$(get_main_ip | sed 's/[^0-9]//')
+LOCAL_BIAS_NUMBER=$(get_main_ip | sed 's/[^0-9]//g')
 # eine grosse Zahl sorgt dafuer, dass neu entdeckte Dienste hinten angehaengt werden
 DEFAULT_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
@@ -20,7 +20,7 @@ _get_service_name() {
 }
 
 
-# Aktualisiere den Zeitstempel und die Entfernung eines Dienstes
+# Aktualisiere den Zeitstempel und die Entfernung (etx) eines Dienstes
 # Es wird _kein_ "uci commit on-core" ausgefuehrt.
 notify_service() {
 	local service="$1"
@@ -30,6 +30,7 @@ notify_service() {
 	local protocol="$5"
 	local path="$6"
 	local details="$7"
+	local source="$8"
 	local service_name=$(_get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 	local now=$(get_time_minute)
 	set_service_value "$service_name" "service" "$service"
@@ -43,15 +44,16 @@ notify_service() {
 	set_service_value "$service_name" "distance" "$(get_routing_distance "$host")"
 	set_service_value "$service_name" "hop_count" "$(get_hop_count "$host")"
 	set_service_value "$service_name" "priority" "$(_get_service_target_priority "$service_name")"
+	set_service_value "$service_name" "source" "$source"
 }
 
 
 # Addiere 1 oder 0 - abhaengig von der lokalen IP und der IP der Gegenstelle.
 # Dadurch koennen wir beim Sortieren strukturelle Ungleichgewichte (z.B. durch alphabetische Sortierung) verhindern.
 _add_local_bias() {
-	local ip
-        local host_number=$(echo "$ip" | sed 's/[^0-9]//')
-	awk '{print ($1+'$LOCAL_BIAS_NUMBER'+'$host_number')%2}')
+	local ip="$1"
+        local host_number=$(echo "$ip" | sed 's/[^0-9]//g')
+	head -1 | awk '{ print $1 + ( '$LOCAL_BIAS_NUMBER' + '$host_number' ) % 2 }'
 }
 
 
@@ -110,7 +112,7 @@ set_service_sorting() {
 # Die Ausgabe dieser Funktion ist also in jedem Fall eine gueltige Sortier-Methode.
 get_service_sorting() {
 	local sorting=$(uci_get "on-core.settings.service_sorting")
-	if [ "$new_sorting" = "manual" -o "$new_sorting" = "hop" -o "$new_sorting" = "etx" ]; then
+	if [ "$sorting" = "manual" -o "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		# zulaessige Sortierung
 		echo "$sorting"
 	else
@@ -139,12 +141,13 @@ get_sorted_services() {
 	else
 		# alle Dienste ohne Typen-Sortierung
 		find_all_uci_sections on-core services
-	fi ) | while read uci_prefix; do
+	fi | while read uci_prefix; do
 		service_name=$(uci_get "${uci_prefix}.name")
 		# keine Entfernung -> nicht erreichbar -> ignorieren
 		[ -z "$(get_service_value "$service_name" "distance")" ] && continue
 		priority=$(get_service_value "$service_name" "priority" | get_int_multiply 10000)
 		echo "$priority" "$service_name"
+		msg_info "$priority $service_name"
 	done | sort -n | awk '{print $2}'
 }
 
@@ -393,7 +396,7 @@ move_service_up() {
 			prev_service="$current_service"
 		done
 	else
-		log_info "Warning: [move_service_up] sorting method is not implemented: $sorting"
+		msg_info "Warning: [move_service_up] sorting method is not implemented: $sorting"
 	fi
 	return 0
 	apply_changes on-core
@@ -434,7 +437,7 @@ move_service_down() {
 			prev_service="$current_service"
 		done
 	else
-		log_info "Warning: [move_service_down] sorting method is not implemented: $sorting"
+		msg_info "Warning: [move_service_down] sorting method is not implemented: $sorting"
 	fi
 	apply_changes on-core
 }
@@ -474,7 +477,7 @@ move_service_top() {
 		# erneuere die Rang-Vergabe
 		_distribute_service_ranks
 	else
-		log_info "Warning: [move_service_top] sorting method is not implemented: $sorting"
+		msg_info "Warning: [move_service_top] sorting method is not implemented: $sorting"
 	fi
 	apply_changes on-core
 }

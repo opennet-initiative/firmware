@@ -5,6 +5,8 @@ debug		false
 lan_ipaddr	172.16.0.1
 lan_netmask	255.255.255.0
 
+service_expire_minutes	30
+
 # no is the numer of the interface, starting from 0
 # check /etc/init.d/on_config for usage
 # on_id_1 is the upper part, on_id_2 the lower part of the opennet id

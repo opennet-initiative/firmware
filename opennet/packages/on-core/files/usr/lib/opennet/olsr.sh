@@ -207,8 +207,19 @@ update_olsr_services() {
 	local proto
 	local service
 	local details
+	local timestamp
+	local service_name
+	local min_timestamp=$(($(get_time_minute) - $(get_on_core_default "service_expire_minutes")))
+	# aktuell verbreitete Dienste benachrichtigen
 	get_olsr_services | while read scheme ip port path proto service details; do
-		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "$details"
+		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "$details" "olsr"
+	done
+	# veraltete Dienste entfernen
+	find_all_uci_sections on-core services "source=olsr" | while read uci_prefix; do
+		service_name=$(uci_get "${uci_prefix}.name")
+		timestamp=$(get_service_value "$service_name" "timestamp" 0)
+		# der Service ist zu lange nicht aktualisiert worden
+		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
 	done
 	apply_changes on-core
 }

@@ -2,9 +2,10 @@ SERVICES_STATUS_FILE=/tmp/on-services.status
 # fuer die Sortierung von Gegenstellen benoetigen wir ein lokales Salz, um strukturelle Bevorzugungen (z.B. von UGW-Hosts) zu vermeiden.
 LOCAL_BIAS_NUMBER=$(get_main_ip | sed 's/[^0-9]//g')
 # eine grosse Zahl sorgt dafuer, dass neu entdeckte Dienste hinten angehaengt werden
-DEFAULT_RANK=10000
+DEFAULT_SERVICE_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
-
+# unbedingt synchron halten mit "_is_persistent_service_attribute" (der Effizienz wegen getrennt)
+PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset"
 
 
 _get_service_name() {
@@ -147,7 +148,6 @@ get_sorted_services() {
 		[ -z "$(get_service_value "$service_name" "distance")" ] && continue
 		priority=$(get_service_value "$service_name" "priority" | get_int_multiply 10000)
 		echo "$priority" "$service_name"
-		msg_info "$priority $service_name"
 	done | sort -n | awk '{print $2}'
 }
 
@@ -168,8 +168,19 @@ filter_enabled_services() {
 
 # Pruefe ob der Schluessel in der persistenten oder der volatilen Datenbank gespeichert werden soll.
 # Ziel ist erhoehte Geschwindigkeit und verringerte Schreibzugriffe.
+# Diese Liste muss synchron gehalten werden mit PERSISTENT_SERVICE_ATTRIBUTES.
 _is_persistent_service_attribute() {
-	echo "$1" | grep -q -E "^(service|scheme|host|port|protocol|path|uci_dependency)$" && return 0
+	[ "$1" = "service" \
+		-o "$1" = "scheme" \
+		-o "$1" = "host" \
+		-o "$1" = "port" \
+		-o "$1" = "protocol" \
+		-o "$1" = "path" \
+		-o "$1" = "uci_dependency" \
+		-o "$1" = "file_dependency" \
+		-o "$1" = "rank" \
+		-o "$1" = "offset" \
+		] && return 0
 	return 1
 }
 
@@ -219,6 +230,10 @@ get_service_value() {
 # die mit dem gegebenen Praefix uebereinstimmen.
 get_service_attributes() {
 	local name="$1"
+	local key
+	for key in $PERSISTENT_SERVICE_ATTRIBUTES; do
+		echo "$key"
+	done
 	_get_file_dict_keys "$SERVICES_STATUS_FILE" "${name}-"
 }
 
@@ -385,20 +400,22 @@ move_service_up() {
 					true
 				else
 					# wir verschieben den Dienst ueber den davor liegenden
-					temp=$(get_service_value "$current_server" "rank" "$DEFAULT_SERVICE_RANK")
+					temp=$(get_service_value "$current_service" "rank" "$DEFAULT_SERVICE_RANK")
 					# ziehe einen halben Rang ab
 					temp=$(echo "$temp" | awk '{ print $1 - 0.5 }')
 					set_service_value "$service_name" "rank" "$temp"
 					# erneuere die Rang-Vergabe
 					_distribute_service_ranks
 				fi
+				# wir sind fertig
+				break
 			fi
 			prev_service="$current_service"
 		done
 	else
 		msg_info "Warning: [move_service_up] sorting method is not implemented: $sorting"
 	fi
-	return 0
+	update_service_priorities
 	apply_changes on-core
 }
 
@@ -427,18 +444,21 @@ move_service_down() {
 		get_sorted_services "$@" | while read current_service; do
 			if [ "$prev_service" = "$service_name" ]; then
 				# wir verschieben den Dienst hinter den danach liegenden
-				temp=$(get_service_value "$current_server" "rank" "$DEFAULT_SERVICE_RANK")
+				temp=$(get_service_value "$current_service" "rank" "$DEFAULT_SERVICE_RANK")
 				# fuege einen halben Rang hinzu
 				temp=$(echo "$temp" | awk '{ print $1 + 0.5 }')
 				set_service_value "$service_name" "rank" "$temp"
 				# erneuere die Rang-Vergabe
 				_distribute_service_ranks
+				# wir sind fertig
+				break
 			fi
 			prev_service="$current_service"
 		done
 	else
 		msg_info "Warning: [move_service_down] sorting method is not implemented: $sorting"
 	fi
+	update_service_priorities
 	apply_changes on-core
 }
 
@@ -464,10 +484,10 @@ move_service_top() {
 	[ -z "$top_service" -o "$top_service" = "$service_name" ] && return 0
 	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		top_distance=$(_get_distance_with_offset "$top_service")
-		our_distance=$(_get_distance_with_offset "$service_distance")
+		our_distance=$(_get_distance_with_offset "$service_name")
 		current_offset=$(get_service_value "$service_name" "offset" 0)
 		# wir verschieben unseren Offset, auf dass wir knapp ueber "top" stehen
-		new_offset=$(awk "{ $current_offset - int($top_distance - $our_distance) - 1 }")
+		new_offset=$(echo | awk "{ $current_offset - int($top_distance - $our_distance) - 1 }")
 		set_service_value "$service_name" "offset" "$new_offset"
 	elif [ "$sorting" = "manual" ]; then
 		# setze den Rang des Dienstes auf den top-Dienst minus 0.5
@@ -479,6 +499,7 @@ move_service_top() {
 	else
 		msg_info "Warning: [move_service_top] sorting method is not implemented: $sorting"
 	fi
+	update_service_priorities
 	apply_changes on-core
 }
 

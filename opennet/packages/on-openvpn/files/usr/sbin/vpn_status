@@ -23,14 +23,13 @@ print_status()
 	local status
 	local timestamp
 	local active
-	local distance
-	local hop_count
 	local offset
 	local quality
 	local now=$(get_time_minute)
+	local sorting=$(get_service_sorting)
 	local format_string="%6s %-16s %18s %7s %4s\n"
 
-	printf "$format_string" "active" "IP" "Distance/ETX" "VPN" "Age"
+	printf "$format_string" "active" "IP" "Quality" "VPN" "Age"
 	get_sorted_services gw ugw | while read service_name; do
 		host=$(get_service_value "$service_name" "host")
 		timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
@@ -40,13 +39,19 @@ print_status()
 			age=
 		fi
 		status=$(get_service_value "$service_name" "status")
-		distance=$(get_service_value "$service_name" "distance")
-		hop_count=$(get_service_value "$service_name" "hop_count")
-		offset=$(get_service_value "$service_name" "offset")
-		quality="$distance / $hop_count"
-		[ -z "$offset" ] && offset=0
-		[ "$offset" -gt 0 ] && offset="+$offset"
-		[ "$offset" -ne 0 ] && quality="($offset) $quality"
+		if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
+			offset=$(get_service_value "$service_name" "offset")
+			if [ "$sorting" = "hop" ]; then
+				quality=$(get_service_value "$service_name" "hop_count")
+			else
+				quality=$(get_service_value "$service_name" "distance")
+			fi
+			[ -z "$offset" ] && offset=0
+			[ "$offset" -gt 0 ] && offset="+$offset"
+			[ "$offset" -ne 0 ] && quality="($offset) $quality"
+		elif [ "$sorting" = "manual" ]; then
+			quality=$(get_service_value "$service_name" "rank")
+		fi
 		active=$(is_openvpn_service_active "$service_name" && echo "*" || true)
 		printf "$format_string" "$active" "$host" "$quality" "$status" "$age"
 	done

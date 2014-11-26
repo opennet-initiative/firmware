@@ -209,6 +209,7 @@ _is_persistent_service_attribute() {
 # Je nach Schluesselname wird der Inhalt in die persistente uci- oder
 # die volatile tmpfs-Datenbank geschrieben.
 set_service_value() {
+	trap "error_trap set_service_value $*" $GUARD_TRAPS
 	local service_name="$1"
 	local attribute="$2"
 	local value="$3"
@@ -225,6 +226,7 @@ set_service_value() {
 
 # Auslesen eines Werts aus der Service-Datenbank.
 get_service_value() {
+	trap "error_trap get_service_value $*" $GUARD_TRAPS
 	local service_name="$1"
 	local attribute="$2"
 	local default="${3:-}"
@@ -262,6 +264,7 @@ print_services() {
 			echo -e "\t$attribute=$value"
 		done
 	done
+	return 0
 }
 
 
@@ -287,6 +290,7 @@ add_service_file_dependency() {
 # Parameter: Service-Name
 # Parameter: textuelle Darstellung einer Abhaengigkeit (ohne Leerzeichen)
 _add_service_dependency() {
+	trap "error_trap _add_service_dependency $*" $GUARD_TRAPS
 	local dependency="$1"
 	local service_name="$2"
 	local token="$3"
@@ -294,7 +298,7 @@ _add_service_dependency() {
 	local dep
 	for dep in $deps; do
 		# schon vorhanden -> fertig
-		[ "$dep" = "$token" ] && return 0
+		[ "$dep" = "$token" ] && return 0 || true
 	done
 	if [ -z "$deps" ]; then
 		deps="$token"
@@ -308,6 +312,7 @@ _add_service_dependency() {
 # Entferne alle mit diesem Service verbundenen Konfigurationen (inkl. Rekonfiguration von firewall, etc.).
 # Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 cleanup_service_dependencies() {
+	trap "error_trap cleanup_service_dependencies $*" $GUARD_TRAPS
 	local service_name="$1"
 	local dep
 	local filename
@@ -324,7 +329,7 @@ cleanup_service_dependencies() {
 	done | sort | uniq | while read branch; do
 		apply_changes "$branch"
 	done
-	set_service_value "$service_name" "uci_dependency"
+	set_service_value "$service_name" "uci_dependency" ""
 }
 
 

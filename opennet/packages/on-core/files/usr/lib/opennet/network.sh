@@ -142,7 +142,7 @@ is_interface_in_zone() {
 	for log_interface in $(get_zone_interfaces "$2"); do
 		for phys_interface in $(uci_get "network.${log_interface}.ifname"); do
 			# Entferne den Teil nach Doppelpunkten - fuer Alias-Interfaces
-			[ "$in_interface" = "$(echo "$phys_interface" | cut -f 1 -d :)" ] && return 0
+			[ "$in_interface" = "$(echo "$phys_interface" | cut -f 1 -d :)" ] && return 0 || true
 		done
 	done
 	return 1
@@ -174,7 +174,7 @@ get_zone_of_interface() {
 	local zone
 	uci show firewall | grep "^firewall\.@zone\[[0-9]\+\]\.network=" | sed 's/=/ /' | while read prefix networks; do
 	zone=$(uci_get "${prefix%.network}.name")
-		echo " $networks " | grep -q "[ \t]$interface[ \t]" && echo "$zone" && return 0
+		echo " $networks " | grep -q "[ \t]$interface[ \t]" && echo "$zone" && return 0 || true
 	done
 	return 1
 }

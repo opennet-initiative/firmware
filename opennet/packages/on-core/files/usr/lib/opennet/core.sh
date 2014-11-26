@@ -122,7 +122,7 @@ _get_file_dict_value() {
 	# fehlende Datei -> kein Ergebnis
 	[ -e "$status_file" ] || return 0
 	while read key value; do
-		[ "$field" = "$key" ] && echo -n "$value" && return
+		[ "$field" = "$key" ] && echo -n "$value" && return || true
 	done < "$status_file"
 	return 0
 }
@@ -139,7 +139,7 @@ _get_file_dict_keys() {
 	[ -e "$status_file" ] || return 0
 	while read key value; do
 		# leerer oder passender Schluessel-Praefix
-		[ -z "$keystart" -o "${key#$keystart}" != "$key" ] && echo "${key#$keystart}"
+		[ -z "$keystart" -o "${key#$keystart}" != "$key" ] && echo "${key#$keystart}" || true
 	done < "$status_file"
 	return 0
 }
@@ -165,7 +165,7 @@ _set_file_dict_value() {
 	# Schreibvorgaenge (=Wahrscheinlichkeit von gleichzeitigem Zugriff) zu reduzieren.
 	(
 		while read fieldname value; do
-			[ "$field" != "$fieldname" -a -n "$fieldname" ] && echo "$fieldname $value"
+			[ "$field" != "$fieldname" -a -n "$fieldname" ] && echo "$fieldname $value" || true
 		 done <"$status_file"
 		# leerer Wert -> loeschen
 		[ -n "$new_value" ] && echo "$field $new_value"
@@ -375,7 +375,7 @@ get_from_key_value_list() {
 	local key
 	sed 's/[ \t]\+/\n/g' | while read key_value; do
 		key=$(echo "$key_value" | cut -f 1 -d "$separator")
-		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break
+		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break || true
 	done
 	return 0
 }

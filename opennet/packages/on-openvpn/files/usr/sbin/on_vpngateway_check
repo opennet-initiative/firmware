@@ -58,7 +58,7 @@ case "${1:-}" in
 		if [ "$#" -gt 0 ]; then
 			# filtere die Dienste, die mit der einen angegebene IP assoziiert sind
 			get_sorted_services ug ugw | while read service_name; do
-				[ "$(get_service_value "$service_name" "host")" = "$1" ] && echo "$service_name"
+				[ "$(get_service_value "$service_name" "host")" = "$1" ] && echo "$service_name" || true
 			done
 		else
 			get_sorted_services ug ugw | filter_enabled_services
@@ -68,8 +68,6 @@ case "${1:-}" in
 			# forciere den Test durch Loeschen des Zeitstempels
 			set_service_value "$service_name" "timestamp_connection_test" ""
 			test_mig_connection "$service_name" && echo "OK" || echo "FEHLER"
-			# positives Ende
-			true
 		 done
 		exit 0
 		find_and_select_best_gateway

@@ -69,7 +69,7 @@ select_mig_connection() {
 		# loesche Flags fuer die Vorselektion
 		set_service_value "$one_service" "switch_candidate_timestamp" ""
 		[ "$one_service" = "$wanted" ] && enable_openvpn_service "$wanted" && continue
-		is_openvpn_service_active "$one_service" && disable_openvpn_service "$one_service"
+		is_openvpn_service_active "$one_service" && disable_openvpn_service "$one_service" || true
 	done
 }
 
@@ -95,7 +95,7 @@ find_and_select_best_gateway() {
 		[ -z "$best_gateway" ] && best_gateway="$service_name"
 		[ -z "$last_gateway" ] && is_openvpn_service_active "$service_name" && last_gateway="$service_name"
 		# sind wir fertig?
-		[ -n "$best_gateway" ] && [ -n "$last_gateway" ] && break
+		[ -n "$best_gateway" ] && [ -n "$last_gateway" ] && break || true
 	done
 	# gibt es einen "letzten" (und somit auch immer einen "besten")?
 	if [ -n "$last_gateway" ]; then
@@ -103,7 +103,7 @@ find_and_select_best_gateway() {
 		if [ "$best_gateway" != "$last_gateway" ]; then
 			last_priority=$(get_service_priority "$last_gateway")
 			best_priority=$(get_service_priority "$best_gateway")
-			[ "$last_priority" -eq "$best_priority" ] && best_gateway="$last_gateway"
+			[ "$last_priority" -eq "$best_priority" ] && best_gateway="$last_gateway" || true
 		fi
 		# Haben wir einen besseren Kandidaten? Muessen wir den Wechselzaehler aktivieren?
 		if [ "$best_gateway" != "$last_gateway" ]; then
@@ -123,7 +123,7 @@ find_and_select_best_gateway() {
 # Diese Funktion bracht recht viel Zeit.
 get_active_mig_connections() {
 	get_sorted_services gw ugw | while read one_service; do
-		is_openvpn_service_active "$one_service" && echo "$one_service"
+		is_openvpn_service_active "$one_service" && echo "$one_service" || true
 	done
 }
 

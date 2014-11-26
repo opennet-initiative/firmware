@@ -221,7 +221,7 @@ _is_ugw_service_in_use() {
 	local wanted_service=$1
 	local uci_prefix
 	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
-		[ "${uci_prefix}.service" = "$wanted_service" ] && return 0
+		[ "${uci_prefix}.service" = "$wanted_service" ] && return 0 || true
 	done
 	return 1
 }
@@ -262,7 +262,7 @@ _is_local_ugw_port_unused() {
 	prepare_on_usergw_uci_settings
 	# Suche nach einer Kollision
 	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
-		[ "$port" = "$(uci_get "${uci_prefix}.local_port")" ] && return 1
+		[ "$port" = "$(uci_get "${uci_prefix}.local_port")" ] && return 1 || true
 	done
 	# keine Kollision entdeckt
 	return 0
@@ -431,7 +431,7 @@ prepare_on_usergw_uci_settings() {
 # Diese Funktion bracht recht viel Zeit.
 get_active_ugw_connections() {
 	get_sorted_services mesh | while read one_service; do
-		is_openvpn_service_active "$one_service" && echo "$one_service"
+		is_openvpn_service_active "$one_service" && echo "$one_service" || true
 	done
 }
 

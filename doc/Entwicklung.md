@@ -310,6 +310,17 @@ Im System-Log (``logread``) lassen sich ausgelöste traps finden:
   logread | grep trapped
 
 
+Folgende Stolperfallen sind sehr beliebt bei der Verwendung des strikten Fehlermodus:
+
+* der letzte Befehl vor dem Ende einer Funktion, einer Schleife oder einer if/then/else-Konstruktion definiert den Rückgabewert
+
+  * beispielsweise führt ``[ 1 -lt "$x" ] && echo "foo"`` als letzte Zeile einer Schleife zu einem Abbruch, da die Schleife mit dieser (nicht-Abbruch-auslösenden, jedoch gleichzeitig nicht-erfolgreichen Kette) nach ihrem letzten Durchlauf als "nicht erfolgreich" gilt und somit zu einem Abbruch führt
+  * dieses Problem versteckt sich sehr gut, da es nur dann wirksam wird, wenn **der letzte Schleifendurchlauf** mit einem Fehlercode endet 
+  * ein ``return 0`` oder ``true`` oder ein angehängtes ``| true`` kann nie schaden
+
+
+
+
 uci-Funktionen
 ^^^^^^^^^^^^^^
 

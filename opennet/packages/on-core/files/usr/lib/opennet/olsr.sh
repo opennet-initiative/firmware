@@ -219,7 +219,7 @@ update_olsr_services() {
 	get_services "source=olsr" | while read service_name; do
 		timestamp=$(get_service_value "$service_name" "timestamp" 0)
 		# der Service ist zu lange nicht aktualisiert worden
-		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
+		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
 	done
 	apply_changes on-core
 }

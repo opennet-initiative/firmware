@@ -138,7 +138,8 @@ _get_file_dict_keys() {
 	# fehlende Datei -> kein Ergebnis
 	[ -e "$status_file" ] || return 0
 	while read key value; do
-		[ "${key#$keystart}" != "$key" ] && echo "${key#$keystart}"
+		# leerer oder passender Schluessel-Praefix
+		[ -z "$keystart" -o "${key#$keystart}" != "$key" ] && echo "${key#$keystart}"
 	done < "$status_file"
 	return 0
 }

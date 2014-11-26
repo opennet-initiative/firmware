@@ -394,7 +394,7 @@ move_service_up() {
 	local temp
 	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		# reduziere den Offset um eins
-		temp=$(get_service_value "$service_name" 0)
+		temp=$(get_service_value "$service_name" "offset" 0)
 		temp=$(echo "$temp" | awk '{ print $1 - 1 }')
 		set_service_value "$service_name" "offset" "$temp"
 	elif [ "$sorting" = "manual" ]; then
@@ -442,7 +442,7 @@ move_service_down() {
 	local temp
 	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		# reduziere den Offset um eins
-		temp=$(get_service_value "$service_name" 0)
+		temp=$(get_service_value "$service_name" "offset" 0)
 		temp=$(echo "$temp" | awk '{ print $1 + 1 }')
 		set_service_value "$service_name" "offset" "$temp"
 	elif [ "$sorting" = "manual" ]; then
@@ -488,11 +488,11 @@ move_service_top() {
 	# kein top-Service oder wir bereits ganz oben -> Ende
 	[ -z "$top_service" -o "$top_service" = "$service_name" ] && return 0
 	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
-		top_distance=$(_get_distance_with_offset "$top_service")
-		our_distance=$(_get_distance_with_offset "$service_name")
+		top_distance=$(get_distance_with_offset "$top_service")
+		our_distance=$(get_distance_with_offset "$service_name")
 		current_offset=$(get_service_value "$service_name" "offset" 0)
 		# wir verschieben unseren Offset, auf dass wir knapp ueber "top" stehen
-		new_offset=$(echo | awk "{ $current_offset - int($top_distance - $our_distance) - 1 }")
+		new_offset=$(echo | awk "{ print $current_offset + int($top_distance - $our_distance) - 1 }")
 		set_service_value "$service_name" "offset" "$new_offset"
 	elif [ "$sorting" = "manual" ]; then
 		# setze den Rang des Dienstes auf den top-Dienst minus 0.5

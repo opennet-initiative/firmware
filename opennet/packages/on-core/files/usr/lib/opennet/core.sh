@@ -20,7 +20,7 @@ update_file_if_changed() {
 	local content="$(cat -)"
 	if [ -e "$target_filename" ] && echo "$content" | cmp -s - "$target_filename"; then
 		# the content did not change
-		return 1
+		trap "" $GUARD_TRAPS && return 1
 	else
 		# updated content
 		echo "$content" > "$target_filename"
@@ -39,7 +39,7 @@ update_dns_servers() {
 	local service
 	local use_dns="$(uci_get on-core.settings.use_olsrd_dns)"
 	# return if we should not use DNS servers provided via olsrd
-	uci_is_false "$use_dns" && return
+	uci_is_false "$use_dns" && return 0
 	local servers_file=$(uci_get "dhcp.@dnsmasq[0].serversfile")
 	# aktiviere die "dnsmasq-serversfile"-Direktive, falls noch nicht vorhanden
 	if [ -z "$servers_file" ]; then
@@ -242,7 +242,7 @@ aquire_lock() {
 	# too old? We claim it for ourself.
 	is_timestamp_older_minutes "$file_timestamp" "$max_age_minutes" && touch "$lock_file" && return 0
 	# lockfile is too young
-	return 1
+	trap "" $GUARD_TRAPS && return 1
 }
 
 
@@ -402,7 +402,7 @@ openvpn_has_certificate() {
 	# das Zertifikat scheint irgendwie anders konfiguriert zu sein - im Zeifelsfall: OK
 	[ -z "$cert_file" ] && return 0
 	# existiert die Datei?
-	[ ! -e "$cert_file" ] && return 1
+	[ ! -e "$cert_file" ] && trap "" $GUARD_TRAPS && return 1
 	return 0
 }
 
@@ -435,6 +435,6 @@ is_timestamp_older_minutes() {
 	[ "$now" -lt "$timestamp_minute" ] && \
 		msg_info "WARNING: Timestamp from future found: $timestamp_minute (minutes since epoch)" && \
 		return 0
-	return 1
+	trap "" $GUARD_TRAPS && return 1
 }
 

@@ -204,7 +204,7 @@ _is_persistent_service_attribute() {
 		-o "$1" = "rank" \
 		-o "$1" = "offset" \
 		] && return 0
-	return 1
+	trap "" $GUARD_TRAPS && return 1
 }
 
 

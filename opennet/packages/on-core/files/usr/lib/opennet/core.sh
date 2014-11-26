@@ -260,8 +260,9 @@ clean_stale_pid_file() {
 
 apply_changes() {
 	local config=$1
-	# keine Aenderungen
-	[ -z "$(uci changes "$config")" ] && return 0
+	# keine Aenderungen?
+	# "on-core" achtet auch auf nicht-uci-Aenderungen (siehe PERSISTENT_SERVICE_STATUS_DIR)
+	[ -z "$(uci changes "$config")" -a "$config" != "on-core" ] && return 0
 	uci commit "$config"
 	case "$config" in
 		system|network|firewall)

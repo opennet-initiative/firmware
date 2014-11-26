@@ -44,7 +44,6 @@ notify_service() {
 	set_service_value "$service_name" "timestamp" "$now"
 	set_service_value "$service_name" "distance" "$(get_routing_distance "$host")"
 	set_service_value "$service_name" "hop_count" "$(get_hop_count "$host")"
-	set_service_value "$service_name" "priority" "$(_get_service_target_priority "$service_name")"
 	set_service_value "$service_name" "source" "$source"
 }
 
@@ -58,11 +57,10 @@ _add_local_bias() {
 }
 
 
-# TODO: andere Varianten hinzufuegen: manuell / usw.
-_get_service_target_priority() {
+get_service_priority() {
 	local service_name="$1"
 	local sorting=$(get_service_sorting)
-	local distance=$(get_distance_with_offset "$service_name")
+	local distance=$(get_service_value "$service_name" "distance")
 	local rank
 	# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
 	[ -z "$distance" ] && return 0
@@ -105,7 +103,6 @@ set_service_sorting() {
 		msg_info "Warning: Ignoring unknown sorting method: $new_sorting" && \
 		trap "" $GUARD_TRAPS && return 1
 	uci set "on-core.settings.service_sorting=$new_sorting"
-	update_service_priorities
 	apply_changes on-core
 }
 
@@ -146,7 +143,7 @@ get_sorted_services() {
 	fi | while read service_name; do
 		# keine Entfernung -> nicht erreichbar -> ignorieren
 		[ -z "$(get_service_value "$service_name" "distance")" ] && continue
-		priority=$(get_service_value "$service_name" "priority" | get_int_multiply 10000)
+		priority=$(get_service_priority "$service_name")
 		echo "$priority" "$service_name"
 	done | sort -n | awk '{print $2}'
 }
@@ -159,7 +156,7 @@ filter_enabled_services() {
 	while read service_name; do
 		disabled=$(get_service_value "$service_name" "disabled")
 		# abgeschaltet?
-		[ -n "$disabled" ] && is_uci_true "$disabled" && continue
+		[ -n "$disabled" ] && uci_is_true "$disabled" && continue
 		# aktiv!
 		echo "$service_name"
 	done
@@ -342,16 +339,6 @@ get_service_description() {
 }
 
 
-update_service_priorities() {
-	local service_name
-	local priority
-	get_services | while read service_name; do
-		priority=$(_get_service_target_priority "$service_name")
-		set_service_value "$service_name" "priority" "$priority"
-	done
-}
-
-
 delete_service() {
 	trap "error_trap delete_service $*" $GUARD_TRAPS
 	local service_name="$1"
@@ -405,7 +392,7 @@ move_service_up() {
 					true
 				else
 					# wir verschieben den Dienst ueber den davor liegenden
-					temp=$(get_service_value "$current_service" "rank" "$DEFAULT_SERVICE_RANK")
+					temp=$(get_service_value "$prev_service" "rank" "$DEFAULT_SERVICE_RANK")
 					# ziehe einen halben Rang ab
 					temp=$(echo "$temp" | awk '{ print $1 - 0.5 }')
 					set_service_value "$service_name" "rank" "$temp"
@@ -420,7 +407,6 @@ move_service_up() {
 	else
 		msg_info "Warning: [move_service_up] sorting method is not implemented: $sorting"
 	fi
-	update_service_priorities
 	apply_changes on-core
 }
 
@@ -463,7 +449,6 @@ move_service_down() {
 	else
 		msg_info "Warning: [move_service_down] sorting method is not implemented: $sorting"
 	fi
-	update_service_priorities
 	apply_changes on-core
 }
 
@@ -504,7 +489,6 @@ move_service_top() {
 	else
 		msg_info "Warning: [move_service_top] sorting method is not implemented: $sorting"
 	fi
-	update_service_priorities
 	apply_changes on-core
 }
 

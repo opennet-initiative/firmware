@@ -50,7 +50,7 @@ test_mig_connection()
 			msg_debug "vpn test of $host failed"
 			trap "" $GUARD_TRAPS && return 1
 		fi
-	elif is_uci_true "$(get_service_value "$service_name" "status")"; then
+	elif uci_is_true "$(get_service_value "$service_name" "status")"; then
 		msg_debug "vpn-availability of gw $host still valid"
 		return 0
 	else
@@ -67,7 +67,7 @@ select_mig_connection() {
 	local one_service
 	get_sorted_services gw ugw | while read one_service; do
 		# loesche Flags fuer die Vorselektion
-		set_service_value "$one_service" "switch_candidate_timestamp"
+		set_service_value "$one_service" "switch_candidate_timestamp" ""
 		[ "$one_service" = "$wanted" ] && enable_openvpn_service "$wanted" && continue
 		is_openvpn_service_active "$one_service" && disable_openvpn_service "$one_service"
 	done
@@ -101,15 +101,14 @@ find_and_select_best_gateway() {
 	if [ -n "$last_gateway" ]; then
 		# falls der beste und der aktive Gateway gleich weit entfernt sind, bleiben wir beim bisher aktiven
 		if [ "$best_gateway" != "$last_gateway" ]; then
-			last_priority=$(get_service_value "$last_gateway" "priority" | get_int_multiply 1000)
-			best_priority=$(get_service_value "$best_gateway" "priority" | get_int_multiply 1000)
+			last_priority=$(get_service_priority "$last_gateway")
+			best_priority=$(get_service_priority "$best_gateway")
 			[ "$last_priority" -eq "$best_priority" ] && best_gateway="$last_gateway"
 		fi
 		# Haben wir einen besseren Kandidaten? Muessen wir den Wechselzaehler aktivieren?
 		if [ "$best_gateway" != "$last_gateway" ]; then
 			# Zaehle hoch bis 
-			switch_candidate_timestamp=$(get_service_value "$one_service" "switch_candidate_timestamp")
-			[ -z "$switch_candidate_timestamp" ] && switch_candidate_timestamp="$now"
+			switch_candidate_timestamp=$(get_service_value "$one_service" "switch_candidate_timestamp" "$now")
 			# noch nicht alt genug fuer den Wechsel?
 			is_timestamp_older_minutes "$switch_candidate_timestamp" "$bettergateway_timeout" || \
 				best_gateway="$last_gateway"

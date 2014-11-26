@@ -41,11 +41,7 @@ print_status()
 		status=$(get_service_value "$service_name" "status")
 		if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 			offset=$(get_service_value "$service_name" "offset")
-			if [ "$sorting" = "hop" ]; then
-				quality=$(get_service_value "$service_name" "hop_count")
-			else
-				quality=$(get_service_value "$service_name" "distance")
-			fi
+			quality=$(get_distance_with_offset "$service_name")
 			[ -z "$offset" ] && offset=0
 			[ "$offset" -gt 0 ] && offset="+$offset"
 			[ "$offset" -ne 0 ] && quality="($offset) $quality"

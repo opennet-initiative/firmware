@@ -216,8 +216,7 @@ update_olsr_services() {
 		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "$details" "olsr"
 	done
 	# veraltete Dienste entfernen
-	find_all_uci_sections on-core services "source=olsr" | while read uci_prefix; do
-		service_name=$(uci_get "${uci_prefix}.name")
+	get_services "source=olsr" | while read service_name; do
 		timestamp=$(get_service_value "$service_name" "timestamp" 0)
 		# der Service ist zu lange nicht aktualisiert worden
 		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"

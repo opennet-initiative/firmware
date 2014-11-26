@@ -1,4 +1,5 @@
-SERVICES_STATUS_FILE=/tmp/on-services.status
+VOLATILE_SERVICE_STATUS_DIR=/tmp/on-services-volatile.d
+PERSISTENT_SERVICE_STATUS_DIR=/etc/on-services.d
 # fuer die Sortierung von Gegenstellen benoetigen wir ein lokales Salz, um strukturelle Bevorzugungen (z.B. von UGW-Hosts) zu vermeiden.
 LOCAL_BIAS_NUMBER=$(get_main_ip | sed 's/[^0-9]//g')
 # eine grosse Zahl sorgt dafuer, dass neu entdeckte Dienste hinten angehaengt werden
@@ -22,7 +23,6 @@ _get_service_name() {
 
 
 # Aktualisiere den Zeitstempel und die Entfernung (etx) eines Dienstes
-# Es wird _kein_ "uci commit on-core" ausgefuehrt.
 notify_service() {
 	local service="$1"
 	local scheme="$2"
@@ -62,12 +62,12 @@ _add_local_bias() {
 _get_service_target_priority() {
 	local service_name="$1"
 	local sorting=$(get_service_sorting)
-	local distance=$(_get_distance_with_offset "$service_name")
+	local distance=$(get_distance_with_offset "$service_name")
 	local rank
 	# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
 	[ -z "$distance" ] && return 0
 	if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
-		_get_distance_with_offset "$service_name"
+		get_distance_with_offset "$service_name"
 	elif [ "$sorting" = "manual" ]; then
 		get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
 	else
@@ -77,11 +77,11 @@ _get_service_target_priority() {
 }
 
 
-_get_distance_with_offset() {
+get_distance_with_offset() {
 	local service_name="$1"
 	local sorting=$(get_service_sorting)
 	local distance=$(get_service_value "$service_name" "distance")
-	local base_value
+	local base_value=
 	[ -z "$distance" ] && return 0
 	local offset=$(get_service_value "$service_name" "offset")
 	[ -z "$offset" ] && offset=0
@@ -89,22 +89,24 @@ _get_distance_with_offset() {
 		base_value="$distance"
 	elif [ "$sorting" = "hop" ]; then
 		base_value=$(get_service_value "$service_name" "hop_count")
+	else
+		msg_debug "get_distance_with_offset: sorting '$sorting' not implemented"
 	fi
-	echo "$base_value" "$offset" | awk '{ print $1 + $2 }'
+	[ -n "$base_value" ] && echo "$base_value" "$offset" | awk '{ print $1 + $2 }'
+	return 0
 }
 
 
 set_service_sorting() {
-	local service_name="$1"
-	local new_sorting="$2"
+	local new_sorting="$1"
 	local old_sorting=$(get_service_sorting)
 	[ "$old_sorting" = "$new_sorting" ] && return 0
 	[ "$new_sorting" != "manual" -a "$new_sorting" != "hop" -a "$new_sorting" != "etx" ] && \
 		msg_info "Warning: Ignoring unknown sorting method: $new_sorting" && \
-		return 1
+		trap "" $GUARD_TRAPS && return 1
 	uci set "on-core.settings.service_sorting=$new_sorting"
 	update_service_priorities
-	uci commit on-core
+	apply_changes on-core
 }
 
 
@@ -132,18 +134,16 @@ get_service_sorting() {
 get_sorted_services() {
 	local service
 	local service_name
-	local uci_prefix
 	local priority
 	if [ "$#" -gt 0 ]; then
 		# hole alle Dienste aus den angegebenen Klassen (z.B. "gw ugw")
 		for service in "$@"; do
-			find_all_uci_sections on-core services "service=$service"
+			get_services "service=$service"
 		done
 	else
 		# alle Dienste ohne Typen-Sortierung
-		find_all_uci_sections on-core services
-	fi | while read uci_prefix; do
-		service_name=$(uci_get "${uci_prefix}.name")
+		get_services
+	fi | while read service_name; do
 		# keine Entfernung -> nicht erreichbar -> ignorieren
 		[ -z "$(get_service_value "$service_name" "distance")" ] && continue
 		priority=$(get_service_value "$service_name" "priority" | get_int_multiply 10000)
@@ -163,6 +163,29 @@ filter_enabled_services() {
 		# aktiv!
 		echo "$service_name"
 	done
+}
+
+
+# Als optionale Parameter koennen beliebig viele "key=value"-Schluesselpaare angegeben werden.
+# Nur diejenigen Dienste, auf die alle Bedingungen zutreffen, werden zurueckgeliefert.
+get_services() {
+	local fname_persist
+	local fname_volatile
+	local condition
+	[ -e "$PERSISTENT_SERVICE_STATUS_DIR" ] || return 0
+	find "$PERSISTENT_SERVICE_STATUS_DIR" -type f | while read fname_persist; do
+		[ -s "$fname_persist" ] || continue
+		fname_volatile="$VOLATILE_SERVICE_STATUS_DIR/$(basename "$fname_persist")"
+		for condition in "$@"; do
+			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt
+			# ersetze das erste Gleichheitszeichen durch eine whitespace-regex
+			condition=$(echo "$condition" | sed 's/=/[ \\t]+/')
+			grep -s -q -E "^$condition$" "$fname_persist" "$fname_volatile" || continue 2
+		done
+		# alle Bedingungen trafen zu
+		basename "$fname_persist"
+	done
+	return 0
 }
 
 
@@ -192,19 +215,14 @@ set_service_value() {
 	local service_name="$1"
 	local attribute="$2"
 	local value="$3"
-	local uci_prefix
+	local dirname
 	if _is_persistent_service_attribute "$attribute"; then
-		# Speicherung via uci
-		uci_prefix=$(get_service_uci_prefix "$service_name")
-		if [ -z "$uci_prefix" ]; then
-			uci_prefix=on-core.$(uci add on-core services)
-			uci set "${uci_prefix}.name=$service_name"
-		fi
-		uci set "${uci_prefix}.$attribute=$value"
+		dirname="$PERSISTENT_SERVICE_STATUS_DIR"
 	else
-		# Speicherung im tmpfs
-		_set_file_dict_value "$SERVICES_STATUS_FILE" "${service_name}-${attribute}" "$value"
+		dirname="$VOLATILE_SERVICE_STATUS_DIR"
 	fi
+	mkdir -p "$dirname"
+	_set_file_dict_value "$dirname/$service_name" "$attribute" "$value"
 }
 
 
@@ -213,14 +231,14 @@ get_service_value() {
 	local service_name="$1"
 	local attribute="$2"
 	local default="${3:-}"
-	local value=
-	local uci_prefix
+	local value
+	local dirname
 	if _is_persistent_service_attribute "$attribute"; then
-		uci_prefix=$(get_service_uci_prefix "$service_name")
-		[ -n "$uci_prefix" ] && value=$(uci_get "${uci_prefix}.$attribute")
+		dirname="$PERSISTENT_SERVICE_STATUS_DIR"
 	else
-		value=$(_get_file_dict_value "$SERVICES_STATUS_FILE" "${service_name}-${attribute}")
+		dirname="$VOLATILE_SERVICE_STATUS_DIR"
 	fi
+	value=$(_get_file_dict_value "$dirname/$service_name" "$attribute")
 	[ -n "$value" ] && echo "$value" || echo "$default"
 	return 0
 }
@@ -229,43 +247,30 @@ get_service_value() {
 # Liefere die Suffixe aller Schluessel aus der Service-Attribut-Datenbank,
 # die mit dem gegebenen Praefix uebereinstimmen.
 get_service_attributes() {
-	local name="$1"
-	local key
-	for key in $PERSISTENT_SERVICE_ATTRIBUTES; do
-		echo "$key"
-	done
-	_get_file_dict_keys "$SERVICES_STATUS_FILE" "${name}-"
+	local service_name="$1"
+	_get_file_dict_keys "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" ""
+	_get_file_dict_keys "$VOLATILE_SERVICE_STATUS_DIR/$service_name" ""
 }
 
 
 # menschenfreundliche Ausgabe der aktuell angemeldeten Dienste
 print_services() {
-	local uci_prefix
-	local name
+	local service_name
 	local attribute
 	local value
-	find_all_uci_sections on-core services | while read uci_prefix; do
-		name=$(uci_get "${uci_prefix}.name")
-		echo "Section '$name'"
-		get_service_attributes "$name" | while read attribute; do
-			value=$(get_service_value "$name" "$attribute")
+	get_services | while read service_name; do
+		echo "$service_name"
+		get_service_attributes "$service_name" | while read attribute; do
+			value=$(get_service_value "$service_name" "$attribute")
 			echo -e "\t$attribute=$value"
 		done
 	done
 }
 
 
-get_service_uci_prefix() {
-	local service_name="$1"
-	shift
-	find_first_uci_section on-core services "name=$service_name" "$@"
-}
-
-
-
 # Speichere das angegebene uci-Praefix als eine von einem Service abhaengige Konfiguration.
 # Dies ist sinnvoll fuer abgeleitete VPN-Konfigurationen oder Portweiterleitungen.
-# Anschliessend muss "uci commit on-core" aufgerufen werden.
+# Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 # Schnittstelle: siehe _add_service_dependency
 add_service_uci_dependency() {
 	_add_service_dependency "uci_dependency" "$@"
@@ -274,7 +279,7 @@ add_service_uci_dependency() {
 
 # Speichere einen Dateinamen als Abhaengigkeit eines Service.
 # Dies ist sinnvoll fuer Dateien, die nicht mehr gebraucht werden, sobald der Service entfernt wird.
-# Anschliessend muss "uci commit on-core" aufgerufen werden.
+# Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 # Schnittstelle: siehe _add_service_dependency
 add_service_file_dependency() {
 	_add_service_dependency "file_dependency" "$@"
@@ -304,7 +309,7 @@ _add_service_dependency() {
 
 
 # Entferne alle mit diesem Service verbundenen Konfigurationen (inkl. Rekonfiguration von firewall, etc.).
-# Anschliessend muss "uci commit on-core" aufgerufen werden.
+# Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 cleanup_service_dependencies() {
 	local service_name="$1"
 	local dep
@@ -338,11 +343,9 @@ get_service_description() {
 
 
 update_service_priorities() {
-	local uci_prefix
 	local service_name
 	local priority
-	find_all_uci_sections on-core services | while read uci_prefix; do
-		service_name=$(uci_get "${uci_prefix}.name")
+	get_services | while read service_name; do
 		priority=$(_get_service_target_priority "$service_name")
 		set_service_value "$service_name" "priority" "$priority"
 	done
@@ -352,8 +355,10 @@ update_service_priorities() {
 delete_service() {
 	trap "error_trap delete_service $*" $GUARD_TRAPS
 	local service_name="$1"
-	[ -z "$service_name" ] && msg_info "Error: no service given for deletion" && return 1
-	local uci_prefix=$(get_service_uci_prefix "$service_name")
+	[ -z "$service_name" ] && msg_info "Error: no service given for deletion" && trap "" $GUARD_TRAPS && return 1
+	cleanup_service_dependencies "$service_name"
+	rm -f "$PERSISTENT_SERVICE_STATUS_DIR/$service_name"
+	rm -f "$VOLATILE_SERVICE_STATUS_DIR/$service_name"
 }
 
 

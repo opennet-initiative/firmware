@@ -1,11 +1,3 @@
-# liefere das UCI-Praefix fuer eine OpenVPN-Instanz zurueck, die zu dem angegebenen Service gehoert.
-get_openvpn_service_uci_prefix() {
-	local service_name="$1"
-	shift
-	find_first_uci_section on-core services "name=$name" "$@"
-}
-
-
 # Schreibe eine openvpn-Konfigurationsdatei.
 # Parameter: der Service-Name
 # Parameter: true|false

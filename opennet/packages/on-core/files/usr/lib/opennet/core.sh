@@ -239,7 +239,7 @@ aquire_lock() {
 	local lock_file=$1
 	local max_age_minutes=$2
 	[ ! -e "$lock_file" ] && touch "$lock_file" && return 0
-	local file_timestamp=$(date --reference "$lock_file" +%s)
+	local file_timestamp=$(get_file_modification_timestamp_minutes "$lock_file")
 	# too old? We claim it for ourself.
 	is_timestamp_older_minutes "$file_timestamp" "$max_age_minutes" && touch "$lock_file" && return 0
 	# lockfile is too young
@@ -426,6 +426,11 @@ get_time_minute() {
 }
 
 
+get_file_modification_timestamp_minutes() {
+	local filename="$1"
+	date --reference "$filename" +%s | awk '{ print int($1/60) }'
+}
+
 # Achtung: Zeitstempel aus der Zukunft gelten immer als veraltet.
 is_timestamp_older_minutes() {
 	local timestamp_minute="$1"
@@ -439,4 +444,5 @@ is_timestamp_older_minutes() {
 		return 0
 	trap "" $GUARD_TRAPS && return 1
 }
+
 

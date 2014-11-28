@@ -16,7 +16,7 @@ set -eu
 
 # bis Version v0.4-5: openvpn.opennet_user.comp_lzo=1
 # seit Version v0.5 muss die Einstellung einen der folgenden Werte haben: yes/no/adaptive
-# Wir ersetzen 1 durch "yes" und 0 durch "no"
+# bzw. seit Version v0.5 gibt es Sektion nicht mehr (openvpn.opennet_user)
 # Status in v0.4-5:
 #   ~# uci show|grep lzo
 #   on-usergw.opennet_ugw.comp_lzo=1

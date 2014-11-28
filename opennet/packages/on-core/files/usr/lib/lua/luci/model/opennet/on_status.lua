@@ -52,6 +52,12 @@ function printOpenVPN()
 end
 
 function printUserGW()
+  -- check if package on-usergw is installed
+  local ugw_installed = luci.sys.exec("opkg list-installed | grep 'on-usergw' ")
+  if (ugw_installed == "" ) then
+    return
+  end 
+
   local ugw_status = {}
   -- central gateway-IPs reachable over tap-devices
   ugw_status.centralips = luci.sys.exec("for gw in $(uci -q get on-usergw.@usergw[0].centralIP); do ip route get $gw | awk '/dev tap/ {print $1}'; done")

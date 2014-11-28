@@ -10,7 +10,7 @@ define Package/on-core
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Rene Ejury <opennet@absorb.it>
   TITLE:=System and Webinterface
-  DEPENDS+=+luci-mod-admin-core +olsrd +olsrd-mod-httpinfo +olsrd-mod-txtinfo +olsrd-mod-nameservice +luci-app-firewall
+  DEPENDS+=+luci-mod-admin-core +olsrd +olsrd-mod-httpinfo +olsrd-mod-txtinfo +olsrd-mod-nameservice
 endef
 
 define Package/on-core/description

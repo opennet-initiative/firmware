@@ -1,8 +1,14 @@
 # opennet-Funktionen rund um das Routing
 # wird durch "on-helper" eingebunden
 
+ROUTING_TABLE_ON_UPLINK=on-tunnel
+ROUTING_TABLE_MESH=olsrd
+ROUTING_TABLE_MESH_DEFAULT=olsrd-default
+OLSR_POLICY_DEFAULT_PRIORITY=20000
 RT_FILE=/etc/iproute2/rt_tables
 RT_START_ID=11
+# Prioritaets-Offset fuer default-Routing-Tabellen (z.B. "default" und "olsrd-default")
+DEFAULT_RULE_PRIO_OFFSET=100
 
 # hier speichern wir die Routing-Informationen zwischenzeitlich
 # Dabei gehen wir davon aus, dass dieser Prozess nicht lange laeuft, da
@@ -68,10 +74,10 @@ delete_throw_routes() {
 }
 
 
-# erzeuge Policy-Rules fuer den IP-Bereich eines Netzwerkinterface
+# erzeuge Policy-Rules entsprechend der IP-Bereiche einer Netzwerk-Zone
 # Parameter: logisches Netzwerkinterface
 # weitere Parameter: Rule-Spezifikation
-add_zone_policy_rules() {
+add_zone_policy_rules_by_destination() {
 	trap "error_trap add_zone_policy_rules $*" $GUARD_TRAPS
 	local zone=$1
 	shift
@@ -79,7 +85,22 @@ add_zone_policy_rules() {
 	local networkprefix
 	for network in $(get_zone_interfaces "$zone"); do
 		networkprefix=$(get_network "$network")
-		[ -n "$networkprefix" ] && ip rule add from "$networkprefix" "$@"
+		[ -n "$networkprefix" ] && ip rule add to "$networkprefix" "$@" || true
+	done
+	return 0
+}
+
+
+# erzeuge Policy-Rules fuer Quell-Interfaces
+# Parameter: logisches Netzwerkinterface
+# weitere Parameter: Rule-Spezifikation
+add_zone_policy_rules_by_iif() {
+	trap "error_trap add_zone_policy_rules $*" $GUARD_TRAPS
+	local zone=$1
+	shift
+	local device
+	for device in $(get_zone_devices "$zone"); do
+		[ -n "$device" ] && ip rule add iif "$device" "$@" || true
 	done
 	return 0
 }
@@ -94,46 +115,41 @@ add_zone_policy_rules() {
 initialize_olsrd_policy_routing() {
 	trap "error_trap initialize_olsrd_policy_routing $*" $GUARD_TRAPS
 	local network
-	local networkprefix
+	local current
+	local table
 	local priority=$OLSR_POLICY_DEFAULT_PRIORITY
 
-	delete_policy_rule table "$ROUTING_TABLE_MESH"
-	ip rule add table "$ROUTING_TABLE_MESH" prio "$((priority++))"
+	# Tabellen anmelden (nur einmalig notwendig)
+	for table in "$ROUTING_TABLE_MESH" "$ROUTING_TABLE_MESH_DEFAULT" \
+			"$ROUTING_TABLE_ON_UPLINK"; do
+		get_or_add_routing_table "$table" >/dev/null
+	done
 
+	# alle Eintraege loeschen
+	delete_policy_rule table "$ROUTING_TABLE_MESH"
 	delete_policy_rule table "$ROUTING_TABLE_MESH_DEFAULT"
+	delete_policy_rule table "$ROUTING_TABLE_ON_UPLINK"
+	delete_policy_rule table main
+	delete_policy_rule table default
+
+	# sehr wichtig - also zuerst: keine vorbeifliegenden Mesh-Pakete umlenken
+	add_zone_policy_rules_by_iif "$ZONE_MESH" table "$ROUTING_TABLE_MESH" prio "$((priority++))"
+	add_zone_policy_rules_by_iif "$ZONE_MESH" table "$ROUTING_TABLE_MESH_DEFAULT" prio "$((priority++))"
+
+	# Pakete mit passendem Ziel orientieren sich an der main-Tabelle
+	# Wir wollen dadurch explizit keine potentielle default-Route verwenden.
+	add_zone_policy_rules_by_destination "$ZONE_LOCAL" table main prio "$((priority++))"
+
+	# alle nicht-mesh-Quellen routen auch ins olsr-Netz
+	ip rule add table "$ROUTING_TABLE_MESH" prio "$((priority++))"
 	ip rule add table "$ROUTING_TABLE_MESH_DEFAULT" prio "$((priority++))"
 
-	# "main"-Regel fuer lokale Quell-Pakete prioritisieren (opennet-Routing soll lokales Routing nicht beeinflussen)
-	# "main"-Regel fuer alle anderen Pakete nach hinten schieben (weniger wichtig als olsr)
-	delete_policy_rule table main
-	add_zone_policy_rules "$ZONE_LOCAL" table main prio "$((priority++))"
-	ip rule add iif lo table main prio "$((priority++))"
+	# Routen, die nicht den lokalen Netz-Interfaces entsprechen (z.B. default-Routen)
 	ip rule add table main prio "$((priority++))"
 
-	# Uplinks folgen erst nach main
-	delete_policy_rule table "$ROUTE_RULE_ON"
-	add_zone_policy_rules "$ZONE_LOCAL" table "$ROUTE_RULE_ON" prio "$((priority++))"
-	add_zone_policy_rules "$ZONE_FREE" table "$ROUTE_RULE_ON" prio "$((priority++))"
-	ip rule add iif lo table "$ROUTE_RULE_ON" prio "$((priority++))"
-
-
-	# Pakete fuer opennet-IP-Bereiche sollen nicht in der main-Tabelle (lokale Interfaces) behandelt werden
-	# Falls spezifischere Interfaces vorhanden sind (z.B. 192.168.1.0/24), dann greift die "throw"-Regel natuerlich nicht.
-	delete_throw_routes main
-	for networkprefix in $(get_on_core_default on_network); do
-		ip route prepend throw "$networkprefix" table main
-	done
-
-	# Pakete in Richtung lokaler Netzwerke (sowie "free") werden nicht von olsrd behandelt.
-	# TODO: koennen wir uns darauf verlassen, dass olsrd diese Regeln erhaelt?
-	delete_throw_routes "$ROUTING_TABLE_MESH"
-	delete_throw_routes "$ROUTING_TABLE_MESH_DEFAULT"
-	for network in $(get_zone_interfaces "$ZONE_LOCAL") $(get_zone_interfaces "$ZONE_FREE"); do
-		networkprefix=$(get_network "$network")
-		[ -z "$networkprefix" ] && continue
-		ip route add throw "$networkprefix" table "$ROUTING_TABLE_MESH"
-		ip route add throw "$networkprefix" table "$ROUTING_TABLE_MESH_DEFAULT"
-	done
+	# die default-Table und VPN-Tunnel fungieren fuer alle anderen Pakete als default-GW
+	ip rule add table default prio "$((priority++))"
+	ip rule add table "$ROUTING_TABLE_ON_UPLINK" prio "$((priority++))"
 }
 
 

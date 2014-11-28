@@ -1,13 +1,9 @@
-ROUTE_RULE_ON=on-tunnel
 ZONE_LOCAL=lan
 ZONE_MESH=on_mesh
 ZONE_TUNNEL=on_vpn
 ZONE_FREE=free
 NETWORK_TUNNEL=on_vpn
 NETWORK_FREE=free
-ROUTING_TABLE_MESH=olsrd
-ROUTING_TABLE_MESH_DEFAULT=olsrd-default
-OLSR_POLICY_DEFAULT_PRIORITY=20000
 
 
 # Liefere alle IPs fuer diesen Namen zurueck
@@ -126,13 +122,27 @@ get_port_forwards() {
 }
 
 
+# Liefere die logischen Netzwerk-Schnittstellen einer Zone zurueck.
 get_zone_interfaces() {
-	local zone=$1
+	local zone="$1"
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
 	# keine Zone -> keine Interfaces
 	[ -z "$uci_prefix" ] && return 0
 	uci_get "${uci_prefix}.network"
 	return 0
+}
+
+
+# Liefere die physischen Netzwerk-Schnittstellen einer Zone zurueck.
+get_zone_devices() {
+	local zone="$1"
+	local iface
+	local result
+	for iface in $(get_zone_interfaces "$zone"); do
+		for result in $(uci_get "network.${iface}.ifname"); do
+			echo "$result"
+		done
+	done
 }
 
 

@@ -34,17 +34,27 @@ notify_service() {
 	local source="$8"
 	local service_name=$(_get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 	local now=$(get_time_minute)
-	set_service_value "$service_name" "service" "$service"
-	set_service_value "$service_name" "scheme" "$scheme"
-	set_service_value "$service_name" "host" "$host"
-	set_service_value "$service_name" "port" "$port"
-	set_service_value "$service_name" "protocol" "$protocol"
-	set_service_value "$service_name" "path" "$path"
+	if ! is_existing_service "$service_name"; then
+		# diese Attribute sind Bestandteil des Namens und aendern sich nicht
+		set_service_value "$service_name" "service" "$service"
+		set_service_value "$service_name" "scheme" "$scheme"
+		set_service_value "$service_name" "host" "$host"
+		set_service_value "$service_name" "port" "$port"
+		set_service_value "$service_name" "protocol" "$protocol"
+		set_service_value "$service_name" "path" "$path"
+	fi
 	set_service_value "$service_name" "details" "$details"
 	set_service_value "$service_name" "timestamp" "$now"
 	set_service_value "$service_name" "distance" "$(get_routing_distance "$host")"
 	set_service_value "$service_name" "hop_count" "$(get_hop_count "$host")"
 	set_service_value "$service_name" "source" "$source"
+}
+
+
+is_existing_service() {
+	local service_name="$1"
+	[ -e "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" ] && return || true
+	trap "" $GUARD_TRAPS && return 1
 }
 
 

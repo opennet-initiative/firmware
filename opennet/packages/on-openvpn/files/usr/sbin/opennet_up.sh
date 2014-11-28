@@ -25,7 +25,7 @@ echo "vpn-tunnel active" >"$MSG_FILE"	# a short message for the web frontend
 # wir muessen nicht mehr streng sein
 set +e
 
-ip route add default via "$route_vpn_gateway" table "$ROUTE_RULE_ON"
+ip route add default via "$route_vpn_gateway" table "$ROUTING_TABLE_ON_UPLINK"
 
 # start dhcp-fwd early
 # TODO: why? It should run automatically anyway ...

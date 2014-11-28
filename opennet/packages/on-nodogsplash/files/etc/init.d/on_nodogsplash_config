@@ -62,21 +62,21 @@ start() {
 		uci_set "${uci_prefix}.output=ACCEPT"
 
 		section=$(uci add firewall forwarding)
-		uci set firewall.$section.src='free'
-		uci set firewall.$section.dest='on_vpn'
+		uci set "firewall.$section.src=$ZONE_FREE"
+		uci set "firewall.$section.dest=$ZONE_TUNNEL"
 
 		section=$(uci add firewall forwarding)
-		uci set firewall.$section.src='local'
-		uci set firewall.$section.dest='free'
+		uci set "firewall.$section.src=$ZONE_LOCAL"
+		uci set "firewall.$section.dest=$ZONE_FREE"
 
 		section=$(uci add firewall redirect)
-		uci set firewall.$section.src='opennet'
-		uci set firewall.$section.proto='udp'
-		uci set firewall.$section.src_dport='67'
-		uci set firewall.$section.target='DNAT'
-		uci set firewall.$section.src_port='67'
-		uci set firewall.$section.dest_ip=${free_ipaddr}
-		uci set firewall.$section.src_dip=${on_ipaddr}
+		uci set "firewall.$section.src=$ZONE_FREE"
+		uci set "firewall.$section.proto=udp"
+		uci set "firewall.$section.src_dport=67"
+		uci set "firewall.$section.target=DNAT"
+		uci set "firewall.$section.src_port=67"
+		uci set "firewall.$section.dest_ip=${free_ipaddr}"
+		uci set "firewall.$section.src_dip=${on_ipaddr}"
 		uci commit firewall
 	else	# fix pre 0.3-6 version bug
 		no=0

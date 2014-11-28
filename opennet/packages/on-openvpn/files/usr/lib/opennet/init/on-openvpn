@@ -45,52 +45,19 @@ configure_tunnel_firewall() {
 }
 
 
-configure_tunnel_openvpn_settings() {
+# bis Version 4.5 verwendeten wir vollstaendige uci-Sektionen fuer die VPN-Server
+# z.B. openvpn.opennet_user
+remove_tunnel_openvpn_settings() {
 	local uci_prefix=openvpn.opennet_user
 
-	# Abbruch falls die Einstellungen bereits definiert sind
-	[ -n "$(uci_get "$uci_prefix")" ] && return
-
-	uci set "${uci_prefix}=openvpn"
-	uci set "${uci_prefix}.client=1"
-	uci set "${uci_prefix}.enable=1"
-	uci set "${uci_prefix}.proto=udp"
-	uci set "${uci_prefix}.dev=tun"
-	uci set "${uci_prefix}.persist_key=1"
-	uci set "${uci_prefix}.persist_tun=1"
-	uci set "${uci_prefix}.ca=/etc/openvpn/opennet_user/opennet-ca.crt"
-	uci set "${uci_prefix}.cert=/etc/openvpn/opennet_user/on_aps.crt"
-	uci set "${uci_prefix}.key=/etc/openvpn/opennet_user/on_aps.key"
-	uci set "${uci_prefix}.nobind=1"
-	uci set "${uci_prefix}.comp_lzo=yes"
-	uci set "${uci_prefix}.up=/etc/openvpn/opennet_user/opennet_up.sh"
-	uci set "${uci_prefix}.down=/etc/openvpn/opennet_user/opennet_down.sh"
-	uci set "${uci_prefix}.ns_cert_type=server"
-	uci set "${uci_prefix}.rport=1600"
-	uci set "${uci_prefix}.script_security=2 execve"
-	uci_add_list "${uci_prefix}.remote" remote
-	uci set "${uci_prefix}.remote=192.168.0.254"
-	uci commit "$uci_prefix"
-}
-
-
-configure_on_openvpn_settings() {
-	local uci_prefix=on-openvpn.gateways
-	local uci_file=/etc/config/on-openvpn
-
-	# Abbruch falls bereits Einstellungen vorhanden sind
-	[ -e "$uci_file" ] && return
-
-	touch "$uci_file"
-	uci set "${uci_prefix}=gateways"
-	uci set "${uci_prefix}.autosearch=on"
-	uci set "${uci_prefix}.vpn_sort_criteria=etx"
-	uci commit "$uci_prefix"
+	# Abbruch falls die Einstellungen bereits entfernt wurden
+	[ -z "$(uci_get "$uci_prefix")" ] && return
+	uci delete "$uci_prefix"
+	uci commit openvpn
 }
 
 
 configure_tunnel_network
 configure_tunnel_firewall
-configure_tunnel_openvpn_settings
-configure_on_openvpn_settings
+remove_tunnel_openvpn_settings
 

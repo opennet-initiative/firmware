@@ -7,14 +7,10 @@
 enable_openvpn_service() {
 	local service_name="$1"
 	local use_sender="$2"
-	local uci_prefix
+	local uci_prefix="openvpn.$service_name"
 	local config_file=$(get_service_value "$service_name" "config_file")
-	# Konfigurationsdatei neu schreiben
-	mkdir -p "$(dirname "$config_file")"
+	update_vpn_config "$service_name" "$use_sender"
 	service_add_file_dependency "$service_name" "$config_file"
-	get_openvpn_config "$service_name" "$use_sender" >"$config_file"
-	# uci-Konfiguration setzen
-	uci_prefix="openvpn.$service_name"
 	# zuvor ankuendigen, dass zukuenftig diese uci-Konfiguration an dem Dienst haengt
 	service_add_uci_dependency "$service_name" "$uci_prefix"
 	# lege die uci-Konfiguration an und aktiviere sie
@@ -23,6 +19,15 @@ enable_openvpn_service() {
 	uci set "${uci_prefix}.config=$config_file"
 	apply_changes openvpn
 	apply_changes on-core
+}
+
+
+update_vpn_config() {
+	local service_name="$1"
+	local use_sender="$2"
+	# Konfigurationsdatei neu schreiben
+	mkdir -p "$(dirname "$config_file")"
+	get_openvpn_config "$service_name" "$use_sender" >"$config_file"
 }
 
 
@@ -40,7 +45,7 @@ is_openvpn_service_active() {
 	local service_name="$1"
 	# wir pruefen lediglich, ob ein VPN-Eintrag existiert
 	[ -n "$(uci_get "openvpn.$service_name")" ] && return 0
-	return 1
+	trap "" $GUARD_TRAPS && return 1
 }
 
 

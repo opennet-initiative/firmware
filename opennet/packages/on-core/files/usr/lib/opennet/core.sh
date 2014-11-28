@@ -339,6 +339,7 @@ set_opennet_id() {
 	netmask=$(get_on_wifidog_default free_netmask)
 	free_ipaddr=$(get_on_ip "$new_id" "$ipschema" 0)
 	uci_prefix=network.$NETWORK_FREE
+	uci set "${uci_prefix}=interface"
 	uci set "${uci_prefix}.proto=static"
 	uci set "${uci_prefix}.ipaddr=$free_ipaddr"
 	uci set "${uci_prefix}.netmask=$netmask"

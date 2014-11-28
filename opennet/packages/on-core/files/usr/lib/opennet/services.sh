@@ -282,7 +282,7 @@ print_services() {
 # Dies ist sinnvoll fuer abgeleitete VPN-Konfigurationen oder Portweiterleitungen.
 # Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 # Schnittstelle: siehe _add_service_dependency
-add_service_uci_dependency() {
+service_add_uci_dependency() {
 	_add_service_dependency "uci_dependency" "$@"
 }
 
@@ -291,7 +291,7 @@ add_service_uci_dependency() {
 # Dies ist sinnvoll fuer Dateien, die nicht mehr gebraucht werden, sobald der Service entfernt wird.
 # Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 # Schnittstelle: siehe _add_service_dependency
-add_service_file_dependency() {
+service_add_file_dependency() {
 	_add_service_dependency "file_dependency" "$@"
 }
 
@@ -315,7 +315,7 @@ _add_service_dependency() {
 	else
 		deps="$deps $token"
 	fi
-	set_service_value "$service_name" "$deps"
+	set_service_value "$service_name" "$dependency" "$deps"
 }
 
 

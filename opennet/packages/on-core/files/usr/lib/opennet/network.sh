@@ -1,4 +1,5 @@
 ZONE_LOCAL=lan
+ZONE_WAN=wan
 ZONE_MESH=on_mesh
 ZONE_TUNNEL=on_vpn
 ZONE_FREE=free
@@ -63,23 +64,22 @@ update_opennet_zone_masquerading() {
 }
 
 
+# Liefere die IP-Adresse eines logischen Interface inkl. Praefix-Laenge (z.B. 172.16.0.1/24).
+# Parameter: logisches Netzwerk-Interface
 get_network() {
 	trap "error_trap get_network $*" $GUARD_TRAPS
-	local ifname=$(
-		# Kurzzeitig den eventuellen strikten Modus abschalten.
-		# (lib/functions.sh kommt mit dem strikten Modus nicht zurecht)
+	local network="$1"
+	local ranges
+	# Kurzzeitig den eventuellen strikten Modus abschalten.
+	# (lib/functions.sh kommt mit dem strikten Modus nicht zurecht)
+	(
 		set +eu
-		. "${IPKG_INSTROOT:-}/lib/functions.sh"
-		include "${IPKG_INSTROOT:-}/lib/network"
-		scan_interfaces
-		config_get "$1" ifname
-		set +eu
+		. "${IPKG_INSTROOT:-}/lib/functions/network.sh"
+		__network_ifstatus "ranges" "$network" "['ipv4-address'][*]['address','mask']" "/"
+		echo "$ranges"
+		set -eu
 	)
-	if [ -n "$ifname" ] && [ "$ifname" != "none" ]; then
-		# TODO: aktuell nur IPv4
-		ipaddr="$(ip address show label "$ifname" | awk '/inet / {print $2; exit}')"
-		[ -z "$ipaddr" ] || { eval $(ipcalc -p -n "$ipaddr"); echo $NETWORK/$PREFIX; }
-	fi
+	return 0
 }
 
 
@@ -114,7 +114,7 @@ get_port_forwards() {
 
 	if [ -z "$cn_address" ] || [ "$cn_address" -lt 1 ] || [ "$cn_address" -gt 255 ]; then
 		msg_info "$(basename "$0"): invalidate certificate Common Name ($client_cn)"
-		return 1
+		trap "" $GUARD_TRAPS && return 1
 	fi
 
 	targetports=$((portbase + (cn_address-1)*port_count))
@@ -146,16 +146,30 @@ get_zone_devices() {
 }
 
 
-is_interface_in_zone() {
-	local in_interface=$1
+# Ist das gegebene physische Netzwer-Interface Teil einer Firewall-Zone?
+is_device_in_zone() {
+	local device=$1
 	local zone=$2
+	local item
 	for log_interface in $(get_zone_interfaces "$2"); do
-		for phys_interface in $(uci_get "network.${log_interface}.ifname"); do
+		for item in $(uci_get "network.${log_interface}.ifname"); do
 			# Entferne den Teil nach Doppelpunkten - fuer Alias-Interfaces
-			[ "$in_interface" = "$(echo "$phys_interface" | cut -f 1 -d :)" ] && return 0 || true
+			[ "$device" = "$(echo "$item" | cut -f 1 -d :)" ] && return 0 || true
 		done
 	done
-	return 1
+	trap "" $GUARD_TRAPS && return 1
+}
+
+
+# Ist das gegebene logische Netzwerk-Interface Teil einer Firewall-Zone?
+is_interface_in_zone() {
+	local interface=$1
+	local zone=$2
+	local item
+	for item in $(get_zone_interfaces "$2"); do
+		[ "$item" = "$interface" ] && return 0 || true
+	done
+	trap "" $GUARD_TRAPS && return 1
 }
 
 
@@ -163,7 +177,7 @@ add_interface_to_zone() {
 	local zone=$1
 	local interface=$2
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
-	[ -z "$uci_prefix" ] && msg_debug "failed to add interface '$interface' to non-existing zone '$zone'" && return 1
+	[ -z "$uci_prefix" ] && msg_debug "failed to add interface '$interface' to non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
 	uci_add_list "${uci_prefix}.network" "$interface"
 }
 
@@ -172,7 +186,7 @@ del_interface_from_zone() {
 	local zone=$1
 	local interface=$2
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
-	[ -z "$uci_prefix" ] && msg_debug "failed to remove interface '$interface' from non-existing zone '$zone'" && return 1
+	[ -z "$uci_prefix" ] && msg_debug "failed to remove interface '$interface' from non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
 	uci del_list "${uci_prefix}.network=$interface"
 }
 
@@ -186,7 +200,7 @@ get_zone_of_interface() {
 	zone=$(uci_get "${prefix%.network}.name")
 		echo " $networks " | grep -q "[ \t]$interface[ \t]" && echo "$zone" && return 0 || true
 	done
-	return 1
+	trap "" $GUARD_TRAPS && return 1
 }
 
 
@@ -220,4 +234,16 @@ get_sorted_opennet_interfaces() {
 	done | sort -n | cut -f 2 -d " "
 }
 
+
+# Liefere alle vorhandenen logischen Netzwerk-Schnittstellen (lan, wan, ...) zurueck.
+get_all_network_interfaces() {
+	local interface
+	uci show network | grep "^network\.[^.]\+=interface$" | cut -f 2 -d . | cut -f 1 -d = | while read interface; do
+		# ignoriere loopback-Interface
+		[ "$interface" = "loopback" ] && continue
+		# alle uebrigen sind reale Interfaces
+		echo "$interface"
+	done
+	return
+}
 

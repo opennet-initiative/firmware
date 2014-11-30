@@ -65,8 +65,7 @@ case "${1:-}" in
 		fi | filter_enabled_services | while read service_name; do
 			description=$(get_service_description "$service_name")
 			echo "Testing Gateway: $description"
-			# forciere den Test durch Loeschen des Zeitstempels
-			set_service_value "$service_name" "timestamp_connection_test" ""
+			reset_mig_connection_test_timestamp "$service_name"
 			test_mig_connection "$service_name" && echo "OK" || echo "FEHLER"
 		 done
 		exit 0

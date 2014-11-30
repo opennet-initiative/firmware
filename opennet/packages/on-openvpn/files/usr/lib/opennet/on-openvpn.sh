@@ -133,8 +133,25 @@ find_and_select_best_gateway() {
 # Liefere die aktiven VPN-Verbindungen (mit Mesh-Internet-Gateways) zurueck.
 # Diese Funktion bracht recht viel Zeit.
 get_active_mig_connections() {
-	get_sorted_services gw ugw | while read one_service; do
-		is_openvpn_service_active "$one_service" && echo "$one_service" || true
+	local service_name
+	get_sorted_services gw ugw | while read service_name; do
+		is_openvpn_service_active "$service_name" && echo "$service_name" || true
+	done
+}
+
+
+# Loesche den Zeitstempel des letztes VPN-Verbindungstests. Beim naechsten Durchlauf wird diese Verbindung
+# erneut geprueft.
+reset_mig_connection_test_timestamp() {
+	service_name="$1"
+	set_service_value "$service_name" "timestamp_connection_test" ""
+}
+
+
+reset_all_mig_connection_test_timestamps() {
+	local service_name
+	get_sorted_services gw ugw | while read service_name; do
+		reset_mig_connection_test_timestamp "$service_name"
 	done
 }
 

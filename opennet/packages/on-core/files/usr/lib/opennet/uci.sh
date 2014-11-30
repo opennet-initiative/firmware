@@ -1,6 +1,6 @@
 
 uci_is_true() {
-	uci_is_false "$1" && return 1
+	uci_is_false "$1" && trap "" $GUARD_TRAPS && return 1
 	return 0
 }
 
@@ -8,7 +8,7 @@ uci_is_true() {
 uci_is_false() {
 	local token=$1
 	[ "$token" = "0" -o "$token" = "no" -o "$token" = "n" -o "$token" = "off" -o "$token" = "false" ] && return 0
-	return 1
+	trap "" $GUARD_TRAPS && return 1
 }
 
 

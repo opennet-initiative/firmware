@@ -507,3 +507,21 @@ move_service_top() {
 	apply_changes on-core
 }
 
+
+get_service_detail() {
+	local service_name="$1"
+	local key="$2"
+	local default="${3:-}"
+	local value=$(get_service_value "$service_name" "details" | get_from_key_value_list "$key")
+	[ -n "$value" ] && echo "$value" || echo "$default"
+	return 0
+}
+
+
+get_service_age() {
+	local service_name="$1"
+	local timestamp=$(get_service_value "$service_name" "timestamp")
+	[ -z "$timestamp" ] && return 0
+	echo "$(get_time_minute)" "$timestamp" | awk '{ print $1 - $2 }'
+}
+

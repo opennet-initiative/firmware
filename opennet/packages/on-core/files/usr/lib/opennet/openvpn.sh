@@ -56,7 +56,7 @@ get_openvpn_config() {
 	if uci_is_true "$use_sender"; then
 		remote=$(get_service_value "$service_name" "host")
 	else
-		remote=$(get_service_value "$service_name" "details" | get_from_key_value_list "hostname")
+		remote=$(get_service_detail "$service_name" "hostname")
 	fi
 	local port=$(get_service_value "$service_name" "port")
 	local protocol=$(get_service_value "$service_name" "protocol")

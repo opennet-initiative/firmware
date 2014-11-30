@@ -37,11 +37,11 @@ table {
 	border-collapse: collapse;
 }
 
-tr[blacklisted="true"] {
+tr[disabled="y"] {
 	background-color: #bbb;
 }
 
-tr[blacklisted="true"] #cbi-network-lan-status, tr[blacklisted="true"] #cbi-network-lan-age {
+tr[disabled="y"] #cbi-network-lan-status, tr[disabled="y"] #cbi-network-lan-age {
 	display: none;
 }
 
@@ -150,7 +150,9 @@ div.cbi-value-description {
 	font-style: italic;
 }
 
-input.cbi-input-del, input.cbi-button-del, input.cbi-button-up, input.cbi-button-down {
+input.cbi-input-del, input.cbi-button-del, input.cbi-button-top,
+input.cbi-button-up, input.cbi-button-down, input.cbi-button-enable,
+input.cbi-button-disable, input.cbi-button-reset {
 	-moz-background-clip:border;
 	-moz-background-inline-policy:continuous;
 	-moz-background-origin:padding;
@@ -159,26 +161,32 @@ input.cbi-input-del, input.cbi-button-del, input.cbi-button-up, input.cbi-button
 	text-transform:capitalize;
 	font-size: 0px;
 	line-height: 0px;
-	height: 17px;
-	width:	17px;
+	height: 24px;
+	width:	24px;
 }
 
 input.cbi-input-del, input.cbi-button-del {
-	background:transparent url(../../luci-static/opennet/gtk-clear.png) no-repeat scroll 1px center;
+	background:transparent url(../../luci-static/opennet/user-trash.png) no-repeat scroll 1px center;
 }
 
 #cbi-network-lan-active[active="n"], #cbi-network-lan-status[status="n"],
 .ugw-wan-route, .ugw-wan-ping, .ugw-mtu, .ugw-centralip,
 .ugw-tunnel_active[status="inactive"], .cert_available {
-	background:transparent url(../../luci-static/opennet/gtk-no.png) no-repeat scroll center;
+	background:transparent url(../../luci-static/opennet/error.png) no-repeat scroll center;
 }
 
 #cbi-network-lan-active[active="y"], #cbi-network-lan-status[status="y"], .ugw-wan-route[status="ok"], .ugw-wan-ping[status="ok"], .ugw-mtu[status="ok"], .ugw-centralip[status="ok"], .ugw-tunnel_active[status="ok"], .cert_available[status="ok"] {
-	background:transparent url(../../luci-static/opennet/gtk-ok.png) no-repeat scroll center;
+	background:transparent url(../../luci-static/opennet/emblem-default.png) no-repeat scroll center;
+	min-height: 24px;
 }
 
 input.cbi-button {
 	background-color: white;
+	background-size: auto;
+}
+
+input.cbi-button-top {
+	background:transparent url(../../luci-static/opennet/gtk-goto-top.png) no-repeat scroll 1px center;
 }
 
 input.cbi-button-up {
@@ -189,13 +197,28 @@ input.cbi-button-down {
 	background:transparent url(../../luci-static/opennet/gtk-go-down.png) no-repeat scroll 1px center;
 }
 
+input.cbi-button-enable {
+	background:transparent url(../../luci-static/opennet/non-starred.png) no-repeat scroll 1px center;
+}
+
+input.cbi-button-disable {
+	background:transparent url(../../luci-static/opennet/starred.png) no-repeat scroll 1px center;
+}
+
+input.cbi-button-reset {
+	background:transparent url(../../luci-static/opennet/gtk-clear.png) no-repeat scroll 1px center;
+}
+
 input.cbi-button-small {
 	background-size: 12px auto;
+	padding-top: 2px;
+	height: 12px;
+	width:	12px;
 }
 
 input.cbi-button-toggle {
 	background:transparent url(../../luci-static/opennet/gtk-refresh.png) no-repeat scroll 1px center;
-	padding-left:17px;
+	padding-left:24px;
 	padding-right:1px;
 	margin-left: 2em;
 }

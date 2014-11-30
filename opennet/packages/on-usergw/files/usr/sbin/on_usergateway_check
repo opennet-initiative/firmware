@@ -80,7 +80,7 @@ ugw_update_vpn_status()
 	local config_name=$1
 	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	local hostname=$(uci_get "${uci_prefix}.hostname")
-	if [ "$(get_ugw_value "$config_name" wan)" != "ok" ]; then
+	if [ "$(get_ugw_value "$config_name" "wan")" != "ok" ]; then
 		msg_info "ugw_update_vpn_status skipped for gw '$hostname': not connected trough WAN"
 		return 0
 	fi
@@ -222,12 +222,12 @@ ugw_update_wan_status () {
 	# Netzwerk-Ereignisketten (openvpn-Neustart, firewall-reload, olsrd, ...) scheinen manchmal zu
 	# einem fehlerhaften Ergebnis zu fuehren - also erstmal oefter probieren, bevor wir die Verbindung
 	# abbrechen. Wo genau ist die Ursache?
-	until is_interface_in_zone "$on_ugw_targetDev" "wan" -o [ "$retry_counter" -ge 3 ]; do
+	until is_device_in_zone "$on_ugw_targetDev" "$ZONE_WAN" -o [ "$retry_counter" -ge 3 ]; do
 		sleep 3
 		on_ugw_targetDev=$(get_target_route_interface "$hostname")
 		: $((retry_counter++))
 	done
-	if is_interface_in_zone "$on_ugw_targetDev" "wan"; then
+	if is_device_in_zone "$on_ugw_targetDev" "$ZONE_WAN"; then
 		set_ugw_value "$config_name" wan ok
 		time=$(ping -w 5 -q "$hostname" 2>/dev/null| awk 'BEGIN{FS="[ \/]+"} /min\/avg\/max/ {print int($7+0.5)}')
 		set_ugw_value "$config_name" ping "$time"

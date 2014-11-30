@@ -74,17 +74,15 @@ delete_throw_routes() {
 }
 
 
-# erzeuge Policy-Rules entsprechend der IP-Bereiche einer Netzwerk-Zone
+# erzeuge Policy-Rules entsprechend der IP-Bereiche eines Netzwerks
 # Parameter: logisches Netzwerkinterface
 # weitere Parameter: Rule-Spezifikation
-add_zone_policy_rules_by_destination() {
-	trap "error_trap add_zone_policy_rules $*" $GUARD_TRAPS
-	local zone=$1
+add_network_policy_rule_by_destination() {
+	trap "error_trap add_network_policy_rule_by_destination $*" $GUARD_TRAPS
+	local network="$1"
 	shift
-	local network
 	local networkprefix
-	for network in $(get_zone_interfaces "$zone"); do
-		networkprefix=$(get_network "$network")
+	for networkprefix in $(get_network "$network"); do 
 		[ -n "$networkprefix" ] && ip rule add to "$networkprefix" "$@" || true
 	done
 	return 0
@@ -92,7 +90,7 @@ add_zone_policy_rules_by_destination() {
 
 
 # erzeuge Policy-Rules fuer Quell-Interfaces
-# Parameter: logisches Netzwerkinterface
+# Parameter: Zone
 # weitere Parameter: Rule-Spezifikation
 add_zone_policy_rules_by_iif() {
 	trap "error_trap add_zone_policy_rules $*" $GUARD_TRAPS
@@ -114,7 +112,7 @@ add_zone_policy_rules_by_iif() {
 # Kurz gesagt: alle bisherigen Policy-Rules sind hinterher kaputt
 initialize_olsrd_policy_routing() {
 	trap "error_trap initialize_olsrd_policy_routing $*" $GUARD_TRAPS
-	local network
+	local iface
 	local current
 	local table
 	local priority=$OLSR_POLICY_DEFAULT_PRIORITY
@@ -132,15 +130,27 @@ initialize_olsrd_policy_routing() {
 	delete_policy_rule table main
 	delete_policy_rule table default
 
+	# free-Verkehr geht immer in den Tunnel
+	add_zone_policy_rules_by_iif "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK" prio "$((priority++))"
+
 	# sehr wichtig - also zuerst: keine vorbeifliegenden Mesh-Pakete umlenken
 	add_zone_policy_rules_by_iif "$ZONE_MESH" table "$ROUTING_TABLE_MESH" prio "$((priority++))"
 	add_zone_policy_rules_by_iif "$ZONE_MESH" table "$ROUTING_TABLE_MESH_DEFAULT" prio "$((priority++))"
 
 	# Pakete mit passendem Ziel orientieren sich an der main-Tabelle
+	# Alle Ziele ausserhalb der mesh-Zone sind geeignet (z.B. local, free, ...).
 	# Wir wollen dadurch explizit keine potentielle default-Route verwenden.
-	add_zone_policy_rules_by_destination "$ZONE_LOCAL" table main prio "$((priority++))"
+	# Aufgrund der "while"-Sub-Shell (mit separatem Variablenraum) belassen wir die Regeln
+	# einfach bei gleicher Prioritaet und erhoehen diese erst anschliessend.
+	get_all_network_interfaces | while read iface; do
+		is_interface_in_zone "$iface" "$ZONE_MESH" && continue
+		add_network_policy_rule_by_destination "$iface" table main prio "$priority"
+	done
+	: $((priority++))
 
 	# alle nicht-mesh-Quellen routen auch ins olsr-Netz
+	#TODO: wir sollten nur private Ziel-IP-Bereiche (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) zulassen
+	# spaeter sind konfigurierbar weitere IPs (fuer HNAs oeffentlicher Dienste) moeglich
 	ip rule add table "$ROUTING_TABLE_MESH" prio "$((priority++))"
 	ip rule add table "$ROUTING_TABLE_MESH_DEFAULT" prio "$((priority++))"
 

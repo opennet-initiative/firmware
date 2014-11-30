@@ -24,9 +24,9 @@ function split(str)
 end
 
 function printFirmwareTitle()
-  local on_version = luci.sys.exec("opkg status on-core | awk '{if (/Version/) print $2;}'")
+  local on_version = luci.sys.exec("on-function get_on_firmware_version")
   local on_id = cursor:get("on-core", "settings", "on_id")
-  local on_aps = split(luci.sys.exec("/usr/bin/on-function get_port_forwards"))[1]
+  local on_aps = split(luci.sys.exec("on-function get_port_forwards"))[1]
   luci.http.write(luci.i18n.stringf("Opennet Firmware version %s", on_version))
   if on_id then
     luci.http.write(luci.i18n.stringf("-- AP %s", on_id))
@@ -37,15 +37,9 @@ function printFirmwareTitle()
 end
 
 function printOpenVPN()
-  if nixio.fs.access("/tmp/openvpn_msg.txt") then
-    remote = cursor:get("openvpn", "opennet_user", "remote")
-    luci.http.write(luci.i18n.string([[VPN-Tunnel active.]])..[[ (]])
-    if remote[1] then
-      luci.http.write(remote[1])
-    else
-      luci.http.write(remote)
-    end
-    luci.http.write(")")
+  local remote = luci.sys.exec("on-function get_active_mig_connections | while read service_name; do get_service_value \"$service_name\" host; done")
+  if remote ~= "" then
+    luci.http.write(luci.i18n.string([[VPN-Tunnel active.]])..[[ (]]..remote..")")
   else
     luci.http.write(luci.i18n.string([[VPN-Tunnel not active, for details check the System Log.]]))
   end
@@ -60,21 +54,18 @@ function printUserGW()
 
   local ugw_status = {}
   -- central gateway-IPs reachable over tap-devices
-  ugw_status.centralips = luci.sys.exec("for gw in $(uci -q get on-usergw.@usergw[0].centralIP); do ip route get $gw | awk '/dev tap/ {print $1}'; done")
-  local words
-  ugw_status.centralips_no = 0
-  for words in string.gfind(ugw_status.centralips, "[^%s]+") do
-    ugw_status.centralips_no=ugw_status.centralips_no+1
-  end
-  ugw_status.centralip_status = "error"
-  if ugw_status.centralips_no >= 1 then
+  ugw_status.connections = luci.sys.exec("on-function get_active_ugw_connections")
+  ugw_status.centralips = luci.sys.exec("echo '"..ugw_status.connections.."' | while read service_name; do get_service_value \"$service_name\" host; done")
+  if ugw_status.centralips ~= "" then
     ugw_status.centralip_status = "ok"
+  else
+    ugw_status.centralip_status = "error"
   end
   -- tunnel active
-  local iterator, number = nixio.fs.glob("/tmp/opennet_ugw*.txt")
-  ugw_status.tunnel_active = (number >= 1)
+  ugw_status.tunnel_active = (ugw_status.centralips ~= "")
   -- sharing possible
   ugw_status.usergateways_no = 0
+  -- TODO: Struktur ab hier weiter umsetzen
   cursor:foreach ("on-usergw", "usergateway", function() ugw_status.usergateways_no = ugw_status.usergateways_no + 1 end)
   ugw_status.sharing_wan_ok = false
   ugw_status.sharing_possible = false

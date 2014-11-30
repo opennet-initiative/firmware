@@ -1,22 +1,60 @@
-function get_service_value(ip, key)
-  local result = luci.sys.exec("on-function get_service_value '"..ip.."' '"..key.."'")
-  if result == "" then
-    return nil
-  else
-    return result
-  end
+-- Vorsicht: "parameters" wird nicht geprueft/maskiert - vorher gruendlich pruefen!
+function on_function(func_name, parameters)
+	if not parameters then
+		return trim_string(luci.sys.exec("on-function '"..func_name.."'"))
+	else
+		return trim_string(luci.sys.exec("on-function '"..func_name.."' "..parameters))
+	end
 end
 
 
-function set_service_value(ip, key, value)
+-- Vorsicht: "parameters" wird nicht geprueft/maskiert - vorher gruendlich pruefen!
+function on_bool_function(func_name, parameters)
+	return os.execute("on-function '"..func_name.."' "..parameters) == 0
+end
+
+
+function uci_is_true(value)
+	return on_bool_function("uci_is_true", "'"..value.."'")
+end
+
+
+function uci_is_false(value)
+	return on_bool_function("uci_is_false", "'"..value.."'")
+end
+
+
+function get_service_detail(service_name, key, default)
+	local result
+	if not default then default = nil end
+	result = on_function("get_service_detail", "'"..service_name.."' '"..key.."'")
+	if result == "" then return default else return result end
+end
+
+
+function get_service_age(service_name)
+	local result = on_function("get_service_age", service_name)
+	if result == "" then return nil else return result end
+end
+
+
+function get_service_value(service_name, key, default)
+  if not default then default = "" end
+  local result = on_function("get_service_value", "'"..service_name.."' '"..key.."' '"..default.."'")
+  if result == "" then return nil else return result end
+end
+
+
+function set_service_value(service_name, key, value)
   if not value then
     value = ""
   end
-  luci.sys.exec("on-function set_service_value '"..ip.."' '"..key.."' '"..value.."'")
+  on_function("set_service_value", "'"..service_name.."' '"..key.."' '"..value.."'")
 end
 
-function delete_service_value(ip, key)
-  set_service_value(ip, key, "")
+
+function delete_service_value(service_name, key)
+  set_service_value(service_name, key, "")
 end
 
 
@@ -31,11 +69,20 @@ function get_default_value(domain, key)
 	else
 		return nil
 	end
-	local result = luci.sys.exec("on-function '"..func_name.."' '"..key.."'")
+	local result = on_function(func_name, "'"..key.."'")
 	if result == "" then
 		return nil
 	else
 		return result
+	end
+end
+
+
+function trim_string(s)
+	if not s then
+		return s
+	else
+		return (s:gsub("^%s*(%S+)%s*$", "%1"))
 	end
 end
 

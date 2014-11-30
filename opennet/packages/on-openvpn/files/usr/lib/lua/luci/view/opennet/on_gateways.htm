@@ -2,6 +2,7 @@
 Opennet Firmware
 
 Copyright 2010 Rene Ejury <opennet@absorb.it>
+Copyright 2014 Lars Kruse <devel@sumpfralle.de>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -11,13 +12,8 @@ You may obtain a copy of the License at
 
 -%>
 
-<% 	local uci = require "luci.model.uci"
+<%
 	require("luci.model.opennet.funcs")
-	local cursor = uci.cursor()
-	local SYSROOT = os.getenv("LUCI_SYSROOT")
-	if not SYSROOT then SYSROOT = "" end		-- SYSROOT is only used for local testing (make runhttpd in luci tree)
-	local on_keycrt_exists = nixio.fs.access(SYSROOT.."/etc/openvpn/opennet_user/on_aps.key") and
-		nixio.fs.access(SYSROOT.."/etc/openvpn/opennet_user/on_aps.crt")
 %>
 
 <%+header%>
@@ -42,186 +38,129 @@ You may obtain a copy of the License at
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
 			<fieldset class="cbi-section-node">
+				<% local sorting = on_function("get_service_sorting") %>
 				<form name="gateways" method="post" action="<%=REQUEST_URI%>">
-				<h3><%:automated gateway-search%>
-				<% local autosearch = (cursor:get("on-openvpn", "gateways", "autosearch") == "on")
-				if autosearch then %>
-					<%:activated%>
-				<% else %>
-					<%:deactivated%>
-				<% end %>
-				<input type="submit" class="cbi-button cbi-button-toggle" name="toggle_gateway_search" value="<%:toggle%>"/></h3>
-				<% if autosearch then 
-					local sort_by_etx = (cursor:get("on-openvpn", "gateways", "vpn_sort_criteria") == "etx")
-				%> <p>Sortierung nach <%
-					if sort_by_etx then %>
-						<% print(luci.i18n.string([[<abbr title='Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR'>ETX</abbr> (rounded)]])) %>
-					<% else %>
-						<%:Distance%>
-					<% end %>
-				<input type="submit" class="cbi-button cbi-button-toggle" name="toggle_sort_criteria" value="<%:toggle%>"/></p>
-				<% end %>
-				<br />
 				<table class="cbi-section-table">
 				<tr class="cbi-section-table-titles">
 						<th colspan = "1" />
 						<th class="cbi-section-table-cell"><%:active%></th>
 						<th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='click to choose immediately as your gateway'>IP-Address</abbr>]])) %></th>
-						<th class="cbi-section-table-cell"><%:Name%></th>
 						<th class="cbi-section-table-cell"><%
-						if offset_exists then
-                          print(luci.i18n.string([[(<abbr title='This offset is added to the values before use/display'>Offset</abbr>)]]))
-                        end
-						print(luci.i18n.string([[<abbr title='Number of Hops to the Gateway'>Distance</abbr> / <abbr title='Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR'>ETX</abbr>]])) %></th>
+						if sorting ~= "manual" then
+							print(luci.i18n.string([[(<abbr title='This offset is added to the values before use/display'>Offset</abbr>)]]))
+							if sorting == "hop_count" then
+								print(luci.i18n.string([[<abbr title='Number of Hops to the Gateway'>Distance</abbr>]]))
+							else
+								print(luci.i18n.string([[<abbr title='Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR'>ETX</abbr>]]))
+							end
+						end %>
+						</th>
                         
-<!--                         <th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='Indicates the Ping-Time in miliseconds. If Gateway cannot be pinged or the ping-time is high, it is probably (temporarily) down.'>Ping-Time</abbr>]])) %></th> -->
-                        <th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='Announced Upload / Download Speed.'>Speed</abbr>]])) %></th>
+						<th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='Announced Upload / Download Speed.'>Speed</abbr>]])) %></th>
 
-						<% if on_keycrt_exists then %>
-							<th class="cbi-section-table-cell"><%:VPN-Status%></th>
-							<th class="cbi-section-table-cell"><%:Test-Age%></th>
-						<% end %>
+						<th class="cbi-section-table-cell"><%:VPN-Status%></th>
+						<th class="cbi-section-table-cell"><%:Test-Age%></th>
+						<th class="cbi-section-table-cell"><%:Actions%></th>
 						<th />
 				</tr>
-<%				local name
-				local count = 1
-				local number_of_gateways = 0
-				os.execute("echo '/route' | nc localhost 2006 > /tmp/olsrd_txtinfo.txt")
-				os.execute("on_vpngateway_check check_blacklisting >/dev/null")
-				cursor:unload("on-openvpn")
-				cursor:foreach ("on-openvpn", "gateway", function() number_of_gateways = number_of_gateways + 1 end)
-				while count <= number_of_gateways do
-					local v = cursor:get_all("on-openvpn", "gate_"..count)
-					if v and v[".type"] == "gateway" then
-						if v.name then name = v.name else name = "..." end
-						local active
-						local cur_gw = cursor:get("openvpn", "opennet_user", "remote")
-						if cur_gw and (v.ipaddr == cur_gw or v.ipaddr == cur_gw[1]) then
-							if (nixio.fs.access("/tmp/openvpn_msg.txt")) then active="y" else active="n" end
+				<%
+				local service_name
+				local name
+				local remote
+				local port
+				local active
+				local is_disabled
+				local distance
+				local offset=0
+				local best_working
+				local current_gw
+				local index = 1
+				local usable
+				function bool_to_yn(bool) if bool then return "y" else return "n" end end
+				for service_name in string.gmatch(on_function("get_sorted_services", "'gw' 'ugw'"), "%S+") do
+					remote = get_service_value(service_name, "host")
+					port = get_service_value(service_name, "port")
+					if port ~= "1600" then
+						remote = remote..":"..port
+					end
+					usable = uci_is_true(get_service_value(service_name, "status"))
+					if usable and not best_working then
+						best_working = service_name
+					end
+					if on_bool_function("is_openvpn_service_active", service_name) then
+						current_gw = service_name
+						if nixio.fs.access("/tmp/openvpn_msg.txt") then active="y" else active="n" end
+					else
+						active = nil
+					end
+					is_disabled = uci_is_true(get_service_value(service_name, "disabled", "false"))
+					if (sorting == "etx") or (sorting == "hop") then
+						offset = tonumber(get_service_value(service_name, "offset", "0"))
+						if sorting == "etx" then
+							distance = get_service_value(service_name, "distance")
+							-- if distance then distance = string.format("%.3f", tonumber(distance)) end
+						else
+							distance = get_service_value(service_name, "hop_count")
+							-- if distance then distance = string.format("%d", tonumber(distance)) end
 						end
-						%>
-					<tr id="cbi-network-lan" class="cbi-section-table-row" blacklisted="<%=v.blacklisted%>">
-						<td class="cbi-value-field"><div id="cbi-network-lan-count"><%=count%></div></td>
+					else
+						distance = ""
+					end %>
+
+					<tr id="cbi-network-lan" class="cbi-section-table-row" disabled="<%=bool_to_yn(is_disabled)%>">
+						<td class="cbi-value-field"><div id="cbi-network-lan-count"><%=index%></div></td>
 						<td class="cbi-value-field"><div id="cbi-network-lan-active" active="<%=active%>">&nbsp;</div>
-						<th><h3><input class="cbi-button" type="submit" value="<%=v.ipaddr%>"
-							<% if active == "y" then %>title="<%:Current Gateway%>" name="ignore"
-							<% else %>title="<%:Select Gateway%>" name="select_gw"<%end%>
-							/></h3></th>
-						<td class="cbi-value-field"><div id="cbi-network-lan-name"><%=name%></div></td>
+						<!-- Name -->
+						<th><%=remote%></th>
+						<!-- Entfernung -->
 						<td class="cbi-value-field"><div id="cbi-network-lan-hopcount">
-						<%
-						local hop=luci.sys.exec("awk 'BEGIN {FS=\"[/\\x09]+\"} \$1==\""..v.ipaddr.."\" {printf \$4; exit}' /tmp/olsrd_txtinfo.txt")
-						local etx=luci.sys.exec("awk 'BEGIN {FS=\"[/\\x09]+\"} \$1==\""..v.ipaddr.."\" {printf \$5; exit}' /tmp/olsrd_txtinfo.txt")
-						local etx_offset=get_gateway_flag(v.ipaddr, "etx_offset")
-						if hop ~= "" and etx ~= "" then
-							if etx_offset and autosearch then
-								hop = tonumber(hop)
-								etx = tonumber(etx)
-								etx_offset = tonumber(etx_offset)
-								io.write(string.format("(%+d) %d / %.3f", etx_offset, hop+etx_offset, etx+etx_offset))
-							else
-								io.write(string.format("%d / %.3f", hop, etx))
-							end
-						end
-						%>
-                        <% if autosearch then %>
-						    <input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="<%=count%>" title="<%:increase offset%>" name="up_etx" />
-						    <input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="<%=count%>" title="<%:decrease offset%>" name="down_etx" />
-                        <% end %>
-                        </div>
-                        </td>
-                        
-                        
-                        <td>
-                          <%
-                            local upload=get_gateway_flag(v.ipaddr, "upload") or "?"
-                            local download=get_gateway_flag(v.ipaddr, "download") or "?"
-                            if upload or download then
-                              local speed = upload.." kbps / "..download.." kbps"
-                              local abbr = luci.i18n.stringf([[upload to Internet %s kbit/s; download from Internet %s kbit/s]], upload, download)
-                              io.write([[<div class="vpn-wan-speed" name="speed" id="cbi-network-lan-speed" ><abbr title="]]..abbr..[[">]]..speed..[[</abbr></div>]])
-                            end %>
-                        </td>
-                        
-                        
-						<% if on_keycrt_exists then %>
-							<td class="cbi-value-field"><div id="cbi-network-lan-status" status="<%=get_gateway_flag(v.ipaddr, "status") %>">&nbsp;</div></td>
-							<td class="cbi-value-field"><div id="cbi-network-lan-age"><%=get_gateway_flag(v.ipaddr, "age") %></div></td>
+							<% if distance and offset ~= 0 then %>
+								(<%=offset%>)<input
+									class="cbi-button cbi-button-reset cbi-button-small"
+									type="submit" value="<%=service_name%>"
+									title="<%:reset offset%>" name="reset_offset" />
+							<% end %>
+							<%=distance%>
+							</div>
+						</td>
+						<!-- Upload / Download -->
+						<td><%
+							local upload = get_service_detail(service_name, "upload")
+							local download = get_service_detail(service_name, "download")
+							if upload or download then
+								local speed = (upload or "?").." kbps / "..(download or "?").." kbps"
+								local abbr = luci.i18n.stringf([[upload to Internet %s kbit/s; download from Internet %s kbit/s]], upload, download)
+								io.write([[<div class="vpn-wan-speed" name="speed" id="cbi-network-lan-speed" ><abbr title="]]..abbr..[[">]]..speed..[[</abbr></div>]])
+							end %>
+						</td>
+
+						<td class="cbi-value-field"><div id="cbi-network-lan-status" status="<%=get_service_value(service_name, "status") %>">&nbsp;</div></td>
+						<td class="cbi-value-field"><div id="cbi-network-lan-age"><%=get_service_age(service_name) %></div></td>
+						<td class="cbi-value-field"><div id="cbi-network-on-actions">
+						<% if is_disabled then %>
+							<input class="cbi-button cbi-button-enable cbi-button-small" type="submit" value="<%=service_name%>" title="<%:enable%>" name="enable_service" />
+						<% else %>
+							<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="<%=service_name%>" title="<%:move to top and connect immediately%>" name="move_top" />
+							<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="<%=service_name%>" title="<%:move up%>" name="move_up" />
+							<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="<%=service_name%>" title="<%:move down%>" name="move_down" />
+							<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%=service_name%>" title="<%:delete%>" name="delete_service" />
+							<input class="cbi-button cbi-button-disable cbi-button-small" type="submit" value="<%=service_name%>" title="<%:disable%>" name="disable_service" />
 						<% end %>
-						<% if not autosearch then %>
-						<td class="cbi-section-table-cell">
-								<% if count ~= 1 then %>
-								<input class="cbi-button cbi-button-up" type="submit" value="<%=count-1%>" title="up" name="down_section" />
-								<% end %>
-						</td>
-						<td class="cbi-section-table-cell">
-								<% if count ~= number_of_gateways then %>
-								<input class="cbi-button cbi-button-down" type="submit" value="<%=count%>" title="down" name="down_section" />
-								<% end %>
-						</td>
-						<td class="cbi-section-table-cell">
-								<input class="cbi-button cbi-button-del" type="submit" value="<%=count%>" title="Del" name="del_section" />
-						</td>
-						<% end %>
+						</div>
 					</tr>
-<%					end
-					count = count + 1
-				end
-				nixio.fs.remove("/tmp/olsrd_txtinfo.txt") %>
-				<% if on_keycrt_exists then %>
+					<% index = index + 1
+				end %>
+				<!-- Fusszeile -->
 				<tr id="cbi-network-lan" class="cbi-section-table-row">
 					<td colspan="6" />
-					<td class="cbi-value-field"><input class="cbi-button" type="submit" name="reset_counter" value="<%:reset test counter%>" /></td>
+					<td class="cbi-value-field"><input class="cbi-button" type="submit" name="reset_connection_test_timestamps" value="<%:reset test counter%>" /></td>
 					<td />
 				</tr>
-				<% end %>
-				<% if not autosearch then %>
-				<tr id="cbi-network-lan" class="cbi-section-table-row">
-					<td colspan="2" />
-					<th><input type="value" name="new_gateway" /></th>
-					<td class="cbi-value-field"><div id="cbi-network-lan-ipaddr"><input type="value" name="new_gateway_name" /></div></td>
-					<td class="cbi-value-field cbi-value-field-add"><input class="cbi-button cbi-button-add" type="submit" value="<%:add%>"/></td>
-				</tr>
-				<% end %>
 				</table>
 				</form>
-				<% local better_gw=get_gateway_flag("common", "better_gw")
-				if  ( better_gw and better_gw ~= "0") then 
-					print(luci.i18n.stringf([[The first reachable and not blocked Gateway is not the current active one. The Tunnel will be restarted and the Gateway will be changed in about %s minutes. The changes will be shown after a reload of this page.]], 6-better_gw))
+				<% if current_gw ~= best_working then 
+					print(luci.i18n.stringf([[The first reachable and not blocked Gateway is not the current active one. The Tunnel will be restarted and the Gateway will be changed in a few minutes. The changes will be shown after a reload of this page.]]))
 				end %>
-			</fieldset>
-		</fieldset>
-	</div>
-<h3><%:Gateway-Blacklist%></h3>
-	<div class="cbi-map">
-		<fieldset class="cbi-section">
-			<fieldset class="cbi-section-node">
-				<form method="post" action="<%=REQUEST_URI%>">
-				<table class="cbi-section-table">
-				<tr class="cbi-section-table-titles">
-						<th class="cbi-section-table-cell"><%:IP Address%></th>
-						<th class="cbi-section-table-cell"><%:Name%></th>
-						<th />
-				</tr>
-<%				name = ""
-				for k, v in pairs(cursor:get_all("on-openvpn")) do
-					if v[".type"] == "blacklist_gateway" then	%>
-					<tr id="cbi-network-lan" class="cbi-section-table-row">
-						<th><h3><%=v.ipaddr%></h3></th>
-						<td class="cbi-value-field"><div id="cbi-network-lan-name"><%=v.name%></div></td>
-						<td class="cbi-section-table-cell">
-								<input class="cbi-button cbi-button-del" type="submit" value="<%=k%>" title="Del" name="del_blacklist_gw" />
-						</td>
-					</tr>
-<% 					end
-				end %>
-				<tr id="cbi-network-lan" class="cbi-section-table-row">
-					<th><input type="value" name="new_blacklist_gateway" /></th>
-					<td class="cbi-value-field"><div id="cbi-network-lan-ipaddr"><input type="value" name="new_blacklist_gateway_name" /></div></td>
-					<td class="cbi-value-field" colspan="2"><input class="cbi-button cbi-button-add" type="submit" value="<%:add%>"/></td>
-				</tr>
-				</table>
-				</form>
 			</fieldset>
 		</fieldset>
 	</div>

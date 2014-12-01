@@ -36,8 +36,9 @@ test_mig_connection() {
 	local nonworking_timeout=$(($recheck_age + $(get_on_openvpn_default vpn_nonworking_timeout)))
 	if [ -n "$timestamp" ] && is_timestamp_older_minutes "$timestamp" "$nonworking_timeout"; then
 		# if there was no vpn-availability for a while (nonworking_timeout minutes), declare vpn-status as not working
-		set_service_value "$service_name" "timestamp_connection_test" "$now"
 		set_service_value "$service_name" "status" "n"
+		# In den naechsten 'vpn_recheck_age' Minuten wollen wir keine Pruefungen durchfuehren.
+		set_service_value "$service_name" "timestamp_connection_test" "$now"
 		trap "" $GUARD_TRAPS && return 1
 	elif [ -z "$timestamp" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age"; then
 		if verify_vpn_connection "$service_name" "true" \
@@ -45,8 +46,8 @@ test_mig_connection() {
 				"$MIG_TEST_VPN_DIR/on_aps.crt" \
 				"$MIG_TEST_VPN_DIR/opennet-ca.crt"; then
 			set_service_value "$service_name" "timestamp_connection_test" "$now"
-			set_service_value "$service_name" "status" "y"
 			msg_debug "vpn-availability of gw $host successfully tested"
+			set_service_value "$service_name" "status" "y"
 			return 0
 		else
 			# "age" will grow until it exceeds "recheck_age + nonworking_timeout" -> no need to do anything now
@@ -88,6 +89,7 @@ find_and_select_best_gateway() {
 	local switch_candidate_timestamp
 	local now=$(get_time_minute)
 	local bettergateway_timeout=$(get_on_openvpn_default vpn_bettergateway_timeout)
+	msg_debug "Trying to find a better gateway"
 	# suche nach dem besten und dem bisher verwendeten Gateway
 	# Ignoriere dabei alle nicht-verwendbaren Gateways.
 	result=$(get_sorted_services gw ugw | filter_enabled_services | while read service_name; do
@@ -105,6 +107,7 @@ find_and_select_best_gateway() {
 	done)
 	best_gateway=$(echo "$result" | sed -n 1p)
 	current_gateway=$(echo "$result" | sed -n 2p)
+	msg_debug "Current ($current_gateway) / best ($best_gateway)"
 	# eventuell wollen wir den aktuellen Host beibehalten (sofern er funktioniert)
 	if [ -n "$current_gateway" ] && uci_is_true "$(get_service_value "$current_gateway" "status" "false")"; then
 		# falls der beste und der aktive Gateway gleich weit entfernt sind, bleiben wir beim bisher aktiven
@@ -115,17 +118,22 @@ find_and_select_best_gateway() {
 		fi
 		# Haben wir einen besseren Kandidaten? Muessen wir den Wechselzaehler aktivieren?
 		if [ "$best_gateway" != "$current_gateway" ]; then
-			# Zaehle hoch bis 
-			switch_candidate_timestamp=$(get_service_value "$best_gateway" "switch_candidate_timestamp" "$now")
-			# noch nicht alt genug fuer den Wechsel?
-			is_timestamp_older_minutes "$switch_candidate_timestamp" "$bettergateway_timeout" || \
-				best_gateway="$current_gateway"
+			# Zaehle hoch bis der switch_candidate_timestamp alt genug ist
+			switch_candidate_timestamp=$(get_service_value "$current_gateway" "switch_candidate_timestamp")
+			if [ -z "$switch_candidate_timestamp" ]; then
+				set_service_value "$current_gateway" "switch_candidate_timestamp" "$now"
+			else
+				# noch nicht alt genug fuer den Wechsel?
+				is_timestamp_older_minutes "$switch_candidate_timestamp" "$bettergateway_timeout" || \
+					best_gateway="$current_gateway"
+			fi
 		fi
 	else
 		# Keine Verbindung ist aktiv. Alles bleibt unveranedert.
 		true
 	fi
 	# eventuell kann hier auch ein leerer String uebergeben werden - dann wird kein Gateway aktiviert (korrekt)
+	[ -n "$best_gateway" ] && msg_debug "Switching gateway from $current_gateway to $best_gateway"
 	select_mig_connection "$best_gateway"
 }
 

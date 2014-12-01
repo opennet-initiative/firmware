@@ -41,7 +41,7 @@ tr[disabled="y"] {
 	background-color: #bbb;
 }
 
-tr[disabled="y"] #cbi-network-lan-status, tr[disabled="y"] #cbi-network-lan-age {
+tr[disabled="y"] #cbi-opennet-gateways-status, tr[disabled="y"] #cbi-opennet-gateways-age {
 	display: none;
 }
 
@@ -169,13 +169,14 @@ input.cbi-input-del, input.cbi-button-del {
 	background:transparent url(../../luci-static/opennet/user-trash.png) no-repeat scroll 1px center;
 }
 
-#cbi-network-lan-active[active="n"], #cbi-network-lan-status[status="n"],
+#cbi-opennet-gateways-active[active="n"], #cbi-opennet-gateways-status[status="n"],
 .ugw-wan-route, .ugw-wan-ping, .ugw-mtu, .ugw-centralip,
 .ugw-tunnel_active[status="inactive"], .cert_available {
 	background:transparent url(../../luci-static/opennet/error.png) no-repeat scroll center;
+	min-height: 24px;
 }
 
-#cbi-network-lan-active[active="y"], #cbi-network-lan-status[status="y"], .ugw-wan-route[status="ok"], .ugw-wan-ping[status="ok"], .ugw-mtu[status="ok"], .ugw-centralip[status="ok"], .ugw-tunnel_active[status="ok"], .cert_available[status="ok"] {
+#cbi-opennet-gateways-active[active="y"], #cbi-opennet-gateways-status[status="y"], .ugw-wan-route[status="ok"], .ugw-wan-ping[status="ok"], .ugw-mtu[status="ok"], .ugw-centralip[status="ok"], .ugw-tunnel_active[status="ok"], .cert_available[status="ok"] {
 	background:transparent url(../../luci-static/opennet/emblem-default.png) no-repeat scroll center;
 	min-height: 24px;
 }
@@ -214,6 +215,7 @@ input.cbi-button-small {
 	padding-top: 2px;
 	height: 12px;
 	width:	12px;
+	min-height: 12px;
 }
 
 input.cbi-button-toggle {

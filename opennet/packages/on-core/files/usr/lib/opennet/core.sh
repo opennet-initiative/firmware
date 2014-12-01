@@ -4,7 +4,7 @@ get_client_cn() {
 }
 
 msg_debug() {
-	[ -z "$DEBUG" ] && DEBUG=$(get_on_core_default debug)
+	[ -z "$DEBUG" ] && DEBUG=$(uci_get on-core.settings debug)
 	uci_is_true "$DEBUG" && logger -t "$(basename "$0")[$$]" "$1" || true
 }
 
@@ -445,5 +445,4 @@ is_timestamp_older_minutes() {
 		return 0
 	trap "" $GUARD_TRAPS && return 1
 }
-
 

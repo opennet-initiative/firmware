@@ -1,6 +1,5 @@
 csr_contact	csr@opennet-initiative.de
 csr_url		http://ca.opennet-initiative.de/csr/
-debug		false
 
 lan_ipaddr	172.16.0.1
 lan_netmask	255.255.255.0

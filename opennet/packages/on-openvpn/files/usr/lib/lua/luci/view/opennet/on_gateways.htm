@@ -44,7 +44,7 @@ You may obtain a copy of the License at
 				<tr class="cbi-section-table-titles">
 						<th colspan = "1" />
 						<th class="cbi-section-table-cell"><%:active%></th>
-						<th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='click to choose immediately as your gateway'>IP-Address</abbr>]])) %></th>
+						<th class="cbi-section-table-cell"><%:IP-Address%></th>
 						<th class="cbi-section-table-cell"><%
 						if sorting ~= "manual" then
 							print(luci.i18n.string([[(<abbr title='This offset is added to the values before use/display'>Offset</abbr>)]]))
@@ -64,94 +64,84 @@ You may obtain a copy of the License at
 						<th />
 				</tr>
 				<%
-				local service_name
-				local name
 				local remote
-				local port
 				local active
-				local is_disabled
-				local distance
-				local offset=0
 				local best_working
 				local current_gw
-				local index = 1
-				local usable
+				local index
+
 				function bool_to_yn(bool) if bool then return "y" else return "n" end end
-				for service_name in string.gmatch(on_function("get_sorted_services", "'gw' 'ugw'"), "%S+") do
-					remote = get_service_value(service_name, "host")
-					port = get_service_value(service_name, "port")
-					if port ~= "1600" then
-						remote = remote..":"..port
+
+				for index, gateway in ipairs(gateway_list) do
+					local key
+					local value
+					for key, value in ipairs(gateway) do
+						%><%=key%>=<%=value%><br/><%
 					end
-					usable = uci_is_true(get_service_value(service_name, "status"))
-					if usable and not best_working then
-						best_working = service_name
+					-- "remote" menschenfreundlich setzen
+					if gateway.port ~= 1600 then
+						remote = gateway.host .. ":" .. (gateway.port or "?")
+					else
+						remote = gateway.host
 					end
-					if on_bool_function("is_openvpn_service_active", service_name) then
-						current_gw = service_name
+					-- "active" als laeuft/kaputt/inaktive setzen
+					if (gateway.status == "y") and not best_working then
+						best_working = gateway.id
+					end
+					if gateway.active then
+						current_gw = gateway.id
 						if nixio.fs.access("/tmp/openvpn_msg.txt") then active="y" else active="n" end
 					else
 						active = nil
 					end
-					is_disabled = uci_is_true(get_service_value(service_name, "disabled", "false"))
-					if (sorting == "etx") or (sorting == "hop") then
-						offset = tonumber(get_service_value(service_name, "offset", "0"))
-						if sorting == "etx" then
-							distance = get_service_value(service_name, "distance")
-							-- if distance then distance = string.format("%.3f", tonumber(distance)) end
-						else
-							distance = get_service_value(service_name, "hop_count")
-							-- if distance then distance = string.format("%d", tonumber(distance)) end
-						end
-					else
-						distance = ""
-					end %>
-
-					<tr id="cbi-network-lan" class="cbi-section-table-row" disabled="<%=bool_to_yn(is_disabled)%>">
-						<td class="cbi-value-field"><div id="cbi-network-lan-count"><%=index%></div></td>
-						<td class="cbi-value-field"><div id="cbi-network-lan-active" active="<%=active%>">&nbsp;</div>
+					%>
+					<tr id="cbi-opennet-gateways" class="cbi-section-table-row" disabled="<%=bool_to_yn(gateway.disabled)%>">
+						<td class="cbi-value-field"><div id="cbi-opennet-gateways-count"><%=index%></div></td>
+						<td class="cbi-value-field"><div id="cbi-opennet-gateways-active" active="<%=active%>">&nbsp;</div>
 						<!-- Name -->
 						<th><%=remote%></th>
 						<!-- Entfernung -->
-						<td class="cbi-value-field"><div id="cbi-network-lan-hopcount">
-							<% if distance and offset ~= 0 then %>
-								(<%=offset%>)<input
+						<td class="cbi-value-field"><div id="cbi-opennet-gateways-hopcount">
+							<% if gateway.distance and (gateway.offset ~= 0) then %>
+								(<%=gateway.offset%>)<input
 									class="cbi-button cbi-button-reset cbi-button-small"
-									type="submit" value="<%=service_name%>"
+									type="submit" value="<%=gateway.id%>"
 									title="<%:reset offset%>" name="reset_offset" />
+							<% end
+							if sorting == "etx" then %>
+								<%=gateway.distance%>
+							<% elseif sorting == "hop" then %>
+								<%=gateway.hop_count%>
 							<% end %>
-							<%=distance%>
 							</div>
 						</td>
-						<!-- Upload / Download -->
 						<td><%
-							local upload = get_service_detail(service_name, "upload")
-							local download = get_service_detail(service_name, "download")
-							if upload or download then
-								local speed = (upload or "?").." kbps / "..(download or "?").." kbps"
+							if gateway.upload or gateway.download then
+								local upload = gateway.upload or "?"
+								local download = gateway.download or "?"
+								local speed = upload .. " kbps / " .. download .. " kbps"
 								local abbr = luci.i18n.stringf([[upload to Internet %s kbit/s; download from Internet %s kbit/s]], upload, download)
-								io.write([[<div class="vpn-wan-speed" name="speed" id="cbi-network-lan-speed" ><abbr title="]]..abbr..[[">]]..speed..[[</abbr></div>]])
-							end %>
+								%>
+								<div class="vpn-wan-speed" name="speed" id="cbi-opennet-gateways-speed" ><abbr title="<%=abbr%>"><%=speed%></abbr></div>
+							<% end %>
 						</td>
-
-						<td class="cbi-value-field"><div id="cbi-network-lan-status" status="<%=get_service_value(service_name, "status") %>">&nbsp;</div></td>
-						<td class="cbi-value-field"><div id="cbi-network-lan-age"><%=get_service_age(service_name) %></div></td>
-						<td class="cbi-value-field"><div id="cbi-network-on-actions">
-						<% if is_disabled then %>
-							<input class="cbi-button cbi-button-enable cbi-button-small" type="submit" value="<%=service_name%>" title="<%:enable%>" name="enable_service" />
+						<td class="cbi-value-field"><div id="cbi-opennet-gateways-status" status="<%=gateway.status%>">&nbsp;</div></td>
+						<td class="cbi-value-field"><div id="cbi-opennet-gateways-age"><%=gateway.age%></div></td>
+						<td class="cbi-value-field"><div id="cbi-opennet-gateways-actions">
+						<% if gateway.disabled then %>
+							<input class="cbi-button cbi-button-enable cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:enable%>" name="enable_service" />
 						<% else %>
-							<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="<%=service_name%>" title="<%:move to top and connect immediately%>" name="move_top" />
-							<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="<%=service_name%>" title="<%:move up%>" name="move_up" />
-							<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="<%=service_name%>" title="<%:move down%>" name="move_down" />
-							<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%=service_name%>" title="<%:delete%>" name="delete_service" />
-							<input class="cbi-button cbi-button-disable cbi-button-small" type="submit" value="<%=service_name%>" title="<%:disable%>" name="disable_service" />
+							<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:move to top and connect immediately%>" name="move_top" />
+							<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:move up%>" name="move_up" />
+							<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:move down%>" name="move_down" />
+							<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:delete%>" name="delete_service" />
+							<input class="cbi-button cbi-button-disable cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:disable%>" name="disable_service" />
 						<% end %>
 						</div>
 					</tr>
-					<% index = index + 1
-				end %>
+				<% end %>
 				<!-- Fusszeile -->
-				<tr id="cbi-network-lan" class="cbi-section-table-row">
+				<tr id="cbi-opennet-gateways" class="cbi-section-table-row">
 					<td colspan="6" />
 					<td class="cbi-value-field"><input class="cbi-button" type="submit" name="reset_connection_test_timestamps" value="<%:reset test counter%>" /></td>
 					<td />

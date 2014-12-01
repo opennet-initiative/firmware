@@ -89,11 +89,11 @@ case "${1:-}" in
 			test_mig_connection "$service_name" || true
 		done
 		# die Gateway-Auswahl ist nur relevant, falls ein Schluessel vorhanden ist
-		if ! [ -e "$MIG_VPN_DIR/on_aps.crt" ] || ! [ -e "$MIG_VPN_DIR/on_aps.key" ]; then
+		if [ -e "$MIG_VPN_DIR/on_aps.crt" -a -e "$MIG_VPN_DIR/on_aps.key" ]; then
+			find_and_select_best_gateway
+		else
 			msg_debug "no VPN certificate or key found: $MIG_VPN_DIR/on_aps.(crt|key) -> exiting"
-			exit 0
 		fi
-		find_and_select_best_gateway
 		;;
 esac
 

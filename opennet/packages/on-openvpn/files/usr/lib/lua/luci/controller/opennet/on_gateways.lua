@@ -25,6 +25,7 @@ function index()
 	page.css   = "opennet.css"
 end
 
+
 function action_vpn_gateways()
 
 	local move_up = luci.http.formvalue("move_up")
@@ -37,14 +38,14 @@ function action_vpn_gateways()
 	local reset_counter = luci.http.formvalue("reset_counter")
 	
 	if move_up then
-		on_function("move_service_up", "'"..move_up.."' ug ugw")
+		on_function("move_service_up", {move_up, "ug", "ugw"})
 	elseif move_down then
-		on_function("move_service_down", "'"..move_down.."' ug ugw")
+		on_function("move_service_down", {move_down, "ug", "ugw"})
 	elseif move_top then
-		on_function("move_service_top", "'"..move_top.."' ug ugw")
-		on_function("select_mig_connection", "'"..move_top.."'")
+		on_function("move_service_top", {move_top, "ug", "ugw"})
+		on_function("select_mig_connection", {move_top})
 	elseif delete_service then
-		on_function("delete_service", "'"..delete_service.."'")
+		on_function("delete_service", {delete_service})
 	elseif disable_service then
 		set_service_value(disable_service, "disabled", "1")
 	elseif enable_service then
@@ -52,14 +53,21 @@ function action_vpn_gateways()
 	elseif reset_offset then
 		delete_service_value(reset_offset, "offset")
 	elseif reset_counter then
-		on_function("reset_alL_mig_connection_test_timestamps")
+		on_function("reset_all_mig_connection_test_timestamps")
 	end
 
 
 	-- optional koennten wir pruefen, ob ueberhaupt eine der Verbindungen einen Offset verwendet
 	local offset_exists = true
 	local show_more_info = luci.http.formvalue("show_more_info")
+	-- wir lesen "status" als string ein, um die drei moeglichen Werte (y/n/leer) zu unterscheiden
+	local gateway_list = parse_csv_service_list({"ugw", "gw"}, {host="string|value|host", port="number|value|port",
+			status="string|value|status", active="bool|function|is_openvpn_service_active",
+			disabled="bool|value|disabled|false", distance="number|value|distance",
+			hop_count="number|value|hop_count|0", offset="number|value|offset|0",
+			download="number|detail|download", upload="number|detail|upload",
+			age="number|function|get_mig_connection_test_age"})
 
-	luci.template.render("opennet/on_gateways", { show_more_info = show_more_info, offset_exists = offset_exists })
+	luci.template.render("opennet/on_gateways", { gateway_list = gateway_list, show_more_info = show_more_info, offset_exists = offset_exists })
 end
 

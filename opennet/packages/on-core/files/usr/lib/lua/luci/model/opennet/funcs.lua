@@ -1,10 +1,13 @@
 -- Vorsicht: "parameters" wird nicht geprueft/maskiert - vorher gruendlich pruefen!
 function on_function(func_name, parameters)
-	if not parameters then
-		return trim_string(luci.sys.exec("on-function '"..func_name.."'"))
-	else
-		return trim_string(luci.sys.exec("on-function '"..func_name.."' "..parameters))
+	local cmdline = "on-function '" .. func_name .. "'"
+	local value
+	if parameters then
+		for _, value in pairs(parameters) do
+			cmdline = cmdline .. " '" .. value .. "'"
+		end
 	end
+	return trim_string(luci.sys.exec(cmdline))
 end
 
 
@@ -27,20 +30,20 @@ end
 function get_service_detail(service_name, key, default)
 	local result
 	if not default then default = nil end
-	result = on_function("get_service_detail", "'"..service_name.."' '"..key.."'")
+	result = on_function("get_service_detail", {service_name, key})
 	if result == "" then return default else return result end
 end
 
 
 function get_service_age(service_name)
-	local result = on_function("get_service_age", service_name)
+	local result = on_function("get_service_age", {service_name})
 	if result == "" then return nil else return result end
 end
 
 
 function get_service_value(service_name, key, default)
   if not default then default = "" end
-  local result = on_function("get_service_value", "'"..service_name.."' '"..key.."' '"..default.."'")
+  local result = on_function("get_service_value", {service_name, key, default})
   if result == "" then return nil else return result end
 end
 
@@ -49,7 +52,7 @@ function set_service_value(service_name, key, value)
   if not value then
     value = ""
   end
-  on_function("set_service_value", "'"..service_name.."' '"..key.."' '"..value.."'")
+  on_function("set_service_value", {service_name, key, value})
 end
 
 
@@ -69,7 +72,7 @@ function get_default_value(domain, key)
 	else
 		return nil
 	end
-	local result = on_function(func_name, "'"..key.."'")
+	local result = on_function(func_name, {key})
 	if result == "" then
 		return nil
 	else

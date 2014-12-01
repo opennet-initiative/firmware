@@ -33,7 +33,7 @@ update_file_if_changed() {
 # Store this list as a dnsmasq 'server-file'.
 # The file is only updated in case of changes.
 update_dns_servers() {
-	trap "error_trap update_dns_servers $*" $GUARD_TRAPS
+	trap "error_trap update_dns_servers '$*'" $GUARD_TRAPS
 	local host
 	local port
 	local service
@@ -65,7 +65,7 @@ update_dns_servers() {
 # The uci settings are only updated in case of changes.
 # ntpclient is restarted in case of changes.
 update_ntp_servers() {
-	trap "error_trap update_ntp_servers $*" $GUARD_TRAPS
+	trap "error_trap update_ntp_servers '$*'" $GUARD_TRAPS
 	local host
 	local port
 	local service
@@ -86,7 +86,7 @@ update_ntp_servers() {
 
 
 add_banner_event() {
-	trap "error_trap add_banner_event $*" $GUARD_TRAPS
+	trap "error_trap add_banner_event '$*'" $GUARD_TRAPS
 	local event=$1
 	local timestamp=$(date)
 	local line_suffix=" - $event -------"

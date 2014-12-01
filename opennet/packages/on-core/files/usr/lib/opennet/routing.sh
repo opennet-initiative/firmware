@@ -78,7 +78,7 @@ delete_throw_routes() {
 # Parameter: logisches Netzwerkinterface
 # weitere Parameter: Rule-Spezifikation
 add_network_policy_rule_by_destination() {
-	trap "error_trap add_network_policy_rule_by_destination $*" $GUARD_TRAPS
+	trap "error_trap add_network_policy_rule_by_destination '$*'" $GUARD_TRAPS
 	local network="$1"
 	shift
 	local networkprefix
@@ -93,7 +93,7 @@ add_network_policy_rule_by_destination() {
 # Parameter: Zone
 # weitere Parameter: Rule-Spezifikation
 add_zone_policy_rules_by_iif() {
-	trap "error_trap add_zone_policy_rules $*" $GUARD_TRAPS
+	trap "error_trap add_zone_policy_rules '$*'" $GUARD_TRAPS
 	local zone=$1
 	shift
 	local device
@@ -111,7 +111,7 @@ add_zone_policy_rules_by_iif() {
 #  * die neuen Policy-Rules fuer die obigen Tabellen werden an anderer Stelle erzeugt
 # Kurz gesagt: alle bisherigen Policy-Rules sind hinterher kaputt
 initialize_olsrd_policy_routing() {
-	trap "error_trap initialize_olsrd_policy_routing $*" $GUARD_TRAPS
+	trap "error_trap initialize_olsrd_policy_routing '$*'" $GUARD_TRAPS
 	local iface
 	local current
 	local table

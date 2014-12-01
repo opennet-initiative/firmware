@@ -67,7 +67,7 @@ update_opennet_zone_masquerading() {
 # Liefere die IP-Adresse eines logischen Interface inkl. Praefix-Laenge (z.B. 172.16.0.1/24).
 # Parameter: logisches Netzwerk-Interface
 get_network() {
-	trap "error_trap get_network $*" $GUARD_TRAPS
+	trap "error_trap get_network '$*'" $GUARD_TRAPS
 	local network="$1"
 	local ranges
 	# Kurzzeitig den eventuellen strikten Modus abschalten.

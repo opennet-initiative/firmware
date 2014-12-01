@@ -81,7 +81,7 @@ get_openvpn_config() {
 #   CA-Zertifikatsdatei: z.B. $VPN_DIR/opennet-ca.crt
 # Ergebnis: Exitcode=0 bei Erfolg
 verify_vpn_connection() {
-	trap "error_trap verify_vpn_connection $*" $GUARD_TRAPS
+	trap "error_trap verify_vpn_connection '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local use_sender="$2"
 	local key_file=${3:-}

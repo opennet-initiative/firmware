@@ -85,7 +85,7 @@ move_down()	{ move_service_down	"$1" gw ugw; }
 
 #TODO: neues Service-Konzept
 add_gw() {
-	trap "error_trap add_gw $*" $GUARD_TRAPS
+	trap "error_trap add_gw '$*'" $GUARD_TRAPS
 	local ipaddr="$1"
 	local port="${2:-1600}"
 	notify_service gw openvpn "$ipaddr" "$port" udp / "" manual

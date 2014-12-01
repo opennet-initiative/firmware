@@ -219,7 +219,7 @@ _is_persistent_service_attribute() {
 # Je nach Schluesselname wird der Inhalt in die persistente uci- oder
 # die volatile tmpfs-Datenbank geschrieben.
 set_service_value() {
-	trap "error_trap set_service_value $*" $GUARD_TRAPS
+	trap "error_trap set_service_value '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local attribute="$2"
 	local value="$3"
@@ -236,7 +236,7 @@ set_service_value() {
 
 # Auslesen eines Werts aus der Service-Datenbank.
 get_service_value() {
-	trap "error_trap get_service_value $*" $GUARD_TRAPS
+	trap "error_trap get_service_value '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local attribute="$2"
 	local default="${3:-}"
@@ -300,7 +300,7 @@ service_add_file_dependency() {
 # Parameter: Service-Name
 # Parameter: textuelle Darstellung einer Abhaengigkeit (ohne Leerzeichen)
 _add_service_dependency() {
-	trap "error_trap _add_service_dependency $*" $GUARD_TRAPS
+	trap "error_trap _add_service_dependency '$*'" $GUARD_TRAPS
 	local dependency="$1"
 	local service_name="$2"
 	local token="$3"
@@ -322,7 +322,7 @@ _add_service_dependency() {
 # Entferne alle mit diesem Service verbundenen Konfigurationen (inkl. Rekonfiguration von firewall, etc.).
 # Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 cleanup_service_dependencies() {
-	trap "error_trap cleanup_service_dependencies $*" $GUARD_TRAPS
+	trap "error_trap cleanup_service_dependencies '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local dep
 	local filename
@@ -355,7 +355,7 @@ get_service_description() {
 
 
 delete_service() {
-	trap "error_trap delete_service $*" $GUARD_TRAPS
+	trap "error_trap delete_service '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	[ -z "$service_name" ] && msg_info "Error: no service given for deletion" && trap "" $GUARD_TRAPS && return 1
 	cleanup_service_dependencies "$service_name"
@@ -387,7 +387,7 @@ _distribute_service_ranks() {
 # Parameter: eine Liste von Dienst-Typen (z.B. "ugw" "gw")
 # Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste nach oben.
 move_service_up() {
-	trap "error_trap move_service_up $*" $GUARD_TRAPS
+	trap "error_trap move_service_up '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	shift
 	local sorting=$(get_service_sorting)
@@ -434,7 +434,7 @@ move_service_up() {
 # Parameter: eine Liste von Dienst-Typen (z.B. "ugw" "gw")
 # Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste nach unten.
 move_service_down() {
-	trap "error_trap move_service_down $*" $GUARD_TRAPS
+	trap "error_trap move_service_down '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	shift
 	local sorting=$(get_service_sorting)
@@ -474,7 +474,7 @@ move_service_down() {
 # Parameter: eine Liste von Dienst-Typen (z.B. "ugw" "gw")
 # Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste an die Spitze.
 move_service_top() {
-	trap "error_trap move_service_top $*" $GUARD_TRAPS
+	trap "error_trap move_service_top '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	shift
 	local top_service=$(get_sorted_services "$@" | head -1)

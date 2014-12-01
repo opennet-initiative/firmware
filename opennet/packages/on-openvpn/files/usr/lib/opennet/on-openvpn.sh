@@ -24,7 +24,7 @@ update_mig_service() {
 # Parameter: Service-Name
 # Resultat: exitcode=0 falls der Test erfolgreich war
 test_mig_connection() {
-	trap "error_trap test_mig_connection $*" $GUARD_TRAPS
+	trap "error_trap test_mig_connection '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
 	update_mig_service "$service_name"

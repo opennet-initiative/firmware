@@ -34,17 +34,17 @@ OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
 DEBUG=${DEBUG:-}
 
 # siehe Entwicklungsdokumentation (Entwicklungshinweise -> Shell-Skripte -> Fehlerbehandlung)
-trap "error_trap __main__ $*" $GUARD_TRAPS
+trap "error_trap __main__ '$*'" $GUARD_TRAPS
 
 
 # Schreibe eine log-Nachricht bei fehlerhaftem Skript-Abbruch
 # Uebliche Parameter sind der aktuelle Funktionsname, sowie Parameter der aufgerufenen Funktion.
 # Jede nicht-triviale Funktion sollte zu Beginn folgende Zeile enthalten:
-#    trap "error_trap FUNKTIONSNAME_HIER_EINTRAGEN $*" $GUARD_TRAPS
+#    trap "error_trap FUNKTIONSNAME_HIER_EINTRAGEN '$*'" $GUARD_TRAPS
 error_trap() {
 	# dies ist der Exitcode des Skripts (im Falle der EXIT trap)
 	local exitcode=$?
-	local message="ERROR [trapped]: $*"
+	local message="ERROR [trapped]: '$*'"
 	[ "$exitcode" = 0 ] && exit 0
 	msg_info "$message"
 	echo >&2 "$message"

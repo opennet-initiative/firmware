@@ -47,7 +47,7 @@ configure_opennet_zone() {
 
 
 configure_olsr_radio() {
-	trap "error_trap configure_olsr_radio $*" $GUARD_TRAPS
+	trap "error_trap configure_olsr_radio '$*'" $GUARD_TRAPS
 	local iface_index=$1
 	local iface_logical=$2
 	local iface_phys=$3
@@ -82,7 +82,7 @@ configure_olsr_radio() {
 
 
 configure_olsr_single_interface() {
-	trap "error_trap configure_olsr_single_interface $*" $GUARD_TRAPS
+	trap "error_trap configure_olsr_single_interface '$*'" $GUARD_TRAPS
 	local iface_logical=$1
 	local iface_addr=$2
 	local iface_netmask=$3
@@ -106,7 +106,7 @@ configure_olsr_single_interface() {
 
 
 configure_olsr_interfaces() {
-	trap "error_trap configure_olsr_interfaces $*" $GUARD_TRAPS
+	trap "error_trap configure_olsr_interfaces '$*'" $GUARD_TRAPS
 
 	# diese Aktion ist bereits abgeschlossen
 	uci show network | grep -q "^network\.on_eth_0\." && return 0

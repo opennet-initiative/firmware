@@ -25,7 +25,7 @@ DATA_LOCK_FILE=/var/run/on_usergateway_check
 # Geschwindigkeitsmessung gegen die konfigurierten UGWs
 # Eintragen der Ergebnisse in die Status-Datei fuer UGWs.
 ugw_update_speed () {
-	trap "error_trap ugw_update_speed $*" $GUARD_TRAPS
+	trap "error_trap ugw_update_speed '$*'" $GUARD_TRAPS
 	echo "ugw_update_speed" >"$DATA_LOCK_FILE"
 	local config_name=$1
 	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
@@ -75,7 +75,7 @@ run_for_all_openvpn_ugw() {
 # parameter is index to test
 ugw_update_vpn_status()
 {
-	trap "error_trap ugw_update_vpn_status $*" $GUARD_TRAPS
+	trap "error_trap ugw_update_vpn_status '$*'" $GUARD_TRAPS
 	echo "ugw_update_vpn_status" >"$DATA_LOCK_FILE"
 	local config_name=$1
 	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
@@ -120,7 +120,7 @@ ugw_update_vpn_status()
 # 
 # 
 ugw_getMTU () {
-	trap "error_trap ugw_getMTU $*" $GUARD_TRAPS
+	trap "error_trap ugw_getMTU '$*'" $GUARD_TRAPS
 	local config_name=$1
 	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	local config_file=$(uci_get "${uci_prefix}.config_file")
@@ -165,7 +165,7 @@ ugw_getMTU () {
 # even if olsrd or icmp-packages are working well. Therefore check MTU before
 # recognizing a ugw as working...
 ugw_update_mtu() {
-	trap "error_trap ugw_update_mtu $*" $GUARD_TRAPS
+	trap "error_trap ugw_update_mtu '$*'" $GUARD_TRAPS
 	echo "ugw_update_mtu" >"$DATA_LOCK_FILE"
 	local config_name=$1
 	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
@@ -211,7 +211,7 @@ ugw_update_mtu() {
 # Pruefung ob der Verkehr zu einem UGW ueber ein WAN-Interface verlaufen wuerde
 # Falls nicht, dann wird das "wan"-Flag auf "error" gesetzt.
 ugw_update_wan_status () {
-	trap "error_trap ugw_update_wan_status $*" $GUARD_TRAPS
+	trap "error_trap ugw_update_wan_status '$*'" $GUARD_TRAPS
 	echo "ugw_update_wan_status" >"$DATA_LOCK_FILE"
 	local config_name=$1
 	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
@@ -245,7 +245,7 @@ ugw_update_wan_status () {
 #################################################################################
 # do extra checks (speed, mtu) only at dedicated times
 ugw_doExtraChecks () {
-	trap "error_trap ugw_doExtraChecks $*" $GUARD_TRAPS
+	trap "error_trap ugw_doExtraChecks '$*'" $GUARD_TRAPS
 	msg_debug "ugw_doExtraChecks"
 	local nr
 	local speed_time

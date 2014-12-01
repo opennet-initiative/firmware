@@ -10,7 +10,7 @@ SERVICES_FILE=/var/run/services_olsr
 # Anschliessend wird olsr und die firewall neugestartet.
 # Dieses Skript sollte via hotplug bei Aenderungen der Netzwerkkonfiguration ausgefuehrt werden.
 update_olsr_interfaces() {
-	trap "error_trap update_olsr_interfaces $*" $GUARD_TRAPS
+	trap "error_trap update_olsr_interfaces '$*'" $GUARD_TRAPS
 	uci set -q "olsrd.@Interface[0].interface=$(get_zone_interfaces "$ZONE_MESH")"
 	apply_changes olsrd
 }
@@ -19,7 +19,7 @@ update_olsr_interfaces() {
 # Pruefe das angegebene olsrd-Plugin aktiv ist und aktiviere es, falls dies nicht der Fall sein sollte.
 # Das Ergebnis ist die uci-Sektion (z.B. "olsrd.@LoadPlugin[1]") als String.
 get_and_enable_olsrd_library_uci_prefix() {
-	trap "error_trap get_and_enable_olsrd_library_uci_prefix $*" $GUARD_TRAPS
+	trap "error_trap get_and_enable_olsrd_library_uci_prefix '$*'" $GUARD_TRAPS
 	local new_section
 	local lib_file
 	local uci_prefix=
@@ -48,7 +48,7 @@ get_and_enable_olsrd_library_uci_prefix() {
 
 
 enable_ondataservice() {
-	trap "error_trap enable_ondataservice $*" $GUARD_TRAPS
+	trap "error_trap enable_ondataservice '$*'" $GUARD_TRAPS
 	local uci_prefix
 
 	# schon vorhanden? Unberuehrt lassen ...
@@ -63,7 +63,7 @@ enable_ondataservice() {
 
 
 enable_nameservice() {
-	trap "error_trap enable_nameservice $*" $GUARD_TRAPS
+	trap "error_trap enable_nameservice '$*'" $GUARD_TRAPS
 	local current_trigger
 	local uci_prefix
 
@@ -87,7 +87,7 @@ enable_nameservice() {
 # Quelle 3: die vorkonfigurierte Standard-IP
 # Anschliessend ist "apply_changes olsrd" erforderlich.
 olsr_set_main_ip() {
-	trap "error_trap olsr_set_main_ip $*" $GUARD_TRAPS
+	trap "error_trap olsr_set_main_ip '$*'" $GUARD_TRAPS
 	# Auslesen der aktuellen, bzw. der Standard-IP
 	local main_ip
 	if [ $# -eq 1 ]; then
@@ -179,7 +179,7 @@ parse_olsr_service_definitions() {
 # Im Fall von "http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108" entspricht dies:
 #   http   192.168.0.15   8080   tcp   ugw   upload:3 download:490 ping:108
 get_olsr_services() {
-	trap "error_trap get_olsr_services $*" $GUARD_TRAPS
+	trap "error_trap get_olsr_services '$*'" $GUARD_TRAPS
 	local filter_service
 	local url
 	local proto

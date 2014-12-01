@@ -99,7 +99,7 @@ add_openvpn_ugw_service() {
 # Speichere diese Liste als on-userugw.@uplink-Liste.
 # Anschliessend werden eventuell Dienste (z.B. openvpn) neu konfiguriert.
 update_ugw_services() {
-	trap "error_trap update_ugw_services $*" $GUARD_TRAPS
+	trap "error_trap update_ugw_services '$*'" $GUARD_TRAPS
 	local scheme
 	local ipaddr
 	local port
@@ -230,7 +230,7 @@ _is_ugw_service_in_use() {
 # Die ugw-Portweiterleitungen werden an ihrem Namen erkannt.
 # Es wird kein "uci commit" durchgefuehrt.
 disable_stale_ugw_services () {
-	trap "error_trap ugw_disable_forwards $*" $GUARD_TRAPS
+	trap "error_trap ugw_disable_forwards '$*'" $GUARD_TRAPS
 	local uci_prefix
 	local ugw_config
 	local service
@@ -295,7 +295,7 @@ get_local_ugw_service_port() {
 # Parameter: config_name
 # commit findet nicht statt
 enable_ugw_service () {
-	trap "error_trap enable_ugw_service $*" $GUARD_TRAPS
+	trap "error_trap enable_ugw_service '$*'" $GUARD_TRAPS
 	local config_name=$1
 	local main_ip=$(get_main_ip)
 	local usergw_uci=$(find_first_uci_section on-usergw uplink "name=$config_name")
@@ -331,7 +331,7 @@ enable_ugw_service () {
 # Parameter: config_name
 # kein commit
 announce_olsr_service_ugw() {
-	trap "error_trap announce_ugw_service_ugw $*" $GUARD_TRAPS
+	trap "error_trap announce_ugw_service_ugw '$*'" $GUARD_TRAPS
 	local config_name=$1
 	local main_ip=$(get_main_ip)
 	local port
@@ -367,7 +367,7 @@ announce_olsr_service_ugw() {
 # Pruefe regelmaessig, ob Weiterleitungen zu allen bekannten UGW-Servern existieren.
 # Fehlende Weiterleitungen oder olsr-Announcements werden angelegt.
 ugw_update_service_state () {
-	trap "error_trap ugw_update_service_state $*" $GUARD_TRAPS
+	trap "error_trap ugw_update_service_state '$*'" $GUARD_TRAPS
 	local name
 	local ugw_name
 	local ugw_enabled

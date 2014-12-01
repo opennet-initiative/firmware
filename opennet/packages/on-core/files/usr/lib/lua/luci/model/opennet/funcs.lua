@@ -174,7 +174,8 @@ function parse_csv_service_list(services, descriptions)
 	for line in string.gmatch(result_string, "[^\n]+") do
 		one_service = {}
 		index = 0
-		for token in string.gmatch(line, "([^;]*)[;$]") do
+		-- das abschliessende Semikolon erleichtert den regulaeren Ausdruck
+		for token in string.gmatch(line .. ";", "([^;]*);") do
 			if index == #order then break end
 			if index == 0 then
 				one_service["id"] = token

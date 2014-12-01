@@ -108,6 +108,7 @@ find_and_select_best_gateway() {
 	best_gateway=$(echo "$result" | sed -n 1p)
 	current_gateway=$(echo "$result" | sed -n 2p)
 	msg_debug "Current ($current_gateway) / best ($best_gateway)"
+	[ "$current_gateway" = "$best_gateway" ] && return 0
 	# eventuell wollen wir den aktuellen Host beibehalten (sofern er funktioniert)
 	if [ -n "$current_gateway" ] && uci_is_true "$(get_service_value "$current_gateway" "status" "false")"; then
 		# falls der beste und der aktive Gateway gleich weit entfernt sind, bleiben wir beim bisher aktiven

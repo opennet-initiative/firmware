@@ -67,11 +67,17 @@ _add_local_bias() {
 }
 
 
+# Ermittle die Service-Prioritaet eines Dienstes.
+# Der Wert ist beliebig und nur im Vergleich mit den Prioritaeten der anderen Dienste verwendbar.
+# Als optionaler zweiter Parameter kann die Sortierung uebergeben werden. Falls diese nicht uebergeben wurde,
+# wird die aktuell konfigurierte Sortierung benutzt.
 get_service_priority() {
 	local service_name="$1"
-	local sorting=$(get_service_sorting)
+	local sorting="${2:-}"
 	local distance=$(get_service_value "$service_name" "distance")
 	local rank
+	# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
+	[ -z "$sorting" ] && sorting=$(get_service_sorting)
 	# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
 	[ -z "$distance" ] && return 0
 	if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
@@ -142,6 +148,7 @@ get_sorted_services() {
 	local service
 	local service_name
 	local priority
+	local sorting=$(get_service_sorting)
 	if [ "$#" -gt 0 ]; then
 		# hole alle Dienste aus den angegebenen Klassen (z.B. "gw ugw")
 		for service in "$@"; do
@@ -152,8 +159,8 @@ get_sorted_services() {
 		get_services
 	fi | while read service_name; do
 		# keine Entfernung -> nicht erreichbar -> ignorieren
-		[ -z "$(get_service_value "$service_name" "distance")" ] && continue
-		priority=$(get_service_priority "$service_name")
+		priority=$(get_service_priority "$service_name" "$sorting")
+		[ -z "$priority" ] && continue
 		echo "$priority" "$service_name"
 	done | sort -n | awk '{print $2}'
 }

@@ -512,7 +512,7 @@ get_service_detail() {
 	local service_name="$1"
 	local key="$2"
 	local default="${3:-}"
-	local value=$(get_service_value "$service_name" "details" | get_from_key_value_list "$key")
+	local value=$(get_service_value "$service_name" "details" | get_from_key_value_list "$key" ":")
 	[ -n "$value" ] && echo "$value" || echo "$default"
 	return 0
 }

@@ -38,11 +38,11 @@ function action_vpn_gateways()
 	local reset_counter = luci.http.formvalue("reset_counter")
 	
 	if move_up then
-		on_function("move_service_up", {move_up, "ug", "ugw"})
+		on_function("move_service_up", {move_up, "gw", "ugw"})
 	elseif move_down then
-		on_function("move_service_down", {move_down, "ug", "ugw"})
+		on_function("move_service_down", {move_down, "gw", "ugw"})
 	elseif move_top then
-		on_function("move_service_top", {move_top, "ug", "ugw"})
+		on_function("move_service_top", {move_top, "gw", "ugw"})
 		on_function("select_mig_connection", {move_top})
 	elseif delete_service then
 		on_function("delete_service", {delete_service})

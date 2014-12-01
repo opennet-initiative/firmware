@@ -525,3 +525,81 @@ get_service_age() {
 	echo "$(get_time_minute)" "$timestamp" | awk '{ print $1 - $2 }'
 }
 
+
+# Liefere eine Semikolon-separierte Liste von Service-Eigenschaften zurueck.
+# Jede Eigenschaft wird folgendermassen ausgedrueckt:
+#  type|source|key[|default]
+# Dabei sind folgende Inhalte moeglich:
+#  type: Rueckgabetyp (string, number, bool)
+#  source: Quelle der Informationen (value, detail, function, id)
+#  key: Name des Werts, des Details oder der Funktion
+#  default: Standardwert, falls das Ergebnis leer sein sollte
+# Wahrheitswerte werden als "true" oder "false" zurueckgeliefert. Alle anderen Rueckgabetypen bleiben unveraendert.
+# Das Ergebnis sieht folgendermassen aus:
+#   SERVICE_NAME;RESULT1;RESULT2;...
+get_service_as_csv() {
+	local service_name="$1"
+	shift
+	local separator=";"
+	local specification
+	local rtype
+	local source
+	local key
+	local default
+	local value
+	local func_call
+	echo -n "$service_name"
+	for specification in "$@"; do
+		rtype=$(echo "$specification" | cut -f 1 -d "|")
+		source=$(echo "$specification" | cut -f 2 -d "|")
+		key=$(echo "$specification" | cut -f 3 -d "|")
+		default=$(echo "$specification" | cut -f 4- -d "|")
+		# Ermittlung des Funktionsaufrufs
+		if [ "$source" = "function" ]; then
+			if [ "$rtype" = "bool" ]; then
+				"$key" "$service_name" && value="true" || value="false"
+			else
+				value=$("$key" "$service_name")
+			fi
+		else
+			if [ "$source" = "value" ]; then
+				value=$(get_service_value "$service_name" "$key")
+			elif [ "$source" = "detail" ]; then
+				value=$(get_service_detail "$service_name" "$key")
+			else
+				msg_info "Unknown service attribute requested: $specification"
+				echo -n "${separator}"
+				continue
+			fi
+			[ -z "$value" ] && [ -n "$default" ] && value="$default"
+			if [ "$rtype" = "bool" ]; then
+				# Pruefung auf wahr/falsch
+				value=$(uci_is_true "$value" && echo "true" || echo "false")
+			fi
+		fi
+		echo -n "${separator}${value}"
+	done
+	# mit Zeilenumbruch abschliessen
+	echo
+}
+
+
+# Liefere alle Dienste der gewaehlten Kategorie entsprechend ihrer Prioritaet mit allen gewuenschten Informationen aus.
+# Siehe "get_service_as_csv" fuer mehr Details.
+# Parameter: mehrere Dienste-Klassen (z.B. "gw" oder "ugw")
+# Parameter: -- (zur Abgrenzung der darauffolgenden Parameter)
+# Parameter: mehrere Informationsbeschreibungen (siehe "get_service_as_csv")
+get_services_as_csv() {
+	local service_name
+	local service_types=""
+	while [ "$1" != "--" ]; do
+		service_types="$service_types $1"
+		shift
+	done
+	# "--" ueberspringen
+	shift
+	get_sorted_services $service_types | while read service_name; do
+		get_service_as_csv "$service_name" "$@"
+	done
+}
+

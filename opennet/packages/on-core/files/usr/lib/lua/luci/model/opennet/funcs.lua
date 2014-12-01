@@ -134,3 +134,65 @@ function generate_csr(type, openssl)
 	end
 end
 
+
+--[[
+-- Einlesen und Typ-konvertieren von CSV-Ausgaben der 'get_services_as_csv'-Funktion (shell-Bibliothek).
+-- Dies ermöglicht die effiziente Sammlung aller relevanten Informationen für die Dienst-Übersicht mit nur
+-- einem einzigen Fork für den Funktionsaufruf. Die einzelne Abfrage aller Informationen dauert dagegen viel
+-- länger.
+-- Parameter services: eine table von Service-Typen (z.B.: {"ugw", "gw"})
+-- Parameter descriptions: eine table von Informationsbeschreibungen (z.B.: offset="number|value|offset")
+-- Der Rückgabewert ist eine table mit benannten Parametern.
+-- Leere Strings werden als nil zurückgeliefert.
+--]]
+function parse_csv_service_list(services, descriptions)
+	local order = {}
+	local specifications = {}
+	local index = 1
+	local name
+	local value
+	local result_string
+	local result
+	local token
+	local arguments = {}
+	local one_service
+	for _, value in pairs(services) do
+		table.insert(arguments, value)
+	end
+	table.insert(arguments, "--")
+	for name, value in pairs(descriptions) do
+		local new_item = {}
+		table.insert(order, name)
+		specifications[name] = value
+		table.insert(arguments, value)
+	end
+	result_string = on_function("get_services_as_csv", arguments)
+	result = {}
+	for line in string.gmatch(result_string, "[^\n]+") do
+		one_service = {}
+		index = 0
+		for token in string.gmatch(line, "([^;]*)[;$]") do
+			if index == #order then break end
+			if index == 0 then
+				one_service["id"] = token
+			else
+				name = order[index]
+				if name then
+					value = specifications[name]
+					if token == "" then
+						token = nil
+					elseif string.sub(value, 1, 7) == "number|" then
+						token = tonumber(token)
+					elseif string.sub(value, 1, 5) == "bool|" then
+						token = (token == "true")
+					end
+					one_service[name] = token
+				end
+			end
+			index = index + 1
+		end
+		table.insert(result, one_service)
+	end
+	return result
+end
+

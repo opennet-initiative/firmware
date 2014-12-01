@@ -164,3 +164,13 @@ reset_all_mig_connection_test_timestamps() {
 	done
 }
 
+
+get_mig_connection_test_age() {
+	local service_name
+	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
+	# noch keine Tests durchgefuehrt?
+	[ -z "$timestamp" ] && return 0
+	local now=$(get_time_minute)
+	echo "$timestamp" "$now" | awk '{ print $2 - $1 }'
+}
+

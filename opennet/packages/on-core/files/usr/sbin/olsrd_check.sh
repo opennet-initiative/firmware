@@ -20,7 +20,7 @@ if is_olsrd_running; then
 	# Topologie ebenfalls leer -> das ist ok (kein Netz)
 	echo /topology | nc localhost 2006 | grep -q "^[0-9]" || exit 0
 	# es gibt also Topologie-Informationen, jedoch keine Routen -> ein Bug
-	/etc/init.d/olsrd restart >/dev/null
+	/etc/init.d/olsrd restart >/dev/null || true
 else
 	/etc/init.d/olsrd start >/dev/null || true
 fi

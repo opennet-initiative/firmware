@@ -50,9 +50,6 @@ echo "$$" >"$PID_FILE"
 
 
 case "${1:-}" in
-	list)
-		vpn_status status
-		;;
 	test)
 		shift
 		if [ "$#" -gt 0 ]; then
@@ -68,7 +65,6 @@ case "${1:-}" in
 			reset_mig_connection_test_timestamp "$service_name"
 			test_mig_connection "$service_name" && echo "OK" || echo "FEHLER"
 		 done
-		exit 0
 		find_and_select_best_gateway
 		;;
 	help|--help)

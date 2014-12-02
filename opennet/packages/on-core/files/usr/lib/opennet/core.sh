@@ -5,6 +5,7 @@ get_client_cn() {
 
 msg_debug() {
 	[ -z "$DEBUG" ] && DEBUG=$(uci_get on-core.settings debug)
+	[ -z "$DEBUG" ] && DEBUG=false
 	uci_is_true "$DEBUG" && logger -t "$(basename "$0")[$$]" "$1" || true
 }
 

@@ -176,7 +176,6 @@ function parse_csv_service_list(services, descriptions)
 		index = 0
 		-- das abschliessende Semikolon erleichtert den regulaeren Ausdruck
 		for token in string.gmatch(line .. ";", "([^;]*);") do
-			if index == #order then break end
 			if index == 0 then
 				one_service["id"] = token
 			else

@@ -37,7 +37,7 @@ function printFirmwareTitle()
 end
 
 function printOpenVPN()
-  local remote = luci.sys.exec("on-function get_active_mig_connections | while read service_name; do get_service_value \"$service_name\" host; done")
+  local remote = luci.sys.exec("on-function get_active_mig_connections | while read service_name; do on-function get_service_value \"$service_name\" host; done")
   if remote ~= "" then
     luci.http.write(luci.i18n.string([[VPN-Tunnel active.]])..[[ (]]..remote..")")
   else

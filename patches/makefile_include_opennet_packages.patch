@@ -3,7 +3,7 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +++ b/openwrt/include/opennet.mk
 @@ -0,0 +1,30 @@
 +include $(INCLUDE_DIR)/opennet-version.mk
-+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(ONI_PKG_VERSION)
++PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 +PKG_BUILD_DEPENDS:=$(if $(STAGING_DIR_ROOT),lua/host)
 +
 +include $(INCLUDE_DIR)/package.mk

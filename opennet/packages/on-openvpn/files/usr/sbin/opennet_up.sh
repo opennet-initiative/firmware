@@ -15,10 +15,6 @@
 
 MSG_FILE=/tmp/openvpn_msg.txt
 
-if [ -e "$MSG_FILE" ]; then
-	msg_info "running instance detected by $MSG_FILE. stopping"
-	exit 1
-fi
 echo "vpn-tunnel active" >"$MSG_FILE"	# a short message for the web frontend
 
 

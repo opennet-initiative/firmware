@@ -39,11 +39,11 @@ esac
 step=0
 while read line; do
   case "$line" in
-    "ONI_PKG_VERSION:="*) 
+    "PKG_VERSION:="*) 
       VERSION="${line#*=}" 
       step=$((step +1))
       ;;
-    "ONI_PKG_RELEASE:="*) 
+    "PKG_RELEASE:="*) 
       RELEASE="${line#*=}"
       step=$((step +1))
       ;;

@@ -259,6 +259,27 @@ clean_stale_pid_file() {
 }
 
 
+# Pruefe ob eine PID-Datei existiert und ob die enthaltene PID zu einem Prozess
+# mit dem angegebenen Namen (nur Dateiname - ohne Pfad) verweist.
+# Parameter PID-Datei: vollstaendiger Pfad
+# Parameter Prozess-Name: Dateiname ohne Pfad
+check_pid_file() {
+	local pid_file="$1"
+	local process_name="$2"
+	local pid
+	local current_process
+	[ -z "$pid_file" -o ! -e "$pid_file" ] && trap "" $GUARD_TRAPS && return 1
+	pid=$(cat "$pid_file" | sed 's/[^0-9]//g')
+	# leere/kaputte PID-Datei
+	[ -z "$pid" ] && trap "" $GUARD_TRAPS && return 1
+	# Prozess-Datei ist kein symbolischer Link?
+	[ ! -L "/proc/$pid/exe" ] && trap "" $GUARD_TRAPS && return 1
+	current_process=$(readlink "/proc/$pid/exe")
+	[ "$process_name" != "$(basename "$current_process")" ] && trap "" $GUARD_TRAPS && return 1
+	return 0
+}
+
+
 apply_changes() {
 	local config=$1
 	# keine Aenderungen?

@@ -43,8 +43,12 @@ disable_openvpn_service() {
 
 is_openvpn_service_active() {
 	local service_name="$1"
-	# wir pruefen lediglich, ob ein VPN-Eintrag existiert
-	[ -n "$(uci_get "openvpn.$service_name")" ] && return 0
+	local pid_file
+	local pid
+	# existiert ein VPN-Eintrag?
+	[ -z "$(uci_get "openvpn.$service_name")" ] && trap "" $GUARD_TRAPS && return 1
+	# gibt es einen Verweis auf eine passende PID-Datei?
+	check_pid_file "$(get_service_value "$service_name" "pid_file")" "openvpn" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

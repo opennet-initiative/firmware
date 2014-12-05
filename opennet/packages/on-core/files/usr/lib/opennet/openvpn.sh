@@ -92,6 +92,7 @@ verify_vpn_connection() {
 	local cert_file=${4:-}
 	local ca_file=${5:-}
 	local temp_config_file="/tmp/vpn_test_${service_name}-$$.conf"
+	local file_opts
 	local wan_dev
 	local openvpn_opts
 	local hostname
@@ -124,7 +125,7 @@ verify_vpn_connection() {
 	#   connect-retry: Sekunden Wartezeit zwischen Versuchen
 	#   connect-timeout: Dauer eines Versuchs
 	#   connect-retry-max: Anzahl moeglicher Wiederholungen
-	openvpn_opts="$openvpn_opts connect-retry=1 connect-timeout=15 connect-retry-max=1"
+	openvpn_opts="$openvpn_opts --connect-retry 1 --connect-timeout 15 --connect-retry-max 1"
 
 	# prevent a real connection (otherwise we may break our current vpn tunnel):
 	#   tls-verify: force a tls handshake failure
@@ -147,8 +148,11 @@ verify_vpn_connection() {
 
 	# check if the output contains a magic line
 	status_output=$(openvpn --config "$temp_config_file" $openvpn_opts || true)
+	# read the additional options from the config file (for debug purposes)
+	file_opts=$(cat "$temp_config_file" | grep -v "^$" | grep -v "^#" | sed 's/^/--/' | tr '\n' ' ')
 	rm -f "$temp_config_file"
 	echo "$status_output" | grep -q "Initial packet" && return 0
+	msg_debug "openvpn test failed: openvpn $file_opts $openvpn_opts"
 	trap "" $GUARD_TRAPS && return 1
 }
 

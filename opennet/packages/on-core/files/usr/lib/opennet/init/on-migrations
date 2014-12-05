@@ -92,20 +92,20 @@ fix_firewall_reload() {
 }
 
 
-# Die Einstellungen "use_olsrd_dns" und "use_olsrd_ntp" sind mit v0.5 hinzugekommen.
-add_use_settings() {
-	prepare_on_uci_settings
-	# erzeuge die services-Node, falls noetig
-	for setting in use_olsrd_dns use_olsrd_ntp; do
-		uci show on-core | grep -q "^on-core\.settings\.$setting=" && continue
-		uci set "on-core.settings.$setting=1"
-	done
-	return 0
+# bis Version 4.5 verwendeten wir vollstaendige uci-Sektionen fuer die VPN-Server
+# z.B. openvpn.opennet_user
+remove_tunnel_openvpn_settings() {
+	local uci_prefix=openvpn.opennet_user
+
+	# Abbruch falls die Einstellungen bereits entfernt wurden
+	[ -z "$(uci_get "$uci_prefix")" ] && return
+	uci delete "$uci_prefix"
+	uci commit openvpn
 }
 
 
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_firewall_reload
-add_use_settings
+remove_tunnel_openvpn_settings
 

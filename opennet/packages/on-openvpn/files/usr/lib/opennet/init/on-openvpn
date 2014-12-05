@@ -27,7 +27,6 @@ configure_tunnel_firewall() {
 	[ -n "$(uci_get "$uci_prefix")" ] && return
 
 	# Zone fuer ausgehenden Verkehr definieren
-	# TODO: genuegt nicht einfach die WAN-Zone?
 	uci_prefix=firewall.$(uci add firewall zone)
 	uci set "${uci_prefix}.name=$ZONE_TUNNEL"
 	uci set "${uci_prefix}.network=$NETWORK_TUNNEL"
@@ -45,19 +44,6 @@ configure_tunnel_firewall() {
 }
 
 
-# bis Version 4.5 verwendeten wir vollstaendige uci-Sektionen fuer die VPN-Server
-# z.B. openvpn.opennet_user
-remove_tunnel_openvpn_settings() {
-	local uci_prefix=openvpn.opennet_user
-
-	# Abbruch falls die Einstellungen bereits entfernt wurden
-	[ -z "$(uci_get "$uci_prefix")" ] && return
-	uci delete "$uci_prefix"
-	uci commit openvpn
-}
-
-
 configure_tunnel_network
 configure_tunnel_firewall
-remove_tunnel_openvpn_settings
 

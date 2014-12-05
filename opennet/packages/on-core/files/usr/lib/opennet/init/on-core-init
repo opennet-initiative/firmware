@@ -6,14 +6,37 @@
 
 set -eu
 
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+# Die Einstellungen "use_olsrd_dns" und "use_olsrd_ntp" sind mit v0.5 hinzugekommen.
+add_use_settings() {
+	prepare_on_uci_settings
+	# erzeuge die services-Node, falls noetig
+	for setting in use_olsrd_dns use_olsrd_ntp; do
+		uci show on-core | grep -q "^on-core\.settings\.$setting=" && continue
+		uci set "on-core.settings.$setting=1"
+	done
+	apply_changes on-core
+}
+
+
 # cron-Logging abschalten (bis auf Fehlermeldungen)
 # siehe http://wiki.openwrt.org/doc/uci/system#system
-uci set "system.@system[0].cronloglevel=9"
-uci commit system
+disable_cron_logging() {
+	uci set "system.@system[0].cronloglevel=9"
+	apply_changes system
+}
+
 
 # die Namensaufloesung im Opennet generiert auch 192.168er-Adressen - diese werden durch "rebind_protection" blockiert
-uci set "dhcp.@dnsmasq[0].rebind_protection=0"
-uci commit dhcp
-# dnsmasq neustarten
-reload_config
+disable_dnsmasq_rebind_protection() {
+	uci set "dhcp.@dnsmasq[0].rebind_protection=0"
+	apply_changes dhcp
+}
+
+
+add_use_settings
+disable_cron_logging
+disable_dnsmasq_rebind_protection
 

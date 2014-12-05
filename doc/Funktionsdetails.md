@@ -12,17 +12,15 @@ Die Aktion des Trigger-Skripts lässt sich manuell auslösen:
 
   on-function update_olsr_services
 
-Die Ergebnisse sind in uci als ``services``-Sektionen unter ``on-core`` zu finden:
+Die Ergebnisse der Dienst-Suche werden im Dateisystem gespeichert. Langfristig unveraenderliche Attribute eines Dienstes (z.B. der Host und der Port) werden persistent gespeichert - die übrigen Informationen (z.B. die Routing-Entfernung) liegen lediglich im tmpfs und werden bei jedem Neustart erneut gesammelt.
 
-  uci show on-core
+Die Details zur Datenablage sind unter ``Datenspeicherung`` zu finden.
 
-Außerdem befinden sich volatile Detail-Attribute in der Services-Datenbank im tmpfs (``/var/on-services.status``).
-
-Die menschenfreundliche Ausgabe ist recht übersichtlich:
+Die menschenfreundliche Zusammenfassung aller Dienst-Informationen ist recht übersichtlich:
 
   on-function print_services
 
-Dienste werden durch einen eindeutigen Namen (zusammengesetzt aus URL, Schema, Hostname, Port, usw.) referenziert. Siehe auch das Attribut ``name`` unter ``on-core.@settings[x]``.
+Dienste werden durch einen eindeutigen Namen (zusammengesetzt aus URL, Schema, Hostname, Port, usw.) referenziert. Dieser eindeutige Namen wird von allen Dienst-relevanten Funktionen verwendet.
 
 
 DNS - Namensauflösung
@@ -59,9 +57,9 @@ Der entsprechende ``nameservice``-Block in der ``olsrd.conf`` des DNS-Servers ka
 Integration auf den APs
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Die Funktion ``update_dns_servers`` in der ``/usr/bin/on-helper.sh`` wird bei jeder Service-Aktualisierung (siehe oben) aufgerufen.
-In dessen Verlauf wird sichergestellt, dass die uci-Variable ``dhcp.@dnsmasq[0].serversfile`` gesetzt ist. Falls dies nicht der Fall ist, wird die Datei ``/var/run/dnsmasq.servers`` eingetragen.
-Anschließend werden alle ``dns``-Einträge aus der Datei ``/var/run/services_olsr`` ausgelesen und im passenden Format in die obige dnsmasq-Datei geschrieben.
+Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank. Im Anschluss wird ``apply_changes on-core`` aufgerufen. Dies löst die Aktualisierung der ``dnsmasq``-Nameserver-Datei (``/var/run/dnsmasq.servers``) basierend auf der Dienstliste aus.
+
+In diesem Verlauf wird auch sichergestellt, dass die uci-Variable ``dhcp.@dnsmasq[0].serversfile`` gesetzt ist. Falls dies nicht der Fall ist, wird die Datei ``/var/run/dnsmasq.servers`` eingetragen.
 Abschließend wird dem ``dnsmasq``-Prozess ein HUP-Signal gesendet, um ein erneutes Einlesen der Konfigurationsdateien auszulösen.
 
 Folgende Voraussetzungen müssen gegeben sein:
@@ -89,8 +87,9 @@ Konfiguration der NTP-Anbieter
 Integration auf den APs
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Die Funktion ``update_ntp_servers`` in der ``/usr/bin/on-helper.sh`` wird im 5-Minuten-Takt mittels des cron-Jobs ``on_update-dns-ntp`` ausgeführt.
-Dabei werden alle ``dns``-Einträge aus der Datei ``/var/run/services_olsr`` ausgelesen. Im Falle von Änderungen der Server-Liste wird diese in die uci-Variablen ``ntpclient.@ntpserver[*]`` übertragen. Anschließend wird der ntp-Dienst neugestartet.
+Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank. Im Anschluss wird ``apply_changes on-core`` aufgerufen. Dies löst die Aktualisierung der NTP-Server-Liste in der uci-Konfiguration (``system.ntp.server``) aus.
+
+Im Falle von Änderungen der Server-Liste wird diese in die uci-Variable ``system.ntp.server`` übertragen. Anschließend wird der ntp-Dienst neugestartet.
 
 
 Gateway-Auswahl
@@ -99,40 +98,45 @@ Gateway-Auswahl
 Gateway-Liste
 ^^^^^^^^^^^^^
 
-Minütlich wird via cronjob die Datei ``/usr/sbin/on_vpngateway_check`` ausgeführt. Diese ruft die lua-Funktion ``update_gateways`` auf:
+Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank.
+Minütlich wird via cronjob die Datei ``/usr/sbin/on_vpngateway_check`` ausgeführt. Dieser führt folgende Aktionen aus:
 
-  require('luci.model.opennet.on_vpn_autosearch'); update_gateways()
+* Test jedes einzelnen announcierten GW- oder UGW-Dienstes (falls die Wartezeit abgelaufen ist)
+* Ermittlung des aktuell besten Gateways und seine Aktivierung, falls er seit mehreren Minuten besser ist oder falls aktuell kein Gateway konfiguriert ist
 
-
-* minütlich:
- * Auslesen aus /var/run/services_olsr
 
 Gateway-Auswahl
 ^^^^^^^^^^^^^^^
- * Sortieren nach Entfernung (falls automatisch)
+ * Sortieren nach Entfernung, Hop-Count oder manuell
 
 Gateway-Wechsel
 ^^^^^^^^^^^^^^^
 
-Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann erhält er den Wert der Gateway-Variable "common/better_gw". Sobald dieser Variable den Wert fünf erreicht hat, wird die neue Gateway-IP in die openvpn-Konfiguration übertragen und openvpn neu gestartet.
+Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann schreibt er das Attribute ``switch_candidate_timestamp`` in diesen neuen Dienst. Sobald dieser Zeitstempel im Verlaufe nachfolgender cronjob-Läufe älter als fünf Minuten ist, wird der neue Gateway via ``select_mig_connection`` aktiviert und eine Verbindung aufgebaut.
 
 Datenspeicherung
 ^^^^^^^^^^^^^^^^
 
 Für jeden Gateway werden dauerhafte und wechselhafte Eigenschaften gespeichert.
 
-Die dauerhaften Eigenschaften werden via uci unterhalb von ``on-openvpn.gate_*`` gespeichert. Folgende Attribute sind dauerhafter Natur:
+Die folgenden Attribute sind persistent (siehe ``on-core/files/usr/lib/opennet/services.sh``):
 
-* ipaddr
-* name (TODO)
+* service
+* scheme
+* host
+* port
+* protocol
+* path
+* uci_dependency
+* file_dependency
+* rank
+* offset
 
-Die wechselhaften Eigenschaften werden im temporären Dateisystem (also im RAM) gespeichert. Dies reduziert Flash-Schreibzugriffe. Die wechselhaften Eigenschaften sind folgende:
+Alle übrigen Attribute unterliegen lediglich der volatilen Speicherung.
 
-* download
-* upload
-* etx
-* hop
-* ping
+Die persistenten Informationen liegen unter ``/etc/on-services.d``.
+
+Die volatilen Informationen liegen unter ``/tmp/on-services-volatile.d``.
 
 
 Internet-Freigabe (Usergateways)

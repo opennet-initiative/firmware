@@ -34,27 +34,37 @@ test_mig_connection() {
 	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)
 	local now=$(get_time_minute)
 	local nonworking_timeout=$(($recheck_age + $(get_on_openvpn_default vpn_nonworking_timeout)))
+	local status=$(get_service_value "$service_name" "status")
 	if [ -n "$timestamp" ] && is_timestamp_older_minutes "$timestamp" "$nonworking_timeout"; then
 		# if there was no vpn-availability for a while (nonworking_timeout minutes), declare vpn-status as not working
 		set_service_value "$service_name" "status" "n"
 		# In den naechsten 'vpn_recheck_age' Minuten wollen wir keine Pruefungen durchfuehren.
 		set_service_value "$service_name" "timestamp_connection_test" "$now"
 		trap "" $GUARD_TRAPS && return 1
-	elif [ -z "$timestamp" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age"; then
+	elif [ -z "$timestamp" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age" || [ -z "$status" ]; then
+		# Neue Pruefung, falls:
+		# 1) noch nie eine Pruefung stattfand
+		# oder
+		# 2) die "recheck"-Zeit abgelaufen ist
+		# oder
+		# 3) falls bisher noch kein definitives Ergebnis feststand (dies ist nur innerhalb
+		#    der ersten "recheck" Minuten nach dem Booten moeglich).
+		# In jedem Fall kann der Zeitstempel gesetzt werden - egal welches Ergebnis die Pruefung hat.
+		set_service_value "$service_name" "timestamp_connection_test" "$now"
 		if verify_vpn_connection "$service_name" "true" \
 				"$MIG_TEST_VPN_DIR/on_aps.key" \
 				"$MIG_TEST_VPN_DIR/on_aps.crt" \
 				"$MIG_TEST_VPN_DIR/opennet-ca.crt"; then
-			set_service_value "$service_name" "timestamp_connection_test" "$now"
 			msg_debug "vpn-availability of gw $host successfully tested"
 			set_service_value "$service_name" "status" "y"
 			return 0
 		else
-			# "age" will grow until it exceeds "recheck_age + nonworking_timeout" -> no need to do anything now
+			# Solange wir keinen "status" setzen, wird der Test bei jedem Lauf wiederholt, bis "nonworking_timeout"
+			# erreicht ist.
 			msg_debug "vpn test of $host failed"
 			trap "" $GUARD_TRAPS && return 1
 		fi
-	elif uci_is_true "$(get_service_value "$service_name" "status")"; then
+	elif uci_is_true "$status"; then
 		msg_debug "vpn-availability of gw $host still valid"
 		return 0
 	else

@@ -1,2 +1,24 @@
 change URL for package download using opennet server.
 Every time generate new value. Else the PKG_* variables will be empty. Don't know why... 
+Index: on_firmware/openwrt/include/version.mk
+===================================================================
+--- on_firmware.orig/openwrt/include/version.mk	2014-12-05 22:54:37.568003627 +0100
++++ on_firmware/openwrt/include/version.mk	2014-12-05 22:58:11.756069434 +0100
+@@ -7,6 +7,7 @@
+ 
+ # Substituted by SDK, do not remove
+ # REVISION:=x
++include $(INCLUDE_DIR)/opennet-version.mk
+ 
+ PKG_CONFIG_DEPENDS += \
+ 	CONFIG_VERSION_NUMBER \
+@@ -29,8 +30,7 @@
+ VERSION_NICK:=$(call qstrip_escape,$(CONFIG_VERSION_NICK))
+ VERSION_NICK:=$(if $(VERSION_NICK),$(VERSION_NICK),$(RELEASE))
+ 
+-VERSION_REPO:=$(call qstrip_escape,$(CONFIG_VERSION_REPO))
+-VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),http://downloads.openwrt.org/snapshots/trunk/%T/packages)
++VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),https://downloads.opennet-initiative.de/openwrt/testing/$(PKG_VERSION)-$(PKG_RELEASE)/packages)
+ 
+ VERSION_DIST:=$(call qstrip_escape,$(CONFIG_VERSION_DIST))
+ VERSION_DIST:=$(if $(VERSION_DIST),$(VERSION_DIST),OpenWrt)

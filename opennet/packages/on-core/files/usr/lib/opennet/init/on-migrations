@@ -92,7 +92,7 @@ fix_firewall_reload() {
 }
 
 
-# bis Version 4.5 verwendeten wir vollstaendige uci-Sektionen fuer die VPN-Server
+# bis Version 0.4-5 verwendeten wir vollstaendige uci-Sektionen fuer die VPN-Server
 # z.B. openvpn.opennet_user
 remove_tunnel_openvpn_settings() {
 	local uci_prefix=openvpn.opennet_user
@@ -104,8 +104,29 @@ remove_tunnel_openvpn_settings() {
 }
 
 
+# bis Version 0.4-5 wurde folgende Zeile ausgefuehrt:
+#   lua -e "require('luci.model.opennet.on_usergw') upgrade()" 2>/dev/null
+# Dadurch wurden openvpn-uci-Konfigurationen (z.B. openvpn.opennet_ugw_erina_on_i_de) nach on-usergw.opennet_ugw* übertragen.
+# Da die openvpn-Konfigurationen nun ein anderes Namensformat haben, loeschen wir sie.
+remove_usergw_openvpn_configs() {
+	local uci_prefix
+	uci show openvpn | grep "^openvpn\.openvpn_ugw_[^.]\+=openvpn$" | cut -f 1 -d = | while read uci_prefix; do
+		uci delete "$uci_prefix"
+	done
+	return 0
+}
+
+
+# bis Version 0.4-5 wurde die Variable "on-usergw.ugwng_hna_mask" verwendet.
+remove_obsolete_usergw_settings() {
+	[ -n "$(uci_get "on-usergw.ugwng_hna_mask")" ] && uci delete "on-usergw.ugwng_hna_mask"
+	return 0
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_firewall_reload
 remove_tunnel_openvpn_settings
+remove_usergw_openvpn_configs
 

@@ -1,4 +1,3 @@
-makefile_include_openwrt_version.patch
 oni-feeds.patch
 luci_show_dfs_channels.patch
 wifidog_iptables_long_table_names.patch

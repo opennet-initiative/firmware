@@ -5,3 +5,4 @@ makefile_include_opennet_packages.patch
 dnsmasq_option_servers_file.patch
 luci_wireless_client_isolation.patch
 makefile_include_opennet_version.patch
+makefile_include_openwrt_version.patch

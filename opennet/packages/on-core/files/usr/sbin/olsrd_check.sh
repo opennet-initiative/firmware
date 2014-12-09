@@ -16,8 +16,8 @@ is_olsrd_running() {
 
 # Ist OLSR zwischenzeitlich abgestuerzt?
 if is_olsrd_running; then
-	echo /routes | nc localhost 2006 | grep -q "^[0-9]" && exit 0
-	# Topologie ebenfalls leer -> das ist ok (kein Netz)
+	ip route show table "$ROUTING_TABLE_MESH" | grep -q "^[0-9]" && exit 0
+	# Topologie ebenfalls leer? Dann ist es ok (wir haben kein Netz).
 	echo /topology | nc localhost 2006 | grep -q "^[0-9]" || exit 0
 	# es gibt also Topologie-Informationen, jedoch keine Routen -> ein Bug
 	/etc/init.d/olsrd restart >/dev/null || true

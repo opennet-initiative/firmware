@@ -98,7 +98,6 @@ verify_vpn_connection() {
 	local hostname
 	local status_output
 
-	get_openvpn_config "$service_name" "$use_sender" >"$temp_config_file"
 	msg_debug "start vpn test of <$temp_config_file>"
 
 	# check if it is possible to open tunnel to the gateway (10 sec. maximum)
@@ -107,8 +106,8 @@ verify_vpn_connection() {
 	
 	# some openvpn options:
 	#   ifconfig-noexec: we do not want to configure a device (and mess up routing tables)
-	#   route-nopull: ignore any advertised routes - we do not want to redirect traffic
-	openvpn_opts="$openvpn_opts --ifconfig-noexec --route-nopull"
+	#   route-noexec: keinerlei Routen hinzufuegen
+	openvpn_opts="$openvpn_opts --ifconfig-noexec --route-noexec"
 
 	# some timing options:
 	#   inactive: close connection after 15s without traffic
@@ -133,8 +132,9 @@ verify_vpn_connection() {
 	#   ns-cert-type: enforce a connection against a server certificate (instead of peer-to-peer)
 	openvpn_opts="$openvpn_opts --tls-verify /bin/false --tls-exit --ns-cert-type server"
 
+	# filtere Einstellungen heraus, die wir ueberschreiben wollen
 	# nie die echte PID-Datei ueberschreiben (falls ein Prozess laeuft)
-	sed -i "/^writepid/d" "$temp_config_file"
+	get_openvpn_config "$service_name" "$use_sender" | grep -v -E "^(writepid|dev)[ \t]" >"$temp_config_file"
 
 	[ -n "$key_file" ] && \
 		openvpn_opts="$openvpn_opts --key $key_file" && \

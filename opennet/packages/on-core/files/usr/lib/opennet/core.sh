@@ -287,7 +287,7 @@ apply_changes() {
 	[ -z "$(uci changes "$config")" -a "$config" != "on-core" ] && return 0
 	uci commit "$config"
 	case "$config" in
-		system|network|firewall)
+		system|network|firewall|dhcp)
 			reload_config || true
 			;;
 		olsrd)
@@ -298,13 +298,16 @@ apply_changes() {
 			;;
 		on-usergw)
 			update_openvpn_ugw_settings
-			apply_changes openvpn
-			apply_changes olsrd
-			apply_changes firewall
+			/etc/init.d/openvpn reload || true
+			/etc/init.d/olsrd restart || true
+			reload_config || true
 			;;
 		on-core)
 			update_ntp_servers
 			update_dns_servers
+			;;
+		on-openvpn)
+			# es ist nichts zu tun
 			;;
 		*)
 			msg_info "no handler defined for applying config changes for '$config'"
@@ -466,5 +469,14 @@ is_timestamp_older_minutes() {
 		msg_info "WARNING: Timestamp from future found: $timestamp_minute (minutes since epoch)" && \
 		return 0
 	trap "" $GUARD_TRAPS && return 1
+}
+
+
+# Fuehre eine Aktion verzoegert im Hintergrund aus.
+# Parameter: Verzoegerung in Sekunden
+# Parameter: Kommandozeile
+run_delayed_in_background() {
+	local delay="$1"
+	(sleep "$delay" && "$@") </dev/null >/dev/null 2>&1
 }
 

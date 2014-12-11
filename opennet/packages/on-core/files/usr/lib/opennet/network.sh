@@ -1,4 +1,4 @@
-ZONE_LOCAL=lan
+ZONE_LOCAL=local
 ZONE_WAN=wan
 ZONE_MESH=on_mesh
 ZONE_TUNNEL=on_vpn

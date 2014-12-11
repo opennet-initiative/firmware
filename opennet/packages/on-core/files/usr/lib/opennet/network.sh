@@ -18,14 +18,13 @@ query_dns_reverse() { nslookup "$1" 2>/dev/null | tail -n 1 | awk '{ printf "%s"
 add_zone_forward() {
 	local source=$1
 	local dest=$2
-	local section
 	local uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
 	# die Weiterleitungsregel existiert bereits -> Ende
 	[ -n "$uci_prefix" ] && return 0
 	# neue Regel erstellen
-	section=$(uci add firewall forwarding)
-	uci set "firewall.${section}.src=$source"
-	uci set "firewall.${section}.dest=$dest"
+	uci_prefix="firewall.$(uci add firewall forwarding)"
+	uci set "${uci_prefix}.src=$source"
+	uci set "${uci_prefix}.dest=$dest"
 }
 
 

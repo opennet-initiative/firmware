@@ -37,8 +37,8 @@ configure_tunnel_firewall() {
 
 	# Weiterleitung aus dem lokalen Netzwerk heraus erlauben
 	uci_prefix=firewall.$(uci add firewall forwarding)
-	uci set "firewall.${section}.src=$ZONE_LOCAL"
-	uci set "firewall.${section}.dest=$ZONE_TUNNEL"
+	uci set "${uci_prefix}.src=$ZONE_LOCAL"
+	uci set "${uci_prefix}.dest=$ZONE_TUNNEL"
 
 	apply_changes firewall
 }

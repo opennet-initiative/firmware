@@ -100,6 +100,10 @@ verify_vpn_connection() {
 
 	msg_debug "start vpn test of <$temp_config_file>"
 
+	# filtere Einstellungen heraus, die wir ueberschreiben wollen
+	# nie die echte PID-Datei ueberschreiben (falls ein Prozess laeuft)
+	get_openvpn_config "$service_name" "$use_sender" | grep -v -E "^(writepid|dev|tls-verify)[ \t]" >"$temp_config_file"
+
 	# check if it is possible to open tunnel to the gateway (10 sec. maximum)
 	# Assembling openvpn parameters ...
 	openvpn_opts="--dev null"
@@ -120,21 +124,18 @@ verify_vpn_connection() {
 	#   resolv-retry: fuer ipv4/ipv6-Tests sollten wir mehrere Versuche zulassen
 	openvpn_opts="$openvpn_opts --verb 3 --nice 3 --resolv-retry 3"
 
-	# wohl nur fuer tcp-Verbindungen
-	#   connect-retry: Sekunden Wartezeit zwischen Versuchen
-	#   connect-timeout: Dauer eines Versuchs
-	#   connect-retry-max: Anzahl moeglicher Wiederholungen
-	openvpn_opts="$openvpn_opts --connect-retry 1 --connect-timeout 15 --connect-retry-max 1"
-
 	# prevent a real connection (otherwise we may break our current vpn tunnel):
 	#   tls-verify: force a tls handshake failure
 	#   tls-exit: stop immediately after tls handshake failure
 	#   ns-cert-type: enforce a connection against a server certificate (instead of peer-to-peer)
 	openvpn_opts="$openvpn_opts --tls-verify /bin/false --tls-exit --ns-cert-type server"
 
-	# filtere Einstellungen heraus, die wir ueberschreiben wollen
-	# nie die echte PID-Datei ueberschreiben (falls ein Prozess laeuft)
-	get_openvpn_config "$service_name" "$use_sender" | grep -v -E "^(writepid|dev)[ \t]" >"$temp_config_file"
+	# nur fuer tcp-Verbindungen
+	#   connect-retry: Sekunden Wartezeit zwischen Versuchen
+	#   connect-timeout: Dauer eines Versuchs
+	#   connect-retry-max: Anzahl moeglicher Wiederholungen
+	grep "^proto[ \t]\+tcp" "$temp_config_file" &&
+		openvpn_opts="$openvpn_opts --connect-retry 1 --connect-timeout 15 --connect-retry-max 1"
 
 	[ -n "$key_file" ] && \
 		openvpn_opts="$openvpn_opts --key $key_file" && \

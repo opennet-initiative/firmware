@@ -1,8 +1,6 @@
 # Standard-IP-Adresse
 CONFIG_IMAGEOPT=y
 CONFIG_VERSIONOPT=y
-# TODO: die URL funktioniert noch nicht und muss final diskutiert werden
-CONFIG_VERSION_REPO="http://downloads.opennet-initiative.de/openwrt/testing/%V-%R/%T/packages"
 CONFIG_VERSION_MANUFACTURER="Opennet Initiative e.V."
 
 

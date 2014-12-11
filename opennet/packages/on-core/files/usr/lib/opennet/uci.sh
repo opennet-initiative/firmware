@@ -94,7 +94,7 @@ _find_uci_sections() {
 	local condition
 	# dieser Cache beschleunigt den Vorgang wesentlich
 	local uci_cache=$(uci -X show "$config")
-	echo "$uci_cache" | grep "^$config\.cfg[^.]\+=$stype$" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
+	echo "$uci_cache" | grep "^$config\.[^.]\+=$stype$" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
 		for condition in "$@"; do
 			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt
 			echo "$uci_cache" | grep -q "^$config\.$section\.$condition$" || continue 2

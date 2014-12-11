@@ -195,7 +195,7 @@ _get_olsr_route_info_column() {
 	local target="$1"
 	local column="$2"
 	# verwende den letzten gecachten Wert, falls vorhanden
-	[ -z "$ROUTE_INFO" ] && ROUTE_INFO=$(echo /routes | nc localhost 2006 | grep "^[0-9]" | sed 's#/32##')
+	[ -z "$ROUTE_INFO" ] && ROUTE_INFO=$(echo /routes | nc -w 2 localhost 2006 | grep "^[0-9]" | sed 's#/32##')
 	echo "$ROUTE_INFO" | awk '{ if ($1 == "'$target'") { print $'$column'; exit; } }'
 }
 

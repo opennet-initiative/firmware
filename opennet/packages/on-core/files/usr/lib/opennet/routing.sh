@@ -9,11 +9,7 @@ RT_FILE=/etc/iproute2/rt_tables
 RT_START_ID=11
 # Prioritaets-Offset fuer default-Routing-Tabellen (z.B. "default" und "olsrd-default")
 DEFAULT_RULE_PRIO_OFFSET=100
-
-# hier speichern wir die Routing-Informationen zwischenzeitlich
-# Dabei gehen wir davon aus, dass dieser Prozess nicht lange laeuft, da
-# die Werte nur ein einziges Mal pro Programmstart eingelesen werden.
-ROUTE_INFO=
+OLSR_ROUTE_CACHE_FILE=/tmp/olsr_routes.cache
 
 
 # Pruefe ob der uebegebene Text eine IPv4-Adresse ist
@@ -191,11 +187,23 @@ get_hop_count() {
 	_get_olsr_route_info_column "$target" 3
 }
 
+
 _get_olsr_route_info_column() {
 	local target="$1"
 	local column="$2"
-	# verwende den letzten gecachten Wert, falls vorhanden
-	[ -z "$ROUTE_INFO" ] && ROUTE_INFO=$(echo /routes | nc -w 2 localhost 2006 | grep "^[0-9]" | sed 's#/32##')
-	echo "$ROUTE_INFO" | awk '{ if ($1 == "'$target'") { print $'$column'; exit; } }'
+	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
+	[ ! -e "$OLSR_ROUTE_CACHE_FILE" ] && return
+	cat "$OLSR_ROUTE_CACHE_FILE" | awk '{ if ($1 == "'$target'") { print $'$column'; exit; } }'
+}
+
+
+# Diese Funktion sollte oft (minuetlich?) aufgerufen werden, um die olsrd-Routing-Informationen abzufragen.
+# Dies ist noetig, um deadlocks bei parallelem Zugriff auf den single-thread olsrd zu verhindern.
+# Symptome eines deadlocks: olsrd ist beendet; viele parallele nc-Instanzen; eine davon ist an den txtinfo-Port gebunden.
+update_olsr_route_cache() {
+	# die temporaere Datei soll verhindern, dass es zwischendurch ein Zeitfenster mit unvollstaendigen Informationen gibt
+	local tmpfile="${OLSR_ROUTE_CACHE_FILE}.new"
+	echo /routes | nc -w 2 localhost 2006 | grep "^[0-9]" | sed 's#/32##' > "$tmpfile"
+	mv "$tmpfile" "$OLSR_ROUTE_CACHE_FILE"
 }
 

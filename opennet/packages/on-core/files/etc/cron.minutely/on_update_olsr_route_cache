@@ -1,0 +1,4 @@
+#!/bin/sh
+
+on-function update_olsr_route_cache
+

@@ -36,7 +36,7 @@ test_mig_connection() {
 		# In den naechsten 'vpn_recheck_age' Minuten wollen wir keine Pruefungen durchfuehren.
 		set_service_value "$service_name" "timestamp_connection_test" "$now"
 		trap "" $GUARD_TRAPS && return 1
-	elif [ -z "$timestamp" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age" || [ -z "$status" ]; then
+	elif [ -z "$timestamp" ] || [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age"; then
 		# Neue Pruefung, falls:
 		# 1) noch nie eine Pruefung stattfand
 		# oder
@@ -45,15 +45,18 @@ test_mig_connection() {
 		# 3) falls bisher noch kein definitives Ergebnis feststand (dies ist nur innerhalb
 		#    der ersten "recheck" Minuten nach dem Booten moeglich).
 		# In jedem Fall kann der Zeitstempel gesetzt werden - egal welches Ergebnis die Pruefung hat.
-		set_service_value "$service_name" "timestamp_connection_test" "$now"
 		if verify_vpn_connection "$service_name" "true" \
 				"$MIG_TEST_VPN_DIR/on_aps.key" \
 				"$MIG_TEST_VPN_DIR/on_aps.crt" \
 				"$MIG_TEST_VPN_DIR/opennet-ca.crt"; then
 			msg_debug "vpn-availability of gw $host successfully tested"
 			set_service_value "$service_name" "status" "y"
+			set_service_value "$service_name" "timestamp_connection_test" "$now"
 			return 0
 		else
+			# kein Zeitstempel? Dann muessen wir beginnen zu zaehlen, damit der
+			# Test irgendwann in den "broken"-Zustand uebergehen kann.
+			[ -z "$timestamp" ] && set_service_value "$service_name" "timestamp_connection_test" "$now"
 			# Solange wir keinen "status" setzen, wird der Test bei jedem Lauf wiederholt, bis "nonworking_timeout"
 			# erreicht ist.
 			msg_debug "vpn test of $host failed"

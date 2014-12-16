@@ -6,14 +6,15 @@ client
 nobind
 comp-lzo yes
 
-# sanfte Abmeldung vom Server
-explicit-exit-notify 1
+# keine sanfte Abmeldung vom Server - sonst ueberschreibt dieses Signal das "ping-restart"-Signal bei einem Verbindungsabbruch
+#explicit-exit-notify 1
+# explizit kein "persist-tun" - damit wir Verbindungsabbrueche via down-Skript erkennen koennen
+#persist-tun
+
+persist-key
 
 dev tun
 dev-type tun
-
-persist-key
-persist-tun
 
 ns-cert-type server
 script-security 2 execve

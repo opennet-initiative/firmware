@@ -17,5 +17,12 @@ if [ -f "/etc/init.d/dhcp-fwd" ]; then
 	stop &
 fi
 
+# ist die Verbindung via ping-restart abgerissen?
+if [ "${signal:-}" = "ping-restart" ]; then
+	# markiere die aktuelle Verbindung als kaputt
+	broken_service=$(on-function get_active_mig_connections | head -1)
+	[ -n "$broken_service" ] && on-function set_service_value "$broken_service" "status" "n" || true
+fi
+
 exit 0
 

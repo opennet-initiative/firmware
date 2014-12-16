@@ -6,7 +6,7 @@ LOCAL_BIAS_NUMBER=$(get_main_ip | sed 's/[^0-9]//g')
 DEFAULT_SERVICE_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
 # unbedingt synchron halten mit "_is_persistent_service_attribute" (der Effizienz wegen getrennt)
-PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset"
+PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset disabled"
 
 
 _get_service_name() {
@@ -217,6 +217,7 @@ _is_persistent_service_attribute() {
 		-o "$1" = "file_dependency" \
 		-o "$1" = "rank" \
 		-o "$1" = "offset" \
+		-o "$1" = "disabled" \
 		] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }

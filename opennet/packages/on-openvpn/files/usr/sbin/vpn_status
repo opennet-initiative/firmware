@@ -32,24 +32,30 @@ print_status()
 	printf "$format_string" "active" "IP" "Quality" "VPN" "Age"
 	get_sorted_services gw ugw | while read service_name; do
 		host=$(get_service_value "$service_name" "host")
-		timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
-		if [ -n "$timestamp" ]; then
-			age=$((now-timestamp))
+		if uci_is_true "$(get_service_value "$service_name" "disabled" "false")"; then
+			# der Dienst wird ignoriert
+			printf "$format_string" "" "($host)" "" "" ""
 		else
-			age=
+			# der Dienst wurde nicht abgeschaltet
+			timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
+			if [ -n "$timestamp" ]; then
+				age=$((now-timestamp))
+			else
+				age=
+			fi
+			status=$(get_service_value "$service_name" "status")
+			if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
+				offset=$(get_service_value "$service_name" "offset")
+				quality=$(get_distance_with_offset "$service_name")
+				[ -z "$offset" ] && offset=0
+				[ "$offset" -gt 0 ] && offset="+$offset"
+				[ "$offset" -ne 0 ] && quality="($offset) $quality"
+			elif [ "$sorting" = "manual" ]; then
+				quality=$(get_service_value "$service_name" "rank")
+			fi
+			active=$(is_openvpn_service_active "$service_name" && echo "*" || true)
+			printf "$format_string" "$active" "$host" "$quality" "$status" "$age"
 		fi
-		status=$(get_service_value "$service_name" "status")
-		if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
-			offset=$(get_service_value "$service_name" "offset")
-			quality=$(get_distance_with_offset "$service_name")
-			[ -z "$offset" ] && offset=0
-			[ "$offset" -gt 0 ] && offset="+$offset"
-			[ "$offset" -ne 0 ] && quality="($offset) $quality"
-		elif [ "$sorting" = "manual" ]; then
-			quality=$(get_service_value "$service_name" "rank")
-		fi
-		active=$(is_openvpn_service_active "$service_name" && echo "*" || true)
-		printf "$format_string" "$active" "$host" "$quality" "$status" "$age"
 	done
 }
 

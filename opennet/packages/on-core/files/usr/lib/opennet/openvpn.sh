@@ -9,8 +9,8 @@ enable_openvpn_service() {
 	local use_sender="$2"
 	local uci_prefix="openvpn.$service_name"
 	local config_file=$(get_service_value "$service_name" "config_file")
-	update_vpn_config "$service_name" "$use_sender"
-	service_add_file_dependency "$service_name" "$config_file"
+	# zukuenftige config-Datei referenzieren
+	update_vpn_config "$service_name" "true"
 	# zuvor ankuendigen, dass zukuenftig diese uci-Konfiguration an dem Dienst haengt
 	service_add_uci_dependency "$service_name" "$uci_prefix"
 	# lege die uci-Konfiguration an und aktiviere sie
@@ -25,6 +25,8 @@ enable_openvpn_service() {
 update_vpn_config() {
 	local service_name="$1"
 	local use_sender="$2"
+	local config_file=$(get_service_value "$service_name" "config_file")
+	service_add_file_dependency "$service_name" "$config_file"
 	# Konfigurationsdatei neu schreiben
 	mkdir -p "$(dirname "$config_file")"
 	get_openvpn_config "$service_name" "$use_sender" >"$config_file"
@@ -33,9 +35,8 @@ update_vpn_config() {
 
 disable_openvpn_service() {
 	local service_name="$1"
-	local config_file=$(get_service_value "$service_name" "config_file")
-	rm -f "$config_file"
-	uci_delete "openvpn.$service_name"
+	# Abbruch, falls es keine openvpn-Instanz gibt
+	[ -z "$(uci_get "openvpn.$service_name")" ] && return 0
 	cleanup_service_dependencies "$service_name"
 	apply_changes openvpn
 }

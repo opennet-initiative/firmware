@@ -13,10 +13,6 @@ update_mig_service() {
 	set_service_value "$service_name" "template_file" "$template_file"
 	set_service_value "$service_name" "config_file" "$config_file"
 	set_service_value "$service_name" "pid_file" "$pid_file"
-	if [ ! -e "$config_file" ]; then
-		update_vpn_config "$service_name" "true"
-		/etc/init.d/openvpn reload
-	fi
 }
 
 
@@ -29,7 +25,6 @@ test_mig_connection() {
 	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
 	update_mig_service "$service_name"
 	local host=$(get_service_value "$service_name" "host")
-	local config_file=$(get_service_value "$service_name" "config_file")
 	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
 	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)
 	local now=$(get_time_minute)
@@ -83,7 +78,7 @@ select_mig_connection() {
 		# loesche Flags fuer die Vorselektion
 		set_service_value "$one_service" "switch_candidate_timestamp" ""
 		[ "$one_service" = "$wanted" ] && enable_openvpn_service "$wanted" "true" && continue
-		is_openvpn_service_active "$one_service" && disable_openvpn_service "$one_service" || true
+		disable_openvpn_service "$one_service" || true
 	done
 }
 

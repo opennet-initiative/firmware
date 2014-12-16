@@ -12,6 +12,8 @@
 # 
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+# die nachfolgenden Kommandos sind nicht sicher
+set +eu
 
 DATABASE_VERSION="0.2"          # we start with 0.2 to have space for the old firmware database, which is 0.1
 DATABASE_FILE="/tmp/database"   # ".json" will be added if it is exported as JSON
@@ -65,8 +67,8 @@ print_interfaces_2_6() {
 	fi
 #     if_type_bridge=$(ls /sys/class/net/${if_name}/brif 2>/dev/null)                      # is bridge interface, list bridged interfaces
     if_type_bridge="$(ls /sys/class/net/${if_name}/brif 2>/dev/null | awk '{printf $1" "}')"
-    ip_addr=$(ip address show $if_name | awk 'BEGIN{ORS=" "} /inet/ {print $2}')  #   contains additional whitespace
-    if_type_bridgedif=$([ "$(ls /sys/class/net/${if_name}/brport 2>/dev/null)" ] && echo "1")    # is bridged interface
+    ip_addr=$(ip address show "$if_name" | awk 'BEGIN{ORS=" "} /inet/ {print $2}')  #   contains additional whitespace
+    if_type_bridgedif=$([ -e "/sys/class/net/${if_name}/brport/bridge" ] && echo "1")    # is bridged interface
       
     if [ "$iface_up" = "up" ] && ([ -n "$ip_addr" ] || [ -n "$if_type_bridgedif" ]) || [ -n "$if_type_bridge" ]; then
       wlan=$(ls /sys/class/net/${if_name}/wireless/ 2>/dev/null)
@@ -138,8 +140,12 @@ print_interfaces_2_6() {
       dhcp_limit="$([ "$dhcpignore" = "1" ] || uci_get dhcp.${lastnetwork}.limit)"
       dhcp_leasetime="$([ "$dhcpignore" = "1" ] || uci_get dhcp.${lastnetwork}.leasetime)"
 
-      dhcp_fwd="$dhcpfwd $(awk 'BEGIN{out=0} {if ($1 == "if" && $2 == "'$if_name'" && $3 == "true") out=1;
-                if (out == 1 && $1 == "server" && $2 == "ip") printf $3}' /etc/dhcp-fwd.conf)"
+      if [ -e /etc/dhcp-fwd.conf ]; then
+          dhcp_fwd="${dhcpfwd:-} $(awk 'BEGIN{out=0} {if ($1 == "if" && $2 == "'$if_name'" && $3 == "true") out=1;
+                  if (out == 1 && $1 == "server" && $2 == "ip") printf $3}' /etc/dhcp-fwd.conf)"
+      else
+          dhcp_fwd=""
+      fi
       on_olsr="$(echo "$olsr_interfaces" | awk 'BEGIN{out="0"} {if ($1 == "'$if_name'") {out="1"; end};} END{print out;}')"
 
       SQL_STRING="$SQL_STRING
@@ -190,7 +196,7 @@ SQL_STRING=""
 create_database
 
 on_id="$(uci_get on-core.settings.on_id)"
-on_olsr_mainip="$(echo \"/config\" | nc localhost 2006 2>/dev/null | awk '/MainIp/ {print $2}')"
+on_olsr_mainip="$(get_main_ip)"
 db_epoch="$(date +%s)"
 
 SQL_STRING="$SQL_STRING 

@@ -477,6 +477,7 @@ is_timestamp_older_minutes() {
 # Parameter: Kommandozeile
 run_delayed_in_background() {
 	local delay="$1"
+	shift
 	(sleep "$delay" && "$@") </dev/null >/dev/null 2>&1 &
 }
 

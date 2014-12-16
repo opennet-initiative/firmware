@@ -1,6 +1,7 @@
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
-SPEEDTEST_UPLOAD_PORT=22222
+# eine beliebige Portnummer, auf der wir keinen Dienst vermuten
+SPEEDTEST_UPLOAD_PORT=29418
 SPEEDTEST_SECONDS=20
 UGW_FIREWALL_RULE_NAME=opennet_ugw
 UGW_LOCAL_SERVICE_PORT_START=5100
@@ -181,7 +182,8 @@ measure_download_speed() {
 # Pruefe Bandbreite durch kurzen Upload-Datenverkehr
 measure_upload_speed() {
 	local host=$1
-	nc "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
+	# UDP-Verkehr laesst sich auch ohne einen laufenden Dienst auf der Gegenseite erzeugen
+	nc -u "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
 	local pid=$!
 	sleep 3
 	[ ! -d "/proc/$pid" ] && return

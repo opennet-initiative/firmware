@@ -58,7 +58,8 @@ update_dns_servers() {
 	done | update_file_if_changed "$servers_file" || return 0
 	# es gab eine Aenderung
 	msg_info "updating DNS servers"
-	killall -s HUP dnsmasq	# reload config
+	# Konfiguration neu einlesen
+	killall -s HUP dnsmasq 2>/dev/null || true
 }
 
 # Gather the list of hosts announcing a NTP services.

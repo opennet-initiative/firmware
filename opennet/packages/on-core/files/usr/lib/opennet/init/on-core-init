@@ -36,7 +36,31 @@ disable_dnsmasq_rebind_protection() {
 }
 
 
+_add_crontab_entry_if_missing() {
+	local file="$1"
+	local time="$2"
+	local command="$3"
+	local line
+	while read line; do
+		# Wurde die Zeile gefunden? Sofort mit Erfolg abbrechen ...
+		[ "$line" != "${line%$command}" ] && return 0 || true
+	done <"$file"
+	# es gab keinen Treffer - wir fuegen die Zeile hinzu
+	echo -e "$time\t$command" >>"$file"
+}
+
+add_crontab_entries() {
+	local crontab_file=/etc/crontabs/root
+	# wir wollen anschliessend pruefen, welche Zeilen vorhanden sind - also notfalls eine leere Datei anlegen
+	[ -e "$crontab_file" ] || touch "$crontab_file"
+	_add_crontab_entry_if_missing "$crontab_file" "* * * * *"	"run-parts /etc/cron.minutely"
+	_add_crontab_entry_if_missing "$crontab_file" "*/5 * * * *"	"run-parts /etc/cron.5mins"
+	_add_crontab_entry_if_missing "$crontab_file" "02 4 * * *"	"run-parts /etc/cron.daily"
+}
+
+
 add_use_settings
 disable_cron_logging
 disable_dnsmasq_rebind_protection
+add_crontab_entries
 

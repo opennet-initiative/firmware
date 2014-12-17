@@ -117,6 +117,14 @@ remove_usergw_openvpn_configs() {
 }
 
 
+# Die uci-Sektion on-core.defaults wurde nur bis v0.4-5 verwendet.
+# Anschliessend wanderten diese Einstellungen nach /usr/share/opennet/core.defaults.
+remove_obsolete_on_core_settings() {
+	[ -n "$(uci_get "on-core.defaults")" ] && uci delete "on-core.defaults"
+	return 0
+}
+
+
 # bis Version 0.4-5 wurde die Variable "on-usergw.ugwng_hna_mask" verwendet.
 remove_obsolete_usergw_settings() {
 	[ -n "$(uci_get "on-usergw.ugwng_hna_mask")" ] && uci delete "on-usergw.ugwng_hna_mask"
@@ -180,12 +188,25 @@ transfer_gateway_uci_settings() {
 }
 
 
+# Bis Version 0.4-5 wurde die Datei /etc/crontabs/root einfach ueberschrieben (bzw. erzeugt).
+# Die damaligen Zeilen sind spaeter nicht mehr nutzbar, da sie auf /usr/bin/run-parts.sh verweisen (spaeter: "/bin/run-parts").
+# Fortan werden die Eintraege manuell hinzugefuegt (siehe /etc/uci-defaults/on-core-init).
+remove_crontab_entries() {
+	local crontab_file=/etc/crontabs/root
+	[ -e "$crontab_file" ] || return 0
+	sed -i '/\/usr\/bin\/run-parts\.sh/d' "$crontab_file"
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_firewall_reload
 remove_tunnel_openvpn_settings
+remove_obsolete_on_core_settings
 remove_usergw_openvpn_configs
 rename_firewall_zone_opennet_to_on_mesh
+remove_crontab_entries
+
 # Diese Aktion startet mit 10 Minuten Verzoegerung im Hintergrund, um vorher ein Empfangen der
 # olsrd-Announcements zu ermoeglichen.
 run_delayed_in_background 600 transfer_gateway_uci_settings

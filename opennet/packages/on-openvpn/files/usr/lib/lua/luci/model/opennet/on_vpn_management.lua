@@ -33,6 +33,9 @@ function upload_file(type)
 		replace_file(tmpfile, SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".key")
 	elseif (string.find(upload_value, ".crt")) then
 		replace_file(tmpfile, SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".crt")
+	else
+		-- unbekannter Datentyp? Wir muessen die Datei loeschen - sonst wird sie beim naechsten Upload wiederverwendet.
+		nixio.fs.remove(tmpfile)
 	end
 end
 

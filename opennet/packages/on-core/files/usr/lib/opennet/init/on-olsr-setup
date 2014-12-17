@@ -11,12 +11,24 @@ set -eu
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
+configure_olsrd_httpinfo_port() {
+	trap "error_trap configure_olsrd_httpinfo_port_8080 '$*'" $GUARD_TRAPS
+	local port="$1"
+	local uci_prefix
+
+	# add and activate ondataservice plugin
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "httpinfo")
+	uci set "${uci_prefix}.port=8080"
+}
+
+
 # erwuenschte Einstellungen setzen
 enable_ondataservice
 enable_nameservice
 disable_missing_olsr_modules
 olsr_set_main_ip
 olsr_set_routing_tables olsrd olsrd-default
+configure_olsrd_httpinfo_port 8080
 
 apply_changes olsrd
 

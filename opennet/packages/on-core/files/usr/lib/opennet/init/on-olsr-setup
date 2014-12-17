@@ -12,13 +12,25 @@ set -eu
 
 
 configure_olsrd_httpinfo_port() {
-	trap "error_trap configure_olsrd_httpinfo_port_8080 '$*'" $GUARD_TRAPS
+	trap "error_trap configure_olsrd_httpinfo_port '$*'" $GUARD_TRAPS
 	local port="$1"
 	local uci_prefix
 
-	# add and activate ondataservice plugin
+	# add and activate httpinfo plugin
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "httpinfo")
 	uci set "${uci_prefix}.port=8080"
+}
+
+
+# das jsoninfo-Modul ist notwendig fuer die luci-Integration von olsrd
+# (nett, aber unwichtig)
+olsrd_enable_jsoninfo() {
+	trap "error_trap olsrd_enable_jsoninfo '$*'" $GUARD_TRAPS
+	local uci_prefix
+
+	# add and activate jsoninfo plugin
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "jsoninfo")
+	uci set "${uci_prefix}.ignore=0"
 }
 
 
@@ -29,6 +41,7 @@ disable_missing_olsr_modules
 olsr_set_main_ip
 olsr_set_routing_tables olsrd olsrd-default
 configure_olsrd_httpinfo_port 8080
+olsrd_enable_jsoninfo
 
 apply_changes olsrd
 

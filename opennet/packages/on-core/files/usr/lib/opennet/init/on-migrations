@@ -132,39 +132,6 @@ remove_obsolete_usergw_settings() {
 }
 
 
-# Bis Version 0.4-5 hiess die Opennet-Mesh-Firewall-Zone "opennet".
-# Mit Version 0.5 wurde die Zone in "on_mesh" umbenannt.
-rename_firewall_zone_opennet_to_on_mesh() {
-	local setting
-	local uci_prefix
-	local key
-	local old_zone=opennet
-	local old_uci_prefix=$(find_first_uci_section firewall zone "name=$old_zone")
-	# die Zone existiert nicht (mehr)
-	[ -z "$old_uci_prefix" ] && return
-	local new_uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
-	[ -z "$new_uci_prefix" ] && new_uci_prefix="firewall.$(uci add firewall zone)"
-	uci show "$old_uci_prefix" | cut -f 3- -d . | while read setting; do
-		# die erste Zeile (der Zonen-Typ) ueberspringen
-		[ -z "$setting" ] && continue
-		uci set "${new_uci_prefix}.$setting"
-	done
-	# den Namen ueberschreiben (er wurde oben von der alten Zone uebernommen)
-	uci set "${new_uci_prefix}.name=$ZONE_MESH"
-	# aktualisiere alle Forwardings, Redirects und Regeln
-	for section in "forwarding" "redirect" "rule"; do
-		for key in "src" "dest"; do
-			find_all_uci_sections firewall "$section" "${key}=$old_zone" | while read uci_prefix; do
-				uci set "${uci_prefix}.${key}=$ZONE_MESH"
-			done
-		done
-	done
-	# fertig - wir loeschen die alte Zone
-	uci_delete "$old_uci_prefix"
-	apply_changes firewall
-}
-
-
 # Die uci-Einstellungen "on-openvpn.gate_XY.*" waren bis Version 0.4-5 in Verwendung.
 # Anschliessend wurden diese Informationen im Dateisystem gespeichert.
 # Im Zweifelsfall (z.B. falls gerade keine Verbindung zum mesh existiert), werden die
@@ -204,7 +171,11 @@ fix_firewall_reload
 remove_tunnel_openvpn_settings
 remove_obsolete_on_core_settings
 remove_usergw_openvpn_configs
-rename_firewall_zone_opennet_to_on_mesh
+# Bis Version 0.4-5 hiess die Opennet-Mesh-Firewall-Zone "opennet".
+# Mit Version 0.5 wurde die Zone in "on_mesh" umbenannt.
+rename_firewall_zone "opennet" "$ZONE_MESH"
+# Bis Version 0.4-5 hiess die lokale Zone "local" - bei barrier braker heisst sie nun "lan"
+rename_firewall_zone "local" "$ZONE_LOCAL"
 remove_crontab_entries
 
 # Diese Aktion startet mit 10 Minuten Verzoegerung im Hintergrund, um vorher ein Empfangen der

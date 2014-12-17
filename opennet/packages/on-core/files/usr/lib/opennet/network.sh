@@ -246,3 +246,35 @@ get_all_network_interfaces() {
 	return
 }
 
+
+rename_firewall_zone() {
+	local old_zone="$1"
+	local new_zone="$2"
+	local setting
+	local uci_prefix
+	local key
+	local old_uci_prefix=$(find_first_uci_section firewall zone "name=$old_zone")
+	# die Zone existiert nicht (mehr)
+	[ -z "$old_uci_prefix" ] && return
+	local new_uci_prefix=$(find_first_uci_section firewall zone "name=$new_zone")
+	[ -z "$new_uci_prefix" ] && new_uci_prefix="firewall.$(uci add firewall zone)"
+	uci show "$old_uci_prefix" | cut -f 3- -d . | while read setting; do
+		# die erste Zeile (der Zonen-Typ) ueberspringen
+		[ -z "$setting" ] && continue
+		uci set "${new_uci_prefix}.$setting"
+	done
+	# den Namen ueberschreiben (er wurde oben von der alten Zone uebernommen)
+	uci set "${new_uci_prefix}.name=$new_zone"
+	# aktualisiere alle Forwardings, Redirects und Regeln
+	for section in "forwarding" "redirect" "rule"; do
+		for key in "src" "dest"; do
+			find_all_uci_sections firewall "$section" "${key}=$old_zone" | while read uci_prefix; do
+				uci set "${uci_prefix}.${key}=$new_zone"
+			done
+		done
+	done
+	# fertig - wir loeschen die alte Zone
+	uci_delete "$old_uci_prefix"
+	apply_changes firewall
+}
+

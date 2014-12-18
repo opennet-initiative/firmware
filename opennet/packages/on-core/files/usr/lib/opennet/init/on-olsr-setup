@@ -18,7 +18,9 @@ configure_olsrd_httpinfo_port() {
 
 	# add and activate httpinfo plugin
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "httpinfo")
-	[ -z "$(uci_get "${uci_prefix}.port")" ] && uci set "${uci_prefix}.port=8080"
+	# Wir koennen leider nicht zwischen "Nutzer hat 1978 eingestellt" und "Auslieferungszustand" unterscheiden.
+	# Falls der Nutzer also explizit diesen Port will, dann muss er ihn nach einem Upgrade wieder einstellen.
+	[ "$(uci_get "${uci_prefix}.port" "1978")" = "1978" ] && uci set "${uci_prefix}.port=8080"
 	return 0
 }
 

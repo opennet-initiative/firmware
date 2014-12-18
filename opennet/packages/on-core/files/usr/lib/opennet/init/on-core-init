@@ -49,6 +49,7 @@ _add_crontab_entry_if_missing() {
 	echo -e "$time\t$command" >>"$file"
 }
 
+
 add_crontab_entries() {
 	local crontab_file=/etc/crontabs/root
 	# wir wollen anschliessend pruefen, welche Zeilen vorhanden sind - also notfalls eine leere Datei anlegen
@@ -59,8 +60,15 @@ add_crontab_entries() {
 }
 
 
+define_persistent_uci_settings() {
+	uci set "luci.flash_keep.on_core_services=/etc/on-services.d/"
+	uci commit luci
+}
+
+
 add_use_settings
 disable_cron_logging
 disable_dnsmasq_rebind_protection
 add_crontab_entries
+define_persistent_uci_settings
 

@@ -120,11 +120,15 @@ remove_usergw_openvpn_configs() {
 # Die uci-Sektion on-core.defaults und on-core.openssl wurde nur bis v0.4-5 verwendet.
 # Anschliessend wanderten diese Einstellungen nach /usr/share/opennet/core.defaults.
 # Ausserdem sind die folgenden Schluessel nach v0.4-5 nicht mehr in Verwendung:
-#   on-openvpn.gateways.searchmask
-#   on-openvpn.gateways.gw_dns
-#   on-openvpn.gateways.gw_ntp
-#   on-openvpn.gateways.better_gw
-#   on-openvpn.gateways.autosearch
+#   on-core.gateways.searchmask
+#   on-core.gateways.gw_dns
+#   on-core.gateways.gw_ntp
+#   on-core.gateways.better_gw
+#   on-core.gateways.autosearch
+#   on-core.gateways.vpn_nonworking_timeout
+#   on-core.gateways.vpn_bettergateway_timeout
+#   on-core.gateways.vpn_sort_criteria
+#   on-core.gateways.vpn_recheck_age
 remove_obsolete_on_core_settings() {
 	local key
 	for key in defaults openssl \
@@ -132,7 +136,11 @@ remove_obsolete_on_core_settings() {
 			gateways.gw_dns \
 			gateways.gw_ntp \
 			gateways.better_gw \
-			gateways.autosearch; do
+			gateways.autosearch \
+			vpn_nonworking_timeout \
+			gateways.vpn_bettergateway_timeout \
+			gateways.vpn_sort_criteria \
+			gateways.vpn_recheck_age; do
 		[ -n "$(uci_get "on-core.$key")" ] && uci_delete "on-core.$key" || true
 	done
 	return 0

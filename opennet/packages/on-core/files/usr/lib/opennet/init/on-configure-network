@@ -43,6 +43,8 @@ configure_opennet_zone() {
 	# via "masq_src" ersetzen wir die ehemalige "/etc/firewall.opennet" fuer Quell-basiertes Masquerading
 	add_zone_forward local "$ZONE_MESH"
 	update_opennet_zone_masquerading
+	# intra-Zone-Verkehr muss explizit erlaubt werden
+	add_zone_forward "$ZONE_MESH" "$ZONE_MESH"
 }
 
 

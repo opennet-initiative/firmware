@@ -1,0 +1,4 @@
+#!/bin/sh
+
+on-function run_scheduled_olsrd_service_updates
+

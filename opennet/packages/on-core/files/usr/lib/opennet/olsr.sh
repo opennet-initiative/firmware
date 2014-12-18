@@ -4,6 +4,7 @@
 
 OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 SERVICES_FILE=/var/run/services_olsr
+OLSR_SERVICE_UPDATE_MARKER=/var/run/waiting_for_olsr_services_update
 
 
 # uebertrage die Netzwerke, die derzeit der Zone "opennet" zugeordnet sind, in die olsr-Konfiguration
@@ -222,5 +223,17 @@ update_olsr_services() {
 		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
 	done
 	apply_changes on-core
+}
+
+
+schedule_olsrd_service_update() {
+	touch "$OLSR_SERVICE_UPDATE_MARKER"
+}
+
+
+run_scheduled_olsrd_service_updates() {
+	[ -e "$OLSR_SERVICE_UPDATE_MARKER" ] || return
+	update_olsr_services
+	rm -f "$OLSR_SERVICE_UPDATE_MARKER"
 }
 

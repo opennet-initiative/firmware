@@ -33,4 +33,5 @@
 * Folgende Features wurden entfernt:
 ** Konfigurations-Reset
 ** Reboot im Opennet-Menü
+* Umstellung von /usr/bin/run-parts.sh auf /bin/run-parts (für cronjobs)
 

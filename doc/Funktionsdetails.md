@@ -7,6 +7,7 @@ Datenbank der Dienste
 Auf jedem AP wird eine Datenbank von Diensten gepflegt. Die typische Quelle fuer diese Datenbank ist der olsrd-Nameservice.
 
 Die Dienste werden mittels eines olsrd-nameservice-Trigger-Skripts aktualisiert (``/etc/olsrd/nameservice.d/on_update_services``).
+Dieses Trigger-Skript setzt eine Markierungsdatei, deren Existenz durch einen minütlichen cronjob geprüft wird. Sofern die Datei existiert, wird einmalig die Service-Aktualisierung durchgeführt.
 
 Die Aktion des Trigger-Skripts lässt sich manuell auslösen:
 

@@ -124,8 +124,8 @@ end
 
 function status_network()
   luci.http.prepare_content("text/plain")
-  printZoneLine("local")
-  printZoneLine("opennet")
+  printZoneLine("lan")
+  printZoneLine("on_mesh")
   printZoneLine("wan")
   printZoneLine("free")
 end
@@ -138,9 +138,9 @@ function printZoneLine(zoneName)
   if networks and relevant(networks) then
 --     luci.http.write([[<tr class='cbi-section-table-titles'><td class='cbi-section-table-cell'>]])
     luci.http.write([[<h3>]])
-    if zoneName == "local" then
+    if zoneName == "lan" then
       luci.http.write(luci.i18n.string([[<abbr title='These addresses are used locally and usually protected by your firewall. Connections to the Internet are routed through your VPN-Tunnel if it is active.'>LOCAL</abbr> IP Address(es):]]))
-    elseif zoneName == "opennet" then
+    elseif zoneName == "on_mesh" then
       luci.http.write(luci.i18n.string([[<abbr title='Opennet-Addresses are usually given to the Access-Point based on your Opennet-ID. These are the interfaces on which OLSR is running.'>OPENNET</abbr> IP Address(es):]]))
     elseif zoneName == "wan" then
       luci.http.write(luci.i18n.string([[<abbr title='The WAN Interface is used for your local Internet-Connection (for instance DSL). It will be used for you local traffic and to map Usergateways into Opennet = Share your Internet Connection if you choose to.'>WAN</abbr> IP Address(es):]]))

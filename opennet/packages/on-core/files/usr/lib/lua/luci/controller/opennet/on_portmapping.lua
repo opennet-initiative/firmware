@@ -25,7 +25,7 @@ function action_portmapping()
 	local uci = require "luci.model.uci"
 	local cursor = uci.cursor()
 	
-	zones = { "on_vpn", "opennet", "local", "wan" }
+	zones = { "on_vpn", "on_mesh", "lan", "wan" }
 	
 	local zone
 	for index = 1, #zones do if  luci.http.formvalue(zones[index]) then zone = zones[index] end end

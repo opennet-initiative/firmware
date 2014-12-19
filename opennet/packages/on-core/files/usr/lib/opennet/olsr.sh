@@ -232,7 +232,7 @@ schedule_olsrd_service_update() {
 
 
 run_scheduled_olsrd_service_updates() {
-	[ -e "$OLSR_SERVICE_UPDATE_MARKER" ] || return
+	[ -e "$OLSR_SERVICE_UPDATE_MARKER" ] || return 0
 	# zuerst loeschen - sonst verpassen wir eventuell ein Ereignis
 	rm -f "$OLSR_SERVICE_UPDATE_MARKER"
 	update_olsr_services

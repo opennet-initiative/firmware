@@ -199,11 +199,11 @@ input.cbi-button-down {
 }
 
 input.cbi-button-enable {
-	background:transparent url(../../luci-static/opennet/non-starred.png) no-repeat scroll 1px center;
+	background:transparent url(../../luci-static/opennet/starred.png) no-repeat scroll 1px center;
 }
 
 input.cbi-button-disable {
-	background:transparent url(../../luci-static/opennet/starred.png) no-repeat scroll 1px center;
+	background:transparent url(../../luci-static/opennet/error.png) no-repeat scroll center;
 }
 
 input.cbi-button-reset {

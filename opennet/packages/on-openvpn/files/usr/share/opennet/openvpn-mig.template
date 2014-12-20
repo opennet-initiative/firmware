@@ -19,6 +19,6 @@ dev-type tun
 ns-cert-type server
 script-security 2 execve
 
-up /etc/openvpn/opennet_user/opennet_up.sh
-down /etc/openvpn/opennet_user/opennet_down.sh
+up /usr/lib/opennet/events/mig_openvpn_updown.sh
+down /usr/lib/opennet/events/mig_openvpn_updown.sh
 

@@ -1,5 +1,6 @@
 MIG_VPN_DIR=/etc/openvpn/opennet_user
 MIG_TEST_VPN_DIR=/etc/openvpn/opennet_vpntest
+MIG_VPN_CONNECTION_LOG=/var/log/mig_openvpn_connections.log
 
 
 # Erzeuge oder aktualisiere einen mig-Service.
@@ -180,5 +181,16 @@ get_mig_connection_test_age() {
 	[ -z "$timestamp" ] && return 0
 	local now=$(get_time_minute)
 	echo "$timestamp" "$now" | awk '{ print $2 - $1 }'
+}
+
+
+append_to_mig_connection_log() {
+	local event="$1"
+	local msg="$2"
+	echo "$(date) openvpn [$event]: $msg" >>"$MIG_VPN_CONNECTION_LOG"
+	# Datei kuerzen, falls sie zu gross sein sollte
+	local filesize=$(get_filesize "$MIG_VPN_CONNECTION_LOG")
+	[ "$filesize" -gt 10000 ] && sed -i "1,30d" "$MIG_VPN_CONNECTION_LOG"
+	return 0
 }
 

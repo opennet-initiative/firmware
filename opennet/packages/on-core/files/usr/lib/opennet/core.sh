@@ -458,6 +458,7 @@ get_file_modification_timestamp_minutes() {
 	date --reference "$filename" +%s | awk '{ print int($1/60) }'
 }
 
+
 # Achtung: Zeitstempel aus der Zukunft gelten immer als veraltet.
 is_timestamp_older_minutes() {
 	local timestamp_minute="$1"
@@ -480,5 +481,13 @@ run_delayed_in_background() {
 	local delay="$1"
 	shift
 	(sleep "$delay" && "$@") </dev/null >/dev/null 2>&1 &
+}
+
+
+get_filesize() {
+	# "stat -c %s DATEI" waere wohl der beste Weg
+	# "stat" ist aber nicht in busybox, sondern nur in coreutils verfuegbar
+	local filename="$1"
+	wc -c "$filename" | awk '{print $1}'
 }
 

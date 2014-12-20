@@ -39,7 +39,12 @@ CONFIG_BUSYBOX_CONFIG_PKILL=y
 CONFIG_BUSYBOX_CONFIG_RDATE=y
 # fuer die minuetlichen/5minuetigen/taeglichen/woechentlichen cronjobs (siehe on-core)
 CONFIG_BUSYBOX_CONFIG_RUN_PARTS=y
+# siehe "get_filesize"
+CONFIG_BUSYBOX_CONFIG_STAT=y
+CONFIG_BUSYBOX_CONFIG_FEATURE_STAT_FORMAT=y
 CONFIG_BUSYBOX_CONFIG_SWAPONOFF=y
+# fuer die umgekehrte  Ausgabe des openvpn-Verbindungsprotokolls
+CONFIG_BUSYBOX_CONFIG_TAC=y
 CONFIG_BUSYBOX_CONFIG_VOLUMEID=y
 
 CONFIG_BUSYBOX_CONFIG_FEATURE_IPV6=y

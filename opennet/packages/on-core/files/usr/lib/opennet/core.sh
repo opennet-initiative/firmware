@@ -485,9 +485,7 @@ run_delayed_in_background() {
 
 
 get_filesize() {
-	# "stat -c %s DATEI" waere wohl der beste Weg
-	# "stat" ist aber nicht in busybox, sondern nur in coreutils verfuegbar
 	local filename="$1"
-	wc -c "$filename" | awk '{print $1}'
+	stat -c %s "$filename"
 }
 

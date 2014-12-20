@@ -148,10 +148,19 @@ You may obtain a copy of the License at
 				</tr>
 				</table>
 				</form>
-				<% if current_gw ~= best_working then 
+				<% if (current_gw ~= "") and (current_gw ~= best_working) then 
 					print(luci.i18n.stringf([[The first reachable and not blocked Gateway is not the current active one. The Tunnel will be restarted and the Gateway will be changed in a few minutes. The changes will be shown after a reload of this page.]]))
 				end %>
 			</fieldset>
 		</fieldset>
 	</div>
+
+	<% local gateway_log = luci.sys.exec("on-function get_mig_connection_log | tail -n 30 | tac") %>
+	<% if gateway_log ~= "" then %>
+		<h3><%:Connection log%></h3>
+		<!-- Verbindungslog -->
+		<div class="cbi-map"><fieldset class="cbi-section">
+			<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly" rows="10" cols="110" wrap="off"><%=gateway_log%></textarea>
+		</fieldset></div>
+	<% end %>
 <%+footer%>

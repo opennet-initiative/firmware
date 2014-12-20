@@ -194,3 +194,9 @@ append_to_mig_connection_log() {
 	return 0
 }
 
+
+# Liefere den Inhalt des Nutzer-VPN-Verbindungsprotokolls (Aufbau + Trennung) zurueck
+get_mig_connection_log() {
+	cat "$MIG_VPN_CONNECTION_LOG"
+}
+

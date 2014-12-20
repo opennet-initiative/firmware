@@ -12,6 +12,7 @@
 ** Rücksetzung eines Gateway-Offsets mit einem Klick
 ** Aktivieren/Deaktivieren einzelner Dienste (anstelle der Blacklist)
 ** Umschaltung der Gateway-Sortierung (manuell, etx, hop) vorerst nur manuell möglich
+* Protokoll der OpenVPN-Verbindungen (Aufbau und Trennungen) ist im Web-Interface sichtbar
 * die UGW- und die Wifidog-Funktion sind vorerst nicht verfügbar
 
 == Technikdetails ==

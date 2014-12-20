@@ -37,9 +37,14 @@ case "$script_type" in
 		rm -f "$MSG_FILE"
 		# der openwrt-Build von openvpn setzt wohl leider nicht die "time_duration"-Umgebungsvariable
 		[ -z "${time_duration:-}" ] && time_duration=$(($(date +%s) - $daemon_start_time))
-		append_to_mig_connection_log "down" "Closing connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
-		# markiere die aktuelle Verbindung als kaputt
-		[ "${signal:-}" = "ping-restart" ] && disconnect_current || true
+		# Verbindungsverlust durch fehlende openvpn-Pings?
+		if [ "${signal:-}" = "ping-restart" ]; then
+			append_to_mig_connection_log "down" "Lost connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
+			# markiere die aktuelle Verbindung als kaputt
+			disconnect_current
+		else
+			append_to_mig_connection_log "down" "Closing connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
+		fi
 		;;
 	*)
 		append_to_mig_connection_log "other" "${remote_1}:${remote_port_1}"

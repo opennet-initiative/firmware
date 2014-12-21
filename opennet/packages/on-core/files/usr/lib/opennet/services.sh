@@ -556,6 +556,8 @@ get_service_as_csv() {
 	local default
 	local value
 	local func_call
+	# Abbruch mit Fehler bei unbekanntem Dienst
+	is_existing_service "$service_name" || { trap "" $GUARD_TRAPS && return 1; }
 	echo -n "$service_name"
 	for specification in "$@"; do
 		rtype=$(echo "$specification" | cut -f 1 -d "|")
@@ -589,25 +591,5 @@ get_service_as_csv() {
 	done
 	# mit Zeilenumbruch abschliessen
 	echo
-}
-
-
-# Liefere alle Dienste der gewaehlten Kategorie entsprechend ihrer Prioritaet mit allen gewuenschten Informationen aus.
-# Siehe "get_service_as_csv" fuer mehr Details.
-# Parameter: mehrere Dienste-Klassen (z.B. "gw" oder "ugw")
-# Parameter: -- (zur Abgrenzung der darauffolgenden Parameter)
-# Parameter: mehrere Informationsbeschreibungen (siehe "get_service_as_csv")
-get_services_as_csv() {
-	local service_name
-	local service_types=""
-	while [ "$1" != "--" ]; do
-		service_types="$service_types $1"
-		shift
-	done
-	# "--" ueberspringen
-	shift
-	get_sorted_services $service_types | while read service_name; do
-		get_service_as_csv "$service_name" "$@"
-	done
 }
 

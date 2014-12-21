@@ -139,63 +139,51 @@ end
 
 
 --[[
--- Einlesen und Typ-konvertieren von CSV-Ausgaben der 'get_services_as_csv'-Funktion (shell-Bibliothek).
--- Dies ermöglicht die effiziente Sammlung aller relevanten Informationen für die Dienst-Übersicht mit nur
--- einem einzigen Fork für den Funktionsaufruf. Die einzelne Abfrage aller Informationen dauert dagegen viel
--- länger.
--- Parameter services: eine table von Service-Typen (z.B.: {"ugw", "gw"})
+-- Einlesen und Typ-konvertieren von CSV-Ausgaben der 'get_service_as_csv'-Funktion (shell-Bibliothek).
+-- Dies ermöglicht die effiziente Sammlung der relevanten Informationen für jeden Dienst mit nur einem
+-- Fork für den Funktionsaufruf. Die einzelne Abfrage aller Informationen dauert dagegen viel länger.
+-- Parameter service_name: der Name eines Diensts
 -- Parameter descriptions: eine table von Informationsbeschreibungen (z.B.: offset="number|value|offset")
 -- Der Rückgabewert ist eine table mit benannten Parametern.
 -- Leere Strings werden als nil zurückgeliefert.
 --]]
-function parse_csv_service_list(services, descriptions)
+function parse_csv_service(service_name, descriptions)
+	local name
+	local token
+	local result_string
 	local order = {}
 	local specifications = {}
-	local index = 1
-	local name
-	local value
-	local result_string
-	local result
-	local token
 	local arguments = {}
-	local one_service
-	for _, value in pairs(services) do
-		table.insert(arguments, value)
-	end
-	table.insert(arguments, "--")
+	local one_service = {}
+	local index = 0
+	table.insert(arguments, service_name)
+	-- arguments, order und specifications fuellen
 	for name, value in pairs(descriptions) do
-		local new_item = {}
 		table.insert(order, name)
 		specifications[name] = value
 		table.insert(arguments, value)
 	end
-	result_string = on_function("get_services_as_csv", arguments)
-	result = {}
-	for line in string.gmatch(result_string, "[^\n]+") do
-		one_service = {}
-		index = 0
-		-- das abschliessende Semikolon erleichtert den regulaeren Ausdruck
-		for token in string.gmatch(line .. ";", "([^;]*);") do
-			if index == 0 then
-				one_service["id"] = token
-			else
-				name = order[index]
-				if name then
-					value = specifications[name]
-					if token == "" then
-						token = nil
-					elseif string.sub(value, 1, 7) == "number|" then
-						token = tonumber(token)
-					elseif string.sub(value, 1, 5) == "bool|" then
-						token = (token == "true")
-					end
-					one_service[name] = token
+	result_string = on_function("get_service_as_csv", arguments)
+	if result_string == "" then return nil end
+	-- das abschliessende Semikolon erleichtert den regulaeren Ausdruck
+	for token in string.gmatch(result_string .. ";", "([^;]*);") do
+		if index == 0 then
+			one_service["id"] = token
+		else
+			name = order[index]
+			if name then
+				value = specifications[name]
+				if token == "" then
+					token = nil
+				elseif string.sub(value, 1, 7) == "number|" then
+					token = tonumber(token)
+				elseif string.sub(value, 1, 5) == "bool|" then
+					token = (token == "true")
 				end
+				one_service[name] = token
 			end
-			index = index + 1
 		end
-		table.insert(result, one_service)
+		index = index + 1
 	end
-	return result
+	return one_service
 end
-

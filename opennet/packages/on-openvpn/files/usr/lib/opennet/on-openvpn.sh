@@ -81,8 +81,11 @@ select_mig_connection() {
 	get_sorted_services gw ugw | while read one_service; do
 		# loesche Flags fuer die Vorselektion
 		set_service_value "$one_service" "switch_candidate_timestamp" ""
-		[ "$one_service" = "$wanted" ] && enable_openvpn_service "$wanted" "true" && continue
+		# erst nach der Abschaltung der alten Dienste wollen wir den/die neuen Dienste anschalten (also nur Ausgabe)
+		[ "$one_service" = "$wanted" ] && echo "$one_service" && continue
 		disable_openvpn_service "$one_service" || true
+	done | while read one_service; do
+		enable_openvpn_service "$wanted" "true"
 	done
 }
 

@@ -54,6 +54,13 @@ CONFIG_BUSYBOX_CONFIG_PING6=y
 # unnoetiges optional machen
 CONFIG_PACKAGE_block-mount=m
 
+# curl wird fuer den CSR-Upload von on-openvpn verwendet
+CONFIG_PACKAGE_curl=y
+CONFIG_PACKAGE_libcurl=y
+CONFIG_LIBCURL_COOKIES=n
+CONFIG_LIBCURL_FTP=n
+CONFIG_LIBCURL_NOSSL=y
+
 # wifi-Treiber
 CONFIG_DRIVER_11N_SUPPORT=y
 CONFIG_DRIVER_WEXT_SUPPORT=y

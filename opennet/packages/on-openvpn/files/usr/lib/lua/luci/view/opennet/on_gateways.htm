@@ -28,24 +28,56 @@ You may obtain a copy of the License at
 	// wir moechten einen Hinweis ausgeben, falls ein Sprung vom aktuellen Gateway auf einen besseren Gateway bevorsteht
 	var best_gateway;
 	var current_gateway;
+	var service_dict = {};
 
 	// loese die Anfrage nach allen Dienst-IDs aus - diese werden anschliessend einzeln nacheinander abgefragt
-	XHR.get('<%=luci.dispatcher.build_url("opennet", "opennet_2", "vpn_gateway_list")%>', null,
-			function(x, services) { schedule_next_service(1, services); });
+	XHR.get('<%=luci.dispatcher.build_url("opennet", "opennet_2", "vpn_gateway_list")%>', null, build_table);
+
+	function build_table(dummy, services) {
+		// splitte die Liste der Dienste in mehrere parallele Ablaeufe
+		// ein Wert groesser als drei scheint keine Beschleunigung zu bringen (mit einem TL-WDR4300)
+		var RUN_IN_PARALLEL = 2;
+		var result = "";
+		var target_table = document.getElementById('on-gateway-list');
+		if (!target_table) return;
+		// Tabellenzeilen erzeugen
+		for (var index = 0; index < services.length; index++) {
+			result += String.format('<tr id="%s" class="cbi-section-table-row cbi-opennet-gateways" disabled="n">', services[index]);
+			result += String.format('<td class="cbi-value-field"><div id="cbi-opennet-gateways-count">%d</div></td>', index + 1);
+			result += '</tr>';
+			service_dict[services[index]] = index;
+		}
+		// die letzte Zeile unter der Tabelle einfuegen (z.B. fuer "reset counter")
+		result += '<tr id="cbi-opennet-gateways" class="cbi-section-table-row">'
+			+ '	<td colspan="5" />'
+			+ '	<td class="cbi-value-field"><input class="cbi-button" type="submit" name="reset_connection_test_timestamps" value="<%:reset test counter%>" /></td>'
+			+ '	<td />'
+			+ '</tr>';
+		target_table.innerHTML += result;
+		// die Anfragen in parallelen Wellen ausloesen
+		var parallels = [];
+		// Listen vorbereiten
+		while (parallels.length < RUN_IN_PARALLEL) parallels.push([]);
+		parallels = services.reduce(function(list, current, index) {
+				list[index % RUN_IN_PARALLEL].push(current);
+				return list;
+			}, parallels);
+		for (var index = 0; index < parallels.length; index++) {
+			schedule_next_service(1, parallels[index]);
+		};
+	}
 
 	function schedule_next_service(index, remaining_services) {
 		if (remaining_services && (remaining_services.length > 0)) {
 			XHR.get('<%=luci.dispatcher.build_url("opennet", "opennet_2", "vpn_gateway_info")%>/' + remaining_services[0], null,
 				function(x, info) { if (info) { insert_gateways(index, info, remaining_services.slice(1)); }});
-		} else {
-			add_table_footer();
 		}
 	}
 
 	function insert_gateways(index, gateway, remaining_services) {
 		// Fuege eine neue Tabellenzeile ein
-		var target_table = document.getElementById('on-gateway-list');
-		if (!target_table) return;
+		var target_row = document.getElementById(gateway.id);
+		if (!target_row) return;
 		var remote;
 		var active;
 		var distance;
@@ -60,6 +92,7 @@ You may obtain a copy of the License at
 		// "active" als laeuft/kaputt/inaktive setzen
 		if (gateway.active) {
 			current_gateway = gateway.id;
+			update_gateway_change_indicator();
 			<% if nixio.fs.access("/tmp/openvpn_msg.txt") then %>
 				active = "y";
 			<% else %>
@@ -68,11 +101,12 @@ You may obtain a copy of the License at
 		} else {
 			active = null;
 		}
-		if (!best_gateway && !gateway.disabled && (gateway.status = "y")) {
+		// best_gateway setzen, falls noch ungesetzt oder weiter oben, als der bisher beste
+		if ((gateway.status = "y") && !gateway.disabled
+				&& (!best_gateway || (service_dict[best_gateway] > service_dict[gateway.id]))) {
 			best_gateway = gateway.id;
+			update_gateway_change_indicator();
 		}
-		result += String.format('<tr id="cbi-opennet-gateways" class="cbi-section-table-row" disabled="%s">', gateway.disabled && "y" || "n");
-		result += String.format('<td class="cbi-value-field"><div id="cbi-opennet-gateways-count">%d</div></td>', index);
 		result += String.format('<td class="cbi-value-field"><div id="cbi-opennet-gateways-active" active="%s">&nbsp;</div>', active);
 		result += String.format('<td><strong>%s</strong></th>', remote);
 		result += '<td class="cbi-value-field"><div id="cbi-opennet-gateways-hopcount">';
@@ -95,6 +129,7 @@ You may obtain a copy of the License at
 		result += String.format('<td class="cbi-value-field" title="<%:tested %d minutes ago%>"><div id="cbi-opennet-gateways-status" status="%s">&nbsp;</div></td>', gateway.age, gateway.status);
 		result += '<td class="cbi-value-field"><div id="cbi-opennet-gateways-actions">';
 		if (gateway.disabled) {
+			target_row.setAttribute("disabled", "y");
 			result += String.format('<input class="cbi-button cbi-button-enable cbi-button-small" type="submit" value="%s" title="<%:enable%>" name="enable_service" />', gateway.id);
 		} else {
 			result += String.format('<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="%s" title="<%:move to top and connect immediately%>" name="move_top" />', gateway.id);
@@ -104,28 +139,22 @@ You may obtain a copy of the License at
 			result += String.format('<input class="cbi-button cbi-button-disable cbi-button-small" type="submit" value="%s" title="<%:disable%>" name="disable_service" />', gateway.id);
 		}
 		result += '</div></tr>';
-		target_table.innerHTML += result;
+		target_row.innerHTML += result;
 		// loese die naechste Anfrage aus (falls weitere vorhanden sind)
 		// Wir sollten diese Anfrage nicht frueher ausloesen, weil beispielsweise die
 		// letzte Zeile ("add_table_footer") sonst hochrutscht (sie ist zu schnell abgeschlossen).
 		schedule_next_service(index + 1, remaining_services);
 	}
 
-	// die letzte Zeile unter der Tabelle einfuegen (z.B. fuer "reset counter")
 	// ausserdem wird die Nachricht "Gateway-Wechsel steht bevor" ausgegeben
-	function add_table_footer() {
-		var target_table = document.getElementById('on-gateway-list');
+	function update_gateway_change_indicator() {
 		var change_label = document.getElementById('on-waiting-for-gateway-change');
-		if (target_table) {
-			target_table.innerHTML += ''
-				+ '<tr id="cbi-opennet-gateways" class="cbi-section-table-row">'
-				+ '	<td colspan="5" />'
-				+ '	<td class="cbi-value-field"><input class="cbi-button" type="submit" name="reset_connection_test_timestamps" value="<%:reset test counter%>" /></td>'
-				+ '	<td />'
-				+ '</tr>';
-		}
-		if (change_label && current_gateway && (current_gateway != best_gateway)) {
-			change_label.style.display = 'block';
+		if (change_label && current_gateway && best_gateway) {
+			if (current_gateway != best_gateway) {
+				change_label.style.display = 'block';
+			} else {
+				change_label.style.display = 'none';
+			}
 		}
 	}
 

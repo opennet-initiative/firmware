@@ -22,5 +22,9 @@ define Package/on-core/install
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 
+define Package/on-core/prepare
+	$(call Build/Prepare,$(1),$(PKG_NAME))
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))
 

@@ -17,7 +17,7 @@ function update_vpn_status_item(item) {
   var element = document.getElementById(item);
   if (element) {
     var run_xhr = new XHR();
-    run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_1")%>/vpn_tunnel/on_<%=item%>', null,
+    run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_1")%>/vpn_tunnel/on_' + item, null,
         function(x) { if (x.responseText) element.innerHTML = x.responseText; });
   }
 }
@@ -31,12 +31,12 @@ if (window.attachEvent) {
 	document.addEventListener('load', init, false);
 } 
 function init() {
-	for (var item in ["vpn_status_label", "vpn_status_form"]) {
+	["vpn_status_label", "vpn_status_form"].map(function(item) {
 		if (document.getElementById(item)) {
 			update_vpn_status_item(item);
-			setInterval('update_vpn_status_item(' + item + ')', 5000);
+			setInterval('update_vpn_status_item("' + item + '")', 5000);
 		}
-	}
+	});
 }
 //]]></script>
 

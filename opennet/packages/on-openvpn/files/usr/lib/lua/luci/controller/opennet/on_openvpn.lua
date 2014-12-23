@@ -37,6 +37,13 @@ function action_on_openvpn()
 	local download = luci.http.formvalue("download")
 	if download then download_file("user", download) end
 	
+	local submit = luci.http.formvalue("submit")
+	if submit then
+		-- zeige lediglich die Ausgabe von curl an
+		luci.http.write(on_function("submit_csr_via_http", {submit, "/etc/openvpn/opennet_user/on_aps.csr"}))
+		return
+	end
+
 	local openssl = {}
 	fill_openssl("on-openvpn", openssl)
 	if luci.http.formvalue("generate") then generate_csr("user", openssl) end

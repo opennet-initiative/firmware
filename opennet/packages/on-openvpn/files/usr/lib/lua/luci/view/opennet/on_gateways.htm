@@ -39,6 +39,7 @@ You may obtain a copy of the License at
 		var RUN_IN_PARALLEL = 2;
 		var result = "";
 		var target_table = document.getElementById('on-gateway-list');
+		var in_progress_spinner = document.getElementById('gateway-list-spinner');
 		if (!target_table) return;
 		// Tabellenzeilen erzeugen
 		for (var index = 0; index < services.length; index++) {
@@ -54,6 +55,8 @@ You may obtain a copy of the License at
 			+ '	<td />'
 			+ '</tr>';
 		target_table.innerHTML += result;
+		// Aktivitaetsindikator verstecken
+		if (in_progress_spinner) in_progress_spinner.style.display = 'none';
 		// die Anfragen in parallelen Wellen ausloesen
 		var parallels = [];
 		// Listen vorbereiten
@@ -207,6 +210,7 @@ You may obtain a copy of the License at
 
 				</table>
 				</form>
+				<center><img class='loading_img_small' id="gateway-list-spinner" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" /></center>
 				<p id="on-waiting-for-gateway-change" style="display:none">
 					<%:The first reachable and not blocked Gateway is not the current active one. The Tunnel will be restarted and the Gateway will be changed in a few minutes. The changes will be shown after a reload of this page.%>
 				</p>

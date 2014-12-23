@@ -1,3 +1,6 @@
+REPORTS_FILE=/tmp/on_report.tar.gz
+
+
 get_client_cn() {
 	openssl x509 -in /etc/openvpn/opennet_user/on_aps.crt \
 		-subject -nameopt multiline -noout 2>/dev/null | awk '/commonName/ {print $3}'
@@ -487,5 +490,27 @@ run_delayed_in_background() {
 get_filesize() {
 	local filename="$1"
 	stat -c %s "$filename"
+}
+
+
+# Bericht erzeugen
+# Der Name der erzeugten tar-Datei wird als Ergebnis ausgegeben.
+generate_report() {
+	trap "error_trap generate_report '$*'" $GUARD_TRAPS
+	local fname
+	local pid
+	local reports_dir=$(mktemp -d)
+	local tar_file=$(mktemp)
+	msg_debug "Creating a report"
+	# Verzeichnis fuer alle aufgerufenen Skripte sichtbar machen
+	# die Skripte duerfen davon ausgehen, dass wir uns im Zielverzeichnis befinden
+	cd "$reports_dir"
+	find /usr/lib/opennet/reports -type f | while read fname; do
+		[ ! -x "$fname" ] && msg_info "skipping non-executable report script: $fname" && continue
+		ON_REPORTS_DIR="$reports_dir" "$fname" || msg_info "ERROR: reports script failed: $fname"
+	done
+	tar czf "$tar_file" .
+	rm -r "$reports_dir"
+	mv "$tar_file" "$ON_REPORTS_FILE"
 }
 

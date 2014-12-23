@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Ueberblick ueber die DNS-Funktionalitaet
+#
+
+set -eu
+
+
+# uci-basierte Konfiguration extrahieren
+uci show dhcp | grep "^dhcp\.@dnsmasq" >dns.uci
+
+
+# kopiere Config-Dateien (keine dhcp-leases)
+for fname in /etc/resolv.conf /tmp/resolv.conf.auto /var/etc/dnsmasq.conf /var/run/dnsmasq.servers; do
+	[ -e "$fname" ] && cp "$fname" "$(basename "$fname")" || true
+done
+
+
+# mehrere Namensabfragen durchfuehren
+(
+	nslookup localhost
+	echo
+	nslookup ca.on
+	echo
+	nslookup ca.opennet-initiative.de
+	echo
+	nslookup fsf.org
+) >dns_tests.log
+

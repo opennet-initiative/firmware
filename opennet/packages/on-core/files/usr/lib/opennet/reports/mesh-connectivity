@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# Zusammenfassung von Verbindungen im Opennet-Mesh
+#
+
+set -eu
+
+
+ping_neighbour() {
+	echo -n "ping $1 - "
+	ping -W 2 -c 3 "$1" >/dev/null && echo "OK" || echo "Error"
+}
+
+
+# verschiedene Ping-Versuche - dies sollte ein gutes Abbild der Situation ergeben
+(
+	# megumi
+	ping_neighbour 192.168.0.246
+	# subaru
+	ping_neighbour 192.168.0.248
+	# Rundstrahler Philo-Turm
+	ping_neighbour 192.168.1.79
+	# Schweriner Dom
+	ping_neighbour 192.168.1.93
+	# Z10
+	ping_neighbour 192.168.2.3
+	# Heilig-Geist-Kirche
+	ping_neighbour 192.168.2.110
+	# tamago (Uni)
+	ping_neighbour 192.168.10.1
+) >ping.log &
+
+
+# Pfade zu interessanten Hosts
+(
+	# subaru
+	mtr -c 3 --report 192.168.0.248
+	# tamago/titan
+	mtr -c 3 --report 192.168.0.254
+	# Schweriner Dom
+	mtr -c 3 --report 192.168.1.93
+) >traceroute.log &
+
+
+# alle Routen
+ip rule >ip_rules.txt
+ip route show >ip_route_table_main.txt
+ip route show table olsrd >ip_route_table_olsrd.txt
+
+wait
+

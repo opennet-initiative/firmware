@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Ueberblick ueber Eigenschaften des Nutzer-VPN-Tunnels
+#
+
+set -eu
+
+
+ping_neighbour() {
+	echo -n "ping $1 - "
+	ping -W 2 -c 3 "$1" >/dev/null && echo "OK" || echo "Error"
+}
+
+
+# typische Routen
+(
+	# 0er-Segment
+	ip route get 192.168.0.1
+	# 1er-Segment
+	ip route get 192.168.1.1
+	# 2er-Segment
+	ip route get 192.168.2.1
+	# 3er-Segment
+	ip route get 192.168.3.1
+	# Tunnel-Server
+	ip route get 10.1.0.1
+	# Internet
+	ip route get 1.1.1.1
+) >vpn_tunnel_routen.log &
+
+
+# Pings ins Internet
+(
+	ping_neighbour 8.8.8.8
+	ping_neighbour 139.30.8.8
+	ping_neighbour opennet-initiative.de
+	# viele Pings (Verlustpruefung)
+	ping -W 2 -c 15 8.8.8.8
+	# grosse Pings (MTU-Test)
+	ping -W 2 -c 1 -s 1300 8.8.8.8
+	ping -W 2 -c 1 -s 1400 8.8.8.8
+	ping -W 2 -c 1 -s 1500 8.8.8.8
+) >vpn_tunnel_ping.log &
+
+wait
+

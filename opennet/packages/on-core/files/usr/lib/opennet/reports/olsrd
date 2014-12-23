@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Ueberblick ueber olsrd-Zustaende
+#
+
+set -eu
+
+
+OLSRD_CONFIG=/var/etc/olsrd.conf
+[ -e "$OLSRD_CONFIG" ] && cat "$OLSRD_CONFIG" >olsrd.conf
+
+# Konfiguration des laufenden Prozess
+echo /config | nc localhost 2006 >olsrd_runtime.conf
+
+# Routen, Nachbarn, usw.
+echo /all | nc localhost 2006 >olsrd_routes.log
+
+OLSRD_SERVICES=/var/run/services_olsr
+[ -e "$OLSRD_SERVICES" ] && cat "$OLSRD_SERVICES" >services_olsr
+
+# falls die obige Datei nicht existiert, soll trotzdem ein Wahrheitswert zurueckgeliefert werden
+exit 0
+

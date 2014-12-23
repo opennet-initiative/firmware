@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# Ueberblick ueber Prozesse
+#
+
+set -eu
+
+
+ps >processes.txt
+netstat -lpn >sockets.txt
+

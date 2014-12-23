@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# Ueberblick ueber system-spezifische Eigenschaften
+#
+
+set -eu
+
+
+# AP-Name, NTP-Server
+uci show system >system.uci
+
+# Konfigurationsdateien und ihre Groesse (Null -> eventuell kaputt)
+ls -l /etc/config/ >config_files.txt
+

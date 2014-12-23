@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Ueberblick ueber netzwerk-relevante Eigenschaften
+#
+
+set -eu
+
+
+# Netzwerkadressen ohne MAC-Identifikation
+ip a | grep -v "link/" >network_addresses.txt
+
+# wifi-Setup
+iwinfo >iwinfo.log
+
+# wifi-Umgebung
+iwlist scan >iwlist_scan.log 2>&1
+

@@ -13,37 +13,30 @@ You may obtain a copy of the License at
 
 <script type="text/javascript">//<![CDATA[
 
-function check_vpn_status_label() {
-  var run_xhr = new XHR();
-  run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_1")%>/vpn_tunnel/on_vpn_status_label', null,
-  function(x) {
-  if (x.responseText)
-    document.getElementById("vpn_status_label").innerHTML = x.responseText;
+function update_vpn_status_item(item) {
+  var element = document.getElementById(item);
+  if (element) {
+    var run_xhr = new XHR();
+    run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_1")%>/vpn_tunnel/on_<%=item%>', null,
+        function(x) { if (x.responseText) element.innerHTML = x.responseText; });
   }
-  );
-}
-
-function check_vpn_status_form() {
-  var run_xhr = new XHR();
-  run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_1")%>/vpn_tunnel/on_vpn_status_form', null,
-  function(x) {
-  if (x.responseText)
-    document.getElementById("vpn_status_form").innerHTML = x.responseText;
-  }
-  );
 }
 
 
-if (window.attachEvent) {window.attachEvent('onload', init);}
-else if (window.addEventListener) {window.addEventListener('load', init, false);}
-else {document.addEventListener('load', init, false);} 
-// 
-//   window .onload = function test() {init();}
+if (window.attachEvent) {
+	window.attachEvent('onload', init);
+} else if (window.addEventListener) {
+	window.addEventListener('load', init, false);
+} else {
+	document.addEventListener('load', init, false);
+} 
 function init() {
-  check_vpn_status_label();
-  check_vpn_status_form();
-  setInterval('check_vpn_status_label()', 5000 )
-  setInterval('check_vpn_status_form()', 5000 )
+	for (var item in ["vpn_status_label", "vpn_status_form"]) {
+		if (document.getElementById(item)) {
+			update_vpn_status_item(item);
+			setInterval('update_vpn_status_item(' + item + ')', 5000);
+		}
+	}
 }
 //]]></script>
 
@@ -51,8 +44,8 @@ function init() {
 <% if certstatus.on_keycrt_ok then %>
 <h3><%:Status%></h3>
 <div class="cbi-map">
-	<fieldset class="cbi-section" id="on_vpn_status_fieldset">
-		<fieldset class="cbi-section-node" >
+  <fieldset class="cbi-section" id="on_vpn_status_fieldset">
+    <fieldset class="cbi-section-node" >
       <table width="100%"><tr><td>
         <table class="usergw-status" id="vpn_status_label">
               <tr><td>
@@ -64,6 +57,6 @@ function init() {
           </form> 
       </td></tr></table>
     </fieldset>
-	</fieldset>
+  </fieldset>
 </div>
 <% end %>

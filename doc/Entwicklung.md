@@ -204,7 +204,7 @@ Einzelnes Paket bauen
 
 Für die schnelle Lösung von Build-Problemen ist es oft sinnvoll, nur das eine problematische Paket erstellen zu lassen:
 
-    make -C openwrt packages/feeds/opennet/on-core/{clean,compile} V=s
+    make -C openwrt package/on-core/{clean,compile} V=s
  
 
 Neue Pakete oder Paketoptionen einbinden

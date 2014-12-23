@@ -161,6 +161,7 @@ verify_vpn_connection() {
 
 # Einreichung einer Zertifikatsanfrage via http (bei http://ca.on)
 # Das Ergebnis ist die html-Ausgabe des Upload-Formulars.
+# Eine Pruefung des Ergebniswerts ist aufgrund des auf menschliche Nutzer ausgerichteten Interface nicht so leicht moeglich.
 submit_csr_via_http() {
 	trap "error_trap submit_csr_via_http '$*'" $GUARD_TRAPS
         # upload_url: z.B. http://ca.on/csr/csr_upload.php

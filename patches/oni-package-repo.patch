@@ -17,7 +17,7 @@ Index: on_firmware/openwrt/include/version.mk
  
  VERSION_REPO:=$(call qstrip_escape,$(CONFIG_VERSION_REPO))
 -VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),http://downloads.openwrt.org/snapshots/trunk/%T/packages)
-+VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),https://downloads.opennet-initiative.de/openwrt/testing/$(PKG_VERSION)-$(PKG_RELEASE)/packages)
++VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),https://downloads.opennet-initiative.de/openwrt/testing/$(PKG_VERSION)-$(PKG_RELEASE)/%T/packages)
  
  VERSION_DIST:=$(call qstrip_escape,$(CONFIG_VERSION_DIST))
  VERSION_DIST:=$(if $(VERSION_DIST),$(VERSION_DIST),OpenWrt)

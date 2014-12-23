@@ -1,5 +1,5 @@
-change URL for package download using opennet server.
-Every time generate new value. Else the PKG_* variables will be empty. Don't know why... 
+Setzen der Repository-URL fuer nachtraegliche Paket-Installationen
+Wir setzen die URL absolut ("=" anstelle von ":="), um sicherzustellen, dass die Opennet-Versionszahlen sichtbar sind
 Index: on_firmware/openwrt/include/version.mk
 ===================================================================
 --- on_firmware.orig/openwrt/include/version.mk	2014-12-05 22:54:37.568003627 +0100
@@ -18,7 +18,7 @@ Index: on_firmware/openwrt/include/version.mk
  
 -VERSION_REPO:=$(call qstrip_escape,$(CONFIG_VERSION_REPO))
 -VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),http://downloads.openwrt.org/snapshots/trunk/%T/packages)
-+VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),https://downloads.opennet-initiative.de/openwrt/testing/$(PKG_VERSION)-$(PKG_RELEASE)/packages)
++VERSION_REPO=https://downloads.opennet-initiative.de/openwrt/testing/$(PKG_VERSION)-$(PKG_RELEASE)/%T/packages
  
  VERSION_DIST:=$(call qstrip_escape,$(CONFIG_VERSION_DIST))
  VERSION_DIST:=$(if $(VERSION_DIST),$(VERSION_DIST),OpenWrt)

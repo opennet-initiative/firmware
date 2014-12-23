@@ -158,3 +158,16 @@ verify_vpn_connection() {
 	trap "" $GUARD_TRAPS && return 1
 }
 
+
+# Einreichung einer Zertifikatsanfrage via http (bei http://ca.on)
+# Das Ergebnis ist die html-Ausgabe des Upload-Formulars.
+submit_csr_via_http() {
+	trap "error_trap submit_csr_via_http '$*'" $GUARD_TRAPS
+        # upload_url: z.B. http://ca.on/csr/csr_upload.php
+	local upload_url="$1"
+	local csr_file="$2"
+	local helper="${3:-}"
+	local helper_email="${4:-}"
+	curl -q --silent --form "file=@$csr_file" --form "opt_name=$helper" --form "opt_mail=$helper_email" "$upload_url"
+}
+

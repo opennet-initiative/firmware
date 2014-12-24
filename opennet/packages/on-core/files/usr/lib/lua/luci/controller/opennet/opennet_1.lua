@@ -22,18 +22,24 @@ function index()
 	local i18n = luci.i18n.string
 	local page
 	
-	page = entry({"opennet", "opennet_1"}, template("opennet/opennet_1"), i18n("Base"), 1)
+	page = entry({"opennet", "opennet_1"}, template("opennet/opennet_1"))
+	page.title = i18n("Base")
+	page.order = 1
 	page.i18n = "on_opennet_1"
 	page.css = "opennet.css"
 	page.index = true
 	page.sysauth = "root"
 	page.sysauth_authenticator = "htmlauth"
 	
-	page = entry({"opennet", "opennet_1", "funknetz"}, template("opennet/on_network"), i18n("Network"), 2)
+	page = entry({"opennet", "opennet_1", "funknetz"}, template("opennet/on_network"))
+	page.title = i18n("Network")
+	page.order = 2
 	page.i18n = "on_network"
 	page.css = "opennet.css"
 
-	page = entry({"opennet", "opennet_1", "bericht"}, call("report"), i18n("Report"), 3)
+	page = entry({"opennet", "opennet_1", "bericht"}, call("report"))
+	page.title = i18n("Report")
+	page.order = 3
 	page.i18n = "on_report"
 	page.css = "opennet.css"
 

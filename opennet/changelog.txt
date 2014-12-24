@@ -13,6 +13,7 @@
 ** Aktivieren/Deaktivieren einzelner Dienste (anstelle der Blacklist)
 ** Umschaltung der Gateway-Sortierung (manuell, etx, hop) vorerst nur manuell möglich
 * Protokoll der OpenVPN-Verbindungen (Aufbau und Trennungen) ist im Web-Interface sichtbar
+* weniger Status-Informationen ohne Anmeldung sichtbar (z.B. keine DHCP-Leases)
 * die UGW- und die Wifidog-Funktion sind vorerst nicht verfügbar
 
 == Technikdetails ==
@@ -35,4 +36,8 @@
 ** Konfigurations-Reset
 ** Reboot im Opennet-Menü
 * Umstellung von /usr/bin/run-parts.sh auf /bin/run-parts (für cronjobs)
+* die Opennet-Status-Seite (/opennet/) ist nun nicht mehr ein mehr ein Alias auf /admin/status/
+** somit stehen ein paar Informationen (Prozesse, DHCP-Leases, Diagramme) nun
+   nicht mehr ohne Anmeldung zur Verfügung
+** http://dev.on-i.de/changeset/6257599600a56255c7b27e6978a790f1776d01e9/on_firmware
 

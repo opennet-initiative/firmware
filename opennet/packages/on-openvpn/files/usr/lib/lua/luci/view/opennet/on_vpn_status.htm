@@ -14,12 +14,12 @@ You may obtain a copy of the License at
 <script type="text/javascript">//<![CDATA[
 
 function update_vpn_status_item(item) {
-  var element = document.getElementById(item);
-  if (element) {
-    var run_xhr = new XHR();
-    run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_1")%>/vpn_tunnel/on_' + item, null,
-        function(x) { if (x.responseText) element.innerHTML = x.responseText; });
-  }
+	var element = document.getElementById(item);
+	if (element) {
+		var run_xhr = new XHR();
+		run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_1")%>/vpn_tunnel/on_' + item, null,
+			function(x) { if (x.responseText) element.innerHTML = x.responseText; });
+	}
 }
 
 
@@ -29,7 +29,7 @@ if (window.attachEvent) {
 	window.addEventListener('load', init, false);
 } else {
 	document.addEventListener('load', init, false);
-} 
+}
 function init() {
 	["vpn_status_label", "vpn_status_form"].map(function(item) {
 		if (document.getElementById(item)) {
@@ -44,19 +44,21 @@ function init() {
 <% if certstatus.on_keycrt_ok then %>
 <h3><%:Status%></h3>
 <div class="cbi-map">
-  <fieldset class="cbi-section" id="on_vpn_status_fieldset">
-    <fieldset class="cbi-section-node" >
-      <table width="100%"><tr><td>
-        <table class="usergw-status" id="vpn_status_label">
-              <tr><td>
-              <img class='loading_img_small' id="vpn_status_spinner" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
-              </td></tr>
-        </table>
-      </td><td>
-          <form method="post" action="<%=REQUEST_URI%>?restartvpn=true" id="vpn_status_form">
-          </form> 
-      </td></tr></table>
-    </fieldset>
-  </fieldset>
+	<fieldset class="cbi-section" id="on_vpn_status_fieldset">
+		<fieldset class="cbi-section-node">
+			<table width="100%">
+				<tr>
+					<td><table class="usergw-status" id="vpn_status_label">
+						<tr><td>
+							<img class='loading_img_small' id="vpn_status_spinner" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
+						</td></tr>
+					</table></td>
+					<td>
+						<form method="post" action="<%=REQUEST_URI%>?restartvpn=true" id="vpn_status_form" />
+					</td>
+				</tr>
+			</table>
+		</fieldset>
+	</fieldset>
 </div>
 <% end %>

@@ -11,9 +11,10 @@ You may obtain a copy of the License at
 
 -%>
 
-<% local uci = require "luci.model.uci"
-   local cursor = uci.cursor()
-   require ("luci.model.opennet.on_usergw")
+<%
+local uci = require "luci.model.uci"
+local cursor = uci.cursor()
+require ("luci.model.opennet.on_usergw")
 %>
 <script type="text/javascript">//<![CDATA[
 
@@ -25,25 +26,24 @@ function is_running(running) {
     document.getElementById("update_mtu").disabled = "true"
     document.getElementById("add_name").disabled = "true"
     try { // only available if ugw is possible
-		document.getElementById("enable").disabled = "true"
-		document.getElementById("suspend").disabled = "true"
-		document.getElementById("running_1").hidden = ""
+      document.getElementById("enable").disabled = "true"
+      document.getElementById("suspend").disabled = "true"
+      document.getElementById("running_1").hidden = ""
     } catch(e) {}
     document.getElementById("running_2").hidden = ""
     elems =  document.getElementsByName("select_gw");
     for ( var i=0; i<elems.length; i++)
       elems[i].disabled = "true"
-  }
-  else if (document.getElementById("running_status").status == "off") {
+  } else if (document.getElementById("running_status").status == "off") {
     document.getElementById("update_wan").disabled = ""
     document.getElementById("update_speed").disabled = ""
     document.getElementById("update_vpn").disabled = ""
     document.getElementById("update_mtu").disabled = ""
     document.getElementById("add_name").disabled = ""
     try { // only available if ugw is possible
-		document.getElementById("enable").disabled = ""
-		document.getElementById("suspend").disabled = ""
-		document.getElementById("running_1").hidden = "true"
+      document.getElementById("enable").disabled = ""
+      document.getElementById("suspend").disabled = ""
+      document.getElementById("running_1").hidden = "true"
     } catch(e) {}
     document.getElementById("running_2").hidden = "true"
     elems =  document.getElementsByName("select_gw");
@@ -101,7 +101,7 @@ function get_wan_value(elems, number, section, call) {
   }
 
   var wan_section = elems[number++]
-  
+
   var wan_xhr = new XHR();
   wan_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/' + call + '_wan/' + number, null,
     function(x) {
@@ -141,7 +141,7 @@ function get_value(elems, number, section, call) {
   }
 
   var wan_section = elems[number++]
-  
+
   var wan_xhr = new XHR();
   wan_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/' + call + '_' + section + '/' + number, null,
     function(x) {
@@ -215,19 +215,24 @@ function get_vpn_values() {
 
 <script type="text/javascript">//<![CDATA[
 
-if (window.attachEvent) {window.attachEvent('onload', init);}
-else if (window.addEventListener) {window.addEventListener('load', init, false);}
-else {document.addEventListener('load', init, false);} 
-// 
-//   window .onload = function test() {init();}
+if (window.attachEvent) {
+    window.attachEvent('onload', init);
+} else if (window.addEventListener) {
+    window.addEventListener('load', init, false);
+} else {
+    document.addEventListener('load', init, false);
+}
+
+// window .onload = function test() {init();}
 function init() {
-  document.getElementById("running_status").status="on"
-  check_running();
-  setInterval('check_running()', 10000 )
-          get_wan_values();
-          get_speed_values();
-          get_mtu_values();
-          get_vpn_values();
+    var status_item = document.getElementById("running_status");
+    if (status_item) status_item.status="on";
+    check_running();
+    setInterval('check_running()', 10000 )
+    get_wan_values();
+    get_speed_values();
+    get_mtu_values();
+    get_vpn_values();
 }
 //]]></script>
 

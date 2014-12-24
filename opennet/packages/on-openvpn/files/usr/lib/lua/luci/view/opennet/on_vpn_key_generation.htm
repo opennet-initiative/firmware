@@ -18,8 +18,8 @@ You may obtain a copy of the License at
 <% else %>
 
 <% if (openssl.commonName == "") then
-    openssl.commonName=test
-    end %>
+	openssl.commonName=test
+end %>
 
 <form method="post" action="<%=REQUEST_URI%>?generate=true">
 <div class="cbi-map">
@@ -55,12 +55,12 @@ You may obtain a copy of the License at
 					<input type="text" size="48" name="openssl.commonName" value="<%=openssl.commonName%>" />
 				</div>
 			</div>
-            <div class="cbi-value">
-                <label class="cbi-value-title"><%:Member Name%></label>
-                <div class="cbi-value-field">
-                    <input type="text" size="48" name="openssl.organizationName" value="<%=openssl.organizationName%>" />
-                </div>
-            </div>
+			<div class="cbi-value">
+				<label class="cbi-value-title"><%:Member Name%></label>
+				<div class="cbi-value-field">
+					<input type="text" size="48" name="openssl.organizationName" value="<%=openssl.organizationName%>" />
+				</div>
+			</div>
 			<div class="cbi-value">
 				<label class="cbi-value-title"><%:Member Email Address%></label>
 				<div class="cbi-value-field">

@@ -12,126 +12,116 @@ You may obtain a copy of the License at
 $Id: index.htm 5448 2009-10-31 15:54:11Z jow $
 
 -%>
-<%  require ("luci.model.opennet.on_status") %>
+<% require ("luci.model.opennet.on_status") %>
 
 <%+header%>
 
 <script type="text/javascript">//<![CDATA[
 
-if (window.attachEvent) {window.attachEvent('onload', init);}
-else if (window.addEventListener) {window.addEventListener('load', init, false);}
-else {document.addEventListener('load', init, false);} 
-// 
-//   window .onload = function test() {init();}
+if (window.attachEvent) {
+	window.attachEvent('onload', init);
+} else if (window.addEventListener) {
+	window.addEventListener('load', init, false);
+} else {
+	document.addEventListener('load', init, false);
+}
+
+// window .onload = function test() {init();}
 function init() {
-  // quit if this function has already been called
-  if (arguments.callee.done) return;
+	// quit if this function has already been called
+	if (arguments.callee.done) return;
 
-  // flag this function so we don't do the same thing twice
-  arguments.callee.done = true;
+	// flag this function so we don't do the same thing twice
+	arguments.callee.done = true;
 
-  var neighbor_xhr = new XHR();
-  neighbor_xhr.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/on_status_neighbors', null,
-      function(x) {
-          if (x.responseText)
-          {
-              document.getElementById("olsr_neighbor_table").innerHTML = x.responseText;
-              document.getElementById("olsr_neighbor_img").style.display = 'none';
-              document.getElementById("olsr_neighbor_table").style.display = 'block';
-          }
-          else document.getElementById("neighbor_section").style.display = 'none';
-      }
-  );
-  var network_xhr = new XHR();
-  network_xhr.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/on_status_network', null,
-      function(x) {
-          if (x.responseText)
-          {
-              document.getElementById("network_section_table").innerHTML = x.responseText;
-              document.getElementById("network_section_img").style.display = 'none';
-              document.getElementById("network_section_table").style.display = 'block';
-          }
-          else document.getElementById("networks_section").style.display = 'none';
-      }
-  );
-  var wireless_xhr = new XHR();
-  wireless_xhr.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/on_status_wireless', null,
-      function(x) {
-          if (x.responseText)
-          {
-              document.getElementById("wireless_section_table").innerHTML = x.responseText;
-              document.getElementById("wireless_section_img").style.display = 'none';
-              document.getElementById("wireless_section_table").style.display = 'block';
-          }
-          else document.getElementById("wireless_section").style.display = 'none';
-      }
-  );
+	var neighbor_xhr = new XHR();
+	neighbor_xhr.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/on_status_neighbors', null,
+		function(x) {
+			if (x.responseText) {
+				document.getElementById("olsr_neighbor_table").innerHTML = x.responseText;
+				document.getElementById("olsr_neighbor_img").style.display = 'none';
+				document.getElementById("olsr_neighbor_table").style.display = 'block';
+			} else {
+				document.getElementById("neighbor_section").style.display = 'none';
+			}
+	});
+	var network_xhr = new XHR();
+	network_xhr.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/on_status_network', null,
+		function(x) {
+			if (x.responseText) {
+				document.getElementById("network_section_table").innerHTML = x.responseText;
+				document.getElementById("network_section_img").style.display = 'none';
+				document.getElementById("network_section_table").style.display = 'block';
+			} else {
+				document.getElementById("networks_section").style.display = 'none';
+			}
+	});
+	var wireless_xhr = new XHR();
+	wireless_xhr.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/on_status_wireless', null,
+		function(x) {
+			if (x.responseText) {
+				document.getElementById("wireless_section_table").innerHTML = x.responseText;
+				document.getElementById("wireless_section_img").style.display = 'none';
+				document.getElementById("wireless_section_table").style.display = 'block';
+			} else {
+				document.getElementById("wireless_section").style.display = 'none';
+			}
+	});
 }
 
 //]]></script>
 
-<h2><a id="content" name="content">
-<%	printFirmwareTitle() %>
-</a></h2>
-	<div class="cbi-map">
-        <h3 class="on_title"><%:This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to the requirements of the Opennet Initiative e.V.%></h3>
-		<div id="status_opennet_logo" /><div id="status_openwrt_logo" />
-	</div>
+<h2><a id="content" name="content"><% printFirmwareTitle() %></a></h2>
+<div class="cbi-map">
+	<h3 class="on_title"><%:This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to the requirements of the Opennet Initiative e.V.%></h3>
+	<div id="status_opennet_logo" /><div id="status_openwrt_logo" />
+</div>
 <h3><%:Status Information%></h3>
-	<div class="cbi-map"><fieldset class="cbi-section">
-		<table class="cbi-section-table" id="status_table">
-            <tr id="networks_section" class="cbi-section-table-titles">
-              <td class="cbi-section-table-cell"><%:Networks:%></td>
-              <td class="cbi-section-table-cell">
-                <img id="network_section_img" class="loading_img_small" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle"  />
-                <table id="network_section_table" class="status_page_table" style="display:none">
-                </table>
-              </td>
-            </tr>
-            <tr id="wireless_section" class="cbi-section-table-titles">
-              <td class="cbi-section-table-cell"><%:Wireless:%></td>
-              <td class="cbi-section-table-cell">
-                <img id="wireless_section_img" class="loading_img_small" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle"  />
-                <table id="wireless_section_table" class="status_page_table" style="display:none">
-                </table>
-              </td>
-            </tr>
-            <tr id="neighbor_section" class="cbi-section-table-titles">
-              <td class="cbi-section-table-cell"><%:Neighbors:%></td>
-              <td class="cbi-section-table-cell">
-                <img id="olsr_neighbor_img" class="loading_img_small" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle"  />
-                <table id="olsr_neighbor_table" class="status_page_table" style="display:none">
-                </table>
-              </td>
-			</tr>
+<div class="cbi-map"><fieldset class="cbi-section">
+	<table class="cbi-section-table" id="status_table">
+		<tr id="networks_section" class="cbi-section-table-titles">
+			<td class="cbi-section-table-cell"><%:Networks:%></td>
+			<td class="cbi-section-table-cell">
+				<img id="network_section_img" class="loading_img_small" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
+				<table id="network_section_table" class="status_page_table" style="display:none" />
+			</td>
+		</tr>
+		<tr id="wireless_section" class="cbi-section-table-titles">
+			<td class="cbi-section-table-cell"><%:Wireless:%></td>
+			<td class="cbi-section-table-cell">
+				<img id="wireless_section_img" class="loading_img_small" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
+				<table id="wireless_section_table" class="status_page_table" style="display:none" />
+			</td>
+		</tr>
+		<tr id="neighbor_section" class="cbi-section-table-titles">
+			<td class="cbi-section-table-cell"><%:Neighbors:%></td>
+			<td class="cbi-section-table-cell">
+				<img id="olsr_neighbor_img" class="loading_img_small" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
+				<table id="olsr_neighbor_table" class="status_page_table" style="display:none" />
+			</td>
+		</tr>
 
-			<tr class="cbi-section-table-titles">
-				<td class="cbi-section-table-cell"><%:OpenVPN:%></td>
-				<td class="cbi-section-table-cell">
-                    <% printOpenVPN() %>
-				</td>
-			</tr>
+		<tr class="cbi-section-table-titles">
+			<td class="cbi-section-table-cell"><%:OpenVPN:%></td>
+			<td class="cbi-section-table-cell"><% printOpenVPN() %></td>
+		</tr>
 
-            <% printUserGW() %>
+		<% printUserGW() %>
 
-			<tr class="cbi-section-table-titles">
-				<td class="cbi-section-table-cell"><%:Hardware-Information:%></td>
-				<td class="cbi-section-table-cell">
-					<%=luci.util.pcdata(luci.sys.exec("echo -e \"Model: \$(cat /proc/diag/model 2>/dev/null)\\n\$(cat /proc/cpuinfo)\" | awk 'BEGIN {FS=\":\"; no=0} /Processor|Hardware|system type|machine|Model|vendor_id/ {gsub(\"[\\t]\", \"\"); if (no > 0) printf \" / \"; if (\$2) { no=1; printf \$1\" :\"\$2}} END {printf \"\\n\";}'"))%>
-				</td>
-			</tr>
-			<tr class="cbi-section-table-titles">
-				<td class="cbi-section-table-cell"><%:Uptime:%></td>
-				<td class="cbi-section-table-cell">
-					<%=luci.util.pcdata(luci.sys.exec("uptime"))%>
-				</td>
-			</tr>
-			<tr class="cbi-section-table-titles">
-				<td class="cbi-section-table-cell"><%:System:%></td>
-				<td class="cbi-section-table-cell">
-					<%=luci.util.pcdata(luci.sys.exec("uname -a"))%>
-				</td>
-			</tr>
-		</table>
-	</fieldset></div>
+		<tr class="cbi-section-table-titles">
+			<td class="cbi-section-table-cell"><%:Hardware-Information:%></td>
+			<td class="cbi-section-table-cell">
+				<%=luci.util.pcdata(luci.sys.exec("echo -e \"Model: \$(cat /proc/diag/model 2>/dev/null)\\n\$(cat /proc/cpuinfo)\" | awk 'BEGIN {FS=\":\"; no=0} /Processor|Hardware|system type|machine|Model|vendor_id/ {gsub(\"[\\t]\", \"\"); if (no > 0) printf \" / \"; if (\$2) { no=1; printf \$1\" :\"\$2}} END {printf \"\\n\";}'"))%>
+			</td>
+		</tr>
+		<tr class="cbi-section-table-titles">
+			<td class="cbi-section-table-cell"><%:Uptime:%></td>
+			<td class="cbi-section-table-cell"><%=luci.util.pcdata(luci.sys.exec("uptime"))%></td>
+		</tr>
+		<tr class="cbi-section-table-titles">
+			<td class="cbi-section-table-cell"><%:System:%></td>
+			<td class="cbi-section-table-cell"><%=luci.util.pcdata(luci.sys.exec("uname -a"))%></td>
+		</tr>
+	</table>
+</fieldset></div>
 <%+footer%>

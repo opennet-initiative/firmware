@@ -18,9 +18,9 @@ function index()
 	local i18n = luci.i18n.string
 	
 	local page = entry({"opennet", "opennet_2"}, template("opennet/opennet_2"), i18n("ON Extended"), 2)
-    page.i18n = "on_opennet_2"
-    page.css = "opennet.css"
-    page.index = true
-    page.sysauth = "root"
-    page.sysauth_authenticator = "htmlauth"
+	page.i18n = "on_opennet_2"
+	page.css = "opennet.css"
+	page.index = true
+	page.sysauth = "root"
+	page.sysauth_authenticator = "htmlauth"
 end

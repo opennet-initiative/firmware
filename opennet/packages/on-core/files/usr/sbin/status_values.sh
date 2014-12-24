@@ -1,15 +1,15 @@
 #!/bin/sh
 #
 # Opennet Firmware
-# 
+#
 # Copyright 2010 Rene Ejury <opennet@absorb.it>
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 # die nachfolgenden Kommandos sind nicht sicher
@@ -23,8 +23,8 @@ EXPORT_JSON="1"                 # export as JSON-file, does not require sqlite3/
 create_database() {
   [ -f "$DATABASE_FILE" ] && return
   [ "$EXPORT_JSON" = "1" ] && return
-  
-  SQL_STRING="$SQL_STRING 
+
+  SQL_STRING="$SQL_STRING
     CREATE TABLE nodes
     (originator text, mainip text, sys_ver text, sys_board text, sys_cpu text, sys_mem int, sys_uptime text,
     sys_load text, sys_free int, sys_watchdog bool, sys_os_type text,
@@ -37,7 +37,7 @@ create_database() {
     on_ugw_connected text, on_ugw_presetips text, on_ugw_presetnames text,
     on_old_autoadapttxpwr text, on_old_remoteconf text,
     db_time text, db_epoch int, db_ver text, db_update int, CONSTRAINT key_nodes PRIMARY KEY (mainip) ON CONFLICT REPLACE);
-    
+
     CREATE TABLE ifaces
     (originator text, mainip text, if_name text, if_type_bridge text, if_type_bridgedif bool, if_hwaddr text,
     ip_label text, ip_addr text, ip_broadcast text,
@@ -69,7 +69,7 @@ print_interfaces_2_6() {
     if_type_bridge="$(ls /sys/class/net/${if_name}/brif 2>/dev/null | awk '{printf $1" "}')"
     ip_addr=$(ip address show "$if_name" | awk 'BEGIN{ORS=" "} /inet/ {print $2}')  #   contains additional whitespace
     if_type_bridgedif=$([ -e "/sys/class/net/${if_name}/brport/bridge" ] && echo "1")    # is bridged interface
-      
+
     if [ "$iface_up" = "up" ] && ([ -n "$ip_addr" ] || [ -n "$if_type_bridgedif" ]) || [ -n "$if_type_bridge" ]; then
       wlan=$(ls /sys/class/net/${if_name}/wireless/ 2>/dev/null)
       if [ -n "$wlan" ]; then
@@ -117,7 +117,7 @@ print_interfaces_2_6() {
       ifstat_tx_heartbeat_errors=$(cat /sys/class/net/${if_name}/statistics/tx_heartbeat_errors 2>/dev/null)
 
       if_hwaddr=$(cat /sys/class/net/${if_name}/address 2>/dev/null)
-      
+
       ip_broadcast=$(ip address show $if_name | awk 'BEGIN{ORS=" "} /inet/ {print $4}')  #   contains additional whitespace
       ip_label=$(ip address show $if_name | awk 'BEGIN{ORS=" "} /inet/ {print $NF}')  #   contains additional whitespace
       # opennet-firmware / openwrt values
@@ -199,7 +199,7 @@ on_id="$(uci_get on-core.settings.on_id)"
 on_olsr_mainip="$(get_main_ip)"
 db_epoch="$(date +%s)"
 
-SQL_STRING="$SQL_STRING 
+SQL_STRING="$SQL_STRING
   BEGIN TRANSACTION;"
 
 print_interfaces_2_6

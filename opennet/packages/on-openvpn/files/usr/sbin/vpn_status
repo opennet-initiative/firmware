@@ -1,15 +1,15 @@
 #!/bin/sh
 #
 # Opennet Firmware
-# 
+#
 # Copyright 2010 Rene Ejury <opennet@absorb.it>
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # 	http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 
 # include helper functions
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
@@ -135,7 +135,7 @@ case "$ACTION" in
 		
 		# Temporary and not so nice replacement for function above
 		[ "$ACTION" = "restart" -o "$1" = "stop" ] && /etc/init.d/openvpn stop
-		[ "$ACTION" = "restart" -o "$1" = "start" ] && /etc/init.d/openvpn start 
+		[ "$ACTION" = "restart" -o "$1" = "start" ] && /etc/init.d/openvpn start
 	;;
 	help|--help)
 		print_usage

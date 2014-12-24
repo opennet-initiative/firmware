@@ -42,22 +42,20 @@ end
 
 
 function get_service_value(service_name, key, default)
-  if not default then default = "" end
-  local result = on_function("get_service_value", {service_name, key, default})
-  if result == "" then return nil else return result end
+	if not default then default = "" end
+	local result = on_function("get_service_value", {service_name, key, default})
+	if result == "" then return nil else return result end
 end
 
 
 function set_service_value(service_name, key, value)
-  if not value then
-    value = ""
-  end
-  on_function("set_service_value", {service_name, key, value})
+	if not value then value = "" end
+	on_function("set_service_value", {service_name, key, value})
 end
 
 
 function delete_service_value(service_name, key)
-  set_service_value(service_name, key, "")
+	set_service_value(service_name, key, "")
 end
 
 

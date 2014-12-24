@@ -20,8 +20,8 @@ function index()
 	local i18n = luci.i18n.string
 	
 	local page = entry({"opennet", "opennet_2", "vpn_gateways"}, call("action_vpn_gateways"), i18n("VPN Gateways"), 1)
-	page.i18n  = "on_gateways"
-	page.css   = "opennet.css"
+	page.i18n = "on_gateways"
+	page.css = "opennet.css"
 
 	entry({"opennet", "opennet_2", "vpn_gateway_info"}, call("gateway_info"), nil).leaf = true
 	entry({"opennet", "opennet_2", "vpn_gateway_list"}, call("gateway_list")).leaf = true
@@ -77,10 +77,10 @@ function gateway_info(service_name)
 			download="number|detail|download", upload="number|detail|upload",
 			age="number|function|get_mig_connection_test_age"})
 	if info then
-	    luci.http.prepare_content("application/json")
-	    luci.http.write_json(info)
+		luci.http.prepare_content("application/json")
+		luci.http.write_json(info)
 	else
-	    luci.http.status(404, "No such device")
+		luci.http.status(404, "No such device")
 	end
 end
 

@@ -23,7 +23,7 @@ require("luci.i18n")
 function get_ugw_status(ugw_status)
     ugw_status.usergateways_no = 0
     cursor:foreach ("on-usergw", "usergateway", function() ugw_status.usergateways_no = ugw_status.usergateways_no + 1 end)
-  
+
     -- central gateway-IPs reachable over tap-devices
     ugw_status.centralips = luci.sys.exec("for gw in $(uci -q get on-usergw.@usergw[0].centralIP); do ip route get $gw | awk '/dev tap/ {print $1}' ; done")
     local words
@@ -34,11 +34,11 @@ function get_ugw_status(ugw_status)
     -- tunnel active
     local iterator, number = nixio.fs.glob("/tmp/opennet_ugw-*.txt")
     ugw_status.tunnel_active = (number >= 1)
-    
+
     -- if the forward is set, the sharing is active
     ugw_status.forwarded_ip = luci.sys.exec("on-function get_ugw_portforward | cut -f 1")
     ugw_status.forwarded_gw = luci.sys.exec("on-function get_ugw_portforward | cut -f 2")
-    
+
     -- sharing possible
     ugw_status.sharing_wan_ok = false
     ugw_status.sharing_possible = false
@@ -69,12 +69,12 @@ end
 function check_ugw_status()
   local ugw_status = {}
   get_ugw_status(ugw_status)
-  
+
   if not SYSROOT then SYSROOT = "" end        -- SYSROOT is only used for local testing (make runhttpd in luci tree)
   local autocheck_running = nixio.fs.access(SYSROOT.."/var/run/on_usergateway_check")
 
   luci.http.prepare_content("text/plain")
-  
+
   luci.http.write([[<div class="cbi-map"><fieldset class="cbi-section"><fieldset class="cbi-section-node"><table class="usergw-status" id="ugw_status_table"><tr>]])
   luci.http.write([[<td rowspan="2" width="10%" ><div class="cbi-value-field"><div class="ugw-centralip" status="]]..ugw_status.centralip_status..[[">&#160;</div></div></td>]])
   luci.http.write([[<td><h4 class="on_sharing_status-title">]])
@@ -103,7 +103,7 @@ function check_ugw_status()
     luci.http.write([[<tr class="cbi-section-table-titles"><td /><td colspan="1"><label class="cbi-value-ugwstatus">]])
     if ugw_status.centralips_no == 0 then
       luci.http.write(luci.i18n.string([[no central Gateway-IPs connected trough tunnel]]))
-    elseif ugw_status.centralips_no == 1 then 
+    elseif ugw_status.centralips_no == 1 then
       luci.http.write(luci.i18n.stringf([[central Gateway-IP %s connected trough tunnel]], ugw_status.centralips))
     else
       luci.http.write(luci.i18n.stringf([[central Gateway-IPs %s connected trough tunnel]], ugw_status.centralips))
@@ -114,7 +114,7 @@ function check_ugw_status()
     luci.http.write([[</label></td></tr>]])
   end
   luci.http.write([[</table></fieldset></fieldset></div>]])
-  
+
   if ugw_status.sharing_possible or ugw_status.sharing_enabled then
     luci.http.write([[<h3>]]..luci.i18n.string([[Manage Internet-Sharing]])..
       [[</h3><div class="cbi-map"><fieldset class="cbi-section"><fieldset class="cbi-section-node">]])
@@ -166,7 +166,7 @@ end
 
 function get_wan()
   local path = luci.dispatcher.context.requestpath
-  local count = path[#path]  
+  local count = path[#path]
   wan = cursor:get("on-usergw", "opennet_ugw"..count, "wan")
   if not wan then wan = "" end
   luci.http.prepare_content("text/plain")
@@ -199,7 +199,7 @@ end
 
 function get_speed()
   local path = luci.dispatcher.context.requestpath
-  local count = path[#path]  
+  local count = path[#path]
   luci.http.prepare_content("text/plain")
   upload = cursor:get("on-usergw", "opennet_ugw"..count, "upload")
   download = cursor:get("on-usergw", "opennet_ugw"..count, "download")
@@ -225,7 +225,7 @@ end
 
 function get_mtu()
   local path = luci.dispatcher.context.requestpath
-  local count = path[#path]  
+  local count = path[#path]
   luci.http.prepare_content("text/plain")
   local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
   if v.mtu then
@@ -247,7 +247,7 @@ end
 
 function get_vpn()
   local path = luci.dispatcher.context.requestpath
-  local count = path[#path]  
+  local count = path[#path]
   luci.http.prepare_content("text/plain")
   local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
   local v_age = luci.sys.exe(". /usr/lib/opennet/on-helper.sh; get_ugw_value "..v.ipaddr.." age")
@@ -289,12 +289,12 @@ function get_forward_active(count)
   end
   return returnValue
 end
-  
+
 function get_name_button()
   local SYSROOT = os.getenv("LUCI_SYSROOT")
   if not SYSROOT then SYSROOT = "" end        -- SYSROOT is only used for local testing (make runhttpd in luci tree)
   local path = luci.dispatcher.context.requestpath
-  local count = path[#path]  
+  local count = path[#path]
   luci.http.prepare_content("text/plain")
   local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
   if v and v.ipaddr and v.ipaddr ~= "" and not nixio.fs.access(SYSROOT.."/var/run/on_usergateway_check") then

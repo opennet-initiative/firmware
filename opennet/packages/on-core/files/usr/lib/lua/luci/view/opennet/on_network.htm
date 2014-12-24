@@ -31,23 +31,23 @@ if (form_id) then
 	local t = split(form_id)
 	
 	local replace_id = false
-    if #t == 1 then
-        t[2] = t[1]
-        t[1] = "1"
-        replace_id = true
-    elseif #t == 2 then
-        replace_id = true    
-    elseif form_id:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$") then
-        t[1] = t[3]
-        t[2] = t[4]
-        replace_id = true
-    end
-    
-    if replace_id then
-	luci.sys.exec("on-function set_opennet_id '"..form_id.."'")
-    else
-        form_id = on_id
-    end
+	if #t == 1 then
+		t[2] = t[1]
+		t[1] = "1"
+		replace_id = true
+	elseif #t == 2 then
+		replace_id = true
+	elseif form_id:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$") then
+		t[1] = t[3]
+		t[2] = t[4]
+		replace_id = true
+	end
+
+	if replace_id then
+		luci.sys.exec("on-function set_opennet_id '"..form_id.."'")
+	else
+		form_id = on_id
+	end
 else
 	form_id = on_id
 end
@@ -66,9 +66,9 @@ end
 					</label>
 					<div class="cbi-value-field">
 						<input type="submit" class="cbi-button cbi-button-apply" value="<%:use%>"
-                          onclick="return confirm('<%
-                            print(luci.i18n.string([[Be aware that the network will be restarted immediately,\n and you might loose the contact to your router.\n\nAre you really wan\'t to update the network-id?]]))
-                            %>')" />
+							onclick="return confirm('<%
+								print(luci.i18n.string([[Be aware that the network will be restarted immediately,\n and you might loose the contact to your router.\n\nAre you really wan\'t to update the network-id?]]))
+							%>')" />
 					</div>
 				</div>
 			</fieldset>
@@ -94,7 +94,7 @@ end
 						<%
 						count = count + 1
 					end
-				end 
+				end
 				local free = cursor:get_all("network", "free")
 				if free then
 						%>

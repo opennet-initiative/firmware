@@ -67,7 +67,7 @@ You may obtain a copy of the License at
 		</fieldset>
 			<div class="cbi-value-description">
 				<% if certstatus.on_crt_exists and certstatus.on_key_exists and (certstatus.on_crt_modulus ~= certstatus.on_key_modulus) then
-					if certstatus.on_csr_modulus == certstatus.on_key_modulus then 
+					if certstatus.on_csr_modulus == certstatus.on_key_modulus then
 						%><div class="errorbox"><%
 						print(luci.i18n.stringf([[Private Key and Certificate do not match. Please replace Certificate!]]))
 						%></div><%
@@ -79,7 +79,7 @@ You may obtain a copy of the License at
 				end %>
 			</div>
 			<div class="cbi-value-description">
-				<% if certstatus.on_keycsr_ok and (not(certstatus.on_crt_exists) or not(certstatus.on_keycrt_ok)) then 
+				<% if certstatus.on_keycsr_ok and (not(certstatus.on_crt_exists) or not(certstatus.on_keycrt_ok)) then
 					local uci = require "luci.model.uci"
 					local cursor = uci.cursor()
 					local contact_email = luci.sys.exec("on-function get_on_core_default csr_contact")
@@ -124,7 +124,7 @@ You may obtain a copy of the License at
 				<td>
 					<input type="submit" class="cbi-button cbi-button-apply" value="<%:upload%>" />
 				</td>
-      </tr></table>
+			</tr></table>
 		</fieldset>
 		</form>
 	</fieldset>

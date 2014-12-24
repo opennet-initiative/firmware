@@ -15,13 +15,13 @@ $Id: index.htm 5448 2009-10-31 15:54:11Z jow $
 <%+header%>
 <h2><a id="content" name="content"><%:Welcome to the Configuration Pages of your Access Point%></a></h2>
 <h3><%:Base Configuration%></h3>
-    <div class="cbi-map"><fieldset class="cbi-section">
-        <p><%:The following points are the ones required to configure any Opennet Access-Point. Please use them all if the mentioned order if you like to configure your Accesspoint the easiest way. Choose the items below or from the menu on the left.%></p>
-        <ul>
-            <li><a href="<%=REQUEST_URI%>/funknetz"><%:Network%></a><p><%:Basic Network Configuration - just enter your Opennet ID and everything will be adapted%></p></li>
-            <% if luci.sys.exec("opkg status on-openvpn | grep installed") ~= "" then %>
-            <li><a href="<%=REQUEST_URI%>/vpn_tunnel"><%:VPN Tunnel%></a><p><%:If you like to use the Internet, you should create or upload your OpenVPN Certificates and Keys here%></p></li>
-            <% end %>
-        </ul>
+	<div class="cbi-map"><fieldset class="cbi-section">
+		<p><%:The following points are the ones required to configure any Opennet Access-Point. Please use them all if the mentioned order if you like to configure your Accesspoint the easiest way. Choose the items below or from the menu on the left.%></p>
+		<ul>
+			<li><a href="<%=REQUEST_URI%>/funknetz"><%:Network%></a><p><%:Basic Network Configuration - just enter your Opennet ID and everything will be adapted%></p></li>
+			<% if luci.sys.exec("opkg status on-openvpn | grep installed") ~= "" then %>
+				<li><a href="<%=REQUEST_URI%>/vpn_tunnel"><%:VPN Tunnel%></a><p><%:If you like to use the Internet, you should create or upload your OpenVPN Certificates and Keys here%></p></li>
+			<% end %>
+		</ul>
 	</fieldset></div>
 <%+footer%>

@@ -28,5 +28,5 @@ function index()
 	page.i18n = "on_network"
 	page.css = "opennet.css"
 
-    page.css = "opennet.css"
+	page.css = "opennet.css"
 end

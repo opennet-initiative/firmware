@@ -15,13 +15,13 @@ module("luci.controller.opennet.on_usergw", package.seeall)
 require("luci.model.opennet.funcs")
 
 function index()
-	luci.i18n.loadc("on_base")
-	local i18n = luci.i18n.string
-	
-	local page = entry({"opennet", "opennet_2", "ugw_tunnel"}, call("action_on_usergw"), i18n("Internet Sharing"), 3)
-	page.css = "opennet.css"
-	page.i18n = "on_usergw"
-    
+    luci.i18n.loadc("on_base")
+    local i18n = luci.i18n.string
+
+    local page = entry({"opennet", "opennet_2", "ugw_tunnel"}, call("action_on_usergw"), i18n("Internet Sharing"), 3)
+    page.css = "opennet.css"
+    page.i18n = "on_usergw"
+
     require ("luci.model.opennet.on_usergw")
     entry({"opennet", "opennet_2", "ugw_tunnel", "check_ugw_status"}, call("check_ugw_status"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "update_wan"}, call("update_wan"), nil).leaf = true
@@ -40,7 +40,7 @@ end
 function action_on_usergwNG(ugw_status)
     local uci = require "luci.model.uci"
     local cursor = uci.cursor()
-    
+
     function move_gateway_down (number)
         local t_below = cursor:get_all("on-usergw", "opennet_ugw"..(number + 1))
         local t_current = cursor:get_all("on-usergw", "opennet_ugw"..number)
@@ -57,23 +57,23 @@ function action_on_usergwNG(ugw_status)
             number = number + 1
             target = cursor:get_all("on-usergw", "opennet_ugw"..number)
         end
-        
+
         while (number > 1) do
             number = number - 1
             move_gateway_down(number)
         end
     end
-    
+
     local new_gateway_name = luci.http.formvalue("new_gateway_name")
     local del_section = luci.http.formvalue("del_section")
     local down_section = luci.http.formvalue("down_section")
     local reset_counter = luci.http.formvalue("reset_counter")
     local select_gw = luci.http.formvalue("select_gw")
-    
+
     if (new_gateway and new_gateway ~= "") or (new_gateway_name and new_gateway_name ~= "") then
         cursor:set ("on-usergw", "opennet_ugw"..(ugw_status.usergateways_no + 1), "usergateway")
         cursor:tset ("on-usergw", "opennet_ugw"..(ugw_status.usergateways_no + 1), { ipaddr = '', name = new_gateway_name, age = '', status = '', ping = ''})
-		ugw_status.usergateways_no = ugw_status.usergateways_no + 1
+        ugw_status.usergateways_no = ugw_status.usergateways_no + 1
     elseif down_section then
         down_section = down_section + 0
         move_gateway_down(down_section)
@@ -85,8 +85,8 @@ function action_on_usergwNG(ugw_status)
         cursor:delete("on-usergw", "opennet_ugw"..del_section)
         cursor:commit("on-usergw")
         cursor:unload("on-usergw")
-		ugw_status.usergateways_no = ugw_status.usergateways_no - 1
-		os.execute("on-function update_openvpn_ugw_settings")
+        ugw_status.usergateways_no = ugw_status.usergateways_no - 1
+        os.execute("on-function update_openvpn_ugw_settings")
     elseif reset_counter then
         for k, v in pairs(cursor:get_all("on-usergw")) do
             if v[".type"] == "usergateway" then cursor:set("on-usergw", k, "age", "") end
@@ -99,25 +99,25 @@ function action_on_usergwNG(ugw_status)
         os.execute("/etc/init.d/usergw down opennet_user")
         os.execute("/etc/init.d/usergw up opennet_user")
     end
-    
+
     if new_gateway_name or down_section or reset_counter or select_gw then
         cursor:commit("on-usergw")
         cursor:unload("on-usergw") -- just to get the real values for del-buttons
     end
-    
+
 end
 
 function action_on_usergw()
-	require ("luci.model.opennet.on_vpn_management")
-  require ("luci.model.opennet.on_usergw")
-	
-  local ugw_status = {}
-  get_ugw_status(ugw_status)
-  action_on_usergwNG(ugw_status)
-	
+    require ("luci.model.opennet.on_vpn_management")
+    require ("luci.model.opennet.on_usergw")
+
+    local ugw_status = {}
+    get_ugw_status(ugw_status)
+    action_on_usergwNG(ugw_status)
+
     local uci = require "luci.model.uci"
     local cursor = uci.cursor()
-    
+
     if luci.http.formvalue("disable_sharing") then
       cursor:set("on-usergw", "ugw_sharing", "shareInternet", "off")
     elseif luci.http.formvalue("enable_sharing") then
@@ -134,21 +134,21 @@ function action_on_usergw()
     end
 
     if luci.http.formvalue("upload") then upload_file("ugw") end
-	
-	local download = luci.http.formvalue("download")
-	if download then download_file("ugw", download) end
-	
-	local openssl = {}
-	fill_openssl("on-usergw", openssl)
-	if luci.http.formvalue("generate") then generate_csr("ugw", openssl) end
-	
-	local certstatus = {}
-	check_cert_status("ugw", certstatus)
-	
-	local force_show_uploadfields = luci.http.formvalue("force_show_uploadfields") or not certstatus.on_keycrt_ok
-	local force_show_generatefields = luci.http.formvalue("force_show_generatefields") or (not certstatus.on_keycrt_ok and not certstatus.on_keycsr_ok)
-	
-	luci.template.render("opennet/on_usergw", {
-		ugw_status=ugw_status, certstatus=certstatus, openssl=openssl, force_show_uploadfields=force_show_uploadfields, force_show_generatefields=force_show_generatefields
-		})
+
+    local download = luci.http.formvalue("download")
+    if download then download_file("ugw", download) end
+
+    local openssl = {}
+    fill_openssl("on-usergw", openssl)
+    if luci.http.formvalue("generate") then generate_csr("ugw", openssl) end
+
+    local certstatus = {}
+    check_cert_status("ugw", certstatus)
+
+    local force_show_uploadfields = luci.http.formvalue("force_show_uploadfields") or not certstatus.on_keycrt_ok
+    local force_show_generatefields = luci.http.formvalue("force_show_generatefields") or (not certstatus.on_keycrt_ok and not certstatus.on_keycsr_ok)
+
+    luci.template.render("opennet/on_usergw", {
+        ugw_status=ugw_status, certstatus=certstatus, openssl=openssl, force_show_uploadfields=force_show_uploadfields, force_show_generatefields=force_show_generatefields
+    })
 end

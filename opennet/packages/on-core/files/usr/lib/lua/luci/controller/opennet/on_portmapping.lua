@@ -28,7 +28,7 @@ function action_portmapping()
 	zones = { "on_vpn", "on_mesh", "lan", "wan" }
 	
 	local zone
-	for index = 1, #zones do if  luci.http.formvalue(zones[index]) then zone = zones[index] end end
+	for index = 1, #zones do if luci.http.formvalue(zones[index]) then zone = zones[index] end end
 
 	local del_section
 	for index = 1, #zones do del_section = luci.http.formvalue(zones[index].."_del_section") if del_section then break end end

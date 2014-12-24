@@ -19,12 +19,12 @@ function index()
 	local i18n = luci.i18n.string
 	
 	local page = entry({"opennet", "opennet_1", "vpn_tunnel"}, call("action_on_openvpn"), i18n("VPN Tunnel"), 2)
-	page.i18n    = "on_openvpn"
-	page.css     = "opennet.css"
-  
-  require ("luci.model.opennet.on_vpn_status")
-  entry({"opennet", "opennet_1", "vpn_tunnel", "on_vpn_status_label"}, call("on_vpn_status_label"), nil).leaf = true
-  entry({"opennet", "opennet_1", "vpn_tunnel", "on_vpn_status_form"}, call("on_vpn_status_form"), nil).leaf = true
+	page.i18n = "on_openvpn"
+	page.css = "opennet.css"
+
+	require ("luci.model.opennet.on_vpn_status")
+	entry({"opennet", "opennet_1", "vpn_tunnel", "on_vpn_status_label"}, call("on_vpn_status_label"), nil).leaf = true
+	entry({"opennet", "opennet_1", "vpn_tunnel", "on_vpn_status_form"}, call("on_vpn_status_form"), nil).leaf = true
 end
 
 function action_on_openvpn()

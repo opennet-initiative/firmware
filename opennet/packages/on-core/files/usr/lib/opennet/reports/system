@@ -12,3 +12,9 @@ uci show system >system.uci
 # Konfigurationsdateien und ihre Groesse (Null -> eventuell kaputt)
 ls -l /etc/config/ >config_files.txt
 
+# Kernel-Log
+dmesg >dmesg
+
+# hier duerften wohl keine privaten Informationen enthalten sein
+logread >logread
+

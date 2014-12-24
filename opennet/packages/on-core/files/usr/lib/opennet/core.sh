@@ -499,18 +499,20 @@ generate_report() {
 	trap "error_trap generate_report '$*'" $GUARD_TRAPS
 	local fname
 	local pid
-	local reports_dir=$(mktemp -d)
+	local temp_dir=$(mktemp -d)
+	local reports_dir="$temp_dir/report"
 	local tar_file=$(mktemp)
 	msg_debug "Creating a report"
-	# Verzeichnis fuer alle aufgerufenen Skripte sichtbar machen
 	# die Skripte duerfen davon ausgehen, dass wir uns im Zielverzeichnis befinden
+	mkdir -p "$reports_dir"
 	cd "$reports_dir"
 	find /usr/lib/opennet/reports -type f | while read fname; do
 		[ ! -x "$fname" ] && msg_info "skipping non-executable report script: $fname" && continue
-		ON_REPORTS_DIR="$reports_dir" "$fname" || msg_info "ERROR: reports script failed: $fname"
+		"$fname" || msg_info "ERROR: reports script failed: $fname"
 	done
-	tar czf "$tar_file" .
-	rm -r "$reports_dir"
-	mv "$tar_file" "$ON_REPORTS_FILE"
+	cd "$temp_dir"
+	tar czf "$tar_file" "report"
+	rm -r "$temp_dir"
+	mv "$tar_file" "$REPORTS_FILE"
 }
 

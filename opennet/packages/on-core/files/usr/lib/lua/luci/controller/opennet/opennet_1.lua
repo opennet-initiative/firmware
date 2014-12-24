@@ -13,20 +13,61 @@ $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 ]]--
 module("luci.controller.opennet.opennet_1", package.seeall)
 
+local report_filename = "/tmp/on_report.tar.gz"
+require("luci.model.opennet.funcs")
+
+
 function index()
 	luci.i18n.loadc("on_base")
 	local i18n = luci.i18n.string
+	local page
 	
-	local page = entry({"opennet", "opennet_1"}, template("opennet/opennet_1"), i18n("Base"), 1)
+	page = entry({"opennet", "opennet_1"}, template("opennet/opennet_1"), i18n("Base"), 1)
 	page.i18n = "on_opennet_1"
 	page.css = "opennet.css"
 	page.index = true
 	page.sysauth = "root"
 	page.sysauth_authenticator = "htmlauth"
 	
-	local page = entry({"opennet", "opennet_1", "funknetz"}, template("opennet/on_network"), i18n("Network"), 1)
+	page = entry({"opennet", "opennet_1", "funknetz"}, template("opennet/on_network"), i18n("Network"), 2)
 	page.i18n = "on_network"
 	page.css = "opennet.css"
 
+	page = entry({"opennet", "opennet_1", "bericht"}, call("report"), i18n("Report"), 3)
+	page.i18n = "on_report"
 	page.css = "opennet.css"
+
+	page = entry({"opennet", "opennet_1", "bericht", "timestamp"}, call("get_report_timestamp"))
 end
+
+
+function report()
+	if luci.http.formvalue("download") and nixio.fs.access(report_filename) then
+		local timestamp = nixio.fs.stat(report_filename, "mtime")
+		local fhandle = io.open(report_filename, "r")
+		luci.http.header('Content-Disposition', 'attachment; filename="AP-report-%s-%s.tar.gz"' % {
+			luci.sys.hostname(), os.date("%Y-%m-%d_%H%M", timestamp)})
+		luci.http.prepare_content("application/x-targz")
+		luci.ltn12.pump.all(luci.ltn12.source.file(fhandle), luci.http.write)
+	else
+		if luci.http.formvalue("delete") and nixio.fs.access(report_filename) then
+			nixio.fs.remove(report_filename)
+		elseif luci.http.formvalue("generate") then
+			on_function("run_delayed_in_background", {"0", "generate_report"})
+		end
+		luci.template.render("opennet/on_report")
+	end
+end
+
+
+function get_report_timestamp()
+	local info
+	if nixio.fs.access(report_filename) then
+		info = nixio.fs.stat(report_filename, "mtime")
+	else
+		info = nil
+	end
+	luci.http.prepare_content("application/json")
+	luci.http.write_json(info)
+end
+

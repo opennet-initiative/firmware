@@ -1,0 +1,62 @@
+<%#
+Opennet Firmware
+
+Copyright 2014 Lars Kruse <devel@sumpfralle.de>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+<%+header%>
+<%+cbi/apply_xhr%>
+
+<%# erforderlich fuer "String.format" %>
+<script type="text/javascript" src="<%=resource%>/cbi.js"></script>
+<script type="text/javascript">//<![CDATA[
+	XHR.poll(10, '<%=luci.dispatcher.build_url("opennet", "opennet_1", "bericht", "timestamp")%>', null, update_report_status);
+
+	function update_report_status(x, info) {
+		var status_field = document.getElementById('on-report-status');
+		if (status_field) {
+			var result = "";
+			if (info) {
+				// javascript verwendet ms statt Sekunden
+				var timestamp = new Date(info * 1000);
+				result += String.format('<label class="cbi-value-title" for="download"><%:Available Report%> (%s):</label>', timestamp.toUTCString());
+				result += '<div class="cbi-value-field">';
+				result += '<input class="cbi-button cbi-button-apply" type="submit" name="download" id="download" value="<%:Download%>" />';
+				result += '<input class="cbi-button cbi-button-apply" type="submit" name="delete" value="<%:Delete%>" />';
+				result += '</div>';
+			} else {
+				result += '<label class="cbi-value-title" for="download"><%:No report available:%></label>';
+				result += '<p><%:Generating a report takes about one minute%></p>';
+			}
+			status_field.innerHTML = result;
+		}
+	}
+//]]></script>
+
+
+<h2><a id="content" name="content"><%:Router summary%></a></h2>
+
+
+<div class="cbi-map"><fieldset class="cbi-section">
+	<legend><%:Report Generator%></legend>
+	<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
+		<div class="cbi-section-descr"><%:Do you want to discuss technical issues with other members of the Opennet community? You can download a detailed summary here. This will help others to understand your setup. The summary does not contain any private information.%></div>
+		<div class="cbi-section-node">
+			<div class="cbi-value">
+				<label class="cbi-value-title" for="generate"><%:Generate Report:%></label>
+				<div class="cbi-value-field">
+					<input class="cbi-button cbi-button-apply" type="submit" id="generate" name="generate" value="<%:Start%>" />
+				</div>
+			</div>
+			<div class="cbi-value" id="on-report-status" />
+		</div>
+	</form>
+</fieldset></div>
+
+<%+footer%>

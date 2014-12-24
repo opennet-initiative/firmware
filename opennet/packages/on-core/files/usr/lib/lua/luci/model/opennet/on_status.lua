@@ -16,6 +16,8 @@ $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 local uci = require "luci.model.uci"
 local cursor = uci.cursor()
 require("luci.sys")
+require("luci.model.opennet.funcs")
+
 
 function split(str)
 	local t = { }
@@ -37,9 +39,21 @@ function printFirmwareTitle()
 end
 
 function printOpenVPN()
-	local remote = luci.sys.exec("on-function get_active_mig_connections | while read service_name; do on-function get_service_value \"$service_name\" host; done")
+	local services = on_function("get_active_mig_connections")
+	local service
+	local host
+	local index
+	local remotes
+	for service in services:gmatch("%S+") do
+		host = get_service_value(service, "host")
+		if remotes then
+			remotes = remotes .. ", " .. host
+		else
+			remotes = host
+		end
+	end
 	if remote ~= "" then
-		luci.http.write(luci.i18n.string([[VPN-Tunnel active.]])..[[ (]]..remote..")")
+		luci.http.write(luci.i18n.string([[VPN-Tunnel active.]])..[[ (]]..remotes..")")
 	else
 		luci.http.write(luci.i18n.string([[VPN-Tunnel not active, for details check the System Log.]]))
 	end

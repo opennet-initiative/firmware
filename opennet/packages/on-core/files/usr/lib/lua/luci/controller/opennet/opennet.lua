@@ -24,25 +24,25 @@ function index()
 	page.title = i18n("Opennet")
 	page.target = alias("opennet", "on_status")
 
-	page = assign({"opennet", "on_status"}, {"admin", "status"}, i18n("Status"), 0)
-	page.target = template("opennet/on_status")
+	-- die Status-Seite
+	page = entry({"opennet", "on_status"}, template("opennet/on_status"))
+	page.title = i18n("Status")
+	page.order = 0
 	page.css = "opennet.css"
 	page.i18n = "on_status"
 
+	-- Quellen fuer die Inhalte der Status-Seite
 	require ("luci.model.opennet.on_status")
-	page = entry({"opennet", "on_status", "on_status_neighbors"}, call("status_neighbors"), nil)
+	page = entry({"opennet", "on_status", "on_status_neighbors"}, call("status_neighbors"))
 	page.leaf = true
 
-	page = entry({"opennet", "on_status", "on_status_network"}, call("status_network"), nil)
+	page = entry({"opennet", "on_status", "on_status_network"}, call("status_network"))
 	page.leaf = true
 
-	page = entry({"opennet", "on_status", "on_status_wireless"}, call("status_wireless"), nil)
+	page = entry({"opennet", "on_status", "on_status_wireless"}, call("status_wireless"))
 	page.leaf = true
 
-	page = assign({"opennet", "on_status", "statistics"}, {"admin", "statistics"}, "", 9999)
-	page = assign({"opennet", "on_status", "graph"}, {"admin", "statistics", "graph"}, i18n("Graphs"), 0)
-	page.css = "opennet.css"
-	
+	-- separate top-level Auswahl fuer das olsr-Web-Interface
 	page = node("olsr")
 	page.title = i18n("OLSR-Status")
 	page.target = template("opennet/on_olsr")

@@ -24,6 +24,16 @@ Die menschenfreundliche Zusammenfassung aller Dienst-Informationen ist recht üb
 Dienste werden durch einen eindeutigen Namen (zusammengesetzt aus URL, Schema, Hostname, Port, usw.) referenziert. Dieser eindeutige Namen wird von allen Dienst-relevanten Funktionen verwendet.
 
 
+Prioritisierung der Dienste
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Wenn mehrere Anbieter eines Dienstes zur Verfügung stehen, dann muss eine automatisierte Entscheidung getroffen werden, welcher davon zu verwenden ist. Derzeit stehen drei Methoden zur Verfügung, von denen eine über die Konfigurationseinstellung ``on-core.settings.service_sorting`` ausgewählt wird:
+
+* etx: die Entfernung, so wie sie von ``olsrd`` als Routing-Metrik verwendet wird (dies ist die Standard-Sortierung)
+* hop: die Anzahl der Routing-Hops
+* manual: die Reihenfolge wird durch manuelle Anordnung festgelegt
+
+
 DNS - Namensauflösung
 ---------------------
 

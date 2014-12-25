@@ -92,6 +92,28 @@ fix_firewall_reload() {
 }
 
 
+# bis Version 0.4-5 wurden die folgenden Einstellungen fuer die Reihenfolge der VPN-Gateways verwendet:
+# * on-openvpn.gateways.vpn_sort_criteria=metric|etx
+# * on-openvpn.gateways.autosearch=on|off
+# Die darauffolgenden Firrmware-Versionen verwenden stattdessen die Einstellung 'on-core.settings.service_sorting'.
+transfer_vpn_sort_criteria_and_autosearch() {
+	local sort_criteria=$(uci_get on-openvpn.gateways.vpn_sort_criteria)
+	local autosearch=$(uci_get on-openvpn.gateways.autosearch)
+	local result
+	if [ -z "$autosearch" -a -z "$sort_criteria" ]; then
+		# die Einstellungen wurden bereits uebertragen
+		return 0
+	elif [ "$autosearch" = "off" ]; then
+		result=manual
+	elif [ "$sort_criteria" = "metric" ]; then
+		result=hop
+	else
+		result=etx
+	fi
+	uci set "on-core.settings.service_sorting=$result"
+}
+
+
 # bis Version 0.4-5 verwendeten wir vollstaendige uci-Sektionen fuer die VPN-Server
 # z.B. openvpn.opennet_user
 remove_tunnel_openvpn_settings() {
@@ -155,22 +177,26 @@ remove_obsolete_usergw_settings() {
 
 
 # Die uci-Einstellungen "on-openvpn.gate_XY.*" waren bis Version 0.4-5 in Verwendung.
-# Anschliessend wurden diese Informationen im Dateisystem gespeichert.
+# In den darauffolgenden Firmware-Versionen werden diese Informationen im Dateisystem gespeichert.
 # Im Zweifelsfall (z.B. falls gerade keine Verbindung zum mesh existiert), werden die
-# zu uebertragenden Informationen (z.B. die Offsets der Gateways) verworfen.
+# zu uebertragenden Informationen (die Offsets der Gateways oder ihre manuelle Reihenfolge) verworfen.
 transfer_gateway_uci_settings() {
 	local uci_prefix
-	local offset
 	local host
+	local offset
+	local rank
+	local service_name
 	find_all_uci_sections on-openvpn gateway | while read uci_prefix; do
+		host=$(uci_get "${uci_prefix}.ipaddr")
 		offset=$(uci_get "${uci_prefix}.etx_offset")
-		# uebertrage den Offset in die neue Konfiguration
-		if [ -n "$offset" ]; then
-			host=$(uci_get "${uci_prefix}.ipaddr")
-			(get_services "service=ugw" "host=$host"; get_services "service=gw" "host=$host") | while read service_name; do
-				set_service_value "$service_name" "offset" "$offset"
-			done
-		fi
+		rank="${uci_prefix#on-openvpn.gate_}"
+		# ermittle alle passenden Dienste dieses Hosts (es koennen mehrere Dienste pro Host vorhanden sein)
+		(get_services "service=ugw" "host=$host"; get_services "service=gw" "host=$host") | while read service_name; do
+			# Offset fuer automatische Sortierung uebertragen
+			[ -n "$offset" ] && set_service_value "$service_name" "offset" "$offset"
+			# Rang fuer manuelle Sortierung uebertragen
+			[ -n "$rank" -a "$rank" != "$uci_prefix" ] && set_service_value "$service_name" "rank" "$rank" || true
+		done
 		uci_delete "$uci_prefix"
 	done
 	apply_changes on-openvpn
@@ -208,6 +234,7 @@ rename_olsrd_Port_to_port() {
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_firewall_reload
+transfer_vpn_sort_criteria_and_autosearch
 remove_tunnel_openvpn_settings
 remove_obsolete_on_core_settings
 remove_usergw_openvpn_configs

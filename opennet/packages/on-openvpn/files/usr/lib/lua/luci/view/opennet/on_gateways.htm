@@ -193,7 +193,7 @@ You may obtain a copy of the License at
 						<th class="cbi-section-table-cell"><%
 						if sorting ~= "manual" then
 							print(luci.i18n.string([[(<abbr title='This offset is added to the values before use/display'>Offset</abbr>)]]))
-							if sorting == "hop_count" then
+							if sorting == "hop" then
 								print(luci.i18n.string([[<abbr title='Number of Hops to the Gateway'>Distance</abbr>]]))
 							else
 								print(luci.i18n.string([[<abbr title='Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR'>ETX</abbr>]]))

@@ -10,7 +10,9 @@ You may obtain a copy of the License at
 	http://www.apache.org/licenses/LICENSE-2.0
 
 -%>
-<% require ("luci.model.opennet.on_crt_data")
+<%
+require ("luci.model.opennet.on_crt_data")
+require("luci.model.opennet.funcs")
 %>
 <h3><%:Key/Cert Status%></h3>
 <div class="cbi-map">
@@ -82,7 +84,7 @@ You may obtain a copy of the License at
 				<% if certstatus.on_keycsr_ok and (not(certstatus.on_crt_exists) or not(certstatus.on_keycrt_ok)) then
 					local uci = require "luci.model.uci"
 					local cursor = uci.cursor()
-					local contact_email = luci.sys.exec("on-function get_on_core_default csr_contact")
+					local contact_email = on_function("get_on_core_default", {"csr_contact"})
 					local on_id = cursor:get("on-core", "settings", "on_id")
 					if not on_id then on_id = "" end %>
 					<div><%

@@ -26,15 +26,15 @@ function split(str)
 end
 
 function printFirmwareTitle()
-	local on_version = luci.sys.exec("on-function get_on_firmware_version")
+	local on_version = on_function("get_on_firmware_version")
 	local on_id = cursor:get("on-core", "settings", "on_id")
-	local on_aps = split(luci.sys.exec("on-function get_port_forwards"))[1]
+	local client_cn = on_function("get_client_cn")
 	luci.http.write(luci.i18n.stringf("Opennet Firmware version %s", on_version))
 	if on_id then
 		luci.http.write(luci.i18n.stringf("-- AP %s", on_id))
 	end
-	if on_aps and on_aps ~= "" then
-		luci.http.write(luci.i18n.stringf("-- CN %s", on_aps))
+	if client_cn and client_cn ~= "" then
+		luci.http.write(luci.i18n.stringf("-- CN %s", client_cn))
 	end
 end
 
@@ -66,15 +66,20 @@ function printUserGW()
 
 	local ugw_status = {}
 	-- central gateway-IPs reachable over tap-devices
-	ugw_status.connections = luci.sys.exec("on-function get_active_ugw_connections")
-	ugw_status.centralips = luci.sys.exec("echo '"..ugw_status.connections.."' | while read service_name; do get_service_value \"$service_name\" host; done")
+	ugw_status.connections = on_function("get_active_ugw_connections")
+	local service_name
+	local central_ips_table = {}
+	for service_name in line_split(ugw_status.connections) do
+		table.insert(central_ips_table, get_service_value(service_name, "host"))
+	end
+	ugw_status.centralips = string_join(central_ips_table, ", ")
 	if ugw_status.centralips ~= "" then
 		ugw_status.centralip_status = "ok"
 	else
 		ugw_status.centralip_status = "error"
 	end
 	-- tunnel active
-	ugw_status.tunnel_active = (ugw_status.centralips ~= "")
+	ugw_status.tunnel_active = to_bool(ugw_status.centralips)
 	-- sharing possible
 	ugw_status.usergateways_no = 0
 	-- TODO: Struktur ab hier weiter umsetzen
@@ -96,8 +101,9 @@ function printUserGW()
 	-- sharing enabled
 	ugw_status.sharing_enabled = (cursor:get("on-usergw", "ugw_sharing", "shareInternet") == "on")
 	-- forwarding enabled
-	ugw_status.forwarded_ip = luci.sys.exec("on-function get_ugw_portforward | cut -f 1")
-	ugw_status.forwarded_gw = luci.sys.exec("on-function get_ugw_portforward | cut -f 2")
+	local ugw_port_forward = tab_split(on_function("get_ugw_portforward"))
+	ugw_status.forwarded_ip = ugw_port_forward[1]
+	ugw_status.forwarded_gw = ugw_port_forward[2]
 
 
 	if ugw_status.sharing_enabled or ugw_status.sharing_possible then
@@ -107,12 +113,10 @@ function printUserGW()
 			<td class='cbi-section-table-cell'>]])
 		if (ugw_status.centralip_status == "ok") or (ugw_status.forwarded_gw ~= "") then
 			luci.http.write(luci.i18n.string([[Internet shared]]))
-			if ugw_status.centralips_no == 0 then
+			if ugw_status.centralips then
 				luci.http.write(luci.i18n.string([[(no central Gateway-IPs connected trough tunnel)]]))
-			elseif ugw_status.centralips_no == 1 then
-				luci.http.write(luci.i18n.stringf([[(central Gateway-IP %s connected trough tunnel)]], ugw_status.centralips))
 			else
-				luci.http.write(luci.i18n.stringf([[(central Gateway-IPs %s connected trough tunnel)]], ugw_status.centralips))
+				luci.http.write(luci.i18n.stringf([[(central Gateway-IPs (%s) connected trough tunnel)]], ugw_status.centralips))
 			end
 			if ugw_status.forwarded_gw ~= "" then
 				print(", "..luci.i18n.stringf([[Gateway-Forward for %s (to %s) activated]], ugw_status.forwarded_ip, ugw_status.forwarded_gw))

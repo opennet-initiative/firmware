@@ -86,7 +86,7 @@ function action_on_usergwNG(ugw_status)
         cursor:commit("on-usergw")
         cursor:unload("on-usergw")
         ugw_status.usergateways_no = ugw_status.usergateways_no - 1
-        os.execute("on-function update_openvpn_ugw_settings")
+	on_function("update_openvpn_ugw_settings")
     elseif reset_counter then
         for k, v in pairs(cursor:get_all("on-usergw")) do
             if v[".type"] == "usergateway" then cursor:set("on-usergw", k, "age", "") end

@@ -84,13 +84,14 @@ get_network() {
 
 # jeder AP bekommt einen Bereich von zehn Ports fuer die Port-Weiterleitung zugeteilt
 # Parameter (optional): common name des Nutzer-Zertifikats
-get_port_forwards() {
+get_port_forward_range() {
 	local client_cn=${1:-}
 	[ -z "$client_cn" ] && client_cn=$(get_client_cn)
 	local port_count=10
 	local cn_address=
 	local portbase
-	local targetports
+	local first_port
+	local last_port
 
 	[ -z "$client_cn" ] && msg_debug "$(basename "$0"): failed to get Common Name - maybe there is no certificate?" && return 0
 
@@ -116,8 +117,9 @@ get_port_forwards() {
 		trap "" $GUARD_TRAPS && return 1
 	fi
 
-	targetports=$((portbase + (cn_address-1)*port_count))
-	echo "$client_cn $targetports $((targetports+9))"
+	first_port=$((portbase + (cn_address-1) * port_count))
+	last_port=$((first_port + port_count - 1))
+	echo -e "$first_port\t$last_port"
 }
 
 

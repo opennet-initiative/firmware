@@ -19,6 +19,7 @@ require "luci.sys"
 require "luci.config"
 resource = luci.config.main.resourcebase
 require("luci.i18n")
+require("luci.model.opennet.funcs")
 
 function get_ugw_status(ugw_status)
     ugw_status.usergateways_no = 0
@@ -36,8 +37,9 @@ function get_ugw_status(ugw_status)
     ugw_status.tunnel_active = (number >= 1)
 
     -- if the forward is set, the sharing is active
-    ugw_status.forwarded_ip = luci.sys.exec("on-function get_ugw_portforward | cut -f 1")
-    ugw_status.forwarded_gw = luci.sys.exec("on-function get_ugw_portforward | cut -f 2")
+    local port_forward = tab_split(on_function("get_ugw_portforward"))
+    ugw_status.forwarded_ip = port_forward[1]
+    ugw_status.forwarded_gw = port_forward[2]
 
     -- sharing possible
     ugw_status.sharing_wan_ok = false
@@ -284,7 +286,7 @@ function get_forward_active(count)
   local ipaddr = cursor:get("on-usergw", "opennet_ugw"..count, "ipaddr")
   local returnValue = "irrelevant"
   if ipaddr then
-    local forwarded_gw = luci.sys.exec("on-function get_ugw_portforward | cut -f 2")
+    local forwarded_gw = tab_split(on_function("get_ugw_portforward"))[2]
     if forwarded_gw == ipaddr then returnValue = "ok" end
   end
   return returnValue

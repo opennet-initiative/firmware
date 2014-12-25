@@ -44,7 +44,7 @@ if (form_id) then
 	end
 
 	if replace_id then
-		luci.sys.exec("on-function set_opennet_id '"..form_id.."'")
+		on_function("set_opennet_id", {form_id})
 	else
 		form_id = on_id
 	end

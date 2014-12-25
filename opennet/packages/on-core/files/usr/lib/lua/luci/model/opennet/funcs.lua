@@ -27,6 +27,45 @@ function uci_is_false(value)
 end
 
 
+function _generic_split(text, token_regex)
+	local result = {}
+	local token
+	for token in text:gmatch(token_regex) do table.insert(result, token) end
+	return result
+end
+
+
+function tab_split(text) return _generic_split(text, "[^\t]+") end
+function line_split(text) return _generic_split(text, "[^\n]+") end
+function space_split(text) return _generic_split(text, "%S+") end
+
+
+-- Fuege die Elemente einer String-Liste mittels eines Separators zusammen.
+-- Eine leere Liste fuehrt zum Ergebnis 'nil'.
+function string_join(table, separator)
+	local result
+	local token
+	local dummy
+	for dummy, token in ipairs(table) do
+		if result then
+			result = result .. separator .. token
+		else
+			result = token
+		end
+	end
+	return result
+end
+
+
+function to_bool(value)
+	if value then
+		return true
+	else
+		return false
+	end
+end
+
+
 function get_service_detail(service_name, key, default)
 	local result
 	if not default then default = nil end

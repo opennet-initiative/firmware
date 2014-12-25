@@ -14,6 +14,7 @@ You may obtain a copy of the License at
 <%
 local uci = require "luci.model.uci"
 local cursor = uci.cursor()
+require("luci.model.opennet.funcs")
 %>
 
 <%+header%>
@@ -61,18 +62,14 @@ local cursor = uci.cursor()
 <% if cursor:get("network", "on_vpn") then %>
 <h3><%:Forwarding from the Internet through your OpenVPN tunnel%></h3>
 <%	require("luci.sys")
-	function split(str)
-		local t = { }
-		str:gsub("%S+", function (w) table.insert(t, w) end)
-		return t
-	end
-	data = split(luci.sys.exec("/usr/bin/on-function get_port_forwards"))
+	local portrange = tab_split(on_function("get_port_forward_range"))
+	local client_cn = on_function("get_client_cn")
 	%>
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
 			<div class="cbi-value-comment">
-<%			if data[1] and data[1] ~= "" then
-				print(luci.i18n.stringf([[Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.]], data[1], data[2], data[3]))
+<%			if client_cn and client_cn ~= "" then
+				print(luci.i18n.stringf([[Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.]], client_cn, portrange[1], portrange[2]))
 			end %>
 			<%:The target should be an IP-Address in your local network. Additionally you can enter the target port in the related field.%></div>
 			<% show_portmap("on_vpn") %>

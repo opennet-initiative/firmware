@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2014-02-21 01:15+0200\n"
+"PO-Revision-Date: 2014-12-26 00:02+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -12,13 +12,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
 
-msgid ""
-"After the configuration is done, it's the beste to restart the Router once - "
-"it's still the best way to get a clean environment"
-msgstr ""
-"Wenn die erste Konfiguration erledigt ist, is es sinnvoll den Accesspoint "
-"neu zu starten. Das ist immer noch der beste Weg eine saubere stabile "
-"Umgebung zu erhalten"
+msgid "Available Report"
+msgstr "Vorhandener Bericht"
 
 msgid "Base"
 msgstr "Basis"
@@ -33,8 +28,30 @@ msgstr ""
 "Grundlegende Netzwerk-Konfiguration - einfach deine Opennet-ID eingeben und "
 "die Interfaces werden entsprechend konfiguriert"
 
-msgid "Confirmation"
-msgstr "Bestätigung"
+msgid "Delete"
+msgstr "Löschen"
+
+msgid ""
+"Do you want to discuss technical issues with other members of the Opennet "
+"community? You can download a detailed summary here. This will help others "
+"to understand your setup. The summary does not contain any private "
+"information."
+msgstr ""
+"Möchtest Du technische Probleme mit anderen Aktiven aus dem Opennet "
+"diskutieren. Zu diesem Zweck kannst Du Dir hier eine detaillierte "
+"Zusammenfassung herunterladen. Diese Zusammenfassung hilft anderen, Dein "
+"Setup zu verstehen. Die Zusammenfassung enthält keine privaten Daten."
+
+msgid "Download"
+msgstr "Herunterladen"
+
+msgid ""
+"Download a detailed summary of your router if you want to report or discuss "
+"a technical issue. This summary does not contain any private information."
+msgstr ""
+"Lade eine detaillierte Zusammenfassung Deines Router-Setups herunter, falls "
+"du ein Anliegen oder ein technisches Problem mit anderen diskutieren "
+"möchtest. Diese Zusammenfassung enthält keine private Informationen."
 
 msgid "Extended Configuration"
 msgstr "Erweiterte Konfiguration"
@@ -51,8 +68,11 @@ msgstr "Weiterleitung aus dem Opennet"
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
 
-msgid "Graphs"
-msgstr "Graphen"
+msgid "Generate Report:"
+msgstr "Zusammenfassung erzeugen:"
+
+msgid "Generating a report takes about one minute"
+msgstr "Die Erzeugung der Zusammenfassung dauert etwa eine Minute"
 
 msgid "Hardware-Information:"
 msgstr "Geräteinfo:"
@@ -75,6 +95,9 @@ msgstr ""
 msgid "Internet Sharing"
 msgstr "Internet Freigabe"
 
+msgid "Issue indicators:"
+msgstr "Problemindikatoren:"
+
 msgid "Loading"
 msgstr "Lade"
 
@@ -86,6 +109,9 @@ msgstr "Netzwerk"
 
 msgid "Networks:"
 msgstr "Netzwerk:"
+
+msgid "No report available:"
+msgstr "Keine Zusammenfassung verfügbar:"
 
 msgid "OLSR-Status"
 msgstr "OLSR-Status"
@@ -105,47 +131,32 @@ msgstr "Opennet ID"
 msgid "Opennet-ID / Network ID"
 msgstr "Opennet-ID / Netzwerk ID"
 
-msgid "Password"
-msgstr "Passwort"
-
-msgid "Password successfully changed!"
-msgstr "Passwort wurde erfolgreich geändert!"
-
-msgid "Perform Reboot"
-msgstr "Neustart durchführen"
-
-msgid "Please wait: Device rebooting..."
-msgstr "Please wait: Device rebooting..."
-
 msgid "Port-Mapping"
 msgstr "Port-Mapping"
 
 msgid "Portmapping - Forwarding of Ports"
 msgstr "Portmapping - Weiterleitung von Ports"
 
-msgid "Reboot"
-msgstr "Neustart"
+msgid "Report"
+msgstr "Zusammenfassung"
 
-msgid "Reboots the operating system of your device"
-msgstr "Neustart des Betriebssytem deines Routers"
+msgid "Report Generator"
+msgstr "Zusammenfassungsgenerator"
 
-msgid "Remove Configuration and Reboot"
-msgstr "Konfiguration entfernen und Router Neustarten"
-
-msgid "Router Password"
-msgstr "Router-Passwort"
+msgid "Router summary"
+msgstr "Router-Überblick"
 
 msgid "Source-Port"
 msgstr "Quell-Port"
+
+msgid "Start"
+msgstr "Anfang"
 
 msgid "Status"
 msgstr "Status"
 
 msgid "Status Information"
 msgstr "Status Information"
-
-msgid "System Reboot"
-msgstr "System Neustart"
 
 msgid "System:"
 msgstr "System:"
@@ -213,6 +224,12 @@ msgstr ""
 "Als Ziel der Weiterleitungen muss eine IP-Adresse im lokalen Netzwerk "
 "angegeben werden. Zusätzlich kann ein Zielport angegeben werden."
 
+msgid "There are indications for possible technical issues."
+msgstr "Es gibt Anzeichen für mögliche technische Probleme."
+
+msgid "There seem to be no issues."
+msgstr "Es scheint keine Probleme zu geben."
+
 msgid ""
 "This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to "
 "the requirements of the Opennet Initiative e.V."
@@ -227,9 +244,6 @@ msgstr ""
 "Hier kannst Du die OpenVPN-Internet-Gateways konfigurieren. Wähle aus, wie "
 "diese sortiert werde und füge spezifische Gateways hinzu oder blockiere "
 "diese."
-
-msgid "Unknown Error, password not changed!"
-msgstr "Unbekannter Fehler, Kennwort nicht geändert!"
 
 msgid "Uptime:"
 msgstr "Gerätelaufzeit:"
@@ -260,9 +274,6 @@ msgstr ""
 "verwaltest Du die benötigten VPN-Zertifikate und entscheidest, ob und wann "
 "Du Dein Internet freigeben möchtest."
 
-msgid "You should change the default password into some privat one here"
-msgstr "Du solltest das Standard-Passwort ändern, wähle dafür diesen Punkt"
-
 msgid "device"
 msgstr "Schnittstelle"
 
@@ -271,3 +282,50 @@ msgstr "zugehörige Netzwerkadressen"
 
 msgid "use"
 msgstr "übernehmen"
+
+#~ msgid ""
+#~ "After the configuration is done, it's the beste to restart the Router "
+#~ "once - it's still the best way to get a clean environment"
+#~ msgstr ""
+#~ "Wenn die erste Konfiguration erledigt ist, is es sinnvoll den Accesspoint "
+#~ "neu zu starten. Das ist immer noch der beste Weg eine saubere stabile "
+#~ "Umgebung zu erhalten"
+
+#~ msgid "Confirmation"
+#~ msgstr "Bestätigung"
+
+#~ msgid "Graphs"
+#~ msgstr "Graphen"
+
+#~ msgid "Password"
+#~ msgstr "Passwort"
+
+#~ msgid "Password successfully changed!"
+#~ msgstr "Passwort wurde erfolgreich geändert!"
+
+#~ msgid "Perform Reboot"
+#~ msgstr "Neustart durchführen"
+
+#~ msgid "Please wait: Device rebooting..."
+#~ msgstr "Please wait: Device rebooting..."
+
+#~ msgid "Reboot"
+#~ msgstr "Neustart"
+
+#~ msgid "Reboots the operating system of your device"
+#~ msgstr "Neustart des Betriebssytem deines Routers"
+
+#~ msgid "Remove Configuration and Reboot"
+#~ msgstr "Konfiguration entfernen und Router Neustarten"
+
+#~ msgid "Router Password"
+#~ msgstr "Router-Passwort"
+
+#~ msgid "System Reboot"
+#~ msgstr "System Neustart"
+
+#~ msgid "Unknown Error, password not changed!"
+#~ msgstr "Unbekannter Fehler, Kennwort nicht geändert!"
+
+#~ msgid "You should change the default password into some privat one here"
+#~ msgstr "Du solltest das Standard-Passwort ändern, wähle dafür diesen Punkt"

@@ -1,9 +1,6 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-msgid "Change announced Address (useful if collisions arise)."
-msgstr ""
-
 msgid ""
 "Check MTU to and from the Gateways (again). This will take approximately 5 "
 "minutes per Gateway."

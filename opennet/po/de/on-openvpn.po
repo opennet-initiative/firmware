@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2014-02-21 01:16+0200\n"
+"PO-Revision-Date: 2014-12-26 00:12+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -18,6 +18,9 @@ msgstr "...mehr Informationen..."
 msgid "...show..."
 msgstr "...anzeigen..."
 
+msgid "Actions"
+msgstr "Aktionen"
+
 msgid "Certificate (.crt)"
 msgstr "Zertifikat (.crt)"
 
@@ -27,17 +30,33 @@ msgstr "Zertifikat-Name"
 msgid "Certificate Request (.csr)"
 msgstr "Zertifikat-Anfrage (.csr)"
 
+msgid ""
+"Choose one of the following options for submitting your certificate signing "
+"request"
+msgstr ""
+"Wähle einen der folgenden Wege für die Einreichung Deiner Zertifikat-Anfrage"
+
+msgid "Connection log"
+msgstr "Verbindungsprotokoll"
+
 msgid "Country"
 msgstr "Land"
-
-msgid "Current Gateway"
-msgstr "Aktueller Gateway"
 
 msgid "Distance"
 msgstr "Entfernung"
 
-msgid "Gateway-Blacklist"
-msgstr "Gateway-Blacklist"
+msgid "Download the CSR file and upload it manually"
+msgstr "Lade die Zertifikatsanfrage (CSR) und lade sie manuell hoch"
+
+msgid "ETX"
+msgstr "ETX"
+
+msgid ""
+"Expected Transmission Count - Quality of the Connection to the Gateway "
+"regarding OLSR"
+msgstr ""
+"Erwartete Anzahl von Übertragungen - die Qualität der Verbindung zum Gateway "
+"aus der Sicht von OLSR"
 
 msgid "Gateway-List"
 msgstr "Gateway-Liste"
@@ -47,8 +66,8 @@ msgstr ""
 "In diesem Bereich können die IP-Adressen der von Dir gewünschten OpenVPN-"
 "Gateways konfiguriert werden."
 
-msgid "IP Address"
-msgstr "IP Adresse"
+msgid "IP-Address"
+msgstr "IP-Adresse"
 
 msgid "Key Generation"
 msgstr "Schlüssel Erzeugung"
@@ -71,8 +90,8 @@ msgstr "Deine EMail Adresse"
 msgid "Member Name"
 msgstr "Dein Name"
 
-msgid "Name"
-msgstr "Name"
+msgid "Number of Hops to the Gateway"
+msgstr "Anzahl der Hops bis zum Gateway"
 
 msgid "Opennet OpenVPN Gateways"
 msgstr "Opennet OpenVPN Gateways"
@@ -86,14 +105,26 @@ msgstr "Geheimer Schlüssel (.key)"
 msgid "Province"
 msgstr "Bundesland"
 
-msgid "Select Gateway"
-msgstr "Gateway auswählen"
+msgid "Send your request with one click"
+msgstr "Sende Deine Anfrage mit einem Klick"
 
 msgid "Status"
 msgstr "Status"
 
-msgid "Test-Age"
-msgstr "Testalter"
+msgid "Submit certificate request"
+msgstr "Sende deine Zertifikatsanfrage"
+
+msgid ""
+"The first reachable and not blocked Gateway is not the current active one. "
+"The Tunnel will be restarted and the Gateway will be changed in a few "
+"minutes. The changes will be shown after a reload of this page."
+msgstr ""
+"Der erste erreichbare und nicht blockierte Gateway ist nicht der aktuell "
+"aktive. Der Tunnel wird in wenigen Minuten neu aufgebaut. Diese Änderung "
+"wird nach einem Neuladen dieser Seite sichtbar."
+
+msgid "This offset is added to the values before use/display"
+msgstr "Dieser Offset wird mit den Werten verrechnet"
 
 msgid "VPN Gateways"
 msgstr "VPN Gateways"
@@ -104,32 +135,35 @@ msgstr "VPN Tunnel"
 msgid "VPN-Status"
 msgstr "VPN-Status"
 
-msgid "activated"
-msgstr "aktiv"
-
 msgid "active"
 msgstr "Aktiv"
 
-msgid "add"
-msgstr "hinzufügen"
+msgid "delete"
+msgstr "löschen"
 
-msgid "automated gateway-search"
-msgstr "automatische Gateway-Suche"
-
-msgid "deactivated"
-msgstr "aus"
-
-msgid "decrease offset"
-msgstr "Offset verringern"
+msgid "disable"
+msgstr "abschalten"
 
 msgid "download"
 msgstr "herunterladen"
 
+msgid "enable"
+msgstr "aktivieren"
+
 msgid "generate"
 msgstr "erzeuge Schlüssel"
 
-msgid "increase offset"
-msgstr "Offset erhöhen"
+msgid "move down"
+msgstr "nach unten bewegen"
+
+msgid "move to top and connect immediately"
+msgstr "ganz nach oben bewegen und sofort verbinden"
+
+msgid "move up"
+msgstr "nach oben bewegen"
+
+msgid "reset offset"
+msgstr "Offset zurücksetzen"
 
 msgid "reset test counter"
 msgstr "zurücksetzen"
@@ -137,8 +171,8 @@ msgstr "zurücksetzen"
 msgid "search file"
 msgstr "suche Datei"
 
-msgid "toggle"
-msgstr "umschalten"
+msgid "tested %d minutes ago"
+msgstr "vor %d Minuten getestet"
 
 msgid "upload"
 msgstr "hochladen"
@@ -146,5 +180,53 @@ msgstr "hochladen"
 msgid "upload Certificate (.crt) or Private Key (.key)"
 msgstr "hochladen von Zertifikat (.crt) oder Geheimem Schlüssel (.key)"
 
+msgid "upload to Internet %s kbit/s; download from Internet %s kbit/s"
+msgstr "Upload ins Internet %s kbit/s; Download aus dem Internet %s kbit/s"
+
 msgid "uploaded or generated on this date."
 msgstr "bei dieser Zeit erstellt oder hochgeladen"
+
+msgid "via Internet"
+msgstr "über das Internet"
+
+msgid "via Opennet"
+msgstr "im Opennet"
+
+#~ msgid "Current Gateway"
+#~ msgstr "Aktueller Gateway"
+
+#~ msgid "Gateway-Blacklist"
+#~ msgstr "Gateway-Blacklist"
+
+#~ msgid "IP Address"
+#~ msgstr "IP Adresse"
+
+#~ msgid "Name"
+#~ msgstr "Name"
+
+#~ msgid "Select Gateway"
+#~ msgstr "Gateway auswählen"
+
+#~ msgid "Test-Age"
+#~ msgstr "Testalter"
+
+#~ msgid "activated"
+#~ msgstr "aktiv"
+
+#~ msgid "add"
+#~ msgstr "hinzufügen"
+
+#~ msgid "automated gateway-search"
+#~ msgstr "automatische Gateway-Suche"
+
+#~ msgid "deactivated"
+#~ msgstr "aus"
+
+#~ msgid "decrease offset"
+#~ msgstr "Offset verringern"
+
+#~ msgid "increase offset"
+#~ msgstr "Offset erhöhen"
+
+#~ msgid "toggle"
+#~ msgstr "umschalten"

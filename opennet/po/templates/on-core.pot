@@ -1,9 +1,7 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-msgid ""
-"After the configuration is done, it's the beste to restart the Router once - "
-"it's still the best way to get a clean environment"
+msgid "Available Report"
 msgstr ""
 
 msgid "Base"
@@ -17,7 +15,22 @@ msgid ""
 "be adapted"
 msgstr ""
 
-msgid "Confirmation"
+msgid "Delete"
+msgstr ""
+
+msgid ""
+"Do you want to discuss technical issues with other members of the Opennet "
+"community? You can download a detailed summary here. This will help others "
+"to understand your setup. The summary does not contain any private "
+"information."
+msgstr ""
+
+msgid "Download"
+msgstr ""
+
+msgid ""
+"Download a detailed summary of your router if you want to report or discuss "
+"a technical issue. This summary does not contain any private information."
 msgstr ""
 
 msgid "Extended Configuration"
@@ -35,7 +48,10 @@ msgstr ""
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr ""
 
-msgid "Graphs"
+msgid "Generate Report:"
+msgstr ""
+
+msgid "Generating a report takes about one minute"
 msgstr ""
 
 msgid "Hardware-Information:"
@@ -54,6 +70,9 @@ msgstr ""
 msgid "Internet Sharing"
 msgstr ""
 
+msgid "Issue indicators:"
+msgstr ""
+
 msgid "Loading"
 msgstr ""
 
@@ -64,6 +83,9 @@ msgid "Network"
 msgstr ""
 
 msgid "Networks:"
+msgstr ""
+
+msgid "No report available:"
 msgstr ""
 
 msgid "OLSR-Status"
@@ -84,46 +106,31 @@ msgstr ""
 msgid "Opennet-ID / Network ID"
 msgstr ""
 
-msgid "Password"
-msgstr ""
-
-msgid "Password successfully changed!"
-msgstr ""
-
-msgid "Perform Reboot"
-msgstr ""
-
-msgid "Please wait: Device rebooting..."
-msgstr ""
-
 msgid "Port-Mapping"
 msgstr ""
 
 msgid "Portmapping - Forwarding of Ports"
 msgstr ""
 
-msgid "Reboot"
+msgid "Report"
 msgstr ""
 
-msgid "Reboots the operating system of your device"
+msgid "Report Generator"
 msgstr ""
 
-msgid "Remove Configuration and Reboot"
-msgstr ""
-
-msgid "Router Password"
+msgid "Router summary"
 msgstr ""
 
 msgid "Source-Port"
+msgstr ""
+
+msgid "Start"
 msgstr ""
 
 msgid "Status"
 msgstr ""
 
 msgid "Status Information"
-msgstr ""
-
-msgid "System Reboot"
 msgstr ""
 
 msgid "System:"
@@ -173,6 +180,12 @@ msgid ""
 "can enter the target port in the related field."
 msgstr ""
 
+msgid "There are indications for possible technical issues."
+msgstr ""
+
+msgid "There seem to be no issues."
+msgstr ""
+
 msgid ""
 "This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to "
 "the requirements of the Opennet Initiative e.V."
@@ -181,9 +194,6 @@ msgstr ""
 msgid ""
 "This is the place where you can configure your Opennet-Internet-Gateways. "
 "Select, how they are ordered and add or blacklist specific Gateways"
-msgstr ""
-
-msgid "Unknown Error, password not changed!"
 msgstr ""
 
 msgid "Uptime:"
@@ -209,9 +219,6 @@ msgid ""
 "you can create and manage the required VPN-Certificates to turn your "
 "Accesspoint into a User-Gateway. If you like to enable or disable the "
 "Internet-Sharing, this is the place to choose"
-msgstr ""
-
-msgid "You should change the default password into some privat one here"
 msgstr ""
 
 msgid "device"

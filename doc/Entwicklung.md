@@ -394,6 +394,26 @@ Unbenutzte Funktionen finden
 Das Skript ``tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
 
 
+Übersetzungen
+=============
+
+Die Übersetzungen werden mittels des luci-Übersetzungskonzepts verwaltet.
+
+Templates
+---------
+
+* im html-Teil: ``<%:This is an example.%>``
+* im lua-Teil mit Platzhaltern: ``luci.i18n.stringf('Send an email to %s for further information.', email_address)``
+* im lua-Teil ohne Platzhalter: ``luci.i18n.string([[Interface]])``
+
+
+Texte übersetzen
+----------------
+
+* po- und pot-Dateien übersetzen: ``make translate``
+* po-Dateien (Übersetzungen) vervollständigen: ``virtaal opennet/po/de/on-core.po``
+
+
 Upgrade-Tests
 =============
 

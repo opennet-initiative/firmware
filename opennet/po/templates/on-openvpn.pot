@@ -7,6 +7,9 @@ msgstr ""
 msgid "...show..."
 msgstr ""
 
+msgid "Actions"
+msgstr ""
+
 msgid "Certificate (.crt)"
 msgstr ""
 
@@ -16,16 +19,29 @@ msgstr ""
 msgid "Certificate Request (.csr)"
 msgstr ""
 
-msgid "Country"
+msgid ""
+"Choose one of the following options for submitting your certificate signing "
+"request"
 msgstr ""
 
-msgid "Current Gateway"
+msgid "Connection log"
+msgstr ""
+
+msgid "Country"
 msgstr ""
 
 msgid "Distance"
 msgstr ""
 
-msgid "Gateway-Blacklist"
+msgid "Download the CSR file and upload it manually"
+msgstr ""
+
+msgid "ETX"
+msgstr ""
+
+msgid ""
+"Expected Transmission Count - Quality of the Connection to the Gateway "
+"regarding OLSR"
 msgstr ""
 
 msgid "Gateway-List"
@@ -34,7 +50,7 @@ msgstr ""
 msgid "Here you can configure the IP-Addresses of your choosen Gateways."
 msgstr ""
 
-msgid "IP Address"
+msgid "IP-Address"
 msgstr ""
 
 msgid "Key Generation"
@@ -58,7 +74,7 @@ msgstr ""
 msgid "Member Name"
 msgstr ""
 
-msgid "Name"
+msgid "Number of Hops to the Gateway"
 msgstr ""
 
 msgid "Opennet OpenVPN Gateways"
@@ -73,13 +89,22 @@ msgstr ""
 msgid "Province"
 msgstr ""
 
-msgid "Select Gateway"
+msgid "Send your request with one click"
 msgstr ""
 
 msgid "Status"
 msgstr ""
 
-msgid "Test-Age"
+msgid "Submit certificate request"
+msgstr ""
+
+msgid ""
+"The first reachable and not blocked Gateway is not the current active one. "
+"The Tunnel will be restarted and the Gateway will be changed in a few "
+"minutes. The changes will be shown after a reload of this page."
+msgstr ""
+
+msgid "This offset is added to the values before use/display"
 msgstr ""
 
 msgid "VPN Gateways"
@@ -91,31 +116,34 @@ msgstr ""
 msgid "VPN-Status"
 msgstr ""
 
-msgid "activated"
-msgstr ""
-
 msgid "active"
 msgstr ""
 
-msgid "add"
+msgid "delete"
 msgstr ""
 
-msgid "automated gateway-search"
-msgstr ""
-
-msgid "deactivated"
-msgstr ""
-
-msgid "decrease offset"
+msgid "disable"
 msgstr ""
 
 msgid "download"
 msgstr ""
 
+msgid "enable"
+msgstr ""
+
 msgid "generate"
 msgstr ""
 
-msgid "increase offset"
+msgid "move down"
+msgstr ""
+
+msgid "move to top and connect immediately"
+msgstr ""
+
+msgid "move up"
+msgstr ""
+
+msgid "reset offset"
 msgstr ""
 
 msgid "reset test counter"
@@ -124,7 +152,7 @@ msgstr ""
 msgid "search file"
 msgstr ""
 
-msgid "toggle"
+msgid "tested %d minutes ago"
 msgstr ""
 
 msgid "upload"
@@ -133,5 +161,14 @@ msgstr ""
 msgid "upload Certificate (.crt) or Private Key (.key)"
 msgstr ""
 
+msgid "upload to Internet %s kbit/s; download from Internet %s kbit/s"
+msgstr ""
+
 msgid "uploaded or generated on this date."
+msgstr ""
+
+msgid "via Internet"
+msgstr ""
+
+msgid "via Opennet"
 msgstr ""

@@ -73,11 +73,11 @@ You may obtain a copy of the License at
 	function schedule_next_service(index, remaining_services) {
 		if (remaining_services && (remaining_services.length > 0)) {
 			XHR.get('<%=luci.dispatcher.build_url("opennet", "opennet_2", "vpn_gateway_info")%>/' + remaining_services[0], null,
-				function(x, info) { if (info) { insert_gateways(index, info, remaining_services.slice(1)); }});
+				function(x, info) { if (info) { insert_gateway(index, info, remaining_services.slice(1)); }});
 		}
 	}
 
-	function insert_gateways(index, gateway, remaining_services) {
+	function insert_gateway(index, gateway, remaining_services) {
 		// Fuege eine neue Tabellenzeile ein
 		var target_row = document.getElementById(gateway.id);
 		if (!target_row) return;
@@ -112,16 +112,19 @@ You may obtain a copy of the License at
 		}
 		result += String.format('<td class="cbi-value-field"><div id="cbi-opennet-gateways-active" active="%s">&nbsp;</div>', active);
 		result += String.format('<td><strong>%s</strong></th>', remote);
-		result += '<td class="cbi-value-field"><div id="cbi-opennet-gateways-hopcount">';
-		if (gateway.distance && (gateway.offset != 0)) {
-			result += String.format('(%d)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_offset" />', gateway.offset, gateway.id, gateway);
+		// wir zeigen die Rang-Zahlen fuer Dienste nicht an
+		if ("<%=sorting%>" != "manual") {
+			result += '<td class="cbi-value-field"><div id="cbi-opennet-gateways-hopcount">';
+			if (gateway.distance && (gateway.offset != 0)) {
+				result += String.format('(%d)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_offset" />', gateway.offset, gateway.id, gateway);
+			}
+			<% if sorting == "etx" then %>
+				distance = gateway.distance;
+			<% elseif sorting == "hop" then %>
+				distance = gateway.hop_count;
+			<% end %>
+			result += String.format('%s</div></td>', distance);
 		}
-		<% if sorting == "etx" then %>
-			distance = gateway.distance;
-		<% elseif sorting == "hop" then %>
-			distance = gateway.hop_count;
-		<% end %>
-		result += String.format('%s</div></td>', distance);
 		result += '<td>';
 		if (gateway.upload || gateway.download) {
 			speed = String.format('%s kbps / %s kbps', gateway.upload || "?", gateway.download || "?");
@@ -190,16 +193,16 @@ You may obtain a copy of the License at
 						<th colspan = "1" />
 						<th class="cbi-section-table-cell"><%:active%></th>
 						<th class="cbi-section-table-cell"><%:IP-Address%></th>
-						<th class="cbi-section-table-cell"><%
-						if sorting ~= "manual" then
-							print(luci.i18n.string([[(<abbr title='This offset is added to the values before use/display'>Offset</abbr>)]]))
-							if sorting == "hop" then
-								print(luci.i18n.string([[<abbr title='Number of Hops to the Gateway'>Distance</abbr>]]))
-							else
-								print(luci.i18n.string([[<abbr title='Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR'>ETX</abbr>]]))
-							end
-						end %>
-						</th>
+						<% if sorting ~= "manual" then %>
+							<th class="cbi-section-table-cell">
+							<abbr title="<%:This offset is added to the values before use/display%>">Offset</abbr> /
+							<% if sorting == "hop" then %>
+								<abbr title="<%:Number of Hops to the Gateway%>"><%:Distance%></abbr>
+							<% else %>
+								<abbr title="<%:Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR%>"><%:ETX%></abbr>
+							<% end %>
+							</th>
+						<% end %>
 
 						<th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='Announced Upload / Download Speed.'>Speed</abbr>]])) %></th>
 

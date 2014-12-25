@@ -87,11 +87,7 @@ end
 -- URL zum Testen: http://172.16.0.1/cgi-bin/luci/opennet/opennet_2/vpn_gateway_list
 function gateway_list(service_name)
 	local services = on_function("get_sorted_services", {"gw", "ugw"})
-	local line
-	local result = {}
-	for line in string.gmatch(services, "[^\n]+") do
-		table.insert(result, line)
-	end
+	local result = line_split(services)
 	luci.http.prepare_content("application/json")
 	luci.http.write_json(result)
 end

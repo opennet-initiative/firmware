@@ -19,12 +19,6 @@ require("luci.sys")
 require("luci.model.opennet.funcs")
 
 
-function split(str)
-	local t = { }
-	str:gsub("%S+", function (w) table.insert(t, w) end)
-	return t
-end
-
 function printFirmwareTitle()
 	local on_version = on_function("get_on_firmware_version")
 	local on_id = cursor:get("on-core", "settings", "on_id")
@@ -39,19 +33,11 @@ function printFirmwareTitle()
 end
 
 function printOpenVPN()
-	local services = on_function("get_active_mig_connections")
-	local service
-	local host
-	local index
-	local remotes
-	for service in services:gmatch("%S+") do
-		host = get_service_value(service, "host")
-		if remotes then
-			remotes = remotes .. ", " .. host
-		else
-			remotes = host
-		end
+	local services = line_split(on_function("get_active_mig_connections"))
+	function get_service_host(service_name)
+		return get_service_value(service_name, "host")
 	end
+	local remotes = string_join(map_table(services, get_service_host), ", ")
 	if remotes then
 		luci.http.write(luci.i18n.string([[VPN-Tunnel active.]])..[[ (]]..remotes..")")
 	else

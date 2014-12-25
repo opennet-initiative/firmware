@@ -40,6 +40,17 @@ function line_split(text) return _generic_split(text, "[^\n]+") end
 function space_split(text) return _generic_split(text, "%S+") end
 
 
+function map_table(input_table, func)
+	local dummy
+	local value
+	local result = {}
+	for dummy, value in ipairs(input_table) do
+		table.insert(result, func(value))
+	end
+	return result
+end
+
+
 -- Fuege die Elemente einer String-Liste mittels eines Separators zusammen.
 -- Eine leere Liste fuehrt zum Ergebnis 'nil'.
 function string_join(table, separator)

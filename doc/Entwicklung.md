@@ -397,7 +397,15 @@ Das Skript ``tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte 
 Übersetzungen
 =============
 
-Die Übersetzungen werden mittels des luci-Übersetzungskonzepts verwaltet.
+Die Übersetzungen werden mittels des luci-Übersetzungskonzepts verwaltet. In den Templates verwenden wir englische Originaltexte.
+
+Konzept
+-------
+
+* mittels luci-Werkzeugen wird aus den Code-Dateien eine pot-Datei erzeugt (ein Template, bzw. Katalog)
+* die pot-Datei wird mit einer eventuell vorhandenen po-Datei verschmolzen (diese enthält die Übersetzungen für eine Zielsprache)
+* die po-Dateien lassen sich mit einem Editor komfortabel bearbeiten (z.B. mit Virtaal)
+* beim Build-Prozess wird mittels des *po2lmo*-Werkzeugs aus jeder po-Datei eine binäre lmo-Datei erzeugt - diese werden vom Makefile final unter */usr/lib/lua/luci/i18n* platziert (siehe *patches/makefile_include_opennet_packages.patch*)
 
 Templates
 ---------
@@ -405,7 +413,6 @@ Templates
 * im html-Teil: ``<%:This is an example.%>``
 * im lua-Teil mit Platzhaltern: ``luci.i18n.stringf('Send an email to %s for further information.', email_address)``
 * im lua-Teil ohne Platzhalter: ``luci.i18n.string([[Interface]])``
-
 
 Texte übersetzen
 ----------------

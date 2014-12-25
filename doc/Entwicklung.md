@@ -319,15 +319,13 @@ Folgende Stolperfallen sind sehr beliebt bei der Verwendung des strikten Fehlerm
   * ein ``return 0`` oder ``true`` oder ein angehängtes ``| true`` kann nie schaden
 
 
-
-
 uci-Funktionen
 ^^^^^^^^^^^^^^
 
 Da der typische uci-Aufruf ``uci -q get CONFIG_KEY`` bei nicht-existenten Schlüsseln einen Fehlercode zurückliefert, müsste hier jeder Aufruf von unübersichtlichem boilerplate-Code umgeben werden, um mit strikter Shell-Fehlerbehandlung zu funktionieren.
 Alternativ steht diese Funktion zur Verfügung:
 
-  uci_get CONFIG_KEY
+  uci_get CONFIG_KEY [DEFAULT_VALUE]
 
 Das Ergebnis ist ein leerer String, falls der config-Wert nicht vorhanden oder leer ist. Andernfalls wird der Inhalt zurückgeliefert.
 
@@ -352,10 +350,20 @@ Funktionen
 Ein paar wenige Funktionen werden von mehreren lua-Skripten verwendet.
 Diese liegen derzeit in der Datei ``on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua``.
 
-Folgende Funktionen sind allgemein verwendbar:
+Die wichtigsten Funktionen sind folgende:
 
-* get_gateway_flag
-* set_gateway_flag
+* on_function
+* get_gateway_value
+* set_gateway_value
+* delete_gateway_value
+* get_default_value
+
+Hinzu kommen ein paar Funktionen für die Erleichterung alltäglicher Dinge:
+
+* tab_split, line_split, space_split
+* string_join
+* map_table
+* to_bool
 
 
 luci-Webinterface
@@ -377,6 +385,15 @@ Der Aufruf von hotplug-Skripten lässt sich folgendermaßen emulieren:
   ACTION=ifup hotplug-call iface
 
 
+Hilfreiche Werkzeuge
+--------------------
+
+Unbenutzte Funktionen finden
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Das Skript ``tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
+
+
 Upgrade-Tests
 =============
 
@@ -386,6 +403,7 @@ Allgemeine Hinweise
 Bei RAM-Mangel (erkennbar am spontanen reboot ohne Änderungen nach dem Upload der neuen Firmware-Datei) kann folgende Kommandozeile wahrscheinlich genügend Platz schaffen:
 
   for a in collectd dnsmasq sysntpd olsrd cron; do /etc/init.d/$a stop; done; wifi down
+
 
 Externe Dokumentationen
 =======================

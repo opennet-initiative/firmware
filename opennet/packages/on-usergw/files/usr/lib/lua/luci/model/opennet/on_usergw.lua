@@ -320,26 +320,3 @@ function check_running()
     luci.http.write("")
   end
 end
-
--- aufgerufen via /etc/uci-defaults/on-usergw-vpn-transfer
--- TODO: Fuer welchen Versionssprung war das relevant? Kann das weg?
-function upgrade()
-  -- transfer all openvpn-remote-names back to on-usergw and remove openvpn entries
-  local count = 1
-  local number_of_gateways = 0
-  cursor:foreach ("on-usergw", "usergateway", function() number_of_gateways = number_of_gateways + 1 end)
-  while count <= number_of_gateways do
-    local name = cursor:get("on-usergw", "opennet_ugw"..count, "name")
-    if not name or name == "" then
-      remote = cursor:get("openvpn", "opennet_ugw"..count, "remote")
-      if remote then
-        cursor:set("on-usergw", "opennet_ugw"..count, "name", remote)
-      end
-      cursor:delete("openvpn", "opennet_ugw"..count)
-    end
-    count = count + 1
-  end
-
-  cursor:commit("openvpn")
-  cursor:commit("on-usergw")
-end

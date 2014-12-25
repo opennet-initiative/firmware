@@ -237,6 +237,7 @@ fix_firewall_reload
 transfer_vpn_sort_criteria_and_autosearch
 remove_tunnel_openvpn_settings
 remove_obsolete_on_core_settings
+remove_obsolete_usergw_settings
 remove_usergw_openvpn_configs
 remove_crontab_entries
 rename_olsrd_Port_to_port

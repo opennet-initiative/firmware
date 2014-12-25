@@ -11,22 +11,6 @@ function on_function(func_name, parameters)
 end
 
 
--- Vorsicht: "parameters" wird nicht geprueft/maskiert - vorher gruendlich pruefen!
-function on_bool_function(func_name, parameters)
-	return os.execute("on-function '"..func_name.."' "..parameters) == 0
-end
-
-
-function uci_is_true(value)
-	return on_bool_function("uci_is_true", "'"..value.."'")
-end
-
-
-function uci_is_false(value)
-	return on_bool_function("uci_is_false", "'"..value.."'")
-end
-
-
 function _generic_split(text, token_regex)
 	local result = {}
 	local token
@@ -74,20 +58,6 @@ function to_bool(value)
 	else
 		return false
 	end
-end
-
-
-function get_service_detail(service_name, key, default)
-	local result
-	if not default then default = nil end
-	result = on_function("get_service_detail", {service_name, key})
-	if result == "" then return default else return result end
-end
-
-
-function get_service_age(service_name)
-	local result = on_function("get_service_age", {service_name})
-	if result == "" then return nil else return result end
 end
 
 

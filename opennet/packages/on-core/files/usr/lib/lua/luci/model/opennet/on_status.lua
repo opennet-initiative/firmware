@@ -52,7 +52,7 @@ function printOpenVPN()
 			remotes = host
 		end
 	end
-	if remote ~= "" then
+	if remotes then
 		luci.http.write(luci.i18n.string([[VPN-Tunnel active.]])..[[ (]]..remotes..")")
 	else
 		luci.http.write(luci.i18n.string([[VPN-Tunnel not active, for details check the System Log.]]))

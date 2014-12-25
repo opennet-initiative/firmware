@@ -12,9 +12,13 @@ uci show system >system.uci
 # Konfigurationsdateien und ihre Groesse (Null -> eventuell kaputt)
 ls -l /etc/config/ >config_files.txt
 
+# Sind uci-defaults-Initialisierungen immer noch unvollstaendig? (das Verzeichnis sollte leer sein)
+ls -l /etc/uci-defaults >uci_defaults_files.txt
+
 # Kernel-Log
 dmesg >dmesg
 
-# hier duerften wohl keine privaten Informationen enthalten sein
-logread >logread
+# Wir entfernen dhcp-relevante Informationen (z.B. DHCPOFFER), um die private MAC-Adressen zu schuetzen.
+# Ansonsten duerften keine privaten Informationen enthalten sein.
+logread | grep -v DHCP >logread
 

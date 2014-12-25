@@ -29,9 +29,12 @@ disable_cron_logging() {
 }
 
 
-# die Namensaufloesung im Opennet generiert auch 192.168er-Adressen - diese werden durch "rebind_protection" blockiert
-disable_dnsmasq_rebind_protection() {
+# verschiedene dnsmasq-Einstellungen
+configure_dnsmasq() {
+	# die Namensaufloesung im Opennet generiert auch 192.168er-Adressen - diese werden durch "rebind_protection" blockiert
 	uci set "dhcp.@dnsmasq[0].rebind_protection=0"
+	# keine Speicherung von DHCP leases
+	uci set "dhcp.@dnsmasq[0].quiet_dhcp=1"
 	apply_changes dhcp
 }
 
@@ -68,7 +71,7 @@ define_persistent_uci_settings() {
 
 add_use_settings
 disable_cron_logging
-disable_dnsmasq_rebind_protection
+configure_dnsmasq
 add_crontab_entries
 define_persistent_uci_settings
 

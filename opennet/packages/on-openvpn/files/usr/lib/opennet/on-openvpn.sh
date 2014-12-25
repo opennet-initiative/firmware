@@ -152,7 +152,7 @@ find_and_select_best_gateway() {
 
 
 # Liefere die aktiven VPN-Verbindungen (mit Mesh-Internet-Gateways) zurueck.
-# Diese Funktion bracht recht viel Zeit.
+# Diese Funktion braucht recht viel Zeit.
 get_active_mig_connections() {
 	local service_name
 	get_sorted_services gw ugw | while read service_name; do

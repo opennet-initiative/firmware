@@ -18,16 +18,23 @@ require("luci.sys")
 require("luci.i18n")
 require("nixio.fs")
 
-function on_vpn_status_label()
+
+-- eine Tunnel-VPN-Verbindung scheint aufgebaut zu sein
+function is_tunnel_active()
 	local SYSROOT = os.getenv("LUCI_SYSROOT")
-	-- SYSROOT is only used for local testing (make runhttpd in luci tree)
 	if not SYSROOT then SYSROOT = "" end
-	local tunnel_active = nixio.fs.access(SYSROOT.."/tmp/openvpn_msg.txt")
-	-- local tunnel_starting = nixio.fs.access(SYSROOT.."/tmp/run/openvpn-opennet_user.pid")
+	return nixio.fs.access(SYSROOT.."/tmp/openvpn_msg.txt")
+end
 
-	-- TODO: Umstellung auf die richtige PID-Datei
-	local tunnel_starting = (luci.sys.exec("kill -0 $(cat /var/run/openvpn-opennet_user.pid 2>/dev/null) 2>/dev/null && echo -n ok") == "ok")
 
+-- ein Tunnel-VPN-Prozess laeuft (eventuell steht die Verbindung noch nicht)
+function is_tunnel_starting()
+	return to_bool(on_function("get_active_mig_connections"))
+end
+
+
+function on_vpn_status_label()
+	local tunnel_active = is_tunnel_active()
 	luci.http.prepare_content("text/plain")
 
 	luci.http.write([[<tr>]])
@@ -41,24 +48,20 @@ function on_vpn_status_label()
 	luci.http.write([[<td><h4 class="on_sharing_status-title">]])
 	if tunnel_active then
 		luci.http.write(luci.i18n.string([[Tunnel active]]))
-	elseif tunnel_starting then
-		luci.http.write(luci.i18n.string([[Tunnel starting]]))
 	else
-		luci.http.write(luci.i18n.string([[Tunnel inactive]]))
+		if is_tunnel_starting() then
+			luci.http.write(luci.i18n.string([[Tunnel starting]]))
+		else
+			luci.http.write(luci.i18n.string([[Tunnel inactive]]))
+		end
 	end
 	luci.http.write([[</h4></td></tr>]])
 end
 
 function on_vpn_status_form()
-	local SYSROOT = os.getenv("LUCI_SYSROOT")
-	-- SYSROOT is only used for local testing (make runhttpd in luci tree)
-	if not SYSROOT then SYSROOT = "" end
-	local tunnel_active = nixio.fs.access(SYSROOT.."/tmp/openvpn_msg.txt")
-	-- TODO: Umstellung auf die richtige PID-Datei
-	local tunnel_starting = nixio.fs.access(SYSROOT.."/tmp/run/openvpn-opennet_user.pid")
 	luci.http.prepare_content("text/plain")
 	luci.http.write([[<input class="cbi-button" type="submit" name="openvpn_restart" title="]])
-	if tunnel_active or tunnel_starting then
+	if is_tunnel_active() or is_tunnel_starting() then
 		luci.http.write(luci.i18n.string([[restart VPN Tunnel]])..[[" value="]]..luci.i18n.string([[restart VPN Tunnel]]))
 	else
 		luci.http.write(luci.i18n.string([[start VPN Tunnnel]])..[[" value="]]..luci.i18n.string([[start VPN Tunnel]]))

@@ -81,7 +81,9 @@ end
 
 function get_default_value(domain, key)
 	local func_name
-	if domain == "on-openvpn" then
+	if domain == "on-core" then
+		func_name = "get_on_core_default"
+	elseif domain == "on-openvpn" then
 		func_name = "get_on_openvpn_default"
 	elseif domain == "on-usergw" then
 		func_name = "get_on_usergw_default"

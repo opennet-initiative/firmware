@@ -516,3 +516,22 @@ generate_report() {
 	mv "$tar_file" "$REPORTS_FILE"
 }
 
+
+# Filtere aus den zugaenglichen Quellen moegliche Fehlermeldungen.
+# Falls diese Funktion ein nicht-leeres Ergebnis zurueckliefert, dann kann dies als Hinweis fuer den
+# Nutzer verwendet werden, auf dass er einen Fehlerbericht einreicht.
+get_potential_error_messages() {
+	local filters=
+	# 1) get_service_as_csv
+	#    Wir ignorieren "get_service_as_csv"-Meldungen - diese werden durch asynchrone Anfragen des
+	#    Web-Interface ausgeloest, die beim vorzeitigen Abbruch des Seiten-Lade-Vorgangs mit
+	#    einem Fehler enden.
+	filters="${filters}|trapped.*get_service_as_csv"
+	# 2) openvpn.*Error opening configuration file
+	#    Beim Booten des Systems wurde die openvpn-Config-Datei, die via uci referenziert ist, noch
+	#    nicht erzeugt. Beim naechsten cron-Lauf wird dieses Problem behoben.
+	filters="${filters}|openvpn.*Error opening configuration file"
+	# System-Fehlermeldungen (inkl. "trapped")
+	logread | grep -i error | grep -vE "(${filters#|})" || true
+}
+

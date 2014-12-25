@@ -25,6 +25,7 @@ function on_vpn_status_label()
 	local tunnel_active = nixio.fs.access(SYSROOT.."/tmp/openvpn_msg.txt")
 	-- local tunnel_starting = nixio.fs.access(SYSROOT.."/tmp/run/openvpn-opennet_user.pid")
 
+	-- TODO: Umstellung auf die richtige PID-Datei
 	local tunnel_starting = (luci.sys.exec("kill -0 $(cat /var/run/openvpn-opennet_user.pid 2>/dev/null) 2>/dev/null && echo -n ok") == "ok")
 
 	luci.http.prepare_content("text/plain")
@@ -53,6 +54,7 @@ function on_vpn_status_form()
 	-- SYSROOT is only used for local testing (make runhttpd in luci tree)
 	if not SYSROOT then SYSROOT = "" end
 	local tunnel_active = nixio.fs.access(SYSROOT.."/tmp/openvpn_msg.txt")
+	-- TODO: Umstellung auf die richtige PID-Datei
 	local tunnel_starting = nixio.fs.access(SYSROOT.."/tmp/run/openvpn-opennet_user.pid")
 	luci.http.prepare_content("text/plain")
 	luci.http.write([[<input class="cbi-button" type="submit" name="openvpn_restart" title="]])

@@ -114,7 +114,7 @@ You may obtain a copy of the License at
 		result += String.format('<td><strong>%s</strong></th>', remote);
 		result += '<td class="cbi-value-field"><div id="cbi-opennet-gateways-hopcount">';
 		if (gateway.distance && (gateway.offset != 0)) {
-			result += String.format('(%d)<input class="cbi-button cbi-button-reset cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_offset" />', gateway.offset, gateway.id, gateway);
+			result += String.format('(%d)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_offset" />', gateway.offset, gateway.id, gateway);
 		}
 		<% if sorting == "etx" then %>
 			distance = gateway.distance;

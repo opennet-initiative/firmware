@@ -152,7 +152,7 @@ div.cbi-value-description {
 
 input.cbi-input-del, input.cbi-button-del, input.cbi-button-top,
 input.cbi-button-up, input.cbi-button-down, input.cbi-button-enable,
-input.cbi-button-disable, input.cbi-button-reset {
+input.cbi-button-disable, input.cbi-button-clear {
 	-moz-background-clip:border;
 	-moz-background-inline-policy:continuous;
 	-moz-background-origin:padding;
@@ -206,7 +206,7 @@ input.cbi-button-disable {
 	background:transparent url(../../luci-static/opennet/error.png) no-repeat scroll center;
 }
 
-input.cbi-button-reset {
+input.cbi-button-clear {
 	background:transparent url(../../luci-static/opennet/gtk-clear.png) no-repeat scroll 1px center;
 }
 

@@ -28,7 +28,8 @@ You may obtain a copy of the License at
 				result += String.format('<label class="cbi-value-title" for="download"><%:Available Report%> (%s):</label>', timestamp.toUTCString());
 				result += '<div class="cbi-value-field">';
 				result += '<input class="cbi-button cbi-button-apply" type="submit" name="download" id="download" value="<%:Download%>" />';
-				result += '<input class="cbi-button cbi-button-apply" type="submit" name="delete" value="<%:Delete%>" />';
+				result += ' ';
+				result += '<input class="cbi-button cbi-button-reset" type="submit" name="delete" value="<%:Delete%>" />';
 				result += '</div>';
 			} else {
 				result += '<label class="cbi-value-title" for="download"><%:No report available:%></label>';

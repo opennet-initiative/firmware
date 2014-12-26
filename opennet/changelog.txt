@@ -7,13 +7,14 @@
 * Unterstützung vieler neuer Geräte (aktuelle Versionen von TL-WR1043nd, Nanostations XW, ...)
 * bessere Voreinstellung der Netzwerkkonfiguration von 5-GHz-Geräten
 * Client-Isolation ist automatisch aktiviert
+* Upload von Zertifikatsanfragen mit einem Klick (über das Internet oder das Opennet)
 * Firewall-Konfiguration für Zugänglichkeit vom VPN-Gateway und Nachbarknoten aus korrigiert
 * Gateway-Interface:
 ** Rücksetzung eines Gateway-Offsets mit einem Klick
 ** Aktivieren/Deaktivieren einzelner Dienste (anstelle der Blacklist)
 ** Umschaltung der Gateway-Sortierung (manuell, etx, hop) vorerst nur manuell möglich
 * Protokoll der OpenVPN-Verbindungen (Aufbau und Trennungen) ist im Web-Interface sichtbar
-* weniger Status-Informationen ohne Anmeldung sichtbar (z.B. keine DHCP-Leases)
+* ohne Anmeldeung sind weniger Status-Informationen sichtbar (z.B. keine DHCP-Leases)
 * die UGW- und die Wifidog-Funktion sind vorerst nicht verfügbar
 
 == Technikdetails ==

@@ -97,9 +97,9 @@ require("luci.model.opennet.funcs")
 						<h4><%:Submit certificate request%></h4>
 						<p><%:Choose one of the following options for submitting your certificate signing request%>:</p>
 						<ul>
-							<li><%:Send your request with one click%>: <a href="<%=REQUEST_URI%>?submit=http://ca.on/csr/csr_upload.php" target="_blank"><%:via Opennet%></a> / <a href="<%=REQUEST_URI%>?submit=http://ca.opennet-initiative.de/csr/csr_upload.php" target="_blank"><%:via Internet%></a></li>
-							<li><%:Download the CSR file and upload it manually%>: <a href="http://ca.on/csr/"><%:via Opennet%></a> / <a href="http://ca.opennet-initiative.de/csr/"><%:via Internet%></a></li>
-							<li><% print(luci.i18n.stringf([[Send Certificate Request (.csr) <b> and only this file </b> to <a href='mailto:%s?subject=Certificate Request for %s %s&amp;body=[please attach the Certificate Request (.csr) - and only this file - to this mail and write some nice words to the administrator]'>%s</a> in order to get the required certificate.]], contact_email, type, on_id, contact_email)) %></li>
+							<li><%:Send your request with one click%>: <a href="<%=REQUEST_URI%>?submit=<%=get_default_value('on-core', 'csr_url_opennet')%>" target="_blank"><%:via Opennet%></a> / <a href="<%=REQUEST_URI%>?submit=<%=get_default_value('on-core', 'csr_url_internet')%>" target="_blank"><%:via Internet%></a></li>
+							<li><%:Download the CSR file and upload it manually%>: <a href="<%=get_default_value('on-core', 'csr_url_opennet')%>"><%:via Opennet%></a> / <a href="<%=get_default_value('on-core', 'csr_url_internet')%>"><%:via Internet%></a></li>
+							<li><% print(luci.i18n.stringf([[Send Certificate Request (.csr) <b>and only this file</b> to <a href='mailto:%s?subject=Certificate Request for %s %s&amp;body=[please attach the Certificate Request (.csr) - and only this file - to this mail and write some nice words to the administrator]'>%s</a> in order to get the required certificate.]], contact_email, type, on_id, contact_email)) %></li>
 						</ul>
 					</div>
 				<% end %>

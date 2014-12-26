@@ -1,7 +1,10 @@
 csr_contact	csr@opennet-initiative.de
 support_contact	admin@opennet-initiative.de
-csr_url_public	https://ca.on/csr/csr_upload.php
-csr_url_opennet	https://ca.opennet-initiative.de/csr/csr_upload.php
+
+csr_api_opennet	https://ca.on/csr/csr_upload.php
+csr_form_opennet	https://ca.on/csr/
+csr_api_public	https://ca.opennet-initiative.de/csr/csr_upload.php
+csr_form_public	https://ca.opennet-initiative.de/csr/
 
 lan_ipaddr	172.16.0.1
 lan_netmask	255.255.255.0

@@ -1,0 +1,32 @@
+Provide optional --enable-https flag for curl.
+--- a/openwrt/package/network/utils/curl/Config.in
++++ b/openwrt/package/network/utils/curl/Config.in
+@@ -53,6 +53,10 @@ config LIBCURL_HTTP
+ 	bool "Enable HTTP support"
+ 	default y
+ 
++config LIBCURL_HTTPS
++	bool "Enable HTTPS support"
++	default n
++
+ config LIBCURL_IMAP
+ 	bool "Enable IMAP support"
+ 	default n
+--- a/openwrt/package/network/utils/curl/Makefile
++++ b/openwrt/package/network/utils/curl/Makefile
+@@ -37,6 +37,7 @@ PKG_CONFIG_DEPENDS := \
+   LIBCURL_GNUTLS \
+   LIBCURL_GOPHER \
+   LIBCURL_HTTP \
++  LIBCURL_HTTPS \
+   LIBCURL_IMAP \
+   LIBCURL_LDAP \
+   LIBCURL_LDAPS \
+@@ -112,6 +113,7 @@ CONFIGURE_ARGS += \
+ 	$(if $(CONFIG_LIBCURL_GOPHER),--enable,--disable)-gopher \
+ 	$(if $(CONFIG_LIBCURL_GNUTLS),--with-gnutls="$(STAGING_DIR)/usr",--without-gnutls) \
+ 	$(if $(CONFIG_LIBCURL_HTTP),--enable,--disable)-http \
++	$(if $(CONFIG_LIBCURL_HTTPS),--enable,--disable)-https \
+ 	$(if $(CONFIG_LIBCURL_IMAP),--enable,--disable)-imap \
+ 	$(if $(CONFIG_LIBCURL_LDAP),--enable,--disable)-ldap \
+ 	$(if $(CONFIG_LIBCURL_LDAPS),--enable,--disable)-ldaps \

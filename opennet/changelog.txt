@@ -1,4 +1,4 @@
-= v0.5 - ??.12.2014 =
+= v0.5 - 26.12.2014 =
 
 == Sichtbare Änderungen ==
 * weniger Flash-Belastung für Nutzergeräte (mit VPN-Tunnel) -> weniger Ausfälle
@@ -20,14 +20,12 @@
 == Technikdetails ==
 * VPN-Tunnel-Statistiken werden nicht mehr mehrmals pro Minute im Flash gespeichert
 ** http://dev.on-i.de/changeset/f31d724437b255d18f90b74bc56f9f97e542b508/on_firmware
-* keine HNA-Veröffentlichung einer IP im 192.168.0-Bereich durch Gateway-Server und UGW-Router
-** stattdessen reine Announcierung via olsrd-Nameservice
-* DNS-Konfiguration via olsrs-nameservice-Announcements:
+* DNS-Konfiguration via olsrd-nameservice-Announcements:
 ** http://dev.on-i.de/changeset/079254f4b8ab7dd0757bfdd39af84637f7bbbceb/on_firmware
 ** es gibt nun keine gegenseitigen DNS-Anfragen der UGWs untereinander mehr
 * verbesserte NTP-Konfiguration via olsrs-nameservice-Announcements:
 ** http://dev.on-i.de/changeset/df96edf2e7ca4e8ef060c2f608d91e8c02a48eff/on_firmware
-** NTP-Server werden nun auch ohne VPN-Zertifikat gefunden
+** NTP-Server werden nun auch ohne VPN-Zertifikat gefunden und verwendet
 * Verwendung des uci-defaults-Mechanismus für Erst- oder Upgrade-Konfiguration:
 ** http://wiki.openwrt.org/doc/uci#defaults
 ** explizite Versionsmigrationen (für Firmware-Upgrades)
@@ -41,4 +39,6 @@
 ** somit stehen ein paar Informationen (Prozesse, DHCP-Leases, Diagramme) nun
    nicht mehr ohne Anmeldung zur Verfügung
 ** http://dev.on-i.de/changeset/6257599600a56255c7b27e6978a790f1776d01e9/on_firmware
+* keine HNA-Veröffentlichung einer IP im 192.168.0-Bereich durch Gateway-Server und UGW-Router
+** stattdessen reine Announcierung via olsrd-Nameservice
 

@@ -531,6 +531,21 @@ get_potential_error_messages() {
 	#    Beim Booten des Systems wurde die openvpn-Config-Datei, die via uci referenziert ist, noch
 	#    nicht erzeugt. Beim naechsten cron-Lauf wird dieses Problem behoben.
 	filters="${filters}|openvpn.*Error opening configuration file"
+	# 3) openvpn(...)[...]: Exiting due to fatal error
+	#    Das Verzeichnis /var/etc/openvpn/ existiert beim Booten noch nicht.
+	filters="${filters}|openvpn.*Exiting due to fatal error"
+	# 4) openvpn(...)[...]: SIGUSR1[soft,tls-error] received, process restarting
+	#    Diese Meldung taucht bei einem Verbindungsabbruch auf. Dieses Ereignis ist nicht
+	#    ungewoehnlich und wird mittels des Verbindungsprotokolls bereits hinreichend gewuerdigt
+	filters="${filters}|openvpn.*soft,tls-error"
+	# 5) openvpn(...)[...]: TLS Error: TLS handshake failed
+	#    Diese Meldung deutet einen fehlgeschlagenen Verbindungsversuch an. Dies ist nicht
+	#    ungewoehnlich (beispielsweise auch fuer Verbindungstests).
+	filters="${filters}|openvpn.*TLS Error"
+	# 6) olsrd: /etc/rc.d/S65olsrd: startup-error: check via: '/usr/sbin/olsrd -f "/var/etc/olsrd.conf" -nofork'
+	#    Falls noch kein Interface vorhanden ist (z.B. als wifi-Client), dann taucht diese Meldung
+	#    beim Booten auf.
+	filters="${filters}|olsrd.*startup-error"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

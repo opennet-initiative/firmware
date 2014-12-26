@@ -7,7 +7,20 @@ msgstr ""
 msgid "...show..."
 msgstr ""
 
+msgid "AccessPoint (type users)"
+msgstr ""
+
 msgid "Actions"
+msgstr ""
+
+msgid ""
+"Additionally you may choose to rank specific gateways higher or lower than "
+"their routing distance would indicate. Please be careful with this manual "
+"intervention since it could force your connection through an inefficient "
+"path. Usually you should just keep the default values."
+msgstr ""
+
+msgid "Announced Upload / Download Speed."
 msgstr ""
 
 msgid "Certificate (.crt)"
@@ -17,6 +30,12 @@ msgid "Certificate Name"
 msgstr ""
 
 msgid "Certificate Request (.csr)"
+msgstr ""
+
+msgid "Certificate contents"
+msgstr ""
+
+msgid "Certificate-Request contents"
 msgstr ""
 
 msgid ""
@@ -53,6 +72,12 @@ msgstr ""
 msgid "IP-Address"
 msgstr ""
 
+msgid ""
+"If you notice a severe slow-down of your connection, you should try to "
+"remove your manual priorities first. Use the small \"clear\" icon in the "
+"\"offset/distance\" column for this purpose."
+msgstr ""
+
 msgid "Key Generation"
 msgstr ""
 
@@ -77,6 +102,9 @@ msgstr ""
 msgid "Number of Hops to the Gateway"
 msgstr ""
 
+msgid "Open Virtual Privat Network"
+msgstr ""
+
 msgid "Opennet OpenVPN Gateways"
 msgstr ""
 
@@ -86,10 +114,31 @@ msgstr ""
 msgid "Private Key (.key)"
 msgstr ""
 
+msgid ""
+"Private Key and Certificate do not match. Certificate-Request also does not "
+"match Private Key, therefore sending the Certificate Request to opennet "
+"authority will not help. Please replace Certificate or Private Key or "
+"regenerate Key and Certificate Request."
+msgstr ""
+
+msgid "Private Key and Certificate do not match. Please replace Certificate!"
+msgstr ""
+
 msgid "Province"
 msgstr ""
 
+msgid ""
+"Send Certificate Request (.csr) <b>and only this file</b> to <a href='mailto:"
+"%s?subject=Certificate Request for %s %s&amp;body=[please attach the "
+"Certificate Request (.csr) - and only this file - to this mail and write "
+"some nice words to the administrator]'>%s</a> in order to get the required "
+"certificate."
+msgstr ""
+
 msgid "Send your request with one click"
+msgstr ""
+
+msgid "Speed"
 msgstr ""
 
 msgid "Status"
@@ -99,12 +148,36 @@ msgid "Submit certificate request"
 msgstr ""
 
 msgid ""
-"The first reachable and not blocked Gateway is not the current active one. "
-"The Tunnel will be restarted and the Gateway will be changed in a few "
-"minutes. The changes will be shown after a reload of this page."
+"Take a look at the Opennet wiki, if you would like to know more about the "
+"Gateway system. Usually the first found Gateway in your list is the one you "
+"are going to use. The Gateway will be changed automatically, if the current "
+"Gateway does not work for approximately 120 seconds."
+msgstr ""
+
+msgid ""
+"The \"distance\" column indicates the routing distance to this Gateway. The "
+"selection of your preferred gateway is based on this value."
+msgstr ""
+
+msgid ""
+"The first reachable Gateway is currently not in use. The Tunnel will be "
+"restarted and the Gateway will be changed in a few minutes. This change will "
+"be shown after a reload of this page."
 msgstr ""
 
 msgid "This offset is added to the values before use/display"
+msgstr ""
+
+msgid "Tunnel active"
+msgstr ""
+
+msgid "Tunnel inactive"
+msgstr ""
+
+msgid "Tunnel starting"
+msgstr ""
+
+msgid "UserGateway (type user gateway)"
 msgstr ""
 
 msgid "VPN Gateways"
@@ -114,6 +187,12 @@ msgid "VPN Tunnel"
 msgstr ""
 
 msgid "VPN-Status"
+msgstr ""
+
+msgid ""
+"Your router periodically tries to connect to all available Gateways in the "
+"Opennet network. The results of these tests are indicated in the \"Status\" "
+"column below."
 msgstr ""
 
 msgid "active"
@@ -149,7 +228,16 @@ msgstr ""
 msgid "reset test counter"
 msgstr ""
 
+msgid "restart VPN Tunnel"
+msgstr ""
+
 msgid "search file"
+msgstr ""
+
+msgid "start VPN Tunnel"
+msgstr ""
+
+msgid "start VPN Tunnnel"
 msgstr ""
 
 msgid "tested %d minutes ago"

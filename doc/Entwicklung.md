@@ -411,8 +411,8 @@ Templates
 ---------
 
 * im html-Teil: ``<%:This is an example.%>``
-* im lua-Teil mit Platzhaltern: ``luci.i18n.stringf('Send an email to %s for further information.', email_address)``
-* im lua-Teil ohne Platzhalter: ``luci.i18n.string([[Interface]])``
+* im lua-Teil ohne Platzhalter: ``luci.i18n.translate("Interface")``
+* im lua-Teil mit Platzhaltern: ``luci.i18n.translatef("Send an email to %s for further information.", email_address)``
 
 Texte übersetzen
 ----------------

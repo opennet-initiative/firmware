@@ -81,84 +81,84 @@ function check_ugw_status()
   luci.http.write([[<td rowspan="2" width="10%" ><div class="cbi-value-field"><div class="ugw-centralip" status="]]..ugw_status.centralip_status..[[">&#160;</div></div></td>]])
   luci.http.write([[<td><h4 class="on_sharing_status-title">]])
   if (ugw_status.centralip_status == "ok") or (ugw_status.forwarded_gw ~= "") then
-    luci.http.write(luci.i18n.string([[Internet shared]]).." (")
+    luci.http.write(luci.i18n.translate("Internet shared") .. " (")
     if (ugw_status.centralip_status == "ok") then
-      luci.http.write(luci.i18n.string([[Central Gateways connected locally]]))
+      luci.http.write(luci.i18n.translate("Central Gateways connected locally"))
     end
     if ugw_status.forwarded_gw ~= "" then
-      luci.http.write(", "..luci.i18n.string([[Gateway-Forward activated]]))
+      luci.http.write(", " .. luci.i18n.translate("Gateway-Forward activated"))
     end
     luci.http.write(")")
   elseif ugw_status.tunnel_active then
-    luci.http.write(luci.i18n.string([[Internet not shared]]).."( "..luci.i18n.string([[Internet-Sharing enabled]])..
-      ", "..luci.i18n.string([[Usergateway-Tunnel active]])..")")
+    luci.http.write(luci.i18n.translate("Internet not shared") .. "( " .. luci.i18n.translate("Internet-Sharing enabled") ..
+      ", " .. luci.i18n.translate("Usergateway-Tunnel active") .. ")")
   elseif ugw_status.sharing_enabled then
-    luci.http.write(luci.i18n.string([[Internet not shared]]).."( "..luci.i18n.string([[Internet-Sharing enabled]])..
-      ", "..luci.i18n.string([[Usergateway-Tunnel not running]])..")")
+    luci.http.write(luci.i18n.translate("Internet not shared") .. "( " .. luci.i18n.translate("Internet-Sharing enabled") ..
+      ", " .. luci.i18n.translate("Usergateway-Tunnel not running") .. ")")
   elseif ugw_status.sharing_possible then
-    luci.http.write(luci.i18n.string([[Internet not shared]])..", "..luci.i18n.string([[Internet-Sharing possible]]))
+    luci.http.write(luci.i18n.translate("Internet not shared") .. ", " .. luci.i18n.translate("Internet-Sharing possible"))
   else
-    luci.http.write(luci.i18n.string([[Internet-Sharing impossible]]))
+    luci.http.write(luci.i18n.translate("Internet-Sharing impossible"))
   end
   luci.http.write([[</h4></td></tr>]])
   if ugw_status.tunnel_active then
     luci.http.write([[<tr class="cbi-section-table-titles"><td /><td colspan="1"><label class="cbi-value-ugwstatus">]])
     if ugw_status.centralips_no == 0 then
-      luci.http.write(luci.i18n.string([[no central Gateway-IPs connected trough tunnel]]))
+      luci.http.write(luci.i18n.translate("no central Gateway-IPs connected trough tunnel"))
     elseif ugw_status.centralips_no == 1 then
-      luci.http.write(luci.i18n.stringf([[central Gateway-IP %s connected trough tunnel]], ugw_status.centralips))
+      luci.http.write(luci.i18n.translatef("central Gateway-IP %s connected trough tunnel", ugw_status.centralips))
     else
-      luci.http.write(luci.i18n.stringf([[central Gateway-IPs %s connected trough tunnel]], ugw_status.centralips))
+      luci.http.write(luci.i18n.translatef("central Gateway-IPs %s connected trough tunnel", ugw_status.centralips))
     end
     if ugw_status.forwarded_gw ~= "" then
-      luci.http.write(", "..luci.i18n.stringf([[Gateway-Forward from %s to %s activated]], ugw_status.forwarded_ip, ugw_status.forwarded_gw))
+      luci.http.write(", " .. luci.i18n.translatef("Gateway-Forward from %s to %s activated", ugw_status.forwarded_ip, ugw_status.forwarded_gw))
     end
     luci.http.write([[</label></td></tr>]])
   end
   luci.http.write([[</table></fieldset></fieldset></div>]])
 
   if ugw_status.sharing_possible or ugw_status.sharing_enabled then
-    luci.http.write([[<h3>]]..luci.i18n.string([[Manage Internet-Sharing]])..
+    luci.http.write([[<h3>]] .. luci.i18n.translate("Manage Internet-Sharing")..
       [[</h3><div class="cbi-map"><fieldset class="cbi-section"><fieldset class="cbi-section-node">]])
     luci.http.write([[<h4 id="running_1" hidden="true"><div class="errorbox">]]..
-      luci.i18n.string([[automated check is running, manual modifications are temporarily disabled]])..[[</div><br /><br /></h4>]])
+      luci.i18n.translate("automated check is running, manual modifications are temporarily disabled") .. "</div><br /><br /></h4>")
     luci.http.write([[<form method="post"><div class="cbi-value">]])
     if ugw_status.sharing_enabled then
-      luci.http.write([[<label class="cbi-value-title">]]..luci.i18n.string([[Internet-Sharing enabled]])..[[</label>]])
+      luci.http.write('<label class="cbi-value-title">' .. luci.i18n.translate("Internet-Sharing enabled") .. "</label>")
       luci.http.write([[<div class="cbi-value-field"><input id="enable" type="submit" class="cbi-button" name="disable_sharing" value="]]..
-        luci.i18n.string([[disable Sharing]])..[[" ]])
+        luci.i18n.translate("disable Sharing") .. '" ')
       if autocheck_running then luci.http.write([[disabled="true"]]) end
       luci.http.write([[/></div>]])
     else
-      luci.http.write([[<label class="cbi-value-title">]]..luci.i18n.string([[Internet-Sharing disabled]])..[[</label>]])
+      luci.http.write('<label class="cbi-value-title">' .. luci.i18n.translate("Internet-Sharing disabled") .. "</label>")
       luci.http.write([[<div class="cbi-value-field"><input id="enable" type="submit" class="cbi-button" name="enable_sharing" value="]]..
-        luci.i18n.string([[enable Sharing]])..[[" ]])
+        luci.i18n.translate("enable Sharing") .. '" ')
       if autocheck_running then luci.http.write([[disabled="true"]]) end
       luci.http.write([[/></div>]])
     end
     luci.http.write([[</div>]])
     if (ugw_status.sharing_blocked and ugw_status.sharing_blocked > 0) then
       luci.http.write([[<div class="cbi-value"><label class="ugw_blocking_message">]]..
-            luci.i18n.stringf([[Internet-Sharing is currently disabled for %s Minutes. It will be automatically reenabled, but you can enable it manually if you like.]], ugw_status.sharing_blocked)..
+            luci.i18n.translatef("Internet-Sharing is currently disabled for %s Minutes. It will be automatically reenabled, but you can enable it manually if you like.", ugw_status.sharing_blocked) ..
             [[</label></div>]])
     elseif (ugw_status.unblock_time) then
       luci.http.write([[<div class="cbi-value"><label class="ugw_blocking_message">]]..
-            luci.i18n.stringf([[Internet-Sharing will be automatically reenabled in between the next 5 Minutes. You can enable it manually if you like.]], ugw_status.sharing_blocked)..
+            luci.i18n.translatef("Internet-Sharing will be automatically reenabled in between the next 5 Minutes. You can enable it manually if you like.", ugw_status.sharing_blocked) ..
             [[</label></div>]])
     end
     if ugw_status.sharing_enabled then
-      luci.http.write([[<div class="cbi-value"><label class="cbi-value-title">]]..luci.i18n.string([[suspend Internet-Sharing for]])..
+      luci.http.write('<div class="cbi-value"><label class="cbi-value-title">' .. luci.i18n.translate("suspend Internet-Sharing for") ..
         [[</label><div class="cbi-value-field"><select class="cbi-input-select" name="suspend_time">]]..
-        [[<option value="10">10 ]]..luci.i18n.string([[minutes]])..[[</option>]]..
-        [[<option value="30">30 ]]..luci.i18n.string([[minutes]])..[[</option>]]..
-        [[<option value="60">1 ]]..luci.i18n.string([[hour]])..[[</option>]]..
-        [[<option value="120">2 ]]..luci.i18n.string([[hours]])..[[</option>]]..
-        [[<option value="180">3 ]]..luci.i18n.string([[hours]])..[[</option>]]..
-        [[<option value="360">6 ]]..luci.i18n.string([[hours]])..[[</option>]]..
-        [[<option value="720">12 ]]..luci.i18n.string([[hours]])..[[</option>]]..
-        [[<option value="1440">1 ]]..luci.i18n.string([[day]])..[[</option>]]..
+        '<option value="10">10 ' .. luci.i18n.translate("minutes") .. "</option>" ..
+        '<option value="30">30 ' .. luci.i18n.translate("minutes") .. "</option>" ..
+        '<option value="60">1 ' .. luci.i18n.translate("hour") .. "</option>" ..
+        '<option value="120">2 ' .. luci.i18n.translate("hours") .. "</option>" ..
+        '<option value="180">3 ' .. luci.i18n.translate("hours") .. "</option>" ..
+        '<option value="360">6 ' .. luci.i18n.translate("hours") .. "</option>" ..
+        '<option value="720">12 ' .. luci.i18n.translate("hours") .. "</option>" ..
+        '<option value="1440">1 ' .. luci.i18n.translate("day") .. "</option>" ..
         [[</select><input id="suspend" type="submit" class="cbi-button" name="suspend" title="suspend" value="]]..
-          luci.i18n.string([[suspend now]])..[[" ]])
+          luci.i18n.translate("suspend now") .. '" ')
       if autocheck_running then luci.http.write([[disabled="true"]]) end
       luci.http.write([[/></div></div>]])
     end
@@ -172,9 +172,9 @@ function get_wan()
   wan = cursor:get("on-usergw", "opennet_ugw"..count, "wan")
   if not wan then wan = "" end
   luci.http.prepare_content("text/plain")
-  luci.http.write([[<div class="ugw-wan-route" name="wan" status="]]..wan..[[" >&#x00A0;</div>]])
-  luci.http.write([[<img class='loading_img_small' name="wan_spinner" src=']]..resource..[[/icons/loading.gif' alt=']]..
-    luci.i18n.string([[Loading]])..[[' style="display:none;" />]])
+  luci.http.write('<div class="ugw-wan-route" name="wan" status="' .. wan .. '" >&#x00A0;</div>')
+  luci.http.write('<img class="loading_img_small" name="wan_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
+    luci.i18n.translate("Loading") .. '" style="display:none;" />')
 end
 
 function update_wan()
@@ -195,8 +195,8 @@ function get_wan_ping()
   end
   luci.http.prepare_content("text/plain")
   luci.http.write([[<div name="wan" id="cbi-network-lan-ping" >]]..ping..[[</div>]])
-  luci.http.write([[<img class='loading_img_small' name="wan_spinner" src=']]..resource..[[/icons/loading.gif' alt=']]..
-    luci.i18n.string([[Loading]])..[[' style="display:none;" />]])
+  luci.http.write('<img class="loading_img_small" name="wan_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
+    luci.i18n.translate("Loading") .. '" style="display:none;" />')
 end
 
 function get_speed()
@@ -210,12 +210,12 @@ function get_speed()
     if not upload or upload == "0" then upload = "?" end
     if not download or download == "0" then download = "?" end
     local speed = upload.." kbps / "..download.." kbps"
-    local abbr = speed_time..luci.i18n.stringf([[: upload to Gateway %s kbit/s; download from Gateway %s kbit/s]], upload, download)
+    local abbr = speed_time..luci.i18n.translatef("upload to Gateway %s kbit/s; download from Gateway %s kbit/s", upload, download)
     luci.http.write([[<div class="ugw-wan-speed" name="speed" id="cbi-network-lan-speed" ><abbr title="]]
       ..abbr..[[">]]..speed..[[</abbr></div>]])
   end
-  luci.http.write([[<img class='loading_img_small' name="speed_spinner" src=']]..resource..[[/icons/loading.gif' alt=']]..
-    luci.i18n.string([[Loading]])..[[' style="display:none;" />]])
+  luci.http.write('<img class="loading_img_small" name="speed_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
+    luci.i18n.translate("Loading") .. '" style="display:none;" />')
 end
 
 function update_speed()
@@ -233,11 +233,11 @@ function get_mtu()
   if v.mtu then
     mtu_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw"..count, "mtu_time"))
     luci.http.write([[<div class="ugw-mtu" name="mtu" status="]]..v.mtu..[["><abbr title="]]..mtu_time..[[: ]]
-      ..luci.i18n.stringf([[(tried/measured) to Gateway: %s/%s from Gateway: %s/%s]], v.mtu_toGW_tried, v.mtu_toGW_actual, v.mtu_fromGW_tried, v.mtu_fromGW_actual)
+      .. luci.i18n.translatef("(tried/measured) to Gateway: %s/%s from Gateway: %s/%s", v.mtu_toGW_tried, v.mtu_toGW_actual, v.mtu_fromGW_tried, v.mtu_fromGW_actual)
       ..[[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
   end
-  luci.http.write([[<img class='loading_img_small' name="mtu_spinner" src=']]..resource..[[/icons/loading.gif' alt=']]..
-    luci.i18n.string([[Loading]])..[[' style="display:none;" />]])
+  luci.http.write('<img class="loading_img_small" name="mtu_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
+    luci.i18n.translate("Loading") .. '" style="display:none;" />')
 end
 
 function update_mtu()
@@ -257,11 +257,11 @@ function get_vpn()
   if not v_age then v_age = "" end
   if v_status then
     luci.http.write([[<div id="cbi-network-lan-status" name="vpn" status="]]..v_status..[["><abbr title="]]
-      ..luci.i18n.stringf([[tested %s minutes ago]], v_age)
+      ..luci.i18n.translatef("tested %s minutes ago", v_age)
       ..[[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
   end
-  luci.http.write([[<img class='loading_img_small' name="vpn_spinner" src=']]..resource..[[/icons/loading.gif' alt=']]..
-    luci.i18n.string([[Loading]])..[[' style="display:none;" />]])
+  luci.http.write('<img class="loading_img_small" name="vpn_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
+    luci.i18n.translate("Loading") .. '" style="display:none;" />')
 end
 
 function update_vpn()
@@ -301,11 +301,11 @@ function get_name_button()
   local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
   if v and v.ipaddr and v.ipaddr ~= "" and not nixio.fs.access(SYSROOT.."/var/run/on_usergateway_check") then
     luci.http.write([[<h3 count="]]..count..[[" tunnel="]]..get_tunnel_active(count)..[[" forward="]]..get_forward_active(count)..[["><input class="cbi-button" type="submit" title="]]
-      ..luci.i18n.stringf([[Click to switch Forwarding to Gateway %s (IP: %s)]], v.name, v.ipaddr)
+      ..luci.i18n.translatef("Click in order to switch Forwarding to Gateway %s (IP: %s)", v.name, v.ipaddr)
       ..[[" name="select_gw" value="]]..v.name..[[" /></h3>]])
   else
     luci.http.write([[<h3 count="]]..count..[[" tunnel="]]..get_tunnel_active(count)..[[" forward="]]..get_forward_active(count)..[["><input class="cbi-button" type="submit" title="]]
-      ..luci.i18n.string([[No IP-Address found for Gateway-Name, Gateway cannot be used]])
+      ..luci.i18n.translate("No IP-Address found for Gateway-Name, Gateway cannot be used")
       ..[[" name="select_gw" value="]]..v.name..[[" disabled="true" /></h3>]])
   end
 end

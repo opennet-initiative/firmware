@@ -47,12 +47,12 @@ function on_vpn_status_label()
 	luci.http.write([[">&#160;</div></td>]])
 	luci.http.write([[<td><h4 class="on_sharing_status-title">]])
 	if tunnel_active then
-		luci.http.write(luci.i18n.string([[Tunnel active]]))
+		luci.http.write(luci.i18n.translate("Tunnel active"))
 	else
 		if is_tunnel_starting() then
-			luci.http.write(luci.i18n.string([[Tunnel starting]]))
+			luci.http.write(luci.i18n.translate("Tunnel starting"))
 		else
-			luci.http.write(luci.i18n.string([[Tunnel inactive]]))
+			luci.http.write(luci.i18n.translate("Tunnel inactive"))
 		end
 	end
 	luci.http.write([[</h4></td></tr>]])
@@ -60,12 +60,12 @@ end
 
 function on_vpn_status_form()
 	luci.http.prepare_content("text/plain")
-	luci.http.write([[<input class="cbi-button" type="submit" name="openvpn_restart" title="]])
+	luci.http.write('<input class="cbi-button" type="submit" name="openvpn_restart" title="')
 	if is_tunnel_active() or is_tunnel_starting() then
-		luci.http.write(luci.i18n.string([[restart VPN Tunnel]])..[[" value="]]..luci.i18n.string([[restart VPN Tunnel]]))
+		luci.http.write(luci.i18n.translate("restart VPN Tunnel") .. '" value="' .. luci.i18n.translate("restart VPN Tunnel"))
 	else
-		luci.http.write(luci.i18n.string([[start VPN Tunnnel]])..[[" value="]]..luci.i18n.string([[start VPN Tunnel]]))
+		luci.http.write(luci.i18n.translate("start VPN Tunnel") .. '" value="' .. luci.i18n.translate("start VPN Tunnel"))
 	end
-	luci.http.write([[" />]])
+	luci.http.write('" />')
 end
 

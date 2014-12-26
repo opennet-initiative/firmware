@@ -68,9 +68,9 @@ require("luci.model.opennet.funcs")
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
 			<div class="cbi-value-comment">
-<%			if client_cn and client_cn ~= "" then
-				print(luci.i18n.stringf([[Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.]], client_cn, portrange[1], portrange[2]))
-			end %>
+			<% if client_cn and client_cn ~= "" then %>
+				<%=luci.i18n.translatef('Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.', client_cn, portrange[1], portrange[2])%>
+			<% end %>
 			<%:The target should be an IP-Address in your local network. Additionally you can enter the target port in the related field.%></div>
 			<% show_portmap("on_vpn") %>
 		</fieldset>

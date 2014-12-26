@@ -40,7 +40,7 @@ function write_infotable(data)
 	local count = 1
 	while count < table.getn(on_crt_data) do
 		if on_crt_data[count] ~= "subject" then
-			luci.http.write("<tr><td>"..luci.i18n.string(on_crt_data[count]).."</td><td>"..on_crt_data[count+1].."</td></tr>")
+			luci.http.write("<tr><td>" .. on_crt_data[count] .. "</td><td>" .. on_crt_data[count+1] .. "</td></tr>")
 			count = count + 1
 		end
 		count = count + 1
@@ -52,13 +52,13 @@ function display_csr_infotable(type)
 	local crtname = "/etc/openvpn/opennet_user/on_aps.csr"
 	if type == "ugw" then crtname = "/etc/openvpn/opennet_ugw/on_ugws.csr" end
 	on_crt_data = split(luci.sys.exec("openssl req -in "..crtname.." -nameopt sep_comma_plus,lname -subject -noout"), '[,=]')
-	luci.http.write("<div><h4>"..luci.i18n.string("Certificate-Request contents").."</h4>")
+	luci.http.write("<div><h4>" .. luci.i18n.translate("Certificate-Request contents") .. "</h4>")
 	write_infotable(on_crt_data)
 end
 function display_crt_infotable(type)
 	local crtname = "/etc/openvpn/opennet_user/on_aps.crt"
 	if type == "ugw" then crtname = "/etc/openvpn/opennet_ugw/on_ugws.crt" end
 	on_crt_data = split(luci.sys.exec("openssl x509 -in "..crtname.." -nameopt sep_comma_plus,lname -subject -noout"), '[,=]')
-	luci.http.write("<div><h4>"..luci.i18n.string("Certificate contents").."</h4>")
+	luci.http.write("<div><h4>" .. luci.i18n.translate("Certificate contents") .. "</h4>")
 	write_infotable(on_crt_data)
 end

@@ -14,9 +14,8 @@ $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 module("luci.controller.opennet.on_portmapping", package.seeall)
 
 function index()
-	luci.i18n.loadc("on_base")
-	local i18n = luci.i18n.string
-	local page = entry({"opennet", "opennet_2", "portmapping"}, call("action_portmapping"), i18n("Port-Mapping"), 2)
+	luci.i18n.loadc("on-core")
+	local page = entry({"opennet", "opennet_2", "portmapping"}, call("action_portmapping"), luci.i18n.translate("Port-Mapping"), 2)
 	page.i18n = "on_portmapping"
 	page.css = "opennet.css"
 end

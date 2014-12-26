@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2014-12-26 00:02+0200\n"
+"PO-Revision-Date: 2014-12-26 16:34+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -11,6 +11,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
+
+msgid "(central Gateway-IPs (%s) connected trough tunnel)"
+msgstr "(externe Gateway-IPs (%s) sind über den Tunnel verbunden)"
+
+msgid "(no central Gateway-IPs connected trough tunnel)"
+msgstr "(keine externen Gateway-IPs sind über den Tunnel verbunden)"
+
+msgid "-- AP %s"
+msgstr "-- AP %s"
+
+msgid "-- CN %s"
+msgstr "-- CN %s"
 
 msgid "Available Report"
 msgstr "Vorhandener Bericht"
@@ -22,11 +34,29 @@ msgid "Base Configuration"
 msgstr "Basis-Konfiguration"
 
 msgid ""
+"Based on your Certificate (%s), the ports from %s to %s are forwarded "
+"through the VPN-Tunnel to your Access-Point - you should enter those as your "
+"source-ports."
+msgstr ""
+"Basierend auf Ihrem Zertifikat (%s) werden die Ports %s bis %s vom VPN-"
+"Gateway an Deinen Access-Point weitergeleitet. Nur diese Ports sind als "
+"eingehende Ports für Dich verwendbar."
+
+msgid ""
 "Basic Network Configuration - just enter your Opennet ID and everything will "
 "be adapted"
 msgstr ""
 "Grundlegende Netzwerk-Konfiguration - einfach deine Opennet-ID eingeben und "
 "die Interfaces werden entsprechend konfiguriert"
+
+msgid ""
+"Be aware that the network will be restarted immediately,\\n and you might "
+"loose the contact to your router.\\n\\nAre you really wan\\'t to update the "
+"network-id?"
+msgstr ""
+"Beachte bitte, dass die Verbindung sofort neu gestartet wird und Du den "
+"Kontakt zu Deinem Router kurz verlieren könntest. Möchtest Du wirklich die "
+"Netzwerk-ID aktualisieren?"
 
 msgid "Delete"
 msgstr "Löschen"
@@ -37,8 +67,8 @@ msgid ""
 "to understand your setup. The summary does not contain any private "
 "information."
 msgstr ""
-"Möchtest Du technische Probleme mit anderen Aktiven aus dem Opennet "
-"diskutieren. Zu diesem Zweck kannst Du Dir hier eine detaillierte "
+"Möchtest Du technische Fragen mit anderen Aktiven aus dem Opennet "
+"diskutieren? Zu diesem Zweck kannst Du Dir hier eine detaillierte "
 "Zusammenfassung herunterladen. Diese Zusammenfassung hilft anderen, Dein "
 "Setup zu verstehen. Die Zusammenfassung enthält keine privaten Daten."
 
@@ -50,11 +80,21 @@ msgid ""
 "a technical issue. This summary does not contain any private information."
 msgstr ""
 "Lade eine detaillierte Zusammenfassung Deines Router-Setups herunter, falls "
-"du ein Anliegen oder ein technisches Problem mit anderen diskutieren "
+"Du ein Anliegen oder ein technisches Problem mit anderen diskutieren "
 "möchtest. Diese Zusammenfassung enthält keine private Informationen."
+
+msgid ""
+"Expected Transmission Count - Quality of the Connection to the Gateway "
+"reagrding OLSR"
+msgstr ""
+"Erwartete Anzahl von Übertragungen - die Qualität der Verbindung zum Gateway "
+"aus der Sicht von OLSR"
 
 msgid "Extended Configuration"
 msgstr "Erweiterte Konfiguration"
+
+msgid "FREE"
+msgstr "FREE"
 
 msgid "Forwarding from DHCP-wireless network"
 msgstr "Weiterleitung aus dem DHCP-Funknetz"
@@ -68,14 +108,41 @@ msgstr "Weiterleitung aus dem Opennet"
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
 
+msgid "Gateway-Forward for %s (to %s) activated"
+msgstr "Gateway-Weiterleitung für %s (nach %s) ist aktiviert"
+
+msgid "Generate"
+msgstr "Erzeugen"
+
 msgid "Generate Report:"
 msgstr "Zusammenfassung erzeugen:"
 
 msgid "Generating a report takes about one minute"
 msgstr "Die Erzeugung der Zusammenfassung dauert etwa eine Minute"
 
+msgid ""
+"Great that you decided to take part in Opennet. Register the IP of your "
+"Access-Point in the %sOpennet-Wiki%s and aquire a free IP-Address. Please "
+"read the information %sin the wiki%s for further details."
+msgstr ""
+"Schön, dass Du Dich entschieden hast, am Opennet teilzunehmen. Wähle Dir "
+"eine IP für Deinen Access-Point im %sOpennet-Wiki%s aus und trage diese hier "
+"ein. Bitte schau Dir vorher auch die %sMitmachen-Seite im Wiki%s an."
+
 msgid "Hardware-Information:"
 msgstr "Geräteinfo:"
+
+msgid "IP"
+msgstr "IP"
+
+msgid "IP Address"
+msgstr "IP-Adresse"
+
+msgid "IP Address(es):"
+msgstr "IP-Adresse(n):"
+
+msgid "IPv6"
+msgstr "IPv6"
 
 msgid ""
 "If you like to forward ports from the outside (for instance the Internet) to "
@@ -90,16 +157,48 @@ msgid ""
 "Certificates and Keys here"
 msgstr ""
 "Wenn Du Internet nutzen möchtest, solltest Du hier Dein Zertifikat und "
-"deinen Schlüssel hochladen oder zuerst eine Zertifikat-Anfrage erstellen"
+"Deinen Schlüssel hochladen oder zuerst eine Zertifikat-Anfrage erstellen"
+
+msgid "Interface"
+msgstr "Schnittstelle"
 
 msgid "Internet Sharing"
 msgstr "Internet Freigabe"
 
+msgid "Internet not shared"
+msgstr "Internet nicht freigegeben"
+
+msgid "Internet shared"
+msgstr "Internet freigegeben"
+
+msgid "Internet-Sharing enabled"
+msgstr "Internet-Freigabe aktiviert"
+
+msgid "Internet-Sharing possible"
+msgstr "Internet-Freigabe ist möglich"
+
+msgid "Internet-Sharing:"
+msgstr "Internet-Freigabe:"
+
 msgid "Issue indicators:"
 msgstr "Problemindikatoren:"
 
+msgid "LOCAL"
+msgstr "LOKAL"
+
+msgid "Link-Quality, how many test-packets you recevie from your neighbor"
+msgstr ""
+
 msgid "Loading"
 msgstr "Lade"
+
+msgid "MAC"
+msgstr "MAC"
+
+msgid ""
+"Neighbor-Link-Quality, how many of your test-packets are reaching your "
+"neighbor"
+msgstr ""
 
 msgid "Neighbors:"
 msgstr "Nachbarn:"
@@ -119,17 +218,39 @@ msgstr "OLSR-Status"
 msgid "ON Extended"
 msgstr "ON Erweitert"
 
+msgid "OPENNET"
+msgstr "OPENNET"
+
 msgid "OpenVPN:"
 msgstr "OpenVPN:"
 
 msgid "Opennet"
 msgstr "Opennet"
 
+msgid "Opennet Firmware version %s"
+msgstr "Opennet-Firmware Version %s"
+
 msgid "Opennet ID"
 msgstr "Opennet ID"
 
+msgid ""
+"Opennet-Addresses are usually given to the Access-Point based on your "
+"Opennet-ID. These are the interfaces on which OLSR is running."
+msgstr ""
+"Opennet-Adressen werden üblicherweise basierend auf Deiner Opennet-ID an den "
+"AP vergeben. Diese Netzwerkschnittstellen werden von OLSR verwendet."
+
 msgid "Opennet-ID / Network ID"
 msgstr "Opennet-ID / Netzwerk ID"
+
+msgid ""
+"Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your "
+"first Opennet-Network-Interface, any change will reconfigure your network "
+"settings immediately."
+msgstr ""
+"Bitte gib Deine Opennet-ID (1.X oder 2.X etc.) oder die IP-Adresse der "
+"ersten Opennet-Netzwerkschnittstelle ein. Jede Änderung wird sofort die "
+"betroffenen Netzwerkschnittstellen neu konfigurieren."
 
 msgid "Port-Mapping"
 msgstr "Port-Mapping"
@@ -146,11 +267,11 @@ msgstr "Zusammenfassungsgenerator"
 msgid "Router summary"
 msgstr "Router-Überblick"
 
+msgid "SSID"
+msgstr "SSID"
+
 msgid "Source-Port"
 msgstr "Quell-Port"
-
-msgid "Start"
-msgstr "Anfang"
 
 msgid "Status"
 msgstr "Status"
@@ -166,6 +287,20 @@ msgstr "Ziel-Adresse"
 
 msgid "Target-Port"
 msgstr "Ziel-Port"
+
+msgid "The FREE Interface will be used to publicly share Opennet with Wifidog."
+msgstr ""
+"Die FREE-Schnittstelle wird für den Betrieb eines öffentlich zugänglichen "
+"Knotens verwendet."
+
+msgid ""
+"The WAN Interface is used for your local Internet-Connection (for instance "
+"DSL). It will be used for you local traffic and to map Usergateways into "
+"Opennet = Share your Internet Connection if you choose to."
+msgstr ""
+"Die WAN-Schnittstelle wird für deinen lokalen Internet-Zugang (z.B. via DSL) "
+"genutzt. Über diese Schnittstelle fließt der Verkehr anderer Nutzer zu den "
+"externen Opennet-Gateways, sofern Du die Internet-Freigabe aktiviert hast."
 
 msgid ""
 "The following points are the ones required to configure any Opennet Access-"
@@ -231,6 +366,15 @@ msgid "There seem to be no issues."
 msgstr "Es scheint keine Probleme zu geben."
 
 msgid ""
+"These addresses are used locally and usually protected by your firewall. "
+"Connections to the Internet are routed through your VPN-Tunnel if it is "
+"active."
+msgstr ""
+"Diese Schnittstellen dienen lokalem Verkehr und sind üblicherweise durch "
+"Firewall-Regeln vor externem Zugriff geschützt. Der Verkehr aus den lokalen "
+"Netzen wird in den VPN-Tunnel geroutet, sofern dieser aktiv ist."
+
+msgid ""
 "This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to "
 "the requirements of the Opennet Initiative e.V."
 msgstr ""
@@ -248,17 +392,32 @@ msgstr ""
 msgid "Uptime:"
 msgstr "Gerätelaufzeit:"
 
+msgid "Usergateway-Tunnel active"
+msgstr "Usergateway-Tunnel ist aktiv"
+
+msgid "Usergateway-Tunnel not running"
+msgstr "Usergateway-Tunnel ist nicht aktiv"
+
 msgid "VPN Gateways"
 msgstr "VPN Gateways"
 
 msgid "VPN Tunnel"
 msgstr "VPN Tunnel"
 
+msgid "VPN-Tunnel active (%s)"
+msgstr "VPN-Tunnel ist aktiv (%s)"
+
+msgid "VPN-Tunnel not active, for details check the System Log."
+msgstr "VPN-Tunnel ist nicht aktiv. Eventuell ist kein Zertifikat vorhanden."
+
+msgid "WAN"
+msgstr "WAN"
+
 msgid "Welcome to the Configuration Pages of your Access Point"
-msgstr "Willkommen zu den Verwaltungs-Seiten dieser Access-Points!"
+msgstr "Willkommen zu den Verwaltungs-Seiten dieses Access-Points!"
 
 msgid "Welcome to the Extended Configuration Pages of your Access Point"
-msgstr "Willkommen zu den Erweiterten Verwaltungs-Seiten dieser Access-Points!"
+msgstr "Willkommen zu den Erweiterten Verwaltungs-Seiten dieses Access-Points!"
 
 msgid "Wireless:"
 msgstr "Funknetz:"
@@ -274,14 +433,28 @@ msgstr ""
 "verwaltest Du die benötigten VPN-Zertifikate und entscheidest, ob und wann "
 "Du Dein Internet freigeben möchtest."
 
+msgid ""
+"You may want to send a <a href=\"%s\">report</a> to the Opennet community "
+"(%s)."
+msgstr ""
+"Vielleicht möchtest Du eine kurze Nachricht mit einer <a href=\""
+"%s>Zusammenfassung</a> Deiner Router-Konfiguration an die Opennet-Aktiven "
+"(%s) senden."
+
 msgid "device"
 msgstr "Schnittstelle"
 
 msgid "related network addresses"
 msgstr "zugehörige Netzwerkadressen"
 
+msgid "start / limit / leasetime"
+msgstr "Beginn / Anzahl / Lease-Laufzeit"
+
 msgid "use"
 msgstr "übernehmen"
+
+#~ msgid "Start"
+#~ msgstr "Anfang"
 
 #~ msgid ""
 #~ "After the configuration is done, it's the beste to restart the Router "

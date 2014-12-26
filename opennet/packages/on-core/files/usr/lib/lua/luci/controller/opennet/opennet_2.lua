@@ -14,10 +14,9 @@ $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 module("luci.controller.opennet.opennet_2", package.seeall)
 
 function index()
-	luci.i18n.loadc("on_base")
-	local i18n = luci.i18n.string
+	luci.i18n.loadc("on-core")
 	
-	local page = entry({"opennet", "opennet_2"}, template("opennet/opennet_2"), i18n("ON Extended"), 2)
+	local page = entry({"opennet", "opennet_2"}, template("opennet/opennet_2"), luci.i18n.translate("ON Extended"), 2)
 	page.i18n = "on_opennet_2"
 	page.css = "opennet.css"
 	page.index = true

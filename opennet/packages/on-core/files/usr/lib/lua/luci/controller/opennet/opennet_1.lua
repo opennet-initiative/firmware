@@ -18,8 +18,8 @@ require("luci.model.opennet.funcs")
 
 
 function index()
-	luci.i18n.loadc("on_base")
-	local i18n = luci.i18n.string
+	luci.i18n.loadc("on-core")
+	local i18n = luci.i18n.translate
 	local page
 	
 	page = entry({"opennet", "opennet_1"}, template("opennet/opennet_1"))

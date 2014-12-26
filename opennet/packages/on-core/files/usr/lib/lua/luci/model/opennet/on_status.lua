@@ -23,12 +23,12 @@ function printFirmwareTitle()
 	local on_version = on_function("get_on_firmware_version")
 	local on_id = cursor:get("on-core", "settings", "on_id")
 	local client_cn = on_function("get_client_cn")
-	luci.http.write(luci.i18n.stringf("Opennet Firmware version %s", on_version))
+	luci.http.write(luci.i18n.translatef("Opennet Firmware version %s", on_version))
 	if on_id then
-		luci.http.write(luci.i18n.stringf("-- AP %s", on_id))
+		luci.http.write(luci.i18n.translatef("-- AP %s", on_id))
 	end
 	if client_cn and client_cn ~= "" then
-		luci.http.write(luci.i18n.stringf("-- CN %s", client_cn))
+		luci.http.write(luci.i18n.translatef("-- CN %s", client_cn))
 	end
 end
 
@@ -39,9 +39,9 @@ function printOpenVPN()
 	end
 	local remotes = string_join(map_table(services, get_service_host), ", ")
 	if remotes then
-		luci.http.write(luci.i18n.string([[VPN-Tunnel active.]])..[[ (]]..remotes..")")
+		luci.http.write(luci.i18n.translatef("VPN-Tunnel active (%s)", remotes))
 	else
-		luci.http.write(luci.i18n.string([[VPN-Tunnel not active, for details check the System Log.]]))
+		luci.http.write(luci.i18n.translate("VPN-Tunnel not active, for details check the System Log."))
 	end
 end
 
@@ -95,28 +95,28 @@ function printUserGW()
 	if ugw_status.sharing_enabled or ugw_status.sharing_possible then
 		luci.http.write([[<tr class='cbi-section-table-titles'>
 			<td class='cbi-section-table-cell'>]]..
-			luci.i18n.string([[Internet-Sharing:]])..[[</td>
+			luci.i18n.translate("Internet-Sharing:") .. [[</td>
 			<td class='cbi-section-table-cell'>]])
 		if (ugw_status.centralip_status == "ok") or (ugw_status.forwarded_gw ~= "") then
-			luci.http.write(luci.i18n.string([[Internet shared]]))
+			luci.http.write(luci.i18n.translate("Internet shared"))
 			if ugw_status.centralips then
-				luci.http.write(luci.i18n.string([[(no central Gateway-IPs connected trough tunnel)]]))
+				luci.http.write(luci.i18n.translate("(no central Gateway-IPs connected trough tunnel)"))
 			else
-				luci.http.write(luci.i18n.stringf([[(central Gateway-IPs (%s) connected trough tunnel)]], ugw_status.centralips))
+				luci.http.write(luci.i18n.translatef("(central Gateway-IPs (%s) connected trough tunnel)", ugw_status.centralips))
 			end
 			if ugw_status.forwarded_gw ~= "" then
-				print(", "..luci.i18n.stringf([[Gateway-Forward for %s (to %s) activated]], ugw_status.forwarded_ip, ugw_status.forwarded_gw))
+				print(", " .. luci.i18n.translatef("Gateway-Forward for %s (to %s) activated", ugw_status.forwarded_ip, ugw_status.forwarded_gw))
 			end
 		elseif ugw_status.tunnel_active then
-			luci.http.write(luci.i18n.string([[Internet not shared]]).." ( "..
-			luci.i18n.string([[Internet-Sharing enabled]])..", "..luci.i18n.string([[Usergateway-Tunnel active]]).." )")
+			luci.http.write(luci.i18n.translate("Internet not shared") .. " ( " ..
+			luci.i18n.translate("Internet-Sharing enabled") .. ", " .. luci.i18n.translate("Usergateway-Tunnel active") .. " )")
 		elseif ugw_status.sharing_enabled then
-			luci.http.write(luci.i18n.string([[Internet not shared]]).." ( "..
-			luci.i18n.string([[Internet-Sharing enabled]])..", "..luci.i18n.string([[Usergateway-Tunnel not running]]).." )")
+			luci.http.write(luci.i18n.translate("Internet not shared") .. " ( "..
+			luci.i18n.translate("Internet-Sharing enabled") .. ", " .. luci.i18n.translate("Usergateway-Tunnel not running") .. " )")
 		elseif ugw_status.sharing_possible then
-			luci.http.write(luci.i18n.string([[Internet not shared]])..", "..luci.i18n.string([[Internet-Sharing possible]]))
+			luci.http.write(luci.i18n.translate("Internet not shared") .. ", " .. luci.i18n.translate("Internet-Sharing possible"))
 		else
-			luci.http.write(luci.i18n.string([[Internet-Sharing possible]]))
+			luci.http.write(luci.i18n.translate("Internet-Sharing possible"))
 		end
 		luci.http.write([[</td></tr>]])
 	end
@@ -141,13 +141,13 @@ function printZoneLine(zoneName)
 		--     luci.http.write([[<tr class='cbi-section-table-titles'><td class='cbi-section-table-cell'>]])
 		luci.http.write([[<h3>]])
 		if zoneName == "lan" then
-			luci.http.write(luci.i18n.string([[<abbr title='These addresses are used locally and usually protected by your firewall. Connections to the Internet are routed through your VPN-Tunnel if it is active.'>LOCAL</abbr> IP Address(es):]]))
+			luci.http.write('<abbr title="' .. luci.i18n.translate("These addresses are used locally and usually protected by your firewall. Connections to the Internet are routed through your VPN-Tunnel if it is active.") .. '">' .. luci.i18n.translate("LOCAL") .. '</abbr> ' .. luci.i18n.translate('IP Address(es):'))
 		elseif zoneName == "on_mesh" then
-			luci.http.write(luci.i18n.string([[<abbr title='Opennet-Addresses are usually given to the Access-Point based on your Opennet-ID. These are the interfaces on which OLSR is running.'>OPENNET</abbr> IP Address(es):]]))
+			luci.http.write('<abbr title="' .. luci.i18n.translate("Opennet-Addresses are usually given to the Access-Point based on your Opennet-ID. These are the interfaces on which OLSR is running.") .. '">' .. luci.i18n.translate("OPENNET") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
 		elseif zoneName == "wan" then
-			luci.http.write(luci.i18n.string([[<abbr title='The WAN Interface is used for your local Internet-Connection (for instance DSL). It will be used for you local traffic and to map Usergateways into Opennet = Share your Internet Connection if you choose to.'>WAN</abbr> IP Address(es):]]))
+			luci.http.write('<abbr title="' .. luci.i18n.translate("The WAN Interface is used for your local Internet-Connection (for instance DSL). It will be used for your local traffic and to map Usergateways into Opennet = Share your Internet Connection if you choose to.") .. '">' .. luci.i18n.translate("WAN") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
 		elseif zoneName == "free" then
-			luci.http.write(luci.i18n.string([[<abbr title='The FREE Interface will be used to publicly share Opennet with Wifidog.'>FREE</abbr> IP Address(es):]]))
+			luci.http.write('<abbr title="' .. luci.i18n.translate("The FREE Interface will be used to publicly share Opennet with Wifidog.") .. '">' .. luci.i18n.translate("FREE") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
 		end
 		luci.http.write([[</h3>]])
 		--     luci.http.write([[</td><td class='cbi-section-table-cell'>]])
@@ -172,12 +172,12 @@ end
 
 function printInterfaces(networks, zoneName)
 	luci.http.write([[<table id='network_table_]]..zoneName..[[' class='status_page_table'><tr><th>]]..
-	luci.i18n.string([[Interface]])..
-	[[</th><th>]]..luci.i18n.string([[IP]])..
-	[[</th><th>]]..luci.i18n.string([[IPv6]])..
-	[[</th><th>]]..luci.i18n.string([[MAC]])..
-	[[</th><th>]])
-	luci.http.write(luci.i18n.string([[<abbr title='start / limit / leasetime'>DHCP</abbr>]]))
+		luci.i18n.translate("Interface") ..
+		"</th><th>" .. luci.i18n.translate("IP") ..
+		"</th><th>" .. luci.i18n.translate("IPv6") ..
+		"</th><th>" .. luci.i18n.translate("MAC") ..
+		"</th><th>")
+	luci.http.write('<abbr title="' .. luci.i18n.translate("start / limit / leasetime") .. '">DHCP</abbr>')
 	luci.http.write([[</th></tr>]])
 	for network in networks:gmatch("%S+") do
 		printNetworkInterfaceValues(network)
@@ -231,8 +231,8 @@ function status_wireless()
 			if v[".type"] == "wifi-iface" then
 				if header == 0 then
 					luci.http.write([[<table id='wireless_table' class='status_page_table'><tr><th>]]..
-					luci.i18n.string([[Interface]])..[[</th><th>]]..
-					luci.i18n.string([[SSID]])..[[</th><th></th></tr>]])
+						luci.i18n.translate("Interface") .. "</th><th>" ..
+						luci.i18n.translate("SSID") .. "</th><th></th></tr>")
 					header = 1
 				end
 				ifname = v.ifname or "-"
@@ -286,14 +286,14 @@ function status_neighbors()
 	luci.http.prepare_content("text/plain")
 	output = luci.sys.exec("echo \"/links\" | nc localhost 2006 | awk 'BEGIN {out=0} { if (out == 1 \&\& \$0 != \"\") printf \"<tr><td><a href=\\\"http://\"$2\"\\\">\"\$2\"</a></td><td>\"\$4\"</td><td>\"\$5\"</td><td>\"\$6\"</td></tr>\"; if (\$1 == \"Local\") out = 1;}'")
 	if output ~= "" then
-		luci.http.write([[<tr><th>]]..
-		luci.i18n.string([[IP Address]])..[[</th><th>]]..
-		luci.i18n.string([[<abbr title='Link-Quality, how many test-packets you recevie from your neighbor'>LQ</abbr>]])..
-			[[</th><th>]]..
-		luci.i18n.string([[<abbr title='Neighbor-Link-Quality, how many of your test-packets are reaching your neighbor'>NLQ</abbr>]])..
-			[[</th><th>]]..
-		luci.i18n.string([[<abbr title='Expected Transmission Count - Quality of the Connection to the Gateway reagrding OLSR'>ETX</abbr>]])..
-			[[</th></tr>]])
+		luci.http.write("<tr><th>" ..
+			luci.i18n.translate("IP Address") .. "</th><th>" ..
+			'<abbr title="' .. luci.i18n.translate("Link-Quality: how many of your packets were received by your neighbor") .. '">LQ</abbr>' ..
+			'</th><th>' ..
+			'<abbr title="' .. luci.i18n.translate("Neighbor-Link-Quality: how many of your test-packets did reach your neighbor") .. '">NLQ</abbr>' ..
+			'</th><th>' ..
+			'<abbr title="' .. luci.i18n.translate("Expected Transmission Count: Quality of the Connection to the Gateway reagrding OLSR") .. '">ETX</abbr>' ..
+			"</th></tr>")
 		luci.http.write(output)
 	end
 end

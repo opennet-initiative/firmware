@@ -253,14 +253,14 @@ function init() {
             </tr>
             <tr class="cbi-section-table-titles">
               <th colspan = "3"  style="width: 2%;"/>
-              <th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='click to forward to this gateway immediately'>Gateway-Name</abbr>]])) %></th>
-              <th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='If Tunnel is activated, a central Gateway-IP is mapped to the local Router. Multiple Tunnels can exist parallel.'>UGW-Tunnel</abbr>]])) %></th>
-              <th class="cbi-section-table-cell right-border"><% print(luci.i18n.string([[<abbr title='If Forwarding is activated, all received VPN-Traffic is routed to the outside Gateway. Only one forward can exist at any time.'>VPN-Forwarding</abbr>]])) %></th>
-              <th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='Indicates if route to Gateway points trough WAN-device, this is required. If not check/reconfigure your WAN connection, maybe it is not working.'>WAN</abbr>]])) %></th>
-              <th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='Indicates the Ping-Time in miliseconds. If Gateway cannot be pinged or the ping-time is high, it is probably (temporarily) down.'>Ping-Time</abbr>]])) %></th>
-              <th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='Indicates Upload / Download Speed.'>Speed</abbr>]])) %></th>
-              <th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='Indicates if the Gateway supports VPN for the users. This is at least required to sucessfully use VPN-Forwarding.'>VPN-Status</abbr>]])) %></th>
-              <th class="cbi-section-table-cell"><% print(luci.i18n.string([[<abbr title='Maximum Transmission Unit - match of configured and measured values is required to share your Internet in any case'>MTU-Status</abbr>]])) %></th>
+	      <th class="cbi-section-table-cell"><abbr title="<%:click in order to forward to this gateway immediately%>"><%:Gateway Name%></abbr></th>
+	      <th class="cbi-section-table-cell"><abbr title="<%:If Tunnel is activated, a central Gateway-IP is mapped to the local Router. Multiple Tunnels can exist in parallel.%>"><%:UGW Tunnel%></abbr></th>
+	      <th class="cbi-section-table-cell right-border"><abbr title="<%:If Forwarding is activated, all received VPN-Traffic is routed to the external Gateway. Only one forward can exist at a time.%>"><%:VPN Forwarding%></abbr></th>
+	      <th class="cbi-section-table-cell"><abbr title="<%:Indicates if route to Gateway points trough WAN-device, this is required. Check/reconfigure your WAN connection is this test fails.%>"><%:WAN%></abbr></th>
+	      <th class="cbi-section-table-cell"><abbr title="<%:Indicates the Ping-Time in miliseconds. If a Gateway cannot be reached or the ping-time is high, it is probably (temporarily) down.%>"><%:Ping Time%></abbr></th>
+	      <th class="cbi-section-table-cell"><abbr title="<%:Indicates Upload / Download Speed.%>"><%:Speed%></abbr></th>
+	      <th class="cbi-section-table-cell"><abbr title="<%:Indicates if the Gateway supports VPN for the users. This is at least required to sucessfully use VPN-Forwarding.%>"><%:VPN Status%></abbr></th>
+	      <th class="cbi-section-table-cell"><abbr title="<%:Maximum Transmission Unit - match of configured and measured values is required to share your Internet in any case.%>"><%:MTU-Status%></abbr></th>
               <th />
             </tr>
 <%          local count = 1
@@ -286,7 +286,7 @@ function init() {
 <!--                        end of UP-DOWN-Buttons -->
 <!--                        begin of Gateway-Name (and IP) -->
                   <td id="name_<%=count%>">
-                    <h3><input class="cbi-button" type="submit" title="<%:[[No IP-Address found for Gateway-Name, Gateway cannot be used]]%>" name="select_gw" value="<%=name%>" disabled="true" /></h3>
+                    <h3><input class="cbi-button" type="submit" title="<%:No IP-Address found for Gateway-Name, Gateway cannot be used%>" name="select_gw" value="<%=name%>" disabled="true" /></h3>
                   </td>
 <!--                        end of Gateway-Name (and IP) -->
 <!--                        begin of Gateway Status -->

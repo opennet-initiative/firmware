@@ -15,10 +15,9 @@ module("luci.controller.opennet.on_usergw", package.seeall)
 require("luci.model.opennet.funcs")
 
 function index()
-    luci.i18n.loadc("on_base")
-    local i18n = luci.i18n.string
+    luci.i18n.loadc("on-usergw")
 
-    local page = entry({"opennet", "opennet_2", "ugw_tunnel"}, call("action_on_usergw"), i18n("Internet Sharing"), 3)
+    local page = entry({"opennet", "opennet_2", "ugw_tunnel"}, call("action_on_usergw"), luci.i18n.translate("Internet Sharing"), 3)
     page.css = "opennet.css"
     page.i18n = "on_usergw"
 

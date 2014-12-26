@@ -1,6 +1,12 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+msgid "(tried/measured) to Gateway: %s/%s from Gateway: %s/%s"
+msgstr ""
+
+msgid "Central Gateways connected locally"
+msgstr ""
+
 msgid ""
 "Check MTU to and from the Gateways (again). This will take approximately 5 "
 "minutes per Gateway."
@@ -21,16 +27,104 @@ msgid ""
 "minute per Gateway."
 msgstr ""
 
+msgid "Click in order to switch Forwarding to Gateway %s (IP: %s)"
+msgstr ""
+
+msgid "Gateway Name"
+msgstr ""
+
+msgid "Gateway-Forward activated"
+msgstr ""
+
+msgid "Gateway-Forward from %s to %s activated"
+msgstr ""
+
+msgid ""
+"If Forwarding is activated, all received VPN-Traffic is routed to the "
+"external Gateway. Only one forward can exist at a time."
+msgstr ""
+
+msgid ""
+"If Tunnel is activated, a central Gateway-IP is mapped to the local Router. "
+"Multiple Tunnels can exist in parallel."
+msgstr ""
+
+msgid "Indicates Upload / Download Speed."
+msgstr ""
+
+msgid ""
+"Indicates if route to Gateway points trough WAN-device, this is required. "
+"Check/reconfigure your WAN connection is this test fails."
+msgstr ""
+
+msgid ""
+"Indicates if the Gateway supports VPN for the users. This is at least "
+"required to sucessfully use VPN-Forwarding."
+msgstr ""
+
+msgid ""
+"Indicates the Ping-Time in miliseconds. If a Gateway cannot be reached or "
+"the ping-time is high, it is probably (temporarily) down."
+msgstr ""
+
 msgid "Internet Sharing"
 msgstr ""
 
 msgid "Internet Sharing Status Overview"
 msgstr ""
 
+msgid "Internet not shared"
+msgstr ""
+
+msgid "Internet shared"
+msgstr ""
+
+msgid "Internet-Sharing disabled"
+msgstr ""
+
+msgid "Internet-Sharing enabled"
+msgstr ""
+
+msgid "Internet-Sharing impossible"
+msgstr ""
+
+msgid ""
+"Internet-Sharing is currently disabled for %s Minutes. It will be "
+"automatically reenabled, but you can enable it manually if you like."
+msgstr ""
+
+msgid "Internet-Sharing possible"
+msgstr ""
+
+msgid ""
+"Internet-Sharing will be automatically reenabled in between the next 5 "
+"Minutes. You can enable it manually if you like."
+msgstr ""
+
 msgid "Loading"
 msgstr ""
 
+msgid "MTU-Status"
+msgstr ""
+
+msgid "Manage Internet-Sharing"
+msgstr ""
+
+msgid ""
+"Maximum Transmission Unit - match of configured and measured values is "
+"required to share your Internet in any case."
+msgstr ""
+
+msgid "No IP-Address found for Gateway-Name, Gateway cannot be used"
+msgstr ""
+
 msgid "Opennet Usergateways"
+msgstr ""
+
+msgid "Ping Time"
+msgstr ""
+
+msgid "Speed"
 msgstr ""
 
 msgid "Status Details, all checks have to be successful"
@@ -51,10 +145,25 @@ msgstr ""
 msgid "This will take approximately 5 seconds per Gateway"
 msgstr ""
 
+msgid "UGW Tunnel"
+msgstr ""
+
 msgid "Usergateway-Status"
 msgstr ""
 
-msgid "[[No IP-Address found for Gateway-Name, Gateway cannot be used]]"
+msgid "Usergateway-Tunnel active"
+msgstr ""
+
+msgid "Usergateway-Tunnel not running"
+msgstr ""
+
+msgid "VPN Forwarding"
+msgstr ""
+
+msgid "VPN Status"
+msgstr ""
+
+msgid "WAN"
 msgstr ""
 
 msgid "add"
@@ -62,6 +171,12 @@ msgstr ""
 
 msgid ""
 "automated check is running, manual modifications are temporarily disabled"
+msgstr ""
+
+msgid "central Gateway-IP %s connected trough tunnel"
+msgstr ""
+
+msgid "central Gateway-IPs %s connected trough tunnel"
 msgstr ""
 
 msgid "check MTU"
@@ -76,11 +191,47 @@ msgstr ""
 msgid "check WAN-Connection"
 msgstr ""
 
+msgid "click in order to forward to this gateway immediately"
+msgstr ""
+
+msgid "day"
+msgstr ""
+
 msgid "delete"
+msgstr ""
+
+msgid "disable Sharing"
 msgstr ""
 
 msgid "down"
 msgstr ""
 
+msgid "enable Sharing"
+msgstr ""
+
+msgid "hour"
+msgstr ""
+
+msgid "hours"
+msgstr ""
+
+msgid "minutes"
+msgstr ""
+
+msgid "no central Gateway-IPs connected trough tunnel"
+msgstr ""
+
+msgid "suspend Internet-Sharing for"
+msgstr ""
+
+msgid "suspend now"
+msgstr ""
+
+msgid "tested %s minutes ago"
+msgstr ""
+
 msgid "up"
+msgstr ""
+
+msgid "upload to Gateway %s kbit/s; download from Gateway %s kbit/s"
 msgstr ""

@@ -57,8 +57,8 @@ end
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
 			<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
-			<p><% print(luci.i18n.string([[Great that you decided to take part in Opennet. Get the address of you Access-Point yourself, <a href='https://wiki.opennet-initiative.de/wiki/Opennet_Nodes'>make an entry in the Opennet-Wiki</a> and aquire a free IP-Address. (Please take care of the information at <a href='https://wiki.opennet-initiative.de/wiki/Mitmachen'>Mitmachen</a>).]])) %></p>
-			<p><% print(luci.i18n.string([[Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your first Opennet-Network-Interface, any change will reconfigure your network settings immediately.]])) %></p>
+				<p><%=luci.i18n.translatef('Great that you decided to take part in Opennet. Register the IP of your Access-Point in the %sOpennet-Wiki%s and aquire a free IP-Address. Please read the information %sin the wiki%s for further details.', '<a href="https://wiki.opennet-initiative.de/wiki/Opennet_Nodes">', '</a>', '<a href="https://wiki.opennet-initiative.de/wiki/Mitmachen">', '</a>')%></p>
+			<p><%:Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your first Opennet-Network-Interface, any change will reconfigure your network settings immediately.%></p>
 			<fieldset class="cbi-section-node">
 				<div class="cbi-value">
 					<label class="cbi-value-title">
@@ -66,9 +66,7 @@ end
 					</label>
 					<div class="cbi-value-field">
 						<input type="submit" class="cbi-button cbi-button-apply" value="<%:use%>"
-							onclick="return confirm('<%
-								print(luci.i18n.string([[Be aware that the network will be restarted immediately,\n and you might loose the contact to your router.\n\nAre you really wan\'t to update the network-id?]]))
-							%>')" />
+						       onclick="return confirm('<%:Be aware that the network will be restarted immediately,\n and you might loose the contact to your router.\n\nAre you really wan\'t to update the network-id?%>')" />
 					</div>
 				</div>
 			</fieldset>

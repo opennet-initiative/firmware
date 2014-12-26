@@ -1,6 +1,18 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+msgid "(central Gateway-IPs (%s) connected trough tunnel)"
+msgstr ""
+
+msgid "(no central Gateway-IPs connected trough tunnel)"
+msgstr ""
+
+msgid "-- AP %s"
+msgstr ""
+
+msgid "-- CN %s"
+msgstr ""
+
 msgid "Available Report"
 msgstr ""
 
@@ -11,8 +23,20 @@ msgid "Base Configuration"
 msgstr ""
 
 msgid ""
+"Based on your Certificate (%s), the ports from %s to %s are forwarded "
+"through the VPN-Tunnel to your Access-Point - you should enter those as your "
+"source-ports."
+msgstr ""
+
+msgid ""
 "Basic Network Configuration - just enter your Opennet ID and everything will "
 "be adapted"
+msgstr ""
+
+msgid ""
+"Be aware that the network will be restarted immediately,\\n and you might "
+"loose the contact to your router.\\n\\nAre you really wan\\'t to update the "
+"network-id?"
 msgstr ""
 
 msgid "Delete"
@@ -33,7 +57,15 @@ msgid ""
 "a technical issue. This summary does not contain any private information."
 msgstr ""
 
+msgid ""
+"Expected Transmission Count - Quality of the Connection to the Gateway "
+"reagrding OLSR"
+msgstr ""
+
 msgid "Extended Configuration"
+msgstr ""
+
+msgid "FREE"
 msgstr ""
 
 msgid "Forwarding from DHCP-wireless network"
@@ -48,13 +80,37 @@ msgstr ""
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr ""
 
+msgid "Gateway-Forward for %s (to %s) activated"
+msgstr ""
+
+msgid "Generate"
+msgstr ""
+
 msgid "Generate Report:"
 msgstr ""
 
 msgid "Generating a report takes about one minute"
 msgstr ""
 
+msgid ""
+"Great that you decided to take part in Opennet. Register the IP of your "
+"Access-Point in the %sOpennet-Wiki%s and aquire a free IP-Address. Please "
+"read the information %sin the wiki%s for further details."
+msgstr ""
+
 msgid "Hardware-Information:"
+msgstr ""
+
+msgid "IP"
+msgstr ""
+
+msgid "IP Address"
+msgstr ""
+
+msgid "IP Address(es):"
+msgstr ""
+
+msgid "IPv6"
 msgstr ""
 
 msgid ""
@@ -67,13 +123,45 @@ msgid ""
 "Certificates and Keys here"
 msgstr ""
 
+msgid "Interface"
+msgstr ""
+
 msgid "Internet Sharing"
+msgstr ""
+
+msgid "Internet not shared"
+msgstr ""
+
+msgid "Internet shared"
+msgstr ""
+
+msgid "Internet-Sharing enabled"
+msgstr ""
+
+msgid "Internet-Sharing possible"
+msgstr ""
+
+msgid "Internet-Sharing:"
 msgstr ""
 
 msgid "Issue indicators:"
 msgstr ""
 
+msgid "LOCAL"
+msgstr ""
+
+msgid "Link-Quality, how many test-packets you recevie from your neighbor"
+msgstr ""
+
 msgid "Loading"
+msgstr ""
+
+msgid "MAC"
+msgstr ""
+
+msgid ""
+"Neighbor-Link-Quality, how many of your test-packets are reaching your "
+"neighbor"
 msgstr ""
 
 msgid "Neighbors:"
@@ -94,16 +182,33 @@ msgstr ""
 msgid "ON Extended"
 msgstr ""
 
+msgid "OPENNET"
+msgstr ""
+
 msgid "OpenVPN:"
 msgstr ""
 
 msgid "Opennet"
 msgstr ""
 
+msgid "Opennet Firmware version %s"
+msgstr ""
+
 msgid "Opennet ID"
 msgstr ""
 
+msgid ""
+"Opennet-Addresses are usually given to the Access-Point based on your "
+"Opennet-ID. These are the interfaces on which OLSR is running."
+msgstr ""
+
 msgid "Opennet-ID / Network ID"
+msgstr ""
+
+msgid ""
+"Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your "
+"first Opennet-Network-Interface, any change will reconfigure your network "
+"settings immediately."
 msgstr ""
 
 msgid "Port-Mapping"
@@ -121,10 +226,10 @@ msgstr ""
 msgid "Router summary"
 msgstr ""
 
-msgid "Source-Port"
+msgid "SSID"
 msgstr ""
 
-msgid "Start"
+msgid "Source-Port"
 msgstr ""
 
 msgid "Status"
@@ -140,6 +245,15 @@ msgid "Target-Address"
 msgstr ""
 
 msgid "Target-Port"
+msgstr ""
+
+msgid "The FREE Interface will be used to publicly share Opennet with Wifidog."
+msgstr ""
+
+msgid ""
+"The WAN Interface is used for your local Internet-Connection (for instance "
+"DSL). It will be used for you local traffic and to map Usergateways into "
+"Opennet = Share your Internet Connection if you choose to."
 msgstr ""
 
 msgid ""
@@ -187,6 +301,12 @@ msgid "There seem to be no issues."
 msgstr ""
 
 msgid ""
+"These addresses are used locally and usually protected by your firewall. "
+"Connections to the Internet are routed through your VPN-Tunnel if it is "
+"active."
+msgstr ""
+
+msgid ""
 "This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to "
 "the requirements of the Opennet Initiative e.V."
 msgstr ""
@@ -199,10 +319,25 @@ msgstr ""
 msgid "Uptime:"
 msgstr ""
 
+msgid "Usergateway-Tunnel active"
+msgstr ""
+
+msgid "Usergateway-Tunnel not running"
+msgstr ""
+
 msgid "VPN Gateways"
 msgstr ""
 
 msgid "VPN Tunnel"
+msgstr ""
+
+msgid "VPN-Tunnel active (%s)"
+msgstr ""
+
+msgid "VPN-Tunnel not active, for details check the System Log."
+msgstr ""
+
+msgid "WAN"
 msgstr ""
 
 msgid "Welcome to the Configuration Pages of your Access Point"
@@ -221,10 +356,18 @@ msgid ""
 "Internet-Sharing, this is the place to choose"
 msgstr ""
 
+msgid ""
+"You may want to send a <a href=\"%s\">report</a> to the Opennet community "
+"(%s)."
+msgstr ""
+
 msgid "device"
 msgstr ""
 
 msgid "related network addresses"
+msgstr ""
+
+msgid "start / limit / leasetime"
 msgstr ""
 
 msgid "use"

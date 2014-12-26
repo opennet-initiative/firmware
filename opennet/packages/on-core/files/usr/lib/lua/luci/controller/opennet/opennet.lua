@@ -14,8 +14,8 @@ $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 module("luci.controller.opennet.opennet", package.seeall)
 
 function index()
-	luci.i18n.loadc("on_base")
-	local i18n = luci.i18n.string
+	luci.i18n.loadc("on-core")
+	local i18n = luci.i18n.translate
 
 	local page = node()
 	page.target = alias("opennet")

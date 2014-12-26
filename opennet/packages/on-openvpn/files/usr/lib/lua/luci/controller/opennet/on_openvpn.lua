@@ -15,10 +15,9 @@ module("luci.controller.opennet.on_openvpn", package.seeall)
 require("luci.model.opennet.funcs")
 
 function index()
-	luci.i18n.loadc("on_base")
-	local i18n = luci.i18n.string
+	luci.i18n.loadc("on-openvpn")
 	
-	local page = entry({"opennet", "opennet_1", "vpn_tunnel"}, call("action_on_openvpn"), i18n("VPN Tunnel"), 2)
+	local page = entry({"opennet", "opennet_1", "vpn_tunnel"}, call("action_on_openvpn"), luci.i18n.translate("VPN Tunnel"), 2)
 	page.i18n = "on_openvpn"
 	page.css = "opennet.css"
 

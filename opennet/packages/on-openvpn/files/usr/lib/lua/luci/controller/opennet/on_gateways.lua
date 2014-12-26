@@ -40,19 +40,25 @@ function action_vpn_gateways()
 	
 	if move_up then
 		on_function("move_service_up", {move_up, "gw", "ugw"})
+		on_function("find_and_select_best_gateway", {"true"})
 	elseif move_down then
 		on_function("move_service_down", {move_down, "gw", "ugw"})
+		on_function("find_and_select_best_gateway", {"true"})
 	elseif move_top then
 		on_function("move_service_top", {move_top, "gw", "ugw"})
 		on_function("select_mig_connection", {move_top})
 	elseif delete_service then
 		on_function("delete_service", {delete_service})
+		on_function("find_and_select_best_gateway", {"true"})
 	elseif disable_service then
 		set_service_value(disable_service, "disabled", "1")
+		on_function("find_and_select_best_gateway", {"true"})
 	elseif enable_service then
 		delete_service_value(enable_service, "disabled")
+		on_function("find_and_select_best_gateway", {"true"})
 	elseif reset_offset then
 		delete_service_value(reset_offset, "offset")
+		on_function("find_and_select_best_gateway", {"true"})
 	elseif reset_counter then
 		on_function("reset_all_mig_connection_test_timestamps")
 	end

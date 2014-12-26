@@ -90,7 +90,10 @@ select_mig_connection() {
 }
 
 
+# Ermittle den besten Gateway und pruefe, ob ein Wechsel sinnvoll ist.
+# Der erste (optionale) Parameter erlaubt den zwangsweisen Wechsel auf den besten Gateway (unabhaengig von Wartezeiten).
 find_and_select_best_gateway() {
+	local force_switch_now=${1:-false}
 	local service_name
 	local host
 	local current_gateway
@@ -133,8 +136,13 @@ find_and_select_best_gateway() {
 		if [ "$best_gateway" != "$current_gateway" ]; then
 			# Zaehle hoch bis der switch_candidate_timestamp alt genug ist
 			switch_candidate_timestamp=$(get_service_value "$current_gateway" "switch_candidate_timestamp")
-			if [ -z "$switch_candidate_timestamp" ]; then
+			if uci_is_true "$force_switch_now"; then
+				# wir wechseln sofort
+				true
+			elif [ -z "$switch_candidate_timestamp" ]; then
+				# wir bleiben beim aktuellen Gateway
 				set_service_value "$current_gateway" "switch_candidate_timestamp" "$now"
+				best_gateway="$current_gateway"
 			else
 				# noch nicht alt genug fuer den Wechsel?
 				is_timestamp_older_minutes "$switch_candidate_timestamp" "$bettergateway_timeout" || \

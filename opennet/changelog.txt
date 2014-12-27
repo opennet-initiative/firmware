@@ -1,4 +1,4 @@
-= v0.5 - 26.12.2014 =
+= v0.5 - 28.12.2014 =
 
 == Sichtbare Änderungen ==
 * weniger Flash-Belastung für Nutzergeräte (mit VPN-Tunnel) -> weniger Ausfälle

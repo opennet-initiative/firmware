@@ -78,7 +78,7 @@ add_network_policy_rule_by_destination() {
 	local network="$1"
 	shift
 	local networkprefix
-	for networkprefix in $(get_network "$network"); do
+	for networkprefix in $(get_address_of_network "$network"); do
 		[ -n "$networkprefix" ] && ip rule add to "$networkprefix" "$@" || true
 	done
 	return 0

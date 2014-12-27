@@ -56,7 +56,7 @@ update_opennet_zone_masquerading() {
 	uci_delete "${uci_prefix}.masq_src"
 	# aktuelle Netzwerke wieder hinzufuegen
 	for network in $(get_zone_interfaces "$ZONE_LOCAL"); do
-		networkprefix=$(get_network "$network")
+		networkprefix=$(get_address_of_network "$network")
 		uci_add_list "${uci_prefix}.masq_src" "$networkprefix"
 	done
 	apply_changes firewall
@@ -65,8 +65,8 @@ update_opennet_zone_masquerading() {
 
 # Liefere die IP-Adresse eines logischen Interface inkl. Praefix-Laenge (z.B. 172.16.0.1/24).
 # Parameter: logisches Netzwerk-Interface
-get_network() {
-	trap "error_trap get_network '$*'" $GUARD_TRAPS
+get_address_of_network() {
+	trap "error_trap get_address_of_network '$*'" $GUARD_TRAPS
 	local network="$1"
 	local ranges
 	# Kurzzeitig den eventuellen strikten Modus abschalten.

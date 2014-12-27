@@ -39,7 +39,11 @@ function action_on_openvpn()
 	local submit = luci.http.formvalue("submit")
 	if submit then
 		-- zeige lediglich die Ausgabe von curl an
-		luci.http.write(on_function("submit_csr_via_http", {submit, "/etc/openvpn/opennet_user/on_aps.csr"}))
+		local result = on_function("submit_csr_via_http", {submit, "/etc/openvpn/opennet_user/on_aps.csr"})
+		if not result or (result == "") then
+			result = luci.i18n.translate("Failed to send Certificate Signing Request. You may want to use a manual approach instead. Sorry!")
+		end
+		luci.http.write(result)
 		return
 	end
 

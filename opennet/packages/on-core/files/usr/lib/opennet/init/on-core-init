@@ -63,6 +63,16 @@ add_crontab_entries() {
 }
 
 
+set_timezone_berlin() {
+	# "timezone" ist bereits gesetzt? Wert beibehalten ...
+	[ -n "$(uci_get "system.@system[0].timezone")" ] && return 0
+	# Zone und Verschiebung setzen
+	uci set "system.@system[0].zonename=Europe/Berlin"
+	uci set "system.@system[0].timezone=CET-1CEST,M3.5.0,M10.5.0/3"
+	uci commit system
+}
+
+
 define_persistent_uci_settings() {
 	uci set "luci.flash_keep.on_core_services=/etc/on-services.d/"
 	uci commit luci
@@ -73,5 +83,6 @@ add_use_settings
 disable_cron_logging
 configure_dnsmasq
 add_crontab_entries
+set_timezone_berlin
 define_persistent_uci_settings
 

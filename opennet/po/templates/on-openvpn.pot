@@ -63,6 +63,11 @@ msgid ""
 "regarding OLSR"
 msgstr ""
 
+msgid ""
+"Failed to send Certificate Signing Request. You may want to use a manual "
+"approach instead. Sorry!"
+msgstr ""
+
 msgid "Gateway-List"
 msgstr ""
 
@@ -235,9 +240,6 @@ msgid "search file"
 msgstr ""
 
 msgid "start VPN Tunnel"
-msgstr ""
-
-msgid "start VPN Tunnnel"
 msgstr ""
 
 msgid "tested %d minutes ago"

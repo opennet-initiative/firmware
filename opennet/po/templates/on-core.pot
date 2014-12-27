@@ -58,7 +58,7 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Expected Transmission Count - Quality of the Connection to the Gateway "
+"Expected Transmission Count: Quality of the Connection to the Gateway "
 "reagrding OLSR"
 msgstr ""
 
@@ -150,7 +150,7 @@ msgstr ""
 msgid "LOCAL"
 msgstr ""
 
-msgid "Link-Quality, how many test-packets you recevie from your neighbor"
+msgid "Link-Quality: how many of your packets were received by your neighbor"
 msgstr ""
 
 msgid "Loading"
@@ -160,8 +160,7 @@ msgid "MAC"
 msgstr ""
 
 msgid ""
-"Neighbor-Link-Quality, how many of your test-packets are reaching your "
-"neighbor"
+"Neighbor-Link-Quality: how many of your test-packets did reach your neighbor"
 msgstr ""
 
 msgid "Neighbors:"
@@ -252,7 +251,7 @@ msgstr ""
 
 msgid ""
 "The WAN Interface is used for your local Internet-Connection (for instance "
-"DSL). It will be used for you local traffic and to map Usergateways into "
+"DSL). It will be used for your local traffic and to map Usergateways into "
 "Opennet = Share your Internet Connection if you choose to."
 msgstr ""
 

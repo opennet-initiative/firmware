@@ -169,6 +169,8 @@ submit_csr_via_http() {
 	local csr_file="$2"
 	local helper="${3:-}"
 	local helper_email="${4:-}"
-	curl -q --silent --capath /etc/ssl/certs --form "file=@$csr_file" --form "opt_name=$helper" --form "opt_mail=$helper_email" "$upload_url"
+	curl -q --silent --capath /etc/ssl/certs --form "file=@$csr_file" --form "opt_name=$helper" --form "opt_mail=$helper_email" "$upload_url" && return 0
+	# ein technischer Verbindungsfehler trat auf
+	trap "" $GUARD_TRAPS && return 1
 }
 

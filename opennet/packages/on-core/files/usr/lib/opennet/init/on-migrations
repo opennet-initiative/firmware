@@ -65,6 +65,28 @@ EOF
 }
 
 
+# bis Version v0.4-5 war /etc/rc.local ein Symlink nach /etc/etc_presets/rc.local
+# In den folgenden Versionen gibt es kein /etc/etc_presets/ mehr.
+# Der Symlink kann dann durch den ueblichen Kommentar-Text ersetzt werden.
+fix_rclocal_broken_symlink() {
+	local target=/etc/rc.local
+	# die Datei existiert, bzw. der Symlink zeigt nicht ins Leere
+	[ -e "$target" ] && return 0
+	# falls die Datei kein Symlink ist, dann fassen wir sie lieber nicht an
+	[ -h "$target" ] || return 0
+	# die Datei ist ein kaputter Symlink - wir ersetzen sie
+	rm -f "$target"
+	# ein huebscheres here-Document mit Tabulator-Bereinigung ("<<-") funktioniert leider nicht mit busybox
+	cat >"$target" << EOF
+# Put your custom commands here that should be executed once
+# the system init finished. By default this file does nothing.
+
+exit 0
+EOF
+	chmod 644 "$target"
+}
+
+
 # bis Version v0.4-5: "firewall reload" fuehrte auch die "include"-Dateien aus (z.B. /etc/firewall.opennet)
 # Ab Version v0.5 verwenden wir diese Datei nicht mehr.
 # Beispiel (v0.4-5):
@@ -234,6 +256,7 @@ rename_olsrd_Port_to_port() {
 
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
+fix_rclocal_broken_symlink
 fix_firewall_reload
 transfer_vpn_sort_criteria_and_autosearch
 remove_tunnel_openvpn_settings

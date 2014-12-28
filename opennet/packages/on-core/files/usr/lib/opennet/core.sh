@@ -550,6 +550,9 @@ get_potential_error_messages() {
 	#    Beim Booten tauchen Fehlermeldungen aufgrund nicht konfigurierter Netzwerk-Interfaces auf.
 	#    TODO: ucarp nur noch als nachinstallierbares Paket markieren (erfordert Aenderung der Makefile-Erzeugung)
 	filters="${filters}|ucarp"
+	# 8) olsrd: /etc/rc.d/S65olsrd: ERROR: there is already an IPv4 instance of olsrd running (pid: '1099'), not starting.
+	#    Dieser Fehler tritt auf, wenn der olsrd_check einen olsrd-Neustart ausloest, obwohl er schon laeuft.
+	filters="${filters}|olsrd: ERROR: there is already an IPv4 instance of olsrd running"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

@@ -199,6 +199,7 @@ transfer_gateway_uci_settings() {
 		done
 		uci_delete "$uci_prefix"
 	done
+	uci_delete on-openvpn.gateways
 	apply_changes on-openvpn
 }
 

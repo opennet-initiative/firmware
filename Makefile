@@ -33,6 +33,8 @@ $(ARCHS): feeds translate
 	$(MAKE) "config-$@"
 	@# update the release identifier
 	@sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=$(GIT_COMMIT_COUNT)/i' $(OPENWRT_DIR)/include/opennet-version.mk
+	@# aus irgendeinem Grund wird die opkg.conf sonst nicht aktualisiert
+	@touch "$(OPENWRT_DIR)/package/system/opkg/Makefile
 	$(MAKE) -C "$(OPENWRT_DIR)"
 
 config-%:

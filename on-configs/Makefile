@@ -28,7 +28,8 @@ $(BIGCONFIG) $(SMALLCONFIG):
 	@$(MAKE) save-config
 	@cat "$@" "$(COMMON_CONFIG)" > "$(CURRENT_CONFIG)"
 	@# replace modules with builtins ('=m' -> '=y') for big devices
-	@echo " $(BIGCONFIG) " | grep -q " $@ " && sed -i 's/=m$$/=y/i' "$(CURRENT_CONFIG)"
+	@# TODO: pruefen, wie/ob wir zukuenftig small/big (4/8 MB) erzeugen wollen; das Aktivieren aller "m"-Pakete ist keine Option
+	@#echo " $(BIGCONFIG) " | grep -q " $@ " && sed -i 's/=m$$/=y/i' "$(CURRENT_CONFIG)"
 	@# Optionally an environment variable 'SUBARCH' may be given.
 	@# Add something like "CONFIG_TARGET_ar71xx_generic_TLWR1043=y" to
 	@# the config file if the environment variable SUBARCH is given.

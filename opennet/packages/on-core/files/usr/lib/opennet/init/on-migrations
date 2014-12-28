@@ -114,6 +114,25 @@ fix_firewall_reload() {
 }
 
 
+# bis Version 0.4-5 sind die folgenden beiden Firewall-Einstellungen gesetzt:
+#   firewall.zone_on_vpn.forward=ACCEPT
+#   firewall.zone_on_mesh.forward=ACCEPT
+# Dieser erlauben die Paketweiterleitung aus unerwuenschten Netzen heraus.
+disable_unwanted_forward() {
+	local zone_name
+	local forward
+	find_all_uci_sections firewall zone | while read uci_prefix; do
+		zone_name=$(uci_get "${uci_prefix}.name")
+		if [ "$zone_name" = "$ZONE_MESH" -o "$zone_name" = "$ZONE_TUNNEL" ]; then
+			forward=$(uci_get "${uci_prefix}.forward")
+			[ "$forward" = "ACCEPT" ] && uci set "${uci_prefix}.forward=REJECT" || true
+		fi
+	done
+	uci commit firewall
+	reload_config || true
+}
+
+
 # bis Version 0.4-5 wurden die folgenden Einstellungen fuer die Reihenfolge der VPN-Gateways verwendet:
 # * on-openvpn.gateways.vpn_sort_criteria=metric|etx
 # * on-openvpn.gateways.autosearch=on|off
@@ -269,6 +288,8 @@ rename_olsrd_Port_to_port
 # Bis Version 0.4-5 hiess die Opennet-Mesh-Firewall-Zone "opennet".
 # Mit Version 0.5 wurde die Zone in "on_mesh" umbenannt.
 rename_firewall_zone "opennet" "$ZONE_MESH"
+
+disable_unwanted_forward
 
 # Bis Version 0.4-5 hiess die lokale Zone "local" - bei barrier braker heisst sie nun "lan"
 rename_firewall_zone "local" "$ZONE_LOCAL"

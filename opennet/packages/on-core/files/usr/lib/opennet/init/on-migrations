@@ -128,6 +128,8 @@ disable_unwanted_forward() {
 			[ "$forward" = "ACCEPT" ] && uci set "${uci_prefix}.forward=REJECT" || true
 		fi
 	done
+	# sicherstellen, dass die als Ersatz fuer "forward=ACCEPT" noetige Weiterleitung existiert
+	add_zone_forward "$ZONE_MESH" "$ZONE_MESH"
 	uci commit firewall
 	reload_config || true
 }

@@ -11,6 +11,33 @@ Ein Kurzeinstieg in den Bau von Firmware-Abbildern ist in der [Readme] (../Readm
 Vorbereitung der Entwicklungsumgebung
 =====================================
 
+Abhängigkeiten installieren
+---------------------------
+
+Debian:
+
+    apt-get install build-essential git flex gcc-multilib subversion libncurses5-dev zlib1g-dev liblzo2-dev gawk unzip python quilt
+
+
+Repository herunterladen
+------------------------
+
+Nur-Lese-Zugriff:
+
+    git clone https://dev.opennet-initiative.de/git/on_firmware
+
+Schreibzugriff:
+
+    git clone git@dev.opennet-initiative.de:on_firmware
+
+Die lokale Arbeitsumgebung wird mit folgenden Kommandos abgeschlossen:
+
+    cd on_firmware
+    make init
+
+Die obige Aktion wird eine Weile dauern, da die openwrt-Repositories heruntergeladen werden.
+
+
 quilt-Konfiguration
 -------------------
 
@@ -429,7 +456,9 @@ Allgemeine Hinweise
 
 Bei RAM-Mangel (erkennbar am spontanen reboot ohne Änderungen nach dem Upload der neuen Firmware-Datei) kann folgende Kommandozeile wahrscheinlich genügend Platz schaffen:
 
-  for a in collectd dnsmasq sysntpd olsrd cron; do /etc/init.d/$a stop; done; wifi down
+  for a in collectd dnsmasq sysntpd cron; do /etc/init.d/$a stop; done
+
+Alterantiv koennen diese Dienste via ``Administration -> System -> Systemstart`` gestoppt (nicht deaktiviert!) werden.
 
 
 Externe Dokumentationen

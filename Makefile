@@ -83,7 +83,7 @@ patch:
 unpatch:
 	@# revert all patches if there are applied ones
 	@# first reset a local change
-	@sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=1/i' $(OPENWRT_DIR)/include/opennet-version.mk
+	@[ -e "$(OPENWRT_DIR)/include/opennet-version.mk" ] && sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=1/i' $(OPENWRT_DIR)/include/opennet-version.mk || true
 	@# now make unpatch
 	@test -n "$(shell quilt applied 2>/dev/null)" && quilt pop -a || true
 

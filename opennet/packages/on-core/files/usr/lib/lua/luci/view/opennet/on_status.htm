@@ -113,7 +113,7 @@ function init() {
 			<% local warnings = on_function("get_potential_error_messages") %>
 			<td class="cbi-section-table-cell" title="<%=warnings%>">
 			<% if warnings and (warnings ~= "") then %>
-				<%:There are indications for possible technical issues.%>
+				<%:There are indications for possible technical issues.%><br/>
 				<% local support_contact = get_default_value("on-core", "support_contact") %>
 				<%=luci.i18n.translatef('You may want to send a <a href="%s">report</a> to the Opennet community (%s).', luci.dispatcher.build_url("opennet", "opennet_1", 'bericht'), '<a href="mailto:' .. support_contact ..'">' .. support_contact .. '</a>') %>
 			<% else %>

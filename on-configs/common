@@ -166,7 +166,8 @@ CONFIG_PACKAGE_vsftpd-tls=m
 # Kernel-Minimierung
 CONFIG_PACKAGE_kmod-hwmon-vid=m
 CONFIG_PACKAGE_kmod-leds-wrap=m
-CONFIG_PACKAGE_kmod-ledtrig-usbdev=m
+# ohne das ledtrig-usbdev-Modul gibt es Fehlermeldungen beim Booten des TL-WDR4300
+CONFIG_PACKAGE_kmod-ledtrig-usbdev=y
 CONFIG_PACKAGE_kmod-usb-ohci=m
 CONFIG_PACKAGE_kmod-usb-core=m
 CONFIG_PACKAGE_kmod-usb-storage=m

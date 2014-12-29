@@ -66,18 +66,18 @@ You may obtain a copy of the License at
 				return list;
 			}, parallels);
 		for (var index = 0; index < parallels.length; index++) {
-			schedule_next_service(1, parallels[index]);
+			schedule_next_service(parallels[index]);
 		};
 	}
 
-	function schedule_next_service(index, remaining_services) {
+	function schedule_next_service(remaining_services) {
 		if (remaining_services && (remaining_services.length > 0)) {
 			XHR.get('<%=luci.dispatcher.build_url("opennet", "opennet_2", "vpn_gateway_info")%>/' + remaining_services[0], null,
-				function(x, info) { if (info) { insert_gateway(index, info, remaining_services.slice(1)); }});
+				function(x, info) { if (info) { insert_gateway(info, remaining_services.slice(1)); }});
 		}
 	}
 
-	function insert_gateway(index, gateway, remaining_services) {
+	function insert_gateway(gateway, remaining_services) {
 		// Fuege eine neue Tabellenzeile ein
 		var target_row = document.getElementById(gateway.id);
 		if (!target_row) return;
@@ -105,7 +105,7 @@ You may obtain a copy of the License at
 			active = null;
 		}
 		// best_gateway setzen, falls noch ungesetzt oder weiter oben, als der bisher beste
-		if ((gateway.status = "y") && !gateway.disabled
+		if ((gateway.status == "y") && !gateway.disabled
 				&& (!best_gateway || (service_dict[best_gateway] > service_dict[gateway.id]))) {
 			best_gateway = gateway.id;
 			update_gateway_change_indicator();
@@ -149,7 +149,7 @@ You may obtain a copy of the License at
 		// loese die naechste Anfrage aus (falls weitere vorhanden sind)
 		// Wir sollten diese Anfrage nicht frueher ausloesen, weil beispielsweise die
 		// letzte Zeile ("add_table_footer") sonst hochrutscht (sie ist zu schnell abgeschlossen).
-		schedule_next_service(index + 1, remaining_services);
+		schedule_next_service(remaining_services);
 	}
 
 	// ausserdem wird die Nachricht "Gateway-Wechsel steht bevor" ausgegeben

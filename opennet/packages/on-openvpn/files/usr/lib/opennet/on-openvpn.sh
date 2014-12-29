@@ -122,8 +122,13 @@ find_and_select_best_gateway() {
 	done)
 	best_gateway=$(echo "$result" | sed -n 1p)
 	current_gateway=$(echo "$result" | sed -n 2p)
+	if [ "$current_gateway" = "$best_gateway" ]; then
+		msg_debug "Current gateway ($current_gateway) is still the best choice"
+		# Wechselzaehler zuruecksetzen (falls er hochgezaehlt wurde)
+		set_service_value "$current_gateway" "switch_candidate_timestamp" ""
+		return 0
+	fi
 	msg_debug "Current ($current_gateway) / best ($best_gateway)"
-	[ "$current_gateway" = "$best_gateway" ] && return 0
 	# eventuell wollen wir den aktuellen Host beibehalten (sofern er funktioniert und wir nicht zwangsweise wechseln)
 	if [ -n "$current_gateway" ] \
 			&& uci_is_false "$force_switch_now" \

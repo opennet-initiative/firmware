@@ -196,17 +196,19 @@ remove_usergw_openvpn_configs() {
 #   on-openvpn.gateways.vpn_recheck_age
 remove_obsolete_on_core_settings() {
 	local key
-	for key in defaults openssl \
-			gateways.searchmask \
-			gateways.gw_dns \
-			gateways.gw_ntp \
-			gateways.better_gw \
-			gateways.autosearch \
-			gateways.vpn_nonworking_timeout \
-			gateways.vpn_bettergateway_timeout \
-			gateways.vpn_sort_criteria \
-			gateways.vpn_recheck_age; do
-		[ -n "$(uci_get "on-openvpn.$key")" ] && uci_delete "on-openvpn.$key" || true
+	for key in \
+			on-core.defaults \
+			on-core.openssl \
+			on-openvpn.gateways.gateways.searchmask \
+			on-openvpn.gateways.gateways.gw_dns \
+			on-openvpn.gateways.gateways.gw_ntp \
+			on-openvpn.gateways.gateways.better_gw \
+			on-openvpn.gateways.gateways.autosearch \
+			on-openvpn.gateways.gateways.vpn_nonworking_timeout \
+			on-openvpn.gateways.gateways.vpn_bettergateway_timeout \
+			on-openvpn.gateways.gateways.vpn_sort_criteria \
+			on-openvpn.gateways.gateways.vpn_recheck_age; do
+		[ -n "$(uci_get "$key")" ] && uci_delete "$key" || true
 	done
 	return 0
 }

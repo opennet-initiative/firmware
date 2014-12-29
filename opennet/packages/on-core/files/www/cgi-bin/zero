@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# unendliche Datenquelle fuer Download-Messungen
+#
+
+echo "Content type: application/octet-stream"
+echo
+
+# auf einem tl-wdr4300 sind mit dem untenstehenden Blockgroesse bei voller CPU-Last ca. 45 MBit/s erreichbar
+dd if=/dev/zero bs=8k
+

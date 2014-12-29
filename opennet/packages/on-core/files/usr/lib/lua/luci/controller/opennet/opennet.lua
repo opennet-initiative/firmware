@@ -23,6 +23,7 @@ function index()
 	page = node("opennet")
 	page.title = i18n("Opennet")
 	page.target = alias("opennet", "on_status")
+	page.order = 70
 
 	-- die Status-Seite
 	page = entry({"opennet", "on_status"}, template("opennet/on_status"))
@@ -47,5 +48,5 @@ function index()
 	page.title = i18n("OLSR-Status")
 	page.target = template("opennet/on_olsr")
 	page.css = "opennet.css"
-	page.order = 100
+	page.order = 50
 end

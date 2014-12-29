@@ -553,6 +553,9 @@ get_potential_error_messages() {
 	# 8) olsrd: /etc/rc.d/S65olsrd: ERROR: there is already an IPv4 instance of olsrd running (pid: '1099'), not starting.
 	#    Dieser Fehler tritt auf, wenn der olsrd_check einen olsrd-Neustart ausloest, obwohl er schon laeuft.
 	filters="${filters}|olsrd: ERROR: there is already an IPv4 instance of olsrd running"
+	# 9) openvpn(...)[...]: Authenticate/Decrypt packet error
+	#    Paketverschiebungen nach dem Verbindungsaufbau - anscheinend unproblematisch.
+	filters="${filters}|openvpn.*Authenticate/Decrypt packet error"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

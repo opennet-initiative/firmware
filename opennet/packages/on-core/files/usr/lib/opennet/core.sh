@@ -557,3 +557,12 @@ get_potential_error_messages() {
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }
 
+
+# Im openwrt-Build-Prozess wird aus bisher ungeklaerter Ursache die falsche opkg-Repository-URL gesetzt.
+# Diese Funktion erlaubt die einfache Aenderung der opkg-URL.
+# Parameter: URL-Bestandteile (z.B. "stable/0.5.0")
+set_opkg_download_version() {
+	local version="$1"
+	sed -i "s#\(/openwrt\)/[^/]\+/[^/]\+/#\1/$version/#" /etc/opkg.conf
+}
+

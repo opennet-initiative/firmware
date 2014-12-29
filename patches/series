@@ -8,3 +8,4 @@ makefile_include_opennet_version.patch
 makefile_include_openwrt_version.patch
 no_dhcp_log.patch
 curl_enable_https.patch
+led_input_trigger_warnings.patch

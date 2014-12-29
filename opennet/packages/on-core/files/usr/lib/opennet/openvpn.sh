@@ -124,7 +124,7 @@ verify_vpn_connection() {
 
 	# filtere Einstellungen heraus, die wir ueberschreiben wollen
 	# nie die echte PID-Datei ueberschreiben (falls ein Prozess laeuft)
-	get_openvpn_config "$service_name" "$use_sender" | grep -v -E "^(writepid|dev|tls-verify)[ \t]" >"$temp_config_file"
+	get_openvpn_config "$service_name" "$use_sender" | grep -v -E "^(writepid|dev|tls-verify|up|down)[ \t]" >"$temp_config_file"
 
 	# check if it is possible to open tunnel to the gateway (10 sec. maximum)
 	# Assembling openvpn parameters ...

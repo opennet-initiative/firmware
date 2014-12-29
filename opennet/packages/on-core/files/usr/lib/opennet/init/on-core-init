@@ -73,16 +73,9 @@ set_timezone_berlin() {
 }
 
 
-define_persistent_uci_settings() {
-	uci set "luci.flash_keep.on_core_services=/etc/on-services.d/"
-	uci commit luci
-}
-
-
 add_use_settings
 disable_cron_logging
 configure_dnsmasq
 add_crontab_entries
 set_timezone_berlin
-define_persistent_uci_settings
 

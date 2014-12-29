@@ -124,37 +124,35 @@ find_and_select_best_gateway() {
 	current_gateway=$(echo "$result" | sed -n 2p)
 	msg_debug "Current ($current_gateway) / best ($best_gateway)"
 	[ "$current_gateway" = "$best_gateway" ] && return 0
-	# eventuell wollen wir den aktuellen Host beibehalten (sofern er funktioniert)
-	if [ -n "$current_gateway" ] && uci_is_true "$(get_service_value "$current_gateway" "status" "false")"; then
+	# eventuell wollen wir den aktuellen Host beibehalten (sofern er funktioniert und wir nicht zwangsweise wechseln)
+	if [ -n "$current_gateway" ] \
+			&& uci_is_false "$force_switch_now" \
+			&& uci_is_true "$(get_service_value "$current_gateway" "status" "false")"; then
 		# falls der beste und der aktive Gateway gleich weit entfernt sind, bleiben wir beim bisher aktiven
-		if [ "$best_gateway" != "$current_gateway" ]; then
-			current_priority=$(get_service_priority "$current_gateway")
-			best_priority=$(get_service_priority "$best_gateway")
-			[ "$current_priority" -eq "$best_priority" ] && best_gateway="$current_gateway" || true
-		fi
+		current_priority=$(get_service_priority "$current_gateway")
+		best_priority=$(get_service_priority "$best_gateway")
+		[ "$current_priority" -eq "$best_priority" ] \
+			&& msg_debug "Keeping current gateway since the best gateway has the same priority" \
+			&& return 0
+		# falls der beste und der aktive Gateway gleich weit entfernt sind, bleiben wir beim bisher aktiven
 		# Haben wir einen besseren Kandidaten? Muessen wir den Wechselzaehler aktivieren?
-		if [ "$best_gateway" != "$current_gateway" ]; then
-			# Zaehle hoch bis der switch_candidate_timestamp alt genug ist
-			switch_candidate_timestamp=$(get_service_value "$current_gateway" "switch_candidate_timestamp")
-			if uci_is_true "$force_switch_now"; then
-				# wir wechseln sofort
-				true
-			elif [ -z "$switch_candidate_timestamp" ]; then
-				# wir bleiben beim aktuellen Gateway
-				set_service_value "$current_gateway" "switch_candidate_timestamp" "$now"
-				best_gateway="$current_gateway"
-			else
-				# noch nicht alt genug fuer den Wechsel?
-				is_timestamp_older_minutes "$switch_candidate_timestamp" "$bettergateway_timeout" || \
-					best_gateway="$current_gateway"
-			fi
+		# Zaehle hoch bis der switch_candidate_timestamp alt genug ist
+		switch_candidate_timestamp=$(get_service_value "$current_gateway" "switch_candidate_timestamp")
+		if [ -z "$switch_candidate_timestamp" ]; then
+			# wir bleiben beim aktuellen Gateway - wir merken uns allerdings den Switch-Zeitstempel
+			set_service_value "$current_gateway" "switch_candidate_timestamp" "$now"
+			msg_debug "Starting to count down until the switching timer reaches $bettergateway_timeout minutes"
+			return 0
+		else
+			# noch nicht alt genug fuer den Wechsel?
+			is_timestamp_older_minutes "$switch_candidate_timestamp" "$bettergateway_timeout" \
+				|| { msg_debug "Counting down further until we reach $bettergateway_timeout minutes"; return 0; }
 		fi
-	else
-		# Keine Verbindung ist aktiv. Alles bleibt unveranedert.
-		true
 	fi
 	# eventuell kann hier auch ein leerer String uebergeben werden - dann wird kein Gateway aktiviert (korrekt)
-	[ -n "$best_gateway" ] && msg_debug "Switching gateway from $current_gateway to $best_gateway"
+	[ -n "$best_gateway" ] \
+		&& msg_debug "Switching gateway from $current_gateway to $best_gateway" \
+		|| msg_debug "Disabling $current_gateway without a viable alternative"
 	select_mig_connection "$best_gateway"
 }
 

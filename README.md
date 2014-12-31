@@ -40,5 +40,5 @@ Detaildokumentation
 
 Hier findest du Informationen zu weiterführende Details:
 
-1. *[Struktur der Build-Umgebung] (master/doc/Struktur.md)*
-2. *[Enwicklungsleitfaden] (master/doc/Entwicklung.md)*
+1. *[Struktur der Build-Umgebung] (master/opennet/doc/Struktur.md)*
+2. *[Enwicklungsleitfaden] (master/opennet/doc/Entwicklung.md)*

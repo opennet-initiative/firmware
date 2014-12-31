@@ -4,8 +4,9 @@ CUSTOM_PO_DIR = opennet/po
 CUSTOM_PACKAGES_DIR = opennet/packages
 LANGUAGES = de
 COMMON_CONFIG = common
+CONFIG_DIR = opennet/config
 # list all files except Makefile, common file and hidden files
-ARCHS = $(shell ls on-configs/ | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
+ARCHS = $(shell ls "$(CONFIG_DIR)/" | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
 GIT_COMMIT_COUNT=$(shell git log --oneline | wc -l)
 
 .PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs
@@ -39,7 +40,7 @@ $(ARCHS): feeds translate
 
 config-%:
 	@test -f $(OPENWRT_DIR)/feeds.conf || echo "**** FEHLER! DATEI feeds.conf FEHLT. Fuehre bitte 'make feeds' aus. ****"
-	$(MAKE) -C on-configs "$(patsubst config-%,%,$@)"
+	$(MAKE) -C "$(CONFIG_DIR)/" "$(patsubst config-%,%,$@)"
 
 menuconfig:
 	$(warning "'menuconfig' gibt es hier nicht - vielleicht meinst du eine der folgenden Aktionen?")

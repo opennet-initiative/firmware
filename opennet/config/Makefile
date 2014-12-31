@@ -1,4 +1,4 @@
-BUILD_DIR = $(shell cd ../openwrt; pwd)
+BUILD_DIR = $(shell cd ../../openwrt; pwd)
 CURRENT_CONFIG = $(BUILD_DIR)/.config
 PREVIOUS_CONFIG = $(BUILD_DIR)/.config.oni
 COMMON_CONFIG = common

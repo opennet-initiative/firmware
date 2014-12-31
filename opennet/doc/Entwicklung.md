@@ -267,7 +267,7 @@ Build-Konfiguration (menuconfig)
 
 Die opennet-Entwicklungsumgebung verwendet grundlegend die Abläufe der openwrt-Buildumgebung. Es gibt jedoch ein paar Besonderheiten, bzw. Komfortfunktionen.
 
-Da die opennet-Firmware verschiedene Ziel-Plattformen (ar71xx, ixp44, x86, ...) unterstützt, müssen verschiedene Konfigurationen gepflegt werden. Zur Erleichterung der Pflege und zur Vermeidung von Doppelungen gibt es für jede Ziel-Plattform eine separate Datei (z.B. *on-configs/ar71xx*), sowie eine Datei mit Einstellungen, die für alle Zielplattformen gelten (*on-configs/common*). Letztere sind für den Entwicklungsprozess wohl die interessanteren.
+Da die opennet-Firmware verschiedene Ziel-Plattformen (ar71xx, ixp44, x86, ...) unterstützt, müssen verschiedene Konfigurationen gepflegt werden. Zur Erleichterung der Pflege und zur Vermeidung von Doppelungen gibt es für jede Ziel-Plattform eine separate Datei (z.B. *opennet/config/ar71xx*), sowie eine Datei mit Einstellungen, die für alle Zielplattformen gelten (*opennet/config/common*). Letztere sind für den Entwicklungsprozess wohl die interessanteren.
 
 
 Konfiguration für eine Plattform erstellen
@@ -418,7 +418,7 @@ Hilfreiche Werkzeuge
 Unbenutzte Funktionen finden
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Das Skript ``tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
+Das Skript ``opennet/tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
 
 
 Übersetzungen

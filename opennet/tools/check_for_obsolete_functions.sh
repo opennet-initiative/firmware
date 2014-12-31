@@ -7,7 +7,7 @@
 
 set -eu
 
-BASE_DIR=$(cd "$(dirname "$0")/../opennet/packages"; pwd)
+BASE_DIR=$(cd "$(dirname "$0")/../packages"; pwd)
 cd "$BASE_DIR"
 
 

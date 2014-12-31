@@ -22,3 +22,6 @@ dmesg >dmesg
 # Ansonsten duerften keine privaten Informationen enthalten sein.
 logread | grep -v DHCP >logread
 
+# installierte Pakete
+opkg list-installed >opkg_installed.txt
+

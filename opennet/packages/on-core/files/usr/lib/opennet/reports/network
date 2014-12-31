@@ -13,5 +13,6 @@ ip a | grep -v "link/" >network_addresses.txt
 iwinfo >iwinfo.log
 
 # wifi-Umgebung
-iwlist scan >iwlist_scan.log 2>&1
+# auf nicht-wifi-Plattformen (z.B. x86) ist iwlist (wireless-tools) nicht installiert
+which iwlist >/dev/null && iwlist scan >iwlist_scan.log 2>&1 || true
 

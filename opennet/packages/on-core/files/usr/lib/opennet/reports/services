@@ -11,6 +11,7 @@ on-function print_services >services.log
 
 # vorhandene Dienst-Dateien im Ueberblick
 for dir in /etc/on-services.d /var/on-services-volatile.d; do
-	ls -l "$dir/" >"$(basename "$dir").txt"
+	# leere Dateien in jedem Fall anlegen - auch wenn die Verzeichnisse nicht existieren
+	([ -d "$dir" ] && ls -l "$dir/" || true) >"$(basename "$dir").txt"
 done
 

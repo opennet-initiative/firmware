@@ -57,6 +57,10 @@ CONFIG_BUSYBOX_CONFIG_PING6=y
 
 # unnoetiges optional machen
 CONFIG_PACKAGE_block-mount=m
+CONFIG_PACKAGE_libstdcpp=m
+CONFIG_PACKAGE_glib2=m
+CONFIG_PACKAGE_libpolarssl=m
+CONFIG_PACKAGE_libffi=m
 
 # curl wird fuer den CSR-Upload von on-openvpn verwendet
 CONFIG_PACKAGE_curl=y
@@ -74,7 +78,7 @@ CONFIG_DRIVER_WEXT_SUPPORT=y
 CONFIG_PACKAGE_hostapd=y
 CONFIG_PACKAGE_hostapd-utils=y
 CONFIG_PACKAGE_iwinfo=y
-CONFIG_PACKAGE_wireless-tools=m
+CONFIG_PACKAGE_wireless-tools=y
 CONFIG_PACKAGE_wpa-cli=m
 CONFIG_PACKAGE_wpad-mini=y
 
@@ -92,16 +96,23 @@ CONFIG_PACKAGE_luci-app-commands=y
 CONFIG_PACKAGE_luci-app-ddns=y
 CONFIG_PACKAGE_luci-app-diag-core=y
 CONFIG_PACKAGE_luci-app-olsr=y
+CONFIG_PACKAGE_luci-app-olsr-services=m
+CONFIG_PACKAGE_luci-app-olsr-viz=m
 CONFIG_PACKAGE_luci-app-statistics=m
 CONFIG_PACKAGE_luci-app-upnp=m
 CONFIG_PACKAGE_luci-app-wol=m
 CONFIG_PACKAGE_luci-i18n-german=y
 CONFIG_PACKAGE_luci-mod-rpc=m
+CONFIG_PACKAGE_luci-sgi-cgi=y
+CONFIG_PACKAGE_luci-sgi-uhttpd=y
 CONFIG_PACKAGE_luci-theme-base=y
 CONFIG_PACKAGE_luci-theme-bootstrap=y
 CONFIG_PACKAGE_luci-theme-openwrt=y
 CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_uhttpd=y
+CONFIG_PACKAGE_uhttpd-mod-lua=y
+CONFIG_PACKAGE_uhttpd-mod-tls=y
+CONFIG_PACKAGE_uhttpd-mod-tls_openssl=y
 CONFIG_PACKAGE_uhttpd-mod-ubus=m
 
 # System
@@ -157,6 +168,7 @@ CONFIG_PACKAGE_iftop=m
 CONFIG_PACKAGE_iperf=y
 CONFIG_PACKAGE_horst=m
 CONFIG_PACKAGE_mtr=y
+CONFIG_PACKAGE_nmap=m
 CONFIG_PACKAGE_screen=y
 CONFIG_PACKAGE_strace=m
 CONFIG_PACKAGE_tcpdump=y
@@ -164,9 +176,17 @@ CONFIG_PACKAGE_vsftpd=m
 CONFIG_PACKAGE_vsftpd-tls=m
 
 # Kernel-Minimierung
+CONFIG_PACKAGE_kmod-ath5k=m
+CONFIG_PACKAGE_kmod-button-hotplug=m
+CONFIG_PACKAGE_kmod-gpio-button-hotplug=m
 CONFIG_PACKAGE_kmod-hwmon-vid=m
+CONFIG_PACKAGE_kmod-input-core=m
+CONFIG_PACKAGE_kmod-input-polldev=m
 CONFIG_PACKAGE_kmod-leds-wrap=m
 CONFIG_PACKAGE_kmod-ledtrig-usbdev=m
+CONFIG_PACKAGE_kmod-madwifi=m
+CONFIG_PACKAGE_kmod-nf-nathelper=m
+CONFIG_PACKAGE_kmod-scsi-core=m
 CONFIG_PACKAGE_kmod-usb-ohci=m
 CONFIG_PACKAGE_kmod-usb-core=m
 CONFIG_PACKAGE_kmod-usb-storage=m
@@ -199,7 +219,11 @@ CONFIG_PACKAGE_vpnc=m
 CONFIG_PACKAGE_vpnc-scripts=m
 
 # VOIP
+CONFIG_PACKAGE_kamailio4=m
 CONFIG_PACKAGE_rtpproxy=m
-CONFIG_PACKAGE_sipsak=m
 CONFIG_PACKAGE_siproxd=m
+CONFIG_PACKAGE_sipsak=m
 
+# SSL-Alternative
+CONFIG_PACKAGE_libpolarssl=m
+CONFIG_PACKAGE_px5g=m

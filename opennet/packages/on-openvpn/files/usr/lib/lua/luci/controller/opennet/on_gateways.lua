@@ -35,7 +35,7 @@ function action_vpn_gateways()
 	local disable_service = luci.http.formvalue("disable_service")
 	local enable_service = luci.http.formvalue("enable_service")
 	local reset_offset = luci.http.formvalue("reset_offset")
-	local reset_counter = luci.http.formvalue("reset_counter")
+	local reset_connection_test_timestamps = luci.http.formvalue("reset_connection_test_timestamps")
 	
 	if move_up then
 		on_function("move_service_up", {move_up, "gw", "ugw"})
@@ -58,7 +58,7 @@ function action_vpn_gateways()
 	elseif reset_offset then
 		delete_service_value(reset_offset, "offset")
 		on_function("find_and_select_best_gateway", {"true"})
-	elseif reset_counter then
+	elseif reset_connection_test_timestamps then
 		on_function("reset_all_mig_connection_test_timestamps")
 	end
 

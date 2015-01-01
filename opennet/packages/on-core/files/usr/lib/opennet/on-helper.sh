@@ -21,11 +21,6 @@ set -eu
 [ "${ON_DEBUG:-}" = "1" ] && set -x
 
 
-GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
-ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
-ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
-ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
-DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 # leider, leider unterstuetzt die busybox-ash kein trap "ERR"
 GUARD_TRAPS=EXIT
 VPN_DIR_TEST=/etc/openvpn/opennet_vpntest

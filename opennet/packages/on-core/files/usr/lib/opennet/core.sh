@@ -1,3 +1,8 @@
+GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
+ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
+ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
+ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
+DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 REPORTS_FILE=/tmp/on_report.tar.gz
 
 

@@ -288,7 +288,6 @@ print_services() {
 
 # Speichere das angegebene uci-Praefix als eine von einem Service abhaengige Konfiguration.
 # Dies ist sinnvoll fuer abgeleitete VPN-Konfigurationen oder Portweiterleitungen.
-# Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 # Schnittstelle: siehe _add_service_dependency
 service_add_uci_dependency() {
 	_add_service_dependency "uci_dependency" "$@"
@@ -297,7 +296,6 @@ service_add_uci_dependency() {
 
 # Speichere einen Dateinamen als Abhaengigkeit eines Service.
 # Dies ist sinnvoll fuer Dateien, die nicht mehr gebraucht werden, sobald der Service entfernt wird.
-# Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 # Schnittstelle: siehe _add_service_dependency
 service_add_file_dependency() {
 	_add_service_dependency "file_dependency" "$@"
@@ -328,7 +326,6 @@ _add_service_dependency() {
 
 
 # Entferne alle mit diesem Service verbundenen Konfigurationen (inkl. Rekonfiguration von firewall, etc.).
-# Anschliessend muss 'apply_changes on-core' aufgerufen werden.
 cleanup_service_dependencies() {
 	trap "error_trap cleanup_service_dependencies '$*'" $GUARD_TRAPS
 	local service_name="$1"
@@ -430,7 +427,6 @@ move_service_up() {
 	else
 		msg_info "Warning: [move_service_up] sorting method is not implemented: $sorting"
 	fi
-	apply_changes on-core
 }
 
 
@@ -472,7 +468,6 @@ move_service_down() {
 	else
 		msg_info "Warning: [move_service_down] sorting method is not implemented: $sorting"
 	fi
-	apply_changes on-core
 }
 
 
@@ -512,7 +507,6 @@ move_service_top() {
 	else
 		msg_info "Warning: [move_service_top] sorting method is not implemented: $sorting"
 	fi
-	apply_changes on-core
 }
 
 

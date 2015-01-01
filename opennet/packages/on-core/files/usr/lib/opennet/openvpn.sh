@@ -18,7 +18,6 @@ enable_openvpn_service() {
 	uci set "${uci_prefix}.enabled=1"
 	uci set "${uci_prefix}.config=$config_file"
 	apply_changes openvpn
-	apply_changes on-core
 }
 
 
@@ -37,8 +36,8 @@ disable_openvpn_service() {
 	local service_name="$1"
 	# Abbruch, falls es keine openvpn-Instanz gibt
 	[ -z "$(uci_get "openvpn.$service_name")" ] && return 0
+	# openvpn wird automatisch neugestartet
 	cleanup_service_dependencies "$service_name"
-	apply_changes openvpn
 }
 
 

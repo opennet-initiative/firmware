@@ -1,5 +1,4 @@
 MIG_VPN_DIR=/etc/openvpn/opennet_user
-MIG_TEST_VPN_DIR=/etc/openvpn/opennet_vpntest
 MIG_VPN_CONNECTION_LOG=/var/log/mig_openvpn_connections.log
 
 
@@ -47,9 +46,9 @@ test_mig_connection() {
 		#    der ersten "recheck" Minuten nach dem Booten moeglich).
 		# In jedem Fall kann der Zeitstempel gesetzt werden - egal welches Ergebnis die Pruefung hat.
 		if verify_vpn_connection "$service_name" "true" \
-				"$MIG_TEST_VPN_DIR/on_aps.key" \
-				"$MIG_TEST_VPN_DIR/on_aps.crt" \
-				"$MIG_TEST_VPN_DIR/opennet-ca.crt"; then
+				"$VPN_DIR_TEST/on_aps.key" \
+				"$VPN_DIR_TEST/on_aps.crt" \
+				"$VPN_DIR_TEST/opennet-ca.crt"; then
 			msg_debug "vpn-availability of gw $host successfully tested"
 			set_service_value "$service_name" "status" "y"
 			set_service_value "$service_name" "timestamp_connection_test" "$now"
@@ -123,9 +122,13 @@ find_and_select_best_gateway() {
 	best_gateway=$(echo "$result" | sed -n 1p)
 	current_gateway=$(echo "$result" | sed -n 2p)
 	if [ "$current_gateway" = "$best_gateway" ]; then
-		msg_debug "Current gateway ($current_gateway) is still the best choice"
-		# Wechselzaehler zuruecksetzen (falls er hochgezaehlt wurde)
-		set_service_value "$current_gateway" "switch_candidate_timestamp" ""
+		if [ -z "$current_gateway" ]; then
+			msg_debug "There is still no usable gateway around"
+		else
+			msg_debug "Current gateway ($current_gateway) is still the best choice"
+			# Wechselzaehler zuruecksetzen (falls er hochgezaehlt wurde)
+			set_service_value "$current_gateway" "switch_candidate_timestamp" ""
+		fi
 		return 0
 	fi
 	msg_debug "Current ($current_gateway) / best ($best_gateway)"

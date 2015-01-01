@@ -125,7 +125,7 @@ You may obtain a copy of the License at
 			<% elseif sorting == "hop" then %>
 				distance = gateway.hop_count;
 			<% end %>
-			result += String.format('%s</div></td>', distance + offset);
+			result += String.format('%s</div></td>', distance + gateway.offset);
 		}
 		result += '<td>';
 		if (gateway.upload || gateway.download) {

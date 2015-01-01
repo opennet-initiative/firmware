@@ -77,6 +77,8 @@ You may obtain a copy of the License at
 		}
 	}
 
+	// Uebertragen eines Gateway-Objekts in eine Tabellenzeile fuer einen Service
+	// Der Inhalt des Gateway-Objekts wird in der Funktion "gateway_info" festgelegt.
 	function insert_gateway(gateway, remaining_services) {
 		// Fuege eine neue Tabellenzeile ein
 		var target_row = document.getElementById(gateway.id);
@@ -123,7 +125,7 @@ You may obtain a copy of the License at
 			<% elseif sorting == "hop" then %>
 				distance = gateway.hop_count;
 			<% end %>
-			result += String.format('%s</div></td>', distance);
+			result += String.format('%s</div></td>', distance + offset);
 		}
 		result += '<td>';
 		if (gateway.upload || gateway.download) {

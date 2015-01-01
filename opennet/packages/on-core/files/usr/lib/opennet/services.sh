@@ -232,6 +232,9 @@ set_service_value() {
 	local attribute="$2"
 	local value="$3"
 	local dirname
+	[ -z "$service_name" ] \
+		&& msg_info "Error: no service given for attribute change ($attribute=$value)" \
+		&& trap "" $GUARD_TRAPS && return 1
 	if _is_persistent_service_attribute "$attribute"; then
 		dirname="$PERSISTENT_SERVICE_STATUS_DIR"
 	else
@@ -250,6 +253,9 @@ get_service_value() {
 	local default="${3:-}"
 	local value
 	local dirname
+	[ -z "$service_name" ] \
+		&& msg_info "Error: no service given for attribute request ('$attribute')" \
+		&& trap "" $GUARD_TRAPS && return 1
 	if _is_persistent_service_attribute "$attribute"; then
 		dirname="$PERSISTENT_SERVICE_STATUS_DIR"
 	else

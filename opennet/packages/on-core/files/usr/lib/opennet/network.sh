@@ -134,9 +134,14 @@ get_port_forward_range() {
 get_zone_interfaces() {
 	local zone="$1"
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
+	local interface
 	# keine Zone -> keine Interfaces
 	[ -z "$uci_prefix" ] && return 0
-	uci_get "${uci_prefix}.network"
+	interfaces=$(uci_get "${uci_prefix}.network")
+	# falls 'network' und 'device' leer sind, dann enthaelt 'name' den Interface-Namen
+	# siehe http://wiki.openwrt.org/doc/uci/firewall#zones
+	[ -z "$interfaces" ] && [ -z "$(uci_get "${uci_prefix}.device")" ] && interfaces="$(uci_get "${uci_prefix}.name")"
+	echo "$interfaces"
 	return 0
 }
 
@@ -202,15 +207,12 @@ del_interface_from_zone() {
 get_zone_of_interface() {
 	local interface=$1
 	local uci_prefix
-	local networks
+	local interfaces
 	local zone
 	find_all_uci_sections firewall zone | while read uci_prefix; do
-		networks=$(uci_get "${uci_prefix}.network")
 		zone=$(uci_get "${uci_prefix}.name")
-		# falls 'network' und 'device' leer ist, dann enthaelt 'name' den Interface-Namen
-		# siehe http://wiki.openwrt.org/doc/uci/firewall#zones
-		[ -z "$networks" ] && [ -z "$(uci_get "${uci_prefix}.device")" ] && networks="$zone"
-		is_in_list "$interface" "$networks" && echo "$zone" && return 0 || true
+		interfaces=$(get_zone_interfaces "$zone")
+		is_in_list "$interface" "$interfaces" && echo "$zone" && return 0 || true
 	done
 	trap "" $GUARD_TRAPS && return 1
 }

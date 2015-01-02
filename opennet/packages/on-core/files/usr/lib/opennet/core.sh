@@ -622,3 +622,12 @@ is_in_list() {
 	# kein passendes Token gefunden
 	trap "" $GUARD_TRAPS && return 1
 }
+
+
+# Liefere den Inhalt einer Variable zurueck.
+# Dies ist beispielsweise fuer lua-Skripte nuetzlich, da diese nicht den shell-Namensraum teilen.
+# Paramter: Name der Variable
+get_variable() {
+	local var_name="$1"
+	eval "echo \"\$$var_name\""
+}

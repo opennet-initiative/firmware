@@ -11,6 +11,7 @@ You may obtain a copy of the License at
 
 $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 ]]--
+require("luci.model.opennet.funcs")
 module("luci.controller.opennet.on_portmapping", package.seeall)
 
 function index()
@@ -39,11 +40,14 @@ function action_portmapping()
 	
 	if del_section then
 		cursor:delete("firewall", del_section)
-		cursor:commit("firewall")
 	elseif zone then
 		cursor:section("firewall", "redirect", nil, { src = zone, proto = 'tcpudp', src_dport = new_src_dport, dest_ip = new_dest_ip, dest_port = new_dest_port, target = 'DNAT' })
+	end
+	if del_section or zone then
 		cursor:commit("firewall")
 		cursor:unload("firewall")
+		-- Neustart der firewall ausloesen
+		luci.sys.exec("reload_config")
 	end
 
 	luci.template.render("opennet/on_portmapping", { show_more_info = show_more_info })

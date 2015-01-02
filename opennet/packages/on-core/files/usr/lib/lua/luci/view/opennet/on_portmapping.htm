@@ -72,7 +72,7 @@ require("luci.model.opennet.funcs")
 				<%=luci.i18n.translatef('Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.', client_cn, portrange[1], portrange[2])%>
 			<% end %>
 			<%:The target should be an IP-Address in your local network. Additionally you can enter the target port in the related field.%></div>
-			<% show_portmap("on_vpn") %>
+			<% show_portmap(on_function("get_variable", {"ZONE_TUNNEL"})) %>
 		</fieldset>
 	</div>
 <% end %>
@@ -80,7 +80,7 @@ require("luci.model.opennet.funcs")
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
 			<div class="cbi-value-comment"><%:The following ports will be forwarded from Opennet (usually WIFI) to computers in your local network. They are usually not reachable directly from the Internet. This section might contain forwardings for Free Internet Access (Wifidog, port 67) and Internet Sharing (Usergateway Forwarding, ports 1600 and 123).%></div>
-			<% show_portmap("opennet") %>
+			<% show_portmap(on_function("get_variable", {"ZONE_MESH"})) %>
 		</fieldset>
 	</div>
 
@@ -88,7 +88,7 @@ require("luci.model.opennet.funcs")
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
 			<div class="cbi-value-comment"><%:The following ports will be forwarded from computers connected to your WIFI (and not running olsr) to computers in your local network.%></div>
-			<% show_portmap("local") %>
+			<% show_portmap(on_function("get_variable", {"ZONE_LOCAL"})) %>
 		</fieldset>
 	</div>
 
@@ -96,7 +96,7 @@ require("luci.model.opennet.funcs")
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
 			<div class="cbi-value-comment"><%:The follwing ports will be forwarded from Internet (your WAN connector) to your local network. If Internet is connected to your WAN, these ports are directly reachable from the outside.%></div>
-			<% show_portmap("wan") %>
+			<% show_portmap(on_function("get_variable", {"ZONE_WAN"})) %>
 		</fieldset>
 	</div>
 <%+footer%>

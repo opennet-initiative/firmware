@@ -67,9 +67,7 @@ diff-menuconfig: feeds
 	@quilt delete
 
 doc:
-	@# doxygen-Build
-	mkdir -p build-doc/api
-	doxygen opennet/doc/doxyfile
+	$(MAKE) -C opennet/doc
 
 translate:
 	@find "$(CUSTOM_PACKAGES_DIR)" -mindepth 1 -maxdepth 1 -type d | while read dname; do \
@@ -97,6 +95,7 @@ unpatch:
 	@test -n "$(shell quilt applied 2>/dev/null)" && quilt pop -a || true
 
 clean: unpatch
+	$(MAKE) -C opennet/doc clean
 
 # VORSICHT: alle lokalen Aenderungen gehen verloren - dies sollte nie von einem
 # Menschen ausgefuehrt werden - es ist lediglich fuer den trac-Autobuilder gedacht

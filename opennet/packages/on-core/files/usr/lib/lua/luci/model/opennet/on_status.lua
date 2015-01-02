@@ -133,10 +133,7 @@ function status_network()
 end
 
 function printZoneLine(zoneName)
-	networks = cursor:get("firewall", "zone_"..zoneName, "network")
-	if not networks then
-		networks = cursor:get("firewall", "zone_"..zoneName, "name")
-	end
+	networks = on_function("get_zone_interfaces", {zoneName})
 	if networks and relevant(networks) then
 		--     luci.http.write([[<tr class='cbi-section-table-titles'><td class='cbi-section-table-cell'>]])
 		luci.http.write([[<h3>]])

@@ -8,9 +8,7 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
-# "ash" liefert leider nicht den korrekten Wert "function" nach einem Aufruf von "type -t".
-# Also verwenden wir die Textausgabe von "type".
-if echo "$(type "$1")" | grep -q "function$"; then
+if is_function_available "$1"; then
 	"$@"
 	exit $?
 else

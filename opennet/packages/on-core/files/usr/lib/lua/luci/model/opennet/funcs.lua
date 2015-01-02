@@ -1,13 +1,25 @@
--- Vorsicht: "parameters" wird nicht geprueft/maskiert - vorher gruendlich pruefen!
-function on_function(func_name, parameters)
-	local cmdline = "on-function '" .. func_name .. "'"
+function _quote_parameters(parameters)
+	local arguments = ""
 	local value
+	local dummy
 	if parameters then
-		for _, value in pairs(parameters) do
-			cmdline = cmdline .. " '" .. value .. "'"
+		for dummy, value in pairs(parameters) do
+			arguments = arguments .. " '" .. value .. "'"
 		end
 	end
+	return arguments
+end
+
+
+function on_function(func_name, parameters)
+	local cmdline = "on-function '" .. func_name .. "' " .. _quote_parameters(parameters)
 	return trim_string(luci.sys.exec(cmdline))
+end
+
+
+function on_bool_function(func_name, parameters)
+	local cmdline = "on-function '" .. func_name .. "' " .. _quote_parameters(parameters)
+	return luci.sys.call(cmdline) == 0
 end
 
 

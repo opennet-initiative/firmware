@@ -33,6 +33,7 @@ function printFirmwareTitle()
 end
 
 function printOpenVPN()
+	if not on_bool_function("is_function_available", {"get_active_mig_connections"}) then return end
 	local services = line_split(on_function("get_active_mig_connections"))
 	function get_service_host(service_name)
 		return get_service_value(service_name, "host")
@@ -47,8 +48,7 @@ end
 
 function printUserGW()
 	-- check if package on-usergw is installed
-	local ugw_installed = luci.sys.exec("opkg list-installed | grep 'on-usergw' ")
-	if (ugw_installed == "" ) then return end
+	if not on_bool_function("is_function_available", {"get_active_ugw_connections"}) then return end
 
 	local ugw_status = {}
 	-- central gateway-IPs reachable over tap-devices

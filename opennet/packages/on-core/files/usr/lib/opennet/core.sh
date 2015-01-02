@@ -631,3 +631,14 @@ get_variable() {
 	local var_name="$1"
 	eval "echo \"\$$var_name\""
 }
+
+
+# Pruefe, ob die angegebene Funktion definiert ist.
+# Dies ersetzt opkg-basierte Pruefungen auf installierte opennet-Firmware-Pakete.
+is_function_available() {
+	local func_name
+	# "ash" liefert leider nicht den korrekten Wert "function" nach einem Aufruf von "type -t".
+	# Also verwenden wir die Textausgabe von "type".
+	echo "$(type "$1")" | grep -q "function$" && return 0
+	trap "" $GUARD_TRAPS && return 1
+}

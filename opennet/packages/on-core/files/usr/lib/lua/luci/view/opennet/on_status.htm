@@ -18,60 +18,26 @@ $Id: index.htm 5448 2009-10-31 15:54:11Z jow $
 
 <script type="text/javascript">//<![CDATA[
 
-if (window.attachEvent) {
-	window.attachEvent('onload', init);
-} else if (window.addEventListener) {
-	window.addEventListener('load', init, false);
-} else {
-	document.addEventListener('load', init, false);
-}
-
-// window .onload = function test() {init();}
-function init() {
-	// quit if this function has already been called
-	if (arguments.callee.done) return;
-
-	// flag this function so we don't do the same thing twice
-	arguments.callee.done = true;
-
-	var neighbor_xhr = new XHR();
-	neighbor_xhr.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/on_status_neighbors', null,
+function fill_result_row(table_cell_name, request_url_suffix) {
+	var xhr_request = new XHR();
+	xhr_request.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/' + request_url_suffix, null,
 		function(x) {
-			if (x.responseText) {
-				document.getElementById("olsr_neighbor_table").innerHTML = x.responseText;
-				document.getElementById("olsr_neighbor_img").style.display = 'none';
-				document.getElementById("olsr_neighbor_table").style.display = 'block';
+			var cell = document.getElementById(table_cell_name);
+			if (!cell) {
+				return;
+			}else if (x.responseText) {
+				// die Zelle mit neuem Inhalt fuellen (und das "loading"-Icon ueberschreiben
+				cell.innerHTML = x.responseText;
 			} else {
-				document.getElementById("neighbor_section").style.display = 'none';
-			}
-	});
-	var network_xhr = new XHR();
-	network_xhr.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/on_status_network', null,
-		function(x) {
-			if (x.responseText) {
-				document.getElementById("network_section_table").innerHTML = x.responseText;
-				document.getElementById("network_section_img").style.display = 'none';
-				document.getElementById("network_section_table").style.display = 'block';
-			} else {
-				document.getElementById("networks_section").style.display = 'none';
-			}
-	});
-	var wireless_xhr = new XHR();
-	wireless_xhr.get('<%=luci.dispatcher.build_url("opennet", "on_status")%>/on_status_wireless', null,
-		function(x) {
-			if (x.responseText) {
-				document.getElementById("wireless_section_table").innerHTML = x.responseText;
-				document.getElementById("wireless_section_img").style.display = 'none';
-				document.getElementById("wireless_section_table").style.display = 'block';
-			} else {
-				document.getElementById("wireless_section").style.display = 'none';
+				// die ganze Zeile verstecken
+				cell.parentNode.style.display = "none";
 			}
 	});
 }
 
 //]]></script>
 
-<h2><a id="content" name="content"><% printFirmwareTitle() %></a></h2>
+<h2><a id="content" name="content"><%=get_firmware_title() %></a></h2>
 <div class="cbi-map">
 	<h3 class="on_title"><%:This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to the requirements of the Opennet Initiative e.V.%></h3>
 	<div id="status_opennet_logo" /><div id="status_openwrt_logo" />
@@ -79,63 +45,35 @@ function init() {
 <h3><%:Status Information%></h3>
 <div class="cbi-map"><fieldset class="cbi-section">
 	<table class="cbi-section-table" id="status_table">
-		<tr id="networks_section" class="cbi-section-table-titles">
-			<td class="cbi-section-table-cell"><%:Networks:%></td>
-			<td class="cbi-section-table-cell">
-				<img id="network_section_img" class="loading_img_small" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
-				<table id="network_section_table" class="status_page_table" style="display:none"></table>
-			</td>
-		</tr>
-		<tr id="wireless_section" class="cbi-section-table-titles">
-			<td class="cbi-section-table-cell"><%:Wireless:%></td>
-			<td class="cbi-section-table-cell">
-				<img id="wireless_section_img" class="loading_img_small" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
-				<table id="wireless_section_table" class="status_page_table" style="display:none"></table>
-			</td>
-		</tr>
-		<tr id="neighbor_section" class="cbi-section-table-titles">
-			<td class="cbi-section-table-cell"><%:Neighbors:%></td>
-			<td class="cbi-section-table-cell">
-				<img id="olsr_neighbor_img" class="loading_img_small" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
-				<table id="olsr_neighbor_table" class="status_page_table" style="display:none"></table>
-			</td>
-		</tr>
+		<%
+		local hardware_info = luci.sys.exec("echo -e \"Model: \$(cat /proc/diag/model 2>/dev/null)\\n\$(cat /proc/cpuinfo)\" | awk 'BEGIN {FS=\":\"; no=0} /Processor|Hardware|system type|machine|Model|vendor_id/ {gsub(\"[\\t]\", \"\"); if (no > 0) printf \" / \"; if (\$2) { no=1; printf \$1\" :\"\$2}} END {printf \"\\n\";}'")
 
-		<tr class="cbi-section-table-titles">
-			<td class="cbi-section-table-cell"><%:OpenVPN:%></td>
-			<td class="cbi-section-table-cell"><% printOpenVPN() %></td>
-		</tr>
-
-		<% printUserGW() %>
-
-		<tr class="cbi-section-table-titles">
-			<td class="cbi-section-table-cell"><%:Issue indicators:%></td>
-			<% local warnings = on_function("get_potential_error_messages") %>
-			<td class="cbi-section-table-cell" title="<%=warnings%>">
-			<% if warnings and (warnings ~= "") then %>
-				<%:There are indications for possible technical issues.%><br/>
-				<% local support_contact = get_default_value("on-core", "support_contact") %>
-				<%=luci.i18n.translatef('You may want to send a <a href="%s">report</a> to the Opennet community (%s).', luci.dispatcher.build_url("opennet", "opennet_1", 'bericht'), '<a href="mailto:' .. support_contact ..'">' .. support_contact .. '</a>') %>
-			<% else %>
-				<%:There seem to be no issues.%>
-			<% end %>
-			</td>
-		</tr>
-
-		<tr class="cbi-section-table-titles">
-			<td class="cbi-section-table-cell"><%:Hardware-Information:%></td>
-			<td class="cbi-section-table-cell">
-				<%=luci.util.pcdata(luci.sys.exec("echo -e \"Model: \$(cat /proc/diag/model 2>/dev/null)\\n\$(cat /proc/cpuinfo)\" | awk 'BEGIN {FS=\":\"; no=0} /Processor|Hardware|system type|machine|Model|vendor_id/ {gsub(\"[\\t]\", \"\"); if (no > 0) printf \" / \"; if (\$2) { no=1; printf \$1\" :\"\$2}} END {printf \"\\n\";}'"))%>
-			</td>
-		</tr>
-		<tr class="cbi-section-table-titles">
-			<td class="cbi-section-table-cell"><%:Uptime:%></td>
-			<td class="cbi-section-table-cell"><%=luci.util.pcdata(luci.sys.exec("uptime"))%></td>
-		</tr>
-		<tr class="cbi-section-table-titles">
-			<td class="cbi-section-table-cell"><%:System:%></td>
-			<td class="cbi-section-table-cell"><%=luci.util.pcdata(luci.sys.exec("uname -a"))%></td>
-		</tr>
+		for _, item in ipairs({
+				  {"networks_section", luci.i18n.translate("Networks"), url="on_status_network"},
+				  {"wireless_section", luci.i18n.translate("Wireless"), url="on_status_wireless"},
+				  {"neighbor_section", luci.i18n.translate("Neighbors"), url="on_status_neighbors"},
+				  {"mig_connection_section", luci.i18n.translate("OpenVPN"), url="on_status_mig_connection"},
+				  {"ugw_connection_section", luci.i18n.translate("Internet-Freigabe"), url="on_status_ugw_connection"},
+				  {"issues_section", luci.i18n.translate("Issue indicators"), url="on_status_issues"},
+				  {"hardware_section", luci.i18n.translate("Hardware-Information"), content=hardware_info},
+				  {"uptime_section", luci.i18n.translate("Uptime"), content=luci.sys.exec("uptime")},
+				  {"system_section", luci.i18n.translate("System"), content=luci.sys.exec("uname -a")},
+			  }) do %>
+			<tr class="cbi-section-table-titles">
+				<td class="cbi-section-table-cell"><%=item[2]%>:</td>
+				<td class="cbi-section-table-cell" id="<%=item[1]%>">
+				<% if item.url then %>
+					<img class="loading_img_small" src="<%=resource%>/icons/loading.gif"
+						alt="<%:Loading%>" style="vertical-align:middle" />
+					<script type="text/javascript">
+						fill_result_row("<%=item[1]%>", "<%=item.url%>")
+					</script>
+				<% else %>
+					<%=luci.util.pcdata(item.content)%>
+				<% end %>
+				</td>
+			</tr>
+		<% end %>
 	</table>
 </fieldset></div>
 <%+footer%>

@@ -19,36 +19,45 @@ require("luci.sys")
 require("luci.model.opennet.funcs")
 
 
-function printFirmwareTitle()
+function get_firmware_title()
 	local on_version = on_function("get_on_firmware_version")
 	local on_id = cursor:get("on-core", "settings", "on_id")
 	local client_cn = on_function("get_client_cn")
-	luci.http.write(luci.i18n.translatef("Opennet Firmware version %s", on_version))
+	local result
+	result = luci.i18n.translatef("Opennet Firmware version %s", on_version)
 	if on_id then
-		luci.http.write(luci.i18n.translatef("-- AP %s", on_id))
+		result = result .. luci.i18n.translatef("-- AP %s", on_id)
 	end
 	if client_cn and client_cn ~= "" then
-		luci.http.write(luci.i18n.translatef("-- CN %s", client_cn))
+		result = result .. luci.i18n.translatef("-- CN %s", client_cn)
 	end
+	return result
 end
 
-function printOpenVPN()
+
+function status_mig_connection()
+	luci.http.prepare_content("text/plain")
 	if not on_bool_function("is_function_available", {"get_active_mig_connections"}) then return end
 	local services = line_split(on_function("get_active_mig_connections"))
+	local result
 	function get_service_host(service_name)
 		return get_service_value(service_name, "host")
 	end
 	local remotes = string_join(map_table(services, get_service_host), ", ")
 	if remotes then
-		luci.http.write(luci.i18n.translatef("VPN-Tunnel active (%s)", remotes))
+		result = luci.i18n.translatef("VPN-Tunnel active (%s)", remotes)
 	else
-		luci.http.write(luci.i18n.translate("VPN-Tunnel not active, for details check the System Log."))
+		result = luci.i18n.translate("VPN-Tunnel not active, for details check the System Log.")
 	end
+	luci.http.write(result)
 end
 
-function printUserGW()
+
+function status_ugw_connection()
 	-- check if package on-usergw is installed
 	if not on_bool_function("is_function_available", {"get_active_ugw_connections"}) then return end
+
+	luci.http.prepare_content("text/plain")
 
 	local ugw_status = {}
 	-- central gateway-IPs reachable over tap-devices
@@ -92,37 +101,39 @@ function printUserGW()
 	ugw_status.forwarded_gw = ugw_port_forward[2]
 
 
+	local result = ""
 	if ugw_status.sharing_enabled or ugw_status.sharing_possible then
-		luci.http.write([[<tr class='cbi-section-table-titles'>
-			<td class='cbi-section-table-cell'>]]..
-			luci.i18n.translate("Internet-Sharing:") .. [[</td>
-			<td class='cbi-section-table-cell'>]])
+		result = result .. [[<tr class='cbi-section-table-titles'><td class='cbi-section-table-cell'>]] ..
+			luci.i18n.translate("Internet-Sharing:") .. [[</td><td class='cbi-section-table-cell'>]]
 		if (ugw_status.centralip_status == "ok") or (ugw_status.forwarded_gw ~= "") then
-			luci.http.write(luci.i18n.translate("Internet shared"))
+			result = result .. luci.i18n.translate("Internet shared")
 			if ugw_status.centralips then
-				luci.http.write(luci.i18n.translate("(no central Gateway-IPs connected trough tunnel)"))
+				result = result .. luci.i18n.translate("(no central Gateway-IPs connected trough tunnel)")
 			else
-				luci.http.write(luci.i18n.translatef("(central Gateway-IPs (%s) connected trough tunnel)", ugw_status.centralips))
+				result = result .. luci.i18n.translatef("(central Gateway-IPs (%s) connected trough tunnel)", ugw_status.centralips)
 			end
 			if ugw_status.forwarded_gw ~= "" then
-				print(", " .. luci.i18n.translatef("Gateway-Forward for %s (to %s) activated", ugw_status.forwarded_ip, ugw_status.forwarded_gw))
+				result = result .. ", " .. luci.i18n.translatef("Gateway-Forward for %s (to %s) activated", ugw_status.forwarded_ip, ugw_status.forwarded_gw)
 			end
 		elseif ugw_status.tunnel_active then
-			luci.http.write(luci.i18n.translate("Internet not shared") .. " ( " ..
-			luci.i18n.translate("Internet-Sharing enabled") .. ", " .. luci.i18n.translate("Usergateway-Tunnel active") .. " )")
+			result = result .. luci.i18n.translate("Internet not shared")
+			    .. " ( " .. luci.i18n.translate("Internet-Sharing enabled")
+			    .. ", " .. luci.i18n.translate("Usergateway-Tunnel active") .. " )"
 		elseif ugw_status.sharing_enabled then
-			luci.http.write(luci.i18n.translate("Internet not shared") .. " ( "..
-			luci.i18n.translate("Internet-Sharing enabled") .. ", " .. luci.i18n.translate("Usergateway-Tunnel not running") .. " )")
+			result = result .. luci.i18n.translate("Internet not shared")
+			    .. " ( "..  luci.i18n.translate("Internet-Sharing enabled")
+			    .. ", " .. luci.i18n.translate("Usergateway-Tunnel not running") .. " )"
 		elseif ugw_status.sharing_possible then
-			luci.http.write(luci.i18n.translate("Internet not shared") .. ", " .. luci.i18n.translate("Internet-Sharing possible"))
+			result = result .. luci.i18n.translate("Internet not shared")
+			    .. ", " .. luci.i18n.translate("Internet-Sharing possible")
 		else
-			luci.http.write(luci.i18n.translate("Internet-Sharing possible"))
+			result = result .. luci.i18n.translate("Internet-Sharing possible")
 		end
-		luci.http.write([[</td></tr>]])
+		result = result .. '</td></tr>'
+		luci.http.write(result)
 	end
 end
 
--- ajaxified rest:
 
 function status_network()
 	luci.http.prepare_content("text/plain")
@@ -135,7 +146,6 @@ end
 function printZoneLine(zoneName)
 	networks = on_function("get_zone_interfaces", {zoneName})
 	if networks and relevant(networks) then
-		--     luci.http.write([[<tr class='cbi-section-table-titles'><td class='cbi-section-table-cell'>]])
 		luci.http.write([[<h3>]])
 		if zoneName == "lan" then
 			luci.http.write('<abbr title="' .. luci.i18n.translate("These addresses are used locally and usually protected by your firewall. Connections to the Internet are routed through your VPN-Tunnel if it is active.") .. '">' .. luci.i18n.translate("LOCAL") .. '</abbr> ' .. luci.i18n.translate('IP Address(es):'))
@@ -147,9 +157,7 @@ function printZoneLine(zoneName)
 			luci.http.write('<abbr title="' .. luci.i18n.translate("The FREE Interface will be used to publicly share Opennet with Wifidog.") .. '">' .. luci.i18n.translate("FREE") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
 		end
 		luci.http.write([[</h3>]])
-		--     luci.http.write([[</td><td class='cbi-section-table-cell'>]])
 		printInterfaces(networks, zoneName)
-		--     luci.http.write([[</td></tr>]])
 	end
 end
 
@@ -274,7 +282,7 @@ function status_wireless()
 			end
 		end
 		if header == 1 then
-			luci.http.write([[</table></td></tr>]])
+			luci.http.write([[</table>]])
 		end
 	end
 end
@@ -283,14 +291,31 @@ function status_neighbors()
 	luci.http.prepare_content("text/plain")
 	output = luci.sys.exec("echo \"/links\" | nc localhost 2006 | awk 'BEGIN {out=0} { if (out == 1 \&\& \$0 != \"\") printf \"<tr><td><a href=\\\"http://\"$2\"\\\">\"\$2\"</a></td><td>\"\$4\"</td><td>\"\$5\"</td><td>\"\$6\"</td></tr>\"; if (\$1 == \"Local\") out = 1;}'")
 	if output ~= "" then
-		luci.http.write("<tr><th>" ..
+		luci.http.write('<table class="status_page_table"><tr><th>' ..
 			luci.i18n.translate("IP Address") .. "</th><th>" ..
 			'<abbr title="' .. luci.i18n.translate("Link-Quality: how many of your packets were received by your neighbor") .. '">LQ</abbr>' ..
 			'</th><th>' ..
 			'<abbr title="' .. luci.i18n.translate("Neighbor-Link-Quality: how many of your test-packets did reach your neighbor") .. '">NLQ</abbr>' ..
 			'</th><th>' ..
 			'<abbr title="' .. luci.i18n.translate("Expected Transmission Count: Quality of the Connection to the Gateway reagrding OLSR") .. '">ETX</abbr>' ..
-			"</th></tr>")
+			"</th></tr></class>")
 		luci.http.write(output)
 	end
 end
+
+
+function status_issues()
+	luci.http.prepare_content("text/plain")
+	local warnings = on_function("get_potential_error_messages")
+	local result = ""
+	if warnings and (warnings ~= "") then
+		result = result .. '<a title="' .. luci.util.pcdata(warnings) .. '">'
+		    .. luci.i18n.translate("There are indications for possible technical issues.") .. "</a><br/>"
+		local support_contact = get_default_value("on-core", "support_contact")
+		result = result .. luci.i18n.translatef('You may want to send a <a href="%s">report</a> to the Opennet community (%s).', luci.dispatcher.build_url("opennet", "opennet_1", 'bericht'), '<a href="mailto:' .. support_contact ..'">' .. support_contact .. '</a>')
+	else
+		result = result .. luci.i18n.translate("There seem to be no issues.")
+	end
+	luci.http.write(result)
+end
+

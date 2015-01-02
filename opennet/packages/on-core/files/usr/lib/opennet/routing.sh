@@ -213,7 +213,7 @@ _get_olsr_route_info_column() {
 	local column="$2"
 	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
 	[ ! -e "$OLSR_ROUTE_CACHE_FILE" ] && return
-	cat "$OLSR_ROUTE_CACHE_FILE" | awk '{ if ($1 == "'$target'") { print $'$column'; exit; } }'
+	awk '{ if ($1 == "'$target'") { print $'$column'; exit; } }' <"$OLSR_ROUTE_CACHE_FILE"
 }
 
 

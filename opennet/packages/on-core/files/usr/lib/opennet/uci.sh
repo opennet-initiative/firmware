@@ -54,7 +54,7 @@ uci_delete() {
 # zeilenweise Rueckgabe von Listenelementen
 # Enthaltene Leerzeichen verhindern die direkte Auswertung des Ergebnis von "uci show".
 # ACHTUNG: lediglich der Name der Option wird geprueft - nicht die Sektion!
-# Diese Funktion ist daher nur in Ausnahmefaellen sinnvoll einsatzbar.
+# Diese Funktion ist daher nur in Ausnahmefaellen sinnvoll einsetzbar.
 # Parameter: Konfiguration (z.B. "olsrd")
 # Parameter: Optionsname
 uci_get_list() {
@@ -62,7 +62,7 @@ uci_get_list() {
 	listname=$2
 	config_file=/etc/config/$config
 	[ ! -e "$config_file" ] && continue
-	cat "$config_file" | grep "list[ \t]\+$listname[ \t]\+" | cut -f 2- -d "'" | sed "s/'$//"
+	grep "list[ \t]\+$listname[ \t]\+" <"$config_file" | cut -f 2- -d "'" | sed "s/'$//"
 }
 
 

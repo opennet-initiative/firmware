@@ -171,7 +171,7 @@ verify_vpn_connection() {
 	# check if the output contains a magic line
 	status_output=$(openvpn --config "$temp_config_file" $openvpn_opts || true)
 	# read the additional options from the config file (for debug purposes)
-	file_opts=$(cat "$temp_config_file" | grep -v "^$" | grep -v "^#" | sed 's/^/--/' | tr '\n' ' ')
+	file_opts=$(grep -v "^$" "$temp_config_file" | grep -v "^#" | sed 's/^/--/' | tr '\n' ' ')
 	rm -f "$temp_config_file"
 	echo "$status_output" | grep -q "Initial packet" && return 0
 	msg_debug "openvpn test failed: openvpn $file_opts $openvpn_opts"

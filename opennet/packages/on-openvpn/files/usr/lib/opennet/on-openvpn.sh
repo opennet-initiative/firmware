@@ -95,8 +95,8 @@ find_and_select_best_gateway() {
 	local force_switch_now=${1:-false}
 	local service_name
 	local host
-	local current_gateway
 	local best_gateway=
+	local current_gateway=
 	local result
 	local current_priority
 	local best_priority
@@ -107,6 +107,9 @@ find_and_select_best_gateway() {
 	# suche nach dem besten und dem bisher verwendeten Gateway
 	# Ignoriere dabei alle nicht-verwendbaren Gateways.
 	result=$(get_sorted_services gw ugw | filter_enabled_services | while read service_name; do
+		# Ist der beste und der aktive Gateway bereits gefunden? Dann einfach weiterspringen ...
+		# (kein Abbruch der Schleife - siehe weiter unten - Stichwort SIGPIPE)
+		[ -n "$current_gateway" ] && continue
 		host=$(get_service_value "$service_name" "host")
 		uci_is_false "$(get_service_value "$service_name" "status" "false")" && \
 			msg_debug "$host did not pass the last test" && \
@@ -116,8 +119,10 @@ find_and_select_best_gateway() {
 		# Daher wollen wir nur ein bis zwei Zeilen:
 		#   den besten
 		#   [den aktiven] (falls vorhanden)
+		# Wir brechen die Ausgabe jedoch nicht nach den ersten beiden Zeilen ab. Andernfalls muessten wir
+		# uns um das SIGPIPE-Signal kuemmern (vor allem in cron-Jobs).
 		[ -z "$best_gateway" ] && best_gateway="$service_name" && echo "$best_gateway"
-		is_openvpn_service_active "$service_name" && echo "$service_name" && break || true
+		is_openvpn_service_active "$service_name" && current_gateway="$service_name" && echo "$service_name" || true
 	done)
 	best_gateway=$(echo "$result" | sed -n 1p)
 	current_gateway=$(echo "$result" | sed -n 2p)

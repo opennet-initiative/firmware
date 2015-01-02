@@ -45,13 +45,16 @@ CONFIG_BUSYBOX_CONFIG_RDATE=y
 CONFIG_BUSYBOX_CONFIG_RUN_PARTS=y
 # siehe "get_filesize"
 CONFIG_BUSYBOX_CONFIG_STAT=y
+CONFIG_BUSYBOX_CONFIG_FEATURE_STAT_FORMAT=y
 # zeitliche Begrenzung fuer ntp-Request
 CONFIG_BUSYBOX_CONFIG_TIMEOUT=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_STAT_FORMAT=y
+# Prozessbaum fuer die Zusammenfassung
+CONFIG_BUSYBOX_CONFIG_PSTREE=y
 CONFIG_BUSYBOX_CONFIG_SWAPONOFF=y
 # fuer die umgekehrte  Ausgabe des openvpn-Verbindungsprotokolls
 CONFIG_BUSYBOX_CONFIG_TAC=y
 CONFIG_BUSYBOX_CONFIG_VOLUMEID=y
+CONFIG_BUSYBOX_CONFIG_WATCH=y
 
 CONFIG_BUSYBOX_CONFIG_FEATURE_IPV6=y
 CONFIG_BUSYBOX_CONFIG_FEATURE_PREFER_IPV4_ADDRESS=y
@@ -63,6 +66,12 @@ CONFIG_PACKAGE_libstdcpp=m
 CONFIG_PACKAGE_glib2=m
 CONFIG_PACKAGE_libpolarssl=m
 CONFIG_PACKAGE_libffi=m
+
+# Zeitabfrage fuer den restart-Zeitstempel
+# TODO: ein geeignetes (kleines) Paket auswaehlen
+CONFIG_PACKAGE_ntp-utils=m
+CONFIG_PACKAGE_ntpclient=m
+CONFIG_PACKAGE_ntpdate=m
 
 # curl wird fuer den CSR-Upload von on-openvpn verwendet
 CONFIG_PACKAGE_curl=y

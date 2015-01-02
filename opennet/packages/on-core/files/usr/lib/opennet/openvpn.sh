@@ -155,7 +155,7 @@ verify_vpn_connection() {
 	#   connect-retry: Sekunden Wartezeit zwischen Versuchen
 	#   connect-timeout: Dauer eines Versuchs
 	#   connect-retry-max: Anzahl moeglicher Wiederholungen
-	grep "^proto[ \t]\+tcp" "$temp_config_file" &&
+	grep -q "^proto[ \t]\+tcp" "$temp_config_file" &&
 		openvpn_opts="$openvpn_opts --connect-retry 1 --connect-timeout 15 --connect-retry-max 1"
 
 	[ -n "$key_file" ] && \

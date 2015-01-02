@@ -574,3 +574,27 @@ set_opkg_download_version() {
 	sed -i "s#\(/openwrt\)/[^/]\+/[^/]\+/#\1/$version/#" /etc/opkg.conf
 }
 
+
+# Ersetze eine Zeile durch einen neuen Inhalt. Falls das Zeilenmuster nicht vorhanden ist, wird eine neue Zeile eingefuegt.
+# Dies entspricht der Funktionalitaet des "lineinfile"-Moduls von ansible.
+# Parameter filename: der Dateiname
+# Parameter pattern: Suchmuster der zu ersetzenden Zeile
+# Parameter new_line: neue Zeile
+line_in_file() {
+	trap "error_trap lineinfile '$*'" $GUARD_TRAPS
+	local filename="$1"
+	local pattern="$2"
+	local new_line="$3"
+	local line
+	# Datei existiert nicht? Einfach mit dieser Zeile erzeugen.
+	[ ! -e "$filename" ] && echo "$content" >"$filename" && return 0
+	# Datei einlesen - zum Muster passende Zeilen austauschen - notfalls neue Zeile anfuegen
+	(
+		while read line; do
+			echo "$line" | grep -q "$pattern" && echo "$new_line" || echo "$line"
+		done <"$filename"
+		# die neue Zeile hinzufuegen, falls das Muster in der alten Datei nicht vorhanden war
+		grep -q "$pattern" "$filename" || echo "$new_line"
+	) | update_file_if_changed "$filename" || true
+}
+

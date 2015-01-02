@@ -39,27 +39,16 @@ configure_dnsmasq() {
 }
 
 
-_add_crontab_entry_if_missing() {
-	local file="$1"
-	local time="$2"
-	local command="$3"
-	local line
-	while read line; do
-		# Wurde die Zeile gefunden? Sofort mit Erfolg abbrechen ...
-		[ "$line" != "${line%$command}" ] && return 0 || true
-	done <"$file"
-	# es gab keinen Treffer - wir fuegen die Zeile hinzu
-	echo -e "$time\t$command" >>"$file"
-}
-
-
 add_crontab_entries() {
 	local crontab_file=/etc/crontabs/root
-	# wir wollen anschliessend pruefen, welche Zeilen vorhanden sind - also notfalls eine leere Datei anlegen
-	[ -e "$crontab_file" ] || touch "$crontab_file"
-	_add_crontab_entry_if_missing "$crontab_file" "* * * * *"	"run-parts /etc/cron.minutely"
-	_add_crontab_entry_if_missing "$crontab_file" "*/5 * * * *"	"run-parts /etc/cron.5mins"
-	_add_crontab_entry_if_missing "$crontab_file" "02 4 * * *"	"run-parts /etc/cron.daily"
+	line_in_file "$crontab_file" "^[^#].*run-parts.*/etc/cron\.minutely" \
+		"* * * * *		run-parts /etc/cron.minutely 2>&1 | logger -t cron-error"
+	line_in_file "$crontab_file" "^[^#].*run-parts.*/etc/cron\.5mins" \
+		"*/5 * * * *		run-parts /etc/cron.5mins 2>&1 | logger -t cron-error"
+	line_in_file "$crontab_file" "^[^#].*run-parts.*/etc/cron\.daily" \
+		"02 4 * * *		run-parts /etc/cron.daily 2>&1 | logger -t cron-error"
+	# es ist schwer zu pruefen, ob die Datei sich geaendert hat - also einfach neustarten
+	/etc/init.d/cron restart
 }
 
 

@@ -126,10 +126,10 @@ end
 
 function status_network()
 	luci.http.prepare_content("text/plain")
-	printZoneLine("lan")
-	printZoneLine("on_mesh")
-	printZoneLine("wan")
-	printZoneLine("free")
+	printZoneLine(on_function("get_variable", {"ZONE_LOCAL"}))
+	printZoneLine(on_function("get_variable", {"ZONE_MESH"}))
+	printZoneLine(on_function("get_variable", {"ZONE_WAN"}))
+	printZoneLine(on_function("get_variable", {"ZONE_FREE"}))
 end
 
 function printZoneLine(zoneName)

@@ -21,6 +21,7 @@ help:
 	$(info - ARCH			eine Architektur kompilieren)
 	$(info - config-ARCH		die Konfiguration einer Architektur anwenden (dies erzeugt 'openwrt/.config'))
 	$(info - diff-menuconfig	vergleichbar mit "make -C openwrt menuconfig" - es wird jedoch anschließend ein diff der Änderungen angezeigt)
+	$(info - doc			Dokumentation aktualisieren)
 	$(info - translate		Übersetzungsdateien (opennet/po/de/*.po) aktualisieren)
 	$(info - feeds			die Paket-Feeds (siehe openwrt/feeds.conf) neu einlesen)
 	$(info - patch			die opennet-Patches via quilt anwenden (siehe ./patches/*.patch))
@@ -64,6 +65,11 @@ diff-menuconfig: feeds
 	$(MAKE) -C "$(OPENWRT_DIR)" menuconfig
 	@quilt diff
 	@quilt delete
+
+doc:
+	@# doxygen-Build
+	mkdir -p build-doc/api
+	doxygen opennet/doc/doxyfile
 
 translate:
 	@find "$(CUSTOM_PACKAGES_DIR)" -mindepth 1 -maxdepth 1 -type d | while read dname; do \

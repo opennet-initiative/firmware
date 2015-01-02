@@ -277,6 +277,26 @@ rename_olsrd_Port_to_port() {
 }
 
 
+# Bis Version 0.4-5 gab es anscheinend die veraltete "mtu_fix"-Option in firewall-Weiterleitungen.
+# Seit OpenWRT 8.09.2 befindet sich diese Option jedoch nicht mehr in den Weiterleitungen, sondern in der Zielzone.
+move_mtu_fix_to_target_zone() {
+	local uci_prefix
+	local mtu_value
+	local target_zone
+	local zone_uci_prefix
+	find_all_uci_sections firewall forwarding | while read uci_prefix; do
+		mtu_value=$(uci_get "${uci_prefix}.mtu_fix")
+		# leer? Es gibt nichts zu uebertragen ...
+		[ -z "$mtu_value" ] && continue
+		target_zone=$(uci_get "${uci_prefix}.dest")
+		zone_uci_prefix=$(find_first_uci_section firewall zone "name=$target_zone")
+		# mtu-Wert uebertragen
+		[ -n "$zone_uci_prefix" ] && uci set "${zone_uci_prefix}.mtu_fix=$mtu_value"
+		# alten Wert loeschen
+		uci_delete "${uci_prefix}.mtu_fix"
+	done
+}
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -294,6 +314,7 @@ rename_olsrd_Port_to_port
 rename_firewall_zone "opennet" "$ZONE_MESH"
 
 disable_unwanted_forward
+move_mtu_fix_to_target_zone
 
 # Bis Version 0.4-5 hiess die lokale Zone "local" - bei barrier braker heisst sie nun "lan"
 rename_firewall_zone "local" "$ZONE_LOCAL"

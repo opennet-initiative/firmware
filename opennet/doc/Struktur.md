@@ -1,4 +1,6 @@
-Überblick
+[TOC]
+
+Überblick {#overview}
 =========
 
 Diese Dokumentation beschäftigt sich mit der Struktur der Firmware-Buildumgebung. Die Verwendung der Umgebung ist dagegen in der [Entwicklungsdokumentation] (Entwicklung.md) beschrieben.
@@ -20,7 +22,7 @@ Die Verzeichnisse haben die folgenden Inhalte:
 * *doc* -- diese Dokumentation
 
 
-Externe Respositories
+Externe Respositories {#repositories}
 ---------------------
 
 Die externen Repositories (openwrt, packages, routing, telephony) werden von uns nur in Form von Patches angepasst.
@@ -28,20 +30,20 @@ Die externen Repositories (openwrt, packages, routing, telephony) werden von uns
 Deren Version (also die git-commit-ID) wird in unserem Repository versioniert - der aktuelle Stand bezüglich der Upstream-Repositories ist also Teil der Versionsverwaltung.
 
 
-Patches
+Patches {#patches}
 -------
 
 Unsere Patches (gegen die externen Repositories) werden im Verzeichnis *patches* mittels *quilt* gepflegt. Die meisten dieser Patches sind bei openwrt eingereicht und harren auf ihre Upstream-Integration.
 
 
-Unser Paket-Feed *opennet*
+Unser Paket-Feed *opennet* {#feed}
 --------------------------
 
 In diesem Paket-Feed liegen unsere selbsterstellten Pakete (*on-*), die für den VPN-Tunnelaufbau und die Datensammlung erforderlich sind. Zusätzlich können hier Pakete untergebracht werden, die (noch) nicht in openwrt enthalten sind.
 
 
 
-Historischer Rückblick: Erstellung der Entwicklungsumgebung im Jahr 2014
+Historischer Rückblick: Erstellung der Entwicklungsumgebung im Jahr 2014 {#history}
 ========================================================================
 
 **Die folgende Beschreibung ist nicht relevant fuer die Weiterentwicklung der Firmware.**
@@ -49,7 +51,7 @@ Historischer Rückblick: Erstellung der Entwicklungsumgebung im Jahr 2014
 Die Beschreibung soll lediglich die Struktur der Firmware-Entwicklungsumgebung verdeutlichen.
 
 
-Repositories verknüpfen
+Repositories verknüpfen {#history-submodules}
 -----------------------
 
     mkdir opennet
@@ -62,7 +64,7 @@ Repositories verknüpfen
     git commit -m "openwrt-Repositories als Submodule eingebunden"
 
 
-Ein erster Patch: Paket-Feeds einbinden
+Ein erster Patch: Paket-Feeds einbinden {#history-feeds}
 ---------------------------------------
 
     mkdir oni-packages

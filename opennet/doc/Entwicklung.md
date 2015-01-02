@@ -1,17 +1,22 @@
-Überblick
+[TOC]
+
+Überblick {#overview}
 =========
 
 Die Opennet-Firmware basiert auf den Komponenten *git*, *quilt* und der *openwrt*-Entwicklungsumgebung.
 Links zur Dokumentation dieser Komponenten findest du am Ende dieses Dokuments.
 
 Die grundlegende Struktur der Entwicklungsumgebung ist in der [Struktur-Dokumentation] (Struktur.md) beschrieben.
-Ein Kurzeinstieg in den Bau von Firmware-Abbildern ist in der [Readme] (../Readme.md) zu finden.
 
 
-Vorbereitung der Entwicklungsumgebung
+Vorbereitung der Entwicklungsumgebung {#prepare}
 =====================================
 
-Abhängigkeiten installieren
+Die Einrichtung der Entwicklungsumgebung dauert nur wenige Minuten und ist untenstehend beschrieben.
+Der gesamte Prozess der Image-Erzeugung erfordert dagegen ca. 10 GB Festplattenplatz je Zielarchitektur und dauert - je nach Rechner - üblicherweise mindestens ein dutzend Stunden.
+
+
+Abhängigkeiten installieren {#dependencies}
 ---------------------------
 
 Debian:
@@ -19,7 +24,7 @@ Debian:
     apt-get install build-essential git flex gcc-multilib subversion libncurses5-dev zlib1g-dev liblzo2-dev gawk unzip python quilt
 
 
-Repository herunterladen
+Repository herunterladen {#repository}
 ------------------------
 
 Nur-Lese-Zugriff:
@@ -38,7 +43,7 @@ Die lokale Arbeitsumgebung wird mit folgenden Kommandos abgeschlossen:
 Die obige Aktion wird eine Weile dauern, da die openwrt-Repositories heruntergeladen werden.
 
 
-quilt-Konfiguration
+quilt-Konfiguration {#quilt-setup}
 -------------------
 
 Für die komfortable Verwendung des Patch-Verwaltungsystems *quilt* sollten ein paar quilt-Einstellungen gesetzt werden.
@@ -56,7 +61,7 @@ Falls die obigen Einstellungen nicht gesetzt werden, wird quilt unnötige Patch-
 Dies ist nicht wünschenswert.
 
 
-Umstellung der nur-lese git-URL
+Umstellung der nur-lese git-URL {#git-repo-writable}
 -------------------------------
 
 Für das Einbringen von Änderungen in das öffentliche Firmware-Repository benötigst du einen git-Account.
@@ -67,11 +72,16 @@ Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den 
     git remote set-url origin git@dev.opennet-initiative.de:on_firmware.git
 
 
+Build-Service {#build-service}
+-------------
 
-Änderungen an der Firmware vornehmen
+Auf dem Server ``minato`` ist ein automatischer Build-Dienst konfiguriert, der kurz nach einem push einen neuen Snapshot der Firmware erzeugt. Innerhalb von ca. 30 Minuten sind die ersten neuen Images dann verfügbar: http://downloads.opennet-initiative.de/openwrt/testing
+
+
+Änderungen an der Firmware vornehmen {#developing}
 ====================================
 
-Änderungen im Opennet-Repository auf den Server pushen
+Änderungen im Opennet-Repository auf den Server pushen {#git-push}
 ------------------------------------------------------
 
 Nach dem Auschecken editiere die gewünschten Dateien. Wenn du .patch-Dateien editieren will, musst du weitere Dinge beachten (siehe andere Abschnitte). 
@@ -94,7 +104,7 @@ Nun kann es sein, dass andere Personen zwischendurch Änderungen gemacht haben. 
     git push
 
 
-Änderungen vom entfernten git-Repository lokal pullen
+Änderungen vom entfernten git-Repository lokal pullen {#git-pull}
 -----------------------------------------------------
 
 Prinzipiell ist die Arbeit mit dem opennet-Repository identisch mit dem üblichen Umgang mit git-Arbeitsumgebungen.
@@ -110,8 +120,7 @@ Daher wird anstelle des üblichen `git pull` folgende Abfolge empfohlen:
 **Achtung**: `git pull --rebase` manipuliert deine lokale git-History. Falls du frische lokale Commits also bereits zu einem anderen Server übertragen haben solltest, dann führt dies zu unüberschaubaren Chaos. Verzichte in diesem Fall auf `--rebase`.
 
 
-
-Eine Datei im openwrt-Repository ändern
+Eine Datei im openwrt-Repository ändern {#patching}
 ---------------------------------------
 
 Im openwrt-Repository befindet sich das Basissystem und openwrt-spezifischer Code. Externe Pakete befinden sich (in Form von Makefiles, die auf upstream-Quellen verweisen) in den separaten Paket-Repositories.
@@ -131,7 +140,7 @@ Im openwrt-Repository befindet sich das Basissystem und openwrt-spezifischer Cod
     git commit patches/IRGENDEIN_THEMA.patch
 
 
-Eine Datei in einem Paket-Repository ändern
+Eine Datei in einem Paket-Repository ändern {#patching-package}
 -------------------------------------------
 
 Im Gegensatz zum openwrt-Repository befinden sich in den Paket-Repositories lediglich Makefiles (Rezepte für den Paketbau) und openwrt-spezifische Patches. Unsere Änderungen sind üblicherweise ebenfalls Patches, die zu den openwrt-Patches hinzukommen.
@@ -161,7 +170,7 @@ Im Gegensatz zum openwrt-Repository befinden sich in den Paket-Repositories ledi
         git commit patches/PATCH_NAME.patch
 
 
-Einen bestehenden Patch verändern
+Einen bestehenden Patch verändern {#patch-change}
 ---------------------------------
 
 1. alle Patches zurücknehmen:
@@ -185,7 +194,7 @@ Einen bestehenden Patch verändern
         quilt header -e
 
 
-Paket-Repositories oder das openwrt-Repository aktualisieren
+Paket-Repositories oder das openwrt-Repository aktualisieren {#update-repo}
 ------------------------------------------------------------
 
 1. alle Patches zurücknehmen:
@@ -207,7 +216,7 @@ Paket-Repositories oder das openwrt-Repository aktualisieren
         git commit openwrt
 
 
-Einen neuen Paket-Feed einbinden
+Einen neuen Paket-Feed einbinden {#feed-add}
 --------------------------------
 
 Ziel: den Patch patches/oni-feeds.patch verändern (z.B. um einen weiteren Feed zu erweitern)
@@ -226,7 +235,7 @@ Ziel: den Patch patches/oni-feeds.patch verändern (z.B. um einen weiteren Feed 
     git commit patches/oni-feeds.patch -m "andere feeds-Dinge hinzugefügt"
 
 
-Einzelnes Paket bauen
+Einzelnes Paket bauen {#build-single}
 ---------------------
 
 Für die schnelle Lösung von Build-Problemen ist es oft sinnvoll, nur das eine problematische Paket erstellen zu lassen:
@@ -234,7 +243,7 @@ Für die schnelle Lösung von Build-Problemen ist es oft sinnvoll, nur das eine 
     make -C openwrt package/on-core/{clean,compile} V=s
  
 
-Neue Pakete oder Paketoptionen einbinden
+Neue Pakete oder Paketoptionen einbinden {#config-change}
 ----------------------------------------
 
 Die Liste vorhandener Pakete und ihrer Einstellungen wird mit dem *feeds*-Skript von openwrt verwaltet. Die Feeds werden mittels des meta-Makefile vor jedem Build und vor jedem Aufruf von `make menuconfig` aktualisiert. Du kannst dies jedoch auch manuell auslösen:
@@ -242,7 +251,7 @@ Die Liste vorhandener Pakete und ihrer Einstellungen wird mit dem *feeds*-Skript
     make feeds
 
 
-Fehler beim Build analysieren
+Fehler beim Build analysieren {#analyze-build-errors}
 -----------------------------
 
 Eine detaillierte Fehlerausgabe erhältst mit der make-Zugabe von `V=s`:
@@ -252,7 +261,7 @@ Eine detaillierte Fehlerausgabe erhältst mit der make-Zugabe von `V=s`:
 Dabei erleichtert es den Überblick deutlich, wenn du parallele Build-Prozess (z.B. `-j 3`) *nicht* verwendest. Andernfalls musst du eventuell ein paar Seiten in der Build-Ausgabe zurückblättern, um die Fehlermeldung zu finden.
 
 
-Parallele Build-Prozesse für Mehr-Kern-Prozessoren
+Parallele Build-Prozesse für Mehr-Kern-Prozessoren {#parallel-build}
 --------------------------------------------------
 
 Wie üblich in make-Buildumgebung kannst du manuell mehrere parallele Prozesse für den Paketbau verwenden. Als Faustregel wird üblicherweise ein Wert von *Anzahl der Kerne + 1* empfohlen. Bei einem vier-Kern-Rechner wäre dies folgende Zeile:
@@ -262,7 +271,7 @@ Wie üblich in make-Buildumgebung kannst du manuell mehrere parallele Prozesse f
 In den ersten 20 Zeilen der Build-Ausgabe wirst du ein paar Fehlermeldung bezüglich `-j1` finden - diese sind ein Indikator für eine openwert-spezifische Unfeinheit. Der finale Build-Prozess wird ungeachtet dieser Warnungen parallelisiert ablaufen.
 
 
-Build-Konfiguration (menuconfig)
+Build-Konfiguration (menuconfig) {#menuconfig}
 ================================
 
 Die opennet-Entwicklungsumgebung verwendet grundlegend die Abläufe der openwrt-Buildumgebung. Es gibt jedoch ein paar Besonderheiten, bzw. Komfortfunktionen.
@@ -270,7 +279,7 @@ Die opennet-Entwicklungsumgebung verwendet grundlegend die Abläufe der openwrt-
 Da die opennet-Firmware verschiedene Ziel-Plattformen (ar71xx, ixp44, x86, ...) unterstützt, müssen verschiedene Konfigurationen gepflegt werden. Zur Erleichterung der Pflege und zur Vermeidung von Doppelungen gibt es für jede Ziel-Plattform eine separate Datei (z.B. *opennet/config/ar71xx*), sowie eine Datei mit Einstellungen, die für alle Zielplattformen gelten (*opennet/config/common*). Letztere sind für den Entwicklungsprozess wohl die interessanteren.
 
 
-Konfiguration für eine Plattform erstellen
+Konfiguration für eine Plattform erstellen {#platform-config}
 ------------------------------------------
 
 Die finale openwrt-Konfiguration wird aus der Ziel-Plattform-Konfiguration und der allgemeinen Konfiguration erstellt und anschließend mittels `make defconfig` durch openwrt auf Aufabhängigkeiten zu prüfen und mit den Standardwerten aufzufüllen.
@@ -278,19 +287,19 @@ Die finale openwrt-Konfiguration wird aus der Ziel-Plattform-Konfiguration und d
 Diese Konfiguration für eine Plattform kann beispielsweise mittels `make config-arx71xx` erstellt werden. Das Ergebnis ist anschließend als *openwrt/.config* verfügbar.
 
 
-Konfigurationsänderungen betrachten
+Konfigurationsänderungen betrachten {#diff-changes}
 -----------------------------------
 
 Zur verbesserten Überschaubarkeit von Einstellungsänderungen ist in dem meta-Makefile ein Target namens `diff-menuconfig` integriert. Es zeigt dir nach dem Ausführen des gewohnten `make -C openwrt menuconfig` den Unterschied zwischen der vorherigen und der gespeicherten Konfiguration in Form eines diffs an.
 
 
-Entwicklungshinweise
+Entwicklungshinweise {#devel-hints}
 ====================
 
-Shell-Skripte
+Shell-Skripte {#shell}
 -------------
 
-### Einbindung der Bibliotheken
+### Einbindung der Bibliotheken {#shell-include}
 
 
 Unter ``/usr/lib/opennet/`` liegen mehrere Dateien, die Shell-Funktionen beinhalten.
@@ -299,7 +308,7 @@ Alle Funktionen werden durch die folgende Zeile im globalen Namensraum verfügba
     . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
-### Funktionen ausprobieren
+### Funktionen ausprobieren {#shell-run}
 
 Alle Funktionen aus den shell-Bibliotheken lassen sich folgendermaßen prüfen:
 
@@ -311,7 +320,7 @@ Dabei ist zu debug-Zwecken auch die ausführliche Ausführungsprotokollierung ve
 
 
 
-### Fehlerbehandlung
+### Fehlerbehandlung {#shell-error-handling}
 
 Die optionale strikte Fehlerbehandlung durch die Shell erleichtert das Debugging.
 Sie lässt sich global in der Datei ``/usr/lib/opennet/on-helper.sh`` mit folgender Zeile aktivieren:
@@ -343,7 +352,7 @@ Folgende Stolperfallen sind sehr beliebt bei der Verwendung des strikten Fehlerm
     * ein ``return 0`` oder ``true`` oder ein angehängtes ``| true`` kann nie schaden
 
 
-###uci-Funktionen
+### uci-Funktionen {#shell-uci}
 
 Da der typische uci-Aufruf ``uci -q get CONFIG_KEY`` bei nicht-existenten Schlüsseln einen Fehlercode zurückliefert, müsste hier jeder Aufruf von unübersichtlichem boilerplate-Code umgeben werden, um mit strikter Shell-Fehlerbehandlung zu funktionieren.
 Alternativ steht diese Funktion zur Verfügung:
@@ -361,13 +370,13 @@ Die Funktion ``uci_delete`` entspricht ihrem Äquivalent (``uci delete``) bis au
     uci_delete CONFIG_KEY
 
 
-lua-Skripte
+lua-Skripte {#lua}
 -----------
 
 Das openwrt-Web-Interface basiert auf lua-Skripten. Der grundlegende Code sollte in den shell-Bibliotheken untergebracht werden - lediglich die für die Darstellung notwendige Logik gehört in die lua-Skripte.
 
 
-### Funktionen
+### Funktionen {#lua-functions}
 
 Ein paar wenige Funktionen werden von mehreren lua-Skripten verwendet.
 Diese liegen derzeit in der Datei ``on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua``.
@@ -388,7 +397,7 @@ Hinzu kommen ein paar Funktionen für die Erleichterung alltäglicher Dinge:
 * to_bool
 
 
-luci-Webinterface
+luci-Webinterface {#luci-web}
 -----------------
 
 Zum Debuggen von Fehlern im Web-Interface sind folgende Kommandos sinnvoll:
@@ -396,7 +405,7 @@ Zum Debuggen von Fehlern im Web-Interface sind folgende Kommandos sinnvoll:
     killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-*; uhttpd -h /www -p 80 -f
 
 
-Hotplug-System
+Hotplug-System {#hotplug}
 --------------
 
 openwrt verwendet ``procd`` für die Behandlung von hotplug-Ereignissen.
@@ -407,20 +416,20 @@ Der Aufruf von hotplug-Skripten lässt sich folgendermaßen emulieren:
     ACTION=ifup hotplug-call iface
 
 
-Hilfreiche Werkzeuge
+Hilfreiche Werkzeuge {#tools}
 --------------------
 
-### Unbenutzte Funktionen finden
+### Unbenutzte Funktionen finden {#tools-unused}
 
 Das Skript ``opennet/tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
 
 
-Übersetzungen
+Übersetzungen {#translations}
 =============
 
 Die Übersetzungen werden mittels des luci-Übersetzungskonzepts verwaltet. In den Templates verwenden wir englische Originaltexte.
 
-Konzept
+Konzept {#translations-overview}
 -------
 
 * mittels luci-Werkzeugen wird aus den Code-Dateien eine pot-Datei erzeugt (ein Template, bzw. Katalog)
@@ -428,25 +437,25 @@ Konzept
 * die po-Dateien lassen sich mit einem Editor komfortabel bearbeiten (z.B. mit Virtaal)
 * beim Build-Prozess wird mittels des *po2lmo*-Werkzeugs aus jeder po-Datei eine binäre lmo-Datei erzeugt - diese werden vom Makefile final unter */usr/lib/lua/luci/i18n* platziert (siehe *patches/makefile_include_opennet_packages.patch*)
 
-Templates
+Templates {#translations-templates}
 ---------
 
 * im html-Teil: ``<%:This is an example.%>``
 * im lua-Teil ohne Platzhalter: ``luci.i18n.translate("Interface")``
 * im lua-Teil mit Platzhaltern: ``luci.i18n.translatef("Send an email to %s for further information.", email_address)``
 
-Texte übersetzen
+Texte übersetzen {#translations-wording}
 ----------------
 
 * po- und pot-Dateien übersetzen: ``make translate``
 * po-Dateien (Übersetzungen) vervollständigen: ``virtaal opennet/po/de/on-core.po``
 
 
-Upgrade-Tests
+Upgrade-Tests {#upgrade}
 =============
 
-Allgemeine Hinweise
--------------------
+Speichermangel {#upgrade-out-of-memory}
+--------------
 
 Bei RAM-Mangel (erkennbar am spontanen reboot ohne Änderungen nach dem Upload der neuen Firmware-Datei) kann folgende Kommandozeile wahrscheinlich genügend Platz schaffen:
 
@@ -455,16 +464,16 @@ Bei RAM-Mangel (erkennbar am spontanen reboot ohne Änderungen nach dem Upload d
 Alterantiv koennen diese Dienste via ``Administration -> System -> Systemstart`` gestoppt (nicht deaktiviert!) werden.
 
 
-Externe Dokumentationen
+Externe Dokumentationen {#doc-external}
 =======================
 
-git
+git {#doc-git}
 ---
 
 Die git-Doku befindet sich hier: http://git-scm.com/documentation
 
 
-quilt
+quilt {#doc-quilt}
 -----
 
 Wir verwenden das Patch-Verwaltungssystem *quilt*. Dies erleichtert die Erstellung und Pflege von Patch-Serien gegenüber fremden Quellen.
@@ -472,7 +481,7 @@ Wir verwenden das Patch-Verwaltungssystem *quilt*. Dies erleichtert die Erstellu
 Das Howto von *quilt* ist hier zu finden: http://repo.or.cz/w/guilt.git/blob/HEAD:/Documentation/HOWTO
 
 
-openwrt
+openwrt {#doc-openwrt}
 -------
 
 Die Entwicklungsdokumentation von *openwrt* ist hier zu finden: http://wiki.openwrt.org/doc/devel/start

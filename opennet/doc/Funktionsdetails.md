@@ -1,7 +1,9 @@
-Firmware 0.5
+[TOC]
+
+Firmware 0.5 {#firmware05}
 ============
 
-Datenbank der Dienste
+Datenbank der Dienste {#services}
 ---------------------
 
 Auf jedem AP wird eine Datenbank von Diensten gepflegt. Die typische Quelle fuer diese Datenbank ist der olsrd-Nameservice.
@@ -24,7 +26,7 @@ Die menschenfreundliche Zusammenfassung aller Dienst-Informationen ist recht üb
 Dienste werden durch einen eindeutigen Namen (zusammengesetzt aus URL, Schema, Hostname, Port, usw.) referenziert. Dieser eindeutige Namen wird von allen Dienst-relevanten Funktionen verwendet.
 
 
-### Prioritisierung der Dienste
+### Prioritisierung der Dienste {#service-priority}
 
 Wenn mehrere Anbieter eines Dienstes zur Verfügung stehen, dann muss eine automatisierte Entscheidung getroffen werden, welcher davon zu verwenden ist. Derzeit stehen drei Methoden zur Verfügung, von denen eine über die Konfigurationseinstellung ``on-core.settings.service_sorting`` ausgewählt wird:
 
@@ -33,7 +35,7 @@ Wenn mehrere Anbieter eines Dienstes zur Verfügung stehen, dann muss eine autom
 * manual: die Reihenfolge wird durch manuelle Anordnung festgelegt
 
 
-DNS - Namensauflösung
+DNS - Namensauflösung {#dns}
 ---------------------
 
 Alle DNS-Server verteilen via olsrd-nameservice-Plugin einen Eintrag ähnlich dem folgenden:
@@ -41,7 +43,7 @@ Alle DNS-Server verteilen via olsrd-nameservice-Plugin einen Eintrag ähnlich de
     dns://192.168.0.247:53|udp|dns
 
 
-#### Konfiguration der DNS-Anbieter
+### Konfiguration der DNS-Anbieter {#dns-server}
 
 Die folgenden Voraussetzungen müssen von DNS-Servern im Opennet erfüllt werden:
 
@@ -59,7 +61,7 @@ Der entsprechende ``nameservice``-Block in der ``olsrd.conf`` des DNS-Servers ka
 
 **Wichtig**: Die angegebene IP muss unbedingt auf einem der von olsr verwalteten Netzwerk-Interfaces konfiguriert sein. Andernfalls wird das ``nameservice``-Plugin stillschweigend die Verteilung unterlassen. In der ``/var/run/services_olsr`` auf dem Host ist sofort zu erkennen, ob der Dienst-Eintrag verteilt wird.
 
-### Integration auf den APs
+### Integration auf den APs {#dns-ap}
 
 Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank. Im Anschluss wird ``apply_changes on-core`` aufgerufen. Dies löst die Aktualisierung der ``dnsmasq``-Nameserver-Datei (``/var/run/dnsmasq.servers``) basierend auf der Dienstliste aus.
 
@@ -74,29 +76,29 @@ Folgende Voraussetzungen müssen gegeben sein:
 
 
 
-NTP - Zeitsynchronisation
+NTP - Zeitsynchronisation {#ntp}
 -------------------------
 
 Alle NTP-Server verteilen via olsrd-nameservice-Plugin einen Eintrag ähnlich dem folgenden:
 
     ntp://192.168.0.247:123|udp|ntp
 
-### Konfiguration der NTP-Anbieter
+### Konfiguration der NTP-Anbieter {#ntp-server}
 
 //analog zur Konfiguration der DNS-Anbieter//
 
 
-### Integration auf den APs
+### Integration auf den APs {#ntp-ap}
 
 Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank. Im Anschluss wird ``apply_changes on-core`` aufgerufen. Dies löst die Aktualisierung der NTP-Server-Liste in der uci-Konfiguration (``system.ntp.server``) aus.
 
 Im Falle von Änderungen der Server-Liste wird diese in die uci-Variable ``system.ntp.server`` übertragen. Anschließend wird der ntp-Dienst neugestartet.
 
 
-Gateway-Auswahl
+Gateway-Auswahl {#mig}
 ---------------
 
-### Gateway-Liste
+### Gateway-Liste {#mig-list}
 
 Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank.
 Minütlich wird via cronjob die Datei ``/usr/sbin/on_vpngateway_check`` ausgeführt. Dieser führt folgende Aktionen aus:
@@ -105,15 +107,15 @@ Minütlich wird via cronjob die Datei ``/usr/sbin/on_vpngateway_check`` ausgefü
 * Ermittlung des aktuell besten Gateways und seine Aktivierung, falls er seit mehreren Minuten besser ist oder falls aktuell kein Gateway konfiguriert ist
 
 
-### Gateway-Auswahl
+### Gateway-Auswahl {#mig-selection}
 
  * Sortieren nach Entfernung, Hop-Count oder manuell
 
-### Gateway-Wechsel
+### Gateway-Wechsel {#mig-switch}
 
 Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann schreibt er das Attribute ``switch_candidate_timestamp`` in diesen neuen Dienst. Sobald dieser Zeitstempel im Verlaufe nachfolgender cronjob-Läufe älter als fünf Minuten ist, wird der neue Gateway via ``select_mig_connection`` aktiviert und eine Verbindung aufgebaut.
 
-### Gateway-Verbindungsabbruch
+### Gateway-Verbindungsabbruch {#mig-disconnect}
 
 Sollte die Verbindung zum aktuellen Gateway abreissen, muss der Gateway als unbrauchbar markiert werden und ein Wechsel zu einem anderen Gateway ist sinnvoll. Dies wird folgendermaßen erreicht:
 
@@ -122,7 +124,7 @@ Sollte die Verbindung zum aktuellen Gateway abreissen, muss der Gateway als unbr
 * Die Einstellung ``explicit-exit-notify`` muss abgeschaltet sein, da andernfalls der Grund des Endes der Verbindung im ``down``-Skript nicht erkennbar ist (die Status-Variable ``signal`` wird von ``explicit-exit-notify`` überschrieben).
 
 
-### Datenspeicherung
+### Datenspeicherung {#mig-storage}
 
 Für jeden Gateway werden dauerhafte und wechselhafte Eigenschaften gespeichert.
 
@@ -146,10 +148,10 @@ Die persistenten Informationen liegen unter ``/etc/on-services.d``.
 Die volatilen Informationen liegen unter ``/tmp/on-services-volatile.d``.
 
 
-Internet-Freigabe (Usergateways)
+Internet-Freigabe (Usergateways) {#ugw}
 --------------------------------
 
-### Datenspeicherung
+### Datenspeicherung {#ugw-storage}
 
 Für jeden externen Gateway werden dauerhafte und wechselhafte Eigenschaften gespeichert.
 
@@ -182,7 +184,7 @@ Die wechselhaften Eigenschaften werden im temporären Dateisystem (also im RAM) 
 * wan - Status des WAN-Tests ("ok" oder "error")
 
 
-### Geschwindigkeitstests
+### Geschwindigkeitstests {#ugw-speed}
 
 Zu allen UGWs wird in der UGW-Übersicht eine Abschätzung der Upload- und Download-Bandbreite angezeigt.
 Diese wird durch den Download von der URL http://UGW_HOSTNAME/.big und den Upload via netcat zu Port 2222 auf dem UGW-Host ermittelt.
@@ -201,7 +203,7 @@ Konfiguration des UGW-Servers:
     (while true; do nc -l -n -p 22222 -q 0 2>&1 >/dev/null; sleep 2; done) &
 
 
-### Liste der Gegenstellen
+### Liste der Gegenstellen {#ugw-server-list}
 
 In der Firmware sind zwei öffentliche VPN-Server angegebene, die den Zugang zum Opennet-Mesh ermöglichen.
 Diese sind in der Datei ``/usr/share/opennet/usergw.defaults`` zu finden (siehe ``openvpn_ugw_preset_X``).
@@ -226,19 +228,19 @@ Die bekannten Host-Einträge werden im uci-Namensraum ``on-usergw`` in der anony
 Nach jedem Booten wird einmal das via olsr-nameservice getriggerte Skript ausgeführt - dies führt implizit dazu, dass im Falle einer leeren Hostliste (nach der Erst-Installation) die zwei vorkonfigurierten Gegenstellene eingetragen werden.
 
 
-Datensammlung: ondataservice
+Datensammlung: ondataservice {#ondataservice}
 ----------------------------
 
 Das //ondataservice//-Plugin verteilt via //olsrd// detaillierte Informationen über den AP im Netz.
 
 
-### Konfiguration auf dem AP
+### Konfiguration auf dem AP {#ondataservice-ap}
 
 Das Initialisierungsskript /etc/uci-defaults/on-olsr-setup wird bei der Erstinstallation oder beim Firmware-Upgrade ausgeführt.
 Es aktiviert da ondataservice-Plugin.
 
 
-Erstkonfiguration
+Erstkonfiguration {#initial-installation}
 -----------------
 
 Nach einer frischen Installation, sowie im Anschluss an ein Firmware-Upgrade wird eine Reihe von Skripten zur Initialisierung ausgeführt.
@@ -254,14 +256,14 @@ Jede aufgefundene Datei wird ausgeführt und bei Erfolg anschließend gelöscht.
 Die Existenz einer Datei in diesem Verzeichnis deutet also auf ein Konfigurationsproblem hin, das gelöst werden sollte.
 
 
-### Standard-IP setzen
+### Standard-IP setzen {#initial-ip}
 
 Das Skript ``/etc/uci-defaults/on-configure-network`` prüft, ob der uci-Wert ``on-core.settings.default_ip_configured`` gesetzt ist.
 Sollte dies nicht der Fall sein, dann wird die IP-Adresse aus der //on-core//-Defaults-Datei ausgelesen und konfiguriert.
 Anschließend wird das obige uci-Flag gesetzt, um eine erneute Konfiguration anch einem Update zu verhindern.
 
 
-Debugging
+Debugging {#debug}
 ---------
 
 Jedes Skript und jede Funktionalität lässt sich folgendermaßen im Detail debuggen:
@@ -269,11 +271,11 @@ Jedes Skript und jede Funktionalität lässt sich folgendermaßen im Detail debu
   ON_DEBUG=1 on_usergateway_check
 
 
-Firmware-NG
-===========
+Firmware 0.4 {#firmware04}
+============
 
 
-Konfiguration initialisieren
+Konfiguration initialisieren {#firmware04-init}
 ----------------------------
 Im Paket *on-core* befindet sich eine Datei *etc/init.d/on_config*. Beim Booten wird *check_firmware_upgrade* durchgeführt und anschließend die Opennet-Erstkonfiguration gesetzt, falls kein Netzwerkinterface mit dem Präfix "on_" existiert.
 
@@ -304,10 +306,10 @@ Opennet-Erstkonfiguration:
 
 
 
-Zeit synchroniseren
+Zeit synchroniseren {#firmware04-ntp}
 -------------------
-Im Paket *on-core* befindet sich eine Datei *etc/init.d/ntpclient*. Beim Start sorgt sie dafür, dass alle konfigurierten NTP-Server (*ntpclient.@ntpserver[..]*) nacheinander im 3-Sekunden-Takt angefragt werden.
-Sobald eine eine Verbindung hergestellt wurde, ist das Skript beendet.
+Im Paket *on-core* befindet sich eine Datei *etc/init.d/ntpclient*. Beim Start sorgt sie dafür, dass alle konfigurierten NTP-Server (*ntpclient.\@ntpserver[..]*) nacheinander im 3-Sekunden-Takt angefragt werden.
+Sobald eine eine Verbindung hergestellt wurde, wird der (nur korrekt ermittelte) Boot-Zeitpunkt in die ``banner``-Datei geschrieben.
 
 Als NTP-Server sind derzeit (via */etc/config_presets/ntpclient*) folgende konfiguriert:
 
@@ -317,39 +319,39 @@ Als NTP-Server sind derzeit (via */etc/config_presets/ntpclient*) folgende konfi
 * 192.168.0.254
 
 
-DNS-Server
+DNS-Server {#firmware04-dns}
 ----------
 
 Im Paket *on-openvpn* wird mittels des Skripts *on-openvpn/files/usr/bin/on_vpngateway_check* mit der Funktion *update_dns_from_gws* die Liste der DNS-Server in */tmp/resolv.conf.auto* gepflegt.
 
 
 
-ondataservice-Plugin
+ondataservice-Plugin {#firmware04-ondataservice}
 --------------------
 
 Im Paket *on-core* ist die olsrd-Konfiguration enthalten, die zum Laden des ondataservice-Plugin führt. Außerdem ist ein täglicher cronjob (*usr/sbin/status_values.sh*) enthalten, der bei Bedarf die sqlite-Datenbank anlegt und die Datensatz-Datei aktualisiert.
 
 
-olsrd
+olsrd {#firmware04-olsrd}
 -----
 Im Paket *on-core* ist ein minütlicher cron-job enthalten, der prüft, ob ein olsrd-Prozess läuft und ihn notfalls neu startet.
 
 Beim Booten kann es dazu kommen, dass das oder die olsrd-Interfaces noch nicht aktiviert sind. In diesem Fall beendet sich olsrd mit der Fehlermeldung "Warning: Interface 'on_wifi_0' not found, skipped". Aufgrund des minütlichen cronjobs wird olsrd innerhalb von einer Minute trotzdem gestartet.
 
 
-cronjobs
+cronjobs {#firmware04-cron}
 --------
 Im Paket *on-core* ist eine Datei *etc/crontabs/root* enthalten, die im groben folgendem Patch folgt: https://dev.openwrt.org/ticket/1328
 
 
-Firewall
+Firewall {#firmware04-firewall}
 --------
 Die Zonen-Konfiguration von openwrt wird durch das Paket *on-core* von uns überschrieben.
 
 Die Datei *etc/firewall.opennet* fügt anscheinend eine relevante Masquerade-Regel zu den üblichen Regeln hinzu, die mit den normalen uci-Regeln nicht nachgebildet werden kann.
 
 
-Nutzer-VPN
+Nutzer-VPN {#firmware04-nutzer-vpn}
 ----------
 Im Paket *on-openvpn* ist das config-preset *on-openvpn* enthalten, das konfigurierbar festlegt, ob alle Gateways als ntp- und DNS-Server verwendet werden sollen.
 Außerdem sind in diesem config_preset die Vorgaben für Nutzer-Zertifikate eingetragen.
@@ -372,7 +374,7 @@ Minütlich läuft ein cronjob (*on_vpngateway_check*), der folgendes tut:
 * der Seiteneffekt der nameservice-Plugin-Aktivierung sollte explizit angewiesen werden
 
 
-Usergateway
+Usergateway {#firmware04-ugw}
 -----------
 Im Paket *on-usergw* sind zwei VPN-Konfigurationen (opennet_ugw, opennet_vpntest) enthalten.
 
@@ -407,7 +409,7 @@ Konfiguration:
 Die Datei /etc/config_presets/on-usergw enthält default Einstellungen für die SSL UGW Zertifkate, zwei Usergateway-Server (erina und subaru) sowie alle OpenVPN Einstellungen zum Verbinden zu den Servern.
 
 
-Wifidog
+Wifidog {#firmware04-wifidog}
 -------
 
 Das allgemeine Wifidog-Konzept wird unter https://wiki.opennet-initiative.de/wiki/Projekt_Wifidog#DHCP-Ablauf_der_Wifidog-Implementierung 

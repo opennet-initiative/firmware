@@ -201,12 +201,16 @@ del_interface_from_zone() {
 
 get_zone_of_interface() {
 	local interface=$1
-	local prefix
+	local uci_prefix
 	local networks
 	local zone
-	uci show firewall | grep "^firewall\.@zone\[[0-9]\+\]\.network=" | sed 's/=/ /' | while read prefix networks; do
-	zone=$(uci_get "${prefix%.network}.name")
-		echo " $networks " | grep -q "[ \t]$interface[ \t]" && echo "$zone" && return 0 || true
+	find_all_uci_sections firewall zone | while read uci_prefix; do
+		networks=$(uci_get "${uci_prefix}.network")
+		zone=$(uci_get "${uci_prefix}.name")
+		# falls 'network' und 'device' leer ist, dann enthaelt 'name' den Interface-Namen
+		# siehe http://wiki.openwrt.org/doc/uci/firewall#zones
+		[ -z "$networks" ] && [ -z "$(uci_get "${uci_prefix}.device")" ] && networks="$zone"
+		is_in_list "$interface" "$networks" && echo "$zone" && return 0 || true
 	done
 	trap "" $GUARD_TRAPS && return 1
 }

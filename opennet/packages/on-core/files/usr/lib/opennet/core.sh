@@ -609,3 +609,16 @@ list_installed_packages_by_size() {
 	done | sort -n | awk 'BEGIN { summe=0 } { summe+=$1; print $0 } END { print summe }'
 }
 
+
+# Pruefe, ob eine Liste ein bestimmtes Element enthaelt
+# Die Listenelemente sind durch beliebigen Whitespace getrennt.
+is_in_list() {
+	local target="$1"
+	local list="$2"
+	local token
+	for token in $list; do
+		[ "$token" = "$target" ] && return 0 || true
+	done
+	# kein passendes Token gefunden
+	trap "" $GUARD_TRAPS && return 1
+}

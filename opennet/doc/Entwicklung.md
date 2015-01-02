@@ -212,18 +212,18 @@ Einen neuen Paket-Feed einbinden
 
 Ziel: den Patch patches/oni-feeds.patch verändern (z.B. um einen weiteren Feed zu erweitern)
 
-    # alle Patches zurücknehmen
-    make unpatch
-    # alle Patches auflisten
-    quilt series
-    # alles bis zu dem gewünschten Patch anwenden
-    quilt push oni-feeds.patch
-    # die neue Feeds-Quelle eintrage
-    vi openwrt/feeds.conf
-    # Patch-Datei aktualisieren
-    quilt refresh
-    # den neuen Patch in das Repository hochladen
-    git commit patches/oni-feeds.patch -m "andere feeds-Dinge hinzugefügt"
+    # alle Patches zurücknehmen
+    make unpatch
+    # alle Patches auflisten
+    quilt series
+    # alles bis zu dem gewünschten Patch anwenden
+    quilt push oni-feeds.patch
+    # die neue Feeds-Quelle eintrage
+    vi openwrt/feeds.conf
+    # Patch-Datei aktualisieren
+    quilt refresh
+    # den neuen Patch in das Repository hochladen
+    git commit patches/oni-feeds.patch -m "andere feeds-Dinge hinzugefügt"
 
 
 Einzelnes Paket bauen
@@ -290,79 +290,75 @@ Entwicklungshinweise
 Shell-Skripte
 -------------
 
-Einbindung der Bibliotheken
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+### Einbindung der Bibliotheken
+
 
 Unter ``/usr/lib/opennet/`` liegen mehrere Dateien, die Shell-Funktionen beinhalten.
 Alle Funktionen werden durch die folgende Zeile im globalen Namensraum verfügbar gemacht:
 
-  . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+    . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
-Funktionen ausprobieren
-^^^^^^^^^^^^^^^^^^^^^^^
+### Funktionen ausprobieren
 
 Alle Funktionen aus den shell-Bibliotheken lassen sich folgendermaßen prüfen:
 
-  on-function get_zone_interfaces on_mesh
+    on-function get_zone_interfaces on_mesh
 
 Dabei ist zu debug-Zwecken auch die ausführliche Ausführungsprotokollierung verfügbar:
 
-  ON_DEBUG=1 on-function get_zone_interfaces on_mesh
+    ON_DEBUG=1 on-function get_zone_interfaces on_mesh
 
 
 
-Fehlerbehandlung
-^^^^^^^^^^^^^^^^
+### Fehlerbehandlung
 
 Die optionale strikte Fehlerbehandlung durch die Shell erleichtert das Debugging.
 Sie lässt sich global in der Datei ``/usr/lib/opennet/on-helper.sh`` mit folgender Zeile aktivieren:
 
-  set -eu
+    set -eu
 
 In allen Skripten sollten Fehler-Traps aktiviert werden, um den Ort der Entstehung von Problemem leichter zu ermitteln.
 Folgende Zeile ist im Kopf von nicht-trivialen Funktionen einzutragen, wobei der Funktionsname zu ersetzen ist:
 
-  trap "error_trap NAME_DER_FUNKTION $*" $GUARD_TRAPS
+    trap "error_trap NAME_DER_FUNKTION $*" $GUARD_TRAPS
 
 Leider ist es in der ash-Shell nicht möglich, reine Fehler (siehe ``set -e``) abzufangen (siehe ``echo 'trap "echo klappt" ERR' ash``).
 Daher müssen wir die in der ash-Shell vorhandene allgemeinere ``EXIT``-trap verwenden.
 Dies führt leider dazu, dass wir gewünschte Fehler (z.B.: ``return 1`` in einer Wahrheitswert-Funktion) von ungewünschten Fehlern (durch ``set -e`` abgefangen) explizit unterscheiden müssen.
 In jeder Funktion, die explizit ein ``false``-Ergebnis zurückliefern möchte (und die traps verwendet), muss folgende Zeile anstelle von ``return 1`` (bzw. anderen Fehlercodes) eingesetzt werden:
 
-  trap "" $GUARD_TRAPS && return 1
+    trap "" $GUARD_TRAPS && return 1
 
 Im System-Log (``logread``) lassen sich ausgelöste traps finden:
 
-  logread | grep trapped
+    logread | grep trapped
 
 
 Folgende Stolperfallen sind sehr beliebt bei der Verwendung des strikten Fehlermodus:
 
 * der letzte Befehl vor dem Ende einer Funktion, einer Schleife oder einer if/then/else-Konstruktion definiert den Rückgabewert
+    * beispielsweise führt ``[ 1 -lt "$x" ] && echo "foo"`` als letzte Zeile einer Schleife zu einem Abbruch, da die Schleife mit dieser (nicht-Abbruch-auslösenden, jedoch gleichzeitig nicht-erfolgreichen Kette) nach ihrem letzten Durchlauf als "nicht erfolgreich" gilt und somit zu einem Abbruch führt
+    * dieses Problem versteckt sich sehr gut, da es nur dann wirksam wird, wenn **der letzte Schleifendurchlauf** mit einem Fehlercode endet
+    * ein ``return 0`` oder ``true`` oder ein angehängtes ``| true`` kann nie schaden
 
-  * beispielsweise führt ``[ 1 -lt "$x" ] && echo "foo"`` als letzte Zeile einer Schleife zu einem Abbruch, da die Schleife mit dieser (nicht-Abbruch-auslösenden, jedoch gleichzeitig nicht-erfolgreichen Kette) nach ihrem letzten Durchlauf als "nicht erfolgreich" gilt und somit zu einem Abbruch führt
-  * dieses Problem versteckt sich sehr gut, da es nur dann wirksam wird, wenn **der letzte Schleifendurchlauf** mit einem Fehlercode endet 
-  * ein ``return 0`` oder ``true`` oder ein angehängtes ``| true`` kann nie schaden
 
-
-uci-Funktionen
-^^^^^^^^^^^^^^
+###uci-Funktionen
 
 Da der typische uci-Aufruf ``uci -q get CONFIG_KEY`` bei nicht-existenten Schlüsseln einen Fehlercode zurückliefert, müsste hier jeder Aufruf von unübersichtlichem boilerplate-Code umgeben werden, um mit strikter Shell-Fehlerbehandlung zu funktionieren.
 Alternativ steht diese Funktion zur Verfügung:
 
-  uci_get CONFIG_KEY [DEFAULT_VALUE]
+    uci_get CONFIG_KEY [DEFAULT_VALUE]
 
 Das Ergebnis ist ein leerer String, falls der config-Wert nicht vorhanden oder leer ist. Andernfalls wird der Inhalt zurückgeliefert.
 
 Außerdem ist eine verbesserte Version von ``uci add_list`` verfügbar, die - im Unterschied zum Original - bereits vorhandene Einträge nicht erneut hinzufügt:
 
-  uci_add_list CONFIG_KEY=NEW_VALUE
+    uci_add_list CONFIG_KEY=NEW_VALUE
 
 Die Funktion ``uci_delete`` entspricht ihrem Äquivalent (``uci delete``) bis auf die fehlende Fehlermeldung und der Fehlercode im Falle der Löschung eines nicht vorhandenen Knotens:
 
-  uci_delete CONFIG_KEY
+    uci_delete CONFIG_KEY
 
 
 lua-Skripte
@@ -371,8 +367,7 @@ lua-Skripte
 Das openwrt-Web-Interface basiert auf lua-Skripten. Der grundlegende Code sollte in den shell-Bibliotheken untergebracht werden - lediglich die für die Darstellung notwendige Logik gehört in die lua-Skripte.
 
 
-Funktionen
-^^^^^^^^^^
+### Funktionen
 
 Ein paar wenige Funktionen werden von mehreren lua-Skripten verwendet.
 Diese liegen derzeit in der Datei ``on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua``.
@@ -398,7 +393,7 @@ luci-Webinterface
 
 Zum Debuggen von Fehlern im Web-Interface sind folgende Kommandos sinnvoll:
 
-  killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-*; uhttpd -h /www -p 80 -f
+    killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-*; uhttpd -h /www -p 80 -f
 
 
 Hotplug-System
@@ -409,21 +404,15 @@ Skripte liegen unter ``/etc/hotplug.d/``. Für unsere netzwerkbasierten Ereignis
 
 Der Aufruf von hotplug-Skripten lässt sich folgendermaßen emulieren:
 
-  ACTION=ifup hotplug-call iface
+    ACTION=ifup hotplug-call iface
 
 
 Hilfreiche Werkzeuge
 --------------------
 
-Unbenutzte Funktionen finden
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+### Unbenutzte Funktionen finden
 
 Das Skript ``opennet/tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
-
-Installierte Pakete nach Größe sortiert auflisten
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Die Funktion ``list_installed_packages_by_size`` kann auf dem AP ausgeführt werden und listet alle Pakete sortiert nach ihrer Größe auf. Damit lassen sich die Wirkungen möglicher Größenoptimierungen besser überblicken.
 
 
 Übersetzungen
@@ -461,7 +450,7 @@ Allgemeine Hinweise
 
 Bei RAM-Mangel (erkennbar am spontanen reboot ohne Änderungen nach dem Upload der neuen Firmware-Datei) kann folgende Kommandozeile wahrscheinlich genügend Platz schaffen:
 
-  for a in collectd dnsmasq sysntpd cron; do /etc/init.d/$a stop; done
+    for a in collectd dnsmasq sysntpd cron; do /etc/init.d/$a stop; done
 
 Alterantiv koennen diese Dienste via ``Administration -> System -> Systemstart`` gestoppt (nicht deaktiviert!) werden.
 

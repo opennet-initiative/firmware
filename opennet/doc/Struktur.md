@@ -1,19 +1,20 @@
 Überblick
 =========
 
-*Diese Dokumentation beschäftigt sich mit der Struktur der Firmware-Buildumgebung. Die Verwendung der Umgebung ist dagegen in der [Entwicklungsdokumentation] (Entwicklung.md) beschrieben.
+Diese Dokumentation beschäftigt sich mit der Struktur der Firmware-Buildumgebung. Die Verwendung der Umgebung ist dagegen in der [Entwicklungsdokumentation] (Entwicklung.md) beschrieben.
 
 Die Opennet-Entwicklungsumgebung ist die Zusammenfassung der openwrt-Repositories und ein paar weniger Opennet-Pakete.
+
 Zusätzlich enthält sie Patches gegenüber *openwrt*, die es bisher noch nicht in deren Repository geschafft haben oder die zu opennet-spezifisch sind.
 
 Die Verzeichnisse haben die folgenden Inhalte:
 
 * *openwrt* -- das openwrt-Repository (Build-Umgebung, Kernel und Basispakete)
 * openwrt-Paket-Feeds:
-  * *packages* -- die meisten openwrt-Pakete
-  * *routing* -- Routing-Pakete
-  * *luci* -- luci-basierte Webinterface-Pakete
-  * *telephony* -- Telefonie-Pakete
+    * *packages* -- die meisten openwrt-Pakete
+    * *routing* -- Routing-Pakete
+    * *luci* -- luci-basierte Webinterface-Pakete
+    * *telephony* -- Telefonie-Pakete
 * *opennet* -- Opennet-Pakete und angepasste/neue Pakete
 * *patches* -- Änderungen an openwrt oder den externen Paket-Feeds
 * *doc* -- diese Dokumentation
@@ -23,6 +24,7 @@ Externe Respositories
 ---------------------
 
 Die externen Repositories (openwrt, packages, routing, telephony) werden von uns nur in Form von Patches angepasst.
+
 Deren Version (also die git-commit-ID) wird in unserem Repository versioniert - der aktuelle Stand bezüglich der Upstream-Repositories ist also Teil der Versionsverwaltung.
 
 

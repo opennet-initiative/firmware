@@ -420,6 +420,11 @@ Unbenutzte Funktionen finden
 
 Das Skript ``opennet/tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
 
+Installierte Pakete nach Größe sortiert auflisten
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Die Funktion ``list_installed_packages_by_size`` kann auf dem AP ausgeführt werden und listet alle Pakete sortiert nach ihrer Größe auf. Damit lassen sich die Wirkungen möglicher Größenoptimierungen besser überblicken.
+
 
 Übersetzungen
 =============

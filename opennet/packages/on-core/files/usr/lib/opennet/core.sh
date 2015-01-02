@@ -598,3 +598,14 @@ line_in_file() {
 	) | update_file_if_changed "$filename" || true
 }
 
+
+# Eine hilfreiche Funktion zur Analyse des Platzbedarfs der installierten Pakete
+# Im AP-Betrieb ist sie nicht relevant.
+list_installed_packages_by_size() {
+	local fname
+	find /usr/lib/opkg/info/ -type f -name "*.control" | while read fname; do
+		grep "Installed-Size:" "$fname" \
+			| awk '{print $2, "\t", "'$(basename "${fname%.control}")'" }'
+	done | sort -n | awk 'BEGIN { summe=0 } { summe+=$1; print $0 } END { print summe }'
+}
+

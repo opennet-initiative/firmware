@@ -46,6 +46,8 @@ ping_neighbour() {
 ip rule >ip_rules.txt
 ip route show >ip_route_table_main.txt
 ip route show table olsrd >ip_route_table_olsrd.txt
+# Routing-Tabellennummern
+[ -e /etc/iproute2/rt_tables ] && cat /etc/iproute2/rt_tables >rt_tables
 
 wait
 

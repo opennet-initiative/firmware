@@ -45,8 +45,11 @@ filter_routable_addresses() {
 }
 
 
-# Ermittle das Netzwerkinterface, ueber den der Verkehr zu einem Ziel laufen wuerde.
-# Falls erforderlich, findet eine Namensaufloesung statt.
+## @fn get_target_route_interface()
+## @brief Ermittle das Netzwerkinterface, über den der Verkehr zu einem Ziel laufen würde.
+## @param target Hostname oder IP des Ziel-Hosts
+## @details Falls erforderlich, findet eine Namensauflösung statt.
+## @return Name des physischen Netzwerk-Interface, über den der Verkehr zum Ziel-Host fließen würde
 get_target_route_interface() {
 	local target=$1
 	local ipaddr

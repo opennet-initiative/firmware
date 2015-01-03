@@ -1,8 +1,8 @@
-# Lars Kruse <devel@sumpfralle.de>, 2014.
+# Lars Kruse <devel@sumpfralle.de>, 2014, 2015.
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2014-12-27 04:48+0200\n"
+"PO-Revision-Date: 2015-01-03 22:57+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -129,8 +129,8 @@ msgstr ""
 "eine IP für Deinen Access-Point im %sOpennet-Wiki%s aus und trage diese hier "
 "ein. Bitte schau Dir vorher auch die %sMitmachen-Seite im Wiki%s an."
 
-msgid "Hardware-Information:"
-msgstr "Geräteinfo:"
+msgid "Hardware Information"
+msgstr "Hardware-Informationen"
 
 msgid "IP"
 msgstr "IP"
@@ -180,8 +180,8 @@ msgstr "Internet-Freigabe ist möglich"
 msgid "Internet-Sharing:"
 msgstr "Internet-Freigabe:"
 
-msgid "Issue indicators:"
-msgstr "Problemindikatoren:"
+msgid "Issue Indicators"
+msgstr "Problemindikatoren"
 
 msgid "LOCAL"
 msgstr "LOKAL"
@@ -201,14 +201,14 @@ msgid ""
 msgstr ""
 "Nachbar-Link-Qualität: wie viele der Pakete des Nachbarn wurden empfangen"
 
-msgid "Neighbors:"
-msgstr "Nachbarn:"
+msgid "Neighbors"
+msgstr "Nachbarn"
 
 msgid "Network"
 msgstr "Netzwerk"
 
-msgid "Networks:"
-msgstr "Netzwerk:"
+msgid "Networks"
+msgstr "Netzwerke"
 
 msgid "No report available:"
 msgstr "Keine Zusammenfassung verfügbar:"
@@ -222,8 +222,8 @@ msgstr "ON Erweitert"
 msgid "OPENNET"
 msgstr "OPENNET"
 
-msgid "OpenVPN:"
-msgstr "OpenVPN:"
+msgid "OpenVPN"
+msgstr "OpenVPN"
 
 msgid "Opennet"
 msgstr "Opennet"
@@ -280,8 +280,8 @@ msgstr "Status"
 msgid "Status Information"
 msgstr "Status Information"
 
-msgid "System:"
-msgstr "System:"
+msgid "System"
+msgstr "System"
 
 msgid "Target-Address"
 msgstr "Ziel-Adresse"
@@ -390,8 +390,8 @@ msgstr ""
 "diese sortiert werde und füge spezifische Gateways hinzu oder blockiere "
 "diese."
 
-msgid "Uptime:"
-msgstr "Gerätelaufzeit:"
+msgid "Uptime"
+msgstr "Gerätelaufzeit"
 
 msgid "Usergateway-Tunnel active"
 msgstr "Usergateway-Tunnel ist aktiv"
@@ -420,8 +420,8 @@ msgstr "Willkommen zu den Verwaltungs-Seiten dieses Access-Points!"
 msgid "Welcome to the Extended Configuration Pages of your Access Point"
 msgstr "Willkommen zu den Erweiterten Verwaltungs-Seiten dieses Access-Points!"
 
-msgid "Wireless:"
-msgstr "Funknetz:"
+msgid "Wireless"
+msgstr "Funknetz"
 
 msgid ""
 "You have some WAN-connection like DSL and like to share the Internet? Here "
@@ -453,6 +453,36 @@ msgstr "Beginn / Anzahl / Lease-Laufzeit"
 
 msgid "use"
 msgstr "übernehmen"
+
+#~ msgid "Hardware-Information"
+#~ msgstr "Hardware-Informationen"
+
+#~ msgid "Issue indicators"
+#~ msgstr "Problemindikatoren"
+
+#~ msgid "Hardware-Information:"
+#~ msgstr "Geräteinfo:"
+
+#~ msgid "Issue indicators:"
+#~ msgstr "Problemindikatoren:"
+
+#~ msgid "Neighbors:"
+#~ msgstr "Nachbarn:"
+
+#~ msgid "Networks:"
+#~ msgstr "Netzwerk:"
+
+#~ msgid "OpenVPN:"
+#~ msgstr "OpenVPN:"
+
+#~ msgid "System:"
+#~ msgstr "System:"
+
+#~ msgid "Uptime:"
+#~ msgstr "Gerätelaufzeit:"
+
+#~ msgid "Wireless:"
+#~ msgstr "Funknetz:"
 
 #~ msgid ""
 #~ "Expected Transmission Count - Quality of the Connection to the Gateway "

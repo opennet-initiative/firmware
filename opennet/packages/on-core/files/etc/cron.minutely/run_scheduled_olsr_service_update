@@ -3,6 +3,8 @@
 # Im 5-Minuten-Takt wird ein cron-Job ausgefuehrt, der _immer_ zur Aktualisierung der Dienste fuehrt.
 # Wir wollen unsere (bedigte) Aktualisierung nicht zeitgleich starten (Speicherbedarf auf kleinen Geraeten reduzieren).
 minute=$(date +%M)
+# entferne eine potentiell fuehrende Null (sonst wird die Zahl als Oktal-Wert interpretiert)
+minute=${minute#0}
 [ "$((minute % 5))" -eq 0 ] && exit 0
 
 on-function run_scheduled_olsrd_service_updates

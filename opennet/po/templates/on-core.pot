@@ -98,7 +98,7 @@ msgid ""
 "read the information %sin the wiki%s for further details."
 msgstr ""
 
-msgid "Hardware-Information:"
+msgid "Hardware Information"
 msgstr ""
 
 msgid "IP"
@@ -144,7 +144,7 @@ msgstr ""
 msgid "Internet-Sharing:"
 msgstr ""
 
-msgid "Issue indicators:"
+msgid "Issue Indicators"
 msgstr ""
 
 msgid "LOCAL"
@@ -163,13 +163,13 @@ msgid ""
 "Neighbor-Link-Quality: how many of your test-packets did reach your neighbor"
 msgstr ""
 
-msgid "Neighbors:"
+msgid "Neighbors"
 msgstr ""
 
 msgid "Network"
 msgstr ""
 
-msgid "Networks:"
+msgid "Networks"
 msgstr ""
 
 msgid "No report available:"
@@ -184,7 +184,7 @@ msgstr ""
 msgid "OPENNET"
 msgstr ""
 
-msgid "OpenVPN:"
+msgid "OpenVPN"
 msgstr ""
 
 msgid "Opennet"
@@ -237,7 +237,7 @@ msgstr ""
 msgid "Status Information"
 msgstr ""
 
-msgid "System:"
+msgid "System"
 msgstr ""
 
 msgid "Target-Address"
@@ -315,7 +315,7 @@ msgid ""
 "Select, how they are ordered and add or blacklist specific Gateways"
 msgstr ""
 
-msgid "Uptime:"
+msgid "Uptime"
 msgstr ""
 
 msgid "Usergateway-Tunnel active"
@@ -345,7 +345,7 @@ msgstr ""
 msgid "Welcome to the Extended Configuration Pages of your Access Point"
 msgstr ""
 
-msgid "Wireless:"
+msgid "Wireless"
 msgstr ""
 
 msgid ""

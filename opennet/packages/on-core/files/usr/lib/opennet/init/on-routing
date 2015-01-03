@@ -1,8 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-
-get_or_add_routing_table "$ROUTING_TABLE_ON_UPLINK" >/dev/null
-

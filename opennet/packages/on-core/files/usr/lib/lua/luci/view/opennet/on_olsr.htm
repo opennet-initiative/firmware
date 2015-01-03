@@ -1,5 +1,6 @@
 <%+header%>
+require("luci.model.opennet.funcs")
 
-<iframe src="http://<%=luci.http.getenv('SERVER_NAME')%>:8080" style="height:100em;width:100%;border:none"/>
+<iframe src="http://<%=luci.http.getenv('SERVER_NAME')%>:<%=on_function('get_variable', {'OLSR_HTTP_PORT'}%>" style="height:100em;width:100%;border:none"/>
 
 <%+footer%>

@@ -20,7 +20,7 @@ configure_olsrd_httpinfo_port() {
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "httpinfo")
 	# Wir koennen leider nicht zwischen "Nutzer hat 1978 eingestellt" und "Auslieferungszustand" unterscheiden.
 	# Falls der Nutzer also explizit diesen Port will, dann muss er ihn nach einem Upgrade wieder einstellen.
-	[ "$(uci_get "${uci_prefix}.port" "1978")" = "1978" ] && uci set "${uci_prefix}.port=8080"
+	[ "$(uci_get "${uci_prefix}.port" "1978")" = "1978" ] && uci set "${uci_prefix}.port=$OLSR_HTTP_PORT"
 	return 0
 }
 
@@ -42,8 +42,8 @@ enable_ondataservice
 enable_nameservice
 disable_missing_olsr_modules
 olsr_set_main_ip
-olsr_set_routing_tables olsrd olsrd-default
-configure_olsrd_httpinfo_port 8080
+olsr_set_routing_tables "$ROUTING_TABLE_MESH" "$ROUTING_TABLE_MESH_DEFAULT"
+configure_olsrd_httpinfo_port "$OLSR_HTTP_PORT"
 olsrd_enable_jsoninfo
 
 apply_changes olsrd

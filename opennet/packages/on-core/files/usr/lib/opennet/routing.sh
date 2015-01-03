@@ -31,11 +31,15 @@ is_ipv6() {
 }
 
 
-# Lies IP-Addressen via stdin ein und gib alle Adressen aus, die (laut "ip route get") erreichbar sind.
-# Dies bedeutet nicht, dass wir mit den Adressen kommunizieren koennen - es geht lediglich um lokale Routing-Regeln.
+## @fn filter_routable_addresses()
+## @brief Filtere aus einer Menge von Ziel-IPs diejenigen heraus, für die eine passende Routing-Regel existiert.
+## @details Lies IP-Addressen zeilenweise via stdin ein und gib alle Adressen aus, die (laut "ip route get") erreichbar sind.
+##   Dies bedeutet nicht, dass wir mit den Adressen kommunizieren koennen - es geht lediglich um lokale Routing-Regeln.
+## @return zeilenweise Ausgabe der route-baren Ziel-IPs:w
 filter_routable_addresses() {
+	local ip
 	while read ip; do
-		[ -n "$(get_target_route_interface "$ip")" ] && echo "$ip"
+		[ -n "$(get_target_route_interface "$ip")" ] && echo "$ip" || true
 	done
 	return 0
 }
@@ -91,9 +95,10 @@ add_network_policy_rule_by_destination() {
 }
 
 
-# erzeuge Policy-Rules fuer Quell-Interfaces
-# Parameter: Zone
-# weitere Parameter: Rule-Spezifikation
+## @fn add_zone_policy_rules_by_iif()
+## @brief Erzeuge Policy-Rules fuer Quell-Interfaces
+## @param zone Pakete aus allen Interfaces dieser Zone kommend sollen betroffen sein
+## @param route Spezifikation einer Route (siehe 'ip route add ...')
 add_zone_policy_rules_by_iif() {
 	trap "error_trap add_zone_policy_rules '$*'" $GUARD_TRAPS
 	local zone=$1
@@ -106,12 +111,13 @@ add_zone_policy_rules_by_iif() {
 }
 
 
-# Aktion fuer die initiale Policy-Routing-Initialisierung nach dem System-Boot
-# Folgende Seiteneffekte treten ein:
-#  * alle throw-Routen aus den Tabellen olsrd/olsrd-default/main werden geloescht
-#  * alle Policy-Rules mit Bezug zu den Tabellen olsrd/olsrd-default/main werden geloescht
-#  * die neuen Policy-Rules fuer die obigen Tabellen werden an anderer Stelle erzeugt
-# Kurz gesagt: alle bisherigen Policy-Rules sind hinterher kaputt
+## @fn initialize_olsrd_policy_routing()
+## @brief Policy-Routing-Initialisierung nach dem System-Boot
+## @details ## Folgende Seiteneffekte treten ein:
+##   * alle throw-Routen aus den Tabellen olsrd/olsrd-default/main werden gelöscht
+##   * alle Policy-Rules mit Bezug zu den Tabellen olsrd/olsrd-default/main werden gelöscht
+##   * die neuen Policy-Rules für die obigen Tabellen werden an anderer Stelle erzeugt
+##   Kurz gesagt: alle bisherigen Policy-Rules sind hinterher kaputt
 initialize_olsrd_policy_routing() {
 	trap "error_trap initialize_olsrd_policy_routing '$*'" $GUARD_TRAPS
 	local iface

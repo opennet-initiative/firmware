@@ -6,11 +6,19 @@ DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 REPORTS_FILE=/tmp/on_report.tar.gz
 
 
+## @fn get_client_cn()
+## @brief Ermittle den Common-Name des Nutzer-Zertifikats
+## @todo Verschiebung zu on-openvpn - Pruefung auf Existenz der Datei
 get_client_cn() {
 	openssl x509 -in /etc/openvpn/opennet_user/on_aps.crt \
 		-subject -nameopt multiline -noout 2>/dev/null | awk '/commonName/ {print $3}'
 }
 
+## @fn msg_debug()
+## @param message Debug-Nachricht
+## @brief Debug-Meldungen ins syslog schreiben
+## @details Die Debug-Nachrichten landen im syslog (siehe ``logread``).
+## Falls das aktuelle Log-Level bei ``info`` oder niedriger liegt, wird keine Nachricht ausgegeben.
 msg_debug() {
 	[ -z "$DEBUG" ] && DEBUG=$(uci_get on-core.settings.debug)
 	[ -z "$DEBUG" ] && DEBUG=false
@@ -21,9 +29,15 @@ msg_info() {
 	logger -t "$(basename "$0")[$$]" "$1"
 }
 
-# update a file if its content changed
-# return exitcode=0 (success) if the file was updated
-# return exitcode=1 (failure) if there was no change
+## @fn update_file_if_changed()
+## @param filename Name der Zieldatei
+## @brief Aktualisiere eine Datei, falls sich ihr Inhalt geändert haben sollte.
+## @details Der neue Inhalt der Datei wird auf der Standardeingabe erwartet.
+##   Im Falle der Gleichheit von aktuellem Inhalt und zukünftigem Inhalt wird
+##   keine Schreiboperation ausgeführt. Der Exitcode gibt an, ob eine Schreiboperation
+##   durchgeführt wurde.
+## @return exitcode=0 (Erfolg) falls die Datei geändert werden musste
+## @return exitcode=1 (Fehler) falls es keine Änderung gab
 update_file_if_changed() {
 	local target_filename="$1"
 	local content="$(cat -)"

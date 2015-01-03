@@ -12,15 +12,21 @@ DEFAULT_RULE_PRIO_OFFSET=100
 OLSR_ROUTE_CACHE_FILE=/tmp/olsr_routes.cache
 
 
-# Pruefe ob der uebegebene Text eine IPv4-Adresse ist
+## @fn is_ipv4()
+## @brief Prüfe ob der übergebene Text eine IPv4-Adresse ist
+## @param target eine Zeichenkette (wahrscheinlich ein DNS-Name, eine IPv4- oder IPv6-Adresse)
 is_ipv4() {
+	local target="$1"
 	echo "$target" | grep -q -E "^[0-9]+(\.[0-9]+){3}$"
 }
 
 
-# Pruefe ob der uebegebene Text eine IPv6-Adresse ist
-# Achtung: der Test ist recht oberflaechlich und kann falsche Positive liefern.
+## @fn is_ipv6()
+## @brief Prüfe ob der übergebene Text eine IPv6-Adresse ist
+## @param target eine Zeichenkette (wahrscheinlich ein DNS-Name, eine IPv4- oder IPv6-Adresse)
+## @details Achtung: der Test ist recht oberflächlich und kann falsche Positive liefern.
 is_ipv6() {
+	local target="$1"
 	echo "$target" | grep -q "^[0-9a-fA-F:]\+$"
 }
 

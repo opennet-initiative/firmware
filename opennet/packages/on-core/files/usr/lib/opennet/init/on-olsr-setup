@@ -42,7 +42,7 @@ enable_ondataservice
 enable_nameservice
 disable_missing_olsr_modules
 olsr_set_main_ip
-olsr_set_routing_tables "$ROUTING_TABLE_MESH" "$ROUTING_TABLE_MESH_DEFAULT"
+olsr_sync_routing_tables
 configure_olsrd_httpinfo_port "$OLSR_HTTP_PORT"
 olsrd_enable_jsoninfo
 

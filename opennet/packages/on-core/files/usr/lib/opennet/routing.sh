@@ -119,11 +119,10 @@ initialize_olsrd_policy_routing() {
 	local table
 	local priority=$OLSR_POLICY_DEFAULT_PRIORITY
 
-	# Tabellen anmelden (nur einmalig notwendig)
-	for table in "$ROUTING_TABLE_MESH" "$ROUTING_TABLE_MESH_DEFAULT" \
-			"$ROUTING_TABLE_ON_UPLINK"; do
-		get_or_add_routing_table "$table" >/dev/null
-	done
+	# Sicherstellen, dass die Tabellen existieren und zur olsrd-Konfiguration passen
+	olsr_sync_routing_tables
+	# die Uplink-Tabelle ist unabhaengig von olsr
+	[ -z "$(get_routing_table_id "$ROUTING_TABLE_ON_UPLINK")" ] && add_routing_table "$ROUTING_TABLE_ON_UPLINK" >/dev/null
 
 	# alle Eintraege loeschen
 	delete_policy_rule table "$ROUTING_TABLE_MESH"
@@ -184,20 +183,37 @@ EOF
 }
 
 
-# Ermitteln der table-ID einer gegebenen Policy-Routing-Tabelle.
-# Falls die Tabelle nicht existiert, wird sie angelegt.
-get_or_add_routing_table() {
-	local table=$1
+## @fn get_routing_table_id()
+## @brief Ermittle die Nummer der namentlich gegebenen Routing-Tabelle.
+## @param table_name Name der gesuchten Routing-Tabelle
+## @return Routing-Tabellen-ID oder nichts (falls die Tabelle nicht existiert)
+get_routing_table_id() {
+	local table_name="$1"
 	_prepare_routing_table_file
-	local table_id=$(grep "^[0-9]\+[ \t]\+$table$" "$RT_FILE" | awk '{print $1}')
+	# Tabellennummer ausgeben, falls sie vorhanden ist
+	grep "^[0-9]\+[ \t]\+$table_name$" "$RT_FILE" | awk '{print $1}'
+	return 0
+}
+
+
+## @fn add_routing_table()
+## @brief Erstelle einen neuen Routing-Tabellen-Eintrag.
+## @param table_name der Name der zu erstellenden Routing-Tabelle
+## @details Die Routing-Tabellen-Nummer wird automatisch ermittelt.
+##    Sollte die Tabelle bereits existieren, dann wird ihre Nummer zurückgeliefert.
+## @return die neue Routing-Tabellen-Nummer wird zurückgeliefert
+add_routing_table() {
+	local table_name="$1"
+	_prepare_routing_table_file
+	local table_id=$(get_routing_table_id "$table_name")
 	# schon vorhanden?
 	[ -n "$table_id" ] && echo "$table_id" && return 0
 	# wir muessen den Eintrag hinzufuegen
-	table_id=$RT_START_ID
+	table_id="$RT_START_ID"
 	while grep -q "^$table_id[ \t]" "$RT_FILE"; do
 		: $((table_id++))
 	done
-	echo "$table_id      $table" >> "$RT_FILE"
+	echo "$table_id      $table_name" >> "$RT_FILE"
 	echo "$table_id"
 }
 

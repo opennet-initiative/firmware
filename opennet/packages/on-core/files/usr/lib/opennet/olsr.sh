@@ -125,20 +125,27 @@ disable_missing_olsr_modules() {
 }
 
 
-# erzeuge und konfiguriere separate Routing-Tabellen für die olsr-Einträge
-olsr_set_routing_tables() {
-	local rt_common=$1
-	local rt_default=$2
-	local rt_common_id=$(uci_get "olsrd.@olsrd[0].RtTable")
-	local rt_default_id=$(uci_get "olsrd.@olsrd[0].RtTableDefault")
-	if [ -z "$rt_common_id" ]; then
-		rt_common_id=$(get_or_add_routing_table "$rt_common")
-		uci set "olsrd.@olsrd[0].RtTable=$rt_common_id"
-	fi
-	if [ -z "$rt_default_id" ]; then
-		rt_default_id=$(get_or_add_routing_table "$rt_default")
-		uci set "olsrd.@olsrd[0].RtTableDefault=$rt_default_id"
-	fi
+## @fn olsr_sync_routing_tables()
+## @brief Synchronisiere die olsrd-Routingtabellen-Konfiguration mit den iproute-Routingtabellennummern.
+## @details Im Konfliktfall wird die olsrd-Konfiguration an die iproute-Konfiguration angepasst.
+olsr_sync_routing_tables() {
+	local olsr_name
+	local iproute_name
+	local olsr_id
+	local iproute_id
+	while read olsr_name iproute_name; do
+		olsr_id=$(uci_get "olsrd.@olsrd[0].$olsr_name")
+		iproute_id=$(get_routing_table_id "$iproute_name")
+		# beide sind gesetzt und identisch? Alles ok ...
+		[ -n "$olsr_id" -a "$olsr_id" = "$iproute_id" ] && continue
+		# eventuell Tabelle erzeugen, falls sie noch nicht existiert
+		[ -z "$iproute_id" ] && iproute_id=$(add_routing_table "$iproute_name")
+		# olsr passt sich im Zweifel der iproute-Nummer an
+		[ "$olsr_id" != "$iproute_id" ] && uci set "olsrd.@olsrd[0].$olsr_name=$iproute_id" || true
+	done << EOF
+RtTable		$ROUTING_TABLE_MESH
+RtTableDefault	$ROUTING_TABLE_MESH_DEFAULT
+EOF
 	apply_changes olsrd
 }
 

@@ -1,6 +1,3 @@
-[submodule "openwrt"]
-	path = openwrt
-	url = git://git.openwrt.org/openwrt.git
 [submodule "packages"]
 	path = packages
 	url = git://git.openwrt.org/packages.git
@@ -13,3 +10,6 @@
 [submodule "telephony"]
 	path = telephony
 	url = http://feeds.openwrt.nanl.de/openwrt/telephony.git
+[submodule "openwrt"]
+	path = openwrt
+	url = git://git.openwrt.org/14.07/openwrt.git

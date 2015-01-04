@@ -262,7 +262,7 @@ get_service_value() {
 		dirname="$VOLATILE_SERVICE_STATUS_DIR"
 	fi
 	value=$(_get_file_dict_value "$dirname/$service_name" "$attribute")
-	[ -n "$value" ] && echo "$value" || echo "$default"
+	[ -n "$value" ] && echo -n "$value" || echo -n "$default"
 	return 0
 }
 

@@ -20,54 +20,69 @@ HOME="$(dirname $(readlink -f "$0"))"
 . "$HOME/$CFG"
 
 # retrieve commands
-PARAM=""
-[ $# -gt 0 ] && PARAM="$1"
+action="${1:-help}"
+
+
+get_snapshot_name() {
+	local input_file="$HOME/$MK_FILE"
+	# get revision number
+	local version=$(grep "^PKG_VERSION:=" "$input_file" | cut -f 2- -d =)
+	local release=$(grep "^PKG_RELEASE:=" "$input_file" | cut -f 2- -d =)
+	[ -z "$version" -o -z "$release" ] && echo >&2 "error getting revision numbers from build" && return 1
+	echo "$version-$release"
+}
+
+
+get_commit_info() {
+	# kurze Uebersicht aller commits des aktuellen Builds inkl. eines Commit-Zaehlers
+	git log --oneline | sed -n '1!G;h;$p' | nl | tac
+}
+
+
+build_platform() {
+	local platform="$1"
+	local snapshot_name=$(get_snapshot_name)
+
+	# prepare export directory
+	local dest_dir="$HOME/$EXPORT_DIR/$snapshot_name"
+	local dest_platform_dir="$dest_dir/$platform"
+	mkdir -p "$dest_platform_dir"
+
+	# copy build to export directory
+	local src_dir="$HOME/$BIN_DIR/$platform"
+	rsync $RSYNC_OPTIONS "$src_dir/" "$dest_platform_dir/"
+
+	# set version number in export directories
+	get_commit_info > "$dest_dir/__${snapshot_name}__"
+	get_commit_info > "$dest_platform_dir/__${snapshot_name}__"
+
+	# generate latest link
+	rm -f "$HOME/$EXPORT_DIR/$LATEST_LINK"
+	(cd "$HOME/$EXPORT_DIR" && ln -s "$snapshot_name" "$LATEST_LINK")
+}
+
+
+export_doc() {
+	local snapshot_name=$(get_snapshot_name)
+	local dest_dir="$HOME/$EXPORT_DIR/$snapshot_name/doc"
+	mkdir -p "$dest_dir"
+	local src_dir="$HOME/$DOC_DIR"
+	rsync $RSYNC_OPTIONS "$src_dir/" "$dest_dir/"
+}
+
 
 # process commands
-PLATFORM=""
-case "$PARAM" in
+case "$action" in
   help|--help)
     echo "Usage: $(basename "$0") [<platform>]"
     exit 0
     ;;
+  doc)
+    export_doc
+    ;;
   *)
-    PLATFORM="/$PARAM"
+    build_platform "$action"
     ;;
 esac
 
-# get revision number
-step=0
-while read line; do
-  case "$line" in
-    "PKG_VERSION:="*) 
-      VERSION="${line#*=}" 
-      step=$((step +1))
-      ;;
-    "PKG_RELEASE:="*) 
-      RELEASE="${line#*=}"
-      step=$((step +1))
-      ;;
-  esac
-done < "$HOME/$MK_FILE"
-[ $step -ne 2 ] && echo >&2 "error getting revision numbers from build" && exit 1
-REVISION="$VERSION-$RELEASE"
-
-# prepare export directory
-DEST_DIR="$HOME/$EXPORT_DIR/$REVISION"
-DEST_PLATFORM_DIR="$DEST_DIR$PLATFORM"
-mkdir -p "$DEST_PLATFORM_DIR"
-
-# copy build to export directory
-SRC_DIR="$HOME/$BIN_DIR$PLATFORM/"
-rsync $RSYNC_OPTIONS "$SRC_DIR"* "$DEST_PLATFORM_DIR"
-
-# set version number in export directories
-touch "$DEST_DIR/__${REVISION}__"
-touch "$DEST_PLATFORM_DIR/__${REVISION}__"
-
-# generate latest link
-rm -f "$HOME/$EXPORT_DIR/$LATEST_LINK"
-(cd "$HOME/$EXPORT_DIR" && ln -s "$REVISION" "$LATEST_LINK")
-
-# return
 exit 0

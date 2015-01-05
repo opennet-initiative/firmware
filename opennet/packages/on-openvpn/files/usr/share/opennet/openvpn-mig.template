@@ -13,6 +13,14 @@ comp-lzo yes
 
 persist-key
 
+# bei einem Verbindungsfehler sollten wir schnell einen Abbruch signalisieren
+# (anstelle unendlich vieler Verbindungsversuche)
+tls-exit
+# nur ein Verbindungsversuch
+single-session
+# begrenze den Timeout fuer das TLS-Handshake auf 30s - dies ermoeglicht einen Verbindungsabbruch innerhalb von einer Minute
+hand-window 30
+
 dev tun
 dev-type tun
 

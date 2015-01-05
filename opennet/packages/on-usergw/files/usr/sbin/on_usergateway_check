@@ -101,7 +101,7 @@ ugw_update_vpn_status()
 		set_ugw_value "$config_name" status n
 		set_ugw_value "$config_name" age 0
 	elif [ "$age" -ge "$recheck_age" ]; then
-		if verify_vpn_connection "$(uci_get "${uci_prefix}.config_file")" \
+		if verify_vpn_connection "$(uci_get "${uci_prefix}.config_file")" "detail:hostname" \
 				"$VPN_DIR_TEST/on_aps.key" \
 				"$VPN_DIR_TEST/on_aps.crt" \
 				"$VPN_DIR_TEST/opennet-ca.crt"; then

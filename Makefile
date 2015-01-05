@@ -9,7 +9,7 @@ CONFIG_DIR = opennet/config
 ARCHS = $(shell ls "$(CONFIG_DIR)/" | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
 GIT_COMMIT_COUNT=$(shell git log --oneline | wc -l)
 
-.PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs
+.PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs doc
 
 all: $(ARCHS)
 
@@ -66,7 +66,7 @@ diff-menuconfig: feeds
 	@quilt diff
 	@quilt delete
 
-doc:
+doc: patch
 	$(MAKE) -C opennet/doc
 
 translate:

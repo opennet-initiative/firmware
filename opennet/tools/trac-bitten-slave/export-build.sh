@@ -42,6 +42,7 @@ get_commit_info() {
 build_platform() {
 	local platform="$1"
 	local snapshot_name=$(get_snapshot_name)
+	[ -z "$snapshot_name" ] && return 1
 
 	# prepare export directory
 	local dest_dir="$HOME/$EXPORT_DIR/$snapshot_name"
@@ -64,6 +65,7 @@ build_platform() {
 
 export_doc() {
 	local snapshot_name=$(get_snapshot_name)
+	[ -z "$snapshot_name" ] && return 1
 	local dest_dir="$HOME/$EXPORT_DIR/$snapshot_name/doc"
 	mkdir -p "$dest_dir"
 	local src_dir="$HOME/$DOC_DIR"
@@ -71,18 +73,36 @@ export_doc() {
 }
 
 
+purge_old_exports() {
+	local keep_builds="$1"
+	cd "$HOME/$EXPORT_DIR"
+	# "uniq -u" entfernt doppelte Zeilen - also verbleiben nur die alten Dateien
+	(
+		ls -t | head -n "$keep_builds"
+		ls
+	) | sort | uniq -u | xargs --delimiter '\n' --no-run-if-empty echo rm -r
+}
+
+
 # process commands
 case "$action" in
-  help|--help)
-    echo "Usage: $(basename "$0") [<platform>]"
-    exit 0
-    ;;
-  doc)
-    export_doc
-    ;;
-  *)
-    build_platform "$action"
-    ;;
+	help|--help)
+		echo "Usage: $(basename "$0") [<platform>]"
+		exit 0
+		;;
+	doc)
+		export_doc
+		;;
+	purge)
+		keep_builds=${2:-}
+		[ -z "$keep_builds" ] && echo >&2 "No number of non-purgeable builds given" && exit 2
+		echo "$keep_builds" | grep -q "[^0-9]" && echo >&2 "Number of non-purgeable builds contains non-digits: '$keep_builds'" && exit 3
+		[ "$keep_builds" -lt 1 ] && echo >&2 "Number of non-purgeable builds is too low: '$keep_builds'" && exit 4
+		purge_old_exports "$keep_builds"
+		;;
+	*)
+		build_platform "$action"
+		;;
 esac
 
 exit 0

@@ -602,7 +602,7 @@ line_in_file() {
 	local new_line="$3"
 	local line
 	# Datei existiert nicht? Einfach mit dieser Zeile erzeugen.
-	[ ! -e "$filename" ] && echo "$content" >"$filename" && return 0
+	[ ! -e "$filename" ] && echo "$new_line" >"$filename" && return 0
 	# Datei einlesen - zum Muster passende Zeilen austauschen - notfalls neue Zeile anfuegen
 	(
 		while read line; do

@@ -145,19 +145,10 @@ get_service_sorting() {
 # Liefere die Dienst-Namen aller ausgewaehlten Dienste, die erreichbar sind.
 # Ein oder mehrere Dienst-Typen koennen angegeben werden.
 get_sorted_services() {
-	local service
 	local service_name
 	local priority
 	local sorting=$(get_service_sorting)
-	if [ "$#" -gt 0 ]; then
-		# hole alle Dienste aus den angegebenen Klassen (z.B. "gw ugw")
-		for service in "$@"; do
-			get_services "service=$service"
-		done
-	else
-		# alle Dienste ohne Typen-Sortierung
-		get_services
-	fi | while read service_name; do
+	get_services "$@" | while read service_name; do
 		# keine Entfernung -> nicht erreichbar -> ignorieren
 		priority=$(get_service_priority "$service_name" "$sorting")
 		[ -z "$priority" ] && continue
@@ -180,24 +171,49 @@ filter_enabled_services() {
 }
 
 
-# Als optionale Parameter koennen beliebig viele "key=value"-Schluesselpaare angegeben werden.
-# Nur diejenigen Dienste, auf die alle Bedingungen zutreffen, werden zurueckgeliefert.
+## @fn get_services()
+## @param service_types ein oder mehrere Service-Typen
+## @brief Liefere alle Dienste zurueck, die einem der angegebenen Typen zugeordnet sind.
+## Falls keine Parameter übergeben wurden, dann werden alle Dienste ungeachtet ihres Typs ausgegeben.
 get_services() {
+	local services
+	local service_type
 	local fname_persist
-	local fname_volatile
-	local condition
-	[ -e "$PERSISTENT_SERVICE_STATUS_DIR" ] || return 0
-	find "$PERSISTENT_SERVICE_STATUS_DIR" -type f | while read fname_persist; do
-		[ -s "$fname_persist" ] || continue
-		fname_volatile="$VOLATILE_SERVICE_STATUS_DIR/$(basename "$fname_persist")"
+	if [ $# -eq 0 ]; then
+		# alle Dienste ausgeben
+		# kein Dienste-Verzeichnis? Keine Ergebnisse ...
+		[ -e "$PERSISTENT_SERVICE_STATUS_DIR" ] || return 0
+		find "$PERSISTENT_SERVICE_STATUS_DIR" -type f | while read fname_persist; do
+			# leere Dateien ignorieren; die anderen als Dienstnamen ausgeben
+			[ -s "$fname_persist" ] && basename "$fname_persist" || true
+		done
+	else
+		# liefere alle Dienste mit dem passenden "service"-Attribut
+		services=$(get_services)
+		for service_type in "$@"; do
+			echo "$services" | filter_services_by_value "service=$service_type"
+		done
+	fi
+}
+
+
+## @fn filter_services_by_value()
+## @param key_values beliebige Anzahl von "SCHLUESSEL=WERT"-Kombinationen
+## @details Als Parameter koennen beliebig viele "key=value"-Schluesselpaare angegeben werden.
+## Nur diejenigen Dienste, auf die alle Bedingungen zutreffen, werden zurueckgeliefert.
+## Sind keine Parameter gegeben, dann werden alle eingegebenen Dienste ausgeliefert
+filter_services_by_value() {
+	local service_name
+	local key
+	local value
+	while read service_name; do
 		for condition in "$@"; do
-			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt
-			# ersetze das erste Gleichheitszeichen durch eine whitespace-regex
-			condition=$(echo "$condition" | sed 's/=/[ \\t]+/')
-			grep -s -q -E "^$condition$" "$fname_persist" "$fname_volatile" || continue 2
+			key=$(echo "$condition" | cut -f 1 -d =)
+			value=$(echo "$condition" | cut -f 2- -d =)
+			[ "$value" = "$(get_service_value "$service_name" "$key")" ] || continue 2
 		done
 		# alle Bedingungen trafen zu
-		basename "$fname_persist"
+		echo "$service_name"
 	done
 	return 0
 }

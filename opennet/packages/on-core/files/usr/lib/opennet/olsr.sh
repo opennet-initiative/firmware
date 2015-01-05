@@ -225,7 +225,7 @@ update_olsr_services() {
 		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "$details" "olsr"
 	done
 	# veraltete Dienste entfernen
-	get_services "source=olsr" | while read service_name; do
+	get_services | filter_services_by_value "source=olsr" | while read service_name; do
 		timestamp=$(get_service_value "$service_name" "timestamp" 0)
 		# der Service ist zu lange nicht aktualisiert worden
 		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true

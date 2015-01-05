@@ -45,7 +45,7 @@ test_mig_connection() {
 		# 3) falls bisher noch kein definitives Ergebnis feststand (dies ist nur innerhalb
 		#    der ersten "recheck" Minuten nach dem Booten moeglich).
 		# In jedem Fall kann der Zeitstempel gesetzt werden - egal welches Ergebnis die Pruefung hat.
-		if verify_vpn_connection "$service_name" "true" \
+		if verify_vpn_connection "$service_name" "host" \
 				"$VPN_DIR_TEST/on_aps.key" \
 				"$VPN_DIR_TEST/on_aps.crt" \
 				"$VPN_DIR_TEST/opennet-ca.crt"; then
@@ -77,14 +77,14 @@ test_mig_connection() {
 select_mig_connection() {
 	local wanted="$1"
 	local one_service
-	get_sorted_services gw ugw | while read one_service; do
+	get_sorted_services "gw" "ugw" | while read one_service; do
 		# loesche Flags fuer die Vorselektion
 		set_service_value "$one_service" "switch_candidate_timestamp" ""
 		# erst nach der Abschaltung der alten Dienste wollen wir den/die neuen Dienste anschalten (also nur Ausgabe)
 		[ "$one_service" = "$wanted" ] && echo "$one_service" && continue
 		disable_openvpn_service "$one_service" || true
 	done | while read one_service; do
-		enable_openvpn_service "$wanted" "true"
+		enable_openvpn_service "$wanted" "host"
 	done
 }
 

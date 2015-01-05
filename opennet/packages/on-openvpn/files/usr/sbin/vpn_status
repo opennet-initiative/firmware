@@ -77,8 +77,7 @@ print_usage()
 
 _get_gateway_service_from_ip() {
 	local host="$1"
-	local service_name=$(get_services "service=ugw" "host=$host" | head -1)
-	[ -z "$service_name" ] && service_name=$(get_services "service=gw" "host=$host" | head -1)
+	local service_name=$(get_services "ugw" "gw" | filter_services_by_value "host=$host" | head -1)
 	echo "$service_name"
 }
 

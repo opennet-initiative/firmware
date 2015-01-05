@@ -236,7 +236,7 @@ transfer_gateway_uci_settings() {
 		offset=$(uci_get "${uci_prefix}.etx_offset")
 		rank="${uci_prefix#on-openvpn.gate_}"
 		# ermittle alle passenden Dienste dieses Hosts (es koennen mehrere Dienste pro Host vorhanden sein)
-		(get_services "service=ugw" "host=$host"; get_services "service=gw" "host=$host") | while read service_name; do
+		get_services "ugw" "gw" | filter_services_by_value "host=$host" | while read service_name; do
 			# Offset fuer automatische Sortierung uebertragen
 			[ -n "$offset" ] && set_service_value "$service_name" "offset" "$offset"
 			# Rang fuer manuelle Sortierung uebertragen

@@ -21,9 +21,10 @@ MSG_FILE=/tmp/openvpn_msg.txt
 disconnect_current() {
 	# das Namensschema der Konfigurationsdatei enthaelt den Dienstnamen
 	local broken_service=$(basename "${config%.conf}")
-	[ -n "$broken_service" ] && on-function set_service_value "$broken_service" "status" "n"
+	[ -n "$broken_service" ] && set_service_value "$broken_service" "status" "n"
 	# PID-Datei loeschen
-	rm -f "/var/run/${broken_service}.pid"
+	local pid_file=$(get_service_value "$broken_service" "pid_file")
+	[ -n "$pid_file" ] && rm -f "$pid_file"
 }
 
 

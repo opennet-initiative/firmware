@@ -279,6 +279,7 @@ ugw_doExtraChecks () {
 
 		# mtuCheck
 		# if last mtucheck is older than 1 day and ugw is not running
+		# TODO: PID-Dateiname im Service speichern (z.B. "pid_file")
 		vpn_pidfile="/var/run/${config_name}.pid"
 		clean_stale_pid_file "$vpn_pidfile"
 		# VPN laeuft -> kein MTU-Test

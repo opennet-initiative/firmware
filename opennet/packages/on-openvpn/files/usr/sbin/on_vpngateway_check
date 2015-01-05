@@ -39,11 +39,9 @@ case "${1:-}" in
 		shift
 		if [ "$#" -gt 0 ]; then
 			# filtere die Dienste, die mit der einen angegebene IP assoziiert sind
-			get_sorted_services gw ugw | while read service_name; do
-				[ "$(get_service_value "$service_name" "host")" = "$1" ] && echo "$service_name" || true
-			done
+			get_services "gw" "ugw" | filter_services_by_value "host=$1"
 		else
-			get_sorted_services gw ugw | filter_enabled_services
+			get_services "gw" "ugw"
 		fi | filter_enabled_services | while read service_name; do
 			description=$(get_service_description "$service_name")
 			echo "Testing Gateway: $description"
@@ -68,7 +66,7 @@ case "${1:-}" in
 		# erster Schritt: alte Verbindungen loeschen
 		cleanup_stale_openvpn_services
 		# teste alle VPN-Verbindungen (falls noetig und moeglich)
-		get_sorted_services gw ugw | filter_enabled_services | while read service_name; do
+		get_services "gw" "ugw" | filter_enabled_services | while read service_name; do
 			test_mig_connection "$service_name" || true
 		done
 		# die Gateway-Auswahl ist nur relevant, falls ein Schluessel vorhanden ist

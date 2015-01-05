@@ -72,7 +72,7 @@ update_dns_servers() {
 	       reload_config
 	fi
 	# wir sortieren alphabetisch - Naehe ist uns egal
-	get_sorted_services dns | filter_enabled_services | sort | while read service; do
+	get_services "dns" | filter_enabled_services | sort | while read service; do
 		host=$(get_service_value "$service" "host")
 		port=$(get_service_value "$service" "port")
 		[ -n "$port" -a "$port" != "53" ] && host="$host#$port"
@@ -99,7 +99,7 @@ update_ntp_servers() {
 	# schreibe die Liste der NTP-Server neu
 	uci_delete system.ntp.server
 	# wir sortieren alphabetisch - Naehe ist uns egal
-	get_sorted_services ntp | filter_enabled_services | sort | while read service; do
+	get_services "ntp" | filter_enabled_services | sort | while read service; do
 		host=$(get_service_value "$service" "host")
 		port=$(get_service_value "$service" "port")
 		[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
@@ -287,6 +287,7 @@ clean_stale_pid_file() {
 # Parameter PID-Datei: vollstaendiger Pfad
 # Parameter Prozess-Name: Dateiname ohne Pfad
 check_pid_file() {
+	trap "error_trap check_pid_file '$*'" $GUARD_TRAPS
 	local pid_file="$1"
 	local process_name="$2"
 	local pid
@@ -650,9 +651,9 @@ get_variable() {
 # Pruefe, ob die angegebene Funktion definiert ist.
 # Dies ersetzt opkg-basierte Pruefungen auf installierte opennet-Firmware-Pakete.
 is_function_available() {
-	local func_name
+	local func_name="$1"
 	# "ash" liefert leider nicht den korrekten Wert "function" nach einem Aufruf von "type -t".
 	# Also verwenden wir die Textausgabe von "type".
-	echo "$(type "$1")" | grep -q "function$" && return 0
+	echo "$(type "$func_name")" | grep -q "function$" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }

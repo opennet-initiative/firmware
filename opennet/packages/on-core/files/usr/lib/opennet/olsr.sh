@@ -1,6 +1,6 @@
-# opennet-Funktionen rund um den OLSR-Dienst
-# wird durch "on-helper" eingebunden
-
+## @defgroup olsr OLSR-Funktionen
+# Beginn der Doku-Gruppe
+## @{
 
 OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 SERVICES_FILE=/var/run/services_olsr
@@ -246,3 +246,5 @@ run_scheduled_olsrd_service_updates() {
 	update_olsr_services
 }
 
+# Ende der Doku-Gruppe
+## @}

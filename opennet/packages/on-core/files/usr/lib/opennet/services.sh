@@ -1,3 +1,7 @@
+## @defgroup services Dienste-Funktionen
+# Beginn der Doku-Gruppe
+## @{
+
 VOLATILE_SERVICE_STATUS_DIR=/tmp/on-services-volatile.d
 PERSISTENT_SERVICE_STATUS_DIR=/etc/on-services.d
 # fuer die Sortierung von Gegenstellen benoetigen wir ein lokales Salz, um strukturelle Bevorzugungen (z.B. von UGW-Hosts) zu vermeiden.
@@ -609,3 +613,5 @@ get_service_as_csv() {
 	echo
 }
 
+# Ende der Doku-Gruppe
+## @}

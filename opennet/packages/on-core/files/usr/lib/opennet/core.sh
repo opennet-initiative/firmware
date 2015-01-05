@@ -1,3 +1,7 @@
+## @defgroup core Kern-Funktionen
+# Beginn der Doku-Gruppe
+## @{
+
 GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
 ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
 ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
@@ -657,3 +661,6 @@ is_function_available() {
 	echo "$(type "$func_name")" | grep -q "function$" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
+
+# Ende der Doku-Gruppe
+## @}

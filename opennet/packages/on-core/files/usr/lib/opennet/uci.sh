@@ -1,3 +1,6 @@
+## @defgroup uci UCI-Funktionen
+# Beginn der Doku-Gruppe
+## @{
 
 uci_is_true() {
 	uci_is_false "$1" && trap "" $GUARD_TRAPS && return 1
@@ -121,3 +124,5 @@ prepare_on_uci_settings() {
 	done
 }
 
+# Ende der Doku-Gruppe
+## @}

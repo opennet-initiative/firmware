@@ -1,3 +1,7 @@
+## @defgroup on-usergw UserGateway-Funktionen
+# Beginn der Doku-Gruppe
+## @{
+
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 # eine beliebige Portnummer, auf der wir keinen Dienst vermuten
@@ -437,3 +441,5 @@ get_active_ugw_connections() {
 	done
 }
 
+# Ende der Doku-Gruppe
+## @}

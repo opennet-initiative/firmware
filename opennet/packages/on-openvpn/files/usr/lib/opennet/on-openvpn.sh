@@ -1,3 +1,7 @@
+## @defgroup on-openvpn Nutzer-Tunnel-Funktionen
+# Beginn der Doku-Gruppe
+## @{
+
 MIG_VPN_DIR=/etc/openvpn/opennet_user
 MIG_VPN_CONNECTION_LOG=/var/log/mig_openvpn_connections.log
 
@@ -262,3 +266,5 @@ cleanup_stale_openvpn_services() {
 	apply_changes openvpn
 }
 
+# Ende der Doku-Gruppe
+## @}

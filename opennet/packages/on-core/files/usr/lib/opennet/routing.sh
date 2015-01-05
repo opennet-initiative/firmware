@@ -1,5 +1,6 @@
-# opennet-Funktionen rund um das Routing
-# wird durch "on-helper" eingebunden
+## @defgroup routing Routing-Funktionen
+# Beginn der Doku-Gruppe
+## @{
 
 ROUTING_TABLE_ON_UPLINK=on-tunnel
 ROUTING_TABLE_MESH=olsrd
@@ -258,3 +259,5 @@ update_olsr_route_cache() {
 	mv "$tmpfile" "$OLSR_ROUTE_CACHE_FILE"
 }
 
+# Ende der Doku-Gruppe
+## @}

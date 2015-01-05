@@ -1,3 +1,7 @@
+## @defgroup network Netzwerk-Funktionen
+# Beginn der Doku-Gruppe
+## @{
+
 ZONE_LOCAL=lan
 ZONE_WAN=wan
 ZONE_MESH=on_mesh
@@ -293,3 +297,5 @@ rename_firewall_zone() {
 	apply_changes firewall
 }
 
+# Ende der Doku-Gruppe
+## @}

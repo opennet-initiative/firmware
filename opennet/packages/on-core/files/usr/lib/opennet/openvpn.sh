@@ -41,27 +41,6 @@ disable_openvpn_service() {
 }
 
 
-# Gelegentlich bleiben nach einem reboot openvpn-Konfigurationen liegen, die durch schlechtes Timing nie geloescht werden.
-# Der dazugehoerige Ablauf ist folgender:
-#   1) eine VPN-Verbindung war beim Abschalten aktiv
-#   2) nach dem Booten wird eine andere VPN-Verbindung ausgewaehlt
-#    * zu diesem Zeitpunkt wurde die vorher aktive Verbindung noch nicht via olsrd-nameservice entdeckt
-#    * somit wurde die Verbindung nicht via 'select_mig_connection' beraeumt
-#   3) die unbrauchbare VPN-Verbindung bleibt liegen und fuehrt im Minutentakt zu einer Fehlermeldung des openvpn-Dienstes
-cleanup_stale_openvpn_services() {
-	local service_name
-	local config_file
-	(get_services "service=gw"; get_services "service=ugw") | while read service_name; do
-		# existiert nicht?
-		[ -z "$(uci_get "openvpn.$service_name")" ] && continue
-		config_file=$(uci_get "openvpn.${service_name}.config")
-		# falls die Datei nicht existiert, koennen wir die Konfiguration loeschen
-		[ -e "$config_file" ] || uci_delete "openvpn.$service_name"
-	done
-	apply_changes openvpn
-}
-
-
 is_openvpn_service_active() {
 	local service_name="$1"
 	local pid_file

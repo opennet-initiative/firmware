@@ -81,20 +81,23 @@ purge_old_exports() {
 	(
 		ls -t | head -n "$keep_builds"
 		ls
-	) | sort | uniq -u | xargs --delimiter '\n' --no-run-if-empty echo rm -r
+	) | sort | uniq -u | xargs --delimiter '\n' --no-run-if-empty rm -r
 }
 
 
 # process commands
 case "$action" in
 	help|--help)
-		echo "Usage: $(basename "$0") [<platform>]"
+		echo "Usage: $(basename "$0")" 
+		echo "	[<platform>]			- export build"
+		echo "	--doc				- generate documentation"
+		echo "	--purge <keep-number-of-dirs>	- purge old exports"
 		exit 0
 		;;
-	doc)
+	doc|--doc)
 		export_doc
 		;;
-	purge)
+	purge|--purge)
 		keep_builds=${2:-}
 		[ -z "$keep_builds" ] && echo >&2 "No number of non-purgeable builds given" && exit 2
 		echo "$keep_builds" | grep -q "[^0-9]" && echo >&2 "Number of non-purgeable builds contains non-digits: '$keep_builds'" && exit 3

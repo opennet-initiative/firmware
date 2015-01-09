@@ -1,4 +1,7 @@
 Provide optional --enable-https flag for curl.
+
+Signed-off-by: Lars Kruse <devel@sumpfralle.de>
+
 --- a/openwrt/package/network/utils/curl/Config.in
 +++ b/openwrt/package/network/utils/curl/Config.in
 @@ -53,6 +53,10 @@ config LIBCURL_HTTP

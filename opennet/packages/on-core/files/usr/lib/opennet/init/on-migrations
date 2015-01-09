@@ -297,6 +297,18 @@ move_mtu_fix_to_target_zone() {
 	done
 }
 
+
+# Bis Version 0.4-5 verwendeten wir ntpclient anstelle des integrierten ntpd
+# Die alten Einstellungen koennen also entfernt werden, da die Hosts automatisch gewaehlt werden.
+remove_ntpclient_config() {
+	# keine config-Datei? Fertig ...
+	[ -e /etc/config/ntpclient ] || return 0
+	# ntpclient ist installiert? Konfiguration belassen ...
+	opkg list-installed | grep -q "^ntpclient[\t ]" && return 0
+	rm -f /etc/config/ntpclient
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -308,6 +320,7 @@ remove_obsolete_usergw_settings
 remove_usergw_openvpn_configs
 remove_crontab_entries
 rename_olsrd_Port_to_port
+remove_ntpclient_config
 
 # Bis Version 0.4-5 hiess die Opennet-Mesh-Firewall-Zone "opennet".
 # Mit Version 0.5 wurde die Zone in "on_mesh" umbenannt.
@@ -318,10 +331,6 @@ move_mtu_fix_to_target_zone
 
 # Bis Version 0.4-5 hiess die lokale Zone "local" - bei barrier braker heisst sie nun "lan"
 rename_firewall_zone "local" "$ZONE_LOCAL"
-
-# Bis Version 0.4-5 verwendeten wir ntpclient anstelle des integrierten ntpd
-# Die alten Einstellungen koennen also entfernt werden, da die Hosts automatisch gewaehlt werden.
-uci_delete ntpclient
 
 # Diese Aktion startet mit 10 Minuten Verzoegerung im Hintergrund, um vorher ein Empfangen der
 # olsrd-Announcements zu ermoeglichen.

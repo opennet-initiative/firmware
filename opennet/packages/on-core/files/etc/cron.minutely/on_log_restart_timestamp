@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# Sorge dafuer, dass nach einem Boot-Vorgang ein passender Log-Eintrag in
+# die Banner-Datei geschrieben wird.
+# Vor dem Schreiben des Zeitstempels wird geprueft, ob die aktuelle Systemzeit
+# mit der Zeit der konfigurierten Zeitserver grob uebereinstimmt. Falls dies
+# nicht der Fall ist, wird der Log-Vorgang verschoben, bis eine maximale
+# Wartezeit ueberschritten ist. Anschliessend erfolgt die Ausgabe mit einem
+# passenden Text ("no time retrieved").
+#
+
+set -eu
+
+
+FLAG_FILE=/var/run/on_boot_time_logged
+MAX_UPTIME_SECONDS=300
+ACCEPTABLE_TIME_OFFSET=180
+
+
+get_current_time_offset_milliseconds() {
+	local peer_args=
+	local peer
+	local offsets
+	# Die Liste der konfigurierten Zeitserver auslesen und als Argumente fuer ntpd zusammensetzen.
+	for peer in $(on-function uci_get system.ntp.server); do
+		[ -n "$peer" ] && peer_args="$peer_args -p $peer" || true
+	done
+	[ -z "$peer_args" ] && return 0
+	# Alle konfigurierten Zeitserver abfragen.
+	# Wir sind lediglich am "offset"-Wert interessiert.
+	offsets=$(timeout -t 4 -s INT ntpd -w -n -q $peer_args 2>&1 \
+		| grep "offset:" \
+		| cut -f 4 -d : \
+		| cut -f 1 -d " ")
+	# Keine Zeitserver erreichbar? Abbruch ...
+	[ -z "$offsets" ] && return 0
+	# Durchschnitt der Offsets ermitteln.
+	echo "$offsets" | awk '
+		BEGIN { summe=0; zaehler=1; }
+		{ summe+=$1; zaehler+=1; }
+		END { print int((summe * 1000) / zaehler) }'
+}
+
+
+# Wurde das Log bereits geschrieben? Dann beenden wir uns sofort.
+[ -e "$FLAG_FILE" ] && exit 0
+
+# Uptime und Zeitsynchronitaet ermitteln
+time_offset=$(get_current_time_offset_milliseconds)
+uptime=$(cut -f 1 -d . /proc/uptime)
+if [ -z "$time_offset" -o "$time_offset" -gt "$ACCEPTABLE_TIME_OFFSET" ]; then
+	# bisher fand kein Zeitabgleich statt - wir pruefen, ob die uptime inzwischen abgelaufen ist
+	# Ist die maximale Uptime abgelaufen? Falls nicht, dann warten wir auf den naechsten Versuch.
+	[ "$uptime" -lt "$MAX_UPTIME_SECONDS" ] && exit 0
+	# Die Zeit ist um - wir schreiben den ungueltigen Zeitstempel.
+	timestamp="(no time retrieved)"
+else
+	# unsere Zeit ist synchronisert - wir koennen das reboot-Log schreiben
+	# Ziehe von der aktuellen Zeit die uptime ab
+	boot_time=$(($(date +%s) - $uptime))
+	timestamp=$(date "@$boot_time")
+fi
+# Schreibe den Zeitstempel
+on-function add_banner_event "system restart" "$timestamp"
+
+# Verhindere eine erneute Ausfuehrung.
+touch "$FLAG_FILE"
+

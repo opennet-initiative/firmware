@@ -113,10 +113,16 @@ update_ntp_servers() {
 }
 
 
+## @fn add_banner_event()
+## @brief Füge ein Ereignis zum dauerhaften Ereignisprotokoll (/etc/banner) hinzu.
+## @param event Ereignistext
+## @param timestamp [optional] Der Zeitstempel-Text kann bei Bedarf vorgegeben werden.
+## @details Ein Zeitstempel, sowie hübsche Formatierung wird automatisch hinzugefügt.
 add_banner_event() {
 	trap "error_trap add_banner_event '$*'" $GUARD_TRAPS
 	local event=$1
-	local timestamp=$(date)
+	# verwende den optionalen zweiten Parameter oder den aktuellen Zeitstempel
+	local timestamp="${2:-$(date)}"
 	local line_suffix=" - $event -------"
 	local line=" - $timestamp "
 	local length=$((54-${#line_suffix}))

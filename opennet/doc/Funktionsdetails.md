@@ -263,6 +263,15 @@ Sollte dies nicht der Fall sein, dann wird die IP-Adresse aus der //on-core//-De
 Anschließend wird das obige uci-Flag gesetzt, um eine erneute Konfiguration anch einem Update zu verhindern.
 
 
+Dauerhaftes Ereignisprotokoll {#bootlog}
+-----------------------------
+
+Relevante Vorgänge (Booten, OLSR-Neustarts) werden im Ereignislog (/etc/banner) festgehalten.
+
+@sa ../packages/on-core/files/etc/cron.minutely/on_log_restart_timestamp
+
+
+
 Debugging {#debug}
 ---------
 

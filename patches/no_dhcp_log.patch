@@ -1,6 +1,9 @@
-add --quit-dhcp option for dnsmasq
+add --quiet-dhcp option for dnsmasq
 
-This increases privacy by omitting DHCP lease logs including MAC addresses.
+This setting increases privacy by omitting DHCP lease logs including MAC addresses.
+
+Signed-off-by: Lars Kruse <devel@sumpfralle.de>
+
 --- a/openwrt/package/network/services/dnsmasq/files/dnsmasq.init
 +++ b/openwrt/package/network/services/dnsmasq/files/dnsmasq.init
 @@ -123,6 +123,7 @@ dnsmasq() {

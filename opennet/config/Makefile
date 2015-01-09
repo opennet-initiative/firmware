@@ -2,6 +2,10 @@ BUILD_DIR = $(shell cd ../../openwrt; pwd)
 CURRENT_CONFIG = $(BUILD_DIR)/.config
 PREVIOUS_CONFIG = $(BUILD_DIR)/.config.oni
 COMMON_CONFIG = common
+GIT_COMMIT_COUNT = $(shell git log --oneline | wc -l)
+# ermittle die Release-Version (falls die aktuelle Version getaggt wurde) - entferne dabei das fuehrende "v" von "v0.5.0"
+GIT_CURRENT_RELEASE_TAG = $(shell git tag -l --points-at HEAD | sed 's/^v//g')
+NEXT_VERSION = $(shell grep "^CONFIG_VERSION_NUMBER=" "$(COMMON_CONFIG)" | cut -f 2 -d '"')
 
 SMALLCONFIG = bcm47xx
 BIGCONFIG = ar71xx common ixp4xx tl-wr1043nd tl-wr842nd x86
@@ -34,6 +38,14 @@ $(BIGCONFIG) $(SMALLCONFIG):
 	@# Add something like "CONFIG_TARGET_ar71xx_generic_TLWR1043=y" to
 	@# the config file if the environment variable SUBARCH is given.
 	@test -n "$(SUBARCH)" && sed -i 's/^\(CONFIG_TARGET_$@_\).*_\?Default\(=y\)$$/\1$(SUBARCH)\2/' "$(CURRENT_CONFIG)" || true
+	@# Release eintragen (eventuell ein echtes - oder einen snapshot mit einer commit-Zahl)
+	@if [ -n "$(GIT_CURRENT_RELEASE_TAG)" ]; then \
+		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(GIT_CURRENT_RELEASE_TAG)"/' "$(CURRENT_CONFIG)"; \
+		sed -i '/^CONFIG_VERSION_REPO=/s/__PKG_STATUS__/stable/' "$(CURRENT_CONFIG)"; \
+	else \
+		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(NEXT_VERSION)-unstable-$(GIT_COMMIT_COUNT)"/' "$(CURRENT_CONFIG)"; \
+		sed -i '/^CONFIG_VERSION_REPO=/s/__PKG_STATUS__/snapshots/' "$(CURRENT_CONFIG)"; \
+	fi
 	@$(MAKE) check-old-config
 
 save-config:

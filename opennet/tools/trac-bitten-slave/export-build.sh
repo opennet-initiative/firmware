@@ -15,6 +15,7 @@ CFG="${FILE%.*}.cfg"
 
 # get current script dir
 HOME="$(dirname $(readlink -f "$0"))"
+OPENWRT_CONFIG="${HOME}/../../../openwrt/.config"
 
 # read variables
 . "$HOME/$CFG"
@@ -24,12 +25,7 @@ action="${1:-help}"
 
 
 get_snapshot_name() {
-	local input_file="$HOME/$MK_FILE"
-	# get revision number
-	local version=$(grep "^PKG_VERSION:=" "$input_file" | cut -f 2- -d =)
-	local release=$(grep "^PKG_RELEASE:=" "$input_file" | cut -f 2- -d =)
-	[ -z "$version" -o -z "$release" ] && echo >&2 "error getting revision numbers from build" && return 1
-	echo "$version-$release"
+	grep "^CONFIG_VERSION_NUMBER=" "$OPENWRT_CONFIG" | cut -f 2 -d '"'
 }
 
 

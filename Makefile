@@ -7,7 +7,6 @@ COMMON_CONFIG = common
 CONFIG_DIR = opennet/config
 # list all files except Makefile, common file and hidden files
 ARCHS = $(shell ls "$(CONFIG_DIR)/" | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
-GIT_COMMIT_COUNT=$(shell git log --oneline | wc -l)
 
 .PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs doc
 
@@ -33,10 +32,6 @@ list-archs:
 $(ARCHS): feeds translate
 	@echo "Building for target architecture: $@"
 	$(MAKE) "config-$@"
-	@# update the release identifier
-	@sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=$(GIT_COMMIT_COUNT)/i' $(OPENWRT_DIR)/include/opennet-version.mk
-	@# aus irgendeinem Grund wird die opkg.conf sonst nicht aktualisiert
-	@touch "$(OPENWRT_DIR)/package/system/opkg/Makefile"
 	$(MAKE) -C "$(OPENWRT_DIR)"
 
 config-%:
@@ -89,9 +84,6 @@ patch:
 
 unpatch:
 	@# revert all patches if there are applied ones
-	@# first reset a local change
-	@[ -e "$(OPENWRT_DIR)/include/opennet-version.mk" ] && sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=1/i' $(OPENWRT_DIR)/include/opennet-version.mk || true
-	@# now make unpatch
 	@test -n "$(shell quilt applied 2>/dev/null)" && quilt pop -a || true
 
 clean: unpatch

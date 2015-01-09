@@ -3,9 +3,7 @@ CONFIG_IMAGEOPT=y
 CONFIG_VERSIONOPT=y
 CONFIG_VERSION_MANUFACTURER="Opennet Initiative e.V."
 CONFIG_VERSION_NUMBER="0.5.1"
-# TODO: __PKG_RELEASE__ soll via Skript gesetzt werden
-#CONFIG_VERSION_REPO="http://downloads.opennet-initiative.de/openwrt/snapshots/%R-__PKG_RELEASE__/%T/packages"
-CONFIG_VERSION_REPO="http://downloads.on/openwrt/stable/%R/%T/packages"
+CONFIG_VERSION_REPO="http://downloads.on/openwrt/__PKG_STATUS__/%R/%T/packages"
 
 
 CONFIG_BUSYBOX_CUSTOM=y

@@ -276,7 +276,15 @@ Build-Konfiguration (menuconfig) {#menuconfig}
 
 Die opennet-Entwicklungsumgebung verwendet grundlegend die Abläufe der openwrt-Buildumgebung. Es gibt jedoch ein paar Besonderheiten, bzw. Komfortfunktionen.
 
-Da die opennet-Firmware verschiedene Ziel-Plattformen (ar71xx, ixp44, x86, ...) unterstützt, müssen verschiedene Konfigurationen gepflegt werden. Zur Erleichterung der Pflege und zur Vermeidung von Doppelungen gibt es für jede Ziel-Plattform eine separate Datei (z.B. *opennet/config/ar71xx*), sowie eine Datei mit Einstellungen, die für alle Zielplattformen gelten (*opennet/config/common*). Letztere sind für den Entwicklungsprozess wohl die interessanteren.
+
+Zusammensetzung einer config-Datei {#config-assemble}
+----------------------------------
+
+Da die opennet-Firmware verschiedene Ziel-Plattformen (ar71xx, ixp44, x86, ...) unterstützt, müssen verschiedene Konfigurationen gepflegt werden. Zur Erleichterung der Pflege und zur Vermeidung von Doppelungen gibt es für jede Ziel-Plattform eine separate Datei (z.B. *opennet/config/ar71xx*), sowie eine Datei mit Einstellungen, die für alle Zielplattformen gelten (*opennet/config/common*). Letztere ist für den Entwicklungsprozess wohl die wichtigere.
+
+Die plattform-spezifische config-Datei wird mit der allgemeinen zusammengefügt. Anschließend werden folgende Ersetzungen vorgenommen:
+* der Platzhalter ``__PKG_STATUS__`` wird durch *stable* oder *snapshots* ersetzt (je nachdem, ob der aktuelle git-commit ein Versions-Tag trägt)
+* die Variable *CONFIG_VERSION_NUMBER* wird durch ein eventuell vorhandenes git-tag ersetzt (falls vorhanden) oder um das Suffix *-unstable-GIT_COMMIT_COUNT* erweitert
 
 
 Konfiguration für eine Plattform erstellen {#platform-config}
@@ -449,6 +457,26 @@ Texte übersetzen {#translations-wording}
 
 * po- und pot-Dateien übersetzen: ``make translate``
 * po-Dateien (Übersetzungen) vervollständigen: ``virtaal opennet/po/de/on-core.po``
+
+
+Versionsnummerierung {#version-numbers}
+====================
+
+Die Versionsnummer des kommenden Release ist in der ``opennet/config/common`` als ``CONFIG_VERSION_NUMBER`` eingetragen.
+
+Im Laufe der Erzeugung der config-Datei wird eventuell die git-commit-Nummer hinzugefügt (@sa config-assemble).
+
+Die opennet-relevanten Pakete (*on-core* u.s.w) erhalten dieselbe Versionsnummer (@sa patches/makefile_include_opennet_packages.patch).
+
+
+Build-Server (minato) {#build-server}
+=====================
+
+Wir verwenden trac als Web-Interface und Entwicklungswerkzeug: http://dev.opennet-initiative.de/.
+
+Das trac-Plugin *bitten* wird durch einen git-commit-Hook ausgelöst und regt wenige Minuten nach einem *git push* einen Build-Prozess auf dem Server *minato* an. Dieser Build-Prozess wird vom Nutzer *trac-bitten-slave* ausgeführt. Die Build-Schritte sind im Web-Interface definiert.
+
+Innerhalb des Build-Prozess wird das export-Skript (@sa opennet/tools/trac-bitten-slave/export-build.sh) ausgeführt. Es kopiert das Build-Ergebnis für eine Plattform oder wahlweise die erstellte Dokumentation in das Export-Verzeichnis, welches via Webserver veröffentlicht wird: http://downloads.opennet-initiative.de/openwrt/. Das exakte Zielverzeichnis ergibt sich dabei aus der Versionsnummer (@sa version-numbers).
 
 
 Upgrade-Tests {#upgrade}

@@ -69,6 +69,7 @@ export_doc() {
 	local dest_dir="$HOME/$EXPORT_DIR/$snapshot_name/doc"
 	mkdir -p "$dest_dir"
 	local src_dir="$HOME/$DOC_DIR"
+	echo "Copying documentation: $src_dir -> $dest_dir"
 	rsync $RSYNC_OPTIONS "$src_dir/" "$dest_dir/"
 }
 

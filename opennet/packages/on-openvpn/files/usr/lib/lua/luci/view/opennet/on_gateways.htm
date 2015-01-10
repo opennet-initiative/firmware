@@ -202,50 +202,50 @@ You may obtain a copy of the License at
 </div>
 
 <h3><%:Gateway-List%></h3>
-	<div class="cbi-map">
-		<fieldset class="cbi-section">
-			<div class="cbi-section-comment"><%=luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste"))%></div>
-			<fieldset class="cbi-section-node">
-				<form name="gateways" method="post" action="<%=REQUEST_URI%>">
-				<table class="cbi-section-table" id="on-gateway-list">
-				<tr class="cbi-section-table-titles">
-						<th colspan = "1" />
-						<th class="cbi-section-table-cell"><%:active%></th>
-						<th class="cbi-section-table-cell"><%:IP-Address%></th>
-						<% if sorting ~= "manual" then %>
-							<th class="cbi-section-table-cell">
-							<abbr title="<%:This offset is added to the values before use/display%>">Offset</abbr> /
-							<% if sorting == "hop" then %>
-								<abbr title="<%:Number of Hops to the Gateway%>"><%:Distance%></abbr>
-							<% else %>
-								<abbr title="<%:Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR%>"><%:ETX%></abbr>
-							<% end %>
-							</th>
+<div class="cbi-map">
+	<fieldset class="cbi-section">
+		<div class="cbi-section-comment"><%=luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste"))%></div>
+		<fieldset class="cbi-section-node">
+			<form name="gateways" method="post" action="<%=REQUEST_URI%>">
+			<table class="cbi-section-table" id="on-gateway-list">
+			<tr class="cbi-section-table-titles">
+					<th colspan = "1" />
+					<th class="cbi-section-table-cell"><%:active%></th>
+					<th class="cbi-section-table-cell"><%:IP-Address%></th>
+					<% if sorting ~= "manual" then %>
+						<th class="cbi-section-table-cell">
+						<abbr title="<%:This offset is added to the values before use/display%>">Offset</abbr> /
+						<% if sorting == "hop" then %>
+							<abbr title="<%:Number of Hops to the Gateway%>"><%:Distance%></abbr>
+						<% else %>
+							<abbr title="<%:Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR%>"><%:ETX%></abbr>
 						<% end %>
+						</th>
+					<% end %>
 
-						<th class="cbi-section-table-cell"><abbr title="<%:Announced Upload / Download Speed.%>"><%:Speed%></abbr></th>
+					<th class="cbi-section-table-cell"><abbr title="<%:Announced Upload / Download Speed.%>"><%:Speed%></abbr></th>
 
-						<th class="cbi-section-table-cell"><%:VPN-Status%></th>
-						<th class="cbi-section-table-cell"><%:Actions%></th>
-						<th />
-				</tr>
+					<th class="cbi-section-table-cell"><%:VPN-Status%></th>
+					<th class="cbi-section-table-cell"><%:Actions%></th>
+					<th />
+			</tr>
 
-				</table>
-				</form>
-				<center><img class='loading_img_small' id="gateway-list-spinner" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" /></center>
-				<p id="on-waiting-for-gateway-change" style="display:none">
-					<%:The first reachable Gateway is currently not in use. The Tunnel will be restarted and the Gateway will be changed in a few minutes. This change will be shown after a reload of this page.%>
-				</p>
-			</fieldset>
+			</table>
+			</form>
+			<center><img class='loading_img_small' id="gateway-list-spinner" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" /></center>
+			<p id="on-waiting-for-gateway-change" style="display:none">
+				<%:The first reachable Gateway is currently not in use. The Tunnel will be restarted and the Gateway will be changed in a few minutes. This change will be shown after a reload of this page.%>
+			</p>
 		</fieldset>
-	</div>
+	</fieldset>
+</div>
 
-	<% local gateway_log = luci.sys.exec("on-function get_mig_connection_log | tail -n 30 | tac") %>
-	<% if gateway_log ~= "" then %>
-		<h3><%:Connection log%></h3>
-		<!-- Verbindungslog -->
-		<div class="cbi-map"><fieldset class="cbi-section">
-			<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly" rows="10" cols="110" wrap="off"><%=gateway_log%></textarea>
-		</fieldset></div>
-	<% end %>
+<% local gateway_log = luci.sys.exec("on-function get_mig_connection_log | tail -n 30 | tac") %>
+<% if gateway_log ~= "" then %>
+	<h3><%:Connection log%></h3>
+	<!-- Verbindungslog -->
+	<div class="cbi-map"><fieldset class="cbi-section">
+		<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly" rows="10" cols="110" wrap="off"><%=gateway_log%></textarea>
+	</fieldset></div>
+<% end %>
 <%+footer%>

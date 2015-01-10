@@ -309,7 +309,7 @@ msgstr "Einstellungen für Dienste"
 msgid "Services"
 msgstr "Dienste"
 
-msgid "Services in the opennet"
+msgid "Services in the Opennet"
 msgstr "Dienste im Opennet"
 
 msgid "Sort order"

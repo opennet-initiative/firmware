@@ -125,7 +125,7 @@ You may obtain a copy of the License at
 			<% elseif sorting == "hop" then %>
 				distance = gateway.hop_count;
 			<% end %>
-			result += String.format('%s</div></td>', distance + gateway.offset);
+			result += String.format('%.2f</div></td>', distance + gateway.offset);
 		}
 		result += '<td>';
 		if (gateway.upload || gateway.download) {
@@ -178,7 +178,7 @@ You may obtain a copy of the License at
 <h2><a id="content" name="content"><%:Opennet OpenVPN Gateways%></a></h2>
 <div class="cbi-map">
 	<fieldset class="cbi-section">
-		<div class="cbi-value-comment">
+		<div class="cbi-section-comment">
 			<p><%:Here you can configure the IP-Addresses of your choosen Gateways.%></p>
 			<% if show_more_info then %>
 				<p><%:Take a look at the Opennet wiki, if you would like to know more about the Gateway system. Usually the first found Gateway in your list is the one you are going to use. The Gateway will be changed automatically, if the current Gateway does not work for approximately 120 seconds.%></p>
@@ -194,7 +194,7 @@ You may obtain a copy of the License at
 		</div>
 	</fieldset>
 	<% if not on_bool_function("has_mig_credentials") then %>
-		<fieldset class="cbi-section"><div class="cbi-value-comment"><div class="alert-message warning">
+		<fieldset class="cbi-section"><div class="cbi-section-comment"><div class="alert-message warning">
 			<p><%:The required certificate and key for your internet access via Opennet seems to be missing%>
 			(<%:see%> <a href="<%=luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel")%>"><%:Certificate management%></a>).</p>
 		</div></div></fieldset>
@@ -204,6 +204,7 @@ You may obtain a copy of the License at
 <h3><%:Gateway-List%></h3>
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
+			<div class="cbi-section-comment"><%=luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste"))%></div>
 			<fieldset class="cbi-section-node">
 				<form name="gateways" method="post" action="<%=REQUEST_URI%>">
 				<table class="cbi-section-table" id="on-gateway-list">

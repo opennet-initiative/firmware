@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-01-10 19:14+0200\n"
+"PO-Revision-Date: 2015-01-10 22:03+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -251,6 +251,13 @@ msgstr "VPN Tunnel"
 
 msgid "VPN-Status"
 msgstr "VPN-Status"
+
+msgid ""
+"You can change the sorting mechanism of gateways in the <a href=\"%s"
+"\">Service Settings section</a>."
+msgstr ""
+"Du kannst die Sortier-Methode der Gateway-Liste in den <a href=\"%s\""
+">Dienste-Einstellungen</a> ändern."
 
 msgid ""
 "Your router periodically tries to connect to all available Gateways in the "

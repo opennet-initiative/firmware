@@ -67,7 +67,7 @@ require("luci.model.opennet.funcs")
 	%>
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
-			<div class="cbi-value-comment">
+			<div class="cbi-section-comment">
 			<% if client_cn and client_cn ~= "" then %>
 				<%=luci.i18n.translatef('Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.', client_cn, portrange[1], portrange[2])%>
 			<% end %>
@@ -79,7 +79,7 @@ require("luci.model.opennet.funcs")
 <h3><%:Forwarding from Opennet%></h3>
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
-			<div class="cbi-value-comment"><%:The following ports will be forwarded from Opennet (usually WIFI) to computers in your local network. They are usually not reachable directly from the Internet. This section might contain forwardings for Free Internet Access (Wifidog, port 67) and Internet Sharing (Usergateway Forwarding, ports 1600 and 123).%></div>
+			<div class="cbi-section-comment"><%:The following ports will be forwarded from Opennet (usually WIFI) to computers in your local network. They are usually not reachable directly from the Internet. This section might contain forwardings for Free Internet Access (Wifidog, port 67) and Internet Sharing (Usergateway Forwarding, ports 1600 and 123).%></div>
 			<% show_portmap(on_function("get_variable", {"ZONE_MESH"})) %>
 		</fieldset>
 	</div>
@@ -87,7 +87,7 @@ require("luci.model.opennet.funcs")
 <h3><%:Forwarding from DHCP-wireless network%></h3>
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
-			<div class="cbi-value-comment"><%:The following ports will be forwarded from computers connected to your WIFI (and not running olsr) to computers in your local network.%></div>
+			<div class="cbi-section-comment"><%:The following ports will be forwarded from computers connected to your WIFI (and not running olsr) to computers in your local network.%></div>
 			<% show_portmap(on_function("get_variable", {"ZONE_LOCAL"})) %>
 		</fieldset>
 	</div>
@@ -95,7 +95,7 @@ require("luci.model.opennet.funcs")
 <h3><%:Forwarding from Internet (WAN-connector)%></h3>
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
-			<div class="cbi-value-comment"><%:The follwing ports will be forwarded from Internet (your WAN connector) to your local network. If Internet is connected to your WAN, these ports are directly reachable from the outside.%></div>
+			<div class="cbi-section-comment"><%:The follwing ports will be forwarded from Internet (your WAN connector) to your local network. If Internet is connected to your WAN, these ports are directly reachable from the outside.%></div>
 			<% show_portmap(on_function("get_variable", {"ZONE_WAN"})) %>
 		</fieldset>
 	</div>

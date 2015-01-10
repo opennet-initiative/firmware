@@ -39,6 +39,9 @@ msgid ""
 "network-id?"
 msgstr ""
 
+msgid "DNS (Name resolution)"
+msgstr ""
+
 msgid "Delete"
 msgstr ""
 
@@ -55,6 +58,12 @@ msgstr ""
 msgid ""
 "Download a detailed summary of your router if you want to report or discuss "
 "a technical issue. This summary does not contain any private information."
+msgstr ""
+
+msgid "ETX: Routing Distance (default)"
+msgstr ""
+
+msgid "Enable or disable services and change their sorting order."
 msgstr ""
 
 msgid ""
@@ -86,7 +95,7 @@ msgstr ""
 msgid "Generate"
 msgstr ""
 
-msgid "Generate Report:"
+msgid "Generate Report"
 msgstr ""
 
 msgid "Generating a report takes about one minute"
@@ -99,6 +108,9 @@ msgid ""
 msgstr ""
 
 msgid "Hardware Information"
+msgstr ""
+
+msgid "Hops: Network Link Count"
 msgstr ""
 
 msgid "IP"
@@ -159,6 +171,12 @@ msgstr ""
 msgid "MAC"
 msgstr ""
 
+msgid "Manual: choose your preferred order"
+msgstr ""
+
+msgid "NTP (Time synchronization)"
+msgstr ""
+
 msgid ""
 "Neighbor-Link-Quality: how many of your test-packets did reach your neighbor"
 msgstr ""
@@ -172,7 +190,13 @@ msgstr ""
 msgid "Networks"
 msgstr ""
 
-msgid "No report available:"
+msgid "No report available"
+msgstr ""
+
+msgid ""
+"Nodes in the Opennet can announce various services. These services can be "
+"used by other nodes. The most important services are Internet access, DNS "
+"and NTP."
 msgstr ""
 
 msgid "OLSR-Status"
@@ -226,6 +250,21 @@ msgid "Router summary"
 msgstr ""
 
 msgid "SSID"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Service settings"
+msgstr ""
+
+msgid "Services"
+msgstr ""
+
+msgid "Services in the Opennet"
+msgstr ""
+
+msgid "Sort order"
 msgstr ""
 
 msgid "Source-Port"

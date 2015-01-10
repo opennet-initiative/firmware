@@ -1,0 +1,68 @@
+<%#
+Opennet Firmware
+
+Copyright 2015 Lars Kruse <devel@sumpfralle.de>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+<%+header%>
+
+<h2><a id="content" name="content"><%:Services in the Opennet%></a></h2>
+
+<%
+local uci = require "luci.model.uci"
+local cursor = uci.cursor()
+require("luci.model.opennet.funcs")
+%>
+
+<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
+<div class="cbi-map"><fieldset class="cbi-section">
+	<legend><%:Service settings%></legend>
+		<div class="cbi-section-descr"><%:Nodes in the Opennet can announce various services. These services can be used by other nodes. The most important services are Internet access, DNS and NTP.%></div>
+		<div class="cbi-section-node">
+			<%# Dienste-Sortierung %>
+			<div class="cbi-value">
+				<label class="cbi-value-title" for="sorting"><%:Sort order%>:</label>
+				<div class="cbi-value-field">
+					<% local current_sorting = on_function("get_service_sorting") %>
+					<select class="cbi-input-select" id="sorting" name="services_sorting" size="1">
+					<% for _, item in ipairs({
+							{ key="etx", label=luci.i18n.translate("ETX: Routing Distance (default)")},
+							{ key="hop", label=luci.i18n.translate("Hops: Network Link Count")},
+							{ key="manual", label=luci.i18n.translate("Manual: choose your preferred order")}}) do %>
+						<option
+							value="<%=item.key%>"
+							<%=(current_sorting == item.key) and 'selected="selected"' or '' %>>
+							<%=luci.util.pcdata(item.label)%></option>
+					<% end %>
+					</select>
+				</div>
+			</div>
+			<%# Checkboxen (ja/nein) %>
+			<% for _, item in ipairs({
+					{ key="use_olsrd_dns", label=luci.i18n.translate("DNS (Name resolution)")},
+					{ key="use_olsrd_ntp", label=luci.i18n.translate("NTP (Time synchronization)")}}) do %>
+				<div class="cbi-value">
+					<label class="cbi-value-title" for="<%=item.key%>"><%=item.label%></label>
+					<div class="cbi-value-field">
+						<%# Die Voreinstellung ist jeweils: "aktiviert". %>
+						<% local is_enabled = cursor:get("on-core", "settings", item.key) ~= "0" %>
+						<input class="cbi-input-checkbox" value="1"
+							type="checkbox" id="<%=item.key%>" name="<%=item.key%>"
+							<%= is_enabled and 'checked="checked"' or '' %> />
+					</div>
+				</div>
+			<% end %>
+		</div>
+</fieldset></div>
+<div class="cbi-page-actions">
+	<input class="cbi-button cbi-button-save" type="submit" name="save" value="<%:Save%>" />
+</div>
+</form>
+
+<%+footer%>

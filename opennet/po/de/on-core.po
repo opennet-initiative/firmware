@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-01-03 22:57+0200\n"
+"PO-Revision-Date: 2015-01-10 21:46+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -58,6 +58,9 @@ msgstr ""
 "Kontakt zu Deinem Router kurz verlieren könntest. Möchtest Du wirklich die "
 "Netzwerk-ID aktualisieren?"
 
+msgid "DNS (Name resolution)"
+msgstr "DNS (Namensauflösung)"
+
 msgid "Delete"
 msgstr "Löschen"
 
@@ -82,6 +85,14 @@ msgstr ""
 "Lade eine detaillierte Zusammenfassung Deines Router-Setups herunter, falls "
 "Du ein Anliegen oder ein technisches Problem mit anderen diskutieren "
 "möchtest. Diese Zusammenfassung enthält keine private Informationen."
+
+msgid "ETX: Routing Distance (default)"
+msgstr "ETX: Routing-Entfernung (Voreinstellung)"
+
+msgid "Enable or disable services and change their sorting order."
+msgstr ""
+"Auswählen oder Abschalten von von Diensten, sowie die Änderung ihrer "
+"Reihenfolge."
 
 msgid ""
 "Expected Transmission Count: Quality of the Connection to the Gateway "
@@ -114,8 +125,8 @@ msgstr "Gateway-Weiterleitung für %s (nach %s) ist aktiviert"
 msgid "Generate"
 msgstr "Erzeugen"
 
-msgid "Generate Report:"
-msgstr "Zusammenfassung erzeugen:"
+msgid "Generate Report"
+msgstr "Zusammenfassung erzeugen"
 
 msgid "Generating a report takes about one minute"
 msgstr "Die Erzeugung der Zusammenfassung dauert etwa eine Minute"
@@ -131,6 +142,9 @@ msgstr ""
 
 msgid "Hardware Information"
 msgstr "Hardware-Informationen"
+
+msgid "Hops: Network Link Count"
+msgstr "Hops: Anzahl der Knoten auf dem Weg"
 
 msgid "IP"
 msgstr "IP"
@@ -196,6 +210,12 @@ msgstr "Lade"
 msgid "MAC"
 msgstr "MAC"
 
+msgid "Manual: choose your preferred order"
+msgstr "Manuell: wähle Deine bevorzugte Reihenfolge"
+
+msgid "NTP (Time synchronization)"
+msgstr "NTP (Zeitsynchronisation)"
+
 msgid ""
 "Neighbor-Link-Quality: how many of your test-packets did reach your neighbor"
 msgstr ""
@@ -210,8 +230,17 @@ msgstr "Netzwerk"
 msgid "Networks"
 msgstr "Netzwerke"
 
-msgid "No report available:"
-msgstr "Keine Zusammenfassung verfügbar:"
+msgid "No report available"
+msgstr "Keine Zusammenfassung verfügbar"
+
+msgid ""
+"Nodes in the Opennet can announce various services. These services can be "
+"used by other nodes. The most important services are Internet access, DNS "
+"and NTP."
+msgstr ""
+"Knoten in der Opennet können verschiedene Dienste anbieten. Diese Dienste "
+"können von anderen Knoten verwendet werden. Die wichtigsten Dienste sind "
+"Internet-Zugang, Namensauflösung und Zeitsynchronisation."
 
 msgid "OLSR-Status"
 msgstr "OLSR-Status"
@@ -270,6 +299,21 @@ msgstr "Router-Überblick"
 
 msgid "SSID"
 msgstr "SSID"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Service settings"
+msgstr "Einstellungen für Dienste"
+
+msgid "Services"
+msgstr "Dienste"
+
+msgid "Services in the opennet"
+msgstr "Dienste im Opennet"
+
+msgid "Sort order"
+msgstr "Sortierreihenfolge"
 
 msgid "Source-Port"
 msgstr "Quell-Port"
@@ -453,6 +497,12 @@ msgstr "Beginn / Anzahl / Lease-Laufzeit"
 
 msgid "use"
 msgstr "übernehmen"
+
+#~ msgid "Generate Report:"
+#~ msgstr "Zusammenfassung erzeugen:"
+
+#~ msgid "No report available:"
+#~ msgstr "Keine Zusammenfassung verfügbar:"
 
 #~ msgid "Hardware-Information"
 #~ msgstr "Hardware-Informationen"

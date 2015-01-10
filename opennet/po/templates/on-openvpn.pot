@@ -203,6 +203,11 @@ msgid "VPN-Status"
 msgstr ""
 
 msgid ""
+"You can change the sorting mechanism of gateways in the <a href=\"%s"
+"\">Service Settings section</a>."
+msgstr ""
+
+msgid ""
 "Your router periodically tries to connect to all available Gateways in the "
 "Opennet network. The results of these tests are indicated in the \"Status\" "
 "column below."

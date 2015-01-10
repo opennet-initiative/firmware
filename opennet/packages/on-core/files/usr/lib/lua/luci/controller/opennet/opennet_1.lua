@@ -15,6 +15,8 @@ module("luci.controller.opennet.opennet_1", package.seeall)
 
 local report_filename = "/tmp/on_report.tar.gz"
 require("luci.model.opennet.funcs")
+local uci = require "luci.model.uci"
+local cursor = uci.cursor()
 
 
 function index()
@@ -37,9 +39,15 @@ function index()
 	page.i18n = "on_network"
 	page.css = "opennet.css"
 
+	page = entry({"opennet", "opennet_1", "dienste"}, call("services"))
+	page.title = i18n("Services")
+	page.order = 3
+	page.i18n = "on_services"
+	page.css = "opennet.css"
+
 	page = entry({"opennet", "opennet_1", "bericht"}, call("report"))
 	page.title = i18n("Report")
-	page.order = 3
+	page.order = 4
 	page.i18n = "on_report"
 	page.css = "opennet.css"
 
@@ -63,6 +71,25 @@ function report()
 		end
 		luci.template.render("opennet/on_report")
 	end
+end
+
+
+function services()
+	if luci.http.formvalue("save") then
+		for _, key in ipairs({"use_olsrd_dns", "use_olsrd_ntp"}) do
+			if luci.http.formvalue(key) then
+				cursor:set("on-core", "settings", key, "1")
+			else
+				cursor:set("on-core", "settings", key, "0")
+			end
+		end
+		local services_sorting = luci.http.formvalue("services_sorting")
+		if services_sorting then
+			on_function("set_service_sorting", {services_sorting})
+		end
+		cursor:commit("on-core")
+	end
+	luci.template.render("opennet/on_services")
 end
 
 

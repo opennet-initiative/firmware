@@ -160,6 +160,7 @@ add_banner_event() {
 ## @details Jede Zeile dieser Datei enthält einen Feldnamen und einen Wert - beide sind durch
 ##   ein beliebiges whitespace-Zeichen getrennt.
 ##   Dieses Dateiformat wird beispielsweise für die Dienst-Zustandsdaten verwendet.
+##   Zusätzlich ist diese Funktion auch zum Parsen von openvpn-Konfigurationsdateien geeignet.
 _get_file_dict_value() {
 	local status_file=$1
 	local field=$2
@@ -437,34 +438,6 @@ get_from_key_value_list() {
 		key=$(echo "$key_value" | cut -f 1 -d "$separator")
 		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break || true
 	done
-	return 0
-}
-
-
-# Pruefe ob die angegebene Openvpn-Konfiguration auf ein Zertifikat verweist, das nicht existiert.
-# Falls der Ort der Zertifikatsdatei nicht zweifelsfrei ermittelt werden kann, dann liefert die
-# Funktion "wahr" zurueck.
-# Parameter: Name der Openvpn-Konfiguration (uci show openvpn.*)
-openvpn_has_certificate() {
-	local uci_prefix="openvpn.$1"
-	local cert_file
-	local config_file=$(uci_get "${uci_prefix}.config")
-	if [ -n "$config_file" ]; then
-		# Verweis auf lokale config-Datei (keine uci-basierte Konfiguration)
-		if [ -e "$config_file" ]; then
-			cert_file=$(grep "^cert[ \t]" "$config_file" | while read key value; do echo "$value"; done)
-		else
-			# im Zweifelsfall: unklar
-			cert_file=
-		fi
-	else
-		# Konfiguration liegt in uci
-		cert_file=$(uci_get "${uci_prefix}.cert")
-	fi
-	# das Zertifikat scheint irgendwie anders konfiguriert zu sein - im Zeifelsfall: OK
-	[ -z "$cert_file" ] && return 0
-	# existiert die Datei?
-	[ ! -e "$cert_file" ] && trap "" $GUARD_TRAPS && return 1
 	return 0
 }
 

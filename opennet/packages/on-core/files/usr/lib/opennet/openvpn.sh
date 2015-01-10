@@ -3,14 +3,21 @@
 # Beginn der opnvpn-Doku-Gruppe
 ## @{
 
+
 ## @fn enable_openvpn_service()
 ## @brief Erzeuge eine funktionierende openvpn-Konfiguration (Datei + UCI).
 ## @param service_name Name eines Dienstes
 ## @param destination_attribute Service-Attribut, das als Ziel-Host für die VPN-Verbindung verwendet werden soll (z.B. "host" oder "detail:hostname")
 ## @details Die Konfigurationsdatei wird erzeugt und eine openvpn-uci-Konfiguration wird angelegt.
+##   Falls zu diesem openvpn-Dienst kein Zertifikat oder kein Schlüssel gefunden wird, dann passiert nichts.
 enable_openvpn_service() {
+	trap "error_trap enable_openvpn_service '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local destination_attribute="$2"
+	if ! openvpn_service_has_certificate_and_key "$service_name"; then
+		msg_info "Refuse to enable openvpn server ('$service_name'): missing key or certificate"
+		trap "" $GUARD_TRAPS && return 1
+	fi
 	local uci_prefix="openvpn.$service_name"
 	local config_file=$(get_service_value "$service_name" "config_file")
 	# zukuenftige config-Datei referenzieren
@@ -30,6 +37,7 @@ enable_openvpn_service() {
 ## @param service_name Name eines Dienstes
 ## @param destination_attribute Service-Attribut, das als Ziel-Host für die VPN-Verbindung verwendet werden soll (z.B. "host" oder "detail:hostname")
 update_vpn_config() {
+	trap "error_trap update_vpn_config '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local destination_attribute="$2"
 	local config_file=$(get_service_value "$service_name" "config_file")
@@ -46,6 +54,7 @@ update_vpn_config() {
 ## @details Die UCI-Konfiguration, sowie alle anderen mit der Verbindung verbundenen Elemente werden entfernt.
 ##   Die openvpn-Verbindung bleibt bestehen, bis zum nächsten Aufruf von 'apply_changes openvpn'.
 disable_openvpn_service() {
+	trap "error_trap disable_openvpn_service '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	# Abbruch, falls es keine openvpn-Instanz gibt
 	[ -z "$(uci_get "openvpn.$service_name")" ] && return 0
@@ -175,6 +184,34 @@ verify_vpn_connection() {
 	rm -f "$temp_config_file"
 	echo "$status_output" | grep -q "Initial packet" && return 0
 	msg_debug "openvpn test failed: openvpn $file_opts $openvpn_opts"
+	trap "" $GUARD_TRAPS && return 1
+}
+
+
+## @fn openvpn_service_has_certificate_and_key()
+## @brief Prüfe ob das Zertifikat eines openvpn-basierten Diensts existiert.
+## @returns exitcode=0 falls das Zertifikat existiert
+## @details Falls der Ort der Zertifikatsdatei nicht zweifelsfrei ermittelt
+##   werden kann, dann liefert die Funktion "wahr" zurück.
+openvpn_service_has_certificate_and_key() {
+	local service_name="$1"
+	local cert_file
+	local key_file
+	local config_template=$(get_service_value "$service_name" "template")
+	# im Zweifelsfall (kein Template gefunden) liefern wir "wahr"
+	[ -z "$config_template" ] && return 0
+	# Verweis auf lokale config-Datei (keine uci-basierte Konfiguration)
+	if [ -e "$config_template" ]; then
+		cert_file=$(_get_file_dict_value "$config_template" "cert")
+		key_file=$(_get_file_dict_value "$config_template" "key")
+	else
+		# im Zweifelsfall: liefere "wahr"
+		return 0
+	fi
+	# das Zertifikat scheint irgendwie anders konfiguriert zu sein - im Zeifelsfall: OK
+	[ -z "$cert_file" -o -z "$key_file" ] && return 0
+	# existiert die Datei?
+	[ -e "$cert_file" -a -e "$key_file" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

@@ -393,7 +393,7 @@ ugw_update_service_state () {
 		mtu_test=$(get_ugw_value "$config_name" mtu)
 		wan_test=$(get_ugw_value "$config_name" wan)
 		openvpn_test=$(get_ugw_value "$config_name" status)
-		cert_available=$(openvpn_has_certificate "$config_name" && echo y || echo n)
+		cert_available=$(openvpn_service_has_certificate_and_key "$config_name" && echo y || echo n)
 
 		# Ziel ist die Aktivierung der openvpn-Verbindung, sowie die Announcierung des Dienstes
 		# und die Einrichtung der Port-Weiterleitungen

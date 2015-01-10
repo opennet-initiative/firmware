@@ -80,7 +80,7 @@ function gateway_info(service_name)
 			disabled="bool|value|disabled|false", distance="number|value|distance",
 			hop_count="number|value|hop_count|0", offset="number|value|offset|0",
 			download="number|detail|download", upload="number|detail|upload",
-			age="number|function|get_mig_connection_test_age"})
+			age="number|function|get_mig_connection_test_age", source="string|value|source"})
 	if info then
 		luci.http.prepare_content("application/json")
 		luci.http.write_json(info)

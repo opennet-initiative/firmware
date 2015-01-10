@@ -143,7 +143,14 @@ You may obtain a copy of the License at
 			result += String.format('<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="%s" title="<%:move to top and connect immediately%>" name="move_top" />', gateway.id);
 			result += String.format('<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="%s" title="<%:move up%>" name="move_up" />', gateway.id);
 			result += String.format('<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="%s" title="<%:move down%>" name="move_down" />', gateway.id);
-			result += String.format('<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="%s" title="<%:delete%>" name="delete_service" />', gateway.id);
+			// den Loeschen-Knopf deaktivieren wir visuell, falls die Quelle nicht "manuell" sein sollte
+			if (gateway.source != "manual") {
+				// Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten
+				result += String.format('<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="%s" title="<%:auto-discovered services cannot be deleted%>" name="delete_service" disabled="disabled" />', gateway.id);
+			} else {
+				// Loeschen ist moeglich
+				result += String.format('<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="%s" title="<%:delete%>" name="delete_service" %s />', gateway.id);
+			}
 			result += String.format('<input class="cbi-button cbi-button-disable cbi-button-small" type="submit" value="%s" title="<%:disable%>" name="disable_service" />', gateway.id);
 		}
 		result += '</div></tr>';

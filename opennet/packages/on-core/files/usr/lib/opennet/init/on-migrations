@@ -329,7 +329,11 @@ rename_firewall_zone "opennet" "$ZONE_MESH"
 disable_unwanted_forward
 move_mtu_fix_to_target_zone
 
-# Bis Version 0.4-5 hiess die lokale Zone "local" - bei barrier braker heisst sie nun "lan"
+# Bis Version 0.4-5 wurden ins lokale Netz eingehende Pakete (z.B. Portweiterleitungen) via SNAT maskiert.
+# siehe https://dev.on-i.de/ticket/73
+uci_delete firewall.zone_local.masq
+
+# Bis Version 0.4-5 hiess die lokale Zone "local" - bei barrier breaker heisst sie nun "lan"
 rename_firewall_zone "local" "$ZONE_LOCAL"
 
 # Diese Aktion startet mit 10 Minuten Verzoegerung im Hintergrund, um vorher ein Empfangen der

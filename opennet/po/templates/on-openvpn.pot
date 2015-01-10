@@ -203,6 +203,9 @@ msgstr ""
 msgid "active"
 msgstr ""
 
+msgid "auto-discovered services cannot be deleted"
+msgstr ""
+
 msgid "delete"
 msgstr ""
 

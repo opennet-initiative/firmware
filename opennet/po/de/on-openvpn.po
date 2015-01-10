@@ -1,8 +1,8 @@
-# Lars Kruse <devel@sumpfralle.de>, 2014.
+# Lars Kruse <devel@sumpfralle.de>, 2014, 2015.
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2014-12-27 04:49+0200\n"
+"PO-Revision-Date: 2015-01-10 06:20+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -253,6 +253,9 @@ msgstr ""
 
 msgid "active"
 msgstr "Aktiv"
+
+msgid "auto-discovered services cannot be deleted"
+msgstr "automatisch entdeckte Dienste können nicht gelöscht werden"
 
 msgid "delete"
 msgstr "löschen"

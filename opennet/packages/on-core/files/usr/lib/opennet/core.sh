@@ -133,19 +133,16 @@ add_banner_event() {
 	local event=$1
 	# verwende den optionalen zweiten Parameter oder den aktuellen Zeitstempel
 	local timestamp="${2:-$(date)}"
-	local line_suffix=" - $event -------"
-	local line=" - $timestamp "
-	local length=$((54-${#line_suffix}))
+	local line=" - $timestamp - $event -"
 	(
 		# Steht unser Text schon im Banner? Ansonsten hinzufuegen ...
 		if grep -q 'clean_restart_log' /etc/banner; then
 			true
 		else
-			echo " ----- clean this log with 'clean_restart_log' -------"
-			echo " ------ restart times: (possibly by watchdog) --------"
+			echo " ------------------- system events: ------------------"
 		fi
-		while [ "${#line}" -lt "$length" ]; do line="$line-"; done
-		echo "$line$line_suffix"
+		while [ "${#line}" -lt 54 ]; do line="$line-"; done
+		echo "$line"
 	) >>/etc/banner
 	sync
 }

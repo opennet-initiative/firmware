@@ -37,27 +37,26 @@ function action_vpn_gateways()
 	local reset_offset = luci.http.formvalue("reset_offset")
 	local reset_connection_test_timestamps = luci.http.formvalue("reset_connection_test_timestamps")
 	
-	if move_up then
-		on_function("move_service_up", {move_up, "gw", "ugw"})
-		on_function("find_and_select_best_gateway", {"true"})
-	elseif move_down then
-		on_function("move_service_down", {move_down, "gw", "ugw"})
-		on_function("find_and_select_best_gateway", {"true"})
-	elseif move_top then
-		on_function("move_service_top", {move_top, "gw", "ugw"})
-		on_function("select_mig_connection", {move_top})
-	elseif delete_service then
-		on_function("delete_service", {delete_service})
-		on_function("find_and_select_best_gateway", {"true"})
-	elseif disable_service then
-		set_service_value(disable_service, "disabled", "1")
-		on_function("find_and_select_best_gateway", {"true"})
-	elseif enable_service then
-		delete_service_value(enable_service, "disabled")
+	if move_up or move_down or move_top or delete_service or disable_service or enable_service then
+		if move_up then
+			on_function("move_service_up", {move_up, "gw", "ugw"})
+		elseif move_down then
+			on_function("move_service_down", {move_down, "gw", "ugw"})
+		elseif move_top then
+			on_function("move_service_top", {move_top, "gw", "ugw"})
+		elseif delete_service then
+			on_function("delete_service", {delete_service})
+		elseif disable_service then
+			set_service_value(disable_service, "disabled", "1")
+		elseif enable_service then
+			delete_service_value(enable_service, "disabled")
+		end
+		-- Forciere sofortigen Wechsel zum aktuell besten Gateway.
+		-- Dies ist nicht immer notwendig - aber sofortige Änderungen
+		-- entsprechen wahrscheinlich der Erwartungshaltung des Nutzenden.
 		on_function("find_and_select_best_gateway", {"true"})
 	elseif reset_offset then
 		delete_service_value(reset_offset, "offset")
-		on_function("find_and_select_best_gateway", {"true"})
 	elseif reset_connection_test_timestamps then
 		on_function("reset_all_mig_connection_test_timestamps")
 	end

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-01-10 06:20+0200\n"
+"PO-Revision-Date: 2015-01-10 19:14+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -51,6 +51,9 @@ msgstr "Zertifikat-Anfrage (.csr)"
 
 msgid "Certificate contents"
 msgstr "Zertifikatsdetails"
+
+msgid "Certificate management"
+msgstr "Zertifikatsverwaltung"
 
 msgid "Certificate-Request contents"
 msgstr "Details der Zertifikatsanfrage"
@@ -218,6 +221,13 @@ msgstr ""
 "in wenigen Minuten neu aufgebaut. Diese Änderung wird erst nach einem "
 "Neuladen dieser Seite sichtbar."
 
+msgid ""
+"The required certificate and key for your internet access via Opennet seems "
+"to be missing"
+msgstr ""
+"Das erforderliche Zertifikat und der Schlüssel für den Internet-Zugang über "
+"das Opennet scheint zu fehlen"
+
 msgid "This offset is added to the values before use/display"
 msgstr "Dieser Offset wird mit den Werten verrechnet"
 
@@ -292,6 +302,9 @@ msgstr "Neustart des VPN-Tunnels"
 
 msgid "search file"
 msgstr "suche Datei"
+
+msgid "see"
+msgstr "siehe"
 
 msgid "start VPN Tunnel"
 msgstr "Starte VPN-Tunnel"

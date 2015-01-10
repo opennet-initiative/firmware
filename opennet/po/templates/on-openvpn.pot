@@ -35,6 +35,9 @@ msgstr ""
 msgid "Certificate contents"
 msgstr ""
 
+msgid "Certificate management"
+msgstr ""
+
 msgid "Certificate-Request contents"
 msgstr ""
 
@@ -170,6 +173,11 @@ msgid ""
 "be shown after a reload of this page."
 msgstr ""
 
+msgid ""
+"The required certificate and key for your internet access via Opennet seems "
+"to be missing"
+msgstr ""
+
 msgid "This offset is added to the values before use/display"
 msgstr ""
 
@@ -240,6 +248,9 @@ msgid "restart VPN Tunnel"
 msgstr ""
 
 msgid "search file"
+msgstr ""
+
+msgid "see"
 msgstr ""
 
 msgid "start VPN Tunnel"

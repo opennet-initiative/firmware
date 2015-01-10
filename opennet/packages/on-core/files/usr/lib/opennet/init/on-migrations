@@ -304,7 +304,7 @@ remove_ntpclient_config() {
 	# keine config-Datei? Fertig ...
 	[ -e /etc/config/ntpclient ] || return 0
 	# ntpclient ist installiert? Konfiguration belassen ...
-	opkg list-installed | grep -q "^ntpclient[\t ]" && return 0
+	is_package_installed "ntpclient" && return 0
 	rm -f /etc/config/ntpclient
 }
 

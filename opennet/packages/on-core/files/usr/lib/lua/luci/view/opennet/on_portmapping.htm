@@ -62,7 +62,7 @@ require("luci.model.opennet.funcs")
 <% if cursor:get("network", "on_vpn") then %>
 <h3><%:Forwarding from the Internet through your OpenVPN tunnel%></h3>
 <%	require("luci.sys")
-	local portrange = tab_split(on_function("get_port_forward_range"))
+	local portrange = tab_split(on_function("get_mig_port_forward_range"))
 	local client_cn = on_function("get_client_cn")
 	%>
 	<div class="cbi-map">

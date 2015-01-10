@@ -16,14 +16,6 @@ DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 REPORTS_FILE=/tmp/on_report.tar.gz
 
 
-## @fn get_client_cn()
-## @brief Ermittle den Common-Name des Nutzer-Zertifikats
-## @todo Verschiebung zu on-openvpn - Pruefung auf Existenz der Datei
-get_client_cn() {
-	openssl x509 -in /etc/openvpn/opennet_user/on_aps.crt \
-		-subject -nameopt multiline -noout 2>/dev/null | awk '/commonName/ {print $3}'
-}
-
 ## @fn msg_debug()
 ## @param message Debug-Nachricht
 ## @brief Debug-Meldungen ins syslog schreiben
@@ -610,6 +602,16 @@ line_in_file() {
 		# die neue Zeile hinzufuegen, falls das Muster in der alten Datei nicht vorhanden war
 		grep -q "$pattern" "$filename" || echo "$new_line"
 	) | update_file_if_changed "$filename" || true
+}
+
+
+## @fn is_package_installed()
+## @brief Prüfe, ob ein opkg-Paket installiert ist.
+## @param package Name des Pakets
+is_package_installed() {
+	local package="$1"
+	opkg list-installed | grep -q "^$package[\t ]" && return 0
+	trap "" $GUARD_TRAPS && return 1
 }
 
 

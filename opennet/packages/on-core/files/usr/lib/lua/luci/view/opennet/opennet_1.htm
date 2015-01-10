@@ -19,7 +19,7 @@ $Id: index.htm 5448 2009-10-31 15:54:11Z jow $
 		<p><%:The following points are the ones required to configure any Opennet Access-Point. Please use them all if the mentioned order if you like to configure your Accesspoint the easiest way. Choose the items below or from the menu on the left.%></p>
 		<ul>
 			<li><a href="<%=REQUEST_URI%>/funknetz"><%:Network%></a><p><%:Basic Network Configuration - just enter your Opennet ID and everything will be adapted%></p></li>
-			<% if luci.sys.exec("opkg status on-openvpn | grep installed") ~= "" then %>
+			<% if on_bool_function("is_package_installed", {"on-openvpn"}) then %>
 				<li><a href="<%=REQUEST_URI%>/vpn_tunnel"><%:VPN Tunnel%></a><p><%:If you like to use the Internet, you should create or upload your OpenVPN Certificates and Keys here%></p></li>
 			<% end %>
 			<li><a href="<%=REQUEST_URI%>/bericht"><%:Report%></a><p><%:Download a detailed summary of your router if you want to report or discuss a technical issue. This summary does not contain any private information.%></p></li>

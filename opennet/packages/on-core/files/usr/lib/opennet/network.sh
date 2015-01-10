@@ -93,47 +93,6 @@ get_address_of_network() {
 }
 
 
-# jeder AP bekommt einen Bereich von zehn Ports fuer die Port-Weiterleitung zugeteilt
-# Parameter (optional): common name des Nutzer-Zertifikats
-get_port_forward_range() {
-	local client_cn=${1:-}
-	[ -z "$client_cn" ] && client_cn=$(get_client_cn)
-	local port_count=10
-	local cn_address=
-	local portbase
-	local first_port
-	local last_port
-
-	[ -z "$client_cn" ] && msg_debug "$(basename "$0"): failed to get Common Name - maybe there is no certificate?" && return 0
-
-	if echo "$client_cn" | grep -q '^\(\(1\.\)\?[0-9][0-9]\?[0-9]\?\.aps\.on\)$'; then
-		portbase=10000
-		cn_address=${client_cn%.aps.on}
-		cn_address=${cn_address#*.}
-	elif echo "$client_cn" | grep -q '^\([0-9][0-9]\?[0-9]\?\.mobile\.on\)$'; then
-		portbase=12550
-		cn_address=${client_cn%.mobile.on}
-	elif echo "$client_cn" | grep -q '^\(2[\._-][0-9][0-9]\?[0-9]\?\.aps\.on\)$'; then
-		portbase=15100
-		cn_address=${client_cn%.aps.on}
-		cn_address=${cn_address#*.}
-	elif echo "$client_cn" | grep -q '^\(3[\._-][0-9][0-9]\?[0-9]\?\.aps\.on\)$'; then
-		portbase=20200
-		cn_address=${client_cn%.aps.on}
-		cn_address=${cn_address#*.}
-	fi
-
-	if [ -z "$cn_address" ] || [ "$cn_address" -lt 1 ] || [ "$cn_address" -gt 255 ]; then
-		msg_info "$(basename "$0"): invalidate certificate Common Name ($client_cn)"
-		trap "" $GUARD_TRAPS && return 1
-	fi
-
-	first_port=$((portbase + (cn_address-1) * port_count))
-	last_port=$((first_port + port_count - 1))
-	echo -e "$first_port\t$last_port"
-}
-
-
 # Liefere die logischen Netzwerk-Schnittstellen einer Zone zurueck.
 get_zone_interfaces() {
 	local zone="$1"

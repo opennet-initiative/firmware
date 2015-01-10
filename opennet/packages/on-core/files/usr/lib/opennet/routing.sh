@@ -221,7 +221,7 @@ add_routing_table() {
 	[ -n "$table_id" ] && echo "$table_id" && return 0
 	# wir muessen den Eintrag hinzufuegen
 	table_id="$RT_START_ID"
-	while grep -q "^$table_id[ \t]" "$RT_FILE"; do
+	while [ -n "$(_get_file_dict_value "$RT_FILE" "$table_id")" ]; do
 		: $((table_id++))
 	done
 	echo "$table_id      $table_name" >> "$RT_FILE"

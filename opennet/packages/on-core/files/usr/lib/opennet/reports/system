@@ -28,3 +28,6 @@ opkg list-installed >opkg_installed.txt
 # Log fuer Reboots und OLSR-Restarts
 cp /etc/banner banner
 
+# Laufzeit
+uptime >uptime.txt
+

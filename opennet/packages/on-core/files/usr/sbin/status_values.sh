@@ -237,6 +237,7 @@ on_vpn_gw="$(uci_get openvpn.opennet_user.remote)"
 on_vpn_autosearch="$([ "$(uci_get on-openvpn.gateways.autosearch)" = "on" ] && echo "1" || echo "0")"
 on_vpn_sort="$(uci_get on-openvpn.gateways.vpn_sort_criteria)"
 
+## @todo on-openvpn-Gateway-Konstruktionen in Service-Modell uebertragen
 index=1; gw_addresses="";
 while [ -n "$(uci_get on-openvpn.gate_$index)" ] ; do
   gw_ipaddr=$(uci_get on-openvpn.gate_$index.ipaddr);

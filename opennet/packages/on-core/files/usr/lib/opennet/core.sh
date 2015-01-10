@@ -2,7 +2,7 @@
 # Beginn der Doku-Gruppe
 ## @{
 
-GATEWAY_STATUS_FILE=/tmp/on-openvpn_gateways.status
+
 ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
 ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
 ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
@@ -214,23 +214,6 @@ get_on_core_default() { _get_file_dict_value "$ON_CORE_DEFAULTS_FILE" "$1"; }
 get_on_openvpn_default() { _get_file_dict_value "$ON_OPENVPN_DEFAULTS_FILE" "$1"; }
 get_on_wifidog_default() { _get_file_dict_value "$ON_WIFIDOG_DEFAULTS_FILE" "$1"; }
 
-
-#################################################################################
-# Auslesen einer Gateway-Information
-# Parameter ip: IP-Adresse des Gateways
-# Parameter key: Informationsschluessel ("age", "status", ...)
-get_gateway_value() {
-	_get_file_dict_value "$GATEWAY_STATUS_FILE" "${1}_${2}"
-}
-
-#################################################################################
-# Aendere eine gateway-Information
-# Parameter ip: IP-Adresse des Gateways
-# Parameter key: Informationsschluessel ("age", "status", ...)
-# Parameter value: der neue Inhalt
-set_gateway_value() {
-	_set_file_dict_value "$GATEWAY_STATUS_FILE" "${1}_${2}" "$3"
-}
 
 
 get_on_firmware_version() {

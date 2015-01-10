@@ -5,6 +5,7 @@
 
 MIG_VPN_DIR=/etc/openvpn/opennet_user
 MIG_VPN_CONNECTION_LOG=/var/log/mig_openvpn_connections.log
+MIG_VPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
 
 
 ## @fn get_on_openvpn_default()
@@ -22,12 +23,27 @@ get_on_openvpn_default() {
 ## @attention Anschließend muss "on-core" comitted werden.
 update_mig_service() {
 	local service_name="$1"
-	local template_file=/usr/share/opennet/openvpn-mig.template
+	local template_file="$MIG_VPN_CONFIG_TEMPLATE_FILE"
 	local pid_file="/var/run/${service_name}.pid"
 	local config_file="$OPENVPN_CONFIG_BASEDIR/${service_name}.conf"
 	set_service_value "$service_name" "template_file" "$template_file"
 	set_service_value "$service_name" "config_file" "$config_file"
 	set_service_value "$service_name" "pid_file" "$pid_file"
+}
+
+
+## @fn has_mig_credentials()
+## @brief Prüft, ob der Nutzer bereits einen Schlüssel und ein Zertifikat angelegt hat.
+## @returns Liefert "wahr", falls Schlüssel und Zertifikat vorhanden sind oder
+##   falls in irgendeiner Form Unklarheit besteht.
+has_mig_credentials() {
+	local cert_file=$(_get_file_dict_value "$MIG_VPN_CONFIG_TEMPLATE_FILE" "cert")
+	local key_file=$(_get_file_dict_value "$MIG_VPN_CONFIG_TEMPLATE_FILE" "key")
+	# im Zweifel: liefere "wahr"
+	[ -z "$key_file" -o -z "$cert_file" ] && return 0
+	# beide Dateien existieren
+	[ -e "$key_file" -a -e "$cert_file" ] && return 0
+	trap "" $GUARD_TRAPS && return 1
 }
 
 

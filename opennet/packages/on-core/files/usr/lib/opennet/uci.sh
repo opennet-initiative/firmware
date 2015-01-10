@@ -1,6 +1,8 @@
-## @defgroup uci UCI-Funktionen
+## @defgroup uci UCI
+## @brief Hilfreiche Funktionen zum lesenden und schreibenden Zugriff auf die UCI-basierte Konfiguration.
 # Beginn der Doku-Gruppe
 ## @{
+
 
 uci_is_true() {
 	uci_is_false "$1" && trap "" $GUARD_TRAPS && return 1

@@ -1,4 +1,5 @@
-## @defgroup on-openvpn Nutzer-Tunnel-Funktionen
+## @defgroup on-openvpn Nutzer-Tunnel
+## @brief Alles rund um die Nutzertunnel-Verbindung: Tests, Auswahl, Aufbau, Abbau, Portweiterleitungen und Logs.
 # Beginn der Doku-Gruppe
 ## @{
 
@@ -6,9 +7,19 @@ MIG_VPN_DIR=/etc/openvpn/opennet_user
 MIG_VPN_CONNECTION_LOG=/var/log/mig_openvpn_connections.log
 
 
-# Erzeuge oder aktualisiere einen mig-Service.
-# Ignoriere doppelte Eintraege.
-# Anschliessend muss "on-core" comitted werden.
+## @fn get_on_openvpn_default()
+## @brief Liefere einen der default-Werte der aktuellen Firmware zurück (Paket on-openvpn).
+## @param key Name des Schlüssels
+## @sa get_on_core_default
+get_on_openvpn_default() {
+	_get_file_dict_value "$ON_OPENVPN_DEFAULTS_FILE" "$1"
+}
+
+
+## @fn update_mig_service()
+## @param Name eines Diensts
+## @brief Erzeuge oder aktualisiere einen Mesh-Internet-Gateway-Dienst Ignoriere doppelte Einträge.
+## @attention Anschließend muss "on-core" comitted werden.
 update_mig_service() {
 	local service_name="$1"
 	local template_file=/usr/share/opennet/openvpn-mig.template
@@ -20,9 +31,11 @@ update_mig_service() {
 }
 
 
-# Pruefe, ob ein Verbindungsaufbau mit einem openvpn-Service moeglich ist.
-# Parameter: Service-Name
-# Resultat: exitcode=0 falls der Test erfolgreich war
+## @fn test_mig_connection()
+## @brief Prüfe, ob ein Verbindungsaufbau mit einem openvpn-Dienst möglich ist.
+## @param Name eines Diensts
+## @returns exitcode=0 falls der Test erfolgreich war
+## @attention Seiteneffekt: die Zustandsinformationen des Diensts (Status, Test-Zeitstempel) werden verändert.
 test_mig_connection() {
 	trap "error_trap test_mig_connection '$*'" $GUARD_TRAPS
 	local service_name="$1"
@@ -76,8 +89,10 @@ test_mig_connection() {
 }
 
 
-# aktiviere den uebergebenen Gateway
-# Seiteneffekt: Beraeumung aller herumliegenden Konfigurationen von alten Verbindungen
+## @fn select_mig_connection()
+## @brief Aktiviere den angegebenen VPN-Gateway
+## @param Name eines Diensts
+## @attention Seiteneffekt: Beräumung aller herumliegenden Konfigurationen von alten Verbindungen.
 select_mig_connection() {
 	local wanted="$1"
 	local one_service
@@ -93,8 +108,10 @@ select_mig_connection() {
 }
 
 
-# Ermittle den besten Gateway und pruefe, ob ein Wechsel sinnvoll ist.
-# Der erste (optionale) Parameter erlaubt den zwangsweisen Wechsel auf den besten Gateway (unabhaengig von Wartezeiten).
+## @fn find_and_select_best_gateway
+## @brief Ermittle den besten Gateway und prüfe, ob ein Wechsel sinnvoll ist.
+## @param force [optional] erzwinge den Wechsel auf den besten Gateway unabhängig von Wartezeiten (true/false)
+## @ref mig-switch
 find_and_select_best_gateway() {
 	local force_switch_now=${1:-false}
 	local service_name
@@ -174,8 +191,10 @@ find_and_select_best_gateway() {
 }
 
 
-# Liefere die aktiven VPN-Verbindungen (mit Mesh-Internet-Gateways) zurueck.
-# Diese Funktion braucht recht viel Zeit.
+## @fn get_active_mig_connections()
+## @brief Liefere die aktiven VPN-Verbindungen (mit Mesh-Internet-Gateways) zurück.
+## @returns Liste der Namen aller Dienste, die aktuell eine aktive VPN-Verbindung halten.
+## @attention Diese Funktion braucht recht viel Zeit.
 get_active_mig_connections() {
 	local service_name
 	get_services "gw" "ugw" | while read service_name; do
@@ -184,14 +203,20 @@ get_active_mig_connections() {
 }
 
 
-# Loesche den Zeitstempel des letztes VPN-Verbindungstests. Beim naechsten Durchlauf wird diese Verbindung
-# erneut geprueft.
+## @fn reset_mig_connection_test_timestamp()
+## @brief Löse eine erneute Prüfung dieses Gateways beim nächsten Prüflauf aus.
+## @param Name eines Diensts
+## @details Das Löschen des *timestamp_connection_test* Werts führt zu einer
+##   erneuten Prüfung zum nächstmöglichen Zeitpunkt.
 reset_mig_connection_test_timestamp() {
-	service_name="$1"
+	local service_name="$1"
 	set_service_value "$service_name" "timestamp_connection_test" ""
 }
 
 
+## @fn reset_all_mig_connection_test_timestamps()
+## @brief Löse eine erneute Prüfung aller Gateways zum nächstmöglichen Zeitpunkt aus.
+## @sa reset_mig_connection_test_timestamp
 reset_all_mig_connection_test_timestamps() {
 	local service_name
 	get_services gw ugw | while read service_name; do
@@ -200,8 +225,12 @@ reset_all_mig_connection_test_timestamps() {
 }
 
 
+## @fn get_mig_connection_test_age()
+## @brief Ermittle das Test des letzten Verbindungstests in Minuten.
+## @returns Das Alter des letzten Verbindungstests in Minuten oder nichts (falls noch kein Test durchgeführt wurde).
+## @details Anhand des Test-Alters lässt sich der Zeitpunkt der nächsten Prüfung abschätzen.
 get_mig_connection_test_age() {
-	local service_name
+	local service_name="$1"
 	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
 	# noch keine Tests durchgefuehrt?
 	[ -z "$timestamp" ] && return 0
@@ -210,6 +239,11 @@ get_mig_connection_test_age() {
 }
 
 
+## @fn append_to_mig_connection_log()
+## @brief Hänge eine neue Nachricht an das Nutzer-VPN-Verbindungsprotokoll an.
+## @param event die Kategorie der Meldung (up/down/other)
+## @param msg die textuelle Beschreibung des Ereignis (z.B. "connection with ... closed")
+## @details Die Meldungen werden von den konfigurierten openvpn-up/down-Skripten gesendet.
 append_to_mig_connection_log() {
 	local event="$1"
 	local msg="$2"
@@ -221,6 +255,8 @@ append_to_mig_connection_log() {
 }
 
 
+## @fn get_mig_connection_log()
+## @brief Liefere den Inhalt des VPN-Verbindungsprotokolls.
 # Liefere den Inhalt des Nutzer-VPN-Verbindungsprotokolls (Aufbau + Trennung) zurueck
 get_mig_connection_log() {
 	[ -e "$MIG_VPN_CONNECTION_LOG" ] && cat "$MIG_VPN_CONNECTION_LOG" || true
@@ -237,6 +273,7 @@ cleanup_stale_openvpn_services() {
 	local service_name
 	local config_file
 	local pid_file
+	local uci_prefix
 	find_all_uci_sections openvpn openvpn | while read uci_prefix; do
 		config_file=$(uci_get "${uci_prefix}.config")
 		# Keine config-Datei? Keine von uns verwaltete Konfiguration ...
@@ -268,10 +305,11 @@ cleanup_stale_openvpn_services() {
 
 
 ## @fn get_client_cn()
-## @brief Ermittle den Common-Name des Nutzer-Zertifikats
-## @todo Verschiebung zu on-openvpn - Pruefung auf Existenz der Datei
+## @brief Ermittle den Common-Name des Nutzer-Zertifikats.
+## @details Liefere eine leere Zeichenkette zurück, falls kein Zertifikat vorhanden ist.
 get_client_cn() {
-	openssl x509 -in /etc/openvpn/opennet_user/on_aps.crt \
+	[ -e "$MIG_VPN_DIR/on_aps.crt" ] || return 0
+	openssl x509 -in "$MIG_VPN_DIR/on_aps.crt" \
 		-subject -nameopt multiline -noout 2>/dev/null | awk '/commonName/ {print $3}'
 }
 

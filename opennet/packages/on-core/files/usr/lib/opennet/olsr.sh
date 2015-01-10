@@ -1,4 +1,5 @@
-## @defgroup olsr OLSR-Funktionen
+## @defgroup olsr OLSR
+## @brief Konfiguration und Abfrage des OLSR-Diensts. Einlesen von Diensten announciert via olsrd-nameservice.
 # Beginn der Doku-Gruppe
 ## @{
 

@@ -1,4 +1,5 @@
-## @defgroup routing Routing-Funktionen
+## @defgroup routing Routing
+## @brief Abfrage von Routing-Informationen und Einrichtung des Policy-Routings.
 # Beginn der Doku-Gruppe
 ## @{
 

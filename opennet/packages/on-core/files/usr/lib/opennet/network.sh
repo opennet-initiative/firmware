@@ -1,4 +1,5 @@
-## @defgroup network Netzwerk-Funktionen
+## @defgroup network Netzwerk
+## @brie Umgang mit uci-Netzwerk-Interfaces und Firewall-Zonen
 # Beginn der Doku-Gruppe
 ## @{
 

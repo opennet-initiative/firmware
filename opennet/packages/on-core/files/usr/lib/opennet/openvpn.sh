@@ -1,4 +1,5 @@
-## @defgroup openvpn allgemeine OpenVPN-Funktionen
+## @defgroup openvpn OpenVPN (allgemein)
+## @brief Vorbereitung, Konfiguration und Prüfung von VPN-Verbindunge (z.B. für Nutzertunnel oder UGW). 
 # Beginn der opnvpn-Doku-Gruppe
 ## @{
 

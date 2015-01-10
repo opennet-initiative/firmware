@@ -1,4 +1,4 @@
-## @defgroup core Kern-Funktionen
+## @defgroup core Kern
 ## @brief Logging, Datei-Operationen, DNS- und NTP-Dienste, Dictionary-Dateien, PID- und Lock-Behandlung, Berichte
 # Beginn der Doku-Gruppe
 ## @{
@@ -27,9 +27,16 @@ msg_debug() {
 	uci_is_true "$DEBUG" && logger -t "$(basename "$0")[$$]" "$1" || true
 }
 
+
+## @fn msg_info()
+## @param message Log-Nachricht
+## @brief Informationen und Fehlermeldungen ins syslog schreiben
+## @details Die Nachrichten landen im syslog (siehe ``logread``).
+## Die info-Nachrichten werden immer ausgegeben, da es kein höheres Log-Level gibt.
 msg_info() {
 	logger -t "$(basename "$0")[$$]" "$1"
 }
+
 
 ## @fn update_file_if_changed()
 ## @param filename Name der Zieldatei
@@ -54,9 +61,11 @@ update_file_if_changed() {
 }
 
 
-# Gather the list of hosts announcing a NTP services.
-# Store this list as a dnsmasq 'server-file'.
-# The file is only updated in case of changes.
+## @fn update_dns_servers()
+## @brief Übertrage die Liste der als DNS-Dienst announcierten Server in die dnsmasq-Konfiguration.
+## @details Die Liste der DNS-Server wird in die separate dnsmasq-Servers-Datei geschrieben (siehe @sa DNSMASQ_SERVERS_FILE_DEFAULT).
+##   Die Server-Datei wird nur bei Änderungen neu geschrieben. Dasselbe gilt für den Neustart des Diensts.
+##   Diese Funktion sollte via olsrd-nameservice-Trigger oder via cron-Job ausgeführt werden.
 update_dns_servers() {
 	trap "error_trap update_dns_servers '$*'" $GUARD_TRAPS
 	local host
@@ -86,10 +95,13 @@ update_dns_servers() {
 	killall -s HUP dnsmasq 2>/dev/null || true
 }
 
-# Gather the list of hosts announcing a NTP services.
-# Store this list as ntpclient-compatible uci settings.
-# The uci settings are only updated in case of changes.
-# ntpclient is restarted in case of changes.
+
+## @fn update_ntp_servers()
+## @brief Übertrage die Liste der als NTP-Dienst announcierten Server in die sysntpd-Konfiguration.
+## @details Die Liste der NTP-Server wird in die uci-Konfiguration geschrieben.
+##   Die uci-Konfiguration wird nur bei Änderungen neu geschrieben. Dasselbe gilt für den Neustart des Diensts.
+##   Diese Funktion sollte via olsrd-nameservice-Trigger oder via cron-Job ausgeführt werden.
+## @sa http://wiki.openwrt.org/doc/uci/system#remote_time_ntp
 update_ntp_servers() {
 	trap "error_trap update_ntp_servers '$*'" $GUARD_TRAPS
 	local host
@@ -139,13 +151,15 @@ add_banner_event() {
 }
 
 
-#################################################################################
-# Auslesen eines Werts aus einer Key/Value-Datei
-# Jede Zeile dieser Datei enthaelt einen Feldnamen und einen Wert - beide sind durch
-# ein beliebiges whitespace-Zeichen getrennt.
-# Wir verwenden dies beispielsweise fuer die volatilen Gateway-Zustandsdaten.
-# Parameter status_file: der Name der Key/Value-Datei
-# Parameter field: das Schluesselwort
+## @fn _get_file_dict_value()
+## @brief Auslesen eines Werts aus einer Schlüssel/Wert-Datei
+## @param status_file der Name der Schlüssel/Wert-Datei
+## @param field das Schlüsselwort
+## @returns Den zum gegebenen Schlüssel gehörenden Wert aus der Schlüssel/Wert-Datei.
+##   Falls kein passender Schlüssel gefunden wurde, dann ist die Ausgabe leer.
+## @details Jede Zeile dieser Datei enthält einen Feldnamen und einen Wert - beide sind durch
+##   ein beliebiges whitespace-Zeichen getrennt.
+##   Dieses Dateiformat wird beispielsweise für die Dienst-Zustandsdaten verwendet.
 _get_file_dict_value() {
 	local status_file=$1
 	local field=$2
@@ -160,29 +174,26 @@ _get_file_dict_value() {
 }
 
 
-# Liefere alle Schluessel aus einer Key/Value-Datei, die mit dem mitgelieferten "keystart"
-# beginnen.
+## @fn _get_file_dict_keys()
+## @brief Liefere alle Schlüssel aus einer Schlüssel/Wert-Datei.
+## @param status_file der Name der Schlüssel/Wert-Datei
+## @returns Liste aller Schlüssel aus der Schlüssel/Wert-Datei.
+## @sa _get_file_dict_value
 _get_file_dict_keys() {
 	local status_file=$1
-	local keystart=$2
-	local key
-	local value
 	# fehlende Datei -> kein Ergebnis
 	[ -e "$status_file" ] || return 0
-	while read key value; do
-		# leerer oder passender Schluessel-Praefix
-		[ -z "$keystart" -o "${key#$keystart}" != "$key" ] && echo "${key#$keystart}" || true
-	done < "$status_file"
+	awk '{ print $1 }' < "$status_file"
 	return 0
 }
 
 
-#################################################################################
-# Schreiben eines Werts in eine Key-Value-Datei
-# Dateiformat: siehe _get_file_dict_value
-# Parameter status_file: der Name der Key/Value-Datei
-# Parameter field: das Schluesselwort
-# Parameter value: der neue Wert
+## @fn _set_file_dict_value()
+## @brief Schreiben eines Werts in eine Schlüssel/Wert-Datei
+## @param status_file der Name der Schlüssel/Wert-Datei
+## @param field das Schlüsselwort
+## @param value der neue Wert
+## @sa _get_file_dict_value
 _set_file_dict_value() {
 	local status_file=$1
 	local field=$2
@@ -205,26 +216,30 @@ _set_file_dict_value() {
 }
 
 
-# hole einen der default-Werte der aktuellen Firmware
-# Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
-# Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfuegbar.
+## @fn get_on_core_default()
+## @brief Liefere einen der default-Werte der aktuellen Firmware zurück (Paket on-core).
+## @param key Name des Schlüssels
+## @details Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
+##   Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfügbar.
 get_on_core_default() { _get_file_dict_value "$ON_CORE_DEFAULTS_FILE" "$1"; }
-get_on_openvpn_default() { _get_file_dict_value "$ON_OPENVPN_DEFAULTS_FILE" "$1"; }
-get_on_wifidog_default() { _get_file_dict_value "$ON_WIFIDOG_DEFAULTS_FILE" "$1"; }
 
 
-
+## @fn get_on_firmware_version()
+## @brief Liefere die aktuelle Firmware-Version zurück.
+## @returns Die zurückgelieferte Zeichenkette beinhaltet den Versionsstring (z.B. "0.5.0").
+## @details Per Konvention entspricht die Version jedes Firmware-Pakets der Firmware-Version.
 get_on_firmware_version() {
 	opkg status on-core | awk '{if (/Version/) print $2;}'
 }
 
 
-# Parameter:
-#   on_id: die ID des AP - z.B. "1.96" oder "2.54"
-#   on_ipschema: siehe "get_on_core_default on_ipschema"
-#   interface_number: 0..X
-# ACHTUNG: manche Aufrufende verlassen sich darauf, dass on_id_1 und
-# on_id_2 nach dem Aufruf verfuegbar sind (also _nicht_ "local")
+## @fn get_on_ip()
+## @param on_id die ID des AP - z.B. "1.96" oder "2.54"
+## @param on_ipschema siehe "get_on_core_default on_ipschema"
+## @param interface_number 0..X (das WLAN-Interface ist typischerweise Interface #0)
+## @attention Manche Aufrufende verlassen sich darauf, dass *on_id_1* und
+##   *on_id_2* nach dem Aufruf verfügbar sind (also _nicht_ als "local"
+##   Variablen deklariert wurden).
 get_on_ip() {
 	local on_id=$1
 	local on_ipschema=$2
@@ -236,7 +251,11 @@ get_on_ip() {
 }
 
 
-# Liefere die aktuell konfigurierte Main-IP zurueck
+## @fn get_main_ip()
+## @brief Liefere die aktuell konfigurierte Main-IP zurück.
+## @returns Die aktuell konfigurierte Main-IP des AP oder die voreingestellte IP.
+## @attention Seiteneffekt: die Variablen "on_id_1" und "on_id_2" sind anschließend verfügbar.
+## @sa get_on_ip
 get_main_ip() {
 	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
 	local ipschema=$(get_on_core_default on_ipschema)
@@ -657,6 +676,25 @@ is_function_available() {
 	# Also verwenden wir die Textausgabe von "type".
 	echo "$(type "$func_name")" | grep -q "function$" && return 0
 	trap "" $GUARD_TRAPS && return 1
+}
+
+
+## @fn get_local_bias_numer()
+## @brief Ermittle eine lokale einzigartige Zahl, die als dauerhaft unveränderlich angenommen werden kann.
+## @returns Eine (initial zufällig ermittelte) Zahl zwischen 0 und 10^8-1, die unveränderlich zu diesem AP gehört. 
+## @details Für ein paar gleichrangige Sortierungen (z.B. verwendete
+##   UGW-Gegenstellen) benötigen wir ein lokales Salz, um strukturelle
+##   Bevorzugungen zu vermeiden.
+get_local_bias_number() {
+	local bias=$(uci_get on-core.settings.local_bias_number)
+	# der Bias-Wert ist schon vorhanden - wir liefern ihn aus
+	if [ -z "$bias" ]; then
+		# wir müssen einen Bias-Wert erzeugen: beliebige gehashte Inhalte ergeben eine akzeptable Zufallszahl
+		bias=$( (logread; dmesg; ps; date) | md5sum | tr "abcdef" "012345" | cut -c 1-8)
+		uci set "on-core.settings.local_bias_number=$bias"
+		uci commit on-core
+	fi
+	echo -n "$bias" && return 0
 }
 
 # Ende der Doku-Gruppe

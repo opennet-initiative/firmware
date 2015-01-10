@@ -1,11 +1,10 @@
-## @defgroup services Dienste-Funktionen
+## @defgroup services Dienste
+## @brief Verwaltung von Diensten (z.B. via olsrd-nameservice announciert)
 # Beginn der Doku-Gruppe
 ## @{
 
 VOLATILE_SERVICE_STATUS_DIR=/tmp/on-services-volatile.d
 PERSISTENT_SERVICE_STATUS_DIR=/etc/on-services.d
-# fuer die Sortierung von Gegenstellen benoetigen wir ein lokales Salz, um strukturelle Bevorzugungen (z.B. von UGW-Hosts) zu vermeiden.
-LOCAL_BIAS_NUMBER=$(get_main_ip | sed 's/[^0-9]//g')
 # eine grosse Zahl sorgt dafuer, dass neu entdeckte Dienste hinten angehaengt werden
 DEFAULT_SERVICE_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
@@ -64,10 +63,10 @@ is_existing_service() {
 
 # Addiere 1 oder 0 - abhaengig von der lokalen IP und der IP der Gegenstelle.
 # Dadurch koennen wir beim Sortieren strukturelle Ungleichgewichte (z.B. durch alphabetische Sortierung) verhindern.
-_add_local_bias() {
+_add_local_bias_to_host() {
 	local ip="$1"
         local host_number=$(echo "$ip" | sed 's/[^0-9]//g')
-	head -1 | awk '{ print $1 + ( '$LOCAL_BIAS_NUMBER' + '$host_number' ) % 2 }'
+	head -1 | awk '{ print $1 + ( '$(get_local_bias_number)' + '$host_number' ) % 2 }'
 }
 
 
@@ -91,7 +90,7 @@ get_service_priority() {
 	else
 		msg_info "Unknown sorting method for services: $sorting"
 		echo 1
-	fi | get_int_multiply 1000 | _add_local_bias "$(get_service_value "$service_name" "host")"
+	fi | get_int_multiply 1000 | _add_local_bias_to_host "$(get_service_value "$service_name" "host")"
 }
 
 

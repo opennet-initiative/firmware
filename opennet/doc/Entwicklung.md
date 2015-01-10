@@ -1,6 +1,6 @@
 [TOC]
 
-Überblick {#overview}
+Überblick {#ueberblick-entwicklung}
 =========
 
 Die Opennet-Firmware basiert auf den Komponenten *git*, *quilt* und der *openwrt*-Entwicklungsumgebung.
@@ -464,9 +464,10 @@ Versionsnummerierung {#version-numbers}
 
 Die Versionsnummer des kommenden Release ist in der ``opennet/config/common`` als ``CONFIG_VERSION_NUMBER`` eingetragen.
 
-Im Laufe der Erzeugung der config-Datei wird eventuell die git-commit-Nummer hinzugefügt (@sa config-assemble).
+Im Laufe der Erzeugung der config-Datei wird eventuell die git-commit-Nummer hinzugefügt (siehe @ref config-assemble).
 
-Die opennet-relevanten Pakete (*on-core* u.s.w) erhalten dieselbe Versionsnummer (@sa patches/makefile_include_opennet_packages.patch).
+Die opennet-relevanten Pakete (*on-core* u.s.w) erhalten dieselbe Versionsnummer.
+@sa ../../patches/makefile_include_opennet_packages.patch
 
 
 Build-Server (minato) {#build-server}
@@ -476,7 +477,8 @@ Wir verwenden trac als Web-Interface und Entwicklungswerkzeug: http://dev.openne
 
 Das trac-Plugin *bitten* wird durch einen git-commit-Hook ausgelöst und regt wenige Minuten nach einem *git push* einen Build-Prozess auf dem Server *minato* an. Dieser Build-Prozess wird vom Nutzer *trac-bitten-slave* ausgeführt. Die Build-Schritte sind im Web-Interface definiert.
 
-Innerhalb des Build-Prozess wird das export-Skript (@sa opennet/tools/trac-bitten-slave/export-build.sh) ausgeführt. Es kopiert das Build-Ergebnis für eine Plattform oder wahlweise die erstellte Dokumentation in das Export-Verzeichnis, welches via Webserver veröffentlicht wird: http://downloads.opennet-initiative.de/openwrt/. Das exakte Zielverzeichnis ergibt sich dabei aus der Versionsnummer (@sa version-numbers).
+Innerhalb des Build-Prozess wird das export-Skript ausgeführt. Es kopiert das Build-Ergebnis für eine Plattform oder wahlweise die erstellte Dokumentation in das Export-Verzeichnis, welches via Webserver veröffentlicht wird (http://downloads.opennet-initiative.de/openwrt/). Das exakte Zielverzeichnis ergibt sich dabei aus der Versionsnummer (siehe @ref version-numbers).
+@sa ../tools/trac-bitten-slave/export-build.sh
 
 
 Upgrade-Tests {#upgrade}

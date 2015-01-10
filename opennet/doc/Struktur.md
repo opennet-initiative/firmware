@@ -1,6 +1,6 @@
 [TOC]
 
-Überblick {#overview}
+Überblick {#ueberblick-struktur}
 =========
 
 Diese Dokumentation beschäftigt sich mit der Struktur der Firmware-Buildumgebung. Die Verwendung der Umgebung ist dagegen in der [Entwicklungsdokumentation] (Entwicklung.md) beschrieben.

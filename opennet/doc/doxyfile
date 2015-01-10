@@ -765,6 +765,9 @@ WARN_LOGFILE           =
 
 INPUT                  = ../packages/on-core/files/usr/lib/opennet \
                          ../packages/on-openvpn/files/usr/lib/opennet \
+                         ../../patches \
+                         ../tools/trac-bitten-slave \
+                         ../tools/check_for_obsolete_functions.sh \
                          .
 
 # This tag can be used to specify the character encoding of the source files

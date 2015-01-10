@@ -133,13 +133,13 @@ get_service_sorting() {
 	local sorting=$(uci_get "on-core.settings.service_sorting")
 	if [ "$sorting" = "manual" -o "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		# zulaessige Sortierung
-		echo "$sorting"
+		echo -n "$sorting"
 	else
 		# unbekannte Sortierung: dauerhaft setzen
 		# keine Warnung falls die Sortierung nicht gesetzt wurde
 		[ -n "$sorting" ] && msg_info "Warning: coercing unknown sorting method: $sorting -> $DEFAULT_SERVICE_SORTING"
 		uci set "on-core.settings.service_sorting=$DEFAULT_SERVICE_SORTING"
-		echo "$DEFAULT_SERVICE_SORTING"
+		echo -n "$DEFAULT_SERVICE_SORTING"
 	fi
 	return 0
 }

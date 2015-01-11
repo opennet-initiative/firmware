@@ -51,13 +51,13 @@ function action_vpn_gateways()
 			set_service_value(disable_service, "disabled", "1")
 		elseif enable_service then
 			delete_service_value(enable_service, "disabled")
+		elseif reset_offset then
+			delete_service_value(reset_offset, "offset")
 		end
 		-- Forciere sofortigen Wechsel zum aktuell besten Gateway.
 		-- Dies ist nicht immer notwendig - aber sofortige Änderungen
 		-- entsprechen wahrscheinlich der Erwartungshaltung des Nutzenden.
 		on_function("find_and_select_best_gateway", {"true"})
-	elseif reset_offset then
-		delete_service_value(reset_offset, "offset")
 	elseif reset_connection_test_timestamps then
 		on_function("reset_all_mig_connection_test_timestamps")
 	elseif new_gateway then

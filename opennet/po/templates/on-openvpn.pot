@@ -13,6 +13,12 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
+msgid "Add"
+msgstr ""
+
+msgid "Add Gateway manually"
+msgstr ""
+
 msgid ""
 "Additionally you may choose to rank specific gateways higher or lower than "
 "their routing distance would indicate. Please be careful with this manual "
@@ -117,6 +123,9 @@ msgid "Opennet OpenVPN Gateways"
 msgstr ""
 
 msgid "Organizational Unit"
+msgstr ""
+
+msgid "Port"
 msgstr ""
 
 msgid "Private Key (.key)"
@@ -262,6 +271,9 @@ msgid "start VPN Tunnel"
 msgstr ""
 
 msgid "tested %d minutes ago"
+msgstr ""
+
+msgid "unreachable"
 msgstr ""
 
 msgid "upload"

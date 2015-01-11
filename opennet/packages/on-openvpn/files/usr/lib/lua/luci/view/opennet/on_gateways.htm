@@ -88,11 +88,21 @@ You may obtain a copy of the License at
 		var distance;
 		var speed;
 		var speed_abbr;
+		var unreachable;
 		var result = "";
 		// "remote" menschenfreundlich setzen
 		remote = gateway.host;
-		if (gateway.port != 1600) {
+		if (gateway.port != <%=on_function("get_variable", {"DEFAULT_MIG_PORT"})%>) {
 			remote += ":" + (gateway.port || "?");
+		}
+		if (gateway.distance) {
+		       unreachable = false;
+		} else {
+		       unreachable = true;
+		}
+		// Zeile visuall als unbenutzbar markieren
+		if (gateway.disabled || unreachable) {
+			target_row.setAttribute("disabled", "y");
 		}
 		// "active" als laeuft/kaputt/inaktive setzen
 		if (gateway.active) {
@@ -107,16 +117,21 @@ You may obtain a copy of the License at
 			active = null;
 		}
 		// best_gateway setzen, falls noch ungesetzt oder weiter oben, als der bisher beste
-		if ((gateway.status == "y") && !gateway.disabled
+		if ((gateway.status == "y") && !gateway.disabled && !gateway.unreachable
 				&& (!best_gateway || (service_dict[best_gateway] > service_dict[gateway.id]))) {
 			best_gateway = gateway.id;
 			update_gateway_change_indicator();
 		}
 		result += String.format('<td class="cbi-value-field"><div id="cbi-opennet-gateways-active" active="%s">&nbsp;</div>', active);
 		result += String.format('<td><strong>%s</strong></th>', remote);
-		// wir zeigen die Rang-Zahlen fuer Dienste nicht an
-		if ("<%=sorting%>" != "manual") {
-			result += '<td class="cbi-value-field"><div id="cbi-opennet-gateways-hopcount">';
+		if (unreachable) {
+			// unerreichbare Knoten werden als solche markiert
+			result += '<td class="cbi-value-field"><%:unreachable%></td>';
+		} else if ("<%=sorting%>" == "manual") {
+			// im manuellen Modus ist die Entfernung egal - also ignorieren wir den Offset
+			result += String.format('<td class="cbi-value-field">%.2f</td>', gateway.distance);
+		} else {
+			result += '<td class="cbi-value-field">';
 			if (gateway.distance && (gateway.offset != 0)) {
 				result += String.format('(%d)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_offset" />', gateway.offset, gateway.id, gateway);
 			}
@@ -125,7 +140,7 @@ You may obtain a copy of the License at
 			<% elseif sorting == "hop" then %>
 				distance = gateway.hop_count;
 			<% end %>
-			result += String.format('%.2f</div></td>', distance + gateway.offset);
+			result += String.format('%.2f</td>', distance + gateway.offset);
 		}
 		result += '<td>';
 		if (gateway.upload || gateway.download) {
@@ -137,7 +152,6 @@ You may obtain a copy of the License at
 		result += String.format('<td class="cbi-value-field" title="<%:tested %d minutes ago%>"><div id="cbi-opennet-gateways-status" status="%s">&nbsp;</div></td>', gateway.age, gateway.status);
 		result += '<td class="cbi-value-field"><div id="cbi-opennet-gateways-actions">';
 		if (gateway.disabled) {
-			target_row.setAttribute("disabled", "y");
 			result += String.format('<input class="cbi-button cbi-button-enable cbi-button-small" type="submit" value="%s" title="<%:enable%>" name="enable_service" />', gateway.id);
 		} else {
 			result += String.format('<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="%s" title="<%:move to top and connect immediately%>" name="move_top" />', gateway.id);
@@ -175,6 +189,7 @@ You may obtain a copy of the License at
 
 //]]></script>
 
+<%# Ein paar Infos zu Gateways im Allgemeinen %>
 <h2><a id="content" name="content"><%:Opennet OpenVPN Gateways%></a></h2>
 <div class="cbi-map">
 	<fieldset class="cbi-section">
@@ -201,6 +216,8 @@ You may obtain a copy of the License at
 	<% end %>
 </div>
 
+
+<%# Dynamisch erzeugte Gateway-Liste, sowie Eingabe manueller Gateways %>
 <h3><%:Gateway-List%></h3>
 <div class="cbi-map">
 	<fieldset class="cbi-section">
@@ -212,16 +229,18 @@ You may obtain a copy of the License at
 					<th colspan = "1" />
 					<th class="cbi-section-table-cell"><%:active%></th>
 					<th class="cbi-section-table-cell"><%:IP-Address%></th>
-					<% if sorting ~= "manual" then %>
-						<th class="cbi-section-table-cell">
-						<abbr title="<%:This offset is added to the values before use/display%>">Offset</abbr> /
+					<th class="cbi-section-table-cell">
+						<% if sorting ~= "manual" then %>
+							<%# es gibt keinen Offset im manual Modus %>
+							<abbr title="<%:This offset is added to the values before use/display%>">Offset</abbr> /
+						<% end %>
 						<% if sorting == "hop" then %>
 							<abbr title="<%:Number of Hops to the Gateway%>"><%:Distance%></abbr>
 						<% else %>
+							<%# im manual und etx Modus zeigen wir den ETX-Wert an %>
 							<abbr title="<%:Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR%>"><%:ETX%></abbr>
 						<% end %>
-						</th>
-					<% end %>
+					</th>
 
 					<th class="cbi-section-table-cell"><abbr title="<%:Announced Upload / Download Speed.%>"><%:Speed%></abbr></th>
 
@@ -259,6 +278,8 @@ You may obtain a copy of the License at
 	</fieldset>
 </div>
 
+
+<%# Protokoll von Gateway-Wechseln %>
 <% local gateway_log = luci.sys.exec("on-function get_mig_connection_log | tail -n 30 | tac") %>
 <% if gateway_log ~= "" then %>
 	<h3><%:Connection log%></h3>

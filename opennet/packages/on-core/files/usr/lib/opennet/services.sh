@@ -81,9 +81,9 @@ get_service_priority() {
 	local rank
 	# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
 	[ -z "$sorting" ] && sorting=$(get_service_sorting)
-	# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
-	[ -z "$distance" ] && return 0
 	if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
+		# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
+		[ -z "$distance" ] && return 0
 		get_distance_with_offset "$service_name"
 	elif [ "$sorting" = "manual" ]; then
 		get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"

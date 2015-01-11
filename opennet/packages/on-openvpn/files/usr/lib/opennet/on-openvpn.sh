@@ -6,6 +6,7 @@
 MIG_VPN_DIR=/etc/openvpn/opennet_user
 MIG_VPN_CONNECTION_LOG=/var/log/mig_openvpn_connections.log
 MIG_VPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
+DEFAULT_MIG_PORT=1600
 
 
 ## @fn get_on_openvpn_default()
@@ -143,7 +144,11 @@ find_and_select_best_gateway() {
 	msg_debug "Trying to find a better gateway"
 	# suche nach dem besten und dem bisher verwendeten Gateway
 	# Ignoriere dabei alle nicht-verwendbaren Gateways.
-	result=$(get_sorted_services gw ugw | filter_enabled_services | while read service_name; do
+	result=$(get_services "gw" "ugw" \
+			| filter_reachable_services \
+			| filter_enabled_services \
+			| sort_services_by_priority \
+			| while read service_name; do
 		# Ist der beste und der aktive Gateway bereits gefunden? Dann einfach weiterspringen ...
 		# (kein Abbruch der Schleife - siehe weiter unten - Stichwort SIGPIPE)
 		[ -n "$current_gateway" ] && continue

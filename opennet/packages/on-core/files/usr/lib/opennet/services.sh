@@ -145,31 +145,40 @@ get_service_sorting() {
 }
 
 
-# Liefere die Dienst-Namen aller ausgewaehlten Dienste, die erreichbar sind.
-# Ein oder mehrere Dienst-Typen koennen angegeben werden.
-get_sorted_services() {
+sort_services_by_priority() {
 	local service_name
 	local priority
 	local sorting=$(get_service_sorting)
-	get_services "$@" | while read service_name; do
-		# keine Entfernung -> nicht erreichbar -> ignorieren
+	local unreachable_services=""
+	while read service_name; do
 		priority=$(get_service_priority "$service_name" "$sorting")
-		[ -z "$priority" ] && continue
+		# keine Entfernung (nicht erreichbar) -> ganz nach hinten sortieren (schmutzig, aber wohl ausreichend)
+		[ -z "$priority" ] && priority=999999999999999999999999999999999999999
 		echo "$priority" "$service_name"
 	done | sort -n | awk '{print $2}'
 }
 
 
-# Lese Service-Namen via stdin und gib alle angeschalteten ("disabled=0" oder leer) Dienste auf stdout aus.
+## @fn filter_reachable_services()
+## @brief Filtere aus einer Reihe eingehender Dienste diejenigen heraus, die erreichbar sind.
+## @details Die Dienst-Namen werden über die Standardeingabe gelesen und an
+##   die Standardausgabe weitergeleitet, falls der Dienst erreichbar sind.
+filter_reachable_services() {
+	local service_name
+	while read service_name; do
+		[ -n "$(get_service_value "$service_name" "distance")" ] && echo "$service_name" || true
+	done
+}
+
+
+## @fn filter_enabled_services()
+## @brief Filtere aus einer Reihe eingehender Dienste diejenigen heraus, die nicht manuell ausgeblendet wurden.
+## @details Die Dienst-Namen werden über die Standardeingabe gelesen und an
+##   die Standardausgabe weitergeleitet, falls der Dienst nicht abgewählt wurde.
 filter_enabled_services() {
 	local service_name
-	local disabled
 	while read service_name; do
-		disabled=$(get_service_value "$service_name" "disabled")
-		# abgeschaltet?
-		[ -n "$disabled" ] && uci_is_true "$disabled" && continue
-		# aktiv!
-		echo "$service_name"
+		uci_is_false "$(get_service_value "$service_name" "disabled" "false")" && echo "$service_name" || true
 	done
 }
 
@@ -402,20 +411,19 @@ delete_service() {
 _distribute_service_ranks() {
 	local service_name
 	local index=1
-	get_sorted_services | while read service_name; do
+	get_services | sort_services_by_priority | while read service_name; do
 		set_service_value "$service_name" "rank" "$index"
 		: $((index++))
 	done
 }
 
 
-# Einen Dienst um eine Stufe nach oben bewegen.
-# Für verschiedene Sortier-Modi hat dies verschiedene Auswirkungen:
-#   manual: Verschiebung vor den davorliegenden Dienst desselben Typs
-#   etx/hop: Reduzierung des Offsets um eins
-# Parameter: zu verschiebender Service
-# Parameter: eine Liste von Dienst-Typen (z.B. "ugw" "gw")
-# Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste nach oben.
+## @fn move_service_up()
+## @brief Verschiebe einen Dienst in der Dienst-Sortierung um eine Stufe nach oben
+## @details Für verschiedene Sortier-Modi hat dies verschiedene Auswirkungen:
+##   * manual: Verschiebung vor den davorplatzierten Dienst desselben Typs
+##   * etx/hop: Reduzierung des Offsets um eins
+##   Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste nach unten.
 move_service_up() {
 	trap "error_trap move_service_up '$*'" $GUARD_TRAPS
 	local service_name="$1"
@@ -430,7 +438,7 @@ move_service_up() {
 		temp=$(echo "$temp" | awk '{ print $1 - 1 }')
 		set_service_value "$service_name" "offset" "$temp"
 	elif [ "$sorting" = "manual" ]; then
-		get_sorted_services "$@" | while read current_service; do
+		get_services "$@" | sort_services_by_priority | while read current_service; do
 			if [ "$current_service" = "$service_name" ]; then
 				if [ -z "$prev_service" ]; then
 					# es gibt keinen Dienst oberhalb des zu verschiebenden
@@ -455,13 +463,12 @@ move_service_up() {
 }
 
 
-# Einen Dienst um eine Stufe nach unten bewegen.
-# Für verschiedene Sortier-Modi hat dies verschiedene Auswirkungen:
-#   manual: Verschiebung hinter den dahinterliegenden Dienst desselben Typs
-#   etx/hop: Erhoehung des Offsets um eins
-# Parameter: zu verschiebender Service
-# Parameter: eine Liste von Dienst-Typen (z.B. "ugw" "gw")
-# Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste nach unten.
+## @fn move_service_down()
+## @brief Verschiebe einen Dienst in der Dienst-Sortierung um eine Stufe nach unten
+## @details Für verschiedene Sortier-Modi hat dies verschiedene Auswirkungen:
+##   * manual: Verschiebung hinter den dahinterliegenden Dienst desselben Typs
+##   * etx/hop: Erhöhung des Offsets um eins
+##   Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste nach unten.
 move_service_down() {
 	trap "error_trap move_service_down '$*'" $GUARD_TRAPS
 	local service_name="$1"
@@ -476,7 +483,7 @@ move_service_down() {
 		temp=$(echo "$temp" | awk '{ print $1 + 1 }')
 		set_service_value "$service_name" "offset" "$temp"
 	elif [ "$sorting" = "manual" ]; then
-		get_sorted_services "$@" | while read current_service; do
+		get_services "$@" | sort_services_by_priority | while read current_service; do
 			if [ "$prev_service" = "$service_name" ]; then
 				# wir verschieben den Dienst hinter den danach liegenden
 				temp=$(get_service_value "$current_service" "rank" "$DEFAULT_SERVICE_RANK")
@@ -496,16 +503,17 @@ move_service_down() {
 }
 
 
-# Einen Dienst an die Spitze der Dienst-Sortierung verschieben.
-# Der Dienst steht anschliessend direkt vor den fuehrenden Dienst der ausgewaehlten Typen (falls angegeben).
-# Parameter: zu verschiebender Service
-# Parameter: eine Liste von Dienst-Typen (z.B. "ugw" "gw")
-# Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste an die Spitze.
+## @fn move_service_top()
+## @brief Verschiebe einen Dienst an die Spitze der Dienst-Sortierung
+## @param service_name der zu verschiebende Dienst
+## @param service_types ein oder mehrere Dienst-Typen, auf die die Ermittlung der Dienst-Liste begrenzt werden soll (z.B. "gw" "ugw")
+## @details Der Dienst steht anschließend direkt vor dem bisher führenden Dienst der ausgewählten Typen (falls angegeben).
+##   Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste an die Spitze.
 move_service_top() {
 	trap "error_trap move_service_top '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	shift
-	local top_service=$(get_sorted_services "$@" | head -1)
+	local top_service=$(get_services "$@" | sort_services_by_priority | head -1)
 	local sorting=$(get_service_sorting)
 	local top_rank
 	local new_rank
@@ -513,11 +521,12 @@ move_service_top() {
 	local our_distance
 	local current_offset
 	local new_offset
-	# kein top-Service oder wir bereits ganz oben -> Ende
+	# kein top-Service oder wir sind bereits ganz oben -> Ende
 	[ -z "$top_service" -o "$top_service" = "$service_name" ] && return 0
 	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		top_distance=$(get_distance_with_offset "$top_service")
 		our_distance=$(get_distance_with_offset "$service_name")
+		[ -z "$our_distance" ] && msg_info "Failed to move unreachable service ('$service_name') to top" && return 0
 		current_offset=$(get_service_value "$service_name" "offset" 0)
 		# wir verschieben unseren Offset, auf dass wir knapp ueber "top" stehen
 		new_offset=$(echo | awk "{ print $current_offset + int($top_distance - $our_distance) - 1 }")

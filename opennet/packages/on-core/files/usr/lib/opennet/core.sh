@@ -83,7 +83,7 @@ update_dns_servers() {
 	       reload_config
 	fi
 	# wir sortieren alphabetisch - Naehe ist uns egal
-	get_services "dns" | filter_enabled_services | sort | while read service; do
+	get_services "dns" | filter_reachable_services | filter_enabled_services | sort | while read service; do
 		host=$(get_service_value "$service" "host")
 		port=$(get_service_value "$service" "port")
 		[ -n "$port" -a "$port" != "53" ] && host="$host#$port"
@@ -113,7 +113,7 @@ update_ntp_servers() {
 	# schreibe die Liste der NTP-Server neu
 	uci_delete system.ntp.server
 	# wir sortieren alphabetisch - Naehe ist uns egal
-	get_services "ntp" | filter_enabled_services | sort | while read service; do
+	get_services "ntp" | filter_reachable_services | filter_enabled_services | sort | while read service; do
 		host=$(get_service_value "$service" "host")
 		port=$(get_service_value "$service" "port")
 		[ -n "$port" -a "$port" != "123" ] && host="$host:$port"

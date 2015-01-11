@@ -42,7 +42,7 @@ case "${1:-}" in
 			get_services "gw" "ugw" | filter_services_by_value "host=$1"
 		else
 			get_services "gw" "ugw"
-		fi | filter_enabled_services | while read service_name; do
+		fi | filter_reachable_services | filter_enabled_services | while read service_name; do
 			description=$(get_service_description "$service_name")
 			echo "Testing Gateway: $description"
 			reset_mig_connection_test_timestamp "$service_name"
@@ -68,7 +68,7 @@ case "${1:-}" in
 		# die Gateway-Tests sind nur moeglich, falls ein Test-Schluessel vorhanden ist
 		if [ -e "$VPN_DIR_TEST/on_aps.crt" -a -e "$VPN_DIR_TEST/on_aps.key" ]; then
 			# teste alle VPN-Verbindungen (falls noetig und moeglich)
-			get_services "gw" "ugw" | filter_enabled_services | while read service_name; do
+			get_services "gw" "ugw" | filter_reachable_services | filter_enabled_services | while read service_name; do
 				test_mig_connection "$service_name" || true
 			done
 			# der Gateway-Wechsel findet nur statt, falls Schluessel und Zertifikat vorhanden sind

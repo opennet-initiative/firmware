@@ -36,6 +36,7 @@ function action_vpn_gateways()
 	local enable_service = luci.http.formvalue("enable_service")
 	local reset_offset = luci.http.formvalue("reset_offset")
 	local reset_connection_test_timestamps = luci.http.formvalue("reset_connection_test_timestamps")
+	local new_gateway = luci.http.formvalue("new_gateway")
 	
 	if move_up or move_down or move_top or delete_service or disable_service or enable_service then
 		if move_up then
@@ -59,14 +60,14 @@ function action_vpn_gateways()
 		delete_service_value(reset_offset, "offset")
 	elseif reset_connection_test_timestamps then
 		on_function("reset_all_mig_connection_test_timestamps")
+	elseif new_gateway then
+		local new_gateway_ip = luci.http.formvalue("new_gateway_ip")
+		local new_gateway_port = luci.http.formvalue("new_gateway_port") or "1600"
+		on_function("notify_service", {"gw", "openvpn", new_gateway_ip, new_gateway_port, "udp", "/", "", "manual"})
 	end
 
-
-	-- optional koennten wir pruefen, ob ueberhaupt eine der Verbindungen einen Offset verwendet
-	local offset_exists = true
 	local show_more_info = luci.http.formvalue("show_more_info")
-
-	luci.template.render("opennet/on_gateways", { gateway_list = gateway_list, show_more_info = show_more_info, offset_exists = offset_exists })
+	luci.template.render("opennet/on_gateways", { show_more_info=show_more_info })
 end
 
 

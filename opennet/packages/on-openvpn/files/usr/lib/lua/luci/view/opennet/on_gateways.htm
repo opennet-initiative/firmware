@@ -237,6 +237,25 @@ You may obtain a copy of the License at
 				<%:The first reachable Gateway is currently not in use. The Tunnel will be restarted and the Gateway will be changed in a few minutes. This change will be shown after a reload of this page.%>
 			</p>
 		</fieldset>
+
+
+		<%# Manuelles Hinzufügen weiterer Gateways %>
+		<fieldset class="cbi-section-node">
+			<form name="gateways" method="post" action="<%=REQUEST_URI%>">
+			<div class="cbi-value">
+				<div class="cbi-value-field">
+					<label for="new_gateway_ip"><%:Add Gateway manually%>:</label>
+					<input class="cbi-input-text" name="new_gateway_ip" id="new_gateway_ip" size="16" />
+					<label for="new_gateway_port"><%:Port%>:</label>
+					<input class="cbi-input-text" name="new_gateway_port"
+						id="new_gateway_ip" size="5"
+						value="<%=on_function("get_variable", {"DEFAULT_MIG_PORT"})%>" />
+					<input class="cbi-button cbi-button-apply" type="submit"
+						id="new_gateway" name="new_gateway" value="<%:Add%>" />
+				</div>
+			</div>
+			</form>
+		</fieldset>
 	</fieldset>
 </div>
 

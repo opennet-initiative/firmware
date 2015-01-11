@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Konfiguriere opkg-relevante Einstellungen
+#
+# Dieses Skript wird nur ein einziges Mal nach einem Upgrade oder der Erstinstallation ausgefuehrt:
+#   http://wiki.openwrt.org/doc/uci#defaults
+#
+
+set -eu
+
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+# opkg-Repository-URL an lokale Version anpassen
+# Da die opkg.conf von openwrt als Konfigurationsdatei betrachtet wird, wird diese bei einer
+# Aktualisierung unter Beibehaltung der Konfiguration nicht an die neuen URLs angepasst:
+#  https://dev.openwrt.org/ticket/13309
+# Also erledigen wir die Anpassung bei der Erstinitialisierung selbst.
+set_opkg_repository_url() {
+	local firmware_version=$(get_on_firmware_version | cut -f 1 -d -)
+	# leere Versionsnummer? Damit können wir nichts anfangen.
+	[ -z "$firmware_version" ] && msg_info "ERROR: Failed to retrieve opennet firmware version for opkg repository URL" && return 0
+	# TODO: aktuell können wir nur mit stable-Releases umgehen - sobald
+	# das Namensschema der snapshot-Builds feststeht, können wir auch auf
+	# diese eingehen.
+	set_opkg_download_version "stable/$firmware_version"
+}
+
+
+set_opkg_repository_url
+

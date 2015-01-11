@@ -34,7 +34,10 @@ print_status()
 		host=$(get_service_value "$service_name" "host")
 		if uci_is_true "$(get_service_value "$service_name" "disabled" "false")"; then
 			# der Dienst wird ignoriert
-			printf "$format_string" "" "($host)" "" "" ""
+			printf "$format_string" "" "($host)" "disabled" "" ""
+		elif [ -z "$(get_service_value "$service_name" "distance")" ]; then
+			# der Dienst ist nicht erreichbar
+			printf "$format_string" "" "[$host]" "unreachable" "" ""
 		else
 			# der Dienst wurde nicht abgeschaltet
 			timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
@@ -92,7 +95,7 @@ move_down()	{ move_service_down	"$1" gw ugw; }
 add_gw() {
 	trap "error_trap add_gw '$*'" $GUARD_TRAPS
 	local ipaddr="$1"
-	local port="${2:-1600}"
+	local port="${2:-$DEFAULT_MIG_PORT}"
 	notify_service gw openvpn "$ipaddr" "$port" udp / "" manual
 	uci commit on-core
 }

@@ -1,4 +1,15 @@
 #!/bin/sh
 
-on-function update_olsr_route_cache
+set -eu
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+# Aktualisiere die mehrfach verwendete Routen-Cache-Datei
+update_olsr_route_cache
+
+# Aktualisiere die Routing-Entfernungen für alle Dienste
+get_services | while read service_name; do
+	update_service_routing_distance "$service_name"
+done
 

@@ -229,24 +229,16 @@ add_routing_table() {
 }
 
 
-get_routing_distance() {
+## @fn get_hop_count_and_etx()
+## @brief Liefere den Hop-Count und den ETX-Wert für einen Zielhost zurück.
+## @param host die Ziel-IP
+## @returns Der Hop-Count und der ETX-Wert wird mit einem Leerzeichen separiert ausgegeben. Falls keine Route bekannt ist, ist das Ergebnis ein leerer String.
+## @details Die Quelle dieser Information ist olsrd. Routen außerhalb von olsrd werden nicht beachtet.
+get_hop_count_and_etx() {
 	local target="$1"
-	_get_olsr_route_info_column "$target" 4
-}
-
-
-get_hop_count() {
-	local target="$1"
-	_get_olsr_route_info_column "$target" 3
-}
-
-
-_get_olsr_route_info_column() {
-	local target="$1"
-	local column="$2"
 	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
 	[ ! -e "$OLSR_ROUTE_CACHE_FILE" ] && return
-	awk '{ if ($1 == "'$target'") { print $'$column'; exit; } }' <"$OLSR_ROUTE_CACHE_FILE"
+	awk '{ if ($1 == "'$target'") { print $3, $4; exit; } }' <"$OLSR_ROUTE_CACHE_FILE"
 }
 
 

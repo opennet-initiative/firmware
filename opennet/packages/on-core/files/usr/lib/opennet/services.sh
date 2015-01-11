@@ -48,9 +48,24 @@ notify_service() {
 	fi
 	set_service_value "$service_name" "details" "$details"
 	set_service_value "$service_name" "timestamp" "$now"
-	set_service_value "$service_name" "distance" "$(get_routing_distance "$host")"
-	set_service_value "$service_name" "hop_count" "$(get_hop_count "$host")"
 	set_service_value "$service_name" "source" "$source"
+	update_service_routing_distance "$service_name"
+}
+
+
+## @fn update_service_routing_distance()
+## @brief Aktualisiere Routing-Entfernung und Hop-Count eines Dienst-Anbieters
+## @param service_name der zu aktualisierende Dienst
+## @details Beide Dienst-Werte werden gelöscht, falls der Host nicht route-bar sein sollte.
+##   Diese Funktion sollte regelmäßig für alle Hosts ausgeführt werden.
+update_service_routing_distance() {
+	local service_name="$1"
+	local hop
+	local etx
+	get_hop_count_and_etx "$(get_service_value "$service_name" "host")" | while read hop etx; do
+		set_service_value "$service_name" "distance" "$etx"
+		set_service_value "$service_name" "hop_count" "$hop"
+	done
 }
 
 
@@ -420,6 +435,7 @@ _distribute_service_ranks() {
 
 ## @fn move_service_up()
 ## @brief Verschiebe einen Dienst in der Dienst-Sortierung um eine Stufe nach oben
+## @param service_name der zu verschiebende Dienst
 ## @details Für verschiedene Sortier-Modi hat dies verschiedene Auswirkungen:
 ##   * manual: Verschiebung vor den davorplatzierten Dienst desselben Typs
 ##   * etx/hop: Reduzierung des Offsets um eins
@@ -465,6 +481,7 @@ move_service_up() {
 
 ## @fn move_service_down()
 ## @brief Verschiebe einen Dienst in der Dienst-Sortierung um eine Stufe nach unten
+## @param service_name der zu verschiebende Dienst
 ## @details Für verschiedene Sortier-Modi hat dies verschiedene Auswirkungen:
 ##   * manual: Verschiebung hinter den dahinterliegenden Dienst desselben Typs
 ##   * etx/hop: Erhöhung des Offsets um eins

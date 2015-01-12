@@ -34,7 +34,7 @@ configure_dnsmasq() {
 	# die Namensaufloesung im Opennet generiert auch 192.168er-Adressen - diese werden durch "rebind_protection" blockiert
 	uci set "dhcp.@dnsmasq[0].rebind_protection=0"
 	# keine Speicherung von DHCP leases
-	uci set "dhcp.@dnsmasq[0].quiet_dhcp=1"
+	uci set "dhcp.@dnsmasq[0].quietdhcp=1"
 	apply_changes dhcp
 }
 

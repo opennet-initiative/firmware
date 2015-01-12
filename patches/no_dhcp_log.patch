@@ -10,7 +10,7 @@ Signed-off-by: Lars Kruse <devel@sumpfralle.de>
  	append_bool "$cfg" nonwildcard "--bind-interfaces"
  	append_bool "$cfg" fqdn "--dhcp-fqdn"
  	append_bool "$cfg" proxydnssec "--proxy-dnssec"
-+	append_bool "$cfg" quiet_dhcp "--quiet-dhcp"
++	append_bool "$cfg" quietdhcp "--quiet-dhcp"
  
  	append_parm "$cfg" dhcpscript "--dhcp-script"
  	append_parm "$cfg" cachesize "--cache-size"

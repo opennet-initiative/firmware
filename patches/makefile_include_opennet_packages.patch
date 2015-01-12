@@ -1,11 +1,9 @@
 die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 --- /dev/null
 +++ b/openwrt/include/opennet.mk
-@@ -0,0 +1,45 @@
+@@ -0,0 +1,47 @@
 +# fuer "VERSION_NUMBER"
 +include $(INCLUDE_DIR)/version.mk
-+include $(INCLUDE_DIR)/package.mk
-+
 +
 +# Wir verwenden die Version des Gesamt-Builds
 +# Vorher entfernen wir das eventuelle "-unstable..."-Suffix.
@@ -14,6 +12,10 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +PKG_RELEASE := $(shell git log --oneline | wc -l)
 +PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 +PKG_BUILD_DEPENDS := $(if $(STAGING_DIR_ROOT),lua/host)
++
++# "package.mk" muss nach dem Setzen von PKG_VERSION und PKG_RELEASE geladen werden
++# include $(INCLUDE_DIR)/package.mk
++
 +
 +PO_CONV = ../../../luci/build/po2lmo
 +

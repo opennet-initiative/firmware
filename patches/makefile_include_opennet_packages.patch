@@ -14,7 +14,7 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +PKG_BUILD_DEPENDS := $(if $(STAGING_DIR_ROOT),lua/host)
 +
 +# "package.mk" muss nach dem Setzen von PKG_VERSION und PKG_RELEASE geladen werden
-+# include $(INCLUDE_DIR)/package.mk
++include $(INCLUDE_DIR)/package.mk
 +
 +
 +PO_CONV = ../../../luci/build/po2lmo

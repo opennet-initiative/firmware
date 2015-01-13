@@ -48,7 +48,8 @@ get_current_time_offset_milliseconds() {
 # Uptime und Zeitsynchronitaet ermitteln
 time_offset=$(get_current_time_offset_milliseconds)
 uptime=$(cut -f 1 -d . /proc/uptime)
-if [ -z "$time_offset" -o "$time_offset" -gt "$ACCEPTABLE_TIME_OFFSET" ]; then
+# beide Bedingungen voneinander trennen - sonst liefert ash eine Fehlermeldung, falls "time_offset" leer ist
+if [ -z "$time_offset" ] || [ "$time_offset" -gt "$ACCEPTABLE_TIME_OFFSET" ]; then
 	# bisher fand kein Zeitabgleich statt - wir pruefen, ob die uptime inzwischen abgelaufen ist
 	# Ist die maximale Uptime abgelaufen? Falls nicht, dann warten wir auf den naechsten Versuch.
 	[ "$uptime" -lt "$MAX_UPTIME_SECONDS" ] && exit 0
@@ -64,5 +65,5 @@ fi
 on-function add_banner_event "system restart" "$timestamp"
 
 # Verhindere eine erneute Ausfuehrung.
-touch "$FLAG_FILE"
+echo "$timestamp" > "$FLAG_FILE"
 

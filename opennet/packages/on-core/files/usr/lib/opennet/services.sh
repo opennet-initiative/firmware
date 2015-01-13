@@ -69,9 +69,13 @@ update_service_routing_distance() {
 }
 
 
+## @fn is_existing_service()
+## @brief Prüfe ob ein Service existiert
+## @param service_name der Name des Diensts
+## @returns exitcode=0 falls der Dienst existiert
 is_existing_service() {
 	local service_name="$1"
-	[ -e "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" ] && return || true
+	[ -n "$service_name" -a -e "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

@@ -17,6 +17,10 @@ define Package/on-core/description
 	Basic opennet-specific settings
 endef
 
+# dummy fuer den openwrt-Buildprozess
+define Package/on-core/compile
+endef
+
 define Package/on-core/install
 	# this template  is defined in ../../../openwrt/include/opennet.mk ( uses luci localisation)
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))

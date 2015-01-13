@@ -20,6 +20,10 @@ define Package/on-openvpn/description
 	- web-based private key and CSR generation
 endef
 
+# dummy fuer den openwrt-Buildprozess
+define Package/on-openvpn/compile
+endef
+
 define Package/on-openvpn/install
 	# this template  is defined in ../../../openwrt/include/opennet.mk ( uses luci localisation)
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))

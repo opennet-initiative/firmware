@@ -17,6 +17,10 @@ define Package/on-nodogsplash/description
 	Opennet-specific implementation for a public hotspot.
 endef
 
+# dummy fuer den openwrt-Buildprozess
+define Package/on-nodogsplash/compile
+endef
+
 define Package/on-nodogsplash/install
 	# this template  is defined in ../../../openwrt/include/opennet.mk ( uses luci localisation)
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))

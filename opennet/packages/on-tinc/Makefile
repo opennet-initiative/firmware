@@ -17,6 +17,10 @@ define Package/on-tinc/description
 	Opennet-specific wrapper for tinc - a mesh VPN.
 endef
 
+# dummy fuer den openwrt-Buildprozess
+define Package/on-tinc/compile
+endef
+
 define Package/on-tinc/install
 	# this template  is defined in ../../../openwrt/include/opennet.mk ( uses luci localisation)
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))

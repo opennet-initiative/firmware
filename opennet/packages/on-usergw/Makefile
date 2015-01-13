@@ -17,6 +17,10 @@ define Package/on-usergw/description
 	Opennet-specific additions necessary for sharing an uplink with the mesh.
 endef
 
+# dummy fuer den openwrt-Buildprozess
+define Package/on-usergw/compile
+endef
+
 define Package/on-usergw/install
 	# this template  is defined in ../../../openwrt/include/opennet.mk ( uses luci localisation)
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))

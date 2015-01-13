@@ -136,11 +136,12 @@ add_banner_event() {
 	local line=" - $timestamp - $event -"
 	(
 		# Steht unser Text schon im Banner? Ansonsten hinzufuegen ...
-		if grep -q 'clean_restart_log' /etc/banner; then
-			true
-		else
-			echo " ------------------- system events: ------------------"
+		# bis einschliesslich Version v0.5.0 war "clean_restart_log" das Schluesselwort
+		# ab v0.5.1 verwenden wir "system events"
+		if ! grep -qE '(clean_restart_log|system events)' /etc/banner; then
+			echo " ------------------- system events -------------------"
 		fi
+		# die Zeile auffuellen
 		while [ "${#line}" -lt 54 ]; do line="$line-"; done
 		echo "$line"
 	) >>/etc/banner

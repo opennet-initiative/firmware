@@ -217,6 +217,8 @@ get_services() {
 	else
 		# liefere alle Dienste mit dem passenden "service"-Attribut
 		services=$(get_services)
+		# falls keine Dienste bekannt sind, dann liefere auch keine Leerzeile zurueck
+		[ -z "$services" ] && return 0
 		for service_type in "$@"; do
 			echo "$services" | filter_services_by_value "service=$service_type"
 		done

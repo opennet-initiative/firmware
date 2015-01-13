@@ -248,7 +248,8 @@ get_hop_count_and_etx() {
 update_olsr_route_cache() {
 	# die temporaere Datei soll verhindern, dass es zwischendurch ein Zeitfenster mit unvollstaendigen Informationen gibt
 	local tmpfile="${OLSR_ROUTE_CACHE_FILE}.new"
-	echo /routes | nc -w 2 localhost 2006 | grep "^[0-9]" | sed 's#/32##' > "$tmpfile"
+	# wir ignorieren Fehlerausgaben von 
+	echo /routes | request_olsrd_txtinfo | grep "^[0-9]" | sed 's#/32##' > "$tmpfile"
 	mv "$tmpfile" "$OLSR_ROUTE_CACHE_FILE"
 }
 

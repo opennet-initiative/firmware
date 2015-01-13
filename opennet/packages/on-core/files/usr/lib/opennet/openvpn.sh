@@ -60,6 +60,8 @@ disable_openvpn_service() {
 	[ -z "$(uci_get "openvpn.$service_name")" ] && return 0
 	# openvpn wird automatisch neugestartet
 	cleanup_service_dependencies "$service_name"
+	# nach einem reboot sind eventuell die dependencies verlorengegangen - also loeschen wir manuell
+	uci_delete "openvpn.$service_name"
 }
 
 

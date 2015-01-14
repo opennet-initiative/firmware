@@ -268,7 +268,9 @@ Dauerhaftes Ereignisprotokoll {#bootlog}
 
 Relevante Vorgänge (Booten, OLSR-Neustarts) werden im Ereignislog (/etc/banner) festgehalten.
 
-@sa ../packages/on-core/files/etc/cron.minutely/on_log_restart_timestamp
+@ref ../packages/on-core/files/etc/cron.minutely/on_log_restart_timestamp
+
+Um den korrekten Zeitstempel für das Boot-Ereignis sicherzustellen prüft das obige Skript zuerst, ob es eine Verbindung mit NTP-Servern (siehe @ref #ntp) aufbauen kann. Bei Erfolg wird eine Datei erzeugt (*/var/run/on_boot_time_logged*). Die Existenz dieser Datei sorgt bei allen weiteren Ausführungen für ein sofortiges Ende des Skripts.
 
 
 

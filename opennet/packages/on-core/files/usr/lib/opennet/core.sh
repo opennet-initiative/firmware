@@ -557,6 +557,9 @@ get_potential_error_messages() {
 	# 9) openvpn(...)[...]: Authenticate/Decrypt packet error
 	#    Paketverschiebungen nach dem Verbindungsaufbau - anscheinend unproblematisch.
 	filters="${filters}|openvpn.*Authenticate/Decrypt packet error"
+	# 10) olsrd: /etc/init.d/olsrd: olsrd_setup_smartgw_rules() Warning: kmod-ipip is missing.
+	#    olsrd gibt beim Starten generell diese Warnung aus. Wir koennen sie ignorieren.
+	filters="${filters}|olsrd.*olsrd_setup_smartgw_rules"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

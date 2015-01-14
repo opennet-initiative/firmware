@@ -1,13 +1,12 @@
 die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 --- /dev/null
 +++ b/openwrt/include/opennet.mk
-@@ -0,0 +1,47 @@
+@@ -0,0 +1,46 @@
 +# fuer "VERSION_NUMBER"
 +include $(INCLUDE_DIR)/version.mk
 +
 +# Wir verwenden die Version des Gesamt-Builds
-+# Vorher entfernen wir das eventuelle "-unstable..."-Suffix.
-+PKG_VERSION := $(shell echo "$(VERSION_NUMBER)" | cut -f 1 -d -)
++PKG_VERSION := $(VERSION_NUMBER)
 +# das Release-Suffix ergibt sich aus dem git-commit-Zaehler
 +PKG_RELEASE := $(shell git log --oneline | wc -l)
 +PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)

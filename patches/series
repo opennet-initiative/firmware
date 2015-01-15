@@ -7,3 +7,4 @@ luci_wireless_client_isolation.patch
 no_dhcp_log.patch
 curl_enable_https.patch
 led_input_trigger_warnings.patch
+luci_olsr_fix_empty_result.patch

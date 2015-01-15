@@ -21,6 +21,10 @@ single-session
 # begrenze den Timeout fuer das TLS-Handshake auf 30s - dies ermoeglicht einen Verbindungsabbruch innerhalb von einer Minute
 hand-window 30
 
+# keine Fehlermeldungen bei scheinbaren "replay"-Angriffen
+# man openvpn: Silence the output of replay warnings, which are a common false alarm on WiFi networks.
+mute-replay-warnings
+
 dev tun
 dev-type tun
 

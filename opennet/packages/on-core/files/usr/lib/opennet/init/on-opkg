@@ -17,16 +17,21 @@ set -eu
 # Aktualisierung unter Beibehaltung der Konfiguration nicht an die neuen URLs angepasst:
 #  https://dev.openwrt.org/ticket/13309
 # Also erledigen wir die Anpassung bei der Erstinitialisierung selbst.
-set_opkg_repository_url() {
-	local firmware_version=$(get_on_firmware_version | cut -f 1 -d -)
+override_opkg_repository_url() {
+	local firmware_version=$(get_on_firmware_version)
 	# leere Versionsnummer? Damit können wir nichts anfangen.
 	[ -z "$firmware_version" ] && msg_info "ERROR: Failed to retrieve opennet firmware version for opkg repository URL" && return 0
-	# TODO: aktuell können wir nur mit stable-Releases umgehen - sobald
-	# das Namensschema der snapshot-Builds feststeht, können wir auch auf
-	# diese eingehen.
-	set_opkg_download_version "stable/$firmware_version"
+	# snapshots erkennen wir aktuell daran, dass auch Buchstaben in der Versionsnummer vorkommen
+	if echo "$firmware_version" | grep -q "[a-zA-Z]"; then
+		# ein Buchstabe wurde entdeckt: unstable
+		set_opkg_download_version "testing/$firmware_version"
+	else
+		# kein Buchstabe wurde entdeckt: stable
+		# wir schneiden alles ab dem ersten Bindestrich ab
+		set_opkg_download_version "stable/$(echo "$firmware_version" | cut -f 1 -d -)"
+	fi
 }
 
 
-set_opkg_repository_url
+override_opkg_repository_url
 

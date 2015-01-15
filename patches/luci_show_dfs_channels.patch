@@ -15,11 +15,9 @@ channels are displayed.
 Sadly no visual indication is given if the current wireless driver supports DFS.
 Thus hostapd may refuse to select the configured channel without any further
 explanation.
-Index: opennet/openwrt/package/network/utils/iwinfo/src/iwinfo_nl80211.c
-===================================================================
---- opennet.orig/openwrt/package/network/utils/iwinfo/src/iwinfo_nl80211.c	2014-02-16 15:31:06.296399206 +0100
-+++ opennet/openwrt/package/network/utils/iwinfo/src/iwinfo_nl80211.c	2014-02-16 18:14:33.381048007 +0100
-@@ -2066,8 +2066,7 @@
+--- a/openwrt/package/network/utils/iwinfo/src/iwinfo_nl80211.c
++++ b/openwrt/package/network/utils/iwinfo/src/iwinfo_nl80211.c
+@@ -2160,8 +2160,7 @@ static int nl80211_get_freqlist_cb(struc
  
  			e->restricted = (
  				freqs[NL80211_FREQUENCY_ATTR_PASSIVE_SCAN] ||

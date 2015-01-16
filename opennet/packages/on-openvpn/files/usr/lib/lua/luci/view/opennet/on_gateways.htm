@@ -210,7 +210,7 @@ You may obtain a copy of the License at
 	</fieldset>
 	<% if not on_bool_function("has_mig_credentials") then %>
 		<fieldset class="cbi-section"><div class="cbi-section-comment"><div class="alert-message warning">
-			<p><%:The required certificate and key for your internet access via Opennet seems to be missing%>
+			<p><%:The required certificate and key for your internet access via Opennet seem to be missing%>
 			(<%:see%> <a href="<%=luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel")%>"><%:Certificate management%></a>).</p>
 		</div></div></fieldset>
 	<% end %>

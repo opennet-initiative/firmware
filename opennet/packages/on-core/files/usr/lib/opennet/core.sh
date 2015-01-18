@@ -671,5 +671,21 @@ get_local_bias_number() {
 	echo -n "$bias" && return 0
 }
 
+
+## @fn system_service_check()
+## @brief Prüfe ob ein Dienst läuft und ob seine PID-Datei aktuell ist.
+## @param executable Der vollständige Pfad zu dem ausführenden Programm.
+## @param pid_file Der Name einer PID-Datei, die von diesem Prozess verwaltet wird.
+## @deteils Dabei wird die 'service_check'-Funktion aus der openwrt-Shell-Bibliothek genutzt.
+system_service_check() {
+	local executable="$1"
+	local pid_file="$2"
+	. /lib/functions/service.sh
+	SERVICE_PID_FILE="$pid_file"
+	set +eu
+	service_check "$executable" && return 0
+	trap "" $GUARD_TRAPS && return 1
+}
+
 # Ende der Doku-Gruppe
 ## @}

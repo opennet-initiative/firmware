@@ -228,7 +228,7 @@ get_all_network_interfaces() {
 		# alle uebrigen sind reale Interfaces
 		echo "$interface"
 	done
-	return
+	return 0
 }
 
 
@@ -240,7 +240,7 @@ rename_firewall_zone() {
 	local key
 	local old_uci_prefix=$(find_first_uci_section firewall zone "name=$old_zone")
 	# die Zone existiert nicht (mehr)
-	[ -z "$old_uci_prefix" ] && return
+	[ -z "$old_uci_prefix" ] && return 0
 	local new_uci_prefix=$(find_first_uci_section firewall zone "name=$new_zone")
 	[ -z "$new_uci_prefix" ] && new_uci_prefix="firewall.$(uci add firewall zone)"
 	uci show "$old_uci_prefix" | cut -f 3- -d . | while read setting; do

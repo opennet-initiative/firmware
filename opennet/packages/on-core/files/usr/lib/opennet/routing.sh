@@ -117,8 +117,8 @@ add_zone_policy_rules_by_iif() {
 
 
 ## @fn initialize_olsrd_policy_routing()
-## @brief Policy-Routing-Initialisierung nach dem System-Boot
-## @details ## Folgende Seiteneffekte treten ein:
+## @brief Policy-Routing-Initialisierung nach dem System-Boot und nach Interface-Hotplug-Ereignissen
+## @details Folgende Seiteneffekte treten ein:
 ##   * alle throw-Routen aus den Tabellen olsrd/olsrd-default/main werden gelöscht
 ##   * alle Policy-Rules mit Bezug zu den Tabellen olsrd/olsrd-default/main werden gelöscht
 ##   * die neuen Policy-Rules für die obigen Tabellen werden an anderer Stelle erzeugt
@@ -237,7 +237,7 @@ add_routing_table() {
 get_hop_count_and_etx() {
 	local target="$1"
 	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
-	[ ! -e "$OLSR_ROUTE_CACHE_FILE" ] && return
+	[ ! -e "$OLSR_ROUTE_CACHE_FILE" ] && return 0
 	awk '{ if ($1 == "'$target'") { print $3, $4; exit; } }' <"$OLSR_ROUTE_CACHE_FILE"
 }
 

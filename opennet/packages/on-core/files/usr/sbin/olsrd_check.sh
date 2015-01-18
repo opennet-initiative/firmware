@@ -7,8 +7,17 @@ START_DELAY=8
 
 
 is_olsrd_running() {
-	trap "" $GUARD_TRAPS
-	system_service_check /usr/sbin/olsrd /var/run/olsrd.pid
+	trap "error_trap is_olsrd_running '$*'" $GUARD_TRAPS
+	local pid_file=$(grep "^PID=" /etc/init.d/olsrd | cut -f 2- -d =)
+	if [ -z "$pid_file" ]; then
+		# Falls wir keine gueltige PID-Datei finden, dann pruefen wir lediglich,
+		# ob irgendein olsrd laeuft - dies ist natuerlich nicht sehr zuverlässig.
+		msg_info "ERROR: failed to find PID file location for olsrd"
+		pidof olsrd >/dev/null && return 0 || true
+	else
+		system_service_check /usr/sbin/olsrd "$pid_file" && return 0 || true
+	fi
+	trap "" $GUARD_TRAPS && return 1
 }
 
 
@@ -16,6 +25,7 @@ is_olsrd_running() {
 # leer ist (echo /routes | nc localhost 2006 | grep -q "^[0-9]").
 # Ist OLSR zwischenzeitlich abgestuerzt?
 check_for_empty_routing_table() {
+	trap "error_trap check_for_empty_routing_table '$*'" $GUARD_TRAPS
 	if is_olsrd_running; then
 		# Pruefe, ob Routen in der richtigen Routing-Tabelle stehen
 		# (es gibt einen Bug, bei dem olsrd vergisst, die Routen zu konfigurieren)
@@ -36,6 +46,7 @@ check_for_empty_routing_table() {
 # Sind andere olsrd-Prozesse aktiv, deren PID nicht in der PID-Datei stehen und somit unkontrolliert
 # weiterlaufen und den Port blockieren?
 check_for_stale_olsrd_process() {
+	trap "error_trap check_for_stale_olsrd_process '$*'" $GUARD_TRAPS
 	if pidof olsrd >/dev/null; then
 		# Wir toeten mutigerweise alle olsrd-Prozesse und hoffen, dass die anderen olsrd-Prozesse
 		# nicht zu einem anderen Netz gehörten.

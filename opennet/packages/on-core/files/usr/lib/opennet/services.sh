@@ -27,6 +27,7 @@ _get_service_name() {
 
 # Aktualisiere den Zeitstempel und die Entfernung (etx) eines Dienstes
 notify_service() {
+	trap "error_trap notify_service '$*'" $GUARD_TRAPS
 	local service="$1"
 	local scheme="$2"
 	local host="$3"
@@ -59,6 +60,7 @@ notify_service() {
 ## @details Beide Dienst-Werte werden gelöscht, falls der Host nicht route-bar sein sollte.
 ##   Diese Funktion sollte regelmäßig für alle Hosts ausgeführt werden.
 update_service_routing_distance() {
+	trap "error_trap update_service_routing_distance '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local hop
 	local etx
@@ -94,6 +96,7 @@ _add_local_bias_to_host() {
 # Als optionaler zweiter Parameter kann die Sortierung uebergeben werden. Falls diese nicht uebergeben wurde,
 # wird die aktuell konfigurierte Sortierung benutzt.
 get_service_priority() {
+	trap "error_trap get_service_priority '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local sorting="${2:-}"
 	local distance=$(get_service_value "$service_name" "distance")
@@ -114,6 +117,7 @@ get_service_priority() {
 
 
 get_distance_with_offset() {
+	trap "error_trap get_distance_with_offset '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local sorting=$(get_service_sorting)
 	local distance=$(get_service_value "$service_name" "distance")
@@ -134,6 +138,7 @@ get_distance_with_offset() {
 
 
 set_service_sorting() {
+	trap "error_trap set_service_sorting '$*'" $GUARD_TRAPS
 	local new_sorting="$1"
 	local old_sorting=$(get_service_sorting)
 	[ "$old_sorting" = "$new_sorting" ] && return 0
@@ -149,6 +154,7 @@ set_service_sorting() {
 # Falls eine ungueltige Sortier-Methode gesetzt ist, wird diese auf die Standard-Sortierung zurueckgesetzt.
 # Die Ausgabe dieser Funktion ist also in jedem Fall eine gueltige Sortier-Methode.
 get_service_sorting() {
+	trap "error_trap get_service_sorting '$*'" $GUARD_TRAPS
 	local sorting=$(uci_get "on-core.settings.service_sorting")
 	if [ "$sorting" = "manual" -o "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		# zulaessige Sortierung
@@ -165,6 +171,7 @@ get_service_sorting() {
 
 
 sort_services_by_priority() {
+	trap "error_trap sort_services_by_priority '$*'" $GUARD_TRAPS
 	local service_name
 	local priority
 	local sorting=$(get_service_sorting)
@@ -232,6 +239,7 @@ pipe_service_attribute() {
 ## @brief Liefere alle Dienste zurueck, die einem der angegebenen Typen zugeordnet sind.
 ## Falls keine Parameter übergeben wurden, dann werden alle Dienste ungeachtet ihres Typs ausgegeben.
 get_services() {
+	trap "error_trap get_services '$*'" $GUARD_TRAPS
 	local services
 	local service_type
 	local fname_persist
@@ -301,7 +309,6 @@ _is_persistent_service_attribute() {
 # Je nach Schluesselname wird der Inhalt in die persistente uci- oder
 # die volatile tmpfs-Datenbank geschrieben.
 set_service_value() {
-	trap "error_trap set_service_value '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local attribute="$2"
 	local value="$3"
@@ -326,7 +333,6 @@ set_service_value() {
 ## @details Falls das Attribut nicht existiert, wird ein leerer Text zurückgeliefert.
 ##   Es gibt keinen abschließenden Zeilenumbruch.
 get_service_value() {
-	trap "error_trap get_service_value '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local attribute="$2"
 	local default="${3:-}"
@@ -357,6 +363,7 @@ get_service_attributes() {
 
 # menschenfreundliche Ausgabe der aktuell angemeldeten Dienste
 print_services() {
+	trap "error_trap print_services '$*'" $GUARD_TRAPS
 	local service_name
 	local attribute
 	local value
@@ -434,6 +441,7 @@ cleanup_service_dependencies() {
 
 
 get_service_description() {
+	trap "error_trap get_service_description '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local scheme=$(get_service_value "$service_name" "scheme")
 	local host=$(get_service_value "$service_name" "host")

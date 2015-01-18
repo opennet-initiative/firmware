@@ -21,6 +21,7 @@ query_dns_reverse() { nslookup "$1" 2>/dev/null | tail -n 1 | awk '{ printf "%s"
 # WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
 # Parameter: Quell-Zone und Ziel-Zone
 add_zone_forward() {
+	trap "error_trap add_zone_forward '$*'" $GUARD_TRAPS
 	local source=$1
 	local dest=$2
 	local uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
@@ -37,6 +38,7 @@ add_zone_forward() {
 # WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
 # Parameter: Quell-Zone und Ziel-Zone
 delete_zone_forward() {
+	trap "error_trap delete_zone_forward '$*'" $GUARD_TRAPS
 	local source=$1
 	local dest=$2
 	local uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
@@ -50,6 +52,7 @@ delete_zone_forward() {
 # Das Masquerading in die Opennet-Zone soll nur fuer bestimmte Quell-Netze erfolgen.
 # Diese Funktion wird bei hotplug-Netzwerkaenderungen ausgefuehrt.
 update_opennet_zone_masquerading() {
+	trap "error_trap update_opennet_zone_masquerading '$*'" $GUARD_TRAPS
 	local network
 	local networkprefix
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
@@ -96,6 +99,7 @@ get_address_of_network() {
 
 # Liefere die logischen Netzwerk-Schnittstellen einer Zone zurueck.
 get_zone_interfaces() {
+	trap "error_trap get_zone_interfaces '$*'" $GUARD_TRAPS
 	local zone="$1"
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
 	local interface
@@ -112,6 +116,7 @@ get_zone_interfaces() {
 
 # Liefere die physischen Netzwerk-Schnittstellen einer Zone zurueck.
 get_zone_devices() {
+	trap "error_trap get_zone_devices '$*'" $GUARD_TRAPS
 	local zone="$1"
 	local iface
 	local result
@@ -125,6 +130,7 @@ get_zone_devices() {
 
 # Ist das gegebene physische Netzwer-Interface Teil einer Firewall-Zone?
 is_device_in_zone() {
+	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
 	local device=$1
 	local zone=$2
 	local item
@@ -174,6 +180,7 @@ del_interface_from_zone() {
 ## @details Das Ergebnis ist ein leerer String, falls zu diesem Interface keine Zone existiert
 ##   oder falls es das Interface nicht gibt.
 get_zone_of_interface() {
+	trap "error_trap get_zone_of_interface '$*'" $GUARD_TRAPS
 	local interface=$1
 	local uci_prefix
 	local interfaces
@@ -194,6 +201,7 @@ get_zone_of_interface() {
 # 2. Netzwerkname beginnend mit "on_wifi", "on_eth", ...
 # 3. alphabetische Sortierung der Netzwerknamen
 get_sorted_opennet_interfaces() {
+	trap "error_trap get_sorted_opennet_interfaces '$*'" $GUARD_TRAPS
 	local uci_prefix
 	local order
 	# wir vergeben einfach statische Ordnungsnummern:
@@ -233,6 +241,7 @@ get_all_network_interfaces() {
 
 
 rename_firewall_zone() {
+	trap "error_trap rename_firewall_zone '$*'" $GUARD_TRAPS
 	local old_zone="$1"
 	local new_zone="$2"
 	local setting

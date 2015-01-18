@@ -86,6 +86,7 @@ is_openvpn_service_active() {
 ## @param service_name Name eines Dienstes
 ## @param destination_attribute Service-Attribut, das als Ziel-Host für die VPN-Verbindung verwendet werden soll (z.B. "host" oder "detail:hostname")
 get_openvpn_config() {
+	trap "error_trap get_openvpn_config '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local destination_attribute="$2"
 	local remote

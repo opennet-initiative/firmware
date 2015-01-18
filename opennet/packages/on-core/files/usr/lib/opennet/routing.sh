@@ -214,6 +214,7 @@ get_routing_table_id() {
 ##    Sollte die Tabelle bereits existieren, dann wird ihre Nummer zurückgeliefert.
 ## @return die neue Routing-Tabellen-Nummer wird zurückgeliefert
 add_routing_table() {
+	trap "error_trap add_routing_table '$*'" $GUARD_TRAPS
 	local table_name="$1"
 	_prepare_routing_table_file
 	local table_id=$(get_routing_table_id "$table_name")
@@ -246,6 +247,7 @@ get_hop_count_and_etx() {
 # Dies ist noetig, um deadlocks bei parallelem Zugriff auf den single-thread olsrd zu verhindern.
 # Symptome eines deadlocks: olsrd ist beendet; viele parallele nc-Instanzen; eine davon ist an den txtinfo-Port gebunden.
 update_olsr_route_cache() {
+	trap "error_trap update_olsr_route_cache '$*'" $GUARD_TRAPS
 	# die temporaere Datei soll verhindern, dass es zwischendurch ein Zeitfenster mit unvollstaendigen Informationen gibt
 	local tmpfile="${OLSR_ROUTE_CACHE_FILE}.new"
 	# wir ignorieren Fehlerausgaben von 

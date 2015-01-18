@@ -23,6 +23,7 @@ get_on_openvpn_default() {
 ## @brief Erzeuge oder aktualisiere einen Mesh-Internet-Gateway-Dienst Ignoriere doppelte Einträge.
 ## @attention Anschließend muss "on-core" comitted werden.
 update_mig_service() {
+	trap "error_trap update_mig_service '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local template_file="$MIG_VPN_CONFIG_TEMPLATE_FILE"
 	local pid_file="/var/run/${service_name}.pid"
@@ -111,6 +112,7 @@ test_mig_connection() {
 ## @param Name eines Diensts
 ## @attention Seiteneffekt: Beräumung aller herumliegenden Konfigurationen von alten Verbindungen.
 select_mig_connection() {
+	trap "error_trap select_mig_connection '$*'" $GUARD_TRAPS
 	local wanted="$1"
 	local one_service
 	get_services "gw" "ugw" | while read one_service; do
@@ -130,6 +132,7 @@ select_mig_connection() {
 ## @param force [optional] erzwinge den Wechsel auf den besten Gateway unabhängig von Wartezeiten (true/false)
 ## @ref mig-switch
 find_and_select_best_gateway() {
+	trap "error_trap find_and_select_best_gateway '$*'" $GUARD_TRAPS
 	local force_switch_now=${1:-false}
 	local service_name
 	local host
@@ -217,6 +220,7 @@ find_and_select_best_gateway() {
 ## @returns Liste der Namen aller Dienste, die aktuell eine aktive VPN-Verbindung halten.
 ## @attention Diese Funktion braucht recht viel Zeit.
 get_active_mig_connections() {
+	trap "error_trap get_active_mig_connections '$*'" $GUARD_TRAPS
 	local service_name
 	get_services "gw" "ugw" | while read service_name; do
 		is_openvpn_service_active "$service_name" && echo "$service_name" || true
@@ -341,6 +345,7 @@ get_client_cn() {
 ## @returns zwei Zahlen durch Tabulatoren getrennt
 ## @details Jeder AP bekommt einen Bereich von zehn Ports fuer die Port-Weiterleitung zugeteilt.
 get_mig_port_forward_range() {
+	trap "error_trap get_mig_port_forward_range '$*'" $GUARD_TRAPS
 	local client_cn=${1:-}
 	[ -z "$client_cn" ] && client_cn=$(get_client_cn)
 	local port_count=10

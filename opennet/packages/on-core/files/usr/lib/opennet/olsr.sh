@@ -107,6 +107,7 @@ olsr_set_main_ip() {
 # Ermittle welche olsr-Module konfiguriert sind, ohne dass die Library vorhanden ist.
 # Deaktiviere diese Module - fuer ein sauberes boot-Log.
 disable_missing_olsr_modules() {
+	trap "error_trap disable_missing_olsr_modules '$*'" $GUARD_TRAPS
 	local libpath=/usr/lib
 	local libline
 	local libfile
@@ -130,6 +131,7 @@ disable_missing_olsr_modules() {
 ## @brief Synchronisiere die olsrd-Routingtabellen-Konfiguration mit den iproute-Routingtabellennummern.
 ## @details Im Konfliktfall wird die olsrd-Konfiguration an die iproute-Konfiguration angepasst.
 olsr_sync_routing_tables() {
+	trap "error_trap olsr_sync_routing_tables '$*'" $GUARD_TRAPS
 	local olsr_name
 	local iproute_name
 	local olsr_id
@@ -154,6 +156,7 @@ EOF
 # Einlesen eines olsrd-Nameservice-Service.
 # Details zum Eingabe- und Ausgabeformat: siehe "get_olsr_services".
 parse_olsr_service_definitions() {
+	trap "error_trap parse_olsr_service_definitions '$*'" $GUARD_TRAPS
 	local url
 	local proto
 	local service
@@ -211,6 +214,7 @@ get_olsr_services() {
 
 
 update_olsr_services() {
+	trap "error_trap update_olsr_services '$*'" $GUARD_TRAPS
 	local scheme
 	local ip
 	local port

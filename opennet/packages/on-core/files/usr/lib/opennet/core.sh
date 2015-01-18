@@ -357,6 +357,7 @@ apply_changes() {
 # 4) IP des Interface "free" setzen
 # 5) DHCP-Redirect fuer wifidog setzen
 set_opennet_id() {
+	trap "error_trap set_opennet_id '$*'" $GUARD_TRAPS
 	local new_id=$1
 	local network
 	local uci_prefix
@@ -660,6 +661,7 @@ is_function_available() {
 ##   UGW-Gegenstellen) benötigen wir ein lokales Salz, um strukturelle
 ##   Bevorzugungen zu vermeiden.
 get_local_bias_number() {
+	trap "error_trap get_local_bias_number '$*'" $GUARD_TRAPS
 	local bias=$(uci_get on-core.settings.local_bias_number)
 	# der Bias-Wert ist schon vorhanden - wir liefern ihn aus
 	if [ -z "$bias" ]; then
@@ -674,7 +676,7 @@ get_local_bias_number() {
 
 ## @fn system_service_check()
 ## @brief Prüfe ob ein Dienst läuft und ob seine PID-Datei aktuell ist.
-## @param executable Der vollständige Pfad zu dem ausführenden Programm.
+## @param executable Der vollständige Pfad zu dem auszuführenden Programm.
 ## @param pid_file Der Name einer PID-Datei, die von diesem Prozess verwaltet wird.
 ## @deteils Dabei wird die 'service_check'-Funktion aus der openwrt-Shell-Bibliothek genutzt.
 system_service_check() {

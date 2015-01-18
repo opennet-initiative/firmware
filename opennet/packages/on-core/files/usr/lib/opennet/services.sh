@@ -202,6 +202,31 @@ filter_enabled_services() {
 }
 
 
+## @fn pipe_service_attribute()
+## @brief Liefere zu einer Reihe von Diensten ein gewähltes Attribut dieser Dienste zurück.
+## @param key Der Name eines Dienst-Attributs
+## @param default Der Standard-Wert wird anstelle des Attribut-Werts verwendet, falls dieser leer ist.
+## @details Die Dienstenamen werden via Standardeingabe erwartet. Auf der Standardausgabe wird für
+##   einen Dienst entweder ein Wert oder nichts ausgeliefert. Keine Ausgabe erfolgt, falls der
+##   Wert des Dienste-Attributs leer ist. Bei der Eingabe von mehreren Diensten werden also
+##   eventuell weniger Zeilen ausgegeben, als eingelesen wurden.
+##   Falls der optionale zweite 'default'-Parameter nicht leer ist, dann wird bei einem leeren
+##   Ergebnis stattdessen dieser Wert ausgegeben. Der 'default'-Parameter sorgt somit dafür, dass
+##   die Anzahl der eingelesenen Zeilen in jedem Fall mit der Anzahl der ausgegebenen Zeilen
+##   übereinstimmt.
+pipe_service_attribute() {
+	local key="$1"
+	local default="${2:-}"
+	local service_name
+	local value
+	while read service_name; do
+		value=$(get_service_value "$service_name" "$key")
+		[ -z "$value" ] && value="$default"
+		[ -n "$value" ] && echo "$value" || true
+	done
+}
+
+
 ## @fn get_services()
 ## @param service_types ein oder mehrere Service-Typen
 ## @brief Liefere alle Dienste zurueck, die einem der angegebenen Typen zugeordnet sind.
@@ -294,7 +319,12 @@ set_service_value() {
 }
 
 
-# Auslesen eines Werts aus der Service-Datenbank.
+## @fn get_service_value()
+## @brief Auslesen eines Werts aus der Service-Datenbank.
+## @param key Der Name eines Dienst-Attributs
+## @param default Der Standard-Wert wird anstelle des Attribut-Werts verwendet, falls dieser leer ist.
+## @details Falls das Attribut nicht existiert, wird ein leerer Text zurückgeliefert.
+##   Es gibt keinen abschließenden Zeilenumbruch.
 get_service_value() {
 	trap "error_trap get_service_value '$*'" $GUARD_TRAPS
 	local service_name="$1"

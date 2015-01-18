@@ -183,7 +183,7 @@ msgid ""
 msgstr ""
 
 msgid ""
-"The required certificate and key for your internet access via Opennet seem "
+"The required certificate and key for your internet access via Opennet seems "
 "to be missing"
 msgstr ""
 

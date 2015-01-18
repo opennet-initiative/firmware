@@ -125,19 +125,8 @@ case "$ACTION" in
 		print_status
 	;;
 	start|stop|restart)
-		# TODO rewrite stuff below because "stop_instance" is not supported anymore
-		#INSTANCE=opennet_user
-		#. "$IPKG_INSTROOT/lib/functions.sh"
-		#. "$IPKG_INSTROOT/lib/functions/service.sh"
-		#. /etc/init.d/openvpn
-
-		#INSTANCE=opennet_user
-		#[ "$1" = "restart" -o "$1" = "stop" ] && stop_instance "$INSTANCE"
-		#[ "$1" = "restart" -o "$1" = "start" ] && start_instance "$INSTANCE"
-		
-		# Temporary and not so nice replacement for function above
-		[ "$ACTION" = "restart" -o "$1" = "stop" ] && /etc/init.d/openvpn stop
-		[ "$ACTION" = "restart" -o "$1" = "start" ] && /etc/init.d/openvpn start
+		# leider ist diese Funktion etwas grob: eventuell koennen mehr Instanzen beeinflusst werden, als gewollt
+		/etc/init.d/openvpn "$ACTION"
 	;;
 	help|--help)
 		print_usage

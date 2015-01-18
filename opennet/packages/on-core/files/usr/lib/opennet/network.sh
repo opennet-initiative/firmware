@@ -168,6 +168,11 @@ del_interface_from_zone() {
 }
 
 
+## @fn get_zone_of_interface()
+## @brief Ermittle die Zone eines physischen Interfaces.
+## @param interface Name eines physischen Interface (z.B. eth0)
+## @details Das Ergebnis ist ein leerer String, falls zu diesem Interface keine Zone existiert
+##   oder falls es das Interface nicht gibt.
 get_zone_of_interface() {
 	local interface=$1
 	local uci_prefix
@@ -176,9 +181,10 @@ get_zone_of_interface() {
 	find_all_uci_sections firewall zone | while read uci_prefix; do
 		zone=$(uci_get "${uci_prefix}.name")
 		interfaces=$(get_zone_interfaces "$zone")
-		is_in_list "$interface" "$interfaces" && echo "$zone" && return 0 || true
+		is_in_list "$interface" "$interfaces" && echo -n "$zone" && return 0 || true
 	done
-	trap "" $GUARD_TRAPS && return 1
+	# ein leerer Rueckgabewert gilt als Fehler
+	return 0
 }
 
 

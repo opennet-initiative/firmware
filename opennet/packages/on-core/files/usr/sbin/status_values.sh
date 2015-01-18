@@ -12,8 +12,7 @@
 #
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-# die nachfolgenden Kommandos sind nicht sicher
-set +eu
+
 
 DATABASE_VERSION="0.2"          # we start with 0.2 to have space for the old firmware database, which is 0.1
 DATABASE_FILE="/tmp/database"   # ".json" will be added if it is exported as JSON
@@ -57,69 +56,68 @@ create_database() {
     db_ver text, db_update int, CONSTRAINT key_ifaces PRIMARY KEY (mainip, if_name) ON CONFLICT REPLACE);"
 }
 
+
 print_interfaces_2_6() {
   olsr_interfaces=$(echo \"/int\" | nc localhost 2006 2>/dev/null)
   for if_name in $(ls /sys/class/net/ | awk '!/lo/ {print $0}'); do
-    iface_up=$(cat /sys/class/net/${if_name}/operstate)
-	# sometimes the up-state is not recognized by /sys, than check with 'ip link'
-	if [ "$iface_up" = "unknown" ] && [ -n "$(ip link show $if_name | awk '{if ($2 == "'$if_name':" && $3 ~ "UP") print $0}')" ]; then
-		iface_up="up"
-	fi
-#     if_type_bridge=$(ls /sys/class/net/${if_name}/brif 2>/dev/null)                      # is bridge interface, list bridged interfaces
-    if_type_bridge="$(ls /sys/class/net/${if_name}/brif 2>/dev/null | awk '{printf $1" "}')"
+    iface_up=$(cat "/sys/class/net/${if_name}/operstate")
+    # sometimes the up-state is not recognized by /sys, than check with 'ip link'
+    if [ "$iface_up" = "unknown" ] && [ -n "$(ip link show "$if_name" | awk '{if ($2 == "'$if_name':" && $3 ~ "UP") print $0}')" ]; then
+        iface_up="up"
+    fi
+    if_type_bridge="$(ls "/sys/class/net/${if_name}/brif" 2>/dev/null | awk '{printf $1" "}')"
     ip_addr=$(ip address show "$if_name" | awk 'BEGIN{ORS=" "} /inet/ {print $2}')  #   contains additional whitespace
-    if_type_bridgedif=$([ -e "/sys/class/net/${if_name}/brport/bridge" ] && echo "1")    # is bridged interface
+    if_type_bridgedif=$([ -e "/sys/class/net/${if_name}/brport/bridge" ] && echo "1" || echo "0")    # is bridged interface
 
     if [ "$iface_up" = "up" ] && ([ -n "$ip_addr" ] || [ -n "$if_type_bridgedif" ]) || [ -n "$if_type_bridge" ]; then
-      wlan=$(ls /sys/class/net/${if_name}/wireless/ 2>/dev/null)
-      if [ -n "$wlan" ]; then
-        iwinfo=$(iwinfo $if_name info | awk '{print $0"{newline}"}')
-        wlan_essid="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($2 == "ESSID:") {gsub("\"","");print $3;}}')"
-        wlan_apmac="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Access" && $2 == "Point:") print $3;}')"
-        wlan_type="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Type:") print $2;}')"
-        wlan_hwmode="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($3 == "HW" && $4 == "Mode(s):") print $5;}')"
-        wlan_mode="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Mode:") print $2;}')"
-        wlan_channel="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($3 == "Channel:") print $4;}')"
-        wlan_freq="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($3 == "Channel:") {gsub("(",""); print $5;}}')"
-        wlan_txpower="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Tx-Power:") print $2;}')"
-        wlan_signal="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Signal:") print $2;}')"
-        wlan_noise="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($4 == "Noise:") print $5;}')"
-        wlan_bitrate="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Bit" && $2 == "Rate:") print $3;}')"
-        wlan_crypt="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Encryption:") {gsub(" Encryption: ","");print $0;}}')"
-        wlan_vaps="$(echo $iwinfo | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Supports" && $2 == "VAPs:") print $3;}')"
+      if [ -e "/sys/class/net/${if_name}/wireless/" ]; then
+        iwinfo=$(iwinfo "$if_name" info | awk '{print $0"{newline}"}')
+        wlan_essid="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($2 == "ESSID:") {gsub("\"","");print $3;}}')"
+        wlan_apmac="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Access" && $2 == "Point:") print $3;}')"
+        wlan_type="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Type:") print $2;}')"
+        wlan_hwmode="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($3 == "HW" && $4 == "Mode(s):") print $5;}')"
+        wlan_mode="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Mode:") print $2;}')"
+        wlan_channel="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($3 == "Channel:") print $4;}')"
+        wlan_freq="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($3 == "Channel:") {gsub("(",""); print $5;}}')"
+        wlan_txpower="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Tx-Power:") print $2;}')"
+        wlan_signal="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Signal:") print $2;}')"
+        wlan_noise="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($4 == "Noise:") print $5;}')"
+        wlan_bitrate="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Bit" && $2 == "Rate:") print $3;}')"
+        wlan_crypt="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Encryption:") {gsub(" Encryption: +","");print $0;}}')"
+        wlan_vaps="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Supports" && $2 == "VAPs:") print $3;}')"
       else
         wlan_essid=""; wlan_apmac=""; wlan_type=""; wlan_hwmode=""; wlan_mode=""; wlan_channel=""; wlan_freq=""; wlan_txpower=""; wlan_signal=""; wlan_noise="";
         wlan_bitrate=""; wlan_crypt=""; wlan_vaps=""
       fi
 
-      ifstat_collisions=$(cat /sys/class/net/${if_name}/statistics/collisions 2>/dev/null)
-      ifstat_rx_compressed=$(cat /sys/class/net/${if_name}/statistics/rx_compressed 2>/dev/null)
-      ifstat_rx_errors=$(cat /sys/class/net/${if_name}/statistics/rx_errors 2>/dev/null)
-      ifstat_rx_length_errors=$(cat /sys/class/net/${if_name}/statistics/rx_length_errors 2>/dev/null)
-      ifstat_rx_packets=$(cat /sys/class/net/${if_name}/statistics/rx_packets 2>/dev/null)
-      ifstat_tx_carrier_errors=$(cat /sys/class/net/${if_name}/statistics/tx_carrier_errors 2>/dev/null)
-      ifstat_tx_errors=$(cat /sys/class/net/${if_name}/statistics/tx_errors 2>/dev/null)
-      ifstat_tx_packets=$(cat /sys/class/net/${if_name}/statistics/tx_packets 2>/dev/null)
-      ifstat_multicast=$(cat /sys/class/net/${if_name}/statistics/multicast 2>/dev/null)
-      ifstat_rx_crc_errors=$(cat /sys/class/net/${if_name}/statistics/rx_crc_errors 2>/dev/null)
-      ifstat_rx_fifo_errors=$(cat /sys/class/net/${if_name}/statistics/rx_fifo_errors 2>/dev/null)
-      ifstat_rx_missed_errors=$(cat /sys/class/net/${if_name}/statistics/rx_missed_errors 2>/dev/null)
-      ifstat_tx_aborted_errors=$(cat /sys/class/net/${if_name}/statistics/tx_aborted_errors 2>/dev/null)
-      ifstat_tx_compressed=$(cat /sys/class/net/${if_name}/statistics/tx_compressed 2>/dev/null)
-      ifstat_tx_fifo_errors=$(cat /sys/class/net/${if_name}/statistics/tx_fifo_errors 2>/dev/null)
-      ifstat_tx_window_errors=$(cat /sys/class/net/${if_name}/statistics/tx_window_errors 2>/dev/null)
-      ifstat_rx_bytes=$(cat /sys/class/net/${if_name}/statistics/rx_bytes 2>/dev/null)
-      ifstat_rx_dropped=$(cat /sys/class/net/${if_name}/statistics/rx_dropped 2>/dev/null)
-      ifstat_rx_frame_errors=$(cat /sys/class/net/${if_name}/statistics/rx_frame_errors 2>/dev/null)
-      ifstat_rx_over_errors=$(cat /sys/class/net/${if_name}/statistics/rx_over_errors 2>/dev/null)
-      ifstat_tx_bytes=$(cat /sys/class/net/${if_name}/statistics/tx_bytes 2>/dev/null)
-      ifstat_tx_dropped=$(cat /sys/class/net/${if_name}/statistics/tx_dropped 2>/dev/null)
-      ifstat_tx_heartbeat_errors=$(cat /sys/class/net/${if_name}/statistics/tx_heartbeat_errors 2>/dev/null)
+      ifstat_collisions=$(cat "/sys/class/net/${if_name}/statistics/collisions" 2>/dev/null)
+      ifstat_rx_compressed=$(cat "/sys/class/net/${if_name}/statistics/rx_compressed" 2>/dev/null)
+      ifstat_rx_errors=$(cat "/sys/class/net/${if_name}/statistics/rx_errors" 2>/dev/null)
+      ifstat_rx_length_errors=$(cat "/sys/class/net/${if_name}/statistics/rx_length_errors" 2>/dev/null)
+      ifstat_rx_packets=$(cat "/sys/class/net/${if_name}/statistics/rx_packets" 2>/dev/null)
+      ifstat_tx_carrier_errors=$(cat "/sys/class/net/${if_name}/statistics/tx_carrier_errors" 2>/dev/null)
+      ifstat_tx_errors=$(cat "/sys/class/net/${if_name}/statistics/tx_errors" 2>/dev/null)
+      ifstat_tx_packets=$(cat "/sys/class/net/${if_name}/statistics/tx_packets" 2>/dev/null)
+      ifstat_multicast=$(cat "/sys/class/net/${if_name}/statistics/multicast" 2>/dev/null)
+      ifstat_rx_crc_errors=$(cat "/sys/class/net/${if_name}/statistics/rx_crc_errors" 2>/dev/null)
+      ifstat_rx_fifo_errors=$(cat "/sys/class/net/${if_name}/statistics/rx_fifo_errors" 2>/dev/null)
+      ifstat_rx_missed_errors=$(cat "/sys/class/net/${if_name}/statistics/rx_missed_errors" 2>/dev/null)
+      ifstat_tx_aborted_errors=$(cat "/sys/class/net/${if_name}/statistics/tx_aborted_errors" 2>/dev/null)
+      ifstat_tx_compressed=$(cat "/sys/class/net/${if_name}/statistics/tx_compressed" 2>/dev/null)
+      ifstat_tx_fifo_errors=$(cat "/sys/class/net/${if_name}/statistics/tx_fifo_errors" 2>/dev/null)
+      ifstat_tx_window_errors=$(cat "/sys/class/net/${if_name}/statistics/tx_window_errors" 2>/dev/null)
+      ifstat_rx_bytes=$(cat "/sys/class/net/${if_name}/statistics/rx_bytes" 2>/dev/null)
+      ifstat_rx_dropped=$(cat "/sys/class/net/${if_name}/statistics/rx_dropped" 2>/dev/null)
+      ifstat_rx_frame_errors=$(cat "/sys/class/net/${if_name}/statistics/rx_frame_errors" 2>/dev/null)
+      ifstat_rx_over_errors=$(cat "/sys/class/net/${if_name}/statistics/rx_over_errors" 2>/dev/null)
+      ifstat_tx_bytes=$(cat "/sys/class/net/${if_name}/statistics/tx_bytes" 2>/dev/null)
+      ifstat_tx_dropped=$(cat "/sys/class/net/${if_name}/statistics/tx_dropped" 2>/dev/null)
+      ifstat_tx_heartbeat_errors=$(cat "/sys/class/net/${if_name}/statistics/tx_heartbeat_errors" 2>/dev/null)
 
-      if_hwaddr=$(cat /sys/class/net/${if_name}/address 2>/dev/null)
+      if_hwaddr=$(cat "/sys/class/net/${if_name}/address" 2>/dev/null)
 
-      ip_broadcast=$(ip address show $if_name | awk 'BEGIN{ORS=" "} /inet/ {print $4}')  #   contains additional whitespace
-      ip_label=$(ip address show $if_name | awk 'BEGIN{ORS=" "} /inet/ {print $NF}')  #   contains additional whitespace
+      ip_broadcast=$(ip address show "$if_name" | awk 'BEGIN{ORS=" "} /inet/ {print $4}')  #   contains additional whitespace
+      ip_label=$(ip address show "$if_name" | awk 'BEGIN{ORS=" "} /inet/ {print $NF}')  #   contains additional whitespace
       # opennet-firmware / openwrt values
       all_networks=$(uci -q show network | awk 'BEGIN{FS="="} /network\..*\.ifname/ {if ($2 == "'${if_name##br-}'") {gsub("network.",""); gsub(".ifname",""); print$1;}}')
       on_networks=""; on_zones=""; lastnetwork="";
@@ -135,7 +133,7 @@ print_interfaces_2_6() {
         zone=$(get_zone_of_interface "${if_name##br-}")
         on_zones="$on_zones $zone"
       fi
-      dhcpignore="$(uci_get dhcp.${lastnetwork}.ignore)"
+      dhcpignore="$(uci_get "dhcp.${lastnetwork}.ignore")"
       dhcp_start="$([ "$dhcpignore" = "1" ] || uci_get dhcp.${lastnetwork}.start)"
       dhcp_limit="$([ "$dhcpignore" = "1" ] || uci_get dhcp.${lastnetwork}.limit)"
       dhcp_leasetime="$([ "$dhcpignore" = "1" ] || uci_get dhcp.${lastnetwork}.leasetime)"
@@ -165,7 +163,7 @@ print_interfaces_2_6() {
         '$wlan_essid', '$wlan_apmac', '$wlan_type', '$wlan_hwmode', '$wlan_mode',
         '$wlan_channel', '$wlan_freq', '$wlan_txpower', '$wlan_signal', '$wlan_noise',
         '$wlan_bitrate', '$wlan_crypt', '$wlan_vaps', '$DATABASE_VERSION', '$db_epoch');"
-      printed_interfaces="$printed_interfaces $if_name";
+
 
       if [ "$EXPORT_JSON" = "1" ];then
         JSON=$(cat <<EOF
@@ -228,34 +226,25 @@ on_packages="$(opkg status | awk '{if ($1 == "Package:" && $2 ~ "^on-" && $2 != 
 on_olsrd_status="$(pidof olsrd >/dev/null && echo "1" || echo "0")"
 on_olsr_mainip="$(echo \"/config\" | nc localhost 2006 2>/dev/null | awk '/MainIp/ {print $2}')"
 
+## @todo auf nodogsplash umstellen
 on_wifidog_status="$(pidof wifidog >/dev/null && echo "1" || echo "0")"
-on_wifidog_id="$(awk '{if ($1 == "GatewayID") print $2}' /etc/wifidog.conf 2>/dev/null)"
+on_wifidog_id="$([ -e /etc/wifidog.conf ] && awk '{if ($1 == "GatewayID") print $2}' /etc/wifidog.conf 2>/dev/null || true)"
+
 
 on_vpn_status="$([ -e /tmp/openvpn_msg.txt ] && echo 1 || echo 0)"
 on_vpn_cn="$(get_client_cn)"
-on_vpn_gw="$(uci_get openvpn.opennet_user.remote)"
-on_vpn_autosearch="$([ "$(uci_get on-openvpn.gateways.autosearch)" = "on" ] && echo "1" || echo "0")"
-on_vpn_sort="$(uci_get on-openvpn.gateways.vpn_sort_criteria)"
+on_vpn_gw="$(get_active_mig_connections | pipe_service_attribute host)"
+on_vpn_autosearch="$([ "$(uci_get on-core.settings.service_sorting)" = "manual" ] && echo "0" || echo "1")"
+on_vpn_sort="$(uci_get on-core.settings.service_sorting)"
 
-## @todo on-openvpn-Gateway-Konstruktionen in Service-Modell uebertragen
-index=1; gw_addresses="";
-while [ -n "$(uci_get on-openvpn.gate_$index)" ] ; do
-  gw_ipaddr=$(uci_get on-openvpn.gate_$index.ipaddr);
-  age=$(get_service_value "$gw_ipaddr" age)
-  status=$(get_service_value "$gw_ipaddr" status)
-  gw_addresses="$gw_addresses ${gw_ipaddr}:${status}:${age}"
-  : $((index++))
-done
-on_vpn_gws="${gw_addresses## }"
+on_vpn_gws=$(get_services "gw" "ugw" | while read service_name; do
+		gw_ipaddr=$(get_service_value "$service_name" "host")
+		age=$(get_mig_connection_test_age "$service_name")
+		status=$(get_service_value "$service_name" "status")
+		echo "${gw_ipaddr}:${status}:${age}"
+	done | tr '\n' ' ')
 
-index=0; gw_blacklist_addresses="";
-while [ -n "$(uci_get on-openvpn.@blacklist_gateway[$index])" ] ; do
-  ipaddr=$(uci_get on-openvpn.@blacklist_gateway[$index].ipaddr);
-  name=$(uci_get on-openvpn.@blacklist_gateway[$index].name);
-  gw_blacklist_addresses="$gw_blacklist_addresses ${ipaddr}:${name}"
-  : $((index++))
-done
-on_vpn_blist="${gw_blacklist_addresses## }"
+on_vpn_blist=$(get_services "gw" "ugw" | filter_enabled_services | pipe_service_attribute host | tr '\n' ' ')
 
 ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '/dev tap/ {printf $1" "}'; done)
 on_ugw_status="$([ "$(echo $ugw_status_centralips | wc -w)" -ge "1" ] && echo "1" || echo "0")"
@@ -269,7 +258,7 @@ while [ -n "$(uci_get on-usergw.opennet_ugw${index})" ]; do
   : $((index++))
 done
 on_ugw_possible="$ugw_status_sharing_possible"
-on_ugw_tunnel="$([ "$(ls /tmp/opennet_ugw*.txt 2>/dev/null)" ] && echo "1" || echo "0")"
+on_ugw_tunnel="$([ -n "$(ls /tmp/opennet_ugw*.txt 2>/dev/null)" ] && echo "1" || echo "0")"
 on_ugw_connected="${ugw_status_centralips# }"
 on_ugw_presetips="$(uci_get on-usergw.@usergw[0].centralIP)"
 on_ugw_presetnames="$(uci_get on-usergw.@usergw[0].name)"

@@ -234,10 +234,20 @@ Datensammlung: ondataservice {#ondataservice}
 Das //ondataservice//-Plugin verteilt via //olsrd// detaillierte Informationen über den AP im Netz.
 
 
-### Konfiguration auf dem AP {#ondataservice-ap}
+### Konfiguration auf dem AP
 
 Das Initialisierungsskript /etc/uci-defaults/on-olsr-setup wird bei der Erstinstallation oder beim Firmware-Upgrade ausgeführt.
 Es aktiviert da ondataservice-Plugin.
+
+### Debugging
+
+Das Plugin versendet standardmäßig im 3-Stunden-Takt olsr-Message-Pakete (Message-ID=222). Diese lassen sich auf dem AP mit tcpdump beobachten:
+
+  tcpdump -vvvlnpi wlan0 port 698 | grep -A 5 "(0xde)"
+
+Zur detaillierten Beobachtung kann es hilfreich sein, den Versand-Intervall (kurzzeitig) zu reduzieren (siehe *interval* in der *ondataservice_light*-Konfiguration in */etc/config/olsrd*).
+
+Im [https://wiki.opennet-initiative.de/wiki/Firmware_Status](Wiki) findest du einige Stunden später deinen AP aufgeführt. Dort findest du auch APs mit alter Firmware, sofern sie von der Kompatibilitätsschnittstelle unseres Datensammlers *geronimo* erfasst werden.
 
 
 Erstkonfiguration {#initial-installation}

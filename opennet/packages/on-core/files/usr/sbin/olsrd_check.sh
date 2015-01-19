@@ -3,6 +3,7 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
+# olsrd benoetigt ein paar Sekunden, bis es beispielsweise nach einem fehlgeschlagenen Port-Binding abbricht
 START_DELAY=8
 
 

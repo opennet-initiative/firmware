@@ -1,36 +1,14 @@
 Show "client isolation" setting even for non-madwifi drivers.
 --- a/luci/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
 +++ b/luci/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
-@@ -410,6 +410,10 @@ network.template = "cbi/network_netlist"
- network.widget = "checkbox"
- network.novirtual = true
- 
-+isolate = s:taboption("general", Flag, "isolate", translate("Separate Clients"),
-+  translate("Prevents client-to-client communication"))
-+isolate:depends({mode="ap"})
+@@ -503,6 +503,10 @@ if hwtype == "mac80211" then
+ 	wmm:depends({mode="ap"})
+ 	wmm:depends({mode="ap-wds"})
+ 	wmm.default = wmm.enabled
 +
- function network.write(self, section, value)
- 	local i = nw:get_interface(section)
- 	if i then
++	isolate = s:taboption("general", Flag, "isolate", translate("Separate Clients"),
++	  translate("Prevents client-to-client communication"))
++	isolate:depends({mode="ap"})
+ end
  
-@@ -560,9 +559,6 @@ if hwtype == "atheros" then
- 	hidden:depends({mode="adhoc"})
- 	hidden:depends({mode="ap-wds"})
- 	hidden:depends({mode="sta-wds"})
--	isolate = s:taboption("advanced", Flag, "isolate", translate("Separate Clients"),
--	 translate("Prevents client-to-client communication"))
--	isolate:depends({mode="ap"})
- 	s:taboption("advanced", Flag, "bgscan", translate("Background Scan"))
- 
- 	mp = s:taboption("macfilter", ListValue, "macpolicy", translate("MAC-Address Filter"))
-@@ -616,10 +612,6 @@ if hwtype == "broadcom" then
- 	hidden:depends({mode="adhoc"})
- 	hidden:depends({mode="wds"})
- 
--	isolate = s:taboption("advanced", Flag, "isolate", translate("Separate Clients"),
--	 translate("Prevents client-to-client communication"))
--	isolate:depends({mode="ap"})
--
- 	s:taboption("advanced", Flag, "doth", "802.11h")
- 	s:taboption("advanced", Flag, "wmm", translate("WMM Mode"))
  

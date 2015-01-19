@@ -1,0 +1,11 @@
+--- a/routing/olsrd/files/olsrd.config
++++ b/routing/olsrd/files/olsrd.config
+@@ -10,7 +10,7 @@ config LoadPlugin
+ 
+ config LoadPlugin
+ 	option library 'olsrd_httpinfo.so.0.1'
+-	option port '1978'
++	option port '8080'
+ 	list Net '0.0.0.0 0.0.0.0'
+ 
+ config LoadPlugin

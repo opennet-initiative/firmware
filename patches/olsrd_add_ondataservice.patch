@@ -1,7 +1,7 @@
 Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 --- a/routing/olsrd/Makefile
 +++ b/routing/olsrd/Makefile
-@@ -94,6 +94,18 @@ define Package/olsrd-mod-nameservice
+@@ -95,6 +95,18 @@ define Package/olsrd-mod-nameservice
    TITLE:=Lightweight hostname resolver plugin
  endef
  
@@ -20,7 +20,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  define Package/olsrd-mod-p2pd
    $(call Package/olsrd/template)
    DEPENDS:=olsrd
-@@ -161,7 +173,7 @@ MAKE_FLAGS+= \
+@@ -162,7 +174,7 @@ MAKE_FLAGS+= \
  	DESTDIR="$(PKG_INSTALL_DIR)" \
  	STRIP="true" \
  	INSTALL_LIB="true" \
@@ -29,7 +29,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  
  define Build/Compile
  	$(call Build/Compile/Default,all)
-@@ -224,6 +236,16 @@ define Package/olsrd-mod-nameservice/ins
+@@ -229,6 +241,16 @@ define Package/olsrd-mod-nameservice/ins
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/nameservice/olsrd_nameservice.so.* $(1)/usr/lib/
  endef
  
@@ -46,7 +46,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  define Package/olsrd-mod-p2pd/install
  	$(INSTALL_DIR) $(1)/usr/lib
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/p2pd/olsrd_p2pd.so.* $(1)/usr/lib/
-@@ -282,6 +304,8 @@ $(eval $(call BuildPackage,olsrd-mod-htt
+@@ -287,6 +309,8 @@ $(eval $(call BuildPackage,olsrd-mod-htt
  $(eval $(call BuildPackage,olsrd-mod-jsoninfo))
  $(eval $(call BuildPackage,olsrd-mod-mdns))
  $(eval $(call BuildPackage,olsrd-mod-nameservice))
@@ -95,7 +95,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 +--- a/Makefile
 ++++ b/Makefile
 +@@ -197,7 +197,7 @@ rpm:
-+ 
++
 + # This is quite ugly but at least it works
 + ifeq ($(OS),linux)
 +-SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns mini nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog
@@ -106,7 +106,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 +@@ -449,6 +449,29 @@ watchdog_install:
 + watchdog_uninstall:
 + 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/watchdog DESTDIR=$(DESTDIR) uninstall
-+ 
++
 ++ondataservice:
 ++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice
 ++
@@ -130,7 +130,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++
 ++ondataservice_light_uninstall:
 ++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice_light DESTDIR=$(DESTDIR) uninstall
-+ 
++
 + build_all:	all switch libs
 + install_all:	install install_libs
 +diff --git a/lib/ondataservice/Makefile b/lib/ondataservice/Makefile
@@ -143,31 +143,31 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++# Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
 ++# All rights reserved.
 ++#
-++# Redistribution and use in source and binary forms, with or without 
-++# modification, are permitted provided that the following conditions 
+++# Redistribution and use in source and binary forms, with or without
+++# modification, are permitted provided that the following conditions
 ++# are met:
 ++#
-++# * Redistributions of source code must retain the above copyright 
+++# * Redistributions of source code must retain the above copyright
 ++#   notice, this list of conditions and the following disclaimer.
-++# * Redistributions in binary form must reproduce the above copyright 
-++#   notice, this list of conditions and the following disclaimer in 
-++#   the documentation and/or other materials provided with the 
+++# * Redistributions in binary form must reproduce the above copyright
+++#   notice, this list of conditions and the following disclaimer in
+++#   the documentation and/or other materials provided with the
 ++#   distribution.
-++# * Neither the name of olsr.org, olsrd nor the names of its 
-++#   contributors may be used to endorse or promote products derived 
+++# * Neither the name of olsr.org, olsrd nor the names of its
+++#   contributors may be used to endorse or promote products derived
 ++#   from this software without specific prior written permission.
 ++#
-++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-++# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-++# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
-++# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-++# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-++# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-++# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-++# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-++# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-++# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-++# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+++# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+++# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+++# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+++# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+++# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+++# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+++# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ++# POSSIBILITY OF SUCH DAMAGE.
 ++#
 ++# Visit http://www.olsr.org for more information.
@@ -264,7 +264,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++
 ++PlParam "dbcreatescript" "/path/to/dbcreatescript"
 ++        Path to some executable script to create the database. This will
-++        be called anytime the database can't be opened. 
+++        be called anytime the database can't be opened.
 ++        script will be called with database-path (see PlParam above)
 ++        as only parameter
 ++        (default not set, database is not created if not existent)
@@ -317,7 +317,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    on_ugw_connected text, on_ugw_presetips text, on_ugw_presetnames text,
 ++    on_old_autoadapttxpwr text, on_old_remoteconf text,
 ++    db_time text, db_epoch int, db_ver text, db_update int, CONSTRAINT key_nodes PRIMARY KEY (mainip) ON CONFLICT REPLACE);
-++    
+++
 ++    CREATE TABLE ifaces
 ++    (originator text, mainip text, if_name text, if_type_bridge text, if_type_bridgedif bool, if_hwaddr text,
 ++    ip_label text, ip_addr text, ip_broadcast text,
@@ -357,7 +357,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    on_ugw_connected text, on_ugw_presetips text, on_ugw_presetnames text,
 ++    on_old_autoadapttxpwr text, on_old_remoteconf text,
 ++    db_time text, db_epoch int, db_ver text, db_update int, CONSTRAINT key_nodes PRIMARY KEY (mainip) ON CONFLICT REPLACE);
-++    
+++
 ++    CREATE TABLE ifaces
 ++    (originator text, mainip text, if_name text, if_type_bridge text, if_type_bridgedif bool, if_hwaddr text,
 ++    ip_label text, ip_addr text, ip_broadcast text,
@@ -777,7 +777,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++
 ++  /* periodic message generation */
 ++  msg_gen_timer = olsr_start_timer(my_interval * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC, &olsr_ondatasvc_gen, NULL, 0);
-++  
+++
 ++  /* periodic database cleanup generation */
 ++  if (my_receive) db_cleanup_timer = olsr_start_timer(my_cleanup_interval * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC, &olsr_ondataservice_expire_db_timer, NULL, 0);
 ++
@@ -793,7 +793,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++ondata_destructor(void)
 ++{
 ++  olsr_stop_timer(msg_gen_timer);
-++  
+++
 ++  if (my_receive) olsr_stop_timer(db_cleanup_timer);
 ++}
 ++
@@ -861,14 +861,14 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  const char *mainip;
 ++  int unsigned currentTable = 0, rc;
 ++  long unsigned min_update_time;
-++  
+++
 ++  min_update_time = time(NULL) - my_timeout;
 ++  mainip = olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
-++  
+++
 ++  rc = open_database(&localdb);
 ++  if( rc == SQLITE_OK ){
 ++    while (currentTable < numberOfTables) {
-++  
+++
 ++      // build Database statement / assumption that time will not be bigger than 20chars long
 ++      localzSql = olsr_malloc(strlen(SQLframe) + strlen(mainip) + strlen(DATABASE_TABLES[currentTable]) + 20 + 1, "update_ondata_entry: space for SQL query");
 ++      sprintf(localzSql, SQLframe, DATABASE_TABLES[currentTable], mainip, min_update_time);
@@ -929,10 +929,10 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    ondatasize = encap_ondatamsg((struct ondatamsg *)ARM_NOWARN_ALIGN(&message->v6.message));
 ++    if (!ondatasize) return;
 ++    ondatasize = ondatasize + sizeof(struct olsrmsg6);
-++    
+++
 ++    message->v6.olsr_msgsize = htons(ondatasize);
 ++  }
-++    
+++
 ++  /* looping trough interfaces */
 ++  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
 ++    OLSR_PRINTF(3, "ONDATA PLUGIN: Generating packet - [%s]\n", ifn->int_name);
@@ -1005,41 +1005,41 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  const char *pzTail;           /* OUT of sqlite3_prepare_v2: Pointer to unused portion of zSql */
 ++  const char *SQLframe = "SELECT * FROM %s WHERE mainip = '%s';";
 ++  const char *SQLframeSpreadAll = "SELECT * FROM %s WHERE originator = '';";
-++  
+++
 ++  struct ipaddr_str main_addr;
 ++  const char *mainip;
 ++  char *pos;
 ++  int iCol, rc;
 ++  uint16_t checksum;
 ++  uint16_t messageLength = 0;
-++  
+++
 ++  // open Database if this not a 'continued Transmission - and Database is already open'
 ++  mainip = olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
-++  
+++
 ++  if (!db_open) {
 ++    OLSR_PRINTF(5, "ONDATA PLUGIN: opening database\n");
-++    
+++
 ++    currentTable = 0;
 ++    rc = open_database(&db);
-++    
+++
 ++    if( rc == SQLITE_OK) db_open = 1;
 ++    else {
 ++      fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
 ++      sqlite3_close(db); return 0;
 ++    }
 ++  }
-++  
+++
 ++  // if there is no Data available, search next Table with Data
 ++  if (!table_open) {
 ++    while (currentTable < numberOfTables) {
 ++      OLSR_PRINTF(5, "ONDATA PLUGIN: using next table %s\n", DATABASE_TABLES[currentTable]);
 ++      // build SQL-query
 ++      if (!my_spreadall) {
-++        zSql = olsr_malloc(strlen(SQLframe) + strlen(DATABASE_TABLES[currentTable]) + strlen(mainip) + 1, "encap_ondatamsg: space for SQL query");      
+++        zSql = olsr_malloc(strlen(SQLframe) + strlen(DATABASE_TABLES[currentTable]) + strlen(mainip) + 1, "encap_ondatamsg: space for SQL query");
 ++        sprintf(zSql, SQLframe, DATABASE_TABLES[currentTable], mainip);
 ++      }
 ++      else {
-++        zSql = olsr_malloc(strlen(SQLframeSpreadAll) + strlen(DATABASE_TABLES[currentTable])+ 1, "encap_ondatamsg: space for SQL query");      
+++        zSql = olsr_malloc(strlen(SQLframeSpreadAll) + strlen(DATABASE_TABLES[currentTable])+ 1, "encap_ondatamsg: space for SQL query");
 ++        sprintf(zSql, SQLframeSpreadAll, DATABASE_TABLES[currentTable]);
 ++      }
 ++      // open table
@@ -1055,7 +1055,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++      currentTable++;
 ++    }
 ++  }
-++  
+++
 ++  // if still no valid table found, give up
 ++  if (!table_open) {
 ++    OLSR_PRINTF(5, "ONDATA PLUGIN: no further table found\n");
@@ -1065,16 +1065,16 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    olsr_change_timer(msg_gen_timer, my_interval * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC);
 ++    return 0;
 ++  }
-++  
+++
 ++  // add all datasets
 ++  if (sqlite3_step(ppStmt) == SQLITE_ROW) {
 ++    OLSR_PRINTF(5, "ONDATA PLUGIN: adding all datasets\n");
 ++    // add all the entries after the ondatamsg header (and keep space for it)
 ++    pos = (char *)msg + sizeof(struct ondatamsg);
-++    
+++
 ++    // always add the Table-Name as first field
 ++    pos = create_packet((struct ondata *)ARM_NOWARN_ALIGN(pos), DATABASE_TABLES[currentTable]);
-++  
+++
 ++    // never transmit originator (col=0), this will be detected at the other end_pos
 ++    // skip last column, it will set at destination to the receiving-time
 ++    iCol = 1;
@@ -1089,8 +1089,8 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    msg->length = htons(messageLength);
 ++    checksum = crcCalculate((char *)msg + sizeof(uint16_t), messageLength - sizeof(uint16_t));
 ++    msg->checksum = htons(checksum);
-++    
-++    OLSR_PRINTF(3, "ONDATA PLUGIN: ##### finished creating packet, length=%d, crc16=0x%x\n", messageLength, checksum);    
+++
+++    OLSR_PRINTF(3, "ONDATA PLUGIN: ##### finished creating packet, length=%d, crc16=0x%x\n", messageLength, checksum);
 ++  }
 ++  else {
 ++    OLSR_PRINTF(5, "ONDATA PLUGIN: finalize query\n");
@@ -1124,7 +1124,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  // do 4-byte padding
 ++  for (k = sizeof(struct ondata) + valuelen; (k & 3) != 0; k++)
 ++    *pos++ = '\0';
-++  
+++
 ++  return pos;
 ++}
 ++
@@ -1146,7 +1146,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  char *localzSql;
 ++  const char *SQLframe = "INSERT OR REPLACE INTO %s VALUES (%s);", *pzTail;
 ++
-++  
+++
 ++  originatorIP = olsr_ip_to_string(&strbuf, originator);
 ++  OLSR_PRINTF(3, "ONDATA PLUGIN: Received Message from %s, version %d, msg_size %d, checksum 0x%x\n", originatorIP, ntohs(msg->version), ntohs(msg->length), ntohs(msg->checksum));
 ++
@@ -1162,40 +1162,40 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    return;
 ++  }
 ++  else OLSR_PRINTF(5, "ONDATA PLUGIN: validated checksum 0x%x\n", checksum);
-++  
-++  
+++
+++
 ++  // every value will be enclosed in brackets "'" and separated by a comma ","
 ++  // so we need four bytes more per value (and we take more than we need, yeah)
 ++  values = olsr_malloc(strlen(originatorIP) + 1 + ntohs(msg->length) + msg->nr_datasets*3, "update_ondata_entry: space for SQL values");
 ++  valuepos = values;
-++  
+++
 ++  // checksum is valid, now add the values to the database.
 ++  // first field is the tablename, abort if it does not exist
 ++  // all following fields contain the table-values for one row.
-++  
+++
 ++  pos = (char *)msg + sizeof(struct ondatamsg);
 ++  end_pos = pos + msg_size - sizeof(struct ondata *);     // at least one struct ondata has to be left
 ++
 ++
 ++  from_packet = (struct ondata *)ARM_NOWARN_ALIGN(pos);
 ++  table = olsr_malloc(ntohs(from_packet->valuelen) + 1, "update_ondata_entry: space for Table Name");
-++  
+++
 ++  memcpy(table, (char *)from_packet + sizeof(struct ondata), ntohs(from_packet->valuelen));
 ++  *(table + ntohs(from_packet->valuelen)) = '\0';
-++  
+++
 ++  // set new position and calculate alignment
 ++  pos += ((sizeof(struct ondata) + ntohs(from_packet->valuelen) - 1) | 3) + 1;
-++  
+++
 ++  // add originator IP
 ++  memcpy(valuepos++, "'", 1);
 ++  memcpy(valuepos, originatorIP, strlen(originatorIP));
 ++  valuepos += strlen(originatorIP);
 ++  memcpy(valuepos, "',", 2);
-++  valuepos += 2; 
-++  
+++  valuepos += 2;
+++
 ++  for (i = ntohs(msg->nr_datasets); i > 0 && pos < end_pos; i--) {
 ++    from_packet = (struct ondata *)ARM_NOWARN_ALIGN(pos);
-++    
+++
 ++    memcpy(valuepos++, "'", 1);
 ++    memcpy(valuepos, (char *)from_packet + sizeof(struct ondata), ntohs(from_packet->valuelen));
 ++    valuepos += ntohs(from_packet->valuelen);
@@ -1208,12 +1208,12 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++
 ++  // add current time to detect age of datasets (and remove them after timeout)
 ++  sprintf(valuepos, "'%lu'", (uintmax_t)time(NULL));
-++  
+++
 ++  // build Database statement
 ++  localzSql = olsr_malloc(strlen(SQLframe) + strlen(table) + strlen(values) + 1, "update_ondata_entry: space for SQL query");
 ++  sprintf(localzSql, SQLframe, table, values);
 ++  free(table); free(values);
-++  
+++
 ++  // apply statement to database
 ++  rc = open_database(&localdb);
 ++  if( rc == SQLITE_OK ){
@@ -1227,7 +1227,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    else fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(localdb));
 ++  }
 ++  else fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(localdb));
-++  
+++
 ++  sqlite3_close(localdb);
 ++  free(localzSql);
 ++}
@@ -1312,7 +1312,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++#define EMISSION_INC_INTERVAL   5 /* seconds between transmission of rows from one dataset */
 ++#define EMISSION_JITTER         25  /* percent */
 ++#define ONDATA_TIMEOUT  21600  /* seconds, how long old data stays valid - 21600 = 6hours */
-++#define ONDATA_VALID_TIME 300  /* seconds, how long a package should maximally be spreaded through the net - 300 - 5mins*/ 
+++#define ONDATA_VALID_TIME 300  /* seconds, how long a package should maximally be spreaded through the net - 300 - 5mins*/
 ++#define CLEANUP_INTERVAL    1800 /* seconds, how often cleanup will be triggered - 1800 = 0.5hours */
 ++
 ++#define ONDATA_PROTOCOL_VERSION	1
@@ -1457,31 +1457,31 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++# Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
 ++# All rights reserved.
 ++#
-++# Redistribution and use in source and binary forms, with or without 
-++# modification, are permitted provided that the following conditions 
+++# Redistribution and use in source and binary forms, with or without
+++# modification, are permitted provided that the following conditions
 ++# are met:
 ++#
-++# * Redistributions of source code must retain the above copyright 
+++# * Redistributions of source code must retain the above copyright
 ++#   notice, this list of conditions and the following disclaimer.
-++# * Redistributions in binary form must reproduce the above copyright 
-++#   notice, this list of conditions and the following disclaimer in 
-++#   the documentation and/or other materials provided with the 
+++# * Redistributions in binary form must reproduce the above copyright
+++#   notice, this list of conditions and the following disclaimer in
+++#   the documentation and/or other materials provided with the
 ++#   distribution.
-++# * Neither the name of olsr.org, olsrd nor the names of its 
-++#   contributors may be used to endorse or promote products derived 
+++# * Neither the name of olsr.org, olsrd nor the names of its
+++#   contributors may be used to endorse or promote products derived
 ++#   from this software without specific prior written permission.
 ++#
-++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-++# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-++# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
-++# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-++# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-++# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-++# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-++# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-++# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-++# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-++# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+++# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+++# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+++# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+++# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+++# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+++# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+++# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ++# POSSIBILITY OF SUCH DAMAGE.
 ++#
 ++# Visit http://www.olsr.org for more information.
@@ -1498,7 +1498,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++# olsrd-config already existing on the device
 ++PLUGIN_VER =	0.1
 ++
-++LIBS += 
+++LIBS +=
 ++
 ++TOPDIR = ../..
 ++include $(TOPDIR)/Makefile.inc
@@ -1684,7 +1684,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// static const char *parse_number(cJSON *item,const char *num)
 ++// {
 ++// 	double n=0,sign=1,scale=0;int subscale=0,signsubscale=1;
-++// 
+++//
 ++// 	/* Could use sscanf for this? */
 ++// 	if (*num=='-') sign=-1,num++;	/* Has sign? */
 ++// 	if (*num=='0') num++;			/* is zero */
@@ -1694,9 +1694,9 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 	{	num++;if (*num=='+') num++;	else if (*num=='-') signsubscale=-1,num++;		/* With sign? */
 ++// 		while (*num>='0' && *num<='9') subscale=(subscale*10)+(*num++ - '0');	/* Number? */
 ++// 	}
-++// 
+++//
 ++// 	n=sign*n*pow(10.0,(scale+subscale*signsubscale));	/* number = +/- number.fraction * 10^+/- exponent */
-++// 	
+++//
 ++// 	item->valuedouble=n;
 ++// 	item->valueint=(int)n;
 ++// 	item->type=cJSON_Number;
@@ -1732,12 +1732,12 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++{
 ++	const char *ptr=str+1;char *ptr2;char *out;int len=0;unsigned uc,uc2;
 ++	if (*str!='\"') {ep=str;return 0;}	/* not a string! */
-++	
+++
 ++	while (*ptr!='\"' && *ptr && ++len) if (*ptr++ == '\\') ptr++;	/* Skip escaped quotes. */
-++	
+++
 ++	out=(char*)cJSON_malloc(len+1);	/* This is how long we need for the string, roughly. */
 ++	if (!out) return 0;
-++	
+++
 ++	ptr=str+1;ptr2=out;
 ++	while (*ptr!='\"' && *ptr)
 ++	{
@@ -1766,7 +1766,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++					}
 ++
 ++					len=4;if (uc<0x80) len=1;else if (uc<0x800) len=2;else if (uc<0x10000) len=3; ptr2+=len;
-++					
+++
 ++					switch (len) {
 ++						case 4: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
 ++						case 3: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
@@ -1793,13 +1793,13 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// static char *print_string_ptr(const char *str)
 ++// {
 ++// 	const char *ptr;char *ptr2,*out;int len=0;unsigned char token;
-++// 	
+++//
 ++// 	if (!str) return cJSON_strdup("");
 ++// 	ptr=str;while ((token=*ptr) && ++len) {if (strchr("\"\\\b\f\n\r\t",token)) len++; else if (token<32) len+=5;ptr++;}
-++// 	
+++//
 ++// 	out=(char*)cJSON_malloc(len+3);
 ++// 	if (!out) return 0;
-++// 
+++//
 ++// 	ptr2=out;ptr=str;
 ++// 	*ptr2++='\"';
 ++// 	while (*ptr)
@@ -1891,16 +1891,16 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// {
 ++// 	cJSON *child;
 ++// 	if (*value!='[')	{ep=value;return 0;}	/* not an array! */
-++// 
+++//
 ++// 	item->type=cJSON_Array;
 ++// 	value=skip(value+1);
 ++// 	if (*value==']') return value+1;	/* empty array. */
-++// 
+++//
 ++// 	item->child=child=cJSON_New_Item();
 ++// 	if (!item->child) return 0;		 /* memory fail */
 ++// 	value=skip(parse_value(child,skip(value)));	/* skip any spacing, get the value. */
 ++// 	if (!value) return 0;
-++// 
+++//
 ++// 	while (*value==',')
 ++// 	{
 ++// 		cJSON *new_item;
@@ -1909,7 +1909,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 		value=skip(parse_value(child,skip(value+1)));
 ++// 		if (!value) return 0;	/* memory fail */
 ++// 	}
-++// 
+++//
 ++// 	if (*value==']') return value+1;	/* end of array */
 ++// 	ep=value;return 0;	/* malformed. */
 ++// }
@@ -1921,7 +1921,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 	char *out=0,*ptr,*ret;int len=5;
 ++// 	cJSON *child=item->child;
 ++// 	int numentries=0,i=0,fail=0;
-++// 	
+++//
 ++// 	/* How many entries in the array? */
 ++// 	while (child) numentries++,child=child->next;
 ++// 	/* Allocate an array to hold the values for each */
@@ -1937,12 +1937,12 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 		if (ret) len+=strlen(ret)+2+(fmt?1:0); else fail=1;
 ++// 		child=child->next;
 ++// 	}
-++// 	
+++//
 ++// 	/* If we didn't fail, try to malloc the output string */
 ++// 	if (!fail) out=(char*)cJSON_malloc(len);
 ++// 	/* If that fails, we fail. */
 ++// 	if (!out) fail=1;
-++// 
+++//
 ++// 	/* Handle failure. */
 ++// 	if (fail)
 ++// 	{
@@ -1950,7 +1950,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 		cJSON_free(entries);
 ++// 		return 0;
 ++// 	}
-++// 	
+++//
 ++// 	/* Compose the output array. */
 ++// 	*out='[';
 ++// 	ptr=out+1;*ptr=0;
@@ -1962,7 +1962,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 	}
 ++// 	cJSON_free(entries);
 ++// 	*ptr++=']';*ptr++=0;
-++// 	return out;	
+++// 	return out;
 ++// }
 ++
 ++/* Build an object from the text. */
@@ -1970,11 +1970,11 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++{
 ++	cJSON *child;
 ++	if (*value!='{')	{ep=value;return 0;}	/* not an object! */
-++	
+++
 ++	item->type=cJSON_Object;
 ++	value=skip(value+1);
 ++	if (*value=='}') return value+1;	/* empty array. */
-++	
+++
 ++	item->child=child=cJSON_New_Item();
 ++	if (!item->child) return 0;
 ++	value=skip(parse_string(child,skip(value)));
@@ -1983,7 +1983,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++	if (*value!=':') {ep=value;return 0;}	/* fail! */
 ++	value=skip(parse_value(child,skip(value+1)));	/* skip any spacing, get the value. */
 ++	if (!value) return 0;
-++	
+++
 ++	while (*value==',')
 ++	{
 ++		cJSON *new_item;
@@ -1996,7 +1996,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++		value=skip(parse_value(child,skip(value+1)));	/* skip any spacing, get the value. */
 ++		if (!value) return 0;
 ++	}
-++	
+++
 ++	if (*value=='}') return value+1;	/* end of array */
 ++	ep=value;return 0;	/* malformed. */
 ++}
@@ -2017,7 +2017,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 	if (!names) {cJSON_free(entries);return 0;}
 ++// 	memset(entries,0,sizeof(char*)*numentries);
 ++// 	memset(names,0,sizeof(char*)*numentries);
-++// 
+++//
 ++// 	/* Collect all the results into our arrays: */
 ++// 	child=item->child;depth++;if (fmt) len+=depth;
 ++// 	while (child)
@@ -2027,11 +2027,11 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 		if (str && ret) len+=strlen(ret)+strlen(str)+2+(fmt?2+depth:0); else fail=1;
 ++// 		child=child->next;
 ++// 	}
-++// 	
+++//
 ++// 	/* Try to allocate the output string */
 ++// 	if (!fail) out=(char*)cJSON_malloc(len);
 ++// 	if (!out) fail=1;
-++// 
+++//
 ++// 	/* Handle failure */
 ++// 	if (fail)
 ++// 	{
@@ -2039,7 +2039,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 		cJSON_free(names);cJSON_free(entries);
 ++// 		return 0;
 ++// 	}
-++// 	
+++//
 ++// 	/* Compose the output: */
 ++// 	*out='{';ptr=out+1;if (fmt)*ptr++='\n';*ptr=0;
 ++// 	for (i=0;i<numentries;i++)
@@ -2052,11 +2052,11 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// 		if (fmt) *ptr++='\n';*ptr=0;
 ++// 		cJSON_free(names[i]);cJSON_free(entries[i]);
 ++// 	}
-++// 	
+++//
 ++// 	cJSON_free(names);cJSON_free(entries);
 ++// 	if (fmt) for (i=0;i<depth-1;i++) *ptr++='\t';
 ++// 	*ptr++='}';*ptr++=0;
-++// 	return out;	
+++// 	return out;
 ++// }
 ++
 ++/* Get Array size/item / object item. */
@@ -2110,17 +2110,17 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 +@@ -0,0 +1,127 @@
 ++/*
 ++  Copyright (c) 2009 Dave Gamble
-++ 
+++
 ++  Permission is hereby granted, free of charge, to any person obtaining a copy
 ++  of this software and associated documentation files (the "Software"), to deal
 ++  in the Software without restriction, including without limitation the rights
 ++  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 ++  copies of the Software, and to permit persons to whom the Software is
 ++  furnished to do so, subject to the following conditions:
-++ 
+++
 ++  The above copyright notice and this permission notice shall be included in
 ++  all copies or substantial portions of the Software.
-++ 
+++
 ++  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 ++  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 ++  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -2146,7 +2146,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++#define cJSON_String 4
 ++#define cJSON_Array 5
 ++#define cJSON_Object 6
-++	
+++
 ++#define cJSON_IsReference 256
 ++
 ++/* The cJSON structure: */
@@ -2190,7 +2190,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++
 ++/* For analysing failed parses. This returns a pointer to the parse error. You'll probably need to look a few chars back to make sense of it. Defined when cJSON_Parse() returns 0. 0 when cJSON_Parse() succeeds. */
 ++// extern const char *cJSON_GetErrorPtr(void);
-++	
+++
 ++/* These calls create a cJSON item of the appropriate type. */
 ++// extern cJSON *cJSON_CreateNull(void);
 ++// extern cJSON *cJSON_CreateTrue(void);
@@ -2219,7 +2219,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++// extern void   cJSON_DeleteItemFromArray(cJSON *array,int which);
 ++// extern cJSON *cJSON_DetachItemFromObject(cJSON *object,const char *string);
 ++// extern void   cJSON_DeleteItemFromObject(cJSON *object,const char *string);
-++	
+++
 ++/* Update array items. */
 ++// extern void cJSON_ReplaceItemInArray(cJSON *array,int which,cJSON *newitem);
 ++// extern void cJSON_ReplaceItemInObject(cJSON *object,const char *string,cJSON *newitem);
@@ -2599,7 +2599,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++{
 ++  /* periodic message generation */
 ++  msg_gen_timer = olsr_start_timer(my_interval * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC, &olsr_ondatasvc_gen, NULL, 0);
-++  
+++
 ++  return 1;
 ++}
 ++
@@ -2652,10 +2652,10 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    ondatasize = encap_ondatamsg((struct ondatamsg *)ARM_NOWARN_ALIGN(&message->v6.message));
 ++    if (!ondatasize) return;
 ++    ondatasize = ondatasize + sizeof(struct olsrmsg6);
-++    
+++
 ++    message->v6.olsr_msgsize = htons(ondatasize);
 ++  }
-++    
+++
 ++  /* looping trough interfaces */
 ++  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
 ++    OLSR_PRINTF(3, "ONDATA PLUGIN: Generating packet - [%s]\n", ifn->int_name);
@@ -2696,20 +2696,20 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    OLSR_PRINTF(0, "ONDATA PLUGIN: opening json file\n");
 ++    json = NULL;
 ++    fp=fopen(my_database, "r");
-++    
+++
 ++    if(fp == NULL) {
 ++      fprintf(stderr, "Can't open json file %s\n", my_database);
 ++      return 0;
 ++    }
 ++  }
-++  
+++
 ++  // search next Table with Data
 ++  if (fp != NULL) {
 ++    if ( fgets ( line, sizeof line, fp ) != NULL ) {
 ++      json=cJSON_Parse(line);
 ++    }
 ++  }
-++  
+++
 ++  // if no further Table give up
 ++  if (!json) {
 ++    OLSR_PRINTF(0, "ONDATA PLUGIN: no further table found\n");
@@ -2720,15 +2720,15 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  }
 ++
 ++  OLSR_PRINTF(0, "ONDATA PLUGIN: using next table %s\n", json->child->string);
-++  
+++
 ++  // add all datasets
 ++  OLSR_PRINTF(0, "ONDATA PLUGIN: adding all datasets\n");
 ++  // add all the entries after the ondatamsg header (and keep space for it)
 ++  pos = (char *)msg + sizeof(struct ondatamsg);
-++  
+++
 ++  // always add the Table-Name as first field
 ++  pos = create_packet((struct ondata *)ARM_NOWARN_ALIGN(pos), json->child->string);
-++  
+++
 ++  // never transmit originator (col=0), this will be detected at the other end_pos
 ++  elem = json->child->child->next;
 ++  // skip last column, it will set at destination to the receiving-time
@@ -2739,7 +2739,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++    elem = elem->next;
 ++  } while(elem->next);
 ++  cJSON_Delete(json);
-++  
+++
 ++  // write the ondatamsg header with the number of announced entries and the protocol version
 ++  msg->nr_datasets = htons(--iCol);   // it won't count the table-name as dataset (and neither mainip-Col)
 ++  msg->version = htons(ONDATA_PROTOCOL_VERSION);
@@ -2747,8 +2747,8 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  msg->length = htons(messageLength);
 ++  checksum = crcCalculate((char *)msg + sizeof(uint16_t), messageLength - sizeof(uint16_t));
 ++  msg->checksum = htons(checksum);
-++  
-++  OLSR_PRINTF(0, "ONDATA PLUGIN: ##### finished creating packet, length=%d, crc16=0x%x\n", messageLength, checksum);    
+++
+++  OLSR_PRINTF(0, "ONDATA PLUGIN: ##### finished creating packet, length=%d, crc16=0x%x\n", messageLength, checksum);
 ++
 ++  // increase Transmission-Time as long as there is data
 ++  olsr_change_timer(msg_gen_timer, 1 * MSEC_PER_SEC, EMISSION_JITTER, OLSR_TIMER_PERIODIC);
@@ -2774,7 +2774,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  // do 4-byte padding
 ++  for (k = sizeof(struct ondata) + valuelen; (k & 3) != 0; k++)
 ++    *pos++ = '\0';
-++  
+++
 ++  return pos;
 ++}
 ++
@@ -2856,7 +2856,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++#define EMISSION_INTERVAL	10800 /* seconds - 10800 = 3hours */
 ++#define EMISSION_INC_INTERVAL   5 /* seconds between transmission of rows from one dataset */
 ++#define EMISSION_JITTER         25  /* percent */
-++#define ONDATA_VALID_TIME 300  /* seconds, how long a package should maximally be spreaded through the net - 300 - 5mins*/ 
+++#define ONDATA_VALID_TIME 300  /* seconds, how long a package should maximally be spreaded through the net - 300 - 5mins*/
 ++
 ++#define ONDATA_PROTOCOL_VERSION	1
 ++

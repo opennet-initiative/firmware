@@ -1,7 +1,7 @@
-diff -Naur a/routing/olsrd/Makefile b/routing/olsrd/Makefile
---- a/routing/olsrd/Makefile	2015-01-16 23:22:34.488638413 +0100
-+++ b/routing/olsrd/Makefile	2015-01-16 23:01:54.416558036 +0100
-@@ -95,6 +95,18 @@
+Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
+--- a/routing/olsrd/Makefile
++++ b/routing/olsrd/Makefile
+@@ -94,6 +94,18 @@ define Package/olsrd-mod-nameservice
    TITLE:=Lightweight hostname resolver plugin
  endef
  
@@ -20,7 +20,7 @@ diff -Naur a/routing/olsrd/Makefile b/routing/olsrd/Makefile
  define Package/olsrd-mod-p2pd
    $(call Package/olsrd/template)
    DEPENDS:=olsrd
-@@ -162,7 +174,7 @@
+@@ -161,7 +173,7 @@ MAKE_FLAGS+= \
  	DESTDIR="$(PKG_INSTALL_DIR)" \
  	STRIP="true" \
  	INSTALL_LIB="true" \
@@ -29,7 +29,7 @@ diff -Naur a/routing/olsrd/Makefile b/routing/olsrd/Makefile
  
  define Build/Compile
  	$(call Build/Compile/Default,all)
-@@ -229,6 +241,16 @@
+@@ -224,6 +236,16 @@ define Package/olsrd-mod-nameservice/ins
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/nameservice/olsrd_nameservice.so.* $(1)/usr/lib/
  endef
  
@@ -46,7 +46,7 @@ diff -Naur a/routing/olsrd/Makefile b/routing/olsrd/Makefile
  define Package/olsrd-mod-p2pd/install
  	$(INSTALL_DIR) $(1)/usr/lib
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/p2pd/olsrd_p2pd.so.* $(1)/usr/lib/
-@@ -287,6 +309,8 @@
+@@ -282,6 +304,8 @@ $(eval $(call BuildPackage,olsrd-mod-htt
  $(eval $(call BuildPackage,olsrd-mod-jsoninfo))
  $(eval $(call BuildPackage,olsrd-mod-mdns))
  $(eval $(call BuildPackage,olsrd-mod-nameservice))
@@ -55,9 +55,8 @@ diff -Naur a/routing/olsrd/Makefile b/routing/olsrd/Makefile
  $(eval $(call BuildPackage,olsrd-mod-p2pd))
  $(eval $(call BuildPackage,olsrd-mod-pgraph))
  $(eval $(call BuildPackage,olsrd-mod-pud))
-diff -Naur a/routing/olsrd/info.txt b/routing/olsrd/info.txt
---- a/routing/olsrd/info.txt	1970-01-01 01:00:00.000000000 +0100
-+++ b/routing/olsrd/info.txt	2015-01-16 23:03:08.436998664 +0100
+--- /dev/null
++++ b/routing/olsrd/info.txt
 @@ -0,0 +1,29 @@
 +olsrd fuer Opennet
 +==================
@@ -88,47 +87,49 @@ diff -Naur a/routing/olsrd/info.txt b/routing/olsrd/info.txt
 +
 +Eine Integration des ondataservice-Plugin in den olsrd-Upstream-Code wurde im jahr 2013 kurz auf der Mailingliste erwogen, wird aber wohl nicht stattfinden.
 +
-diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patches/023-ondataservice.patch
---- a/routing/olsrd/patches/023-ondataservice.patch	1970-01-01 01:00:00.000000000 +0100
-+++ b/routing/olsrd/patches/023-ondataservice.patch	2015-01-16 23:02:17.972698270 +0100
-@@ -0,0 +1,2802 @@
+--- /dev/null
++++ b/routing/olsrd/patches/023-ondataservice.patch
+@@ -0,0 +1,2895 @@
 +diff --git a/Makefile b/Makefile
-+index de030c1..8e63e7f 100644
++index 8ce6dc5..cf3b410 100644
 +--- a/Makefile
 ++++ b/Makefile
-+@@ -183,6 +183,9 @@
-+ endif
-+ endif
-+
-++# for all platforms
-++SUBDIRS += ondataservice ondataservice_light
-++
-+ libs:
-+                @set -e;for dir in $(SUBDIRS);do $(MAKECMD) -C lib/$$dir LIBDIR=$(LIBDIR);done
-+
-+@@ -420,6 +420,25 @@ watchdog_install:
++@@ -197,7 +197,7 @@ rpm:
++ 
++ # This is quite ugly but at least it works
++ ifeq ($(OS),linux)
++-SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns mini nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog
+++SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns mini nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog ondataservice ondataservice_light
++ else
++ ifeq ($(OS),win32)
++ SUBDIRS := dot_draw httpinfo jsoninfo mini pgraph secure txtinfo
++@@ -449,6 +449,29 @@ watchdog_install:
 + watchdog_uninstall:
-+ 		@$(MAKECMD) -C lib/watchdog DESTDIR=$(DESTDIR) uninstall
++ 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/watchdog DESTDIR=$(DESTDIR) uninstall
 + 
 ++ondataservice:
-++		@$(MAKECMD) -C lib/ondataservice clean
-++		@$(MAKECMD) -C lib/ondataservice
+++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice
+++
+++ondataservice_clean:
+++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice clean
 ++
 ++ondataservice_install:
-++		@$(MAKECMD) -C lib/ondataservice DESTDIR=$(DESTDIR) install
+++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice DESTDIR=$(DESTDIR) install
 ++
 ++ondataservice_uninstall:
-++		@$(MAKECMD) -C lib/ondataservice DESTDIR=$(DESTDIR) uninstall
+++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice DESTDIR=$(DESTDIR) uninstall
 ++
 ++ondataservice_light:
-++		@$(MAKECMD) -C lib/ondataservice_light clean
-++		@$(MAKECMD) -C lib/ondataservice_light
+++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice_light
+++
+++ondataservice_light_clean:
+++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice_light clean
 ++
 ++ondataservice_light_install:
-++		@$(MAKECMD) -C lib/ondataservice_light DESTDIR=$(DESTDIR) install
+++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice_light DESTDIR=$(DESTDIR) install
 ++
 ++ondataservice_light_uninstall:
-++		@$(MAKECMD) -C lib/ondataservice_light DESTDIR=$(DESTDIR) uninstall
+++		$(MAKECMDPREFIX)$(MAKECMD) -C lib/ondataservice_light DESTDIR=$(DESTDIR) uninstall
 + 
 + build_all:	all switch libs
 + install_all:	install install_libs
@@ -219,10 +220,10 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++endif
 +diff --git a/lib/ondataservice/README_ONDATASERVICE b/lib/ondataservice/README_ONDATASERVICE
 +new file mode 100644
-+index 0000000..9b346e1
++index 0000000..0aae865
 +--- /dev/null
 ++++ b/lib/ondataservice/README_ONDATASERVICE
-+@@ -0,0 +1,65 @@
++@@ -0,0 +1,74 @@
 ++---------------------------------------------------------------------
 ++ONDATASERVICE PLUGIN FOR OLSRD
 ++by Rene Ejury <opennet@absorb.it>
@@ -262,10 +263,19 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++        Path to the database
 ++
 ++PlParam "dbcreatescript" "/path/to/dbcreatescript"
-++        Path to some executable script to create the database
+++        Path to some executable script to create the database. This will
+++        be called anytime the database can't be opened. 
 ++        script will be called with database-path (see PlParam above)
 ++        as only parameter
 ++        (default not set, database is not created if not existent)
+++
+++PlParam "dberrorscript" "/path/to/dberrorscript"
+++        Path to some executable script to check if the database is ok and
+++        create the database in case of error. This will be called anytime
+++        some data can't be written to the database.
+++        script will be called with database-path (see PlParam above)
+++        as only parameter
+++        (default not set, database is not re-created if there are problems)
 ++
 ++PlParam "receive" "false|true"
 ++        Set to true if you like to receive and store the values.
@@ -327,6 +337,51 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++    db_ver text, db_update int, CONSTRAINT key_ifaces PRIMARY KEY (mainip, if_name) ON CONFLICT REPLACE);"
 ++
 ++sqlite3 -batch $1 "$SQL_STRING"
+++
++diff --git a/lib/ondataservice/SAMPLE_DBERRORSCRIPT.sh b/lib/ondataservice/SAMPLE_DBERRORSCRIPT.sh
++new file mode 100755
++index 0000000..cd81e77
++--- /dev/null
+++++ b/lib/ondataservice/SAMPLE_DBERRORSCRIPT.sh
++@@ -0,0 +1,39 @@
+++#!/bin/sh
+++SQL_STRING="CREATE TABLE nodes
+++    (originator text, mainip text, sys_ver text, sys_board text, sys_cpu text, sys_mem int, sys_uptime text,
+++    sys_load text, sys_free int, sys_watchdog bool, sys_os_type text,
+++    sys_os_name text, sys_os_rel text, sys_os_ver text, sys_os_arc text,
+++    sys_os_insttime int, on_core_ver text, on_core_insttime int, on_packages text,
+++    on_id text, on_olsrd_status text, on_olsrd_mainip text,
+++    on_wifidog_status bool, on_wifidog_id text, on_vpn_cn text, on_vpn_status bool,
+++    on_vpn_gw text, on_vpn_autosearch bool, on_vpn_sort text, on_vpn_gws text, on_vpn_blist text,
+++    on_ugw_status bool, on_ugw_enabled bool, on_ugw_possible bool, on_ugw_tunnel bool,
+++    on_ugw_connected text, on_ugw_presetips text, on_ugw_presetnames text,
+++    on_old_autoadapttxpwr text, on_old_remoteconf text,
+++    db_time text, db_epoch int, db_ver text, db_update int, CONSTRAINT key_nodes PRIMARY KEY (mainip) ON CONFLICT REPLACE);
+++    
+++    CREATE TABLE ifaces
+++    (originator text, mainip text, if_name text, if_type_bridge text, if_type_bridgedif bool, if_hwaddr text,
+++    ip_label text, ip_addr text, ip_broadcast text,
+++    on_networks text, on_zones text, on_olsr bool,
+++    dhcp_start text, dhcp_limit text, dhcp_leasetime text, dhcp_fwd text,
+++    ifstat_collisions int, ifstat_rx_compressed int, ifstat_rx_errors int,
+++    ifstat_rx_length_errors int, ifstat_rx_packets int, ifstat_tx_carrier_errors int,
+++    ifstat_tx_errors int, ifstat_tx_packets int, ifstat_multicast int,
+++    ifstat_rx_crc_errors int, ifstat_rx_fifo_errors int, ifstat_rx_missed_errors int,
+++    ifstat_tx_aborted_errors int, ifstat_tx_compressed int, ifstat_tx_fifo_errors int,
+++    ifstat_tx_window_errors int, ifstat_rx_bytes int, ifstat_rx_dropped int,
+++    ifstat_rx_frame_errors int, ifstat_rx_over_errors int, ifstat_tx_bytes int,
+++    ifstat_tx_dropped int, ifstat_tx_heartbeat_errors int,
+++    wlan_essid text, wlan_apmac text, wlan_type text, wlan_hwmode text, wlan_mode text,
+++    wlan_channel text, wlan_freq text, wlan_txpower text, wlan_signal text, wlan_noise text,
+++    wlan_bitrate text, wlan_crypt text, wlan_vaps text,
+++    db_ver text, db_update int, CONSTRAINT key_ifaces PRIMARY KEY (mainip, if_name) ON CONFLICT REPLACE);"
+++
+++ifaces_columns=$(sqlite3 /tmp/ondatabase.sqlite "PRAGMA table_info(ifaces);" | wc -l)
+++nodes_columns=$(sqlite3 /tmp/ondatabase.sqlite "PRAGMA table_info(nodes);" | wc -l)
+++
+++if [ "$ifaces_columns" != "54" ] || [ "$nodes_columns" != "44" ]; then
+++	sqlite3 -batch $1 "$SQL_STRING"
+++fi
 ++
 +diff --git a/lib/ondataservice/src/compat.c b/lib/ondataservice/src/compat.c
 +new file mode 100644
@@ -564,10 +619,10 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++ */
 +diff --git a/lib/ondataservice/src/ondataservice.c b/lib/ondataservice/src/ondataservice.c
 +new file mode 100644
-+index 0000000..6229dfd
++index 0000000..c1e1076
 +--- /dev/null
 ++++ b/lib/ondataservice/src/ondataservice.c
-+@@ -0,0 +1,583 @@
++@@ -0,0 +1,619 @@
 ++
 ++/*
 ++ * Copyright (c) 2011, Rene Ejury <opennet@absorb.it>
@@ -641,6 +696,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++static int my_vtime = ONDATA_VALID_TIME;            // how long the data will be spread trough the net
 ++static char my_database[MAX_FILE + 1];
 ++static char my_dbcreatescript[MAX_FILE + 1];
+++static char my_dberrorscript[MAX_FILE + 1];
 ++static bool my_receive = false;
 ++static bool my_spreadall = false;
 ++
@@ -675,8 +731,8 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++  strscpy(my_dbcreatescript, "", sizeof(my_dbcreatescript));
 ++#endif
 ++
-++
 ++}
+++
 ++
 ++/* *INDENT-OFF* */
 ++static const struct olsrd_plugin_parameters plugin_parameters[] = {
@@ -686,6 +742,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++  { .name = "timeout",            .set_plugin_parameter = &set_plugin_int,         .data = &my_timeout },
 ++  { .name = "database",          .set_plugin_parameter = &set_plugin_string,      .data = &my_database,          .addon = {sizeof(my_database)} },
 ++  { .name = "dbcreatescript",          .set_plugin_parameter = &set_plugin_string,      .data = &my_dbcreatescript,          .addon = {sizeof(my_dbcreatescript)} },
+++  { .name = "dberrorscript",          .set_plugin_parameter = &set_plugin_string,      .data = &my_dberrorscript,          .addon = {sizeof(my_dberrorscript)} },
 ++  { .name = "receive",            .set_plugin_parameter = &set_plugin_boolean,     .data = &my_receive },
 ++  { .name = "spreadall",            .set_plugin_parameter = &set_plugin_boolean,     .data = &my_spreadall },
 ++  { .name = "vtime",            .set_plugin_parameter = &set_plugin_int,     .data = &my_vtime },
@@ -752,9 +809,42 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++    free(buf);
 ++    rc = sqlite3_open_v2(my_database, localdb, SQLITE_OPEN_READWRITE, NULL);
 ++  }
+++  if(rc != SQLITE_OK && strlen(my_dberrorscript) != 0){
+++    char *buf;
+++    fprintf(stderr, "Can't open database, running database-error script: %s\n", my_dberrorscript);
+++    asprintf(&buf,"%s %s", my_dberrorscript, my_database);
+++    system(buf);
+++    free(buf);
+++    rc = sqlite3_open_v2(my_database, localdb, SQLITE_OPEN_READWRITE, NULL);
+++  }
 ++  return rc;
 ++}
 ++
+++
+++/**
+++ * wrapper for sqlite3_prepare_v2, calls error handle script on error
+++ */
+++int unsigned
+++local_sqlite3_prepare_v2(
+++  sqlite3 *db,            /* Database handle */
+++  const char *zSql,       /* SQL statement, UTF-8 encoded */
+++  int nByte,              /* Maximum length of zSql in bytes. */
+++  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+++  const char **pzTail     /* OUT: Pointer to unused portion of zSql */
+++)
+++{
+++  int unsigned rc;
+++  rc = sqlite3_prepare_v2(db, zSql, nByte, ppStmt, pzTail);
+++  if(rc != SQLITE_OK && strlen(my_dberrorscript) != 0){
+++    char *buf;
+++    fprintf(stderr, "running database-error script: %s\n", my_dberrorscript);
+++    asprintf(&buf,"%s %s", my_dberrorscript, my_database);
+++    system(buf);
+++    free(buf);
+++    rc = sqlite3_prepare_v2(db, zSql, nByte, ppStmt, pzTail);
+++  }
+++  return rc;
+++}
 ++
 ++/**
 ++ * Callback for the db validity timer.
@@ -768,12 +858,12 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++  const char *pzTail;           /* OUT of sqlite3_prepare_v2: Pointer to unused portion of zSql */
 ++  const char *SQLframe = "DELETE FROM %s WHERE (originator != '' AND mainip != '%s' AND db_update < %lu );";
 ++  struct ipaddr_str main_addr;
-++  char *mainip;
+++  const char *mainip;
 ++  int unsigned currentTable = 0, rc;
 ++  long unsigned min_update_time;
 ++  
 ++  min_update_time = time(NULL) - my_timeout;
-++  mainip = (char*)olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
+++  mainip = olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
 ++  
 ++  rc = open_database(&localdb);
 ++  if( rc == SQLITE_OK ){
@@ -785,7 +875,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++
 ++      // apply statement to database
 ++      // use 1500 as max MTU and therefore as max SQL size (which is not quite accurate)
-++      rc = sqlite3_prepare_v2(localdb, localzSql, 1500, &localppStmt, &pzTail);
+++      rc = local_sqlite3_prepare_v2(localdb, localzSql, 1500, &localppStmt, &pzTail);
 ++      if( rc == SQLITE_OK ){
 ++        sqlite3_step(localppStmt);
 ++        sqlite3_finalize(localppStmt);
@@ -917,14 +1007,14 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++  const char *SQLframeSpreadAll = "SELECT * FROM %s WHERE originator = '';";
 ++  
 ++  struct ipaddr_str main_addr;
-++  char *mainip;
+++  const char *mainip;
 ++  char *pos;
 ++  int iCol, rc;
 ++  uint16_t checksum;
 ++  uint16_t messageLength = 0;
 ++  
 ++  // open Database if this not a 'continued Transmission - and Database is already open'
-++  mainip = (char*)olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
+++  mainip = olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
 ++  
 ++  if (!db_open) {
 ++    OLSR_PRINTF(5, "ONDATA PLUGIN: opening database\n");
@@ -953,7 +1043,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++        sprintf(zSql, SQLframeSpreadAll, DATABASE_TABLES[currentTable]);
 ++      }
 ++      // open table
-++      rc = sqlite3_prepare_v2(db, zSql, 100, &ppStmt, &pzTail);
+++      rc = local_sqlite3_prepare_v2(db, zSql, 100, &ppStmt, &pzTail);
 ++      if( rc == SQLITE_OK) {
 ++        table_open = 1;
 ++        break;
@@ -989,7 +1079,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++    // skip last column, it will set at destination to the receiving-time
 ++    iCol = 1;
 ++    while (iCol < sqlite3_column_count(ppStmt) - 1) {
-++      pos = create_packet((struct ondata *)ARM_NOWARN_ALIGN(pos), (char *)sqlite3_column_text(ppStmt, iCol));
+++      pos = create_packet((struct ondata *)ARM_NOWARN_ALIGN(pos), (const char *)sqlite3_column_text(ppStmt, iCol));
 ++      iCol++;
 ++    }
 ++    // write the ondatamsg header with the number of announced entries and the protocol version
@@ -1046,7 +1136,8 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++update_ondata_entry(union olsr_ip_addr *originator, struct ondatamsg *msg, int msg_size)
 ++{
 ++  struct ipaddr_str strbuf;
-++  char *pos, *end_pos, *values, *valuepos, *table, *originatorIP;
+++  char *pos, *end_pos, *values, *valuepos, *table;
+++  const char *originatorIP;
 ++  struct ondata *from_packet;
 ++  int i, rc;
 ++  uint16_t checksum;
@@ -1056,7 +1147,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++  const char *SQLframe = "INSERT OR REPLACE INTO %s VALUES (%s);", *pzTail;
 ++
 ++  
-++  originatorIP = (char*)olsr_ip_to_string(&strbuf, originator);
+++  originatorIP = olsr_ip_to_string(&strbuf, originator);
 ++  OLSR_PRINTF(3, "ONDATA PLUGIN: Received Message from %s, version %d, msg_size %d, checksum 0x%x\n", originatorIP, ntohs(msg->version), ntohs(msg->length), ntohs(msg->checksum));
 ++
 ++  if (ntohs(msg->version) != ONDATA_PROTOCOL_VERSION) {
@@ -1127,7 +1218,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++  rc = open_database(&localdb);
 ++  if( rc == SQLITE_OK ){
 ++    // use 1500 as max MTU and therefore as max SQL size (which is not quite accurate)
-++    rc = sqlite3_prepare_v2(localdb, localzSql, 1500, &localppStmt, &pzTail);
+++    rc = local_sqlite3_prepare_v2(localdb, localzSql, 1500, &localppStmt, &pzTail);
 ++    if( rc == SQLITE_OK ){
 ++      sqlite3_step(localppStmt);
 ++      sqlite3_finalize(localppStmt);
@@ -1153,10 +1244,10 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++
 +diff --git a/lib/ondataservice/src/ondataservice.h b/lib/ondataservice/src/ondataservice.h
 +new file mode 100644
-+index 0000000..f88841a
++index 0000000..cc1251b
 +--- /dev/null
 ++++ b/lib/ondataservice/src/ondataservice.h
-+@@ -0,0 +1,108 @@
++@@ -0,0 +1,109 @@
 ++
 ++/*
 ++ * Copyright (c) 2005, Bruno Randolf <bruno.randolf@4g-systems.biz>
@@ -1211,7 +1302,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++// #include "mantissa.h"
 ++
 ++#define PLUGIN_NAME		"OLSRD ondataservice plugin"
-++#define PLUGIN_VERSION		"0.2"
+++#define PLUGIN_VERSION		"0.3"
 ++#define PLUGIN_AUTHOR		"Rene Ejury, Bruno Randolf, Jens Nachtigall, Sven-Ola Tuecke"
 ++#define DATABASE_FILE		"/tmp/database"
 ++
@@ -1237,6 +1328,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++/* open or create and open database */
 ++#include <sqlite3.h>
 ++int open_database(sqlite3 **localdb);
+++int unsigned local_sqlite3_prepare_v2(sqlite3 *db, const char *zSql, int nByte, sqlite3_stmt **ppStmt, const char **pzTail);
 ++
 ++/* callback for database cleanup */
 ++void olsr_ondataservice_expire_db_timer(void *);
@@ -1490,10 +1582,10 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++}
 +diff --git a/lib/ondataservice_light/src/cJSON.c b/lib/ondataservice_light/src/cJSON.c
 +new file mode 100644
-+index 0000000..e2c9c69
++index 0000000..a5d910e
 +--- /dev/null
 ++++ b/lib/ondataservice_light/src/cJSON.c
-+@@ -0,0 +1,514 @@
++@@ -0,0 +1,516 @@
 ++/*
 ++  Copyright (c) 2009 Dave Gamble
 ++
@@ -1679,7 +1771,9 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++						case 4: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
 ++						case 3: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
 ++						case 2: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
-++						case 1: *--ptr2 =(uc | firstByteMark[len]);
+++						case 1:
+++            default:
+++              *--ptr2 =(uc | firstByteMark[len]);
 ++					}
 ++					ptr2+=len;
 ++					break;
@@ -2377,10 +2471,10 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++ */
 +diff --git a/lib/ondataservice_light/src/ondataservice.c b/lib/ondataservice_light/src/ondataservice.c
 +new file mode 100644
-+index 0000000..9ffee15
++index 0000000..4f685c9
 +--- /dev/null
 ++++ b/lib/ondataservice_light/src/ondataservice.c
-+@@ -0,0 +1,316 @@
++@@ -0,0 +1,313 @@
 ++
 ++/*
 ++ * Copyright (c) 2011, Rene Ejury <opennet@absorb.it>
@@ -2590,7 +2684,6 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++encap_ondatamsg(struct ondatamsg *msg)
 ++{
 ++  struct ipaddr_str main_addr;
-++  char *mainip;
 ++  char *pos;
 ++  int iCol;
 ++  uint16_t checksum;
@@ -2598,8 +2691,6 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++  cJSON *json = NULL, *elem;
 ++  char line [ 3000 ]; /* or other suitable maximum line size */
 ++
-++  mainip = (char*)olsr_ip_to_string(&main_addr, &olsr_cnf->main_addr);
-++  
 ++  // open Database if this not a 'continued Transmission - and Database is already open'
 ++  if (fp == NULL) {
 ++    OLSR_PRINTF(0, "ONDATA PLUGIN: opening json file\n");
@@ -2699,7 +2790,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++
 +diff --git a/lib/ondataservice_light/src/ondataservice.h b/lib/ondataservice_light/src/ondataservice.h
 +new file mode 100644
-+index 0000000..c8221c8
++index 0000000..aea2f4c
 +--- /dev/null
 ++++ b/lib/ondataservice_light/src/ondataservice.h
 +@@ -0,0 +1,101 @@
@@ -2756,7 +2847,7 @@ diff -Naur a/routing/olsrd/patches/023-ondataservice.patch b/routing/olsrd/patch
 ++// #include "mantissa.h"
 ++
 ++#define PLUGIN_NAME		"OLSRD ondataservice plugin"
-++#define PLUGIN_VERSION		"0.2"
+++#define PLUGIN_VERSION		"0.3"
 ++#define PLUGIN_AUTHOR		"Rene Ejury, Bruno Randolf, Jens Nachtigall, Sven-Ola Tuecke"
 ++#define DATABASE_FILE   "/tmp/database.json"
 ++

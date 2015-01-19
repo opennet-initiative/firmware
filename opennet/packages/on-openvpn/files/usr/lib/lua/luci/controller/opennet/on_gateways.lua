@@ -38,7 +38,7 @@ function action_vpn_gateways()
 	local reset_connection_test_timestamps = luci.http.formvalue("reset_connection_test_timestamps")
 	local new_gateway = luci.http.formvalue("new_gateway")
 	
-	if move_up or move_down or move_top or delete_service or disable_service or enable_service then
+	if move_up or move_down or move_top or delete_service or disable_service or enable_service or reset_offset then
 		if move_up then
 			on_function("move_service_up", {move_up, "gw", "ugw"})
 		elseif move_down then

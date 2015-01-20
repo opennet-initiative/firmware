@@ -10,4 +10,3 @@ led_input_trigger_warnings.patch
 luci_olsr_fix_empty_result.patch
 openwrt_backport_fix-nanostation-phy.patch
 olsrd_add_ondataservice.patch
-olsr_httpinfo_plugin_port_8080.patch

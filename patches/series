@@ -9,3 +9,4 @@ curl_enable_https.patch
 led_input_trigger_warnings.patch
 luci_olsr_fix_empty_result.patch
 olsrd_add_ondataservice.patch
+openwrt_backport_r43776.patch

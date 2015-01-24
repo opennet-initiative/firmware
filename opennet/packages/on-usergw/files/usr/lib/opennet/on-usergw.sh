@@ -399,14 +399,14 @@ ugw_update_service_state () {
 		# und die Einrichtung der Port-Weiterleitungen
 		if uci_is_false "$openvpn_enable"; then
 			# openvpn-Setup ist abgeschaltet - soll es aktiviert werden?
-			if [ "$mtu_test" = "ok" -a "$wan_test" = "ok" ] && \
+			if uci_is_true "$mtu_test" && uci_is_true "$wan_test" && \
 					uci_is_true "$openvpn_test" && \
 					uci_is_true "$sharing_enabled"; then
 				enable_ugw_service "$config_name"
 			fi
 		else
 			# openvpn-Setup ist aktiviert - muss es abgeschaltet werden?
-			if [ "$mtu_test" != "ok" -o "$wan_test" != "ok" ] || \
+			if uci_is_false "$mtu_test" || uci_is_false "$wan_test" || \
 					uci_is_false "$openvpn_test" || \
 					uci_is_false "$sharing_enabled"; then
 				disable_ugw_service "$config_name"

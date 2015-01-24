@@ -80,7 +80,7 @@ ugw_update_vpn_status()
 	local config_name=$1
 	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	local hostname=$(uci_get "${uci_prefix}.hostname")
-	if [ "$(get_ugw_value "$config_name" "wan")" != "ok" ]; then
+	if uci_is_false "$(get_service_value "$config_name" "wan")"; then
 		msg_info "ugw_update_vpn_status skipped for gw '$hostname': not connected trough WAN"
 		return 0
 	fi
@@ -110,7 +110,7 @@ ugw_update_vpn_status()
 			msg_debug "vpn-availability of gw '$hostname' successfully tested"
 		fi
 		msg_debug "finished vpn test of '$hostname'"
-	elif [ "$(get_ugw_value "$config_name" status)" = "y" ]; then
+	elif uci_is_true "$(get_service_value "$config_name" status)"; then
 		msg_debug "vpn-availability of gw '$hostname' still valid"
 	fi
 }
@@ -170,7 +170,7 @@ ugw_update_mtu() {
 	local config_name=$1
 	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 	local hostname=$(uci_get "${uci_prefix}.hostname")
-	if [ "$(get_ugw_value "$config_name" wan)" != "ok" ]; then
+	if uci_is_false "$(get_service_value "$config_name" "wan")"; then
 		msg_debug "ugw_update_mtu for '$hostname' skipped, please check WAN first"
 		return
 	fi
@@ -188,9 +188,9 @@ ugw_update_mtu() {
 		local status_output=$(echo "$result" | cut -f 5- -d ,)
 	
 		if [ "$toGW_tried" -le "$toGW_actual" ] && [ "$fromGW_tried" -le "$fromGW_actual" ]; then
-			set_ugw_value "$config_name" mtu ok
+			set_service_value "$config_name" "mtu" "y"
 		else
-			set_ugw_value "$config_name" mtu error
+			set_service_value "$config_name" "mtu" "n"
 		fi
 
 		set_ugw_value "$config_name" mtu_msg "$status_output"
@@ -209,7 +209,7 @@ ugw_update_mtu() {
 
 
 # Pruefung ob der Verkehr zu einem UGW ueber ein WAN-Interface verlaufen wuerde
-# Falls nicht, dann wird das "wan"-Flag auf "error" gesetzt.
+# Falls nicht, dann wird das "wan"-Flag auf "n" gesetzt.
 ugw_update_wan_status () {
 	trap "error_trap ugw_update_wan_status '$*'" $GUARD_TRAPS
 	echo "ugw_update_wan_status" >"$DATA_LOCK_FILE"
@@ -228,16 +228,16 @@ ugw_update_wan_status () {
 		: $((retry_counter++))
 	done
 	if is_device_in_zone "$on_ugw_targetDev" "$ZONE_WAN"; then
-		set_ugw_value "$config_name" wan ok
+		set_server_value "$config_name" "wan" "true"
 		time=$(ping -w 5 -q "$hostname" 2>/dev/null| awk 'BEGIN{FS="[ \/]+"} /min\/avg\/max/ {print int($7+0.5)}')
 		set_ugw_value "$config_name" ping "$time"
 		msg_debug "checkWAN: $hostname routing through wan device: $on_ugw_targetDev"
 		msg_debug "checkWAN: $hostname avg ping time: $time"
 	else
 		# ausfuehrliche Erklaerung, falls das Routing eben noch akzeptabel war
-		[ "$(get_ugw_value "$config_name" "wan")" = "ok" ] && msg_info "Routing switched away from WAN interface to <$on_ugw_targetDev>"
-		set_ugw_value "$config_name" wan error
-		set_ugw_value "$config_name" ping ""
+		uci_is_true "$(get_service_value "$config_name" "wan")" && msg_info "Routing switched away from WAN interface to <$on_ugw_targetDev>"
+		set_server_value "$config_name" "wan" "n"
+		set_server_value "$config_name" "ping" ""
 	fi
 }
 
@@ -259,7 +259,7 @@ ugw_doExtraChecks () {
 	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
 		config_name=$(uci_get "${uci_prefix}.name")
 		# do extraChecks only if WAN-Connection is established
-		[ "$(get_ugw_value "$config_name" "wan")" != "ok" ] && continue
+		uci_is_false "$(get_service_value "$config_name" "wan")" && continue
 
 		# speedCheck
 		speed_time=$(get_ugw_value "$config_name" "speed_time")

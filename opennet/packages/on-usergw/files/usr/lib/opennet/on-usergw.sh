@@ -369,9 +369,9 @@ ugw_update_service_state () {
 		ugw_enabled=$(uci_get "${uci_prefix}.enable")
 		openvpn_enable=$(uci_get "openvpn.${config_name}.enable")
 		[ -z "$openvpn_enable" ] && openvpn_enable=1
-		mtu_test=$(get_service_value "$config_name" mtu)
-		wan_test=$(get_service_value "$config_name" wan)
-		openvpn_test=$(get_service_value "$config_name" status)
+		mtu_test=$(get_service_value "$config_name" "mtu_state")
+		wan_test=$(get_service_value "$config_name" "wan_state")
+		openvpn_test=$(get_service_value "$config_name" "status")
 		cert_available=$(openvpn_service_has_certificate_and_key "$config_name" && echo y || echo n)
 
 		# Ziel ist die Aktivierung der openvpn-Verbindung, sowie die Announcierung des Dienstes

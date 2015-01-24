@@ -143,9 +143,9 @@ You may obtain a copy of the License at
 			result += String.format('%.2f</td>', distance + gateway.offset);
 		}
 		result += '<td>';
-		if (gateway.upload || gateway.download) {
-			speed = String.format('%s kbps / %s kbps', gateway.upload || "?", gateway.download || "?");
-			speed_abbr = String.format('<%:upload to Internet %s kbit/s; download from Internet %s kbit/s%>', gateway.upload || "?", gateway.download || "?");
+		if (gateway.wan_speed_upload || gateway.wan_speed_download) {
+			speed = String.format('%s kbps / %s kbps', gateway.wan_speed_upload || "?", gateway.wan_speed_download || "?");
+			speed_abbr = String.format('<%:upload to Internet %s kbit/s; download from Internet %s kbit/s%>', gateway.wan_speed_upload || "?", gateway.wan_speed_download || "?");
 			result += String.format('<div class="vpn-wan-speed" name="speed" id="cbi-opennet-gateways-speed" ><abbr title="%s">%s</abbr></div>', speed_abbr, speed);
 		}
 		result += '</td>';

@@ -48,7 +48,7 @@ function get_ugw_status(ugw_status)
     while count <= ugw_status.usergateways_no do
         local onusergw = cursor:get_all("on-usergw", "opennet_ugw"..count)
         if (uci_to_bool(onusergw.wan)) then ugw_status.sharing_wan_ok = true end
-        if (uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu)) then
+        if (uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu_state)) then
             ugw_status.sharing_possible = true
         end
         if onusergw.ipaddr == ugw_status.forwarded_gw then
@@ -203,10 +203,10 @@ function get_speed()
   local path = luci.dispatcher.context.requestpath
   local count = path[#path]
   luci.http.prepare_content("text/plain")
-  upload = cursor:get("on-usergw", "opennet_ugw"..count, "upload")
-  download = cursor:get("on-usergw", "opennet_ugw"..count, "download")
+  upload = cursor:get("on-usergw", "opennet_ugw"..count, "wan_speed_upload")
+  download = cursor:get("on-usergw", "opennet_ugw"..count, "wan_speed_download")
   if upload or download then
-    speed_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw"..count, "speed_time"))
+    speed_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw"..count, "wan_speed_timestamp"))
     if not upload or upload == "0" then upload = "?" end
     if not download or download == "0" then download = "?" end
     local speed = upload.." kbps / "..download.." kbps"
@@ -230,11 +230,11 @@ function get_mtu()
   local count = path[#path]
   luci.http.prepare_content("text/plain")
   local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
-  if v.mtu then
-    mtu_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw"..count, "mtu_time"))
-    luci.http.write([[<div class="ugw-mtu" name="mtu" status="]]..v.mtu..[["><abbr title="]]..mtu_time..[[: ]]
-      .. luci.i18n.translatef("(tried/measured) to Gateway: %s/%s from Gateway: %s/%s", v.mtu_toGW_tried, v.mtu_toGW_actual, v.mtu_fromGW_tried, v.mtu_fromGW_actual)
-      ..[[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
+  if v.mtu_state then
+    mtu_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw" .. count, "mtu_timestamp"))
+    luci.http.write([[<div class="ugw-mtu" name="mtu" status="]] .. v.mtu_state .. [["><abbr title="]] .. mtu_time .. [[: ]]
+      .. luci.i18n.translatef("(tried/measured) to Gateway: %s/%s from Gateway: %s/%s", v.mtu_out_wanted, v.mtu_out_real, v.mtu_in_wanted, v.mtu_in_real)
+      .. [[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
   end
   luci.http.write('<img class="loading_img_small" name="mtu_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
     luci.i18n.translate("Loading") .. '" style="display:none;" />')

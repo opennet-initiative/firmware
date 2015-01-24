@@ -48,9 +48,9 @@ ugw_update_speed () {
 	fi
 	# no significant change? Keep previous timestamp.
 	if [ "$((download_speed/1000))" = "$((prev_download/1000))" ] && [ "$((upload_speed/1000))" = "$((prev_upload/1000))" ]; then
-		set_service_value "$config_name" speed_time_prev "$(get_service_value "$config_name" speed_time)"
+		set_service_value "$config_name" speed_time_prev "$(get_service_value "$config_name" "wan_speed_timestamp")"
 	fi
-	set_service_value "$config_name" speed_time "$(date +%s)"
+	set_service_value "$config_name" "wan_speed_timestamp" "$(date +%s)"
 }
 
 
@@ -181,30 +181,30 @@ ugw_update_mtu() {
 	local result=$(ugw_getMTU "$config_name")
 
 	if [ -n "$result" ]; then
-		local toGW_tried=$(echo "$result" | cut -f 1 -d ,)
-		local toGW_actual=$(echo "$result" | cut -f 2 -d ,)
-		local fromGW_tried=$(echo "$result" | cut -f 3 -d ,)
-		local fromGW_actual=$(echo "$result" | cut -f 4 -d ,)
+		local out_wanted=$(echo "$result" | cut -f 1 -d ,)
+		local out_real=$(echo "$result" | cut -f 2 -d ,)
+		local in_wanted=$(echo "$result" | cut -f 3 -d ,)
+		local in_real=$(echo "$result" | cut -f 4 -d ,)
 		local status_output=$(echo "$result" | cut -f 5- -d ,)
 	
-		if [ "$toGW_tried" -le "$toGW_actual" ] && [ "$fromGW_tried" -le "$fromGW_actual" ]; then
-			set_service_value "$config_name" "mtu" "y"
+		if [ "$out_wanted" -le "$out_real" ] && [ "$in_wanted" -le "$in_real" ]; then
+			set_service_value "$config_name" "mtu_state" "y"
 		else
-			set_service_value "$config_name" "mtu" "n"
+			set_service_value "$config_name" "mtu_state" "n"
 		fi
 
 		set_service_value "$config_name" mtu_msg "$status_output"
-		set_service_value "$config_name" mtu_toGW_tried "$toGW_tried"
-		set_service_value "$config_name" mtu_toGW_actual "$toGW_actual"
-		set_service_value "$config_name" mtu_fromGW_tried "$fromGW_tried"
-		set_service_value "$config_name" mtu_fromGW_actual "$fromGW_actual"
-		set_service_value "$config_name" mtu_time "$(date +%s)"
+		set_service_value "$config_name" mtu_out_wanted "$out_wanted"
+		set_service_value "$config_name" mtu_out_real "$out_real"
+		set_service_value "$config_name" mtu_in_wanted "$in_wanted"
+		set_service_value "$config_name" mtu_in_real "$in_real"
+		set_service_value "$config_name" mtu_timestamp "$(date +%s)"
 	fi
 
-	local mtu=$(get_service_value "$config_name" mtu)
+	local mtu_state=$(get_service_value "$config_name" mtu_state)
 	local mtu_msg=$(get_service_value "$config_name" mtu_msg)
-	msg_debug "$mtu: ugw_update_mtu for '$hostname' done"
-	msg_debug "$mtu: $mtu_msg"
+	msg_debug "mtu [$mtu_state]: ugw_update_mtu for '$hostname' done"
+	msg_debug "mtu [$mtu_state]: $mtu_msg"
 }
 
 
@@ -262,15 +262,15 @@ ugw_doExtraChecks () {
 		uci_is_false "$(get_service_value "$config_name" "wan")" && continue
 
 		# speedCheck
-		speed_time=$(get_service_value "$config_name" "speed_time")
+		speed_time=$(get_service_value "$config_name" "wan_speed_timestamp")
 		[ -z "$speed_time" ] && speed_time=0
 		# never checked since restart
 		if [ "$((speed_time-restart_time))" -lt 0 ]; then
-			set_service_value "$config_name" "speed_time" ""
-			set_service_value "$config_name" "speed_time_prev" ""
+			set_service_value "$config_name" "wan_speed_timestamp" ""
+			set_service_value "$config_name" "wan_speed_timestamp_prev" ""
 		fi
-		speed_time=$(get_service_value "$config_name" "speed_time")
-		speed_time_prev=$(get_service_value "$config_name" "speed_time_prev")
+		speed_time=$(get_service_value "$config_name" "wan_speed_timestamp")
+		speed_time_prev=$(get_service_value "$config_name" "wan_speed_timestamp_prev")
 		if [ -z "$speed_time" ] ||
 				# last (successful) check older than 1 day and no two successful checks had been done
 				( [ "$(($(date +%s)-speed_time))" -gt 86400 ] && [ -z "$speed_time_prev" ] ); then
@@ -284,7 +284,7 @@ ugw_doExtraChecks () {
 		clean_stale_pid_file "$vpn_pidfile"
 		# VPN laeuft -> kein MTU-Test
 		[ -e "$vpn_pidfile" ] && continue
-		mtu_time=$(get_service_value "$config_name" "mtu_time")
+		mtu_time=$(get_service_value "$config_name" "mtu_timestamp")
 		[ -z "$mtu_time" ] && mtu_time=0
 		if [ "$(($(date +%s)-mtu_time))" -gt 86400 ]; then
 			ugw_update_mtu "$config_name"

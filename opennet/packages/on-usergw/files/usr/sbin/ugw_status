@@ -24,8 +24,8 @@ print_status()
 	local ugw_status_sharing_possible=""
 	local count=1
 	while ( [ -n "$(uci_get openvpn.opennet_ugw$count)" ] ); do
-		onusergw_wan=$(uci_get on-usergw.opennet_ugw${count}.wan)
-		onusergw_mtu=$(uci_get on-usergw.opennet_ugw${count}.mtu)
+		onusergw_wan=$(uci_get on-usergw.opennet_ugw${count}.wan_state)
+		onusergw_mtu=$(uci_get on-usergw.opennet_ugw${count}.mtu_state)
 		uci_is_true "$onusergw_wan" && ugw_status_sharing_wan_ok="true"
 		uci_is_true "$onusergw_wan" && uci_is_true "$onusergw_mtu" && ugw_status_sharing_possible="true" && break
 		: $((count++))
@@ -72,20 +72,20 @@ print_status()
 
 	count=1
 	while ( [ -n "$(uci_get openvpn.opennet_ugw$count)" ] ); do
-		onusergw_wan=$(uci_get on-usergw.opennet_ugw$count.wan)
-		onusergw_wanping=$(uci_get on-usergw.opennet_ugw$count.wanping)
-		onusergw_mtu_toGW_tried=$(uci_get on-usergw.opennet_ugw$count.mtu_toGW_tried)
-		onusergw_mtu_toGW_actual=$(uci_get on-usergw.opennet_ugw$count.mtu_toGW_actual)
-		onusergw_mtu_fromGW_tried=$(uci_get on-usergw.opennet_ugw$count.mtu_fromGW_tried)
-		onusergw_mtu_fromGW_actual=$(uci_get on-usergw.opennet_ugw$count.mtu_fromGW_actual)
-		onusergw_mtu=$(uci_get on-usergw.opennet_ugw$count.mtu)
-		openvpn_remote=$(uci_get openvpn.opennet_ugw$count.remote)
+		onusergw_wan=$(uci_get "on-usergw.opennet_ugw${count}.wan")
+		onusergw_wan_ping=$(uci_get "on-usergw.opennet_ugw${count}.wan_ping")
+		onusergw_mtu_out_wanted=$(uci_get "on-usergw.opennet_ugw${count}.mtu_out_wanted")
+		onusergw_mtu_out_real=$(uci_get "on-usergw.opennet_ugw${count}.mtu_out_real")
+		onusergw_mtu_in_wanted=$(uci_get "on-usergw.opennet_ugw${count}.mtu_in_wanted")
+		onusergw_mtu_in_real=$(uci_get "on-usergw.opennet_ugw${count}.mtu_in_real")
+		onusergw_mtu_state=$(uci_get "on-usergw.opennet_ugw${count}.mtu_state")
+		openvpn_remote=$(uci_get "openvpn.opennet_ugw${count}.remote")
 
 		ugw_tunnel_active="------"
 		[ -e "/tmp/opennet_ugw-${openvpn_remote}.txt" ] && ugw_tunnel_active="active"
 	
-		output=$output"$openvpn_remote\t$onusergw_wan\t$onusergw_wanping\t$onusergw_mtu_toGW_tried\t$onusergw_mtu_toGW_actual\t$onusergw_mtu_fromGW_tried\t$onusergw_mtu_fromGW_actual"
-		output=$output"\t$onusergw_mtu\t$ugw_tunnel_active\n"
+		output=$output"$openvpn_remote\t$onusergw_wan\t$onusergw_wan_ping\t$onusergw_mtu_out_wanted\t$onusergw_mtu_out_real\t$onusergw_mtu_in_wanted\t$onusergw_mtu_in_real"
+		output=$output"\t$onusergw_mtu_state\t$ugw_tunnel_active\n"
 		: $((count++))
 	done;		
 

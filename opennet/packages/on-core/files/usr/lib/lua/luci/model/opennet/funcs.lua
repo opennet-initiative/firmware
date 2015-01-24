@@ -1,3 +1,7 @@
+--- @defgroup lua Lua-Funktionen
+-- Beginn der Doku-Gruppe
+--- @{
+
 function _quote_parameters(parameters)
 	local arguments = ""
 	local value
@@ -20,6 +24,15 @@ end
 function on_bool_function(func_name, parameters)
 	local cmdline = "on-function '" .. func_name .. "' " .. _quote_parameters(parameters)
 	return luci.sys.call(cmdline) == 0
+end
+
+
+--- @brief Interpretiere einen Text entsprechend der uci-Boolean-Definition (yes/y/true/1 = wahr).
+--- @param text textuelle Repräsentation eines Wahrheitswerts
+--- @returns true oder false
+--- @details Leere oder nicht erkannte Eingaben werden als "false" gewertet.
+function uci_to_bool(text)
+	return on_bool_function("uci_is_true", {"text"})
 end
 
 
@@ -219,3 +232,6 @@ function parse_csv_service(service_name, descriptions)
 	end
 	return one_service
 end
+
+-- Ende der Doku-Gruppe
+--- @}

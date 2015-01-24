@@ -605,12 +605,34 @@ move_service_top() {
 }
 
 
+## @fn get_service_detail()
+## @brief Ermittle den Wert eines Schlüssel-Wert-Paars im "details"-Attribut eines Diensts
+## @param service_name Name eines Diensts
+## @param key Name des Schlüssels
+## @param default dieser Wert wird zurückgeliefert, falls der Schlüssel nicht gefunden wurde
+## @returns den ermittelten Wert aus dem Schlüssel-Wert-Paar
 get_service_detail() {
 	local service_name="$1"
 	local key="$2"
 	local default="${3:-}"
 	local value=$(get_service_value "$service_name" "details" | get_from_key_value_list "$key" ":")
-	[ -n "$value" ] && echo "$value" || echo "$default"
+	[ -n "$value" ] && echo -n "$value" || echo -n "$default"
+	return 0
+}
+
+
+## @fn set_service_detail()
+## @brief Setze den Wert eines Schlüssel-Wert-Paars im "details"-Attribut eines Diensts
+## @param service_name Name eines Diensts
+## @param key Name des Schlüssels
+## @param value der neue Wert
+## @details Ein leerer Wert löscht das Schlüssel-Wert-Paar.
+set_service_detail() {
+	local service_name="$1"
+	local key="$2"
+	local value="$3"
+	local new_details=$(get_service_value "$service_name" "details" | set_in_key_value_list "$key" ":" "$value")
+	set_service_value "$service_name" "details" "$new_details"
 	return 0
 }
 

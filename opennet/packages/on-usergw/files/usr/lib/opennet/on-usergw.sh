@@ -18,25 +18,6 @@ UGW_SERVICE_CREATOR=ugw_service
 get_on_usergw_default() { _get_file_dict_value "$ON_USERGW_DEFAULTS_FILE" "$1"; }
 
 
-#################################################################################
-# Auslesen einer Gateway-Information
-# Parameter ip: IP-Adresse des Gateways
-# Parameter key: Informationsschluessel ("age", "status", ...)
-get_ugw_value() {
-	_get_file_dict_value "$UGW_STATUS_FILE" "${1}_${2}"
-}
-
-
-#################################################################################
-# Aendere eine gateway-Information
-# Parameter ip: IP-Adresse des Gateways
-# Parameter key: Informationsschluessel ("age", "status", ...)
-# Parameter value: der neue Inhalt
-set_ugw_value() {
-	_set_file_dict_value "$UGW_STATUS_FILE" "${1}_${2}" "$3"
-}
-
-
 # Ermittle den aktuell definierten UGW-Portforward.
 # Ergebnis (tab-separiert fuer leichte 'cut'-Behandlung des Output):
 #   lokale IP-Adresse fuer UGW-Forward
@@ -93,9 +74,9 @@ add_openvpn_ugw_service() {
 	uci set "${uci_prefix}.port=$port"
 	uci set "${uci_prefix}.protocol=$protocol"
 	# Zeitstempel auffrischen
-	set_ugw_value "$config_name" last_seen "$(date +%s)"
+	set_service_value "$config_name" "last_seen" "$(date +%s)"
 	# Details koennen sich haeufig aendern (z.B. Geschwindigkeiten)
-	set_ugw_value "$config_name" details "$details"
+	set_service_value "$config_name" "details" "$details"
 }
 
 
@@ -267,11 +248,9 @@ _is_local_ugw_port_unused() {
 	local uci_prefix
 	prepare_on_usergw_uci_settings
 	# Suche nach einer Kollision
-	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
-		[ "$port" = "$(uci_get "${uci_prefix}.local_port")" ] && return 1 || true
-	done
-	# keine Kollision entdeckt
-	return 0
+	[ -z "$(find_all_uci_sections on-usergw uplink "local_port=$port")" ] && return 0
+	# mindestens eine Kollision entdeckt
+	trap "" $GUARD_TRAPS && return 1
 }
 
 
@@ -347,9 +326,9 @@ announce_olsr_service_ugw() {
 	prepare_on_usergw_uci_settings
 	ugw_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
 
-	local download=$(get_ugw_value "$config_name" download)
-	local upload=$(get_ugw_value "$config_name" upload)
-	local ping=$(get_ugw_value "$config_name" ping)
+	local download=$(get_service_detail "$config_name" download)
+	local upload=$(get_service_detail "$config_name" upload)
+	local ping=$(get_service_detail "$config_name" ping)
 
 	local olsr_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	[ -z "$olsr_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && trap "" $GUARD_TRAPS && return 1
@@ -390,9 +369,9 @@ ugw_update_service_state () {
 		ugw_enabled=$(uci_get "${uci_prefix}.enable")
 		openvpn_enable=$(uci_get "openvpn.${config_name}.enable")
 		[ -z "$openvpn_enable" ] && openvpn_enable=1
-		mtu_test=$(get_ugw_value "$config_name" mtu)
-		wan_test=$(get_ugw_value "$config_name" wan)
-		openvpn_test=$(get_ugw_value "$config_name" status)
+		mtu_test=$(get_service_value "$config_name" mtu)
+		wan_test=$(get_service_value "$config_name" wan)
+		openvpn_test=$(get_service_value "$config_name" status)
 		cert_available=$(openvpn_service_has_certificate_and_key "$config_name" && echo y || echo n)
 
 		# Ziel ist die Aktivierung der openvpn-Verbindung, sowie die Announcierung des Dienstes

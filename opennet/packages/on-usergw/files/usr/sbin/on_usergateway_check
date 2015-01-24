@@ -34,23 +34,23 @@ ugw_update_speed () {
 	local upload_speed=$(measure_upload_speed "$hostname")
 	# no checks if no number is available
 	[ -z "$download_speed" ] && [ -z "$upload_speed" ] && return
-	local prev_download=$(get_ugw_value "$config_name" download)
-	local prev_upload=$(get_ugw_value "$config_name" upload)
+	local prev_download=$(get_service_detail "$config_name" download)
+	local prev_upload=$(get_service_detail "$config_name" upload)
 	if [ -z "$prev_download" -o "$prev_download" = "0" ]; then
-		set_ugw_value "$config_name" download "$download_speed"
+		set_service_detail "$config_name" download "$download_speed"
 	else
-		set_ugw_value "$config_name" download "$(((download_speed+prev_download)/2))"
+		set_service_detail "$config_name" download "$(((download_speed+prev_download)/2))"
 	fi
 	if [ -z "$prev_upload" -o "$prev_upload" = "0" ]; then
-		set_ugw_value "$config_name" upload "$upload_speed"
+		set_service_detail "$config_name" upload "$upload_speed"
 	else
-		set_ugw_value "$config_name" upload "$(((download_speed+prev_upload)/2))"
+		set_service_detail "$config_name" upload "$(((download_speed+prev_upload)/2))"
 	fi
 	# no significant change? Keep previous timestamp.
 	if [ "$((download_speed/1000))" = "$((prev_download/1000))" ] && [ "$((upload_speed/1000))" = "$((prev_upload/1000))" ]; then
-		set_ugw_value "$config_name" speed_time_prev "$(get_ugw_value "$config_name" speed_time)"
+		set_service_value "$config_name" speed_time_prev "$(get_service_value "$config_name" speed_time)"
 	fi
-	set_ugw_value "$config_name" speed_time "$(date +%s)"
+	set_service_value "$config_name" speed_time "$(date +%s)"
 }
 
 
@@ -85,28 +85,28 @@ ugw_update_vpn_status()
 		return 0
 	fi
 	# if no age set yet than set to recheck_age to force immediate testing
-	local recheck_age=$(get_on_usergw_default vpn_recheck_age)
-	local nonworking_timeout=$(get_on_usergw_default vpn_nonworking_timeout)
-	local age=$(get_ugw_value "$config_name" age)
+	local recheck_age=$(get_on_usergw_default "vpn_recheck_age")
+	local nonworking_timeout=$(get_on_usergw_default "vpn_nonworking_timeout")
+	local age=$(get_service_value "$config_name" "age")
 	if [ -n "$age" ]; then
 		# it's running every 5 minutes
 		age=$((age+5))
 	else
 		age=$recheck_age
 	fi
-	set_ugw_value "$config_name" age "$age"
+	set_service_value "$config_name" "age" "$age"
 
 	if [ "$age" -ge "$((recheck_age+nonworking_timeout))" ]; then
 		# if there was no vpn-availability for a dedicated time (nonworking_timeout minutes), declare vpn-status as not working
-		set_ugw_value "$config_name" status n
-		set_ugw_value "$config_name" age 0
+		set_service_value "$config_name" "status" "n"
+		set_service_value "$config_name" "age" "0"
 	elif [ "$age" -ge "$recheck_age" ]; then
 		if verify_vpn_connection "$(uci_get "${uci_prefix}.config_file")" "detail:hostname" \
 				"$VPN_DIR_TEST/on_aps.key" \
 				"$VPN_DIR_TEST/on_aps.crt" \
 				"$VPN_DIR_TEST/opennet-ca.crt"; then
-			set_ugw_value "$config_name" status y
-			set_ugw_value "$config_name" age 0
+			set_service_value "$config_name" "status" "y"
+			set_service_value "$config_name" "age" "0"
 			msg_debug "vpn-availability of gw '$hostname' successfully tested"
 		fi
 		msg_debug "finished vpn test of '$hostname'"
@@ -193,16 +193,16 @@ ugw_update_mtu() {
 			set_service_value "$config_name" "mtu" "n"
 		fi
 
-		set_ugw_value "$config_name" mtu_msg "$status_output"
-		set_ugw_value "$config_name" mtu_toGW_tried "$toGW_tried"
-		set_ugw_value "$config_name" mtu_toGW_actual "$toGW_actual"
-		set_ugw_value "$config_name" mtu_fromGW_tried "$fromGW_tried"
-		set_ugw_value "$config_name" mtu_fromGW_actual "$fromGW_actual"
-		set_ugw_value "$config_name" mtu_time "$(date +%s)"
+		set_service_value "$config_name" mtu_msg "$status_output"
+		set_service_value "$config_name" mtu_toGW_tried "$toGW_tried"
+		set_service_value "$config_name" mtu_toGW_actual "$toGW_actual"
+		set_service_value "$config_name" mtu_fromGW_tried "$fromGW_tried"
+		set_service_value "$config_name" mtu_fromGW_actual "$fromGW_actual"
+		set_service_value "$config_name" mtu_time "$(date +%s)"
 	fi
 
-	local mtu=$(get_ugw_value "$config_name" mtu)
-	local mtu_msg=$(get_ugw_value "$config_name" mtu_msg)
+	local mtu=$(get_service_value "$config_name" mtu)
+	local mtu_msg=$(get_service_value "$config_name" mtu_msg)
 	msg_debug "$mtu: ugw_update_mtu for '$hostname' done"
 	msg_debug "$mtu: $mtu_msg"
 }
@@ -230,7 +230,7 @@ ugw_update_wan_status () {
 	if is_device_in_zone "$on_ugw_targetDev" "$ZONE_WAN"; then
 		set_server_value "$config_name" "wan" "true"
 		time=$(ping -w 5 -q "$hostname" 2>/dev/null| awk 'BEGIN{FS="[ \/]+"} /min\/avg\/max/ {print int($7+0.5)}')
-		set_ugw_value "$config_name" ping "$time"
+		set_server_value "$config_name" "ping" "$time"
 		msg_debug "checkWAN: $hostname routing through wan device: $on_ugw_targetDev"
 		msg_debug "checkWAN: $hostname avg ping time: $time"
 	else
@@ -262,15 +262,15 @@ ugw_doExtraChecks () {
 		uci_is_false "$(get_service_value "$config_name" "wan")" && continue
 
 		# speedCheck
-		speed_time=$(get_ugw_value "$config_name" "speed_time")
+		speed_time=$(get_service_value "$config_name" "speed_time")
 		[ -z "$speed_time" ] && speed_time=0
 		# never checked since restart
 		if [ "$((speed_time-restart_time))" -lt 0 ]; then
-			set_ugw_value "$config_name" "speed_time" ""
-			set_ugw_value "$config_name" "speed_time_prev" ""
+			set_service_value "$config_name" "speed_time" ""
+			set_service_value "$config_name" "speed_time_prev" ""
 		fi
-		speed_time=$(get_ugw_value "$config_name" "speed_time")
-		speed_time_prev=$(get_ugw_value "$config_name" "speed_time_prev")
+		speed_time=$(get_service_value "$config_name" "speed_time")
+		speed_time_prev=$(get_service_value "$config_name" "speed_time_prev")
 		if [ -z "$speed_time" ] ||
 				# last (successful) check older than 1 day and no two successful checks had been done
 				( [ "$(($(date +%s)-speed_time))" -gt 86400 ] && [ -z "$speed_time_prev" ] ); then
@@ -284,7 +284,7 @@ ugw_doExtraChecks () {
 		clean_stale_pid_file "$vpn_pidfile"
 		# VPN laeuft -> kein MTU-Test
 		[ -e "$vpn_pidfile" ] && continue
-		mtu_time=$(get_ugw_value "$config_name" "mtu_time")
+		mtu_time=$(get_service_value "$config_name" "mtu_time")
 		[ -z "$mtu_time" ] && mtu_time=0
 		if [ "$(($(date +%s)-mtu_time))" -gt 86400 ]; then
 			ugw_update_mtu "$config_name"

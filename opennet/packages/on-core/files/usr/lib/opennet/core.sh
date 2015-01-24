@@ -425,18 +425,41 @@ set_opennet_id() {
 # Durchsuche eine Schluessel-Wert-Liste nach einem Schluessel und liefere den dazugehoerigen Wert zurueck.
 # Beispiel:
 #   foo=bar baz=nux
-# Der Separator ist konfigurierbar - standardmaessig wird das Gleichheitszeichen verwendet.
+# Der Separator ist konfigurierbar.
 # Die Liste wird auf der Standardeingabe erwartet.
 # Der erste und einzige Parameter ist der gewuenschte Schluessel.
 get_from_key_value_list() {
-	local search_key=$1
-	local separator=${2:-=}
+	local search_key="$1"
+	local separator="$2"
 	local key_value
 	local key
 	sed 's/[ \t]\+/\n/g' | while read key_value; do
 		key=$(echo "$key_value" | cut -f 1 -d "$separator")
 		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break || true
 	done
+	return 0
+}
+
+
+## @fn set_in_key_value_list()
+## @brief Ermittle aus einer mit Tabulatoren oder Leerzeichen getrennten Liste von Schlüssel-Wert-Paaren den Inhalt des Werts zu einem Schlüssel.
+## @param search_key der Name des Schlüsselworts
+## @param separator der Name des Trennzeichens zwischen Wert und Schlüssel
+## @returns die korrigierte Schlüssel-Wert-Liste wird ausgegeben (eventuell mit veränderten Leerzeichen oder Tabulatoren)
+set_in_key_value_list() {
+	local search_key="$1"
+	local separator="$2"
+	local value="$3"
+	local key_value
+	sed 's/[ \t]\+/\n/g' | while read key_value; do
+		key=$(echo "$key_value" | cut -f 1 -d "$separator")
+		if [ "$key" = "$search_key" ]; then
+			# nicht ausgeben, falls der Wert leer ist
+			[ -n "$value" ] && echo -n " ${key_value}${separator}${value}" || true
+		else
+			echo -n " $key_value"
+		fi
+	done | sed 's/^ //'
 	return 0
 }
 

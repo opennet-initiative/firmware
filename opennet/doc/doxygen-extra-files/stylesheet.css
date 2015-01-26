@@ -1074,10 +1074,12 @@ div.toc {
         background-color: #F4F6FA;
         border: 1px solid #D8DFEE;
         border-radius: 7px 7px 7px 7px;
-        float: right;
+        /*float: right;*/
+	float: none;
         height: auto;
         margin: 0 20px 10px 10px;
-        width: 200px;
+        /*width: 200px;*/
+	width: auto;
 }
 
 div.toc li {

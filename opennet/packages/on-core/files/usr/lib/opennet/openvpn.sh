@@ -247,6 +247,41 @@ has_openvpn_credentials_by_template() {
 }
 
 
+## @fn log_openvpn_events_and_disconnect_if_requested()
+## @brief Allgemeines Ereignisbehandlung fuer openvpn-Verbindungen: Logging und eventuell Dienst-Bereinigung (nur für "down").
+## @details Alle Informationen (bis auf das Log-Ziel) werden aus den Umgebungsvariablen gezogen, die openvpn in
+##   seinen Ereignisskripten setzt.
+log_openvpn_events_and_disconnect_if_requested() {
+	local log_target="$1"
+	# die config-Datei enthaelt den Dienst-Namen
+	local service_name=$(basename "${config%.conf}")
+	local pid_file=$(get_service_value "$broken_service" "pid_file")
+	case "$script_type" in
+		up)
+			append_to_custom log "$log_target" "up" "Connecting to ${remote_1}:${remote_port_1}"
+			;;
+		down)
+			# der openwrt-Build von openvpn setzt wohl leider nicht die "time_duration"-Umgebungsvariable
+			[ -z "${time_duration:-}" ] && time_duration=$(($(date +%s) - $daemon_start_time))
+			# Verbindungsverlust durch fehlende openvpn-Pings?
+			if [ "${signal:-}" = "ping-restart" ]; then
+				append_to_custom log "$log_target" "down" \
+					"Lost connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
+				# Verbindung trennen
+				set_service_value "$broken_service" "status" "n"
+				[ -n "$pid_file" ] && rm -f "$pid_file" || true
+			else
+				append_to_custom log "$log_target" "down" \
+					"Closing connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
+			fi
+			;;
+		*)
+			append_to_custom log "$log_target" "other" "${remote_1}:${remote_port_1}"
+			;;
+	esac
+}
+
+
 ## @fn prepare_openvpn_service()
 ## @param Name eines Diensts
 ## @param template_file Name einer openvpn-Konfigurationsvorlage

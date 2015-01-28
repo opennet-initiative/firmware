@@ -351,8 +351,8 @@ announce_olsr_service_ugw() {
 
 # Pruefe regelmaessig, ob Weiterleitungen zu allen bekannten UGW-Servern existieren.
 # Fehlende Weiterleitungen oder olsr-Announcements werden angelegt.
-ugw_update_service_state () {
-	trap "error_trap ugw_update_service_state '$*'" $GUARD_TRAPS
+ugw_update_service_status() {
+	trap "error_trap ugw_update_service_status '$*'" $GUARD_TRAPS
 	local name
 	local ugw_name
 	local ugw_enabled
@@ -369,8 +369,8 @@ ugw_update_service_state () {
 		ugw_enabled=$(uci_get "${uci_prefix}.enable")
 		openvpn_enable=$(uci_get "openvpn.${config_name}.enable")
 		[ -z "$openvpn_enable" ] && openvpn_enable=1
-		mtu_test=$(get_service_value "$config_name" "mtu_state")
-		wan_test=$(get_service_value "$config_name" "wan_state")
+		mtu_test=$(get_service_value "$config_name" "mtu_status")
+		wan_test=$(get_service_value "$config_name" "wan_status")
 		openvpn_test=$(get_service_value "$config_name" "status")
 		cert_available=$(openvpn_service_has_certificate_and_key "$config_name" && echo y || echo n)
 

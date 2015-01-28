@@ -168,19 +168,20 @@ Die wechselhaften Eigenschaften werden im temporären Dateisystem (also im RAM) 
 * timestamp - Zeitstempel (epoch) der letzten empfangenen Dienst-Announcierung
 * details - eventuelle Zusatzinformationen, die aus einem olsrd-nameservice-Announcement entnommen wurden (z.B. Bandbreite)
 * status - Zusammenfassung: Gateway ist erreichbar (true/false)
-* mtu_state - Status des MTU-Test ("ok" oder "error")
+* mtu_status - Status des MTU-Test ("ok" oder "error")
 * mtu_timestamp - Zeitstempel (epoch) des letzten MTU-Tests
 * mtu_msg - vollständige Status-Ausgabe von openvpn infolge des MTU-Tests
 * mtu_out_wanted - Startwert für die MTU-Prüfung (ausgehend)
 * mtu_out_real - Resultat der MTU-Prüfung (ausgehend)
 * mtu_in_wanted - Startwert für die MTU-Prüfung (eingehend)
 * mtu_in_real - Resultat der MTU-Prüfung (eingehend)
-* wan_state - Status des WAN-Tests ("ok" oder "error")
+* wan_status - Status des WAN-Tests ("ok" oder "error")
 * wan_ping - Ping-Laufzeit zum UGW-Server
 * wan_speed_timestamp - Zeitstempel (epoch) des letzten UGW-Tests
-* wan_speed_timestamp_prev - Zeitstempel (epoch) der anzeigt, seit wann die aktuelle Geschwindigkeitsmessung grob konstant blieb
 * wan_speed_download - letzte ermittelte Download-Bandbreite (kBytes/s)
 * wan_speed_upload - letzte ermittelte Upload-Bandbreite (kBytes/s)
+* vpn_status - Ergebnis des letzten VPN-Verbindungstests
+* vpn_timestamp - Zeitpunkt (epoch) des letzten VPN-Verbindungstests
 
 
 ### Geschwindigkeitstests {#ugw-speed}

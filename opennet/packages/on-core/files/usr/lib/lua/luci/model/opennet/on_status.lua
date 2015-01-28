@@ -79,7 +79,7 @@ function status_ugw_connection()
 	local count = 1
 	while count <= ugw_status.usergateways_no do
 		local onusergw = cursor:get_all("on-usergw", "opennet_ugw"..count)
-		if uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu_state) then
+		if uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu_status) then
 			ugw_status.sharing_possible = true
 			break
 		end

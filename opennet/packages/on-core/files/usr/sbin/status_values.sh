@@ -252,9 +252,9 @@ on_ugw_enabled="$(uci_is_true "$(uci_get on-usergw.ugw_sharing.shareInternet)" &
 
 index=1; ugw_status_sharing_possible=0;
 while [ -n "$(uci_get on-usergw.opennet_ugw${index})" ]; do
-  wan_state=$(uci_get on-usergw.opennet_ugw${index}.wan_state)
-  mtu_state=$(uci_get on-usergw.opennet_ugw${index}.mtu_state)
-  uci_is_true "$wan_state" && uci_is_true "$mtu_state" && ugw_status_sharing_possible=1 && break
+  wan_status=$(uci_get on-usergw.opennet_ugw${index}.wan_status)
+  mtu_status=$(uci_get on-usergw.opennet_ugw${index}.mtu_status)
+  uci_is_true "$wan_status" && uci_is_true "$mtu_status" && ugw_status_sharing_possible=1 && break
   : $((index++))
 done
 on_ugw_possible="$ugw_status_sharing_possible"

@@ -24,8 +24,8 @@ print_status()
 	local ugw_status_sharing_possible=""
 	local count=1
 	while ( [ -n "$(uci_get openvpn.opennet_ugw$count)" ] ); do
-		onusergw_wan=$(uci_get on-usergw.opennet_ugw${count}.wan_state)
-		onusergw_mtu=$(uci_get on-usergw.opennet_ugw${count}.mtu_state)
+		onusergw_wan=$(uci_get on-usergw.opennet_ugw${count}.wan_status)
+		onusergw_mtu=$(uci_get on-usergw.opennet_ugw${count}.mtu_status)
 		uci_is_true "$onusergw_wan" && ugw_status_sharing_wan_ok="true"
 		uci_is_true "$onusergw_wan" && uci_is_true "$onusergw_mtu" && ugw_status_sharing_possible="true" && break
 		: $((count++))
@@ -78,14 +78,14 @@ print_status()
 		onusergw_mtu_out_real=$(uci_get "on-usergw.opennet_ugw${count}.mtu_out_real")
 		onusergw_mtu_in_wanted=$(uci_get "on-usergw.opennet_ugw${count}.mtu_in_wanted")
 		onusergw_mtu_in_real=$(uci_get "on-usergw.opennet_ugw${count}.mtu_in_real")
-		onusergw_mtu_state=$(uci_get "on-usergw.opennet_ugw${count}.mtu_state")
+		onusergw_mtu_status=$(uci_get "on-usergw.opennet_ugw${count}.mtu_status")
 		openvpn_remote=$(uci_get "openvpn.opennet_ugw${count}.remote")
 
 		ugw_tunnel_active="------"
 		[ -e "/tmp/opennet_ugw-${openvpn_remote}.txt" ] && ugw_tunnel_active="active"
 	
 		output=$output"$openvpn_remote\t$onusergw_wan\t$onusergw_wan_ping\t$onusergw_mtu_out_wanted\t$onusergw_mtu_out_real\t$onusergw_mtu_in_wanted\t$onusergw_mtu_in_real"
-		output=$output"\t$onusergw_mtu_state\t$ugw_tunnel_active\n"
+		output=$output"\t$onusergw_mtu_status\t$ugw_tunnel_active\n"
 		: $((count++))
 	done;		
 

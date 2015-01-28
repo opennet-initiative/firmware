@@ -48,7 +48,7 @@ function get_ugw_status(ugw_status)
     while count <= ugw_status.usergateways_no do
         local onusergw = cursor:get_all("on-usergw", "opennet_ugw"..count)
         if (uci_to_bool(onusergw.wan)) then ugw_status.sharing_wan_ok = true end
-        if (uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu_state)) then
+        if (uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu_status)) then
             ugw_status.sharing_possible = true
         end
         if onusergw.ipaddr == ugw_status.forwarded_gw then
@@ -230,9 +230,9 @@ function get_mtu()
   local count = path[#path]
   luci.http.prepare_content("text/plain")
   local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
-  if v.mtu_state then
+  if v.mtu_status then
     mtu_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw" .. count, "mtu_timestamp"))
-    luci.http.write([[<div class="ugw-mtu" name="mtu" status="]] .. v.mtu_state .. [["><abbr title="]] .. mtu_time .. [[: ]]
+    luci.http.write([[<div class="ugw-mtu" name="mtu" status="]] .. v.mtu_status .. [["><abbr title="]] .. mtu_time .. [[: ]]
       .. luci.i18n.translatef("(tried/measured) to Gateway: %s/%s from Gateway: %s/%s", v.mtu_out_wanted, v.mtu_out_real, v.mtu_in_wanted, v.mtu_in_real)
       .. [[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
   end

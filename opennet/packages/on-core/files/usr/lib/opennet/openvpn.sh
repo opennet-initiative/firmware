@@ -4,6 +4,10 @@
 ## @{
 
 
+VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
+OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
+
+
 ## @fn enable_openvpn_service()
 ## @brief Erzeuge eine funktionierende openvpn-Konfiguration (Datei + UCI).
 ## @param service_name Name eines Dienstes

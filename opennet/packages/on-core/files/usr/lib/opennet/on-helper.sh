@@ -23,8 +23,6 @@ set -eu
 
 # leider, leider unterstuetzt die busybox-ash kein trap "ERR"
 GUARD_TRAPS=EXIT
-VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
-OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
 
 DEBUG=${DEBUG:-}
 

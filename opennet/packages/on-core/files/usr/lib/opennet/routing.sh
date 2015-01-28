@@ -56,14 +56,13 @@ get_target_route_interface() {
 	local target=$1
 	local ipaddr
 	if is_ipv4 "$target" || is_ipv6 "$target"; then
-		ipaddr=$target
+		echo "$target"
 	else
-		ipaddr=$(query_dns "$target")
-	fi
-	# "failed_policy" wird von ipv6 fuer nicht-zustellbare Adressen zurueckgeliefert
-	# falls ein Hostname mehrere IP-Adressen ergibt (z.B. ipv4 und ipv6), dann werden beide probiert
-	for item in $ipaddr; do
-		ip route get "$item" | grep -v ^failed_policy | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
+		query_dns "$target"
+	fi | while read ipaddr; do
+		# "failed_policy" wird von ipv6 fuer nicht-zustellbare Adressen zurueckgeliefert
+		# falls ein Hostname mehrere IP-Adressen ergibt (z.B. ipv4 und ipv6), dann werden beide probiert
+		ip route get "$ipaddr" | grep -v ^failed_policy | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
 	done | head -1
 }
 

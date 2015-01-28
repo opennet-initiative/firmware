@@ -246,5 +246,21 @@ has_openvpn_credentials_by_template() {
 	trap "" $GUARD_TRAPS && return 1
 }
 
+
+## @fn prepare_openvpn_service()
+## @param Name eines Diensts
+## @param template_file Name einer openvpn-Konfigurationsvorlage
+## @brief Erzeuge oder aktualisiere einen OpenVPN-Dienst
+prepare_openvpn_service() {
+	trap "error_trap prepare_openvpn_service '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local template_file="$2"
+	local pid_file="/var/run/${service_name}.pid"
+	local config_file="$OPENVPN_CONFIG_BASEDIR/${service_name}.conf"
+	set_service_value "$service_name" "template_file" "$template_file"
+	set_service_value "$service_name" "config_file" "$config_file"
+	set_service_value "$service_name" "pid_file" "$pid_file"
+}
+
 # Ende der openvpn-Doku-Gruppe
 ## @}

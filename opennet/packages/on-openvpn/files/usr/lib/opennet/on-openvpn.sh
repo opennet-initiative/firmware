@@ -17,22 +17,6 @@ get_on_openvpn_default() {
 }
 
 
-## @fn update_mig_service()
-## @param Name eines Diensts
-## @brief Erzeuge oder aktualisiere einen Mesh-Internet-Gateway-Dienst Ignoriere doppelte Einträge.
-## @attention Anschließend muss "on-core" comitted werden.
-update_mig_service() {
-	trap "error_trap update_mig_service '$*'" $GUARD_TRAPS
-	local service_name="$1"
-	local template_file="$MIG_VPN_CONFIG_TEMPLATE_FILE"
-	local pid_file="/var/run/${service_name}.pid"
-	local config_file="$OPENVPN_CONFIG_BASEDIR/${service_name}.conf"
-	set_service_value "$service_name" "template_file" "$template_file"
-	set_service_value "$service_name" "config_file" "$config_file"
-	set_service_value "$service_name" "pid_file" "$pid_file"
-}
-
-
 ## @fn has_mig_openvpn_credentials()
 ## @brief Prüft, ob der Nutzer bereits einen Schlüssel und ein Zertifikat angelegt hat.
 ## @returns Liefert "wahr", falls Schlüssel und Zertifikat vorhanden sind oder
@@ -52,7 +36,7 @@ test_mig_connection() {
 	trap "error_trap test_mig_connection '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
-	update_mig_service "$service_name"
+	prepare_openvpn_service "$service_name" "$MIG_VPN_CONFIG_TEMPLATE_FILE"
 	local host=$(get_service_value "$service_name" "host")
 	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
 	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)

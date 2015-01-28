@@ -215,10 +215,19 @@ msgstr ""
 msgid "hours"
 msgstr ""
 
+msgid "inactive"
+msgstr ""
+
+msgid "irrelevant"
+msgstr ""
+
 msgid "minutes"
 msgstr ""
 
 msgid "no central Gateway-IPs connected trough tunnel"
+msgstr ""
+
+msgid "ok"
 msgstr ""
 
 msgid "suspend Internet-Sharing for"

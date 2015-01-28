@@ -4,7 +4,6 @@
 ## @{
 
 MIG_VPN_DIR=/etc/openvpn/opennet_user
-MIG_VPN_CONNECTION_LOG=/var/log/mig_openvpn_connections.log
 MIG_VPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
 DEFAULT_MIG_PORT=1600
 
@@ -261,30 +260,6 @@ get_mig_connection_test_age() {
 	[ -z "$timestamp" ] && return 0
 	local now=$(get_time_minute)
 	echo "$timestamp" "$now" | awk '{ print $2 - $1 }'
-}
-
-
-## @fn append_to_mig_connection_log()
-## @brief Hänge eine neue Nachricht an das Nutzer-VPN-Verbindungsprotokoll an.
-## @param event die Kategorie der Meldung (up/down/other)
-## @param msg die textuelle Beschreibung des Ereignis (z.B. "connection with ... closed")
-## @details Die Meldungen werden von den konfigurierten openvpn-up/down-Skripten gesendet.
-append_to_mig_connection_log() {
-	local event="$1"
-	local msg="$2"
-	echo "$(date) openvpn [$event]: $msg" >>"$MIG_VPN_CONNECTION_LOG"
-	# Datei kuerzen, falls sie zu gross sein sollte
-	local filesize=$(get_filesize "$MIG_VPN_CONNECTION_LOG")
-	[ "$filesize" -gt 10000 ] && sed -i "1,30d" "$MIG_VPN_CONNECTION_LOG"
-	return 0
-}
-
-
-## @fn get_mig_connection_log()
-## @brief Liefere den Inhalt des VPN-Verbindungsprotokolls.
-# Liefere den Inhalt des Nutzer-VPN-Verbindungsprotokolls (Aufbau + Trennung) zurueck
-get_mig_connection_log() {
-	[ -e "$MIG_VPN_CONNECTION_LOG" ] && cat "$MIG_VPN_CONNECTION_LOG" || true
 }
 
 

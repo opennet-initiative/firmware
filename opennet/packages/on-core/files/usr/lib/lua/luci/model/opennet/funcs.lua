@@ -36,6 +36,14 @@ function uci_to_bool(text)
 end
 
 
+--- @brief Liefere eine begrenzte Anzahl von Zeilen eines Logs zurück (umgekehrt sortiert von neu zu alt).
+--- @param log_name Name des Log-Ziels
+--- @param lines Anzahl der zurückzuliefernden Zeilen
+function get_custom_log_reversed(log_name, lines)
+	return luci.sys.exec("on-function get_custom_log '" .. log_name .. "' | tail -n '" .. lines .. "' | tac")
+end
+
+
 function _generic_split(text, token_regex)
 	local result = {}
 	local token

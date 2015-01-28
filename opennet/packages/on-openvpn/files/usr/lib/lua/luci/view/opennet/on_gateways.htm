@@ -280,12 +280,13 @@ You may obtain a copy of the License at
 
 
 <%# Protokoll von Gateway-Wechseln %>
-<% local gateway_log = luci.sys.exec("on-function get_mig_connection_log | tail -n 30 | tac") %>
 <% if gateway_log ~= "" then %>
 	<h3><%:Connection log%></h3>
 	<!-- Verbindungslog -->
 	<div class="cbi-map"><fieldset class="cbi-section">
-		<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly" rows="10" cols="110" wrap="off"><%=gateway_log%></textarea>
+		<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly" rows="10" cols="110" wrap="off">
+			<%= get_custom_log_reversed("mig-openvpn-connections", 30) %>
+		</textarea>
 	</fieldset></div>
 <% end %>
 <%+footer%>

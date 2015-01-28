@@ -14,6 +14,8 @@ ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 ## @var Dateiname für erstellte Zusammenfassungen
 REPORTS_FILE=/tmp/on_report.tar.gz
+## @var Basis-Verzeichnis für Log-Dateien
+LOG_BASE_DIR=/var/log
 
 
 ## @fn msg_debug()
@@ -35,6 +37,36 @@ msg_debug() {
 ## Die info-Nachrichten werden immer ausgegeben, da es kein höheres Log-Level gibt.
 msg_info() {
 	logger -t "$(basename "$0")[$$]" "$1"
+}
+
+
+## @fn append_to_custom_log()
+## @brief Hänge eine neue Nachricht an ein spezfisches Protokoll an.
+## @param log_name Name des Log-Ziels
+## @param event die Kategorie der Meldung (up/down/???)
+## @param msg die textuelle Beschreibung des Ereignis (z.B. "connection with ... closed")
+## @details Die Meldungen werden beispielsweise von den konfigurierten openvpn-up/down-Skripten gesendet.
+append_to_custom_log() {
+	local log_name="$1"
+	local event="$2"
+	local msg="$3"
+	local logfile="$LOG_BASE_DIR/${log_name}.log"
+	echo "$(date) openvpn [$event]: $msg" >>"$logfile"
+	# Datei kuerzen, falls sie zu gross sein sollte
+	local filesize=$(get_filesize "$logfile")
+	[ "$filesize" -gt 10000 ] && sed -i "1,30d" "$logfile"
+	return 0
+}
+
+
+## @fn get_custom_log()
+## @brief Liefere den Inhalt eines spezifischen Logs (z.B. das OpenVPN-Verbindungsprotokoll) zurück.
+## @param log_name Name des Log-Ziels
+## @returns Zeilenweise Ausgabe der Protokollereignisse (aufsteigend nach Zeitstempel sortiert).
+get_custom_log() {
+	local log_name="$1"
+	local logfile="$LOG_BASE_DIR/${log_name}.log"
+	[ -e "$logfile" ] && cat "$logfile" || true
 }
 
 

@@ -10,6 +10,7 @@ DEFAULT_SERVICE_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
 # unbedingt synchron halten mit "_is_persistent_service_attribute" (der Effizienz wegen getrennt)
 PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset disabled"
+LOCAL_BIAS_MODULO=10
 
 
 get_service_name() {
@@ -82,12 +83,12 @@ is_existing_service() {
 }
 
 
-# Addiere 1 oder 0 - abhaengig von der lokalen IP und der IP der Gegenstelle.
+# Addiere eine Zahl von 0 bis (LOCAL_BIAS_MODULO-1) - abhaengig von der lokalen IP und der IP der Gegenstelle.
 # Dadurch koennen wir beim Sortieren strukturelle Ungleichgewichte (z.B. durch alphabetische Sortierung) verhindern.
 _add_local_bias_to_host() {
 	local ip="$1"
         local host_number=$(echo "$ip" | sed 's/[^0-9]//g')
-	head -1 | awk '{ print $1 + ( '$(get_local_bias_number)' + '$host_number' ) % 2 }'
+	head -1 | awk '{ print $1 + ( '$(get_local_bias_number)' + '$host_number' ) % '$LOCAL_BIAS_MODULO' }'
 }
 
 
@@ -95,23 +96,34 @@ _add_local_bias_to_host() {
 # Der Wert ist beliebig und nur im Vergleich mit den Prioritaeten der anderen Dienste verwendbar.
 # Als optionaler zweiter Parameter kann die Sortierung uebergeben werden. Falls diese nicht uebergeben wurde,
 # wird die aktuell konfigurierte Sortierung benutzt.
+# Sollte ein Dienst ein "priority"-Attribut tragen, dann wird die uebliche Dienst-Sortierung aufgehoben
+# und lediglich "priority" (und gegebenenfalls separat "offset") beachtet.
 get_service_priority() {
 	trap "error_trap get_service_priority '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local sorting="${2:-}"
-	local distance=$(get_service_value "$service_name" "distance")
+	local priority=$(get_service_value "$service_name" "priority")
 	local rank
-	# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
-	[ -z "$sorting" ] && sorting=$(get_service_sorting)
-	if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
-		# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
-		[ -z "$distance" ] && return 0
-		get_distance_with_offset "$service_name"
-	elif [ "$sorting" = "manual" ]; then
-		get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
+	# priority wird von nicht-olsr-Clients verwendet (z.B. mesh-Gateways mit oeffentlichen IPs)
+	if [ -n "$priority" ]; then
+		# dieses Ziel traegt anscheinend keine Routing-Metrik
+		local offset=$(get_service_value "$service_name" "offset" "0")
+		echo "$((priority + offset))"
 	else
-		msg_info "Unknown sorting method for services: $sorting"
-		echo 1
+		# wir benoetigen Informationen fuer Ziele mit Routing-Metriken
+		local distance=$(get_service_value "$service_name" "distance")
+		# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
+		[ -z "$sorting" ] && sorting=$(get_service_sorting)
+		if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
+			# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
+			[ -z "$distance" ] && return 0
+			get_distance_with_offset "$service_name"
+		elif [ "$sorting" = "manual" ]; then
+			get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
+		else
+			msg_info "Unknown sorting method for services: $sorting"
+			echo 1
+		fi
 	fi | get_int_multiply 1000 | _add_local_bias_to_host "$(get_service_value "$service_name" "host")"
 }
 
@@ -175,12 +187,25 @@ sort_services_by_priority() {
 	local service_name
 	local priority
 	local sorting=$(get_service_sorting)
-	local unreachable_services=""
 	while read service_name; do
 		priority=$(get_service_priority "$service_name" "$sorting")
 		# keine Entfernung (nicht erreichbar) -> ganz nach hinten sortieren (schmutzig, aber wohl ausreichend)
 		[ -z "$priority" ] && priority=999999999999999999999999999999999999999
 		echo "$priority" "$service_name"
+	done | sort -n | awk '{print $2}'
+}
+
+
+## @fn sort_services_by()
+## @brief Sortiere den eingegeben Strom von Dienstnamen und gib eine sortierte Liste entsprechende des Arguments aus.
+## @param sort_column Die Spalte, anhand deren Inhalt die Auswertung und Sortierung stattfinden soll.
+sort_services_by() {
+	trap "error_trap sort_services_by '$*'" $GUARD_TRAPS
+	local sort_column="$1"
+	local service_name
+	while read service_name; do
+		value=$(get_service_value "$service_name" "$sort_column" "_")
+		echo "$value" "$service_name"
 	done | sort -n | awk '{print $2}'
 }
 

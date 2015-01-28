@@ -4,7 +4,11 @@
 
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
-# eine beliebige Portnummer, auf der wir keinen Dienst vermuten
+MESH_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-ugw.template
+## @todo vorerst unter einer fremden Domain, bis wir ueber das Konzept entschieden haben
+MESH_OPENVPN_SRV_DNS_NAME=_mesh-openvpn._udp.systemausfall.org
+#MESH_OPENVPN_SRV_DNS_NAME=_mesh-openvpn._udp.opennet-initiative.de
+## eine beliebige Portnummer, auf der wir keinen udp-Dienst vermuten
 SPEEDTEST_UPLOAD_PORT=29418
 SPEEDTEST_SECONDS=20
 UGW_FIREWALL_RULE_NAME=opennet_ugw
@@ -80,28 +84,32 @@ add_openvpn_ugw_service() {
 }
 
 
-# Parse die Liste der via olsrd-nameservice announcierten ugw-Dienste.
-# Falls keine UGW-Dienste gefunden werden, bzw. vorher konfiguriert waren, werden die Standard-Opennet-Server eingetragen.
-# Speichere diese Liste als on-userugw.@uplink-Liste.
-# Anschliessend werden eventuell Dienste (z.B. openvpn) neu konfiguriert.
-update_ugw_services() {
-	trap "error_trap update_ugw_services '$*'" $GUARD_TRAPS
-	local scheme
-	local ipaddr
+## @fn update_mesh_services_via_dns()
+## @brief Frage den Sammel-Domainnamen für alle Mesh-Gateways ab, erzeuge Dienste für alle angegebenen Namen und lösche veraltete Einträge der Liste.
+## @details Diese Funktion sollte gelegentlich via cronjob ausgeführt werden.
+update_mesh_services_via_dns() {
+	local priority
+	local weight
 	local port
-	local proto
-	local details
 	local hostname
-	local service_description
-	get_olsr_services mesh | cut -f 1,2,3,5,7 | while read scheme ipaddr port proto details; do
-		service_description="$scheme://$ipaddr:$port ($proto) $details"
-		if [ "$scheme" = "openvpn" ]; then
-			hostname=$(echo "$details" | get_from_key_value_list hostname :)
-			if [ -n "$hostname" ]; then
-				add_openvpn_ugw_service "$hostname" "$port" "$proto" "$details"
-			else
-				msg_info "ignoring service due to missing hostname: $service_description"
-			fi
+	local service_name
+	local timestamp
+	local min_timestamp=$(($(get_time_minute) - $(get_on_core_default "service_expire_minutes")))
+	query_srv_records "$MESH_OPENVPN_SRV_DNS_NAME" | while read priority weight port hostname; do
+		notify_service "mesh" "openvpn" "$hostname" "$port" "udp" "/" "" "dns-srv"
+		service_name=$(get_service_name "mesh" "openvpn" "$hostname" "$port" "udp" "/")
+		# wir ignorieren das SRV-Attribut "weight" - nur "priority" ist fuer uns relevant
+		set_service_value "$service_name" "priority" "$priority"
+	done
+	# veraltete Dienste entfernen
+	get_services | filter_services_by_value "service=mesh" "scheme=openvpn" "source=dns-srv" | while read service_name; do
+		timestamp=$(get_service_value "$service_name" "timestamp" 0)
+		# der Service ist zu lange nicht aktualisiert worden
+		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
+	done
+}
+
+
 		else
 			msg_info "update_ugw_services: unbekannter ugw-Service: $service_description"
 		fi

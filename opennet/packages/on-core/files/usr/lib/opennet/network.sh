@@ -17,6 +17,18 @@ query_dns() { nslookup "$1" | sed '1,/^Name:/d' | awk '{print $3}' | sort -n; }
 query_dns_reverse() { nslookup "$1" 2>/dev/null | tail -n 1 | awk '{ printf "%s", $4 }'; }
 
 
+## @fn query_srv_record()
+## @brief Liefere die SRV Records zu einer Domain zurück.
+## @param srv_domain Dienst-Domain (z.B. _mesh-openvpn._udp.opennet-initiative.de)
+## @returns Zeilenweise Ausgabe von SRV Records: PRIORITY WEIGHT PORT HOSTNAME
+## @details siehe RFC 2782
+query_srv_records() {
+	local srv_domain="$1"
+	# entferne den abschliessenden Top-Level-Domain-Punkt ("on-i.de." statt "on-i.de")
+	dig +short SRV "$srv_domain" | sed 's/\.$//'
+}
+
+
 # Lege eine Weiterleitungsregel fuer die firewall an (firewall.@forwarding[?]=...)
 # WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
 # Parameter: Quell-Zone und Ziel-Zone

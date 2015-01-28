@@ -297,5 +297,48 @@ prepare_openvpn_service() {
 	set_service_value "$service_name" "pid_file" "$pid_file"
 }
 
+
+## @fn openvpn_get_mtu()
+## @brief Ermittle die MTU auf dem Weg zum Anbieter des Diensts. Die Attribute des Diensts werden anschließend aktualisiert.
+openvpn_get_mtu() {
+	trap "error_trap openvpn_get_mtu '$*'" $GUARD_TRAPS
+	local service_name=$1
+	local pid_file="/tmp/openvpn_mtutest_${service_name}.pid"
+	local config_file="/tmp/openvpn_mtutest_${service_name}.conf"
+	local out_file="/tmp/openvpn_mtutest_${service_name}.out"
+
+	get_openvpn_config "$service_name" | grep -v -E "^(writepid|dev)[ \t]" >"$config_file"
+	openvpn --config "$config_file" --dev null --writepid "$pid_file" --mtu-test >"$out_file" 2>&1 &
+	# wait for openvpn to startup and write pid file
+	local pid=$(cat "$pid_file" 2>/dev/null || true)
+	local wait_loops=40
+	local mtu_out
+	while [ "$wait_loops" -gt 0 ]; do
+		mtu_out=$(grep "MTU test completed" "$out_file")
+		# for example
+		# Thu Jul  3 22:23:01 2014 NOTE: Empirical MTU test completed [Tried,Actual] local->remote=[1573,1573] remote->local=[1573,1573]
+		if [ -n "$mtu_out" ]; then
+                        # output result as one line 4 numbers and complete status output line comma separated
+			echo "$mtu_out" | tr '[' ',' | tr ']' ',' | cut -d , -f 5,6,8,9 | tr '\n' ','
+			echo "$mtu_out"
+			kill "$pid" >/dev/null 2>&1 || true; rm -f "$pid_file" "$out_file"
+			return 0
+		fi
+		if [ -z "$pid" -o ! -d "/proc/$pid" ]; then
+			msg_info "test for ugw_getMTU $hostname impossible. Aborting."
+			[ -n "$pid" ] && kill "$pid" >/dev/null 2>&1 || true
+			rm -f "$pid_file" "$out_file"
+			# leere Ausgabe bei Fehler
+			return 0
+		fi
+		sleep 10
+		: $((wait_loops--))
+	done
+	# der Zaehler ist abgelaufen - wir brechen alle Prozesse ab und raeumen auf
+	kill "$pid" >/dev/null 2>&1 || true; rm -f "$pid_file" "$out_file"
+	msg_info "timeout for openvpn_get_mtu '$host' - aborting."
+	return 0
+}
+
 # Ende der openvpn-Doku-Gruppe
 ## @}

@@ -29,6 +29,20 @@ query_srv_records() {
 }
 
 
+## @fn get_ping_time()
+## @brief Ermittle die Latenz eines Ping-Pakets auf dem Weg zu einem Ziel.
+## @param target IP oder DNS-Name des Zielhosts
+## @param duration die Dauer der Ping-Kommunikation in Sekunden (falls ungesetzt: 5)
+## @returns Ausgabe der mittleren Ping-Zeit in ganzen Sekunden; bei Nichterreichbarkit ist die Ausgabe leer
+get_ping_time() {
+	local target="$1"
+	local duration="${2:-5}"
+	local ip=$(query_dns "$target")
+	[ -z "$ip" ] && return 0
+	ping -w "$duration" -q "$ip" 2>/dev/null | grep "min/avg/max/" | cut -f 6 -d / | awk '{ print int($1 + 0.5); }'
+}
+
+
 # Lege eine Weiterleitungsregel fuer die firewall an (firewall.@forwarding[?]=...)
 # WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
 # Parameter: Quell-Zone und Ziel-Zone

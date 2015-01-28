@@ -12,6 +12,9 @@ MESH_OPENVPN_SRV_DNS_NAME=_mesh-openvpn._udp.systemausfall.org
 SPEEDTEST_UPLOAD_PORT=29418
 SPEEDTEST_SECONDS=20
 UGW_FIREWALL_RULE_NAME=opennet_ugw
+## für die Kompatibilität mit Firmware vor v0.5
+UGW_LOCAL_SERVICE_PORT_LEGACY=1600
+## falls mehr als ein GW-Dienst weitergereicht wird, wird dieser Port und die folgenden verwendet
 UGW_LOCAL_SERVICE_PORT_START=5100
 UGW_SERVICE_CREATOR=ugw_service
 
@@ -22,65 +25,49 @@ UGW_SERVICE_CREATOR=ugw_service
 get_on_usergw_default() { _get_file_dict_value "$ON_USERGW_DEFAULTS_FILE" "$1"; }
 
 
-# Ermittle den aktuell definierten UGW-Portforward.
-# Ergebnis (tab-separiert fuer leichte 'cut'-Behandlung des Output):
-#   lokale IP-Adresse fuer UGW-Forward
-#   externer Gateway
-# TODO: siehe auch http://dev.on-i.de/ticket/49 - wir duerfen uns nicht auf die iptables-Ausgabe verlassen
-get_ugw_portforward() {
-	local chain=zone_${ZONE_MESH}_prerouting
-	# TODO: vielleicht lieber den uci-Portforward mit einem Namen versehen?
-	iptables -L "$chain" -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600 to:/ {printf $3 "\t" $5 "\t" $10; exit}'
+## @fn has_mesh_openvpn_credentials()
+## @brief Prüft, ob der Nutzer bereits einen Schlüssel und ein Zertifikat angelegt hat.
+## @returns Liefert "wahr", falls Schlüssel und Zertifikat vorhanden sind oder
+##   falls in irgendeiner Form Unklarheit besteht.
+has_mesh_openvpn_credentials() {
+	has_openvpn_credentials_by_template "$MESH_OPENVPN_CONFIG_TEMPLATE_FILE" && return 0
+	trap "" $GUARD_TRAPS && return 1
 }
 
 
-# Erzeuge einen neuen ugw-Service.
-# Ignoriere doppelte Eintraege.
-# Es wird _kein_ "uci commit" durchgefuehrt.
-# TODO: nahezu identisch mit add_openvpn_mig_service
-add_openvpn_ugw_service() {
-	local hostname=$1
-	local port=$2
-	local protocol=$3
-	local details=$4
-	local uci_prefix
-	local ipaddr
-	local template
-	local config_dir
-	local config_file
-	local config_name
-	local safe_hostname
-	local config_prefix
-	if [ "$protocol" = "udp" ]; then
-		template=/usr/share/opennet/openvpn-ugw-udp.template
-		config_dir=$OPENVPN_CONFIG_BASEDIR
-		config_prefix=on_ugw
-	else
-		msg_info "failed to add openvpn service for UGW due to invalid protocol ($protocol)"
-		return 1
+## @fn test_ugw_openvpn_connection()
+## @brief Prüfe, ob ein Verbindungsaufbau mit einem openvpn-Dienst möglich ist.
+## @param Name eines Diensts
+## @returns exitcode=0 falls der Test erfolgreich war
+## @details Die UGW-Tests dürfen eher träger Natur sein, da die Nutzer-VPN-Tests für schnelle Wechsel im Fehlerfall
+##   sorgen und jedes UGW typischerweise mehrere Gateway-Dienste via Portweiterleitung anbietet.
+## @attention Seiteneffekt: die Zustandsinformationen des Diensts (Status und Test-Zeitstempel) werden verändert.
+test_ugw_openvpn_connection() {
+	trap "error_trap test_ugw_openvpn_connection '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
+	prepare_openvpn_service "$service_name" "$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
+	local host=$(get_service_detail "$service_name" "hostname")
+	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
+	local recheck_age=$(get_on_usergw_default "openvpn_recheck_age")
+	local now=$(get_time_minute)
+	local status=$(get_service_value "$service_name" "status")
+	local returncode=0
+	if [ -z "$timestamp" ] || [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age"; then
+		if verify_vpn_connection "$service_name" \
+				"$VPN_DIR_TEST/on_aps.key" \
+				"$VPN_DIR_TEST/on_aps.crt" \
+				"$VPN_DIR_TEST/opennet-ca.crt"; then
+			msg_debug "vpn-availability of gw $host successfully tested"
+			set_service_value "$service_name" "status" "y"
+		else
+			set_service_value "$service_name" "status" "n"
+			msg_debug "failed to test vpn-availability of gw $host"
+			returncode=1
+		fi
+		set_service_value "$service_name" "timestamp_connection_test" "$now"
 	fi
-	[ "$protocol" != "tcp" -a "$protocol" != "udp" ] && \
-		msg_info "failed to set up openvpn settings for invalid protocol ($protocol)" && return 1
-	# config-Schluessel erstellen
-	safe_hostname=$(echo "$hostname" | sed 's/[^a-zA-Z0-9]/_/g')
-	config_name=openvpn_${config_prefix}_${safe_hostname}_${protocol}_${port}
-	config_file=$config_dir/${config_name}.conf
-	prepare_on_usergw_uci_settings
-	uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
-	[ -z "$uci_prefix" ] && uci_prefix=on-usergw.$(uci add on-usergw uplink)
-	# neuer Eintrag? Dann moege er aktiv sein.
-	[ -z "$(uci_get "${uci_prefix}.enable")" ] && uci set "${uci_prefix}.enable=1"
-	uci set "${uci_prefix}.name=$config_name"
-	uci set "${uci_prefix}.type=openvpn"
-	uci set "${uci_prefix}.hostname=$hostname"
-	uci set "${uci_prefix}.template=$template"
-	uci set "${uci_prefix}.config_file=$config_file"
-	uci set "${uci_prefix}.port=$port"
-	uci set "${uci_prefix}.protocol=$protocol"
-	# Zeitstempel auffrischen
-	set_service_value "$config_name" "last_seen" "$(date +%s)"
-	# Details koennen sich haeufig aendern (z.B. Geschwindigkeiten)
-	set_service_value "$config_name" "details" "$details"
+	trap "" $GUARD_TRAPS && return "$returncode"
 }
 
 
@@ -110,16 +97,140 @@ update_mesh_services_via_dns() {
 }
 
 
+## @fn update_public_gateway_speed_estimation()
+## @brief Schätze die Upload- und Download-Geschwindigkeit zu dem Dienstanbieter ab. Aktualisiere anschließend die Attribute des Diensts.
+## @param service_name der Name des Diensts
+## @details Auf der Gegenseite wird die Datei '.10megabyte' fuer den Download via http erwartet.
+update_public_gateway_speed_estimation() {
+	trap "error_trap update_public_gateway_speed_estimation '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local host=$(get_service_value "$service_name" "$host")
+	local download_speed=$(measure_download_speed "$host")
+	local upload_speed=$(measure_upload_speed "$host")
+	# keine Zahlen? Keine Aktualisierung ...
+	[ -z "$download_speed" ] && [ -z "$upload_speed" ] && return
+	# gleitende Mittelwerte: vorherigen Wert einfliessen lassen
+	# Falls keine vorherigen Werte vorliegen, dann werden die aktuellen verwendet.
+	local prev_download=$(get_service_detail "$service_name" "wan_speed_download" "${download_speed:-0}")
+	local prev_upload=$(get_service_detail "$service_name" "wan_speed_upload" "${upload_speed:-0}")
+	set_service_detail "$service_name" "wan_speed_download" "$(((3 * download_speed + prev_download) / 4))"
+	set_service_detail "$service_name" "wan_speed_upload" "$(((3 * download_speed + prev_upload) / 4))"
+	set_service_value "$service_name" "wan_speed_timestamp" "$(get_time_minute)"
+}
+
+
+## @fn update_service_wan_status()
+## @brief Pruefe ob der Verkehr zum Anbieter des Diensts über ein WAN-Interface verlaufen würde. Das "wan_status"-Flag des Diensts wird daraufhin aktualisiert.
+## @param service_name der Name des Diensts
+## @details Diese Operation dauert ca. 5s, da zusätzlich die Ping-Zeit des Zielhosts ermittelt wird.
+update_service_wan_status() {
+	trap "error_trap ugw_update_wan_status '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local host=$(get_service_value "$service_name" "host")
+	local outgoing_interface=$(get_target_route_interface "$hostname")
+	if is_device_in_zone "$outgoing_interface" "$ZONE_WAN"; then
+		set_server_value "$service_name" "wan_status" "true"
+		local ping_time=$(get_ping_time "$host")
+		set_server_value "$service_name" "wan_ping" "$ping_time"
+		msg_debug "target '$host' routing through wan device: $outgoing_interface"
+		msg_debug "average ping time for $host: ${ping_time}s"
+	else
+		local outgoing_zone=$(get_zone_of_interface "$outgoing_interface")
+		# ausfuehrliche Erklaerung, falls das Routing zuvor noch akzeptabel war
+		uci_is_true "$(get_service_value "$service_name" "wan_status")" \
+			&& msg_info "Routing switched away from WAN interface to '$outgoing_interface'"
+		msg_debug "warning: target '$host' is routed via interface '$outgoing_interface' (zone '$outgoing_zone') instead of the expected WAN zone ($ZONE_WAN)"
+		set_server_value "$service_name" "wan_status" "false"
+		set_server_value "$service_name" "wan_ping" ""
+	fi
+}
+
+
+## @fn update_public_gateway_mtu()
+## @brief Falls auf dem Weg zwischen Router und öffentlichem Gateway ein MTU-Problem existiert, dann werden die Daten nur bruchstückhaft fließen, auch wenn alle anderen Symptome (z.B. Ping) dies nicht festellten. Daher müssen wir auch den MTU-Pfad auswerten lassen.
+## @param service_name der Name des Diensts
+## @returns keine Ausgabe - als Seiteneffekt wird der MTU des Diensts verändert
+update_public_gateway_mtu() {
+	trap "error_trap update_public_gateway_mtu '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local host=$(get_service_value "$service_name" "host")
+	local state
+
+	msg_debug "starting update_public_gateway_mtu for '$host'"
+	msg_debug "update_public_gateway_mtu will take around 5 minutes per gateway"
+
+	local result=$(openvpn_get_mtu "$service_name")
+
+	if [ -n "$result" ]; then
+		local out_wanted=$(echo "$result" | cut -f 1 -d ,)
+		local out_real=$(echo "$result" | cut -f 2 -d ,)
+		local in_wanted=$(echo "$result" | cut -f 3 -d ,)
+		local in_real=$(echo "$result" | cut -f 4 -d ,)
+		local status_output=$(echo "$result" | cut -f 5- -d ,)
+
+		if [ "$out_wanted" -le "$out_real" ] && [ "$in_wanted" -le "$in_real" ]; then
+			state="true"
 		else
-			msg_info "update_ugw_services: unbekannter ugw-Service: $service_description"
+			state="false"
 		fi
-	done
-	# pruefe ob keine UGWs konfiguriert sind - erstelle andernfalls die Standard-UGWs von Opennet
-	prepare_on_usergw_uci_settings
-	[ -z "$(find_all_uci_sections on-usergw uplink)" ] && add_default_openvpn_ugw_services
-	# Portweiterleitungen aktivieren
-	# kein "apply_changes" - andernfalls koennten Loops entstehen
-	uci commit on-usergw
+
+	else
+		out_wanted=
+		out_real=
+		in_wanted=
+		in_real=
+		status_output=
+		state="false"
+	fi
+	set_service_value "$service_name" mtu_msg "$status_output"
+	set_service_value "$service_name" mtu_out_wanted "$out_wanted"
+	set_service_value "$service_name" mtu_out_real "$out_real"
+	set_service_value "$service_name" mtu_in_wanted "$in_wanted"
+	set_service_value "$service_name" mtu_in_real "$in_real"
+	set_service_value "$service_name" mtu_timestamp "$(get_time_minute)"
+	set_service_value "$service_name" "mtu_status" "$state"
+
+	local mtu_status=$(get_service_value "$service_name" mtu_status)
+	local mtu_msg=$(get_service_value "$service_name" mtu_msg)
+	msg_debug "mtu [$mtu_status]: update_public_gateway_mtu for '$host' done"
+	msg_debug "mtu [$mtu_status]: $mtu_msg"
+}
+
+
+# try to establish openvpn tunnel
+# return a string, if it works (else return nothing)
+# parameter is index to test
+update_public_gateway_vpn_status() {
+	trap "error_trap ugw_update_vpn_status '$*'" $GUARD_TRAPS
+	local service_name=$1
+	local host=$(get_server_value "$service_name" "host")
+	local status
+	if verify_vpn_connection "$service_name" \
+			"$VPN_DIR_TEST/on_aps.key" \
+			"$VPN_DIR_TEST/on_aps.crt" \
+			"$VPN_DIR_TEST/opennet-ca.crt"; then
+		status="true"
+		msg_debug "vpn-availability of gw '$host' successfully tested"
+	else
+		status="false"
+	fi
+	set_service_value "$service_name" "vpn_status" "false"
+	set_service_value "$service_name" "vpn_timestamp" "$(get_time_minute)"
+	msg_debug "finished vpn test of '$host'"
+}
+
+
+#----------
+
+# Ermittle den aktuell definierten UGW-Portforward.
+# Ergebnis (tab-separiert fuer leichte 'cut'-Behandlung des Output):
+#   lokale IP-Adresse fuer UGW-Forward
+#   externer Gateway
+# TODO: siehe auch http://dev.on-i.de/ticket/49 - wir duerfen uns nicht auf die iptables-Ausgabe verlassen
+get_ugw_portforward() {
+	local chain=zone_${ZONE_MESH}_prerouting
+	# TODO: vielleicht lieber den uci-Portforward mit einem Namen versehen?
+	iptables -L "$chain" -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600 to:/ {printf $3 "\t" $5 "\t" $10; exit}'
 }
 
 

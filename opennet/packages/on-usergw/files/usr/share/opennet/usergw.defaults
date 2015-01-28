@@ -1,6 +1,4 @@
-vpn_recheck_age			15
-vpn_nonworking_timeout		15
-vpn_bettergateway_timeout	10
+openvpn_recheck_age		15
 
 certificate_countryName		de
 certificate_provinceName	Mecklenburg-Vorpommern

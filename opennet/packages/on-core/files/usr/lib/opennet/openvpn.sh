@@ -229,5 +229,22 @@ submit_csr_via_http() {
 	trap "" $GUARD_TRAPS && return 1
 }
 
+
+## @fn has_openvpn_credentials_by_template()
+## @brief Prüft, ob der Nutzer bereits einen Schlüssel und ein Zertifikat angelegt hat.
+## @param template_file Name einer openvpn-Konfigurationsdatei (oder einer Vorlage). Aus dieser Datei werden "cert"- und "key"-Werte entnommen.
+## @returns Liefert "wahr", falls Schlüssel und Zertifikat vorhanden sind oder falls in irgendeiner Form Unklarheit besteht.
+has_openvpn_credentials_by_template() {
+	trap "error_trap has_openvpn_credentials_by_template '$*'" $GUARD_TRAPS
+	local template_file="$1"
+	local cert_file=$(_get_file_dict_value "$template_file" "cert")
+	local key_file=$(_get_file_dict_value "$template_file" "key")
+	# im Zweifel: liefere "wahr"
+	[ -z "$key_file" -o -z "$cert_file" ] && return 0
+	# beide Dateien existieren
+	[ -e "$key_file" -a -e "$cert_file" ] && return 0
+	trap "" $GUARD_TRAPS && return 1
+}
+
 # Ende der openvpn-Doku-Gruppe
 ## @}

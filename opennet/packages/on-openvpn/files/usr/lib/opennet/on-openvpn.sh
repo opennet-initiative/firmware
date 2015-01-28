@@ -33,17 +33,12 @@ update_mig_service() {
 }
 
 
-## @fn has_mig_credentials()
+## @fn has_mig_openvpn_credentials()
 ## @brief Prüft, ob der Nutzer bereits einen Schlüssel und ein Zertifikat angelegt hat.
 ## @returns Liefert "wahr", falls Schlüssel und Zertifikat vorhanden sind oder
 ##   falls in irgendeiner Form Unklarheit besteht.
-has_mig_credentials() {
-	local cert_file=$(_get_file_dict_value "$MIG_VPN_CONFIG_TEMPLATE_FILE" "cert")
-	local key_file=$(_get_file_dict_value "$MIG_VPN_CONFIG_TEMPLATE_FILE" "key")
-	# im Zweifel: liefere "wahr"
-	[ -z "$key_file" -o -z "$cert_file" ] && return 0
-	# beide Dateien existieren
-	[ -e "$key_file" -a -e "$cert_file" ] && return 0
+has_mig_openvpn_credentials() {
+	has_openvpn_credentials_by_template "$MIG_VPN_CONFIG_TEMPLATE_FILE" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

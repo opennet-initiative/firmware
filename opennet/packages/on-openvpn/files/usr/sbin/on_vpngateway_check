@@ -72,7 +72,7 @@ case "${1:-}" in
 				test_mig_connection "$service_name" || true
 			done
 			# der Gateway-Wechsel findet nur statt, falls Schluessel und Zertifikat vorhanden sind
-			has_mig_credentials && find_and_select_best_gateway || true
+			has_mig_openvpn_credentials && find_and_select_best_gateway || true
 		fi
 		;;
 esac

@@ -12,7 +12,7 @@ DEFAULT_SERVICE_SORTING=etx
 PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset disabled"
 
 
-_get_service_name() {
+get_service_name() {
 	local service="$1"
 	local scheme="$2"
 	local host="$3"
@@ -36,7 +36,7 @@ notify_service() {
 	local path="$6"
 	local details="$7"
 	local source="$8"
-	local service_name=$(_get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
+	local service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 	local now=$(get_time_minute)
 	if ! is_existing_service "$service_name"; then
 		# diese Attribute sind Bestandteil des Namens und aendern sich nicht

@@ -79,7 +79,7 @@ test_mig_connection() {
 		# 3) falls bisher noch kein definitives Ergebnis feststand (dies ist nur innerhalb
 		#    der ersten "recheck" Minuten nach dem Booten moeglich).
 		# In jedem Fall kann der Zeitstempel gesetzt werden - egal welches Ergebnis die Pruefung hat.
-		if verify_vpn_connection "$service_name" "host" \
+		if verify_vpn_connection "$service_name" \
 				"$VPN_DIR_TEST/on_aps.key" \
 				"$VPN_DIR_TEST/on_aps.crt" \
 				"$VPN_DIR_TEST/opennet-ca.crt"; then

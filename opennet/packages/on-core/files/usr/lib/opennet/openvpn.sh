@@ -11,13 +11,11 @@ OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
 ## @fn enable_openvpn_service()
 ## @brief Erzeuge eine funktionierende openvpn-Konfiguration (Datei + UCI).
 ## @param service_name Name eines Dienstes
-## @param destination_attribute Service-Attribut, das als Ziel-Host für die VPN-Verbindung verwendet werden soll (z.B. "host" oder "detail:hostname")
 ## @details Die Konfigurationsdatei wird erzeugt und eine openvpn-uci-Konfiguration wird angelegt.
 ##   Falls zu diesem openvpn-Dienst kein Zertifikat oder kein Schlüssel gefunden wird, dann passiert nichts.
 enable_openvpn_service() {
 	trap "error_trap enable_openvpn_service '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local destination_attribute="$2"
 	if ! openvpn_service_has_certificate_and_key "$service_name"; then
 		msg_info "Refuse to enable openvpn server ('$service_name'): missing key or certificate"
 		trap "" $GUARD_TRAPS && return 1
@@ -25,7 +23,7 @@ enable_openvpn_service() {
 	local uci_prefix="openvpn.$service_name"
 	local config_file=$(get_service_value "$service_name" "config_file")
 	# zukuenftige config-Datei referenzieren
-	update_vpn_config "$service_name" "$destination_attribute"
+	update_vpn_config "$service_name"
 	# zuvor ankuendigen, dass zukuenftig diese uci-Konfiguration an dem Dienst haengt
 	service_add_uci_dependency "$service_name" "$uci_prefix"
 	# lege die uci-Konfiguration an und aktiviere sie
@@ -39,16 +37,14 @@ enable_openvpn_service() {
 ## @fn update_vpn_config()
 ## @brief Schreibe eine openvpn-Konfigurationsdatei.
 ## @param service_name Name eines Dienstes
-## @param destination_attribute Service-Attribut, das als Ziel-Host für die VPN-Verbindung verwendet werden soll (z.B. "host" oder "detail:hostname")
 update_vpn_config() {
 	trap "error_trap update_vpn_config '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local destination_attribute="$2"
 	local config_file=$(get_service_value "$service_name" "config_file")
 	service_add_file_dependency "$service_name" "$config_file"
 	# Konfigurationsdatei neu schreiben
 	mkdir -p "$(dirname "$config_file")"
-	get_openvpn_config "$service_name" "$destination_attribute" >"$config_file"
+	get_openvpn_config "$service_name" >"$config_file"
 }
 
 
@@ -88,17 +84,10 @@ is_openvpn_service_active() {
 ## @fn get_openvpn_config()
 ## @brief liefere openvpn-Konfiguration eines Dienstes zurück
 ## @param service_name Name eines Dienstes
-## @param destination_attribute Service-Attribut, das als Ziel-Host für die VPN-Verbindung verwendet werden soll (z.B. "host" oder "detail:hostname")
 get_openvpn_config() {
 	trap "error_trap get_openvpn_config '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local destination_attribute="$2"
-	local remote
-	if echo "$destination_attribute" | grep -q "^detail:"; then
-		remote=$(get_service_detail "$service_name" "${destination_attribute#detail:}")
-	else
-		remote=$(get_service_value "$service_name" "$destination_attribute")
-	fi
+	local remote=$(get_service_value "$service_name" "host")
 	local port=$(get_service_value "$service_name" "port")
 	local protocol=$(get_service_value "$service_name" "protocol")
 	[ "$protocol" = "tcp" ] && protocol=tcp-client
@@ -116,7 +105,6 @@ get_openvpn_config() {
 ## @fn verify_vpn_connection()
 ## @brief Prüfe einen VPN-Verbindungsaufbau
 ## @param service_name Name eines Dienstes
-## @param destination_attribute Service-Attribut, das als Ziel-Host für die VPN-Verbindung verwendet werden soll (z.B. "host" oder "detail:hostname")
 ## @param key [optional] Schluesseldatei: z.B. $VPN_DIR/on_aps.key
 ## @param cert [optional] Zertifikatsdatei: z.B. $VPN_DIR/on_aps.crt
 ## @param ca-cert [optional] CA-Zertifikatsdatei: z.B. $VPN_DIR/opennet-ca.crt
@@ -124,10 +112,9 @@ get_openvpn_config() {
 verify_vpn_connection() {
 	trap "error_trap verify_vpn_connection '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local destination_attribute="$2"
-	local key_file=${3:-}
-	local cert_file=${4:-}
-	local ca_file=${5:-}
+	local key_file=${2:-}
+	local cert_file=${3:-}
+	local ca_file=${4:-}
 	local temp_config_file="/tmp/vpn_test_${service_name}-$$.conf"
 	local file_opts
 	local wan_dev
@@ -139,7 +126,7 @@ verify_vpn_connection() {
 
 	# filtere Einstellungen heraus, die wir ueberschreiben wollen
 	# nie die echte PID-Datei ueberschreiben (falls ein Prozess laeuft)
-	get_openvpn_config "$service_name" "$destination_attribute" | grep -v -E "^(writepid|dev|tls-verify|up|down)[ \t]" >"$temp_config_file"
+	get_openvpn_config "$service_name" | grep -v -E "^(writepid|dev|tls-verify|up|down)[ \t]" >"$temp_config_file"
 
 	# check if it is possible to open tunnel to the gateway (10 sec. maximum)
 	# Assembling openvpn parameters ...

@@ -613,9 +613,13 @@ get_potential_error_messages() {
 	# 9) openvpn(...)[...]: Authenticate/Decrypt packet error
 	#    Paketverschiebungen nach dem Verbindungsaufbau - anscheinend unproblematisch.
 	filters="${filters}|openvpn.*Authenticate/Decrypt packet error"
-	# 10) olsrd: /etc/init.d/olsrd: olsrd_setup_smartgw_rules() Warning: kmod-ipip is missing.
+	# 10) olsrd: ... olsrd_setup_smartgw_rules() Warning: kmod-ipip is missing.
 	#    olsrd gibt beim Starten generell diese Warnung aus. Wir koennen sie ignorieren.
 	filters="${filters}|olsrd.*olsrd_setup_smartgw_rules"
+	# 11) olsrd: ... olsrd_write_interface() Warning: Interface '...' not found, skipped
+	#    Falls das wlan-Interface beim Bootvorgang noch nicht aktiv ist, wenn olsrd startet, dann erscheint diese
+	#    harmlose Meldung.
+	filters="${filters}|olsrd.*Interface.*not found"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

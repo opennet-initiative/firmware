@@ -48,25 +48,19 @@ test_ugw_openvpn_connection() {
 	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
 	prepare_openvpn_service "$service_name" "$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
 	local host=$(get_service_detail "$service_name" "hostname")
-	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
-	local recheck_age=$(get_on_usergw_default "openvpn_recheck_age")
-	local now=$(get_time_minute)
-	local status=$(get_service_value "$service_name" "status")
 	local returncode=0
-	if [ -z "$timestamp" ] || [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age"; then
-		if verify_vpn_connection "$service_name" \
-				"$VPN_DIR_TEST/on_aps.key" \
-				"$VPN_DIR_TEST/on_aps.crt" \
-				"$VPN_DIR_TEST/opennet-ca.crt"; then
-			msg_debug "vpn-availability of gw $host successfully tested"
-			set_service_value "$service_name" "status" "y"
-		else
-			set_service_value "$service_name" "status" "n"
-			msg_debug "failed to test vpn-availability of gw $host"
-			returncode=1
-		fi
-		set_service_value "$service_name" "timestamp_connection_test" "$now"
+	if verify_vpn_connection "$service_name" \
+			"$VPN_DIR_TEST/on_aps.key" \
+			"$VPN_DIR_TEST/on_aps.crt" \
+			"$VPN_DIR_TEST/opennet-ca.crt"; then
+		msg_debug "vpn-availability of gw $host successfully tested"
+		set_service_value "$service_name" "status" "y"
+	else
+		set_service_value "$service_name" "status" "n"
+		msg_debug "failed to test vpn-availability of gw $host"
+		returncode=1
 	fi
+	set_service_value "$service_name" "timestamp_connection_test" "$(get_time_minute)"
 	trap "" $GUARD_TRAPS && return "$returncode"
 }
 
@@ -182,16 +176,16 @@ update_public_gateway_mtu() {
 		status_output=
 		state="false"
 	fi
-	set_service_value "$service_name" mtu_msg "$status_output"
-	set_service_value "$service_name" mtu_out_wanted "$out_wanted"
-	set_service_value "$service_name" mtu_out_real "$out_real"
-	set_service_value "$service_name" mtu_in_wanted "$in_wanted"
-	set_service_value "$service_name" mtu_in_real "$in_real"
-	set_service_value "$service_name" mtu_timestamp "$(get_time_minute)"
+	set_service_value "$service_name" "mtu_msg" "$status_output"
+	set_service_value "$service_name" "mtu_out_wanted" "$out_wanted"
+	set_service_value "$service_name" "mtu_out_real" "$out_real"
+	set_service_value "$service_name" "mtu_in_wanted" "$in_wanted"
+	set_service_value "$service_name" "mtu_in_real" "$in_real"
+	set_service_value "$service_name" "mtu_timestamp" "$(get_time_minute)"
 	set_service_value "$service_name" "mtu_status" "$state"
 
-	local mtu_status=$(get_service_value "$service_name" mtu_status)
-	local mtu_msg=$(get_service_value "$service_name" mtu_msg)
+	local mtu_status=$(get_service_value "$service_name" "mtu_status")
+	local mtu_msg=$(get_service_value "$service_name" "mtu_msg")
 	msg_debug "mtu [$mtu_status]: update_public_gateway_mtu for '$host' done"
 	msg_debug "mtu [$mtu_status]: $mtu_msg"
 }

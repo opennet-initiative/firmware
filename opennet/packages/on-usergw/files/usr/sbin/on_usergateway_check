@@ -45,14 +45,32 @@ case "$ACTION" in
 			run_for_all_openvpn_ugw "$func"
 		fi
 		;;
-	auto|*)
+	auto)
 		update_mesh_services_via_dns
 		get_services "mesh" | filter_enabled_services | sort_services_by "mtu_timestamp" | while read service_name; do
+			# Geschwindigkeitstest
+			timestamp=$(get_service_value "$service_name" "wan_speed_timestamp" "0")
+			recheck_minutes=$(get_on_usergw_default "wan_speed_recheck_period")
+			is_timestamp_older_minutes "$timestamp" "$recheck_minutes" \
+				&& update_public_gateway_speed_estimation "$service_name"
+			# VPN-Test
+			timestamp=$(get_service_value "$service_name" "vpn_timestamp" "0")
+			recheck_minutes=$(get_on_usergw_default "openvpn_recheck_period")
+			is_timestamp_older_minutes "$timestamp" "$recheck_minutes" \
+				&& update_public_gateway_vpn_status "$service_name"
+			# der MTU-Test
+			timestamp=$(get_service_value "$service_name" "mtu_timestamp" "0")
+			recheck_minutes=$(get_on_usergw_default "mtu_recheck_period")
+			is_timestamp_older_minutes "$timestamp" "$recheck_minutes" \
+				&& update_public_gateway_mtu "$service_name"
+			# der WAN-Test geht schnell - es gibt keine Wartezeit
 			update_service_wan_status "$service_name"
-			update_public_gateway_mtu "$service_name"
-			update_public_gateway_speed_estimation "$service_name"
-			update_public_gateway_vpn_status "$service_name"
-			ugw_update_service_status
+			# Gesamtstatus ermitteln
+			new_status="true"
+			for attribute in "wan_status" "mtu_status" "vpn_status"; do
+				uci_is_true "$(get_service_value "$service_name" "$attribute" "false")" || new_status="false"
+			done
+			set_service_value "$service_name" "status" "$new_status"
 		done
 		;;
 esac

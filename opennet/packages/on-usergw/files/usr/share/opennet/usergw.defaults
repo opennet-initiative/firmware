@@ -1,4 +1,6 @@
-openvpn_recheck_age		15
+openvpn_recheck_period		15
+wan_speed_recheck_period	1440
+mtu_recheck_period		120
 
 certificate_countryName		de
 certificate_provinceName	Mecklenburg-Vorpommern

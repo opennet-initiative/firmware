@@ -14,40 +14,30 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
-#################################################################################
-# start here - with the menu
 ACTION="${1:-auto}"
 shift
-
-test "$ACTION" = "--help" && echo -e "\
-Usage: on_usergateway_check [OPTION]...
-	usually called by cron every 5 minutes
-Options:
-	(no option)	do regular 5-minutely check
-	checkWan	check if routes to UGW go through WAN-device, detect ping-time
-	checkMtu	check if MTU of WAN-UGW-Tunnel is ok
-			this test will last ~5 minutes per tunnel
-			results will be stored in on-usergw config
-	checkVpn	check Vpn availability of gateway on port 1600
-	checkSpeed	check Speed of Gateway
-	--help		this help" && exit 0
 
 
 case "$ACTION" in
 	checkWan|checkMtu|checkVpn|checkSpeed)
-		[ "$ACTION" = checkWan ] && func=ugw_update_wan_status
-		[ "$ACTION" = checkMtu ] && func=ugw_update_mtu
-		[ "$ACTION" = checkVpn ] && func=ugw_update_vpn_status
-		[ "$ACTION" = checkSpeed ] && func=ugw_update_speed
-		if [ $# -gt 0 ]; then
-			"$func" "$@"
+		[ "$ACTION" = checkWan ] && func=update_service_wan_status
+		[ "$ACTION" = checkMtu ] && func=update_public_gateway_mtu
+		[ "$ACTION" = checkVpn ] && func=update_public_gateway_vpn_status
+		[ "$ACTION" = checkSpeed ] && func=update_public_gateway_speed_estimation
+		if [ "$#" -gt 0 ]; then
+			# filtere die Dienste, die mit der einen angegebenen IP assoziiert sind
+			get_services "mesh" | filter_services_by_value "host=$1"
 		else
-			run_for_all_openvpn_ugw "$func"
-		fi
+			get_services "mesh"
+		fi | filter_reachable_services | filter_enabled_services | while read service_name; do
+			description=$(get_service_description "$service_name")
+			echo "Testing Gateway: $description"
+			"$func" "$service_name" && echo "OK" || echo "FEHLER"
+		done
 		;;
 	auto)
 		update_mesh_services_via_dns
-		get_services "mesh" | filter_enabled_services | sort_services_by "mtu_timestamp" | while read service_name; do
+		get_services "mesh" | filter_enabled_services | while read service_name; do
 			# Geschwindigkeitstest
 			timestamp=$(get_service_value "$service_name" "wan_speed_timestamp" "0")
 			recheck_minutes=$(get_on_usergw_default "wan_speed_recheck_period")
@@ -73,5 +63,26 @@ case "$ACTION" in
 			set_service_value "$service_name" "status" "$new_status"
 		done
 		;;
+	--help|help)
+			cat - <<EOF
+Usage: $(basename "$0") [OPTION]...
+	usually called by cron every 5 minutes
+Options:
+	(no option)	do regular 5-minutely check
+	checkWan	check if routes to UGW go through WAN-device, detect ping-time
+	checkMtu	check if MTU of WAN-UGW-Tunnel is ok
+			this test will last ca. 5 minutes per tunnel
+			results will be stored in on-usergw config
+	checkVpn	check Mesh-OpenVPN availability of gateway
+	checkSpeed	check Speed of Gateway
+	--help		this help
+EOF
+		;;
+	*)
+		"$0" help >&2
+		exit 1
+		;;
 esac
+
+exit 0
 

@@ -38,7 +38,7 @@ case "${1:-}" in
 	test)
 		shift
 		if [ "$#" -gt 0 ]; then
-			# filtere die Dienste, die mit der einen angegebene IP assoziiert sind
+			# filtere die Dienste, die mit der einen angegebenen IP assoziiert sind
 			get_services "gw" "ugw" | filter_services_by_value "host=$1"
 		else
 			get_services "gw" "ugw"

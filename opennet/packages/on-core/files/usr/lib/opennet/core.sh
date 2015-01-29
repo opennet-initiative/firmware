@@ -394,14 +394,16 @@ set_opennet_id() {
 	olsr_set_main_ip "$main_ipaddr"
 	apply_changes olsrd
 	# wifidog-Interface konfigurieren
-	ipschema=$(get_on_wifidog_default free_ipschema)
-	netmask=$(get_on_wifidog_default free_netmask)
-	free_ipaddr=$(get_on_ip "$new_id" "$ipschema" 0)
-	uci_prefix=network.$NETWORK_FREE
-	uci set "${uci_prefix}=interface"
-	uci set "${uci_prefix}.proto=static"
-	uci set "${uci_prefix}.ipaddr=$free_ipaddr"
-	uci set "${uci_prefix}.netmask=$netmask"
+	if is_function_available "get_on_wifidog_default"; then
+		ipschema=$(get_on_wifidog_default free_ipschema)
+		netmask=$(get_on_wifidog_default free_netmask)
+		free_ipaddr=$(get_on_ip "$new_id" "$ipschema" 0)
+		uci_prefix="network.$NETWORK_FREE"
+		uci set "${uci_prefix}=interface"
+		uci set "${uci_prefix}.proto=static"
+		uci set "${uci_prefix}.ipaddr=$free_ipaddr"
+		uci set "${uci_prefix}.netmask=$netmask"
+	fi
 	apply_changes network
 	# DHCP-Forwards fuer wifidog
 	# Ziel ist beispielsweise folgendes Setup:

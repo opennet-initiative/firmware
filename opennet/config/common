@@ -242,3 +242,6 @@ CONFIG_PACKAGE_bind-tools=m
 CONFIG_PACKAGE_djbdns-tools=m
 CONFIG_PACKAGE_drill=m
 CONFIG_PACKAGE_unbound-host=m
+
+# traceroute und mtr mit ONI Ortsinformationen
+CONFIG_PACKAGE_traceroute-oni-names=m

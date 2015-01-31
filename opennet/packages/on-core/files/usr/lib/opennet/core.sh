@@ -691,5 +691,14 @@ system_service_check() {
 	trap "" $GUARD_TRAPS && return 1
 }
 
+
+## @fn get_memory_size()
+## @brief Ermittle die Größe des Arbeitsspeichers in Megabyte.
+## @returns Der Rückgabewert (in Megabyte) ist etwas kleiner als der physische Arbeitsspeicher (z.B. 126 statt 128 MB).
+get_memory_size() {
+	local memsize_kb=$(grep "^MemTotal:" /proc/meminfo | sed 's/[^0-9]//g')
+	echo $((memsize_kb / 1024))
+}
+
 # Ende der Doku-Gruppe
 ## @}

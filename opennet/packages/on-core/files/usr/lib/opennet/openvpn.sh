@@ -269,6 +269,7 @@ log_openvpn_events_and_disconnect_if_requested() {
 					"Lost connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
 				# Verbindung trennen
 				set_service_value "$service_name" "status" "n"
+				disable_openvpn_service "$service_name"
 				[ -n "$pid_file" ] && rm -f "$pid_file" || true
 			else
 				append_to_custom_log "$log_target" "down" \
@@ -338,6 +339,46 @@ openvpn_get_mtu() {
 	kill "$pid" >/dev/null 2>&1 || true; rm -f "$pid_file" "$out_file"
 	msg_info "timeout for openvpn_get_mtu '$host' - aborting."
 	return 0
+}
+
+
+## @fn cleanup_stale_openvpn_services()
+## @brief Beräumung liegengebliebener openvpn-Konfigurationen, sowie Deaktivierung funktionsunfähiger Verbindungen.
+## @details Verwaiste openvpn-Konfigurationen können aus zwei Grunden auftreten:
+##   1) nach einem reboot wurde nicht du zuletzt aktive openvpn-Verbindung ausgewählt - somit bleibt der vorher aktive uci-Konfigurationseintrag erhalten
+##   2) ein VPN-Verbindungsaufbau scheitert und hinterlässt einen uci-Eintrag, eine PID-Datei, jedoch keinen laufenden Prozess
+cleanup_stale_openvpn_services() {
+	trap "error_trap cleanup_stale_openvpn_services '$*'" $GUARD_TRAPS
+	local service_name
+	local config_file
+	local pid_file
+	local uci_prefix
+	find_all_uci_sections openvpn openvpn | while read uci_prefix; do
+		config_file=$(uci_get "${uci_prefix}.config")
+		# Keine config-Datei? Keine von uns verwaltete Konfiguration ...
+		[ -z "$config_file" ] && continue
+		service_name="${uci_prefix#openvpn.}"
+		pid_file=$(get_service_value "$service_name" "pid_file")
+		# Keine PID-Dateiangabe? Keine von uns verwaltete Konfiguration ...
+		[ -z "$pid_file" ] && continue
+		# Es scheint sich um eine von uns verwaltete Verbindung zu handeln.
+		# Falls die config-Datei oder die pid-Datei fehlt, dann ist es ein reboot-Fragment. Wir löschen die Überreste.
+		if [ ! -e "$config_file" -o ! -e "$pid_file" ]; then
+			msg_info "Removing a reboot-fragment of a previously used openvpn connection: $service_name"
+			disable_openvpn_service "$service_name"
+		elif check_pid_file "$pid_file" "openvpn"; then
+			# Prozess läuft - alles gut
+			true
+		else
+			# Falls die PID-Datei existiert, jedoch veraltet ist (kein dazugehöriger Prozess läuft), dann
+			# schlug der Verbindungsaufbau fehlt (siehe "tls-exit" und "single-session").
+			# Wir markieren die Verbindung als kaputt.
+			msg_info "Marking a possibly interrupted openvpn connection as broken: $service_name"
+			set_service_value "$service_name" "status" "n"
+			disable_openvpn_service "$service_name"
+		fi
+	done
+	apply_changes openvpn
 }
 
 # Ende der openvpn-Doku-Gruppe

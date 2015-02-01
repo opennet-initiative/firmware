@@ -154,28 +154,18 @@ update_public_gateway_mtu() {
 	msg_debug "update_public_gateway_mtu will take around 5 minutes per gateway"
 
 	local result=$(openvpn_get_mtu "$service_name")
+	local out_wanted=$(echo "$result" | cut -f 1)
+	local out_real=$(echo "$result" | cut -f 2)
+	local in_wanted=$(echo "$result" | cut -f 3)
+	local in_real=$(echo "$result" | cut -f 4)
+	local status_output=$(echo "$result" | cut -f 5)
 
-	if [ -n "$result" ]; then
-		local out_wanted=$(echo "$result" | cut -f 1 -d ,)
-		local out_real=$(echo "$result" | cut -f 2 -d ,)
-		local in_wanted=$(echo "$result" | cut -f 3 -d ,)
-		local in_real=$(echo "$result" | cut -f 4 -d ,)
-		local status_output=$(echo "$result" | cut -f 5- -d ,)
-
-		if [ "$out_wanted" -le "$out_real" ] && [ "$in_wanted" -le "$in_real" ]; then
-			state="true"
-		else
-			state="false"
-		fi
-
+	if [ -n "$result" ] && [ "$out_wanted" -le "$out_real" ] && [ "$in_wanted" -le "$in_real" ]; then
+		state="true"
 	else
-		out_wanted=
-		out_real=
-		in_wanted=
-		in_real=
-		status_output=
 		state="false"
 	fi
+
 	set_service_value "$service_name" "mtu_msg" "$status_output"
 	set_service_value "$service_name" "mtu_out_wanted" "$out_wanted"
 	set_service_value "$service_name" "mtu_out_real" "$out_real"

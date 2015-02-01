@@ -300,10 +300,12 @@ prepare_openvpn_service() {
 
 
 ## @fn openvpn_get_mtu()
-## @brief Ermittle die MTU auf dem Weg zum Anbieter des Diensts. Die Attribute des Diensts werden anschließend aktualisiert.
+## @brief Ermittle die MTU auf dem Weg zum Anbieter des Diensts.
+## @details The output can be easily parsed via 'cut'. Even the full status output of openvpn is safe for parsing since potential tabulator characters are removed.
+## @returns One line consisting of five fields separated by tab characters is returned (tried_to_remote real_to_remote tried_from_remote real_from_remote full_status_output). Failed tests are indicated by an empty result.
 openvpn_get_mtu() {
 	trap "error_trap openvpn_get_mtu '$*'" $GUARD_TRAPS
-	local service_name=$1
+	local service_name="$1"
 	local pid_file="/tmp/openvpn_mtutest_${service_name}.pid"
 	local config_file="/tmp/openvpn_mtutest_${service_name}.conf"
 	local out_file="/tmp/openvpn_mtutest_${service_name}.out"
@@ -319,25 +321,24 @@ openvpn_get_mtu() {
 		# for example
 		# Thu Jul  3 22:23:01 2014 NOTE: Empirical MTU test completed [Tried,Actual] local->remote=[1573,1573] remote->local=[1573,1573]
 		if [ -n "$mtu_out" ]; then
-                        # output result as one line 4 numbers and complete status output line comma separated
-			echo "$mtu_out" | tr '[' ',' | tr ']' ',' | cut -d , -f 5,6,8,9 | tr '\n' ','
-			echo "$mtu_out"
-			kill "$pid" >/dev/null 2>&1 || true; rm -f "$pid_file" "$out_file"
-			return 0
+                        # Ausgabe der vier Zahlen getrennt durch Tabulatoren
+			echo "$mtu_out" | tr '[' ',' | tr ']' ',' | cut -d , -f 5,6,8,9 --output-delimiter '\t' | tr '\n' '\t'
+			# wir ersetzen alle eventuell vorhandenen Tabulatoren in der Statusausgabe - zur Vereinfachung des Parsers
+			echo -n "$mtu_out" | tr '\t' ' '
+			break
 		fi
 		if [ -z "$pid" -o ! -d "/proc/$pid" ]; then
-			msg_info "test for ugw_getMTU $hostname impossible. Aborting."
-			[ -n "$pid" ] && kill "$pid" >/dev/null 2>&1 || true
-			rm -f "$pid_file" "$out_file"
-			# leere Ausgabe bei Fehler
-			return 0
+			msg_info "failed to verify MTU resctrictions for $(get_service_value "$service_name" "host")"
+			break
 		fi
 		sleep 10
 		: $((wait_loops--))
 	done
-	# der Zaehler ist abgelaufen - wir brechen alle Prozesse ab und raeumen auf
-	kill "$pid" >/dev/null 2>&1 || true; rm -f "$pid_file" "$out_file"
-	msg_info "timeout for openvpn_get_mtu '$host' - aborting."
+	# sicherheitshalber brechen wir den Prozess ab und loeschen alle Dateien
+	kill "$pid" >/dev/null 2>&1 || true
+	rm -f "$pid_file" "$out_file" "$config_file"
+	# ist der Zaehler abgelaufen?
+	[ "$wait_loops" -eq 0 ] && msg_info "timeout for openvpn_get_mtu '$host' - aborting."
 	return 0
 }
 

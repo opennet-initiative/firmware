@@ -61,6 +61,7 @@ Der entsprechende ``nameservice``-Block in der ``olsrd.conf`` des DNS-Servers ka
 
 **Wichtig**: Die angegebene IP muss unbedingt auf einem der von olsr verwalteten Netzwerk-Interfaces konfiguriert sein. Andernfalls wird das ``nameservice``-Plugin stillschweigend die Verteilung unterlassen. In der ``/var/run/services_olsr`` auf dem Host ist sofort zu erkennen, ob der Dienst-Eintrag verteilt wird.
 
+
 ### Integration auf den APs {#dns-ap}
 
 Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank. Im Anschluss wird ``apply_changes on-core`` aufgerufen. Dies löst die Aktualisierung der ``dnsmasq``-Nameserver-Datei (``/var/run/dnsmasq.servers``) basierend auf der Dienstliste aus.
@@ -82,6 +83,7 @@ NTP - Zeitsynchronisation {#ntp}
 Alle NTP-Server verteilen via olsrd-nameservice-Plugin einen Eintrag ähnlich dem folgenden:
 
     ntp://192.168.0.247:123|udp|ntp
+
 
 ### Konfiguration der NTP-Anbieter {#ntp-server}
 
@@ -111,9 +113,11 @@ Minütlich wird via cronjob die Datei ``/usr/sbin/on_vpngateway_check`` ausgefü
 
  * Sortieren nach Entfernung, Hop-Count oder manuell
 
+
 ### Gateway-Wechsel {#mig-switch}
 
 Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann schreibt er das Attribute ``switch_candidate_timestamp`` in diesen neuen Dienst. Sobald dieser Zeitstempel im Verlaufe nachfolgender cronjob-Läufe älter als fünf Minuten ist, wird der neue Gateway via ``select_mig_connection`` aktiviert und eine Verbindung aufgebaut.
+
 
 ### Gateway-Verbindungsabbruch {#mig-disconnect}
 
@@ -153,35 +157,27 @@ Internet-Freigabe (Usergateways) {#ugw}
 
 ### Datenspeicherung {#ugw-storage}
 
-Für jeden externen Gateway wird ein Service-Eintrag angelegt (siehe @ref services).
+Für jeden externen Gateway werden dauerhafte und wechselhafte Eigenschaften gespeichert.
 
-Relevante Attribute sind:
+Die Eigenschaften von Gateway-Diensten werden durch die Dienstverwaltung gespeichert. Neben den für alle Dienste persistenten Informationen werden die folgenden UGW-spezifischen Informationen gespeichert:
 
-* scheme - z.B. "openvpn"
-* details:hostname - öffentlicher DNS-Name des UGW-Servers
-* port - Portnummer des UGW-Servers
-* protocol - "tcp" oder "udp"
 * template - die zu verwendende Konfigurationsvorlage (z.B. /usr/share/opennet/ugw-openvpn-udp.template)
-
-Die wechselhaften Eigenschaften werden im temporären Dateisystem (also im RAM) gespeichert. Dies reduziert Flash-Schreibzugriffe. Die wechselhaften Eigenschaften sind folgende:
-
-* timestamp - Zeitstempel (epoch) der letzten empfangenen Dienst-Announcierung
+* age - Alter des Eintrags (TODO: durch "last_seen" ersetzen)
 * details - eventuelle Zusatzinformationen, die aus einem olsrd-nameservice-Announcement entnommen wurden (z.B. Bandbreite)
-* status - Zusammenfassung: Gateway ist erreichbar (true/false)
-* mtu_status - Status des MTU-Test ("ok" oder "error")
-* mtu_timestamp - Zeitstempel (epoch) des letzten MTU-Tests
+* download - letzte ermittelte Download-Bandbreite (kBytes/s)
+* mtu - Status des MTU-Test ("ok" oder "error")
 * mtu_msg - vollständige Status-Ausgabe von openvpn infolge des MTU-Tests
-* mtu_out_wanted - Startwert für die MTU-Prüfung (ausgehend)
-* mtu_out_real - Resultat der MTU-Prüfung (ausgehend)
-* mtu_in_wanted - Startwert für die MTU-Prüfung (eingehend)
-* mtu_in_real - Resultat der MTU-Prüfung (eingehend)
-* wan_status - Status des WAN-Tests ("ok" oder "error")
-* wan_ping - Ping-Laufzeit zum UGW-Server
-* wan_speed_timestamp - Zeitstempel (epoch) des letzten UGW-Tests
-* wan_speed_download - letzte ermittelte Download-Bandbreite (kBytes/s)
-* wan_speed_upload - letzte ermittelte Upload-Bandbreite (kBytes/s)
-* vpn_status - Ergebnis des letzten VPN-Verbindungstests
-* vpn_timestamp - Zeitpunkt (epoch) des letzten VPN-Verbindungstests
+* mtu_toGW_tried - Startwert für die MTU-Prüfung (ausgehend)
+* mtu_toGW_actual - Resultat der MTU-Prüfung (ausgehend)
+* mtu_fromGW_tried - Startwert für die MTU-Prüfung (eingehend)
+* mtu_fromGW_actual - Resultat der MTU-Prüfung (eingehend)
+* mtu_time - Zeitstempel (epoch) des letzten MTU-Tests
+* ping - Ping-Laufzeit zum UGW-Server
+* speed_time - Zeitstempel (epoch) des letzten UGW-Tests
+* speed_time_prev - Zeitstempel (epoch) der anzeigt, seit wann die aktuelle Geschwindigkeitsmessung grob konstant blieb
+* status - Zusammenfassung: Gateway ist erreichbar ("ok" oder "error")
+* upload - letzte ermittelte Upload-Bandbreite (kBytes/s)
+* wan - Status des WAN-Tests ("ok" oder "error")
 
 
 ### Geschwindigkeitstests {#ugw-speed}
@@ -205,27 +201,41 @@ Konfiguration des UGW-Servers:
 
 ### Liste der Gegenstellen {#ugw-server-list}
 
-In der Firmware sind zwei öffentliche VPN-Server angegebene, die den Zugang zum Opennet-Mesh ermöglichen.
-Diese sind in der Datei ``/usr/share/opennet/usergw.defaults`` zu finden (siehe ``openvpn_ugw_preset_X``).
+Die UGW-Server bieten üblicherweise zwei Dienste an:
 
-Neben den vordefinierten Hosts werden Zugangsmöglichkeiten auch via olsrd-Nameservice veröffentlicht (Service-Typ: "mesh").
-Bei jeder Änderung der lokalen Services-Liste (``/var/run/services_olsr``) wird somit das Skript ``/etc/olsrd/nameservice.d/on_update_usergw`` ausgeführt, welches eventuell neu announcierte Hosts parst und speichert.
+* Zugang zum mesh-Netzwerk
+* Zugang zum Internet aus dem mesh-Netzwerk heraus
 
-Die bekannten Host-Einträge werden im uci-Namensraum ``on-usergw`` in der anonymen Liste ``uplink`` gespeichert. Hier sind alle für den Verbindungsaufbau notwendigen Daten abgelegt. Folgende Attribute sind dort beispielsweise zu finden:
+Beide Dienste sind über ihre öffentlichen IPs erreichbar. Daher ist eine Announcierung via olsrd-nameservice nicht umsetzbar.
+Somit verwenden wir stattdessen die Veröffentlichung via DNS-SRV (RFC 2782).
 
-    on-usergw.@uplink[0]=uplink
-    on-usergw.@uplink[0].enable=1
-    on-usergw.@uplink[0].name=openvpn_on_ugw_erina_opennet_initiative_de_udp_1602
-    on-usergw.@uplink[0].type=openvpn
-    on-usergw.@uplink[0].hostname=erina.opennet-initiative.de
-    on-usergw.@uplink[0].template=/usr/share/opennet/ugw-openvpn-udp.template
-    on-usergw.@uplink[0].config_file=/var/etc/openvpn/openvpn_on_ugw_erina_opennet_initiative_de_udp_1602.conf
-    on-usergw.@uplink[0].port=1602
-    on-usergw.@uplink[0].protocol=udp
-    on-usergw.@uplink[0].local_port=5100
-    on-usergw.@uplink[0].service=openvpn://192.168.1.203:5100|udp|ugw upload:4 download:4704 ping: creator:ugw_service
+Die DNS-Namen für die beiden Dienste sind folgende:
 
-Nach jedem Booten wird einmal das via olsr-nameservice getriggerte Skript ausgeführt - dies führt implizit dazu, dass im Falle einer leeren Hostliste (nach der Erst-Installation) die zwei vorkonfigurierten Gegenstellene eingetragen werden.
+* ``_mesh-openvpn._udp.systemausfall.org``
+* ``_igw-openvpn._udp.systemausfall.org``
+
+Beispielhafte Einträge sind folgende:
+
+    root@foo:~# dig +short SRV _mesh-openvpn._udp.systemausfall.org
+    5 0 1602 erina.opennet-initiative.de.
+    5 0 1602 megumi.opennet-initiative.de.
+    5 0 1602 subaru.opennet-initiative.de.
+
+    root@foo:~# dig +short SRV _igw-openvpn._udp.systemausfall.org
+    5 0 1600 megumi.opennet-initiative.de.
+    5 0 1600 subaru.opennet-initiative.de.
+    5 0 1600 erina.opennet-initiative.de.
+
+Dabei wird die Priorität (1. Spalte des Ergebnis) für die Vorauswahl der automatisch zu nutzenden Anbietern beachtet.
+Diensteanbieter, die eventuell zu Überraschungen beim Nutzenden führen (z.B. ein Exit-Knoten im Ausland), sollten eine nachgelagerte Priorität (höherer Zahlenwert) tragen. Der Nutzer kann durch manuelle Interaktion auch Dienste nachgelagerter Priorität explizit zur Nutzung freigeben.
+
+Die Gewichtung (2. Spalte) wird aktuell nicht für Mesh- oder Internetgateways verwendet.
+
+Sowohl Port als auch Hostname werden für die Nutzung des Diensts verwendet.
+
+Eine Beschreibung des Dienstanbieters (beispielsweise der Hosting-Standort: "Hetzner, Düsseldorf (Deutschland)") wird durch den TXT-Eintrag des dazugehörigen Dienstanbieters (siehe ``dig TXT erina.opennet-initiative.de``) ausgeliefert.
+
+Die ermittelten Dienst-Anbieter werden durch die Dienste-Verwaltung gespeichert. Darin werden alle für den Verbindungsaufbau notwendigen Daten abgelegt.
 
 
 Datensammlung: ondataservice {#ondataservice}
@@ -238,6 +248,7 @@ Das //ondataservice//-Plugin verteilt via //olsrd// detaillierte Informationen �
 
 Das Initialisierungsskript /etc/uci-defaults/on-olsr-setup wird bei der Erstinstallation oder beim Firmware-Upgrade ausgeführt.
 Es aktiviert da ondataservice-Plugin.
+
 
 ### Debugging
 
@@ -319,7 +330,7 @@ check_firmware_upgrade:
 
 Opennet-Erstkonfiguration:
 
-* preset-Dateien (etc/config_presets/*) werden nach etc/ kopiert:
+* preset-Dateien (*etc/config_presets/*) werden nach etc/ kopiert:
     * firewall: manuell erstellte Zonenkonfiguration
     * ntpclient: siehe "Zeitsychronisation"
     * olsrd: Basiskonfiguration inkl. nameservice

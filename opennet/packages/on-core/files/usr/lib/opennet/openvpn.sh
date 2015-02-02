@@ -359,12 +359,11 @@ cleanup_stale_openvpn_services() {
 		# Keine config-Datei? Keine von uns verwaltete Konfiguration ...
 		[ -z "$config_file" ] && continue
 		service_name="${uci_prefix#openvpn.}"
-		pid_file=$(get_service_value "$service_name" "pid_file")
-		# Keine PID-Dateiangabe? Keine von uns verwaltete Konfiguration ...
-		[ -z "$pid_file" ] && continue
 		# Es scheint sich um eine von uns verwaltete Verbindung zu handeln.
+		# Das "pid_file"-Attribut ist nicht persistent - nach einem Neustart kann es also leer sein.
+		pid_file=$(get_service_value "$service_name" "pid_file")
 		# Falls die config-Datei oder die pid-Datei fehlt, dann ist es ein reboot-Fragment. Wir löschen die Überreste.
-		if [ ! -e "$config_file" -o ! -e "$pid_file" ]; then
+		if [ ! -e "$config_file" -o -z "$pid_file" -o ! -e "$pid_file" ]; then
 			msg_info "Removing a reboot-fragment of a previously used openvpn connection: $service_name"
 			disable_openvpn_service "$service_name"
 		elif check_pid_file "$pid_file" "openvpn"; then

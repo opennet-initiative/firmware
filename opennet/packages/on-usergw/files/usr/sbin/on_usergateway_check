@@ -36,8 +36,9 @@ case "$ACTION" in
 		done
 		;;
 	auto)
+		cleanup_stale_openvpn_services
 		update_mesh_services_via_dns
-		get_services "mesh" | filter_enabled_services | while read service_name; do
+		get_services "mesh" | filter_services_by_value "scheme=openvpn" | filter_enabled_services | while read service_name; do
 			# Geschwindigkeitstest
 			timestamp=$(get_service_value "$service_name" "wan_speed_timestamp" "0")
 			recheck_minutes=$(get_on_usergw_default "wan_speed_recheck_period")
@@ -62,6 +63,9 @@ case "$ACTION" in
 			done
 			set_service_value "$service_name" "status" "$new_status"
 		done
+		# die laufenden OpenVPN-Prozesse an die aktuellen Zustaende anpassen
+		has_mesh_openvpn_credentials && sync_mesh_openvpn_connection_processes
+		true
 		;;
 	--help|help)
 			cat - <<EOF

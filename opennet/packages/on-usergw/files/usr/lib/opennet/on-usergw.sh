@@ -83,7 +83,7 @@ update_mesh_services_via_dns() {
 		set_service_value "$service_name" "priority" "$priority"
 	done
 	# veraltete Dienste entfernen
-	get_services | filter_services_by_value "service=mesh" "scheme=openvpn" "source=dns-srv" | while read service_name; do
+	get_services "mesh" | filter_services_by_value "scheme=openvpn" "source=dns-srv" | while read service_name; do
 		timestamp=$(get_service_value "$service_name" "timestamp" 0)
 		# der Service ist zu lange nicht aktualisiert worden
 		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
@@ -181,9 +181,9 @@ update_public_gateway_mtu() {
 }
 
 
-# try to establish openvpn tunnel
-# return a string, if it works (else return nothing)
-# parameter is index to test
+## @fn update_public_gateway_vpn_status()
+## @brief Prüfe den VPN-Verbindungsaufbau mit Probezertifikaten und aktualisiere den VPN-Status, sowie -Testzeitstempel.
+## @param service_name der Name des Diensts
 update_public_gateway_vpn_status() {
 	trap "error_trap ugw_update_vpn_status '$*'" $GUARD_TRAPS
 	local service_name=$1
@@ -201,6 +201,31 @@ update_public_gateway_vpn_status() {
 	set_service_value "$service_name" "vpn_status" "false"
 	set_service_value "$service_name" "vpn_timestamp" "$(get_time_minute)"
 	msg_debug "finished vpn test of '$host'"
+}
+
+
+## @fn sync_mesh_gateway_connection_processes()
+## @brief Erzeuge openvpn-Konfigurationen für die als nutzbar markierten Dienste und entferne die Konfigurationen von unbrauchbaren Dienste. Beachte dabei auch die maximale Anzahl von mesh-OpenVPN-Verbindungen.
+sync_mesh_openvpn_connection_processes() {
+	local service_name
+	local max_connections=2
+	local conn_count=0
+	# diese Festlegung ist recht willkürlich: auf Geräten mit nur 32 MB scheinen wir jedenfalls nahe der Speichergrenze zu arbeiten
+	[ "$(get_memory_size)" -gt 32 ] && max_connections=5
+	get_services "mesh" \
+			| filter_services_by_value "scheme=openvpn" \
+			| filter_enabled_services \
+			| sort_services_by_priority \
+			| while read service_name; do
+		if [ "$conn_count" -lt "$max_connections" ] && uci_is_true "$(get_service_value "$service_name" "status" "false")"; then
+			is_openvpn_service_active "$service_name" || enable_openvpn_service "$service_name"
+			: $((conn_count++))
+		else
+			is_openvpn_service_active "$service_name" && disable_openvpn_service "$service_name"
+			true
+		fi
+	done
+	apply_changes openvpn
 }
 
 

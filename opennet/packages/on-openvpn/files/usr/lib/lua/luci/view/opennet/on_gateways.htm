@@ -15,6 +15,12 @@ You may obtain a copy of the License at
 <%
 	require("luci.model.opennet.funcs")
 	local sorting = on_function("get_service_sorting")
+
+	local parallel_processes = 3
+	-- Geraete mit weniger als 32 MB zeigen sonst gelegentlich ein out-of-memory-Verhalten
+	if tonumber(on_function("get_memory_size")) <= 32 then
+		parallel_processes = 1
+	end
 %>
 
 <%+header%>
@@ -36,7 +42,7 @@ You may obtain a copy of the License at
 	function build_table(dummy, services) {
 		// splitte die Liste der Dienste in mehrere parallele Ablaeufe
 		// ein Wert groesser als drei scheint keine Beschleunigung zu bringen (mit einem TL-WDR4300)
-		var RUN_IN_PARALLEL = 2;
+		var RUN_IN_PARALLEL = <%=parallel_processes%>;
 		var result = "";
 		var target_table = document.getElementById('on-gateway-list');
 		var in_progress_spinner = document.getElementById('gateway-list-spinner');

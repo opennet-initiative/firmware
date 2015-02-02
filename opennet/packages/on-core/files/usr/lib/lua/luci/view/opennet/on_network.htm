@@ -18,8 +18,8 @@ You may obtain a copy of the License at
 local uci = require "luci.model.uci"
 local cursor = uci.cursor()
 local form_id = luci.http.formvalue("form_id")
-local on_id = cursor:get("on-core", "settings", "on_id")
 local devices = { "on_eth_", "on_wifi_" }
+local show_invalid_id_warning = false
 
 
 if (form_id) then
@@ -32,29 +32,40 @@ if (form_id) then
 	
 	local replace_id = false
 	if #t == 1 then
-		t[2] = t[1]
-		t[1] = "1"
+		-- nur eine Zahl: Netzgruppe "1"
+		t[1] = 1
+		t[2] = tonumber(t[1])
 		replace_id = true
 	elseif #t == 2 then
+		-- zwei Zahlen: beide verwenden
+		t[1] = tonumber(t[1])
+		t[2] = tonumber(t[2])
 		replace_id = true
 	elseif form_id:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$") then
-		t[1] = t[3]
-		t[2] = t[4]
+		-- vier Zahlen: die letzten beiden verwenden
+		t[1] = tonumber(t[3])
+		t[2] = tonumber(t[4])
 		replace_id = true
 	end
 
 	if replace_id then
-		on_function("set_opennet_id", {form_id})
-	else
-		form_id = on_id
+		if (0 <= t[1]) and (t[1] <= 255) and (1 <= t[2]) and (t[2] <= 255) then
+			local id_string = t[1] .. "." .. t[2]
+			on_function("set_opennet_id", {id_string})
+		else
+		    show_invalid_id_warning = true
+		end
 	end
-else
-	form_id = on_id
 end
 %>
 
 <h3><%:Opennet-ID / Network ID%></h3>
 	<div class="cbi-map">
+		<% if show_invalid_id_warning then %>
+			<fieldset class="cbi-section"><div class="cbi-section-comment"><div class="alert-message warning">
+				<p><%:The specified opennet ID is invalid. Please try again (input format: 'X.YYY').%></p>
+			</div></div></fieldset>
+		<% end %>
 		<fieldset class="cbi-section">
 			<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 				<p><%=luci.i18n.translatef('Great that you decided to take part in Opennet. Register the IP of your Access-Point in the %sOpennet-Wiki%s and aquire a free IP-Address. Please read the information %sin the wiki%s for further details.', '<a href="https://wiki.opennet-initiative.de/wiki/Opennet_Nodes">', '</a>', '<a href="https://wiki.opennet-initiative.de/wiki/Mitmachen">', '</a>')%></p>
@@ -62,7 +73,8 @@ end
 			<fieldset class="cbi-section-node">
 				<div class="cbi-value">
 					<label class="cbi-value-title">
-						<input type="value" name="form_id" value="<%=form_id%>" />
+						<input type="value" name="form_id"
+							value="<%= cursor:get("on-core", "settings", "on_id") %>" />
 					</label>
 					<div class="cbi-value-field">
 						<input type="submit" class="cbi-button cbi-button-apply" value="<%:use%>"

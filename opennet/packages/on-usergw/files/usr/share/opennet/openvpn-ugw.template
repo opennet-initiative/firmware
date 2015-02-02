@@ -13,12 +13,6 @@ comp-lzo yes
 
 persist-key
 
-# bei einem Verbindungsfehler sollten wir schnell einen Abbruch signalisieren
-# (anstelle unendlich vieler Verbindungsversuche)
-tls-exit
-# nur ein Verbindungsversuch
-single-session
-
 # keine Fehlermeldungen bei scheinbaren "replay"-Angriffen
 # man openvpn: Silence the output of replay warnings, which are a common false alarm on WiFi networks.
 mute-replay-warnings

@@ -87,8 +87,8 @@ is_existing_service() {
 # Dadurch koennen wir beim Sortieren strukturelle Ungleichgewichte (z.B. durch alphabetische Sortierung) verhindern.
 _add_local_bias_to_host() {
 	local ip="$1"
-        local host_number=$(echo "$ip" | sed 's/[^0-9]//g')
-	head -1 | awk '{ print $1 + ( '$(get_local_bias_number)' + '$host_number' ) % '$LOCAL_BIAS_MODULO' }'
+	local host_number=$(echo "$ip$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g')
+	head -1 | awk '{ print $1 + ('$host_number' % '$LOCAL_BIAS_MODULO') }'
 }
 
 

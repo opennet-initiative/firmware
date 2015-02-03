@@ -123,9 +123,9 @@ update_service_wan_status() {
 	local host=$(get_service_value "$service_name" "host")
 	local outgoing_interface=$(get_target_route_interface "$hostname")
 	if is_device_in_zone "$outgoing_interface" "$ZONE_WAN"; then
-		set_server_value "$service_name" "wan_status" "true"
+		set_service_value "$service_name" "wan_status" "true"
 		local ping_time=$(get_ping_time "$host")
-		set_server_value "$service_name" "wan_ping" "$ping_time"
+		set_service_value "$service_name" "wan_ping" "$ping_time"
 		msg_debug "target '$host' routing through wan device: $outgoing_interface"
 		msg_debug "average ping time for $host: ${ping_time}s"
 	else
@@ -134,8 +134,8 @@ update_service_wan_status() {
 		uci_is_true "$(get_service_value "$service_name" "wan_status")" \
 			&& msg_info "Routing switched away from WAN interface to '$outgoing_interface'"
 		msg_debug "warning: target '$host' is routed via interface '$outgoing_interface' (zone '$outgoing_zone') instead of the expected WAN zone ($ZONE_WAN)"
-		set_server_value "$service_name" "wan_status" "false"
-		set_server_value "$service_name" "wan_ping" ""
+		set_service_value "$service_name" "wan_status" "false"
+		set_service_value "$service_name" "wan_ping" ""
 	fi
 }
 
@@ -187,7 +187,7 @@ update_public_gateway_mtu() {
 update_public_gateway_vpn_status() {
 	trap "error_trap ugw_update_vpn_status '$*'" $GUARD_TRAPS
 	local service_name=$1
-	local host=$(get_server_value "$service_name" "host")
+	local host=$(get_service_value "$service_name" "host")
 	local status
 	if verify_vpn_connection "$service_name" \
 			"$VPN_DIR_TEST/on_aps.key" \

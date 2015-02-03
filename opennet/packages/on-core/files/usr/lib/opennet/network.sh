@@ -21,11 +21,25 @@ query_dns_reverse() { nslookup "$1" 2>/dev/null | tail -n 1 | awk '{ printf "%s"
 ## @brief Liefere die SRV Records zu einer Domain zurück.
 ## @param srv_domain Dienst-Domain (z.B. _mesh-openvpn._udp.opennet-initiative.de)
 ## @returns Zeilenweise Ausgabe von SRV Records: PRIORITY WEIGHT PORT HOSTNAME
-## @details siehe RFC 2782
+## @details Siehe RFC 2782 für die SRV-Spezifikation. Die Abfrage erfordert dig drill oder unbound-host.
 query_srv_records() {
-	local srv_domain="$1"
-	# entferne den abschliessenden Top-Level-Domain-Punkt ("on-i.de." statt "on-i.de")
-	dig +short SRV "$srv_domain" | sed 's/\.$//'
+	local domain="$1"
+	# verschiedene DNS-Werkzeuge sind nutzbar: dig, drill oder unbound-host
+	# "djbdns-tools" unterstützt leider nicht das Parsen von srv-Records (siehe "dnsq 33 DOMAIN localhost")
+	# "drill" ist das kleinste Werkzeug
+	if which dig >/dev/null; then
+		dig +short SRV "$domain"
+	elif which drill >/dev/null; then
+		drill "$domain" SRV | grep -v "^;" \
+			| grep "[[:space:]]IN[[:space:]]\+SRV[[:space:]]\+[[:digit:]]\+[[:space:]]\+[[:digit:]]" \
+			| awk '{print $5, $6, $7, $8}'
+	elif which unbound-host >/dev/null; then
+		unbound-host -t SRV "$domain" \
+			| awk '{print $5, $6, $7, $8}'
+	else
+		msg_info "Missing advanced DNS resolver for mesh gateway discovery"
+	fi | sed 's/\.$//'
+	# (siehe oben) entferne den abschliessenden Top-Level-Domain-Punkt ("on-i.de." statt "on-i.de")
 }
 
 

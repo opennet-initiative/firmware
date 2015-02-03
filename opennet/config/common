@@ -236,9 +236,3 @@ CONFIG_PACKAGE_openvpn-polarssl=m
 CONFIG_OPENVPN_polarssl_ENABLE_SERVER=n
 CONFIG_OPENVPN_polarssl_ENABLE_SMALL=n
 
-# DNS-Client-Alternativen (fuer die Abfrage von SRV-Records, die busybox-nslookup nicht beherrscht)
-CONFIG_PACKAGE_bind-dig=m
-CONFIG_PACKAGE_bind-tools=m
-CONFIG_PACKAGE_djbdns-tools=m
-CONFIG_PACKAGE_drill=m
-CONFIG_PACKAGE_unbound-host=m

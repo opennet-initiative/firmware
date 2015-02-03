@@ -10,7 +10,7 @@ define Package/on-usergw
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Rene Ejury <opennet@absorb.it>
   TITLE:=Usergateway extensions
-  DEPENDS+=+on-core +on-openvpn +ifstat
+  DEPENDS+=+on-core +on-openvpn +ifstat +drill
 endef
 
 define Package/on-usergw/description

@@ -386,13 +386,16 @@ get_service_attributes() {
 }
 
 
-# menschenfreundliche Ausgabe der aktuell angemeldeten Dienste
+## @fn print_services()
+## @brief menschenfreundliche Ausgabe der aktuell angemeldeten Dienste
+## @param service_types (optional) Liste von gewünschten Service-Typen (falls leer: alle)
+## @returns Ausgabe der bekannten Dienste (für Menschen - nicht parsebar)
 print_services() {
 	trap "error_trap print_services '$*'" $GUARD_TRAPS
 	local service_name
 	local attribute
 	local value
-	get_services | while read service_name; do
+	get_services "$@" | while read service_name; do
 		echo "$service_name"
 		get_service_attributes "$service_name" | while read attribute; do
 			value=$(get_service_value "$service_name" "$attribute")

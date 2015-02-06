@@ -98,7 +98,7 @@ update_mesh_services_via_dns() {
 update_public_gateway_speed_estimation() {
 	trap "error_trap update_public_gateway_speed_estimation '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local host=$(get_service_value "$service_name" "$host")
+	local host=$(get_service_value "$service_name" "host")
 	local download_speed=$(measure_download_speed "$host")
 	local upload_speed=$(measure_upload_speed "$host")
 	# keine Zahlen? Keine Aktualisierung ...
@@ -121,7 +121,7 @@ update_service_wan_status() {
 	trap "error_trap ugw_update_wan_status '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local host=$(get_service_value "$service_name" "host")
-	local outgoing_interface=$(get_target_route_interface "$hostname")
+	local outgoing_interface=$(get_target_route_interface "$host")
 	if is_device_in_zone "$outgoing_interface" "$ZONE_WAN"; then
 		set_service_value "$service_name" "wan_status" "true"
 		local ping_time=$(get_ping_time "$host")
@@ -152,6 +152,9 @@ update_public_gateway_mtu() {
 
 	msg_debug "starting update_public_gateway_mtu for '$host'"
 	msg_debug "update_public_gateway_mtu will take around 5 minutes per gateway"
+
+	# sicherstellen, dass die config-Datei existiert
+	prepare_openvpn_service "$service_name" "$MIG_VPN_CONFIG_TEMPLATE_FILE"
 
 	local result=$(openvpn_get_mtu "$service_name")
 	local out_wanted=$(echo "$result" | cut -f 1)

@@ -37,6 +37,8 @@ CONFIG_BUSYBOX_CONFIG_MESG=y
 CONFIG_BUSYBOX_CONFIG_MKSWAP=y
 CONFIG_BUSYBOX_CONFIG_NC=y
 CONFIG_BUSYBOX_CONFIG_NC_EXTRA=y
+# Upload-Test für UGW-Funktion (nc -u ...)
+CONFIG_BUSYBOX_CONFIG_NC_110_COMPAT=y
 CONFIG_BUSYBOX_CONFIG_PKILL=y
 CONFIG_BUSYBOX_CONFIG_RDATE=y
 # fuer die minuetlichen/5minuetigen/taeglichen/woechentlichen cronjobs (siehe on-core)
@@ -167,8 +169,6 @@ CONFIG_PACKAGE_muninlite=m
 
 # Analyse & Werkzeuge
 CONFIG_PACKAGE_bwm=m
-# fuer "get_device_traffic" (UGW)
-CONFIG_PACKAGE_ifstat=y
 CONFIG_PACKAGE_iftop=m
 CONFIG_PACKAGE_iperf=y
 CONFIG_PACKAGE_horst=m

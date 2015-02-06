@@ -277,33 +277,35 @@ get_wan_device() {
 #   RX TX
 # (empfangene|gesendete KBytes/s)
 get_device_traffic() {
-	local device=$1
-	local seconds=$2
+	local device="$1"
+	local seconds="$2"
 	ifstat -q -b -i "$device" "$seconds" 1 | tail -n 1 | awk '{print int($1 + 0.5) "\t" int($2 + 0.5)}'
 }
 
 
 # Pruefe Bandbreite durch kurzen Download-Datenverkehr
 measure_download_speed() {
-	local host=$1
+	local host="$1"
+	local target_dev=$(get_target_route_interface "$host")
 	wget -q -O /dev/null "http://$host/.big" &
-	local pid=$!
+	local pid="$!"
 	sleep 3
 	[ ! -d "/proc/$pid" ] && return
-	get_device_traffic "$(get_wan_device)" "$SPEEDTEST_SECONDS" | cut -f 1
+	get_device_traffic "$target_dev" "$SPEEDTEST_SECONDS" | cut -f 1
 	kill "$pid" 2>/dev/null || true
 }
 
 
 # Pruefe Bandbreite durch kurzen Upload-Datenverkehr
 measure_upload_speed() {
-	local host=$1
+	local host="$1"
+	local target_dev=$(get_target_route_interface "$host")
 	# UDP-Verkehr laesst sich auch ohne einen laufenden Dienst auf der Gegenseite erzeugen
 	nc -u "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
-	local pid=$!
+	local pid="$!"
 	sleep 3
 	[ ! -d "/proc/$pid" ] && return
-	get_device_traffic "$(get_wan_device)" "$SPEEDTEST_SECONDS" | cut -f 2
+	get_device_traffic "$target_dev" "$SPEEDTEST_SECONDS" | cut -f 2
 	kill "$pid" 2>/dev/null || true
 }
 

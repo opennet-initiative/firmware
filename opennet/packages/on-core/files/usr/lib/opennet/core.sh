@@ -546,9 +546,12 @@ run_delayed_in_background() {
 }
 
 
+## @fn get_filesize()
+## @brief Ermittle die Größe einer Datei in Bytes.
+## @params filename Name der zu untersuchenden Datei.
 get_filesize() {
 	local filename="$1"
-	stat -c %s "$filename"
+	wc -c "$filename" | awk '{ print $1 }'
 }
 
 

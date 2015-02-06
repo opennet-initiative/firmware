@@ -43,9 +43,6 @@ CONFIG_BUSYBOX_CONFIG_PKILL=y
 CONFIG_BUSYBOX_CONFIG_RDATE=y
 # fuer die minuetlichen/5minuetigen/taeglichen/woechentlichen cronjobs (siehe on-core)
 CONFIG_BUSYBOX_CONFIG_RUN_PARTS=y
-# siehe "get_filesize"
-CONFIG_BUSYBOX_CONFIG_STAT=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_STAT_FORMAT=y
 # zeitliche Begrenzung fuer ntp-Request
 CONFIG_BUSYBOX_CONFIG_TIMEOUT=y
 # Prozessbaum fuer die Zusammenfassung

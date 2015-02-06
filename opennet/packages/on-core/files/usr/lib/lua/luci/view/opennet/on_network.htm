@@ -23,37 +23,38 @@ local show_invalid_id_warning = false
 
 
 if (form_id) then
-	function split(str)
+	function split_numbers(str)
 		local t = { }
-		str:gsub("%d+", function (w) table.insert(t, w) end)
+		str:gsub("%d+", function (w) table.insert(t, tonumber(w)) end)
 		return t
 	end
-	local t = split(form_id)
-	
-	local replace_id = false
-	if #t == 1 then
+	local numbers = split_numbers(form_id)
+
+	local major
+	local minor
+	local replace_id = true
+	if #numbers == 1 then
 		-- nur eine Zahl: Netzgruppe "1"
-		t[1] = 1
-		t[2] = tonumber(t[1])
-		replace_id = true
-	elseif #t == 2 then
+		major = 1
+		minor = numbers[1]
+	elseif #numbers == 2 then
 		-- zwei Zahlen: beide verwenden
-		t[1] = tonumber(t[1])
-		t[2] = tonumber(t[2])
-		replace_id = true
-	elseif form_id:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$") then
-		-- vier Zahlen: die letzten beiden verwenden
-		t[1] = tonumber(t[3])
-		t[2] = tonumber(t[4])
-		replace_id = true
+		major = numbers[1]
+		minor = numbers[2]
+	elseif #numbers == 4 then
+		-- vier Zahlen (192.168.x.y): die letzten beiden verwenden
+		major = numbers[3]
+		minor = numbers[4]
+	else
+		replace_id = false
 	end
 
 	if replace_id then
-		if (0 <= t[1]) and (t[1] <= 255) and (1 <= t[2]) and (t[2] <= 255) then
-			local id_string = t[1] .. "." .. t[2]
+		if (0 <= major) and (major <= 255) and (1 <= minor) and (minor <= 255) then
+			local id_string = major .. "." .. minor
 			on_function("set_opennet_id", {id_string})
 		else
-		    show_invalid_id_warning = true
+			show_invalid_id_warning = true
 		end
 	end
 end

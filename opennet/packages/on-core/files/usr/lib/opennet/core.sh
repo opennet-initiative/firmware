@@ -536,9 +536,17 @@ is_timestamp_older_minutes() {
 }
 
 
-# Fuehre eine Aktion verzoegert im Hintergrund aus.
-# Parameter: Verzoegerung in Sekunden
-# Parameter: Kommandozeile
+## @fn get_uptime_seconds()
+## @brief Ermittle die Anzahl der Sekunden seit dem letzten Bootvorgang.
+get_uptime_seconds() {
+	cut -f 1 -d . /proc/uptime
+}
+
+
+## @fn run_delayed_in_background()
+## @brief Führe eine Aktion verzögert im Hintergrund aus.
+## @param delay Verzögerung in Sekunden
+## @param command alle weiteren Token werden als Kommando und Parameter interpretiert und mit Verzögerung ausgeführt.
 run_delayed_in_background() {
 	local delay="$1"
 	shift

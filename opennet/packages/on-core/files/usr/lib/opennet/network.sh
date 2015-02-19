@@ -53,7 +53,11 @@ get_ping_time() {
 	local duration="${2:-5}"
 	local ip=$(query_dns "$target")
 	[ -z "$ip" ] && return 0
-	ping -w "$duration" -q "$ip" 2>/dev/null | grep "min/avg/max/" | cut -f 6 -d / | awk '{ print int($1 + 0.5); }'
+	ping -w "$duration" -q "$ip" 2>/dev/null \
+		| grep "min/avg/max" \
+		| cut -f 2 -d = \
+		| cut -f 2 -d / \
+		| awk '{ print int($1 + 0.5); }'
 }
 
 

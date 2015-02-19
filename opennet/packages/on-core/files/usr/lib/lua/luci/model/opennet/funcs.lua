@@ -55,6 +55,7 @@ end
 function tab_split(text) return _generic_split(text, "[^\t]+") end
 function line_split(text) return _generic_split(text, "[^\n]+") end
 function space_split(text) return _generic_split(text, "%S+") end
+function dot_split(text) return _generic_split(text, "[^.]+") end
 
 
 function map_table(input_table, func)

@@ -68,33 +68,25 @@ function status_ugw_connection()
 		table.insert(central_ips_table, get_service_value(service_name, "host"))
 	end
 	ugw_status.centralips = string_join(central_ips_table, ", ")
-	if ugw_status.centralips ~= "" then
-		ugw_status.centralip_status = "ok"
-	else
-		ugw_status.centralip_status = "error"
-	end
+	ugw_status.centralip_status = (ugw_status.centralips ~= "")
 	-- tunnel active
 	ugw_status.tunnel_active = to_bool(ugw_status.centralips)
 	-- sharing possible
 	ugw_status.usergateways_no = 0
 	-- TODO: Struktur ab hier weiter umsetzen
 	cursor:foreach ("on-usergw", "usergateway", function() ugw_status.usergateways_no = ugw_status.usergateways_no + 1 end)
-	ugw_status.sharing_wan_ok = false
 	ugw_status.sharing_possible = false
 	local count = 1
 	while count <= ugw_status.usergateways_no do
 		local onusergw = cursor:get_all("on-usergw", "opennet_ugw"..count)
-		if (onusergw.wan == "ok") then
-			ugw_status.sharing_wan_ok = true
-		end
-		if (onusergw.wan == "ok" and onusergw.mtu == "ok") then
+		if uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu_status) then
 			ugw_status.sharing_possible = true
 			break
 		end
 		count = count + 1
 	end
 	-- sharing enabled
-	ugw_status.sharing_enabled = (cursor:get("on-usergw", "ugw_sharing", "shareInternet") == "on")
+	ugw_status.sharing_enabled = uci_to_bool(cursor:get("on-usergw", "ugw_sharing", "shareInternet"))
 	-- forwarding enabled
 	local ugw_port_forward = tab_split(on_function("get_ugw_portforward"))
 	ugw_status.forwarded_ip = ugw_port_forward[1]
@@ -105,7 +97,7 @@ function status_ugw_connection()
 	if ugw_status.sharing_enabled or ugw_status.sharing_possible then
 		result = result .. [[<tr class='cbi-section-table-titles'><td class='cbi-section-table-cell'>]] ..
 			luci.i18n.translate("Internet-Sharing:") .. [[</td><td class='cbi-section-table-cell'>]]
-		if (ugw_status.centralip_status == "ok") or (ugw_status.forwarded_gw ~= "") then
+		if uci_to_bool(ugw_status.centralip_status) or (ugw_status.forwarded_gw ~= "") then
 			result = result .. luci.i18n.translate("Internet shared")
 			if ugw_status.centralips then
 				result = result .. luci.i18n.translate("(no central Gateway-IPs connected trough tunnel)")

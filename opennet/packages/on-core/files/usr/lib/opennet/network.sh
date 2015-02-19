@@ -17,6 +17,50 @@ query_dns() { nslookup "$1" | sed '1,/^Name:/d' | awk '{print $3}' | sort -n; }
 query_dns_reverse() { nslookup "$1" 2>/dev/null | tail -n 1 | awk '{ printf "%s", $4 }'; }
 
 
+## @fn query_srv_record()
+## @brief Liefere die SRV Records zu einer Domain zurück.
+## @param srv_domain Dienst-Domain (z.B. _mesh-openvpn._udp.opennet-initiative.de)
+## @returns Zeilenweise Ausgabe von SRV Records: PRIORITY WEIGHT PORT HOSTNAME
+## @details Siehe RFC 2782 für die SRV-Spezifikation. Die Abfrage erfordert dig drill oder unbound-host.
+query_srv_records() {
+	local domain="$1"
+	# verschiedene DNS-Werkzeuge sind nutzbar: dig, drill oder unbound-host
+	# "djbdns-tools" unterstützt leider nicht das Parsen von srv-Records (siehe "dnsq 33 DOMAIN localhost")
+	# "drill" ist das kleinste Werkzeug
+	if which dig >/dev/null; then
+		dig +short SRV "$domain"
+	elif which drill >/dev/null; then
+		drill "$domain" SRV | grep -v "^;" \
+			| grep "[[:space:]]IN[[:space:]]\+SRV[[:space:]]\+[[:digit:]]\+[[:space:]]\+[[:digit:]]" \
+			| awk '{print $5, $6, $7, $8}'
+	elif which unbound-host >/dev/null; then
+		unbound-host -t SRV "$domain" \
+			| awk '{print $5, $6, $7, $8}'
+	else
+		msg_info "Missing advanced DNS resolver for mesh gateway discovery"
+	fi | sed 's/\.$//'
+	# (siehe oben) entferne den abschliessenden Top-Level-Domain-Punkt ("on-i.de." statt "on-i.de")
+}
+
+
+## @fn get_ping_time()
+## @brief Ermittle die Latenz eines Ping-Pakets auf dem Weg zu einem Ziel.
+## @param target IP oder DNS-Name des Zielhosts
+## @param duration die Dauer der Ping-Kommunikation in Sekunden (falls ungesetzt: 5)
+## @returns Ausgabe der mittleren Ping-Zeit in ganzen Sekunden; bei Nichterreichbarkit ist die Ausgabe leer
+get_ping_time() {
+	local target="$1"
+	local duration="${2:-5}"
+	local ip=$(query_dns "$target")
+	[ -z "$ip" ] && return 0
+	ping -w "$duration" -q "$ip" 2>/dev/null \
+		| grep "min/avg/max" \
+		| cut -f 2 -d = \
+		| cut -f 2 -d / \
+		| awk '{ print int($1 + 0.5); }'
+}
+
+
 # Lege eine Weiterleitungsregel fuer die firewall an (firewall.@forwarding[?]=...)
 # WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
 # Parameter: Quell-Zone und Ziel-Zone

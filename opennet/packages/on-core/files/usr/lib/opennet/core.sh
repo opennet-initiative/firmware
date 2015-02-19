@@ -14,6 +14,8 @@ ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 ## @var Dateiname für erstellte Zusammenfassungen
 REPORTS_FILE=/tmp/on_report.tar.gz
+## @var Basis-Verzeichnis für Log-Dateien
+LOG_BASE_DIR=/var/log
 
 
 ## @fn msg_debug()
@@ -35,6 +37,36 @@ msg_debug() {
 ## Die info-Nachrichten werden immer ausgegeben, da es kein höheres Log-Level gibt.
 msg_info() {
 	logger -t "$(basename "$0")[$$]" "$1"
+}
+
+
+## @fn append_to_custom_log()
+## @brief Hänge eine neue Nachricht an ein spezfisches Protokoll an.
+## @param log_name Name des Log-Ziels
+## @param event die Kategorie der Meldung (up/down/???)
+## @param msg die textuelle Beschreibung des Ereignis (z.B. "connection with ... closed")
+## @details Die Meldungen werden beispielsweise von den konfigurierten openvpn-up/down-Skripten gesendet.
+append_to_custom_log() {
+	local log_name="$1"
+	local event="$2"
+	local msg="$3"
+	local logfile="$LOG_BASE_DIR/${log_name}.log"
+	echo "$(date) openvpn [$event]: $msg" >>"$logfile"
+	# Datei kuerzen, falls sie zu gross sein sollte
+	local filesize=$(get_filesize "$logfile")
+	[ "$filesize" -gt 10000 ] && sed -i "1,30d" "$logfile"
+	return 0
+}
+
+
+## @fn get_custom_log()
+## @brief Liefere den Inhalt eines spezifischen Logs (z.B. das OpenVPN-Verbindungsprotokoll) zurück.
+## @param log_name Name des Log-Ziels
+## @returns Zeilenweise Ausgabe der Protokollereignisse (aufsteigend nach Zeitstempel sortiert).
+get_custom_log() {
+	local log_name="$1"
+	local logfile="$LOG_BASE_DIR/${log_name}.log"
+	[ -e "$logfile" ] && cat "$logfile" || true
 }
 
 
@@ -427,18 +459,41 @@ set_opennet_id() {
 # Durchsuche eine Schluessel-Wert-Liste nach einem Schluessel und liefere den dazugehoerigen Wert zurueck.
 # Beispiel:
 #   foo=bar baz=nux
-# Der Separator ist konfigurierbar - standardmaessig wird das Gleichheitszeichen verwendet.
+# Der Separator ist konfigurierbar.
 # Die Liste wird auf der Standardeingabe erwartet.
 # Der erste und einzige Parameter ist der gewuenschte Schluessel.
 get_from_key_value_list() {
-	local search_key=$1
-	local separator=${2:-=}
+	local search_key="$1"
+	local separator="$2"
 	local key_value
 	local key
 	sed 's/[ \t]\+/\n/g' | while read key_value; do
 		key=$(echo "$key_value" | cut -f 1 -d "$separator")
 		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break || true
 	done
+	return 0
+}
+
+
+## @fn set_in_key_value_list()
+## @brief Ermittle aus einer mit Tabulatoren oder Leerzeichen getrennten Liste von Schlüssel-Wert-Paaren den Inhalt des Werts zu einem Schlüssel.
+## @param search_key der Name des Schlüsselworts
+## @param separator der Name des Trennzeichens zwischen Wert und Schlüssel
+## @returns die korrigierte Schlüssel-Wert-Liste wird ausgegeben (eventuell mit veränderten Leerzeichen oder Tabulatoren)
+set_in_key_value_list() {
+	local search_key="$1"
+	local separator="$2"
+	local value="$3"
+	local key_value
+	sed 's/[ \t]\+/\n/g' | while read key_value; do
+		key=$(echo "$key_value" | cut -f 1 -d "$separator")
+		if [ "$key" = "$search_key" ]; then
+			# nicht ausgeben, falls der Wert leer ist
+			[ -n "$value" ] && echo -n " ${key_value}${separator}${value}" || true
+		else
+			echo -n " $key_value"
+		fi
+	done | sed 's/^ //'
 	return 0
 }
 
@@ -481,9 +536,17 @@ is_timestamp_older_minutes() {
 }
 
 
-# Fuehre eine Aktion verzoegert im Hintergrund aus.
-# Parameter: Verzoegerung in Sekunden
-# Parameter: Kommandozeile
+## @fn get_uptime_seconds()
+## @brief Ermittle die Anzahl der Sekunden seit dem letzten Bootvorgang.
+get_uptime_seconds() {
+	cut -f 1 -d . /proc/uptime
+}
+
+
+## @fn run_delayed_in_background()
+## @brief Führe eine Aktion verzögert im Hintergrund aus.
+## @param delay Verzögerung in Sekunden
+## @param command alle weiteren Token werden als Kommando und Parameter interpretiert und mit Verzögerung ausgeführt.
 run_delayed_in_background() {
 	local delay="$1"
 	shift
@@ -491,9 +554,12 @@ run_delayed_in_background() {
 }
 
 
+## @fn get_filesize()
+## @brief Ermittle die Größe einer Datei in Bytes.
+## @params filename Name der zu untersuchenden Datei.
 get_filesize() {
 	local filename="$1"
-	stat -c %s "$filename"
+	wc -c "$filename" | awk '{ print $1 }'
 }
 
 
@@ -560,9 +626,13 @@ get_potential_error_messages() {
 	# 9) openvpn(...)[...]: Authenticate/Decrypt packet error
 	#    Paketverschiebungen nach dem Verbindungsaufbau - anscheinend unproblematisch.
 	filters="${filters}|openvpn.*Authenticate/Decrypt packet error"
-	# 10) olsrd: /etc/init.d/olsrd: olsrd_setup_smartgw_rules() Warning: kmod-ipip is missing.
+	# 10) olsrd: ... olsrd_setup_smartgw_rules() Warning: kmod-ipip is missing.
 	#    olsrd gibt beim Starten generell diese Warnung aus. Wir koennen sie ignorieren.
 	filters="${filters}|olsrd.*olsrd_setup_smartgw_rules"
+	# 11) olsrd: ... olsrd_write_interface() Warning: Interface '...' not found, skipped
+	#    Falls das wlan-Interface beim Bootvorgang noch nicht aktiv ist, wenn olsrd startet, dann erscheint diese
+	#    harmlose Meldung.
+	filters="${filters}|olsrd.*Interface.*not found"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }
@@ -698,6 +768,18 @@ system_service_check() {
 get_memory_size() {
 	local memsize_kb=$(grep "^MemTotal:" /proc/meminfo | sed 's/[^0-9]//g')
 	echo $((memsize_kb / 1024))
+}
+
+
+run_parts() {
+	local rundir=$1
+	local fname
+	find "$rundir" -type f | while read fname; do
+		# ignoriere verwaiste symlinks
+		[ ! -f "$fname" ] && continue
+		# ignoriere Fehler bei der Ausfuehrung
+		"$fname" || true
+	done
 }
 
 # Ende der Doku-Gruppe

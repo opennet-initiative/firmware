@@ -240,6 +240,18 @@ function init() {
 <div id="running_status" hidden="true" status="on"/>
 <div id="hidden_name_button" hidden="true"><h3 count="1" /></div>
 
+<%
+	function bool_to_status(value)
+		if (not value) or (value == "") then
+			return ""
+		elseif uci_to_bool(value) then
+			return "y"
+		else
+			return "n"
+		end
+	end
+%>
+
 <h3><%:Usergateway-Status%></h3>
   <div class="cbi-map">
     <fieldset class="cbi-section">
@@ -263,60 +275,58 @@ function init() {
 	      <th class="cbi-section-table-cell"><abbr title="<%:Maximum Transmission Unit - match of configured and measured values is required to share your Internet in any case.%>"><%:MTU-Status%></abbr></th>
               <th />
             </tr>
-<%          local count = 1
-            while count <= ugw_status.usergateways_no do
-              local name = cursor:get("on-usergw", "opennet_ugw"..count, "name")
-              if not name then name = "" end
-%>
+	    <%
+	    local services = line_split(on_function("get_services", {"mesh"}))
+            for index, service_name in ipairs(services) do
+              local label = dot_split(get_service_value(service_name, "host"))[1]
+              if not label then label = service_name end
+	      %>
                 <tr id="cbi-network-lan" class="cbi-section-table-row">
-<!--                        begin of UP-DOWN-Buttons -->
+                  <!-- begin of UP-DOWN-Buttons -->
                   <td class="cbi-value-field">
-                    <% if count ~= 1 then %>
-                      <input class="cbi-button cbi-button-up" type="submit" value="<%=count-1%>" title="<%:up%>" name="down_section" />
+                    <% if index ~= 1 then %>
+                      <input class="cbi-button cbi-button-up" type="submit" value="<%=service_name%>" title="<%:up%>" name="mesh_move_up" />
                     <% end %>
                   </td>
                   <td class="cbi-value-field">
-                    <% if count ~= ugw_status.usergateways_no then %>
-                      <input class="cbi-button cbi-button-down" type="submit" value="<%=count%>" title="<%:down%>" name="down_section" />
+                    <% if index ~= table.maxn(services) then %>
+                      <input class="cbi-button cbi-button-down" type="submit" value="<%=service_name%>" title="<%:down%>" name="mesh_move_down" />
                     <% end %>
-                  </td>
+		  <%=services.maxn%></td>
                   <td class="cbi-value-field">
-                    <input class="cbi-button cbi-button-del" type="submit" value="<%=count%>" title="<%:delete%>" name="del_section" />
+                    <input class="cbi-button cbi-button-del" type="submit" value="<%=service_name%>" title="<%:delete%>" name="mesh_delete" />
                   </td>
-<!--                        end of UP-DOWN-Buttons -->
-<!--                        begin of Gateway-Name (and IP) -->
-                  <td id="name_<%=count%>">
-                    <h3><input class="cbi-button" type="submit" title="<%:No IP-Address found for Gateway-Name, Gateway cannot be used%>" name="select_gw" value="<%=name%>" disabled="true" /></h3>
-                  </td>
-<!--                        end of Gateway-Name (and IP) -->
-<!--                        begin of Gateway Status -->
+                  <!-- end of UP-DOWN-Buttons -->
+                  <!-- begin of Gateway-Name (and IP) -->
+		  <td id="name_<%=service_name%>"><strong><%=label%></strong></td>
+                  <!-- end of Gateway-Name (and IP) -->
+                  <!-- begin of Gateway Status -->
                   <td class="cbi-value-field">
-                    <div id="ugw_tunnel_active_<%=count%>" class="ugw-tunnel_active" status="irrelevant">&nbsp;</div>
+                    <div id="ugw_tunnel_active_<%=service_name%>" class="ugw-tunnel_active" status="irrelevant">&nbsp;</div>
                   </td>
                   <td class="cbi-value-field right-border">
-                    <div id="ugw_forward_active_<%=count%>" class="ugw-tunnel_active" status="irrelevant">&nbsp;</div>
+                    <div id="ugw_forward_active_<%=service_name%>" class="ugw-tunnel_active" status="irrelevant">&nbsp;</div>
                   </td>
-<!--                        end of Gateway Status -->
-<!--                        begin of other status section -->
+                  <!-- end of Gateway Status -->
+                  <!-- begin of other status section -->
                   <td name="wan_section" class="cbi-value-field">
-                    <img class='loading_img_small' src='<%=resource%>/icons/loading.gif' alt='<%:Loading%>' />
+                    <div status="<%= bool_to_status(get_service_value(service_name, 'wan_status')) %>" />
                   </td>
-                  <td id="wan_ping_<%=count%>" class="cbi-value-field">
-                    <img class='loading_img_small' src='<%=resource%>/icons/loading.gif' alt='<%:Loading%>' />
+                  <td id="wan_ping_<%=service_name%>" class="cbi-value-field">
+                    <div status="<%= bool_to_status(get_service_value(service_name, 'vpn_status')) %>" />
                   </td>
                   <td name="speed_section" class="cbi-value-field">
-                    <img class='loading_img_small' src='<%=resource%>/icons/loading.gif' alt='<%:Loading%>' />
+                    <div status="<%= bool_to_status(get_service_value(service_name, 'vpn_status')) %>" />
                   </td>
                   <td name="vpn_section" class="cbi-value-field">
-                    <img class='loading_img_small' src='<%=resource%>/icons/loading.gif' alt='<%:Loading%>' />
+                    <div status="<%= bool_to_status(get_service_value(service_name, 'vpn_status')) %>" />
                   </td>
                   <td name="mtu_section" class="cbi-value-field">
-                    <img class='loading_img_small' src='<%=resource%>/icons/loading.gif' alt='<%:Loading%>' />
+                    <div status="<%= bool_to_status(get_service_value(service_name, 'mtu_status')) %>" />
                   </td>
-<!--                        end of other status section -->
+                  <!-- end of other status section -->
                 </tr>
-<%            count = count + 1
-            end %>
+              <% end %>
             <tr id="cbi-network-lan" class="cbi-section-table-row">
               <td colspan="3" />
               <th><input type="value" name="new_gateway_name" /></th>

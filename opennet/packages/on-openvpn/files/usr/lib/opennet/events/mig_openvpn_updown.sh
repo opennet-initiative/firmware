@@ -18,38 +18,17 @@
 MSG_FILE=/tmp/openvpn_msg.txt
 
 
-disconnect_current() {
-	# das Namensschema der Konfigurationsdatei enthaelt den Dienstnamen
-	local broken_service=$(basename "${config%.conf}")
-	[ -n "$broken_service" ] && set_service_value "$broken_service" "status" "n"
-	# PID-Datei loeschen
-	local pid_file=$(get_service_value "$broken_service" "pid_file")
-	[ -n "$pid_file" ] && rm -f "$pid_file"
-}
+# Allgemeine openvpn-Ereignisbehandlung
+log_openvpn_events_and_disconnect_if_requested "mig-openvpn-connections"
 
-
+# Sonder-Aktionen für mig-Verbindungen
 case "$script_type" in
 	up)
 		echo "vpn-tunnel active" >"$MSG_FILE"	# a short message for the web frontend
-		append_to_mig_connection_log "up" "Connecting to ${remote_1}:${remote_port_1}"
 		ip route add default via "$route_vpn_gateway" table "$ROUTING_TABLE_ON_UPLINK" || true
 		;;
 	down)
 		rm -f "$MSG_FILE"
-		# der openwrt-Build von openvpn setzt wohl leider nicht die "time_duration"-Umgebungsvariable
-		[ -z "${time_duration:-}" ] && time_duration=$(($(date +%s) - $daemon_start_time))
-		# Verbindungsverlust durch fehlende openvpn-Pings?
-		if [ "${signal:-}" = "ping-restart" ]; then
-			append_to_mig_connection_log "down" "Lost connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
-			# markiere die aktuelle Verbindung als kaputt
-			disconnect_current
-		else
-			append_to_mig_connection_log "down" "Closing connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
-		fi
-		;;
-	*)
-		append_to_mig_connection_log "other" "${remote_1}:${remote_port_1}"
-		;;
 esac
 
 exit 0

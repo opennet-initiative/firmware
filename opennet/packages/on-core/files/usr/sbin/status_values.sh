@@ -247,14 +247,14 @@ on_vpn_gws=$(get_services "gw" "ugw" | while read service_name; do
 on_vpn_blist=$(get_services "gw" "ugw" | filter_enabled_services | pipe_service_attribute host | tr '\n' ' ')
 
 ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '/dev tap/ {printf $1" "}'; done)
-on_ugw_status="$([ "$(echo $ugw_status_centralips | wc -w)" -ge "1" ] && echo "1" || echo "0")"
-on_ugw_enabled="$([ "$(uci_get on-usergw.ugw_sharing.shareInternet)" = "on" ] && echo "1" || echo "0")"
+on_ugw_status="$([ "$(echo "$ugw_status_centralips" | wc -w)" -ge "1" ] && echo "1" || echo "0")"
+on_ugw_enabled="$(uci_is_true "$(uci_get on-usergw.ugw_sharing.shareInternet)" && echo "1" || echo "0")"
 
 index=1; ugw_status_sharing_possible=0;
 while [ -n "$(uci_get on-usergw.opennet_ugw${index})" ]; do
-  wan=$(uci_get on-usergw.opennet_ugw${index}.wan)
-  mtu=$(uci_get on-usergw.opennet_ugw${index}.mtu)
-  [ "$wan" = "ok" ] && [ "$mtu" = "ok" ] && ugw_status_sharing_possible=1 && break
+  wan_status=$(uci_get on-usergw.opennet_ugw${index}.wan_status)
+  mtu_status=$(uci_get on-usergw.opennet_ugw${index}.mtu_status)
+  uci_is_true "$wan_status" && uci_is_true "$mtu_status" && ugw_status_sharing_possible=1 && break
   : $((index++))
 done
 on_ugw_possible="$ugw_status_sharing_possible"

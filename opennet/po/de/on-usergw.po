@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-01-03 22:53+0200\n"
+"PO-Revision-Date: 2015-01-28 22:09+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -133,32 +133,38 @@ msgid ""
 "Internet-Sharing will be automatically reenabled in between the next 5 "
 "Minutes. You can enable it manually if you like."
 msgstr ""
+"Die Internetfreigabe wird automatisch in den nächsten 5 Minuten erneut "
+"aktiviert. Du kannst sie bei Bedarf vorzeitig manuell aktivieren."
 
 msgid "Loading"
 msgstr "Lade"
 
 msgid "MTU-Status"
-msgstr ""
+msgstr "MTU-Status"
 
 msgid "Manage Internet-Sharing"
-msgstr ""
+msgstr "Verwaltung der Internetfreigabe"
 
 msgid ""
 "Maximum Transmission Unit - match of configured and measured values is "
 "required to share your Internet in any case."
 msgstr ""
+"Maximum Transmission Unit - die konfigurierten und gemessenen Werte müssen "
+"für eine funktionierende Internetfreigabe übereinstimmen."
 
 msgid "No IP-Address found for Gateway-Name, Gateway cannot be used"
 msgstr ""
+"Die Namensauflösung des Gateway-Namens schlug fehl. Der Gateway kann nicht "
+"verwendet werden."
 
 msgid "Opennet Usergateways"
 msgstr "Opennet Internet-Freigabe / Usergateways"
 
 msgid "Ping Time"
-msgstr ""
+msgstr "Ping-Zeit"
 
 msgid "Speed"
-msgstr ""
+msgstr "Geschwindigkeit"
 
 msgid "Status Details, all checks have to be successful"
 msgstr "Status Details, alle Tests müssen erfolgreich sein"
@@ -179,25 +185,25 @@ msgid "This will take approximately 5 seconds per Gateway"
 msgstr "Dies wird etwa 5 Sekunden je Gateway dauern"
 
 msgid "UGW Tunnel"
-msgstr ""
+msgstr "UGW-Tunnel"
 
 msgid "Usergateway-Status"
 msgstr "Usergateway-Status"
 
 msgid "Usergateway-Tunnel active"
-msgstr ""
+msgstr "Usergateway-Tunnel ist aktiv"
 
 msgid "Usergateway-Tunnel not running"
-msgstr ""
+msgstr "Usergateway-Tunnel ist nicht aktiv"
 
 msgid "VPN Forwarding"
-msgstr ""
+msgstr "VPN-Weiterleitung"
 
 msgid "VPN Status"
-msgstr ""
+msgstr "VPN-Status"
 
 msgid "WAN"
-msgstr ""
+msgstr "WAN"
 
 msgid "add"
 msgstr "hinzufügen"
@@ -208,10 +214,10 @@ msgstr ""
 "automatische Prüfung läuft, Änderungen sind vorübergehend nicht möglich"
 
 msgid "central Gateway-IP %s connected trough tunnel"
-msgstr ""
+msgstr "externe Gateway-IP %s ist über den Tunnel verbunden"
 
 msgid "central Gateway-IPs %s connected trough tunnel"
-msgstr ""
+msgstr "externe Gateway-IPs %s sind über den Tunnel verbunden"
 
 msgid "check MTU"
 msgstr "prüfe MTU"
@@ -227,48 +233,58 @@ msgstr "prüfe WAN-Verbindung"
 
 msgid "click in order to forward to this gateway immediately"
 msgstr ""
+"klicke hier um die Weiterleitung zu diesem Gateway unverzüglich zu aktivieren"
 
 msgid "day"
-msgstr ""
+msgstr "Tag"
 
 msgid "delete"
 msgstr "löschen"
 
 msgid "disable Sharing"
-msgstr ""
+msgstr "Freigabe abschalten"
 
 msgid "down"
 msgstr "runter"
 
 msgid "enable Sharing"
-msgstr ""
+msgstr "Freigabe aktivieren"
 
 msgid "hour"
-msgstr ""
+msgstr "Stunde"
 
 msgid "hours"
-msgstr ""
+msgstr "Stunden"
+
+msgid "inactive"
+msgstr "deaktiviert"
+
+msgid "irrelevant"
+msgstr "unwichtig"
 
 msgid "minutes"
-msgstr ""
+msgstr "Minuten"
 
 msgid "no central Gateway-IPs connected trough tunnel"
-msgstr ""
+msgstr "keine externen Gateway-IPs sind über den Tunnel verbunden"
+
+msgid "ok"
+msgstr "ok"
 
 msgid "suspend Internet-Sharing for"
-msgstr ""
+msgstr "Internetfreigabe kurzfristig abschalten"
 
 msgid "suspend now"
-msgstr ""
+msgstr "jetzt aussetzen"
 
 msgid "tested %s minutes ago"
-msgstr ""
+msgstr "vor %s Minuten getestet"
 
 msgid "up"
 msgstr "hoch"
 
 msgid "upload to Gateway %s kbit/s; download from Gateway %s kbit/s"
-msgstr ""
+msgstr "Upload ins Internet %s kbit/s; Download aus dem Internet %s kbit/s"
 
 #~ msgid "[[No IP-Address found for Gateway-Name, Gateway cannot be used]]"
 #~ msgstr ""

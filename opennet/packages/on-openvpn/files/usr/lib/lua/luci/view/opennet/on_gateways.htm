@@ -21,6 +21,8 @@ You may obtain a copy of the License at
 	if tonumber(on_function("get_memory_size")) <= 32 then
 		parallel_processes = 1
 	end
+
+	local gateway_log = get_custom_log_reversed("mig-openvpn-connections", 30)
 %>
 
 <%+header%>
@@ -129,7 +131,7 @@ You may obtain a copy of the License at
 			update_gateway_change_indicator();
 		}
 		result += String.format('<td class="cbi-value-field"><div id="cbi-opennet-gateways-active" active="%s">&nbsp;</div>', active);
-		result += String.format('<td><strong>%s</strong></th>', remote);
+		result += String.format('<td><strong>%s</strong></td>', remote);
 		if (unreachable) {
 			// unerreichbare Knoten werden als solche markiert
 			result += '<td class="cbi-value-field"><%:unreachable%></td>';
@@ -149,9 +151,9 @@ You may obtain a copy of the License at
 			result += String.format('%.2f</td>', distance + gateway.offset);
 		}
 		result += '<td>';
-		if (gateway.upload || gateway.download) {
-			speed = String.format('%s kbps / %s kbps', gateway.upload || "?", gateway.download || "?");
-			speed_abbr = String.format('<%:upload to Internet %s kbit/s; download from Internet %s kbit/s%>', gateway.upload || "?", gateway.download || "?");
+		if (gateway.wan_speed_upload || gateway.wan_speed_download) {
+			speed = String.format('%s kbps / %s kbps', gateway.wan_speed_upload || "?", gateway.wan_speed_download || "?");
+			speed_abbr = String.format('<%:upload to Internet %s kbit/s; download from Internet %s kbit/s%>', gateway.wan_speed_upload || "?", gateway.wan_speed_download || "?");
 			result += String.format('<div class="vpn-wan-speed" name="speed" id="cbi-opennet-gateways-speed" ><abbr title="%s">%s</abbr></div>', speed_abbr, speed);
 		}
 		result += '</td>';
@@ -214,7 +216,7 @@ You may obtain a copy of the License at
 			<% end %>
 		</div>
 	</fieldset>
-	<% if not on_bool_function("has_mig_credentials") then %>
+	<% if not on_bool_function("has_mig_openvpn_credentials") then %>
 		<fieldset class="cbi-section"><div class="cbi-section-comment"><div class="alert-message warning">
 			<p><%:The required certificate and key for your internet access via Opennet seems to be missing%>
 			(<%:see%> <a href="<%=luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel")%>"><%:Certificate management%></a>).</p>
@@ -286,12 +288,12 @@ You may obtain a copy of the License at
 
 
 <%# Protokoll von Gateway-Wechseln %>
-<% local gateway_log = luci.sys.exec("on-function get_mig_connection_log | tail -n 30 | tac") %>
 <% if gateway_log ~= "" then %>
 	<h3><%:Connection log%></h3>
 	<!-- Verbindungslog -->
 	<div class="cbi-map"><fieldset class="cbi-section">
-		<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly" rows="10" cols="110" wrap="off"><%=gateway_log%></textarea>
+		<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly"
+			rows="10" cols="110" wrap="off"><%=gateway_log%></textarea>
 	</fieldset></div>
 <% end %>
 <%+footer%>

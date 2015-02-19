@@ -31,7 +31,7 @@ function get_ugw_status(ugw_status)
     ugw_status.centralips_no = 0
     for words in string.gfind(ugw_status.centralips, "[^%s]+") do ugw_status.centralips_no=ugw_status.centralips_no+1 end
     ugw_status.centralip_status = "error"
-    if ugw_status.centralips_no >= 1 then ugw_status.centralip_status = "ok" end
+    if ugw_status.centralips_no >= 1 then uci_to_bool(ugw_status.centralip_status) end
     -- tunnel active
     local iterator, number = nixio.fs.glob("/tmp/opennet_ugw-*.txt")
     ugw_status.tunnel_active = (number >= 1)
@@ -47,8 +47,8 @@ function get_ugw_status(ugw_status)
     local count = 1
     while count <= ugw_status.usergateways_no do
         local onusergw = cursor:get_all("on-usergw", "opennet_ugw"..count)
-        if (onusergw.wan == "ok") then ugw_status.sharing_wan_ok = true end
-        if (onusergw.wan == "ok" and onusergw.mtu == "ok") then
+        if (uci_to_bool(onusergw.wan)) then ugw_status.sharing_wan_ok = true end
+        if (uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu_status)) then
             ugw_status.sharing_possible = true
         end
         if onusergw.ipaddr == ugw_status.forwarded_gw then
@@ -57,7 +57,7 @@ function get_ugw_status(ugw_status)
         count = count + 1
     end
     -- sharing enabled
-    ugw_status.sharing_enabled = (cursor:get("on-usergw", "ugw_sharing", "shareInternet") == "on")
+    ugw_status.sharing_enabled = uci_to_bool(cursor:get("on-usergw", "ugw_sharing", "shareInternet"))
     -- sharing blocked
     ugw_status.unblock_time = cursor:get("on-usergw", "ugw_sharing", "unblock_time")
     if ugw_status.unblock_time then
@@ -80,9 +80,9 @@ function check_ugw_status()
   luci.http.write([[<div class="cbi-map"><fieldset class="cbi-section"><fieldset class="cbi-section-node"><table class="usergw-status" id="ugw_status_table"><tr>]])
   luci.http.write([[<td rowspan="2" width="10%" ><div class="cbi-value-field"><div class="ugw-centralip" status="]]..ugw_status.centralip_status..[[">&#160;</div></div></td>]])
   luci.http.write([[<td><h4 class="on_sharing_status-title">]])
-  if (ugw_status.centralip_status == "ok") or (ugw_status.forwarded_gw ~= "") then
+  if uci_to_bool(ugw_status.centralip_status) or (ugw_status.forwarded_gw ~= "") then
     luci.http.write(luci.i18n.translate("Internet shared") .. " (")
-    if (ugw_status.centralip_status == "ok") then
+    if uci_to_bool(ugw_status.centralip_status) then
       luci.http.write(luci.i18n.translate("Central Gateways connected locally"))
     end
     if ugw_status.forwarded_gw ~= "" then
@@ -203,10 +203,10 @@ function get_speed()
   local path = luci.dispatcher.context.requestpath
   local count = path[#path]
   luci.http.prepare_content("text/plain")
-  upload = cursor:get("on-usergw", "opennet_ugw"..count, "upload")
-  download = cursor:get("on-usergw", "opennet_ugw"..count, "download")
+  upload = cursor:get("on-usergw", "opennet_ugw"..count, "wan_speed_upload")
+  download = cursor:get("on-usergw", "opennet_ugw"..count, "wan_speed_download")
   if upload or download then
-    speed_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw"..count, "speed_time"))
+    speed_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw"..count, "wan_speed_timestamp"))
     if not upload or upload == "0" then upload = "?" end
     if not download or download == "0" then download = "?" end
     local speed = upload.." kbps / "..download.." kbps"
@@ -230,11 +230,11 @@ function get_mtu()
   local count = path[#path]
   luci.http.prepare_content("text/plain")
   local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
-  if v.mtu then
-    mtu_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw"..count, "mtu_time"))
-    luci.http.write([[<div class="ugw-mtu" name="mtu" status="]]..v.mtu..[["><abbr title="]]..mtu_time..[[: ]]
-      .. luci.i18n.translatef("(tried/measured) to Gateway: %s/%s from Gateway: %s/%s", v.mtu_toGW_tried, v.mtu_toGW_actual, v.mtu_fromGW_tried, v.mtu_fromGW_actual)
-      ..[[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
+  if v.mtu_status then
+    mtu_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw" .. count, "mtu_timestamp"))
+    luci.http.write([[<div class="ugw-mtu" name="mtu" status="]] .. v.mtu_status .. [["><abbr title="]] .. mtu_time .. [[: ]]
+      .. luci.i18n.translatef("(tried/measured) to Gateway: %s/%s from Gateway: %s/%s", v.mtu_out_wanted, v.mtu_out_real, v.mtu_in_wanted, v.mtu_in_real)
+      .. [[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
   end
   luci.http.write('<img class="loading_img_small" name="mtu_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
     luci.i18n.translate("Loading") .. '" style="display:none;" />')
@@ -276,43 +276,38 @@ end
 
 function get_tunnel_active(count)
   local name = cursor:get("on-usergw", "opennet_ugw"..count, "name")
-  if not name then name = "" end
-  local returnValue = "inactive"
-  if nixio.fs.access("/tmp/opennet_ugw-"..name..".txt") then returnValue = "ok" end
-  return returnValue
+  if not name then return false end
+  return nixio.fs.access("/tmp/opennet_ugw-"..name..".txt")
 end
 
 function get_forward_active(count)
   local ipaddr = cursor:get("on-usergw", "opennet_ugw"..count, "ipaddr")
-  local returnValue = "irrelevant"
-  if ipaddr then
-    local forwarded_gw = tab_split(on_function("get_ugw_portforward"))[2]
-    if forwarded_gw == ipaddr then returnValue = "ok" end
-  end
-  return returnValue
+  if not ipaddr then return false end
+  local forwarded_gw = tab_split(on_function("get_ugw_portforward"))[2]
+  return forwarded_gw == ipaddr
 end
 
 function get_name_button()
-  local SYSROOT = os.getenv("LUCI_SYSROOT")
-  if not SYSROOT then SYSROOT = "" end        -- SYSROOT is only used for local testing (make runhttpd in luci tree)
+  local SYSROOT = os.getenv("LUCI_SYSROOT") or ""
   local path = luci.dispatcher.context.requestpath
   local count = path[#path]
   luci.http.prepare_content("text/plain")
   local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
+  luci.http.write([[<h3 count="]] .. count
+      .. [[" tunnel="]] .. (get_tunnel_active(count) and luci.i18n.translate("ok") or luci.i18n.translate("inactive"))
+      .. [[" forward="]] .. (get_forward_active(count) and luci.i18n.translate("ok") or luci.i18n.translate("irrelevant"))
+      .. [["><input class="cbi-button" type="submit" title="]])
   if v and v.ipaddr and v.ipaddr ~= "" and not nixio.fs.access(SYSROOT.."/var/run/on_usergateway_check") then
-    luci.http.write([[<h3 count="]]..count..[[" tunnel="]]..get_tunnel_active(count)..[[" forward="]]..get_forward_active(count)..[["><input class="cbi-button" type="submit" title="]]
-      ..luci.i18n.translatef("Click in order to switch Forwarding to Gateway %s (IP: %s)", v.name, v.ipaddr)
-      ..[[" name="select_gw" value="]]..v.name..[[" /></h3>]])
+    luci.http.write(luci.i18n.translatef("Click in order to switch Forwarding to Gateway %s (IP: %s)", v.name, v.ipaddr)
+        ..[[" name="select_gw" value="]]..v.name..[[" /></h3>]])
   else
-    luci.http.write([[<h3 count="]]..count..[[" tunnel="]]..get_tunnel_active(count)..[[" forward="]]..get_forward_active(count)..[["><input class="cbi-button" type="submit" title="]]
-      ..luci.i18n.translate("No IP-Address found for Gateway-Name, Gateway cannot be used")
-      ..[[" name="select_gw" value="]]..v.name..[[" disabled="true" /></h3>]])
+    luci.http.write(luci.i18n.translate("No IP-Address found for Gateway-Name, Gateway cannot be used")
+        ..[[" name="select_gw" value="]]..v.name..[[" disabled="true" /></h3>]])
   end
 end
 
 function check_running()
-  local SYSROOT = os.getenv("LUCI_SYSROOT")
-  if not SYSROOT then SYSROOT = "" end        -- SYSROOT is only used for local testing (make runhttpd in luci tree)
+  local SYSROOT = os.getenv("LUCI_SYSROOT") or ""
   luci.http.prepare_content("text/plain")
   if nixio.fs.access(SYSROOT.."/var/run/on_usergateway_check") then
     luci.http.write("script running")

@@ -235,6 +235,7 @@ update_olsr_services() {
 		# der Service ist zu lange nicht aktualisiert worden
 		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
 	done
+	# aktualisiere DNS- und NTP-Dienste
 	apply_changes on-core
 }
 

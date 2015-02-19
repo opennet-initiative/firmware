@@ -1,3 +1,7 @@
+--- @defgroup lua Lua-Funktionen
+-- Beginn der Doku-Gruppe
+--- @{
+
 function _quote_parameters(parameters)
 	local arguments = ""
 	local value
@@ -23,6 +27,23 @@ function on_bool_function(func_name, parameters)
 end
 
 
+--- @brief Interpretiere einen Text entsprechend der uci-Boolean-Definition (yes/y/true/1 = wahr).
+--- @param text textuelle Repräsentation eines Wahrheitswerts
+--- @returns true oder false
+--- @details Leere oder nicht erkannte Eingaben werden als "false" gewertet.
+function uci_to_bool(text)
+	return on_bool_function("uci_is_true", {"text"})
+end
+
+
+--- @brief Liefere eine begrenzte Anzahl von Zeilen eines Logs zurück (umgekehrt sortiert von neu zu alt).
+--- @param log_name Name des Log-Ziels
+--- @param lines Anzahl der zurückzuliefernden Zeilen
+function get_custom_log_reversed(log_name, lines)
+	return luci.sys.exec("on-function get_custom_log '" .. log_name .. "' | tail -n '" .. lines .. "' | tac")
+end
+
+
 function _generic_split(text, token_regex)
 	local result = {}
 	local token
@@ -34,6 +55,7 @@ end
 function tab_split(text) return _generic_split(text, "[^\t]+") end
 function line_split(text) return _generic_split(text, "[^\n]+") end
 function space_split(text) return _generic_split(text, "%S+") end
+function dot_split(text) return _generic_split(text, "[^.]+") end
 
 
 function map_table(input_table, func)
@@ -219,3 +241,6 @@ function parse_csv_service(service_name, descriptions)
 	end
 	return one_service
 end
+
+-- Ende der Doku-Gruppe
+--- @}

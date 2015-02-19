@@ -10,9 +10,10 @@ DEFAULT_SERVICE_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
 # unbedingt synchron halten mit "_is_persistent_service_attribute" (der Effizienz wegen getrennt)
 PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset disabled"
+LOCAL_BIAS_MODULO=10
 
 
-_get_service_name() {
+get_service_name() {
 	local service="$1"
 	local scheme="$2"
 	local host="$3"
@@ -36,7 +37,7 @@ notify_service() {
 	local path="$6"
 	local details="$7"
 	local source="$8"
-	local service_name=$(_get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
+	local service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 	local now=$(get_time_minute)
 	if ! is_existing_service "$service_name"; then
 		# diese Attribute sind Bestandteil des Namens und aendern sich nicht
@@ -82,12 +83,12 @@ is_existing_service() {
 }
 
 
-# Addiere 1 oder 0 - abhaengig von der lokalen IP und der IP der Gegenstelle.
+# Addiere eine Zahl von 0 bis (LOCAL_BIAS_MODULO-1) - abhaengig von der lokalen IP und der IP der Gegenstelle.
 # Dadurch koennen wir beim Sortieren strukturelle Ungleichgewichte (z.B. durch alphabetische Sortierung) verhindern.
 _add_local_bias_to_host() {
 	local ip="$1"
-        local host_number=$(echo "$ip" | sed 's/[^0-9]//g')
-	head -1 | awk '{ print $1 + ( '$(get_local_bias_number)' + '$host_number' ) % 2 }'
+	local host_number=$(echo "$ip$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g')
+	head -1 | awk '{ print $1 + ('$host_number' % '$LOCAL_BIAS_MODULO') }'
 }
 
 
@@ -95,23 +96,34 @@ _add_local_bias_to_host() {
 # Der Wert ist beliebig und nur im Vergleich mit den Prioritaeten der anderen Dienste verwendbar.
 # Als optionaler zweiter Parameter kann die Sortierung uebergeben werden. Falls diese nicht uebergeben wurde,
 # wird die aktuell konfigurierte Sortierung benutzt.
+# Sollte ein Dienst ein "priority"-Attribut tragen, dann wird die uebliche Dienst-Sortierung aufgehoben
+# und lediglich "priority" (und gegebenenfalls separat "offset") beachtet.
 get_service_priority() {
 	trap "error_trap get_service_priority '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local sorting="${2:-}"
-	local distance=$(get_service_value "$service_name" "distance")
+	local priority=$(get_service_value "$service_name" "priority")
 	local rank
-	# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
-	[ -z "$sorting" ] && sorting=$(get_service_sorting)
-	if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
-		# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
-		[ -z "$distance" ] && return 0
-		get_distance_with_offset "$service_name"
-	elif [ "$sorting" = "manual" ]; then
-		get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
+	# priority wird von nicht-olsr-Clients verwendet (z.B. mesh-Gateways mit oeffentlichen IPs)
+	if [ -n "$priority" ]; then
+		# dieses Ziel traegt anscheinend keine Routing-Metrik
+		local offset=$(get_service_value "$service_name" "offset" "0")
+		echo "$((priority + offset))"
 	else
-		msg_info "Unknown sorting method for services: $sorting"
-		echo 1
+		# wir benoetigen Informationen fuer Ziele mit Routing-Metriken
+		local distance=$(get_service_value "$service_name" "distance")
+		# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
+		[ -z "$sorting" ] && sorting=$(get_service_sorting)
+		if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
+			# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
+			[ -z "$distance" ] && return 0
+			get_distance_with_offset "$service_name"
+		elif [ "$sorting" = "manual" ]; then
+			get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
+		else
+			msg_info "Unknown sorting method for services: $sorting"
+			echo 1
+		fi
 	fi | get_int_multiply 1000 | _add_local_bias_to_host "$(get_service_value "$service_name" "host")"
 }
 
@@ -175,12 +187,25 @@ sort_services_by_priority() {
 	local service_name
 	local priority
 	local sorting=$(get_service_sorting)
-	local unreachable_services=""
 	while read service_name; do
 		priority=$(get_service_priority "$service_name" "$sorting")
 		# keine Entfernung (nicht erreichbar) -> ganz nach hinten sortieren (schmutzig, aber wohl ausreichend)
 		[ -z "$priority" ] && priority=999999999999999999999999999999999999999
 		echo "$priority" "$service_name"
+	done | sort -n | awk '{print $2}'
+}
+
+
+## @fn sort_services_by()
+## @brief Sortiere den eingegeben Strom von Dienstnamen und gib eine sortierte Liste entsprechende des Arguments aus.
+## @param sort_column Die Spalte, anhand deren Inhalt die Auswertung und Sortierung stattfinden soll.
+sort_services_by() {
+	trap "error_trap sort_services_by '$*'" $GUARD_TRAPS
+	local sort_column="$1"
+	local service_name
+	while read service_name; do
+		value=$(get_service_value "$service_name" "$sort_column" "_")
+		echo "$value" "$service_name"
 	done | sort -n | awk '{print $2}'
 }
 
@@ -361,13 +386,16 @@ get_service_attributes() {
 }
 
 
-# menschenfreundliche Ausgabe der aktuell angemeldeten Dienste
+## @fn print_services()
+## @brief menschenfreundliche Ausgabe der aktuell angemeldeten Dienste
+## @param service_types (optional) Liste von gewünschten Service-Typen (falls leer: alle)
+## @returns Ausgabe der bekannten Dienste (für Menschen - nicht parsebar)
 print_services() {
 	trap "error_trap print_services '$*'" $GUARD_TRAPS
 	local service_name
 	local attribute
 	local value
-	get_services | while read service_name; do
+	get_services "$@" | while read service_name; do
 		echo "$service_name"
 		get_service_attributes "$service_name" | while read attribute; do
 			value=$(get_service_value "$service_name" "$attribute")
@@ -605,12 +633,34 @@ move_service_top() {
 }
 
 
+## @fn get_service_detail()
+## @brief Ermittle den Wert eines Schlüssel-Wert-Paars im "details"-Attribut eines Diensts
+## @param service_name Name eines Diensts
+## @param key Name des Schlüssels
+## @param default dieser Wert wird zurückgeliefert, falls der Schlüssel nicht gefunden wurde
+## @returns den ermittelten Wert aus dem Schlüssel-Wert-Paar
 get_service_detail() {
 	local service_name="$1"
 	local key="$2"
 	local default="${3:-}"
 	local value=$(get_service_value "$service_name" "details" | get_from_key_value_list "$key" ":")
-	[ -n "$value" ] && echo "$value" || echo "$default"
+	[ -n "$value" ] && echo -n "$value" || echo -n "$default"
+	return 0
+}
+
+
+## @fn set_service_detail()
+## @brief Setze den Wert eines Schlüssel-Wert-Paars im "details"-Attribut eines Diensts
+## @param service_name Name eines Diensts
+## @param key Name des Schlüssels
+## @param value der neue Wert
+## @details Ein leerer Wert löscht das Schlüssel-Wert-Paar.
+set_service_detail() {
+	local service_name="$1"
+	local key="$2"
+	local value="$3"
+	local new_details=$(get_service_value "$service_name" "details" | set_in_key_value_list "$key" ":" "$value")
+	set_service_value "$service_name" "details" "$new_details"
 	return 0
 }
 

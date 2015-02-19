@@ -6,18 +6,23 @@ client
 nobind
 comp-lzo yes
 
-# sanfte Abmeldung vom Server
-explicit-exit-notify 1
+# keine sanfte Abmeldung vom Server - sonst ueberschreibt dieses Signal das "ping-restart"-Signal bei einem Verbindungsabbruch
+#explicit-exit-notify 1
+# explizit kein "persist-tun" - damit wir Verbindungsabbrueche via down-Skript erkennen koennen
+#persist-tun
+
+persist-key
+
+# keine Fehlermeldungen bei scheinbaren "replay"-Angriffen
+# man openvpn: Silence the output of replay warnings, which are a common false alarm on WiFi networks.
+mute-replay-warnings
 
 dev tap
 dev-type tap
 
-persist-key
-persist-tun
-
 ns-cert-type server
 script-security 2 execve
 
-up /etc/openvpn/opennet_ugw/opennet_ugw_up.sh
-down /etc/openvpn/opennet_ugw/opennet_ugw_down.sh
+up /usr/lib/opennet/events/mesh_openvpn_updown.sh
+down /usr/lib/opennet/events/mesh_openvpn_updown.sh
 

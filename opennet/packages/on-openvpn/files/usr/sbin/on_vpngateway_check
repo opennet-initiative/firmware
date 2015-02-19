@@ -38,7 +38,7 @@ case "${1:-}" in
 	test)
 		shift
 		if [ "$#" -gt 0 ]; then
-			# filtere die Dienste, die mit der einen angegebene IP assoziiert sind
+			# filtere die Dienste, die mit der einen angegebenen IP assoziiert sind
 			get_services "gw" "ugw" | filter_services_by_value "host=$1"
 		else
 			get_services "gw" "ugw"
@@ -72,7 +72,7 @@ case "${1:-}" in
 				test_mig_connection "$service_name" || true
 			done
 			# der Gateway-Wechsel findet nur statt, falls Schluessel und Zertifikat vorhanden sind
-			has_mig_credentials && find_and_select_best_gateway || true
+			has_mig_openvpn_credentials && find_and_select_best_gateway || true
 		fi
 		;;
 esac

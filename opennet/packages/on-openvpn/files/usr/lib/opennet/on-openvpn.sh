@@ -4,7 +4,6 @@
 ## @{
 
 MIG_VPN_DIR=/etc/openvpn/opennet_user
-MIG_VPN_CONNECTION_LOG=/var/log/mig_openvpn_connections.log
 MIG_VPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
 DEFAULT_MIG_PORT=1600
 
@@ -18,33 +17,12 @@ get_on_openvpn_default() {
 }
 
 
-## @fn update_mig_service()
-## @param Name eines Diensts
-## @brief Erzeuge oder aktualisiere einen Mesh-Internet-Gateway-Dienst Ignoriere doppelte Einträge.
-## @attention Anschließend muss "on-core" comitted werden.
-update_mig_service() {
-	trap "error_trap update_mig_service '$*'" $GUARD_TRAPS
-	local service_name="$1"
-	local template_file="$MIG_VPN_CONFIG_TEMPLATE_FILE"
-	local pid_file="/var/run/${service_name}.pid"
-	local config_file="$OPENVPN_CONFIG_BASEDIR/${service_name}.conf"
-	set_service_value "$service_name" "template_file" "$template_file"
-	set_service_value "$service_name" "config_file" "$config_file"
-	set_service_value "$service_name" "pid_file" "$pid_file"
-}
-
-
-## @fn has_mig_credentials()
+## @fn has_mig_openvpn_credentials()
 ## @brief Prüft, ob der Nutzer bereits einen Schlüssel und ein Zertifikat angelegt hat.
 ## @returns Liefert "wahr", falls Schlüssel und Zertifikat vorhanden sind oder
 ##   falls in irgendeiner Form Unklarheit besteht.
-has_mig_credentials() {
-	local cert_file=$(_get_file_dict_value "$MIG_VPN_CONFIG_TEMPLATE_FILE" "cert")
-	local key_file=$(_get_file_dict_value "$MIG_VPN_CONFIG_TEMPLATE_FILE" "key")
-	# im Zweifel: liefere "wahr"
-	[ -z "$key_file" -o -z "$cert_file" ] && return 0
-	# beide Dateien existieren
-	[ -e "$key_file" -a -e "$cert_file" ] && return 0
+has_mig_openvpn_credentials() {
+	has_openvpn_credentials_by_template "$MIG_VPN_CONFIG_TEMPLATE_FILE" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 
@@ -58,7 +36,7 @@ test_mig_connection() {
 	trap "error_trap test_mig_connection '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
-	update_mig_service "$service_name"
+	prepare_openvpn_service "$service_name" "$MIG_VPN_CONFIG_TEMPLATE_FILE"
 	local host=$(get_service_value "$service_name" "host")
 	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
 	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)
@@ -80,7 +58,7 @@ test_mig_connection() {
 		# 3) falls bisher noch kein definitives Ergebnis feststand (dies ist nur innerhalb
 		#    der ersten "recheck" Minuten nach dem Booten moeglich).
 		# In jedem Fall kann der Zeitstempel gesetzt werden - egal welches Ergebnis die Pruefung hat.
-		if verify_vpn_connection "$service_name" "host" \
+		if verify_vpn_connection "$service_name" \
 				"$VPN_DIR_TEST/on_aps.key" \
 				"$VPN_DIR_TEST/on_aps.crt" \
 				"$VPN_DIR_TEST/opennet-ca.crt"; then
@@ -261,71 +239,6 @@ get_mig_connection_test_age() {
 	[ -z "$timestamp" ] && return 0
 	local now=$(get_time_minute)
 	echo "$timestamp" "$now" | awk '{ print $2 - $1 }'
-}
-
-
-## @fn append_to_mig_connection_log()
-## @brief Hänge eine neue Nachricht an das Nutzer-VPN-Verbindungsprotokoll an.
-## @param event die Kategorie der Meldung (up/down/other)
-## @param msg die textuelle Beschreibung des Ereignis (z.B. "connection with ... closed")
-## @details Die Meldungen werden von den konfigurierten openvpn-up/down-Skripten gesendet.
-append_to_mig_connection_log() {
-	local event="$1"
-	local msg="$2"
-	echo "$(date) openvpn [$event]: $msg" >>"$MIG_VPN_CONNECTION_LOG"
-	# Datei kuerzen, falls sie zu gross sein sollte
-	local filesize=$(get_filesize "$MIG_VPN_CONNECTION_LOG")
-	[ "$filesize" -gt 10000 ] && sed -i "1,30d" "$MIG_VPN_CONNECTION_LOG"
-	return 0
-}
-
-
-## @fn get_mig_connection_log()
-## @brief Liefere den Inhalt des VPN-Verbindungsprotokolls.
-# Liefere den Inhalt des Nutzer-VPN-Verbindungsprotokolls (Aufbau + Trennung) zurueck
-get_mig_connection_log() {
-	[ -e "$MIG_VPN_CONNECTION_LOG" ] && cat "$MIG_VPN_CONNECTION_LOG" || true
-}
-
-
-## @fn cleanup_stale_openvpn_services()
-## @brief Beräumung liegengebliebener openvpn-Konfigurationen, sowie Deaktivierung funktionsunfähiger Verbindungen.
-## @details Verwaiste openvpn-Konfigurationen können aus zwei Grunden auftreten:
-##   1) nach einem reboot wurde nicht du zuletzt aktive openvpn-Verbindung ausgewählt - somit bleibt der vorher aktive uci-Konfigurationseintrag erhalten
-##   2) ein VPN-Verbindungsaufbau scheitert und hinterlässt einen uci-Eintrag, eine PID-Datei, jedoch keinen laufenden Prozess
-cleanup_stale_openvpn_services() {
-	trap "error_trap cleanup_stale_openvpn_services '$*'" $GUARD_TRAPS
-	local service_name
-	local config_file
-	local pid_file
-	local uci_prefix
-	find_all_uci_sections openvpn openvpn | while read uci_prefix; do
-		config_file=$(uci_get "${uci_prefix}.config")
-		# Keine config-Datei? Keine von uns verwaltete Konfiguration ...
-		[ -z "$config_file" ] && continue
-		service_name="${uci_prefix#openvpn.}"
-		pid_file=$(get_service_value "$service_name" "pid_file")
-		# Keine PID-Dateiangabe? Keine von uns verwaltete Konfiguration ...
-		[ -z "$pid_file" ] && continue
-		# Es scheint sich um eine von uns verwaltete Verbindung zu handeln.
-		# Falls die config-Datei oder die pid-Datei fehlt, dann ist es ein reboot-Fragment. Wir löschen die Überreste.
-		if [ ! -e "$config_file" -o ! -e "$pid_file" ]; then
-			msg_info "Removing a reboot-fragment of a previously used openvpn connection: $service_name"
-			disable_openvpn_service "$service_name"
-		elif check_pid_file "$pid_file" "openvpn"; then
-			# Prozess läuft - alles gut
-			true
-		else
-			# Falls die PID-Datei existiert, jedoch veraltet ist (kein dazugehöriger Prozess läuft), dann
-			# schlug der Verbindungsaufbau fehlt (siehe "tls-exit" und "single-session").
-			# Wir markieren die Verbindung als kaputt.
-			msg_info "Marking a possibly interrupted openvpn connection as broken: $service_name"
-			set_service_value "$service_name" "status" "n"
-			reset_mig_connection_test_timestamp "$service_name"
-			disable_openvpn_service "$service_name"
-		fi
-	done
-	apply_changes openvpn
 }
 
 

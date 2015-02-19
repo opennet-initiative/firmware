@@ -11,331 +11,82 @@
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
 
-# Debug?
-#set -x
-set -u
-
-# include helper functions
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
-DATA_LOCK_FILE=/var/run/on_usergateway_check
 
-
-#################################################################################
-# Geschwindigkeitsmessung gegen die konfigurierten UGWs
-# Eintragen der Ergebnisse in die Status-Datei fuer UGWs.
-ugw_update_speed () {
-	trap "error_trap ugw_update_speed '$*'" $GUARD_TRAPS
-	echo "ugw_update_speed" >"$DATA_LOCK_FILE"
-	local config_name=$1
-	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
-	local hostname=$(uci_get "${uci_prefix}.hostname")
-	local download_speed=$(measure_download_speed "$hostname")
-	local upload_speed=$(measure_upload_speed "$hostname")
-	# no checks if no number is available
-	[ -z "$download_speed" ] && [ -z "$upload_speed" ] && return
-	local prev_download=$(get_ugw_value "$config_name" download)
-	local prev_upload=$(get_ugw_value "$config_name" upload)
-	if [ -z "$prev_download" -o "$prev_download" = "0" ]; then
-		set_ugw_value "$config_name" download "$download_speed"
-	else
-		set_ugw_value "$config_name" download "$(((download_speed+prev_download)/2))"
-	fi
-	if [ -z "$prev_upload" -o "$prev_upload" = "0" ]; then
-		set_ugw_value "$config_name" upload "$upload_speed"
-	else
-		set_ugw_value "$config_name" upload "$(((download_speed+prev_upload)/2))"
-	fi
-	# no significant change? Keep previous timestamp.
-	if [ "$((download_speed/1000))" = "$((prev_download/1000))" ] && [ "$((upload_speed/1000))" = "$((prev_upload/1000))" ]; then
-		set_ugw_value "$config_name" speed_time_prev "$(get_ugw_value "$config_name" speed_time)"
-	fi
-	set_ugw_value "$config_name" speed_time "$(date +%s)"
-}
-
-
-#################################################################################
-# check all stored Usergateways for speed
-run_for_all_openvpn_ugw() {
-	local action
-	local uci_prefix
-	local config_name
-	for action in "$@"; do
-		find_all_uci_sections on-usergw uplink "type=openvpn" | while read uci_prefix; do
-			config_name=$(uci_get "${uci_prefix}.name")
-			"$action" "$config_name"
-		done
-	done
-}
-
-
-#################################################################################
-# try to establish openvpn tunnel
-# return a string, if it works (else return nothing)
-# parameter is index to test
-ugw_update_vpn_status()
-{
-	trap "error_trap ugw_update_vpn_status '$*'" $GUARD_TRAPS
-	echo "ugw_update_vpn_status" >"$DATA_LOCK_FILE"
-	local config_name=$1
-	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
-	local hostname=$(uci_get "${uci_prefix}.hostname")
-	if [ "$(get_ugw_value "$config_name" "wan")" != "ok" ]; then
-		msg_info "ugw_update_vpn_status skipped for gw '$hostname': not connected trough WAN"
-		return 0
-	fi
-	# if no age set yet than set to recheck_age to force immediate testing
-	local recheck_age=$(get_on_usergw_default vpn_recheck_age)
-	local nonworking_timeout=$(get_on_usergw_default vpn_nonworking_timeout)
-	local age=$(get_ugw_value "$config_name" age)
-	if [ -n "$age" ]; then
-		# it's running every 5 minutes
-		age=$((age+5))
-	else
-		age=$recheck_age
-	fi
-	set_ugw_value "$config_name" age "$age"
-
-	if [ "$age" -ge "$((recheck_age+nonworking_timeout))" ]; then
-		# if there was no vpn-availability for a dedicated time (nonworking_timeout minutes), declare vpn-status as not working
-		set_ugw_value "$config_name" status n
-		set_ugw_value "$config_name" age 0
-	elif [ "$age" -ge "$recheck_age" ]; then
-		if verify_vpn_connection "$(uci_get "${uci_prefix}.config_file")" "detail:hostname" \
-				"$VPN_DIR_TEST/on_aps.key" \
-				"$VPN_DIR_TEST/on_aps.crt" \
-				"$VPN_DIR_TEST/opennet-ca.crt"; then
-			set_ugw_value "$config_name" status y
-			set_ugw_value "$config_name" age 0
-			msg_debug "vpn-availability of gw '$hostname' successfully tested"
-		fi
-		msg_debug "finished vpn test of '$hostname'"
-	elif [ "$(get_ugw_value "$config_name" status)" = "y" ]; then
-		msg_debug "vpn-availability of gw '$hostname' still valid"
-	fi
-}
-
-
-#################################################################################
-#
-#
-ugw_getMTU () {
-	trap "error_trap ugw_getMTU '$*'" $GUARD_TRAPS
-	local config_name=$1
-	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
-	local config_file=$(uci_get "${uci_prefix}.config_file")
-	local hostname=$(uci_get "${uci_prefix}.hostname")
-	local pidfile="/tmp/openvpn_mtutest_${config_name}.pid"
-	local outfile="/tmp/openvpn_mtutest_${config_name}.out"
-
-	openvpn --config "$config_file" --writepid "$pidfile" --mtu-test >"$outfile" 2>&1 &
-	# wait for openvpn to startup and write pid file
-	local pid=$(cat "$pidfile" 2>/dev/null || true)
-	local wait_loops=40
-	local mtu_out
-	while [ "$wait_loops" -gt 0 ]; do
-		mtu_out=$(grep "MTU test completed" "$outfile")
-		# for example
-		# Thu Jul  3 22:23:01 2014 NOTE: Empirical MTU test completed [Tried,Actual] local->remote=[1573,1573] remote->local=[1573,1573]
-		if [ -n "$mtu_out" ]; then
-                        # output result as one line 4 numbers and complete status output line comma separated
-			echo "$mtu_out" | tr '[' ',' | tr ']' ',' | cut -d , -f 5,6,8,9 | tr '\n' ','
-			echo "$mtu_out"
-			kill "$pid" >/dev/null 2>&1 || true ; rm -f "$pidfile" "$outfile"
-			return 0
-		fi
-		if [ -z "$pid" -o ! -d "/proc/$pid" ]; then
-			msg_info "test for ugw_getMTU $hostname impossible. Aborting."
-			[ -n "$pid" ] && kill "$pid" >/dev/null 2>&1 || true
-			rm -f "$pidfile" "$outfile"
-			trap "" $GUARD_TRAPS && return 1
-		fi
-		sleep 10
-		: $((wait_loops--))
-	done
-	# timer run off, kill leftover openvpn and abort test
-	kill "$pid" >/dev/null 2>&1 || true
-	rm -f "$pidfile" "$outfile"
-	msg_info "timeout for ugw_getMTU $hostname Aborting."
-	trap "" $GUARD_TRAPS && return 1
-}
-
-#################################################################################
-# if ugw has some broken MTU settings, traffic will not go through the gateway
-# even if olsrd or icmp-packages are working well. Therefore check MTU before
-# recognizing a ugw as working...
-ugw_update_mtu() {
-	trap "error_trap ugw_update_mtu '$*'" $GUARD_TRAPS
-	echo "ugw_update_mtu" >"$DATA_LOCK_FILE"
-	local config_name=$1
-	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
-	local hostname=$(uci_get "${uci_prefix}.hostname")
-	if [ "$(get_ugw_value "$config_name" wan)" != "ok" ]; then
-		msg_debug "ugw_update_mtu for '$hostname' skipped, please check WAN first"
-		return
-	fi
-	
-	msg_debug "starting ugw_update_mtu for '$hostname'"
-	msg_debug "ugw_update_mtu will take around 5 minutes per gateway"
-
-	local result=$(ugw_getMTU "$config_name")
-
-	if [ -n "$result" ]; then
-		local toGW_tried=$(echo "$result" | cut -f 1 -d ,)
-		local toGW_actual=$(echo "$result" | cut -f 2 -d ,)
-		local fromGW_tried=$(echo "$result" | cut -f 3 -d ,)
-		local fromGW_actual=$(echo "$result" | cut -f 4 -d ,)
-		local status_output=$(echo "$result" | cut -f 5- -d ,)
-	
-		if [ "$toGW_tried" -le "$toGW_actual" ] && [ "$fromGW_tried" -le "$fromGW_actual" ]; then
-			set_ugw_value "$config_name" mtu ok
-		else
-			set_ugw_value "$config_name" mtu error
-		fi
-
-		set_ugw_value "$config_name" mtu_msg "$status_output"
-		set_ugw_value "$config_name" mtu_toGW_tried "$toGW_tried"
-		set_ugw_value "$config_name" mtu_toGW_actual "$toGW_actual"
-		set_ugw_value "$config_name" mtu_fromGW_tried "$fromGW_tried"
-		set_ugw_value "$config_name" mtu_fromGW_actual "$fromGW_actual"
-		set_ugw_value "$config_name" mtu_time "$(date +%s)"
-	fi
-
-	local mtu=$(get_ugw_value "$config_name" mtu)
-	local mtu_msg=$(get_ugw_value "$config_name" mtu_msg)
-	msg_debug "$mtu: ugw_update_mtu for '$hostname' done"
-	msg_debug "$mtu: $mtu_msg"
-}
-
-
-# Pruefung ob der Verkehr zu einem UGW ueber ein WAN-Interface verlaufen wuerde
-# Falls nicht, dann wird das "wan"-Flag auf "error" gesetzt.
-ugw_update_wan_status () {
-	trap "error_trap ugw_update_wan_status '$*'" $GUARD_TRAPS
-	echo "ugw_update_wan_status" >"$DATA_LOCK_FILE"
-	local config_name=$1
-	local uci_prefix=$(find_first_uci_section on-usergw uplink "name=$config_name")
-	local hostname=$(uci_get "${uci_prefix}.hostname")
-	local on_ugw_targetDev
-	local retry_counter=0
-	on_ugw_targetDev=$(get_target_route_interface "$hostname")
-	# Netzwerk-Ereignisketten (openvpn-Neustart, firewall-reload, olsrd, ...) scheinen manchmal zu
-	# einem fehlerhaften Ergebnis zu fuehren - also erstmal oefter probieren, bevor wir die Verbindung
-	# abbrechen. Wo genau ist die Ursache?
-	until is_device_in_zone "$on_ugw_targetDev" "$ZONE_WAN" -o [ "$retry_counter" -ge 3 ]; do
-		sleep 3
-		on_ugw_targetDev=$(get_target_route_interface "$hostname")
-		: $((retry_counter++))
-	done
-	if is_device_in_zone "$on_ugw_targetDev" "$ZONE_WAN"; then
-		set_ugw_value "$config_name" wan ok
-		time=$(ping -w 5 -q "$hostname" 2>/dev/null| awk 'BEGIN{FS="[ \/]+"} /min\/avg\/max/ {print int($7+0.5)}')
-		set_ugw_value "$config_name" ping "$time"
-		msg_debug "checkWAN: $hostname routing through wan device: $on_ugw_targetDev"
-		msg_debug "checkWAN: $hostname avg ping time: $time"
-	else
-		# ausfuehrliche Erklaerung, falls das Routing eben noch akzeptabel war
-		[ "$(get_ugw_value "$config_name" "wan")" = "ok" ] && msg_info "Routing switched away from WAN interface to <$on_ugw_targetDev>"
-		set_ugw_value "$config_name" wan error
-		set_ugw_value "$config_name" ping ""
-	fi
-}
-
-
-#################################################################################
-# do extra checks (speed, mtu) only at dedicated times
-ugw_doExtraChecks () {
-	trap "error_trap ugw_doExtraChecks '$*'" $GUARD_TRAPS
-	msg_debug "ugw_doExtraChecks"
-	local nr
-	local speed_time
-	local speed_time_prev
-	local name
-	local vpn_pidfile
-	local mtu_time
-	local config_name
-	local restart_time=$(($(date +%s)-$(cut -f1 -d. /proc/uptime)))
-
-	find_all_uci_sections on-usergw uplink | while read uci_prefix; do
-		config_name=$(uci_get "${uci_prefix}.name")
-		# do extraChecks only if WAN-Connection is established
-		[ "$(get_ugw_value "$config_name" "wan")" != "ok" ] && continue
-
-		# speedCheck
-		speed_time=$(get_ugw_value "$config_name" "speed_time")
-		[ -z "$speed_time" ] && speed_time=0
-		# never checked since restart
-		if [ "$((speed_time-restart_time))" -lt 0 ]; then
-			set_ugw_value "$config_name" "speed_time" ""
-			set_ugw_value "$config_name" "speed_time_prev" ""
-		fi
-		speed_time=$(get_ugw_value "$config_name" "speed_time")
-		speed_time_prev=$(get_ugw_value "$config_name" "speed_time_prev")
-		if [ -z "$speed_time" ] ||
-				# last (successful) check older than 1 day and no two successful checks had been done
-				( [ "$(($(date +%s)-speed_time))" -gt 86400 ] && [ -z "$speed_time_prev" ] ); then
-			ugw_update_speed "$config_name"
-		fi
-
-		# mtuCheck
-		# if last mtucheck is older than 1 day and ugw is not running
-		# TODO: PID-Dateiname im Service speichern (z.B. "pid_file")
-		vpn_pidfile="/var/run/${config_name}.pid"
-		clean_stale_pid_file "$vpn_pidfile"
-		# VPN laeuft -> kein MTU-Test
-		[ -e "$vpn_pidfile" ] && continue
-		mtu_time=$(get_ugw_value "$config_name" "mtu_time")
-		[ -z "$mtu_time" ] && mtu_time=0
-		if [ "$(($(date +%s)-mtu_time))" -gt 86400 ]; then
-			ugw_update_mtu "$config_name"
-		fi
-	done
-	return 0
-}
-
-
-#################################################################################
-# start here - with the menu
 ACTION="${1:-auto}"
 shift
 
-test "$ACTION" = "--help" && echo -e "\
-Usage: on_usergateway_check [OPTION]...
+
+case "$ACTION" in
+	checkWan|checkMtu|checkVpn|checkSpeed)
+		[ "$ACTION" = checkWan ] && func=update_service_wan_status
+		[ "$ACTION" = checkMtu ] && func=update_public_gateway_mtu
+		[ "$ACTION" = checkVpn ] && func=update_public_gateway_vpn_status
+		[ "$ACTION" = checkSpeed ] && func=update_public_gateway_speed_estimation
+		if [ "$#" -gt 0 ]; then
+			# filtere die Dienste, die mit der einen angegebenen IP assoziiert sind
+			get_services "mesh" | filter_services_by_value "host=$1"
+		else
+			get_services "mesh"
+		fi | filter_reachable_services | filter_enabled_services | while read service_name; do
+			description=$(get_service_description "$service_name")
+			echo "Testing Gateway: $description"
+			"$func" "$service_name" && echo "OK" || echo "FEHLER"
+		done
+		;;
+	auto)
+		cleanup_stale_openvpn_services
+		update_mesh_services_via_dns
+		get_services "mesh" | filter_services_by_value "scheme=openvpn" | filter_enabled_services | while read service_name; do
+			# Geschwindigkeitstest
+			timestamp=$(get_service_value "$service_name" "wan_speed_timestamp" "0")
+			recheck_minutes=$(get_on_usergw_default "wan_speed_recheck_period")
+			is_timestamp_older_minutes "$timestamp" "$recheck_minutes" \
+				&& update_public_gateway_speed_estimation "$service_name"
+			# VPN-Test
+			timestamp=$(get_service_value "$service_name" "vpn_timestamp" "0")
+			recheck_minutes=$(get_on_usergw_default "openvpn_recheck_period")
+			is_timestamp_older_minutes "$timestamp" "$recheck_minutes" \
+				&& update_public_gateway_vpn_status "$service_name"
+			# der MTU-Test
+			timestamp=$(get_service_value "$service_name" "mtu_timestamp" "0")
+			recheck_minutes=$(get_on_usergw_default "mtu_recheck_period")
+			is_timestamp_older_minutes "$timestamp" "$recheck_minutes" \
+				&& update_public_gateway_mtu "$service_name"
+			# der WAN-Test geht schnell - es gibt keine Wartezeit
+			update_service_wan_status "$service_name"
+			# Gesamtstatus ermitteln
+			new_status="true"
+			for attribute in "wan_status" "mtu_status" "vpn_status"; do
+				uci_is_true "$(get_service_value "$service_name" "$attribute" "false")" || new_status="false"
+			done
+			set_service_value "$service_name" "status" "$new_status"
+		done
+		# die laufenden OpenVPN-Prozesse an die aktuellen Zustaende anpassen
+		has_mesh_openvpn_credentials && sync_mesh_openvpn_connection_processes
+		true
+		;;
+	--help|help)
+			cat - <<EOF
+Usage: $(basename "$0") [OPTION]...
 	usually called by cron every 5 minutes
 Options:
 	(no option)	do regular 5-minutely check
 	checkWan	check if routes to UGW go through WAN-device, detect ping-time
 	checkMtu	check if MTU of WAN-UGW-Tunnel is ok
-			this test will last ~5 minutes per tunnel
+			this test will last ca. 5 minutes per tunnel
 			results will be stored in on-usergw config
-	checkVpn	check Vpn availability of gateway on port 1600
+	checkVpn	check Mesh-OpenVPN availability of gateway
 	checkSpeed	check Speed of Gateway
-	--help		this help" && exit 0
-
-aquire_lock "$DATA_LOCK_FILE" 10 || { msg_debug "parallel instance running, exit" && exit; }
-echo "running: $ACTION $@" >"$DATA_LOCK_FILE"
-msg_debug "starting another instance ($@)"
-
-
-case "$ACTION" in
-	checkWan|checkMtu|checkVpn|checkSpeed)
-		[ "$ACTION" = checkWan ] && func=ugw_update_wan_status
-		[ "$ACTION" = checkMtu ] && func=ugw_update_mtu
-		[ "$ACTION" = checkVpn ] && func=ugw_update_vpn_status
-		[ "$ACTION" = checkSpeed ] && func=ugw_update_speed
-		if [ $# -gt 0 ]; then
-			"$func" "$@"
-		else
-			run_for_all_openvpn_ugw "$func"
-		fi
+	--help		this help
+EOF
 		;;
-	auto|*)
-		run_for_all_openvpn_ugw ugw_update_wan_status ugw_update_vpn_status
-		ugw_doExtraChecks
-		ugw_update_service_state
+	*)
+		"$0" help >&2
+		exit 1
 		;;
 esac
 
-rm -f "$DATA_LOCK_FILE"
-msg_debug "finishing another instance"
+exit 0
 

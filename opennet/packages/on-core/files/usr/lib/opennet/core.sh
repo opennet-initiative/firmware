@@ -770,5 +770,17 @@ get_memory_size() {
 	echo $((memsize_kb / 1024))
 }
 
+
+run_parts() {
+	local rundir=$1
+	local fname
+	find "$rundir" -type f | while read fname; do
+		# ignoriere verwaiste symlinks
+		[ ! -f "$fname" ] && continue
+		# ignoriere Fehler bei der Ausfuehrung
+		"$fname" || true
+	done
+}
+
 # Ende der Doku-Gruppe
 ## @}

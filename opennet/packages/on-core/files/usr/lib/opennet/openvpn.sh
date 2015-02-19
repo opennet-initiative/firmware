@@ -91,6 +91,7 @@ get_openvpn_config() {
 	local port=$(get_service_value "$service_name" "port")
 	local protocol=$(get_service_value "$service_name" "protocol")
 	[ "$protocol" = "tcp" ] && protocol=tcp-client
+	# TODO: es scheint vorzukommen, dass "template_file" noch nicht definiert ist - dann abbrechen - siehe build 853 bei oyla
 	local template_file=$(get_service_value "$service_name" "template_file")
 	local pid_file=$(get_service_value "$service_name" "pid_file")
 	# schreibe die Konfigurationsdatei

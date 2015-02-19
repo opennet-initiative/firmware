@@ -250,12 +250,16 @@ transfer_gateway_uci_settings() {
 
 
 # Bis Version 0.4-5 wurde die Datei /etc/crontabs/root einfach ueberschrieben (bzw. erzeugt).
-# Die damaligen Zeilen sind spaeter nicht mehr nutzbar, da sie auf /usr/bin/run-parts.sh verweisen (spaeter: "/bin/run-parts").
+# In Version 0.5 wurde die busybox-Funktion "run-parts" verwendet. Zugunsten der separaten
+# Paketierung wollen wir dies nicht mehr verwenden.
 # Fortan werden die Eintraege manuell hinzugefuegt (siehe /etc/uci-defaults/on-core-init).
 remove_crontab_entries() {
 	local crontab_file=/etc/crontabs/root
 	[ -e "$crontab_file" ] || return 0
+	# Verwendung des alten shell-Skripts
 	sed -i '/\/usr\/bin\/run-parts\.sh/d' "$crontab_file"
+	# Verwendung der busybox-Funktion
+	sed -i '/\trun-parts /d' "$crontab_file"
 }
 
 

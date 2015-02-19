@@ -7,6 +7,5 @@ set -eu
 
 
 ps >processes.txt
-pstree >processes_tree.txt
 netstat -lpn >sockets.txt
 

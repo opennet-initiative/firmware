@@ -61,8 +61,12 @@ get_target_route_interface() {
 		query_dns "$target"
 	fi | while read ipaddr; do
 		# "failed_policy" wird von ipv6 fuer nicht-zustellbare Adressen zurueckgeliefert
-		# falls ein Hostname mehrere IP-Adressen ergibt (z.B. ipv4 und ipv6), dann werden beide probiert
-		ip route get "$ipaddr" | grep -v ^failed_policy | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
+		# Falls ein Hostname mehrere IP-Adressen ergibt (z.B. ipv4 und ipv6), dann werden beide geprüft.
+		# Die Ergebnis der Interface-Ermittlung für eine IPv6-Adresse bei fehlendem IPv6-Gateway sieht folgendermaßen aus:
+		#    root@AP-1-193:/tmp/log/on-services# ip route get 2a01:4f8:140:1222::1:7
+		#    12 2a01:4f8:140:1222::1:7 from :: dev lo  src fe80::26a4:3cff:fefd:7649  metric -1  error -1
+		# Wir ignorieren also Zeilen, die auf "error -1" enden.
+		ip route get "$ipaddr" | grep -v ^failed_policy | grep -v "error -1$" | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
 	done | head -1
 }
 

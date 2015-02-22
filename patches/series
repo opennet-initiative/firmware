@@ -11,3 +11,4 @@ luci_olsr_fix_empty_result.patch
 olsrd_add_ondataservice.patch
 openwrt_backport_r43776.patch
 kernel_enable_ag71xx_debug.patch
+openwrt_backport_loco_xw.patch

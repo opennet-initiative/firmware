@@ -42,11 +42,11 @@ configure_dnsmasq() {
 add_crontab_entries() {
 	local crontab_file=/etc/crontabs/root
 	line_in_file "$crontab_file" "^[^#].*run-parts.*/etc/cron\.minutely" \
-		"* * * * *		on-function run-parts /etc/cron.minutely 2>&1 | logger -t cron-error"
+		"* * * * *		on-function run_parts /etc/cron.minutely 2>&1 | logger -t cron-error"
 	line_in_file "$crontab_file" "^[^#].*run-parts.*/etc/cron\.5mins" \
-		"*/5 * * * *		on-function run-parts /etc/cron.5mins 2>&1 | logger -t cron-error"
+		"*/5 * * * *		on-function run_parts /etc/cron.5mins 2>&1 | logger -t cron-error"
 	line_in_file "$crontab_file" "^[^#].*run-parts.*/etc/cron\.daily" \
-		"02 4 * * *		on-function run-parts /etc/cron.daily 2>&1 | logger -t cron-error"
+		"02 4 * * *		on-function run_parts /etc/cron.daily 2>&1 | logger -t cron-error"
 	# es ist schwer zu pruefen, ob die Datei sich geaendert hat - also einfach neustarten
 	/etc/init.d/cron restart
 }

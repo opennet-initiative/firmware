@@ -11,8 +11,17 @@ BASE_DIR=$(cd "$(dirname "$0")/../packages"; pwd)
 cd "$BASE_DIR"
 
 
-get_lua_files() { find on-*/files/usr/lib/lua -type f; }
-get_shell_files() { grep -rl '^#!/bin/sh'; }
+get_lua_files() {
+	find on-*/files/usr/lib/lua -type f
+}
+
+
+get_shell_files() {
+	(
+		grep -rl '^#!/bin/sh'
+		grep -rl "GUARD_TRAPS"
+	) | sort | uniq
+}
 
 
 get_lua_funcs() {
@@ -67,20 +76,52 @@ check_lua_function_in_use() {
 check_shell_function_in_use() {
 	local funcname="$1"
 	local fname
-	local count=$(get_shell_files | while read fname; do get_shell_func_calls "$fname" "$funcname"; done | wc -l)
+	# shell-Funktionsaufrufe duerfen in shell- und in lua-Datei auftauchen
+	local count=$( (get_shell_files; get_lua_files) | while read fname; do get_shell_func_calls "$fname" "$funcname"; done | wc -l)
 	# mindestens ein Vorkommen? -> ok
 	[ "$count" -gt 0 ] && return 0
 	return 1
 }
 
 
-echo "**************** eventuell unbenutzte lua-Funktionen *********************"
-get_lua_funcs | while read funcname; do
-	check_lua_function_in_use "$funcname" || echo "$funcname"
-done
+ACTION=${1:-check}
 
-echo "*************** eventuell unbenutzte shell-Funktionen ********************"
-get_shell_funcs | while read funcname; do
-	check_shell_function_in_use "$funcname" || echo "$funcname"
-done
+case "$ACTION" in
+	check)
+		"$0" lua-check
+		"$0" shell-check
+		;;
+	lua-check)
+		echo "**************** eventuell unbenutzte lua-Funktionen *********************"
+		get_lua_funcs | while read funcname; do
+			check_lua_function_in_use "$funcname" || echo "$funcname"
+		done
+		;;
+	shell-check)
+		echo "*************** eventuell unbenutzte shell-Funktionen ********************"
+		get_shell_funcs | while read funcname; do
+			check_shell_function_in_use "$funcname" || echo "$funcname"
+		done
+		;;
+	lua-funcs)
+		get_lua_funcs | sort
+		;;
+	shell-funcs)
+		get_shell_funcs | sort
+		;;
+	lua-files)
+		get_lua_files | sort
+		;;
+	shell-files)
+		get_shell_files | sort
+		;;
+	help|--help)
+		echo "Syntax: $(basename "$0")  { check | lua-check | shell-check | lua-funcs | shell-funcs | lua-files | shell-files | help }"
+		echo
+		;;
+	*)
+		"$0" help >&2
+		exit 1
+		;;
+esac
 

@@ -86,9 +86,12 @@ is_existing_service() {
 
 # Addiere eine Zahl von 0 bis (LOCAL_BIAS_MODULO-1) - abhaengig von der lokalen IP und der IP der Gegenstelle.
 # Dadurch koennen wir beim Sortieren strukturelle Ungleichgewichte (z.B. durch alphabetische Sortierung) verhindern.
+# TODO: pruefen, ob diese Funktion nicht eventuell furchtbar langsam ist (relevant fuer sortierte Dienstlisten)
 _add_local_bias_to_host() {
 	local ip="$1"
-	local host_number=$(echo "$ip$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g')
+	# Die resultierende host_number darf nicht zu gross sein (z.B. mit Exponentendarstellung),
+	# da andernfalls awk die Berechnung fehlerhaft durchführt.
+	local host_number=$(echo "$ip$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g' | dd bs=8 count=1 2>/dev/null)
 	head -1 | awk '{ print $1 + ('$host_number' % '$LOCAL_BIAS_MODULO') }'
 }
 
@@ -191,7 +194,7 @@ sort_services_by_priority() {
 	while read service_name; do
 		priority=$(get_service_priority "$service_name" "$sorting")
 		# keine Entfernung (nicht erreichbar) -> ganz nach hinten sortieren (schmutzig, aber wohl ausreichend)
-		[ -z "$priority" ] && priority=999999999999999999999999999999999999999
+		[ -z "$priority" ] && priority=999999999999999
 		echo "$priority" "$service_name"
 	done | sort -n | awk '{print $2}'
 }

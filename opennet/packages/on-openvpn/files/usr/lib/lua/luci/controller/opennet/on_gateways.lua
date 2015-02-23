@@ -61,9 +61,14 @@ function action_vpn_gateways()
 	elseif reset_connection_test_timestamps then
 		on_function("reset_all_mig_connection_test_timestamps")
 	elseif new_gateway then
-		local new_gateway_ip = luci.http.formvalue("new_gateway_ip")
-		local new_gateway_port = luci.http.formvalue("new_gateway_port") or "1600"
-		on_function("notify_service", {"gw", "openvpn", new_gateway_ip, new_gateway_port, "udp", "/", "", "manual"})
+		local new_gateway_host = parse_hostname_string(luci.http.formvalue("new_gateway_ip"))
+		local new_gateway_port = parse_number_string(luci.http.formvalue("new_gateway_port"))
+				or on_function("get_variable", {"DEFAULT_MIG_PORT"})
+		if new_gateway_host and new_gateway_port then
+			on_function("notify_service", {"gw", "openvpn", new_gateway_host, new_gateway_port, "udp", "/", "", "manual"})
+		else
+			-- Fehlermeldung?
+		end
 	end
 
 	local show_more_info = luci.http.formvalue("show_more_info")

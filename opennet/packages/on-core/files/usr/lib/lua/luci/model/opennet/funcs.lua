@@ -268,5 +268,23 @@ function parse_csv_service(service_name, descriptions)
 	return one_service
 end
 
+
+--- @brief Zahl aus einer Zeichenkette herausfiltern (sinnvoll für freie Texteingaben).
+--- @param text Zeichenkette (oder nil) die Ziffern enthalten sollte.
+--- @returns nil (leere Eingabe oder keine Zahl enthalten) bzw. der String der die Ziffern enthält
+function parse_number_string(text)
+	return string.match(text or "", "%d+")
+end
+
+
+--- @brief Hostnamen, bzw. IP aus einer Zeichenkette herausfiltern.
+--- @param text Zeichenkette (oder nil) die einen Hostnamen oder eine IP enthalten sollte.
+--- @returns nil bzw. der gefilterte String
+function parse_hostname_string(text)
+	local text = text or ""
+	-- IPv4/IPv6 oder Hostname (sehr tolerante Filter - ausreichend fuer die Erkennung boeser Eingaben)
+	return string.match(text, "^[0-9A-Fa-f:.]$") or string.match(text, "^[a-zA-Z0-9.-]+$")
+end
+
 -- Ende der Doku-Gruppe
 --- @}

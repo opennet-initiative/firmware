@@ -253,9 +253,10 @@ update_olsr_route_cache() {
 	trap "error_trap update_olsr_route_cache '$*'" $GUARD_TRAPS
 	# die temporaere Datei soll verhindern, dass es zwischendurch ein Zeitfenster mit unvollstaendigen Informationen gibt
 	local tmpfile="${OLSR_ROUTE_CACHE_FILE}.new"
-	# wir ignorieren Fehlerausgaben von 
-	echo /routes | request_olsrd_txtinfo | grep "^[0-9]" | sed 's#/32##' > "$tmpfile"
-	mv "$tmpfile" "$OLSR_ROUTE_CACHE_FILE"
+	# Bei der Ausfuehrung via cron wird SIGPIPE eventuell behandelt, auf dass die Ausfuehrung
+	# ohne Erzeugung der Datei abbrechen koennte. Daher ist die &&-Verknuepfung sinnvoll.
+	echo /routes | request_olsrd_txtinfo | grep "^[0-9]" | sed 's#/32##' > "$tmpfile" && mv "$tmpfile" "$OLSR_ROUTE_CACHE_FILE"
+	return 0
 }
 
 # Ende der Doku-Gruppe

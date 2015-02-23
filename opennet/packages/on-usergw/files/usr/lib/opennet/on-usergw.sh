@@ -14,6 +14,7 @@ SPEEDTEST_SECONDS=20
 UGW_FIREWALL_RULE_NAME=opennet_ugw
 ## für die Kompatibilität mit Firmware vor v0.5
 UGW_LOCAL_SERVICE_PORT_LEGACY=1600
+DEFAULT_MESH_OPENVPN_PORT=1602
 ## falls mehr als ein GW-Dienst weitergereicht wird, wird dieser Port und die folgenden verwendet
 UGW_LOCAL_SERVICE_PORT_START=5100
 UGW_SERVICE_CREATOR=ugw_service
@@ -35,33 +36,30 @@ has_mesh_openvpn_credentials() {
 }
 
 
-## @fn test_ugw_openvpn_connection()
+## @fn update_mesh_openvpn_connection_state()
 ## @brief Prüfe, ob ein Verbindungsaufbau mit einem openvpn-Dienst möglich ist.
 ## @param Name eines Diensts
 ## @returns exitcode=0 falls der Test erfolgreich war
 ## @details Die UGW-Tests dürfen eher träger Natur sein, da die Nutzer-VPN-Tests für schnelle Wechsel im Fehlerfall
 ##   sorgen und jedes UGW typischerweise mehrere Gateway-Dienste via Portweiterleitung anbietet.
 ## @attention Seiteneffekt: die Zustandsinformationen des Diensts (Status und Test-Zeitstempel) werden verändert.
-test_ugw_openvpn_connection() {
-	trap "error_trap test_ugw_openvpn_connection '$*'" $GUARD_TRAPS
+update_mesh_openvpn_connection_state() {
+	trap "error_trap update_mesh_openvpn_connection_state '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
 	prepare_openvpn_service "$service_name" "$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
-	local host=$(get_service_detail "$service_name" "hostname")
-	local returncode=0
+	local host=$(get_service_value "$service_name" "host")
 	if verify_vpn_connection "$service_name" \
 			"$VPN_DIR_TEST/on_aps.key" \
 			"$VPN_DIR_TEST/on_aps.crt" \
 			"$VPN_DIR_TEST/opennet-ca.crt"; then
 		msg_debug "vpn-availability of gw $host successfully tested"
-		set_service_value "$service_name" "status" "y"
+		set_service_value "$service_name" "vpn_status" "y"
 	else
-		set_service_value "$service_name" "status" "n"
+		set_service_value "$service_name" "vpn_status" "n"
 		msg_debug "failed to test vpn-availability of gw $host"
-		returncode=1
 	fi
 	set_service_value "$service_name" "timestamp_connection_test" "$(get_time_minute)"
-	trap "" $GUARD_TRAPS && return "$returncode"
 }
 
 
@@ -127,7 +125,7 @@ update_service_wan_status() {
 		local ping_time=$(get_ping_time "$host")
 		set_service_value "$service_name" "wan_ping" "$ping_time"
 		msg_debug "target '$host' routing through wan device: $outgoing_interface"
-		msg_debug "average ping time for $host: ${ping_time}s"
+		msg_debug "average ping time for $host: ${ping_time}ms"
 	else
 		local outgoing_zone=$(get_zone_of_interface "$outgoing_interface")
 		# ausfuehrliche Erklaerung, falls das Routing zuvor noch akzeptabel war
@@ -140,21 +138,21 @@ update_service_wan_status() {
 }
 
 
-## @fn update_public_gateway_mtu()
+## @fn update_mesh_gateway_mtu()
 ## @brief Falls auf dem Weg zwischen Router und öffentlichem Gateway ein MTU-Problem existiert, dann werden die Daten nur bruchstückhaft fließen, auch wenn alle anderen Symptome (z.B. Ping) dies nicht festellten. Daher müssen wir auch den MTU-Pfad auswerten lassen.
 ## @param service_name der Name des Diensts
 ## @returns keine Ausgabe - als Seiteneffekt wird der MTU des Diensts verändert
-update_public_gateway_mtu() {
-	trap "error_trap update_public_gateway_mtu '$*'" $GUARD_TRAPS
+update_mesh_gateway_mtu() {
+	trap "error_trap update_update_mesh_gateway_mtu '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local host=$(get_service_value "$service_name" "host")
 	local state
 
-	msg_debug "starting update_public_gateway_mtu for '$host'"
-	msg_debug "update_public_gateway_mtu will take around 5 minutes per gateway"
+	msg_debug "starting update_mesh_gateway_mtu for '$host'"
+	msg_debug "update_mesh_gateway_mtu will take around 5 minutes per gateway"
 
 	# sicherstellen, dass die config-Datei existiert
-	prepare_openvpn_service "$service_name" "$MIG_VPN_CONFIG_TEMPLATE_FILE"
+	prepare_openvpn_service "$service_name" "$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
 
 	local result=$(openvpn_get_mtu "$service_name")
 	local out_wanted=$(echo "$result" | cut -f 1)
@@ -183,7 +181,7 @@ update_public_gateway_mtu() {
 
 
 ## @fn sync_mesh_gateway_connection_processes()
-## @brief Erzeuge openvpn-Konfigurationen für die als nutzbar markierten Dienste und entferne die Konfigurationen von unbrauchbaren Dienste. Beachte dabei auch die maximale Anzahl von mesh-OpenVPN-Verbindungen.
+## @brief Erzeuge openvpn-Konfigurationen für die als nutzbar markierten Dienste und entferne die Konfigurationen von unbrauchbaren Dienste. Dabei wird auch die maximale Anzahl von mesh-OpenVPN-Verbindungen beachtet.
 sync_mesh_openvpn_connection_processes() {
 	local service_name
 	local max_connections=2

@@ -216,13 +216,17 @@ sort_services_by() {
 
 ## @fn filter_reachable_services()
 ## @brief Filtere aus einer Reihe eingehender Dienste diejenigen heraus, die erreichbar sind.
-## @details Die Dienst-Namen werden über die Standardeingabe gelesen und an
-##   die Standardausgabe weitergeleitet, falls der Dienst erreichbar sind.
+## @details Die Dienst-Namen werden über die Standardeingabe gelesen und an die Standardausgabe
+##   weitergeleitet, falls der Dienst erreichbar sind. "Erreichbarkeit" gilt als erreicht, wenn
+##   der Host via olsr route-bar ist oder wenn er als DNS-entdeckter Dienst eine Priorität hat
+##   oder wenn er manuell hinzugefügt wurde.
 filter_reachable_services() {
 	local service_name
 	while read service_name; do
-		([ -n "$(get_service_value "$service_name" "distance")" ] || [ -n "$(get_service_value "$service_name" "priority")" ]) \
-			&& echo "$service_name" || true
+		( [ -n "$(get_service_value "$service_name" "distance")" ] \
+			|| [ -n "$(get_service_value "$service_name" "priority")" ] \
+			|| [ "$(get_service_value "$service_name" "source")" = "manual" ]
+		) && echo "$service_name" || true
 	done
 }
 

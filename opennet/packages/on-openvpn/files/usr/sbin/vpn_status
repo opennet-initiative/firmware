@@ -91,13 +91,11 @@ move_up()	{ move_service_up	"$1" gw ugw; }
 move_down()	{ move_service_down	"$1" gw ugw; }
 
 
-#TODO: neues Service-Konzept
 add_gw() {
 	trap "error_trap add_gw '$*'" $GUARD_TRAPS
 	local ipaddr="$1"
 	local port="${2:-$DEFAULT_MIG_PORT}"
-	notify_service gw openvpn "$ipaddr" "$port" udp / "" manual
-	uci commit on-core
+	notify_service "ugw" "openvpn" "$ipaddr" "$port" udp / "" manual
 }
 
 

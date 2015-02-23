@@ -171,7 +171,7 @@ You may obtain a copy of the License at
 				result += String.format('<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="%s" title="<%:auto-discovered services cannot be deleted%>" name="delete_service" disabled="disabled" />', gateway.id);
 			} else {
 				// Loeschen ist moeglich
-				result += String.format('<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="%s" title="<%:delete%>" name="delete_service" %s />', gateway.id);
+				result += String.format('<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="%s" title="<%:delete%>" name="delete_service" />', gateway.id);
 			}
 			result += String.format('<input class="cbi-button cbi-button-disable cbi-button-small" type="submit" value="%s" title="<%:disable%>" name="disable_service" />', gateway.id);
 		}

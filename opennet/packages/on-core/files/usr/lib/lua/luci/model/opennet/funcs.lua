@@ -32,7 +32,7 @@ end
 --- @returns true oder false
 --- @details Leere oder nicht erkannte Eingaben werden als "false" gewertet.
 function uci_to_bool(text)
-	return on_bool_function("uci_is_true", {"text"})
+	return on_bool_function("uci_is_true", {text or ""})
 end
 
 

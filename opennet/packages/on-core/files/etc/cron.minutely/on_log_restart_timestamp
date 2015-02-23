@@ -47,7 +47,7 @@ get_current_time_offset_milliseconds() {
 
 # Uptime und Zeitsynchronitaet ermitteln
 time_offset=$(get_current_time_offset_milliseconds)
-uptime=$(get_uptime_seconds)
+uptime=$(on-function get_uptime_seconds)
 # beide Bedingungen voneinander trennen - sonst liefert ash eine Fehlermeldung, falls "time_offset" leer ist
 if [ -z "$time_offset" ] || [ "$time_offset" -gt "$ACCEPTABLE_TIME_OFFSET" ]; then
 	# bisher fand kein Zeitabgleich statt - wir pruefen, ob die uptime inzwischen abgelaufen ist

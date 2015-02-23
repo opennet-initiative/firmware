@@ -351,7 +351,8 @@ prepare_openvpn_service() {
 openvpn_get_mtu() {
 	trap "error_trap openvpn_get_mtu '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local config_file="/tmp/openvpn_mtutest_${service_name}.conf"
+	local config_file="$(mktemp)"
+	local pid_file="$(mktemp)"
 	local log_file="$(get_service_log_filename "$service_name" "openvpn" "mtu")"
 	local filename
 	local key
@@ -361,7 +362,7 @@ openvpn_get_mtu() {
 
 	# kein Netzwerkinterface, keine pid-Datei
 	_change_openvpn_config_setting "$config_file" "dev" "null"
-	_change_openvpn_config_setting "$config_file" "writepid" ""
+	_change_openvpn_config_setting "$config_file" "writepid" "$pid_file"
 
 	# Log-Datei anlegen
 	_change_openvpn_config_setting "$config_file" "log" "$log_file"
@@ -383,16 +384,25 @@ cert $VPN_DIR_TEST/on_aps.crt
 EOF
 
 	openvpn --mtu-test --config "$config_file" 2>&1 &
-	local pid=$!
+	# warte auf den Startvorgang
+	sleep 3
+	local pid="$(cat "$pid_file")"
 	local wait_loops=40
 	local mtu_out
+	local mtu_out_filtered
 	while [ "$wait_loops" -gt 0 ]; do
 		mtu_out=$(grep "MTU test completed" "$log_file")
 		# for example
 		# Thu Jul  3 22:23:01 2014 NOTE: Empirical MTU test completed [Tried,Actual] local->remote=[1573,1573] remote->local=[1573,1573]
 		if [ -n "$mtu_out" ]; then
                         # Ausgabe der vier Zahlen getrennt durch Tabulatoren
-			echo "$mtu_out" | tr '[' ',' | tr ']' ',' | cut -d , -f 5,6,8,9 --output-delimiter '\t' | tr '\n' '\t'
+			mtu_out_filtered="$(echo "$mtu_out" | tr '[' ',' | tr ']' ',')"
+			# Leider koennen wir nicht alle Felder auf einmal ausgeben (tab-getrennt),
+			# da das busybox-cut nicht den --output-delimiter unterstützt.
+			echo "$mtu_out_filtered" | cut -d , -f 5 | tr '\n' '\t'
+			echo "$mtu_out_filtered" | cut -d , -f 6 | tr '\n' '\t'
+			echo "$mtu_out_filtered" | cut -d , -f 8 | tr '\n' '\t'
+			echo "$mtu_out_filtered" | cut -d , -f 9 | tr '\n' '\t'
 			# wir ersetzen alle eventuell vorhandenen Tabulatoren in der Statusausgabe - zur Vereinfachung des Parsers
 			echo -n "$mtu_out" | tr '\t' ' '
 			break
@@ -406,7 +416,7 @@ EOF
 	done
 	# sicherheitshalber brechen wir den Prozess ab und loeschen alle Dateien
 	kill "$pid" >/dev/null 2>&1 || true
-	rm -f "$config_file"
+	rm -f "$config_file" "$pid_file"
 	# ist der Zaehler abgelaufen?
 	[ "$wait_loops" -eq 0 ] && msg_info "timeout for openvpn_get_mtu '$host' - aborting."
 	return 0

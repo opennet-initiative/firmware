@@ -1,3 +1,8 @@
+# Kommentare (alles zwischen "END" und "BEGIN") sollten ignoriert werden:
+#   http://www.rfc-editor.org/internet-drafts/draft-josefsson-pkix-textual-10.txt (Abschnitt 2: General Considerations)
+#
+# UGW-CA (2006)
+# C=DE, ST=Mecklenburg-Vorpommern, L=Rostock, O=OpenNet, OU=user gateways, CN=User gateway CA/emailAddress=admin@opennet-initiative.de
 -----BEGIN CERTIFICATE-----
 MIIE8DCCA9igAwIBAgIBADANBgkqhkiG9w0BAQQFADCBsDELMAkGA1UEBhMCREUx
 HzAdBgNVBAgTFk1lY2tsZW5idXJnLVZvcnBvbW1lcm4xEDAOBgNVBAcTB1Jvc3Rv
@@ -27,6 +32,8 @@ B4kdyCzRX4/NTY7A02lRc+gyBrs3HsfqgHv5e7WRYiBw9qan/dK/8kjM0CjYeh6Q
 uimt1mXszGzoBzZ94KpLrWod07IqeoVlGunFxLhC6kLIxoJTeeHpYI8yw+s1HQAI
 FUmCNrWbcvU2YcGn07R2biAfz+Q=
 -----END CERTIFICATE-----
+# Server-CA (2014)
+# C=DE, ST=Mecklenburg-Vorpommern, O=Opennet Initiative e.V., OU=Opennet CA, CN=opennet-server.ca.on/emailAddress=admin@opennet-initiative.de
 -----BEGIN CERTIFICATE-----
 MIIGZjCCBE6gAwIBAgIJAJ52z3EPcf7xMA0GCSqGSIb3DQEBCwUAMIGuMQswCQYD
 VQQGEwJERTEfMB0GA1UECBMWTWVja2xlbmJ1cmctVm9ycG9tbWVybjEgMB4GA1UE
@@ -64,6 +71,8 @@ IbJt9VihxA3X+SfnlhG+8okhdy44qJ0Y9aP2hTCPWtXjO8ZVmfVtS8WxdcjcoA29
 ycrJDxyhdB74mhLojjYLwErf2r1FF/nGivasUyzxPsC8WvUB0ADQKwrHt2TDmz/S
 Dzw47o27ziWuGw==
 -----END CERTIFICATE-----
+# Root-CA (2014)
+# C=DE, ST=Mecklenburg-Vorpommern, O=Opennet Initiative e.V., OU=Opennet CA, CN=opennet-root.ca.on/emailAddress=admin@opennet-initiative.de
 -----BEGIN CERTIFICATE-----
 MIIHZjCCBU6gAwIBAgIJANCUEcpFurXxMA0GCSqGSIb3DQEBDQUAMIGuMQswCQYD
 VQQGEwJERTEfMB0GA1UECBMWTWVja2xlbmJ1cmctVm9ycG9tbWVybjEgMB4GA1UE

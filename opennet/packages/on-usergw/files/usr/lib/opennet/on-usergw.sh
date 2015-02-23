@@ -177,33 +177,8 @@ update_public_gateway_mtu() {
 	set_service_value "$service_name" "mtu_timestamp" "$(get_time_minute)"
 	set_service_value "$service_name" "mtu_status" "$state"
 
-	local mtu_status=$(get_service_value "$service_name" "mtu_status")
-	local mtu_msg=$(get_service_value "$service_name" "mtu_msg")
-	msg_debug "mtu [$mtu_status]: update_public_gateway_mtu for '$host' done"
-	msg_debug "mtu [$mtu_status]: $mtu_msg"
-}
-
-
-## @fn update_public_gateway_vpn_status()
-## @brief Prüfe den VPN-Verbindungsaufbau mit Probezertifikaten und aktualisiere den VPN-Status, sowie -Testzeitstempel.
-## @param service_name der Name des Diensts
-update_public_gateway_vpn_status() {
-	trap "error_trap ugw_update_vpn_status '$*'" $GUARD_TRAPS
-	local service_name=$1
-	local host=$(get_service_value "$service_name" "host")
-	local status
-	if verify_vpn_connection "$service_name" \
-			"$VPN_DIR_TEST/on_aps.key" \
-			"$VPN_DIR_TEST/on_aps.crt" \
-			"$VPN_DIR_TEST/opennet-ca.crt"; then
-		status="true"
-		msg_debug "vpn-availability of gw '$host' successfully tested"
-	else
-		status="false"
-	fi
-	set_service_value "$service_name" "vpn_status" "false"
-	set_service_value "$service_name" "vpn_timestamp" "$(get_time_minute)"
-	msg_debug "finished vpn test of '$host'"
+	msg_debug "mtu [$state]: update_mesh_gateway_mtu for '$host' done"
+	msg_debug "mtu [$state]: $status_output"
 }
 
 
@@ -243,25 +218,6 @@ get_ugw_portforward() {
 	local chain=zone_${ZONE_MESH}_prerouting
 	# TODO: vielleicht lieber den uci-Portforward mit einem Namen versehen?
 	iptables -L "$chain" -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600 to:/ {printf $3 "\t" $5 "\t" $10; exit}'
-}
-
-
-# Lies die vorkonfigurierten Opennet-UGW-Server ein und uebertrage sie in die on-usergw-Konfiguration.
-# Diese Aktion sollte nur ausgefuehrt werden, wenn keine UGWs eintragen sind (z.B. weil der Nutzende sie versehentlich geloescht hat).
-add_default_openvpn_ugw_services() {
-	local index=1
-	local hostname
-	local port
-	local proto
-	local details
-	while [ -n "$(get_on_usergw_default "openvpn_ugw_preset_$index")" ]; do
-		# stelle sicher, dass ein Newline vorliegt - sonst liest "read" nix
-		(get_on_usergw_default "openvpn_ugw_preset_$index"; echo) | while read hostname port proto details; do
-			[ -z "$hostname" ] && break
-			add_openvpn_ugw_service "$hostname" "$port" "$proto" "$details"
-		done
-		: $((index++))
-	done
 }
 
 

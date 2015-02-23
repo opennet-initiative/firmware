@@ -134,50 +134,70 @@ verify_vpn_connection() {
 	local cert_file=${3:-}
 	local ca_file=${4:-}
 	local temp_config_file="/tmp/vpn_test_${service_name}-$$.conf"
+	local log_file="$(get_service_log_filename "$service_name" "openvpn" "verify")"
 	local file_opts
 	local wan_dev
-	local openvpn_opts
 	local hostname
 	local status_output
 
 	msg_debug "start vpn test of <$temp_config_file>"
 
-	# filtere Einstellungen heraus, die wir ueberschreiben wollen
-	# nie die echte PID-Datei ueberschreiben (falls ein Prozess laeuft)
-	get_openvpn_config "$service_name" | grep -v -E "^(writepid|dev|tls-verify|up|down)[ \t]" >"$temp_config_file"
 
-	# check if it is possible to open tunnel to the gateway (10 sec. maximum)
-	# Assembling openvpn parameters ...
-	openvpn_opts="--dev null"
-	
-	# some openvpn options:
-	#   ifconfig-noexec: we do not want to configure a device (and mess up routing tables)
-	#   route-noexec: keinerlei Routen hinzufuegen
-	openvpn_opts="$openvpn_opts --ifconfig-noexec --route-noexec"
+	# erstelle die config-Datei
+	(
+		# filtere Einstellungen heraus, die wir ueberschreiben wollen
+		# nie die echte PID-Datei ueberschreiben (falls ein Prozess laeuft)
+		get_openvpn_config "$service_name"
 
-	# some timing options:
-	#   inactive: close connection after 15s without traffic
-	#   ping-exit: close connection after 15s without a ping from the other side (which is probably disabled)
-	openvpn_opts="$openvpn_opts --inactive 15 1000000 --ping-exit 15"
+		# some openvpn options:
+		#   ifconfig-noexec: we do not want to configure a device (and mess up routing tables)
+		#   route-noexec: keinerlei Routen hinzufuegen
+		echo "ifconfig-noexec"
+		echo "route-noexec"
 
-	# other options:
-	#   verb: verbose level 3 is required for the TLS messages
-	#   nice: testing is not too important
-	#   resolv-retry: fuer ipv4/ipv6-Tests sollten wir mehrere Versuche zulassen
-	openvpn_opts="$openvpn_opts --verb 3 --nice 3 --resolv-retry 3"
+		# some timing options:
+		#   inactive: close connection after 15s without traffic
+		#   ping-exit: close connection after 15s without a ping from the other side (which is probably disabled)
+		echo "inactive 15 1000000"
+		echo "ping-exit 15"
 
-	# prevent a real connection (otherwise we may break our current vpn tunnel):
-	#   tls-verify: force a tls handshake failure
-	#   tls-exit: stop immediately after tls handshake failure
-	#   ns-cert-type: enforce a connection against a server certificate (instead of peer-to-peer)
-	openvpn_opts="$openvpn_opts --tls-verify /bin/false --tls-exit --ns-cert-type server"
+		# other options:
+		#   verb: verbose level 3 is required for the TLS messages
+		#   nice: testing is not too important
+		#   resolv-retry: fuer ipv4/ipv6-Tests sollten wir mehrere Versuche zulassen
+		echo "verb 4"
+		echo "nice 3"
+		echo "resolv-retry 3"
 
-	# nur fuer tcp-Verbindungen
+		# prevent a real connection (otherwise we may break our current vpn tunnel):
+		#   tls-exit: stop immediately after tls handshake failure
+		#   ns-cert-type: enforce a connection against a server certificate (instead of peer-to-peer)
+		echo "tls-exit"
+		echo "ns-cert-type server"
+
+	) >"$temp_config_file"
+
+	# kein Netzwerkinterface erzeugen
+	_change_openvpn_config_setting "$temp_config_file" "dev" "null"
+	# keine PID-Datei anlegen
+	_change_openvpn_config_setting "$temp_config_file" "writepid" ""
+	# keine Netzwerkkonfiguration via up/down
+	_change_openvpn_config_setting "$temp_config_file" "up" ""
+	_change_openvpn_config_setting "$temp_config_file" "down" ""
+	# TLS-Pruefung immer fehlschlagen lassen
+	_change_openvpn_config_setting "$temp_config_file" "tls-verify" "/bin/false"
+	# Log-Datei anlegen
+	_change_openvpn_config_setting "$temp_config_file" "log" "$log_file"
+
+	# nur fuer tcp-Verbindungen (ipv4/ipv6)
 	#   connect-retry: Sekunden Wartezeit zwischen Versuchen
 	#   connect-timeout: Dauer eines Versuchs
 	#   connect-retry-max: Anzahl moeglicher Wiederholungen
-	grep -q "^proto[ \t]\+tcp" "$temp_config_file" &&
-		openvpn_opts="$openvpn_opts --connect-retry 1 --connect-timeout 15 --connect-retry-max 1"
+	if grep -q "^proto[ \t]\+tcp" "$temp_config_file"; then
+		echo "connect-retry 1"
+		echo "connect-timeout 15"
+		echo "connect-retry-max 1"
+	fi >>"$temp_config_file"
 
 	# Schluessel und Zertifikate bei Bedarf austauschen
 	[ -n "$key_file" ] && \
@@ -187,13 +207,13 @@ verify_vpn_connection() {
 	[ -n "$ca_file" ] && \
 		_change_openvpn_config_setting "$temp_config_file" "ca" "$ca_file"
 
-	# check if the output contains a magic line
-	status_output=$(openvpn --config "$temp_config_file" $openvpn_opts || true)
+	# Aufbau der VPN-Verbindung bis zum Timeout oder bis zum Verbindungsabbruch via "tls-exit" (/bin/false)
+	openvpn --config "$temp_config_file" || true
 	# read the additional options from the config file (for debug purposes)
 	file_opts=$(grep -v "^$" "$temp_config_file" | grep -v "^#" | sed 's/^/--/' | tr '\n' ' ')
 	rm -f "$temp_config_file"
-	echo "$status_output" | grep -q "Initial packet" && return 0
-	msg_debug "openvpn test failed: openvpn $file_opts $openvpn_opts"
+	grep -q "Initial packet" "$log_file" && return 0
+	msg_debug "openvpn test failed: openvpn $file_opts"
 	trap "" $GUARD_TRAPS && return 1
 }
 

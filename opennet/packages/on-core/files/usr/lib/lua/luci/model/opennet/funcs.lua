@@ -2,6 +2,10 @@
 -- Beginn der Doku-Gruppe
 --- @{
 
+require "luci.config"
+html_resource_base = luci.config.main.resourcebase
+
+
 function _quote_parameters(parameters)
 	local arguments = ""
 	local value
@@ -33,6 +37,28 @@ end
 --- @details Leere oder nicht erkannte Eingaben werden als "false" gewertet.
 function uci_to_bool(text)
 	return on_bool_function("uci_is_true", {text or ""})
+end
+
+
+--- @brief Liefere zu einem boolean-Wert das html-geeignete "y" / "n" oder "" zurück.
+--- @param text textuelle Repräsentation eines Wahrheitswerts
+--- @returns "y" / "n" oder ""
+--- @details Leere Eingaben werden mit einem leeren String quittiert. Nicht erkannte Eingaben werden als "false" gewertet.
+function bool_string_to_yn(value)
+	if (not value) or (value == "") then
+		return ""
+	elseif uci_to_bool(value) then
+		return "y"
+	else
+		return "n"
+	end
+end
+
+
+function get_html_loading_spinner(name, style)
+	return '<img class="loading_img_small" name="' .. name ..
+			'" src="' .. html_resource_base .. '/icons/loading.gif" alt="' ..
+			luci.i18n.translate("Loading") .. '" style="display:none;" />'
 end
 
 

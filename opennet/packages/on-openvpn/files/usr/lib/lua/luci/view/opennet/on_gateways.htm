@@ -259,7 +259,7 @@ You may obtain a copy of the License at
 
 			</table>
 			</form>
-			<center><img class='loading_img_small' id="gateway-list-spinner" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" /></center>
+			<center><%= get_html_loading_spinner('gateway-list-spinner', 'vertical-align:middle;') %></center>
 			<p id="on-waiting-for-gateway-change" style="display:none">
 				<%:The first reachable Gateway is currently not in use. The Tunnel will be restarted and the Gateway will be changed in a few minutes. This change will be shown after a reload of this page.%>
 			</p>

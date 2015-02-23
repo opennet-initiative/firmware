@@ -16,10 +16,9 @@ $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 local uci = require "luci.model.uci"
 local cursor = uci.cursor()
 require "luci.sys"
-require "luci.config"
-resource = luci.config.main.resourcebase
 require("luci.i18n")
 require("luci.model.opennet.funcs")
+
 
 function get_ugw_status(ugw_status)
     ugw_status.usergateways_no = 0
@@ -67,6 +66,7 @@ function get_ugw_status(ugw_status)
   local returnVal = luci.sys.exec("ps | grep on_usergateway_check")
   ugw_status.checkWANMTUrunning = (string.match(returnVal, "checkMtu") or string.match(returnVal, "checkWan"))
 end
+
 
 function check_ugw_status()
   local ugw_status = {}
@@ -166,6 +166,7 @@ function check_ugw_status()
   end
 end
 
+
 function get_wan()
   local path = luci.dispatcher.context.requestpath
   local count = path[#path]
@@ -173,9 +174,9 @@ function get_wan()
   if not wan then wan = "" end
   luci.http.prepare_content("text/plain")
   luci.http.write('<div class="ugw-wan-route" name="wan" status="' .. wan .. '" >&#x00A0;</div>')
-  luci.http.write('<img class="loading_img_small" name="wan_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
-    luci.i18n.translate("Loading") .. '" style="display:none;" />')
+  luci.http.write(get_html_loading_spinner("wan_spinner", "display:none;"));
 end
+
 
 function update_wan()
   local path = luci.dispatcher.context.requestpath
@@ -183,6 +184,7 @@ function update_wan()
   luci.sys.exec("/usr/sbin/on_usergateway_check checkWan "..count)
   get_wan()
 end
+
 
 function get_wan_ping()
   local path = luci.dispatcher.context.requestpath
@@ -195,9 +197,9 @@ function get_wan_ping()
   end
   luci.http.prepare_content("text/plain")
   luci.http.write([[<div name="wan" id="cbi-network-lan-ping" >]]..ping..[[</div>]])
-  luci.http.write('<img class="loading_img_small" name="wan_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
-    luci.i18n.translate("Loading") .. '" style="display:none;" />')
+  luci.http.write(get_html_loading_spinner("wan_ping_spinner", "display:none;"));
 end
+
 
 function get_speed()
   local path = luci.dispatcher.context.requestpath
@@ -214,9 +216,9 @@ function get_speed()
     luci.http.write([[<div class="ugw-wan-speed" name="speed" id="cbi-network-lan-speed" ><abbr title="]]
       ..abbr..[[">]]..speed..[[</abbr></div>]])
   end
-  luci.http.write('<img class="loading_img_small" name="speed_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
-    luci.i18n.translate("Loading") .. '" style="display:none;" />')
+  luci.http.write(get_html_loading_spinner("speed_spinner", "display:none;"));
 end
+
 
 function update_speed()
   local path = luci.dispatcher.context.requestpath
@@ -225,20 +227,27 @@ function update_speed()
   get_speed()
 end
 
+
 function get_mtu()
   local path = luci.dispatcher.context.requestpath
   local count = path[#path]
+  local mtu = parse_csv_service(service_name, {
+      out_wanted="number|value|mtu_out_wanted",
+      out_real="number|value|mtu_out_real",
+      in_wanted="number|value|mtu_in_wanted",
+      in_real="number|value|mtu_in_real",
+      timestamp="number|value|0|mtu_timestamp",
+      status="bool|value|disabled|mtu_status"})
   luci.http.prepare_content("text/plain")
-  local v = cursor:get_all("on-usergw", "opennet_ugw"..count)
-  if v.mtu_status then
-    mtu_time = os.date("%c", cursor:get("on-usergw", "opennet_ugw" .. count, "mtu_timestamp"))
-    luci.http.write([[<div class="ugw-mtu" name="mtu" status="]] .. v.mtu_status .. [["><abbr title="]] .. mtu_time .. [[: ]]
-      .. luci.i18n.translatef("(tried/measured) to Gateway: %s/%s from Gateway: %s/%s", v.mtu_out_wanted, v.mtu_out_real, v.mtu_in_wanted, v.mtu_in_real)
+  if mtu.status then
+    local timestring = os.date("%c", mtu.timestamp)
+    luci.http.write([[<div class="ugw-mtu" name="mtu" status="]] .. bool_to_yn(v.status) .. [["><abbr title="]] .. timestring .. [[: ]]
+      .. luci.i18n.translatef("(tried/measured) to Gateway: %s/%s from Gateway: %s/%s", mtu.out_wanted, mtu.out_real, mtu.in_wanted, mtu.in_real)
       .. [[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
   end
-  luci.http.write('<img class="loading_img_small" name="mtu_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
-    luci.i18n.translate("Loading") .. '" style="display:none;" />')
+  luci.http.write(get_html_loading_spinner("mtu_spinner", "display:none;"));
 end
+
 
 function update_mtu()
   local path = luci.dispatcher.context.requestpath
@@ -246,6 +255,7 @@ function update_mtu()
   luci.sys.exec("/usr/sbin/on_usergateway_check checkMtu "..count)
   get_mtu()
 end
+
 
 function get_vpn()
   local path = luci.dispatcher.context.requestpath
@@ -260,9 +270,9 @@ function get_vpn()
       ..luci.i18n.translatef("tested %s minutes ago", v_age)
       ..[[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
   end
-  luci.http.write('<img class="loading_img_small" name="vpn_spinner" src="' .. resource .. '/icons/loading.gif" alt="' ..
-    luci.i18n.translate("Loading") .. '" style="display:none;" />')
+  luci.http.write(get_html_loading_spinner("vpn_spinner", "display:none;"));
 end
+
 
 function update_vpn()
   local path = luci.dispatcher.context.requestpath
@@ -274,11 +284,13 @@ function update_vpn()
   get_vpn()
 end
 
+
 function get_tunnel_active(count)
   local name = cursor:get("on-usergw", "opennet_ugw"..count, "name")
   if not name then return false end
   return nixio.fs.access("/tmp/opennet_ugw-"..name..".txt")
 end
+
 
 function get_forward_active(count)
   local ipaddr = cursor:get("on-usergw", "opennet_ugw"..count, "ipaddr")
@@ -286,6 +298,7 @@ function get_forward_active(count)
   local forwarded_gw = tab_split(on_function("get_ugw_portforward"))[2]
   return forwarded_gw == ipaddr
 end
+
 
 function get_name_button()
   local SYSROOT = os.getenv("LUCI_SYSROOT") or ""
@@ -305,6 +318,7 @@ function get_name_button()
         ..[[" name="select_gw" value="]]..v.name..[[" disabled="true" /></h3>]])
   end
 end
+
 
 function check_running()
   local SYSROOT = os.getenv("LUCI_SYSROOT") or ""

@@ -70,6 +70,11 @@ function get_custom_log_reversed(log_name, lines)
 end
 
 
+function get_services_sorted_by_priority(service_type)
+	return luci.sys.exec("on-function get_services '" .. service_type .. "' | on-function sort_services_by_priority")
+end
+
+
 function _generic_split(text, token_regex)
 	local result = {}
 	local token

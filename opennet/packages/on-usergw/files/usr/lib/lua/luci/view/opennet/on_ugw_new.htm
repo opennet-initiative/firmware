@@ -12,333 +12,154 @@ You may obtain a copy of the License at
 -%>
 
 <%
-local uci = require "luci.model.uci"
-local cursor = uci.cursor()
-require ("luci.model.opennet.on_usergw")
+	require ("luci.model.opennet.on_usergw")
+	require("luci.model.opennet.funcs")
 %>
-<script type="text/javascript">//<![CDATA[
 
-function is_running(running) {
-  if (running) {
-    document.getElementById("update_wan").disabled = "true"
-    document.getElementById("update_speed").disabled = "true"
-    document.getElementById("update_vpn").disabled = "true"
-    document.getElementById("update_mtu").disabled = "true"
-    document.getElementById("add_name").disabled = "true"
-    try { // only available if ugw is possible
-      document.getElementById("enable").disabled = "true"
-      document.getElementById("suspend").disabled = "true"
-      document.getElementById("running_1").hidden = ""
-    } catch(e) {}
-    document.getElementById("running_2").hidden = ""
-    elems =  document.getElementsByName("select_gw");
-    for ( var i=0; i<elems.length; i++)
-      elems[i].disabled = "true"
-  } else if (document.getElementById("running_status").status == "off") {
-    document.getElementById("update_wan").disabled = ""
-    document.getElementById("update_speed").disabled = ""
-    document.getElementById("update_vpn").disabled = ""
-    document.getElementById("update_mtu").disabled = ""
-    document.getElementById("add_name").disabled = ""
-    try { // only available if ugw is possible
-      document.getElementById("enable").disabled = ""
-      document.getElementById("suspend").disabled = ""
-      document.getElementById("running_1").hidden = "true"
-    } catch(e) {}
-    document.getElementById("running_2").hidden = "true"
-    elems =  document.getElementsByName("select_gw");
-    button_elem = document.getElementById("hidden_name_button");
-    for ( var i = 1; i < elems.length; i++) {
-      var name_button_xhr =  new XHR();
-      name_button_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/get_name_button/' + i, null,
-        function(x) {
-          if (x.responseText) {
-            button_elem.innerHTML = x.responseText;
-            document.getElementById("name_" + button_elem.getElementsByTagName("h3")[0].getAttribute("count")).innerHTML = x.responseText;
-            document.getElementById("ugw_tunnel_active_" + button_elem.getElementsByTagName("h3")[0].getAttribute("count"))
-              .setAttribute("status", button_elem.getElementsByTagName("h3")[0].getAttribute("tunnel"))
-            document.getElementById("ugw_forward_active_" + button_elem.getElementsByTagName("h3")[0].getAttribute("count"))
-              .setAttribute("status", button_elem.getElementsByTagName("h3")[0].getAttribute("forward"))
-          }
-        }
-      );
-    }
-  }
-}
-
-function check_running() {
-  var run_xhr = new XHR();
-  run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/check_running', null,
-    function(x) {
-      if (x.responseText && x.responseText != "")
-        document.getElementById("running_status").status="on"
-      else {
-        if (document.getElementById("running_status").status == "on") {
-          get_wan_values();
-          get_speed_values();
-          get_mtu_values();
-          get_vpn_values();
-        }
-        document.getElementById("running_status").status="off"
-      }
-      is_running(x.responseText && x.responseText != "")
-    }
-  );
-}
-
-// this can be used to walk trough all WAN elems and update them step-by-step
-// additionally the ping-time will be updated
-// params
-// elems:   array of all wan section objects
-// number:  the current row number, starting from 0
-// section: will be ignored
-// call: 'check' or 'get', if check values will be updated
-function get_wan_value(elems, number, section, call) {
-//   alert(number + " " + elems.length)
-  if (number >= elems.length) {
-    is_running(false);
-    return false;
-  }
-
-  var wan_section = elems[number++]
-
-  var wan_xhr = new XHR();
-  wan_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/' + call + '_wan/' + number, null,
-    function(x) {
-      if (x.responseText)
-        wan_section.innerHTML = x.responseText;
-
-      var name_button_xhr =  new XHR();
-      name_button_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/get_name_button/' + number, null,
-        function(x) {
-          if (x.responseText)
-            document.getElementById("name_" + number).innerHTML = x.responseText;
-
-          var wan_ping_xhr =  new XHR();
-          wan_ping_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/get_wan_ping/' + number, null,
-            function(x) {
-              if (x.responseText)
-                document.getElementById("wan_ping_" + number).innerHTML = x.responseText;
-              get_wan_value(elems, number, section, call);
-            }
-          );
-        }
-      );
-    }
-  );
-}
-
-// this can be used to walk trough all WAN elems and update them step-by-step
-// params
-// elems:   array of all wan section objects
-// number:  the current row number, starting from 0
-// section: the section, for instance speed
-// call: 'check' or 'get', if check values will be updated
-function get_value(elems, number, section, call) {
-  if (number >= elems.length) {
-    is_running(false);
-    return false;
-  }
-
-  var wan_section = elems[number++]
-
-  var wan_xhr = new XHR();
-  wan_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_2")%>/ugw_tunnel/' + call + '_' + section + '/' + number, null,
-    function(x) {
-      if (x.responseText)
-        wan_section.innerHTML = x.responseText;
-      get_value(elems, number, section, call);
-    }
-  );
-}
-
-function update_values(section, call_function) {
-  // hide all current values and show spinners
-  var elems =  document.getElementsByName(section);
-  for ( var i=0; i<elems.length; i++)
-    elems[i].style.display = 'none'
-  elems =  document.getElementsByName(section + "_spinner");
-  for ( var i=0; i<elems.length; i++)
-    elems[i].style.display = ''
-
-  is_running(true);
-
-  call_function(document.getElementsByName(section + "_section"), 0, section, "update")
-  return false;
-}
-
-function update_wan_values() {
-  if (confirm("<%:Check route trough WAN and ping-time of Gateways (again). This will take approximately 5 seconds per Gateway.%>"))
-    update_values("wan", get_wan_value)
-
-  return false;
-}
-
-function get_wan_values() {
-//   alert("get_wan_values")
-  get_wan_value(document.getElementsByName("wan_section"), 0, "wan", "get")
-}
-
-function update_speed_values() {
-  if (confirm("<%:Check speed to and from the Gateways (again). This will take approximately 1 minute per Gateway.%>"))
-    update_values("speed", get_value)
-
-  return false;
-}
-
-function get_speed_values() {
-  get_value(document.getElementsByName("speed_section"), 0, "speed", "get")
-}
-
-function update_mtu_values() {
-  if (confirm("<%:Check MTU to and from the Gateways (again). This will take approximately 5 minutes per Gateway.%>"))
-    update_values("mtu", get_value)
-
-  return false;
-}
-
-function get_mtu_values() {
-  get_value(document.getElementsByName("mtu_section"), 0, "mtu", "get")
-}
-
-function update_vpn_values() {
-  if (confirm("<%:Check VPN availability of Gateways (again). This will take approximately 10 seconds per Gateway.%>"))
-    update_values("vpn", get_value)
-
-  return false;
-}
-
-function get_vpn_values() {
-  get_value(document.getElementsByName("vpn_section"), 0, "vpn", "get")
-}
-//]]></script>
-
-<script type="text/javascript">//<![CDATA[
-
-if (window.attachEvent) {
-    window.attachEvent('onload', init);
-} else if (window.addEventListener) {
-    window.addEventListener('load', init, false);
-} else {
-    document.addEventListener('load', init, false);
-}
-
-// window .onload = function test() {init();}
-function init() {
-    var status_item = document.getElementById("running_status");
-    if (status_item) status_item.status="on";
-    check_running();
-    setInterval('check_running()', 10000 )
-    get_wan_values();
-    get_speed_values();
-    get_mtu_values();
-    get_vpn_values();
-}
-//]]></script>
 
 <!-- hidden label to store running status and name button -->
 <div id="running_status" hidden="true" status="on"/>
 <div id="hidden_name_button" hidden="true"><h3 count="1" /></div>
 
-<%
-	function bool_to_status(value)
-		if (not value) or (value == "") then
-			return ""
-		elseif uci_to_bool(value) then
-			return "y"
-		else
-			return "n"
-		end
-	end
-%>
 
-<h3><%:Usergateway-Status%></h3>
-  <div class="cbi-map">
-    <fieldset class="cbi-section">
-      <fieldset class="cbi-section-node">
-        <h4 id="running_2" hidden="true"><div class="errorbox"><%:automated check is running, manual modifications are temporarily disabled%></div><br /><br /></h4>
-        <form id="main_form" method="post" action="<%=REQUEST_URI%>">
-          <table class="cbi-section-table">
-            <tr class="cbi-section-table-titles">
-              <th class="cbi-section-table-cell right-border" colspan = "6" style="width: 30%"><%:Internet Sharing Status Overview%></th>
-              <th class="cbi-section-table-cell" colspan = "5" ><%:Status Details, all checks have to be successful%></th>
-            </tr>
-            <tr class="cbi-section-table-titles">
-              <th colspan = "3"  style="width: 2%;"/>
-	      <th class="cbi-section-table-cell"><abbr title="<%:click in order to forward to this gateway immediately%>"><%:Gateway Name%></abbr></th>
-	      <th class="cbi-section-table-cell"><abbr title="<%:If Tunnel is activated, a central Gateway-IP is mapped to the local Router. Multiple Tunnels can exist in parallel.%>"><%:UGW Tunnel%></abbr></th>
-	      <th class="cbi-section-table-cell right-border"><abbr title="<%:If Forwarding is activated, all received VPN-Traffic is routed to the external Gateway. Only one forward can exist at a time.%>"><%:VPN Forwarding%></abbr></th>
-	      <th class="cbi-section-table-cell"><abbr title="<%:Indicates if route to Gateway points trough WAN-device, this is required. Check/reconfigure your WAN connection is this test fails.%>"><%:WAN%></abbr></th>
-	      <th class="cbi-section-table-cell"><abbr title="<%:Indicates the Ping-Time in miliseconds. If a Gateway cannot be reached or the ping-time is high, it is probably (temporarily) down.%>"><%:Ping Time%></abbr></th>
-	      <th class="cbi-section-table-cell"><abbr title="<%:Indicates Upload / Download Speed.%>"><%:Speed%></abbr></th>
-	      <th class="cbi-section-table-cell"><abbr title="<%:Indicates if the Gateway supports VPN for the users. This is at least required to sucessfully use VPN-Forwarding.%>"><%:VPN Status%></abbr></th>
-	      <th class="cbi-section-table-cell"><abbr title="<%:Maximum Transmission Unit - match of configured and measured values is required to share your Internet in any case.%>"><%:MTU-Status%></abbr></th>
-              <th />
-            </tr>
-	    <%
-	    local services = line_split(on_function("get_services", {"mesh"}))
-            for index, service_name in ipairs(services) do
-              local label = dot_split(get_service_value(service_name, "host"))[1]
-              if not label then label = service_name end
-	      %>
-                <tr id="cbi-network-lan" class="cbi-section-table-row">
-                  <!-- begin of UP-DOWN-Buttons -->
-                  <td class="cbi-value-field">
-                    <% if index ~= 1 then %>
-                      <input class="cbi-button cbi-button-up" type="submit" value="<%=service_name%>" title="<%:up%>" name="mesh_move_up" />
-                    <% end %>
-                  </td>
-                  <td class="cbi-value-field">
-                    <% if index ~= table.maxn(services) then %>
-                      <input class="cbi-button cbi-button-down" type="submit" value="<%=service_name%>" title="<%:down%>" name="mesh_move_down" />
-                    <% end %>
-		  <%=services.maxn%></td>
-                  <td class="cbi-value-field">
-                    <input class="cbi-button cbi-button-del" type="submit" value="<%=service_name%>" title="<%:delete%>" name="mesh_delete" />
-                  </td>
-                  <!-- end of UP-DOWN-Buttons -->
-                  <!-- begin of Gateway-Name (and IP) -->
-		  <td id="name_<%=service_name%>"><strong><%=label%></strong></td>
-                  <!-- end of Gateway-Name (and IP) -->
-                  <!-- begin of Gateway Status -->
-                  <td class="cbi-value-field">
-                    <div id="ugw_tunnel_active_<%=service_name%>" class="ugw-tunnel_active" status="irrelevant">&nbsp;</div>
-                  </td>
-                  <td class="cbi-value-field right-border">
-                    <div id="ugw_forward_active_<%=service_name%>" class="ugw-tunnel_active" status="irrelevant">&nbsp;</div>
-                  </td>
-                  <!-- end of Gateway Status -->
-                  <!-- begin of other status section -->
-                  <td name="wan_section" class="cbi-value-field">
-                    <div status="<%= bool_to_status(get_service_value(service_name, 'wan_status')) %>" />
-                  </td>
-                  <td id="wan_ping_<%=service_name%>" class="cbi-value-field">
-                    <div status="<%= bool_to_status(get_service_value(service_name, 'vpn_status')) %>" />
-                  </td>
-                  <td name="speed_section" class="cbi-value-field">
-                    <div status="<%= bool_to_status(get_service_value(service_name, 'vpn_status')) %>" />
-                  </td>
-                  <td name="vpn_section" class="cbi-value-field">
-                    <div status="<%= bool_to_status(get_service_value(service_name, 'vpn_status')) %>" />
-                  </td>
-                  <td name="mtu_section" class="cbi-value-field">
-                    <div status="<%= bool_to_status(get_service_value(service_name, 'mtu_status')) %>" />
-                  </td>
-                  <!-- end of other status section -->
-                </tr>
-              <% end %>
-            <tr id="cbi-network-lan" class="cbi-section-table-row">
-              <td colspan="3" />
-              <th><input type="value" name="new_gateway_name" /></th>
-              <td colspan="1" />
-              <td class="cbi-value-field cbi-value-field-add right-border"><input id="add_name" class="cbi-button cbi-button-add" type="submit" value="<%:add%>"/></td>
-              <td colspan="2"><input id="update_wan" class="cbi-button" type="submit" title="<%:This will take approximately 5 seconds per Gateway%>" value="<%:check WAN-Connection%>" onclick="return update_wan_values();"/></td>
-              <td><input id="update_speed" class="cbi-button" type="submit" title="<%:This will take approximately 1 minute per Gateway%>" value="<%:check Speed%>" onclick="return update_speed_values();"/></td>
-              <td><input id="update_vpn" class="cbi-button" type="submit" title="<%:This will take approximately 10 seconds per Gateway%>" value="<%:check VPN%>" onclick="return update_vpn_values();"/></td>
-              <td><input id="update_mtu" class="cbi-button" type="submit" title="<%:This will take approximately 5 minutes per Gateway%>" value="<%:check MTU%>" onclick="return update_mtu_values();"/></td>
-            </tr>
-          </table>
-        </form>
-      </fieldset>
-    </fieldset>
-  </div>
+
+<h3><%:Mesh and Internet Gateways%></h3>
+<div class="cbi-map">
+<fieldset class="cbi-section">
+<div class="cbi-section-comment"><%=luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste"))%></div>
+<fieldset class="cbi-section-node">
+	<form name="gateways" method="post" action="<%=REQUEST_URI%>">
+	<table class="cbi-section-table" id="on-gateway-list">
+	<tr class="cbi-section-table-titles">
+		<th colspan = "1" />
+		<th class="cbi-section-table-cell"><%:active%></th>
+		<th class="cbi-section-table-cell"><%:Gateway%></th>
+		<th class="cbi-section-table-cell"><%:Priority%></th>
+		<th class="cbi-section-table-cell">
+			<abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN%></abbr></th>
+		<th class="cbi-section-table-cell">
+			<abbr title="<%:The configured Maximum Transmission Unit can cause subtle problems. Thus it needs to be tested carefully.%>"><%:MTU%></abbr></th>
+		<th class="cbi-section-table-cell">
+			<abbr title="<%:Connection to an Mesh VPN service succeeded.%>"><%:VPN%></abbr></th>
+		<th class="cbi-section-table-cell">
+			<abbr title="<%:Estimated upload and download speed to this exit gateway.%>"><%:Speed%></abbr></th>
+		<th class="cbi-section-table-cell">
+			<abbr title="<%:Ping latency describes the travelling time of a small packet to the gateway and back.%>"><%:Ping%></abbr></th>
+		<th class="cbi-section-table-cell"><%:Actions%></th>
+		<th />
+	</tr>
+	<%
+	local services = line_split(get_services_sorted_by_priority("mesh"))
+        for index, service_name in ipairs(services) do
+          local gateway = parse_csv_service(service_name, {
+              active="bool|function|is_openvpn_service_active",
+              disabled="string|value|disabled",
+              host="string|value|host",
+              mtu_status="string|value|mtu_status",
+              mtu_msg="string|value|mtu_msg",
+              offset="number|value|offset|0",
+              port="number|value|port",
+              priority="number|value|priority|10",
+              source="string|value|source",
+              vpn_status="string|value|vpn_status",
+              wan_speed_download="number|value|wan_speed_download",
+              wan_speed_upload="number|value|wan_speed_upload",
+              wan_ping="number|value|wan_ping",
+              wan_status="string|value|wan_status",
+          })
+	  if gateway then
+            local label = gateway.host
+	    -- falls das Ziel nicht wie eine IP (v4/v6) aussehen sollte, dann nimm den Text-Bestandteil vor dem ersten Punkt
+            if not string.match(label or "", "^[0-9a-fA-F:.]+$") then label = dot_split(label)[1] end
+            if not label then label = service_name end
+	%>
+	<tr id="cbi-network-lan" class="cbi-section-table-row cbi-opennet-gateways" disabled="<%= bool_string_to_yn(gateway.disabled) %>">
+		<td class="cbi-value-field" style="text-align:right;"><%= index %>.</td>
+		<td class="cbi-value-field">
+			<div class="opennet-bool" status="<%= gateway.active and "y" or "" %>">&nbsp;</div></td>
+		<td id="name_<%=service_name%>">
+			<div title="<%=gateway.host%>:<%=gateway.port%>"><%=label%></div></td>
+		<!-- begin of other status section -->
+		<td class="cbi-value-field">
+			<% if gateway.offset ~= 0 then %>
+				(<%=gateway.offset%>)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:reset offset%>" name="reset_offset" />
+			<% end %>
+			<%= gateway.priority + gateway.offset %></td>
+		<td class="cbi-value-field">
+			<div class="opennet-bool" status="<%= bool_string_to_yn(gateway.wan_status) %>" /></td>
+		<td class="cbi-value-field">
+			<div class="opennet-bool" status="<%= bool_string_to_yn(gateway.mtu_status) %>" title="<%= luci.util.pcdata(gateway.mtu_msg) %>"/></td>
+		<td class="cbi-value-field">
+			<div class="opennet-bool" status="<%= bool_string_to_yn(gateway.vpn_status) %>" /></td>
+		<td class="cbi-value-field">
+			<% if (gateway.wan_speed_upload or gateway.wan_speed_download) then
+				local speed = (gateway.wan_speed_upload or '?') .. " kbps / " .. (gateway.wan_speed_upload or '?') .. " kbps";
+				local speed_abbr = luci.i18n.translatef('upload to Internet %s kbit/s | download from Internet %s kbit/s', gateway.wan_speed_upload or "?", gateway.wan_speed_download or "?")
+			%>
+				<div class="vpn-wan-speed" name="speed" id="cbi-opennet-gateways-speed">
+					<abbr title="<%=speed_abbr%>"><%=speed%></abbr></div></div>
+			<% end %></td>
+		<td id="wan_ping_<%=service_name%>" class="cbi-value-field"><%=gateway.wan_ping%></td>
+		<!-- end of other status section -->
+		<td class="cbi-value-field">
+			<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:move up%>" name="move_up" />
+			<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:move down%>" name="move_down" />
+			<% if gateway.source ~= "manual" then %>
+				<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
+				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%=gateway.id%>"
+					title="<%:auto-discovered services cannot be deleted%>" name="delete_service" disabled="disabled" />
+			<% else %>
+				<%# Loeschen ist moeglich %>
+				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%=gateway.id%>"
+					title="<%:delete%>" name="delete_service" />
+			<% end %>
+			<input class="cbi-button cbi-button-disable cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:disable%>" name="disable_service" />
+		</td>
+	</tr>
+	<% end %>
+	<% end %>
+
+	</table>
+	</form>
+	<center><%= get_html_loading_spinner('gateway-list-spinner', 'vertical-align:middle;') %></center>
+</fieldset>
+
+<%# Manuelles Hinzufügen weiterer Mesh-Gateways %>
+<fieldset class="cbi-section-node">
+	<form name="gateways" method="post" action="<%=REQUEST_URI%>">
+	<div class="cbi-value">
+		<div class="cbi-value-field">
+			<label for="new_gateway_ip"><%:Manually add Mesh Gateway%>:</label>
+			<input class="cbi-input-text" name="new_gateway_host" id="new_gateway_host" size="16" />
+			<label for="new_gateway_port"><%:Port%>:</label>
+			<input class="cbi-input-text" name="new_gateway_port"
+				id="new_gateway_ip" size="5"
+				value="<%=on_function("get_variable", {"DEFAULT_MESH_OPENVPN_PORT"})%>" />
+			<input class="cbi-button cbi-button-apply" type="submit"
+				id="add_gateway_mesh" name="add_gateway_mesh" value="<%:Add%>" />
+		</div>
+	</div>
+	</form>
+</fieldset>
+
+<%# Manuelles Hinzufügen weiterer Internet-Gateways %>
+<fieldset class="cbi-section-node">
+	<form name="gateways" method="post" action="<%=REQUEST_URI%>">
+	<div class="cbi-value">
+		<div class="cbi-value-field">
+			<label for="new_gateway_ip"><%:Manually add Exit Gateway%>:</label>
+			<input class="cbi-input-text" name="new_gateway_host" id="new_gateway_host" size="16" />
+			<label for="new_gateway_port"><%:Port%>:</label>
+			<input class="cbi-input-text" name="new_gateway_port"
+				id="new_gateway_ip" size="5"
+				value="<%=on_function("get_variable", {"DEFAULT_MIG_PORT"})%>" />
+			<input class="cbi-button cbi-button-apply" type="submit"
+				id="add_gateway_igw" name="add_gateway_igw" value="<%:Add%>" />
+		</div>
+	</div>
+	</form>
+</fieldset>
+
+</fieldset>
+</div>
+

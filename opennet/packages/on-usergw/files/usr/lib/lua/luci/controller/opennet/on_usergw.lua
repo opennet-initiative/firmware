@@ -23,88 +23,59 @@ function index()
 
     require ("luci.model.opennet.on_usergw")
     entry({"opennet", "opennet_2", "ugw_tunnel", "check_ugw_status"}, call("check_ugw_status"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "update_wan"}, call("update_wan"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "get_wan"}, call("get_wan"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "get_wan_ping"}, call("get_wan_ping"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "update_speed"}, call("update_speed"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "get_speed"}, call("get_speed"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "update_mtu"}, call("update_mtu"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "get_mtu"}, call("get_mtu"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "update_vpn"}, call("update_vpn"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "get_vpn"}, call("get_vpn"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "get_name_button"}, call("get_name_button"), nil).leaf = true
     entry({"opennet", "opennet_2", "ugw_tunnel", "check_running"}, call("check_running"), nil).leaf = true
 end
 
+
 function action_on_usergwNG(ugw_status)
-    local uci = require "luci.model.uci"
-    local cursor = uci.cursor()
+    local new_gateway_host = luci.http.formvalue("new_gateway_host")
+    local new_gateway_port = luci.http.formvalue("new_gateway_port")
+    local add_gateway_mesh = luci.http.formvalue("add_gateway_mesh")
+    local add_gateway_igw = luci.http.formvalue("add_gateway_igw")
 
-    function move_gateway_down (number)
-        local t_below = cursor:get_all("on-usergw", "opennet_ugw"..(number + 1))
-        local t_current = cursor:get_all("on-usergw", "opennet_ugw"..number)
-        cursor:delete ("on-usergw", "opennet_ugw"..(number + 1))
-        cursor:delete ("on-usergw", "opennet_ugw"..number)
-        cursor:section ("on-usergw", "usergateway", "opennet_ugw"..(number + 1), t_current)
-        cursor:section ("on-usergw", "usergateway", "opennet_ugw"..number, t_below)
-    end
+    local move_up = luci.http.formvalue("move_up")
+    local move_down = luci.http.formvalue("move_down")
+    local move_top = luci.http.formvalue("move_top")
+    local delete_service = luci.http.formvalue("delete_service")
+    local disable_service = luci.http.formvalue("disable_service")
+    local enable_service = luci.http.formvalue("enable_service")
+    local reset_offset = luci.http.formvalue("reset_offset")
 
-    function bring_gateway_top (name)
-        local number = 1
-        local target = cursor:get_all("on-usergw", "opennet_ugw"..number)
-        while target and (target.name ~= name) do
-            number = number + 1
-            target = cursor:get_all("on-usergw", "opennet_ugw"..number)
+    if new_gateway_host and new_gateway_port then
+        new_gateway_port = parse_number_string(new_gateway_port) or on_function("get_variable", {"DEFAULT_MIG_PORT"})
+        new_gateway_host = parse_hostname_string(new_gateway_host)
+        if not new_gateway_host then
+            -- Fehlerausgabe?
+        elseif add_gateway_mesh then
+            on_function("notify_service", {"mesh", "openvpn", new_gateway_host, new_gateway_port, "udp", "/", "", "manual"})
+        elseif add_gateway_igw then
+            on_function("notify_service", {"igw", "openvpn", new_gateway_host, new_gateway_port, "udp", "/", "", "manual"})
         end
-
-        while (number > 1) do
-            number = number - 1
-            move_gateway_down(number)
+    elseif move_up or move_down or move_top or delete_service or disable_service or enable_service or reset_offset then
+        if move_up then
+          on_function("move_service_up", {move_up, "mesh"})
+        elseif move_down then
+          on_function("move_service_down", {move_down, "mesh"})
+        elseif move_top then
+          on_function("move_service_top", {move_top, "mesh"})
+        elseif delete_service then
+          on_function("delete_service", {delete_service})
+        elseif disable_service then
+          set_service_value(disable_service, "disabled", "1")
+        elseif enable_service then
+          delete_service_value(enable_service, "disabled")
+        elseif reset_offset then
+          delete_service_value(reset_offset, "offset")
         end
     end
-
-    local new_gateway_name = luci.http.formvalue("new_gateway_name")
-    local del_section = luci.http.formvalue("del_section")
-    local down_section = luci.http.formvalue("down_section")
-    local reset_counter = luci.http.formvalue("reset_counter")
-    local select_gw = luci.http.formvalue("select_gw")
-
-    if (new_gateway and new_gateway ~= "") or (new_gateway_name and new_gateway_name ~= "") then
-        cursor:set ("on-usergw", "opennet_ugw"..(ugw_status.usergateways_no + 1), "usergateway")
-        cursor:tset ("on-usergw", "opennet_ugw"..(ugw_status.usergateways_no + 1), { ipaddr = '', name = new_gateway_name, age = '', status = '', ping = ''})
-        ugw_status.usergateways_no = ugw_status.usergateways_no + 1
-    elseif down_section then
-        down_section = down_section + 0
-        move_gateway_down(down_section)
-    elseif del_section then
-        while ((del_section + 0) < ugw_status.usergateways_no) do   -- comparing failed if del_section wasn't forced to be int
-            move_gateway_down(del_section)
-            del_section = del_section + 1
-        end
-        cursor:delete("on-usergw", "opennet_ugw"..del_section)
-        cursor:commit("on-usergw")
-        cursor:unload("on-usergw")
-        ugw_status.usergateways_no = ugw_status.usergateways_no - 1
-	on_function("update_openvpn_ugw_settings")
-    elseif reset_counter then
-        for k, v in pairs(cursor:get_all("on-usergw")) do
-            if v[".type"] == "usergateway" then cursor:set("on-usergw", k, "age", "") end
-        end
-    elseif select_gw then
-        cursor:set("on-usergw", "gateways", "autosearch", "off")
-        bring_gateway_top(select_gw)
-        cursor:set("usergw", "opennet_user", "remote", select_gw)
-        cursor:commit("usergw")
-        os.execute("/etc/init.d/usergw down opennet_user")
-        os.execute("/etc/init.d/usergw up opennet_user")
-    end
-
-    if new_gateway_name or down_section or reset_counter or select_gw then
-        cursor:commit("on-usergw")
-        cursor:unload("on-usergw") -- just to get the real values for del-buttons
-    end
-
 end
+
 
 function action_on_usergw()
     require ("luci.model.opennet.on_vpn_management")

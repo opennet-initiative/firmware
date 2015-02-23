@@ -167,10 +167,10 @@ Die Eigenschaften von Gateway-Diensten werden durch die Dienstverwaltung gespeic
 * download - letzte ermittelte Download-Bandbreite (kBytes/s)
 * mtu - Status des MTU-Test ("ok" oder "error")
 * mtu_msg - vollständige Status-Ausgabe von openvpn infolge des MTU-Tests
-* mtu_toGW_tried - Startwert für die MTU-Prüfung (ausgehend)
-* mtu_toGW_actual - Resultat der MTU-Prüfung (ausgehend)
-* mtu_fromGW_tried - Startwert für die MTU-Prüfung (eingehend)
-* mtu_fromGW_actual - Resultat der MTU-Prüfung (eingehend)
+* mtu_out_wanted - Startwert für die MTU-Prüfung (ausgehend)
+* mtu_out_real - Resultat der MTU-Prüfung (ausgehend)
+* mtu_in_wanted - Startwert für die MTU-Prüfung (eingehend)
+* mtu_in_real - Resultat der MTU-Prüfung (eingehend)
 * mtu_time - Zeitstempel (epoch) des letzten MTU-Tests
 * ping - Ping-Laufzeit zum UGW-Server
 * speed_time - Zeitstempel (epoch) des letzten UGW-Tests

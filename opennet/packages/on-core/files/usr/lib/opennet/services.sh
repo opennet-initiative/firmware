@@ -217,7 +217,8 @@ sort_services_by() {
 filter_reachable_services() {
 	local service_name
 	while read service_name; do
-		[ -n "$(get_service_value "$service_name" "distance")" ] && echo "$service_name" || true
+		([ -n "$(get_service_value "$service_name" "distance")" ] || [ -n "$(get_service_value "$service_name" "priority")" ]) \
+			&& echo "$service_name" || true
 	done
 }
 

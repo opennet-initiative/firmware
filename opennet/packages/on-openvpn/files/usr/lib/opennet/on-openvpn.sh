@@ -3,8 +3,8 @@
 # Beginn der Doku-Gruppe
 ## @{
 
-MIG_VPN_DIR=/etc/openvpn/opennet_user
-MIG_VPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
+MIG_OPENVPN_DIR=/etc/openvpn/opennet_user
+MIG_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
 DEFAULT_MIG_PORT=1600
 
 
@@ -22,7 +22,7 @@ get_on_openvpn_default() {
 ## @returns Liefert "wahr", falls Schlüssel und Zertifikat vorhanden sind oder
 ##   falls in irgendeiner Form Unklarheit besteht.
 has_mig_openvpn_credentials() {
-	has_openvpn_credentials_by_template "$MIG_VPN_CONFIG_TEMPLATE_FILE" && return 0
+	has_openvpn_credentials_by_template "$MIG_OPENVPN_CONFIG_TEMPLATE_FILE" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 
@@ -36,7 +36,7 @@ test_mig_connection() {
 	trap "error_trap test_mig_connection '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
-	prepare_openvpn_service "$service_name" "$MIG_VPN_CONFIG_TEMPLATE_FILE"
+	prepare_openvpn_service "$service_name" "$MIG_OPENVPN_CONFIG_TEMPLATE_FILE"
 	local host=$(get_service_value "$service_name" "host")
 	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
 	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)
@@ -246,8 +246,8 @@ get_mig_connection_test_age() {
 ## @brief Ermittle den Common-Name des Nutzer-Zertifikats.
 ## @details Liefere eine leere Zeichenkette zurück, falls kein Zertifikat vorhanden ist.
 get_client_cn() {
-	[ -e "$MIG_VPN_DIR/on_aps.crt" ] || return 0
-	openssl x509 -in "$MIG_VPN_DIR/on_aps.crt" \
+	[ -e "$MIG_OPENVPN_DIR/on_aps.crt" ] || return 0
+	openssl x509 -in "$MIG_OPENVPN_DIR/on_aps.crt" \
 		-subject -nameopt multiline -noout 2>/dev/null | awk '/commonName/ {print $3}'
 }
 

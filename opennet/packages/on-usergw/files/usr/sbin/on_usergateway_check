@@ -20,10 +20,10 @@ shift
 
 case "$ACTION" in
 	checkWan|checkMtu|checkVpn|checkSpeed)
-		[ "$ACTION" = checkWan ] && func=update_service_wan_status
-		[ "$ACTION" = checkMtu ] && func=update_public_gateway_mtu
-		[ "$ACTION" = checkVpn ] && func=update_public_gateway_vpn_status
-		[ "$ACTION" = checkSpeed ] && func=update_public_gateway_speed_estimation
+		[ "$ACTION" = checkWan ] && func=update_service_wan_status && success_attribute=wan_status
+		[ "$ACTION" = checkMtu ] && func=update_mesh_gateway_mtu && success_attribute=mtu_status
+		[ "$ACTION" = checkVpn ] && func=update_mesh_openvpn_connection_state && success_attribute=vpn_status
+		[ "$ACTION" = checkSpeed ] && func=update_public_gateway_speed_estimation && success_attribute=
 		if [ "$#" -gt 0 ]; then
 			# filtere die Dienste, die mit der einen angegebenen IP assoziiert sind
 			get_services "mesh" | filter_services_by_value "host=$1"
@@ -32,13 +32,23 @@ case "$ACTION" in
 		fi | filter_reachable_services | filter_enabled_services | while read service_name; do
 			description=$(get_service_description "$service_name")
 			echo "Testing Gateway: $description"
-			"$func" "$service_name" && echo "OK" || echo "FEHLER"
+			"$func" "$service_name"
+			if [ -n "$success_attribute" ]; then
+				# wir wollen das Ergebnis erst am Ende des if-Blocks auswerten: dafuer sorgt " && true"
+				uci_is_true "$(get_service_value "$service_name" "$success_attribute")" && true
+			else
+				# Geschwindkeitstestwerte gesetzt?
+				[ "$ACTION" = checkSpeed ] && [ -n "$(get_service_value "$service_name" "wan_speed_download")" ]
+			fi && echo "OK" || echo "FEHLER"
 		done
 		;;
 	auto)
 		cleanup_stale_openvpn_services
 		update_mesh_services_via_dns
-		get_services "mesh" | filter_services_by_value "scheme=openvpn" | filter_enabled_services | while read service_name; do
+		get_services "mesh" | filter_services_by_value "scheme=openvpn" \
+				| filter_reachable_services \
+				| filter_enabled_services \
+				| while read service_name; do
 			# Geschwindigkeitstest
 			timestamp=$(get_service_value "$service_name" "wan_speed_timestamp" "0")
 			recheck_minutes=$(get_on_usergw_default "wan_speed_recheck_period")

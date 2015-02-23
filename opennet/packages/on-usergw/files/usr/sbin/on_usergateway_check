@@ -48,12 +48,14 @@ case "$ACTION" in
 			timestamp=$(get_service_value "$service_name" "vpn_timestamp" "0")
 			recheck_minutes=$(get_on_usergw_default "openvpn_recheck_period")
 			is_timestamp_older_minutes "$timestamp" "$recheck_minutes" \
-				&& update_public_gateway_vpn_status "$service_name"
-			# der MTU-Test
-			timestamp=$(get_service_value "$service_name" "mtu_timestamp" "0")
-			recheck_minutes=$(get_on_usergw_default "mtu_recheck_period")
-			is_timestamp_older_minutes "$timestamp" "$recheck_minutes" \
-				&& update_public_gateway_mtu "$service_name"
+				&& update_mesh_openvpn_connection_state "$service_name"
+			# der MTU-Test (nur mit echtem Zertifikat moeglich)
+			if has_mesh_openvpn_credentials; then
+				timestamp=$(get_service_value "$service_name" "mtu_timestamp" "0")
+				recheck_minutes=$(get_on_usergw_default "mtu_recheck_period")
+				is_timestamp_older_minutes "$timestamp" "$recheck_minutes" \
+					&& update_mesh_gateway_mtu "$service_name"
+			fi
 			# der WAN-Test geht schnell - es gibt keine Wartezeit
 			update_service_wan_status "$service_name"
 			# Gesamtstatus ermitteln

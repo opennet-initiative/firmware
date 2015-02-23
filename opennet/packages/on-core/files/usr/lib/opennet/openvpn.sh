@@ -81,6 +81,22 @@ is_openvpn_service_active() {
 }
 
 
+## @fn _change_openvpn_config_setting()
+## @brief Ändere eine Einstellung in einer openvpn-Konfigurationsdatei.
+## @param config_file Name der Konfigurationsdatei.
+## @param config_key Name der openvpn-Einstellung.
+## @param config_value Neuer Inhalt der Einstellung - die Einstellung wird gelöscht, falls dieser Parameter fehlt oder leer ist.
+## @attention OpenVPN-Optionen ohne Parameter (z.B. --mtu-test) können nicht mittels dieser Funktion gesetzt werden.
+_change_openvpn_config_setting() {
+	local config_file="$1"
+	local config_key="$2"
+	local config_value="${3:-}"
+	sed -i "/^$config_key[\t ]/d" "$config_file"
+	[ -n "$config_value" ] && echo "$config_key $config_value" >>"$config_file"
+	return 0
+}
+
+
 ## @fn get_openvpn_config()
 ## @brief liefere openvpn-Konfiguration eines Dienstes zurück
 ## @param service_name Name eines Dienstes
@@ -91,7 +107,6 @@ get_openvpn_config() {
 	local port=$(get_service_value "$service_name" "port")
 	local protocol=$(get_service_value "$service_name" "protocol")
 	[ "$protocol" = "tcp" ] && protocol=tcp-client
-	# TODO: es scheint vorzukommen, dass "template_file" noch nicht definiert ist - dann abbrechen - siehe build 853 bei oyla
 	local template_file=$(get_service_value "$service_name" "template_file")
 	local pid_file=$(get_service_value "$service_name" "pid_file")
 	# schreibe die Konfigurationsdatei
@@ -100,6 +115,8 @@ get_openvpn_config() {
 	echo "proto $protocol"
 	echo "writepid $pid_file"
 	cat "$template_file"
+	# sicherstellen, dass die Konfigurationsdatei mit einem Zeilenumbruch endet (fuer "echo >> ...")
+	echo
 }
 
 
@@ -162,15 +179,13 @@ verify_vpn_connection() {
 	grep -q "^proto[ \t]\+tcp" "$temp_config_file" &&
 		openvpn_opts="$openvpn_opts --connect-retry 1 --connect-timeout 15 --connect-retry-max 1"
 
+	# Schluessel und Zertifikate bei Bedarf austauschen
 	[ -n "$key_file" ] && \
-		openvpn_opts="$openvpn_opts --key $key_file" && \
-		sed -i "/^key/d" "$temp_config_file"
+		_change_openvpn_config_setting "$temp_config_file" "key" "$key_file"
 	[ -n "$cert_file" ] && \
-		openvpn_opts="$openvpn_opts --cert $cert_file" && \
-		sed -i "/^cert/d" "$temp_config_file"
+		_change_openvpn_config_setting "$temp_config_file" "cert" "$cert_file"
 	[ -n "$ca_file" ] && \
-		openvpn_opts="$openvpn_opts --ca $ca_file" && \
-		sed -i "/^ca/d" "$temp_config_file"
+		_change_openvpn_config_setting "$temp_config_file" "ca" "$ca_file"
 
 	# check if the output contains a magic line
 	status_output=$(openvpn --config "$temp_config_file" $openvpn_opts || true)
@@ -307,18 +322,34 @@ prepare_openvpn_service() {
 openvpn_get_mtu() {
 	trap "error_trap openvpn_get_mtu '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local pid_file="/tmp/openvpn_mtutest_${service_name}.pid"
 	local config_file="/tmp/openvpn_mtutest_${service_name}.conf"
-	local out_file="/tmp/openvpn_mtutest_${service_name}.out"
+	local log_file="$(get_service_log_filename "$service_name" "openvpn" "mtu")"
 
-	get_openvpn_config "$service_name" | grep -v -E "^(writepid|dev)[ \t]" >"$config_file"
-	openvpn --config "$config_file" --dev null --writepid "$pid_file" --mtu-test >"$out_file" 2>&1 &
-	# wait for openvpn to startup and write pid file
-	local pid=$(cat "$pid_file" 2>/dev/null || true)
+	get_openvpn_config "$service_name" >"$config_file"
+
+	# kein Netzwerkinterface, keine pid-Datei
+	_change_openvpn_config_setting "$config_file" "dev" "null"
+	_change_openvpn_config_setting "$config_file" "writepid" ""
+
+	# Log-Datei anlegen
+	_change_openvpn_config_setting "$config_file" "log" "$log_file"
+	_change_openvpn_config_setting "$config_file" "verb" "4"
+
+	# keine Skripte
+	_change_openvpn_config_setting "$config_file" "up" ""
+	_change_openvpn_config_setting "$config_file" "down" ""
+
+	# Test-Schluessel verwenden
+	_change_openvpn_config_setting "$config_file" "key" "$VPN_DIR_TEST/on_aps.key"
+	_change_openvpn_config_setting "$config_file" "cert" "$VPN_DIR_TEST/on_aps.crt"
+	_change_openvpn_config_setting "$config_file" "ca" "$VPN_DIR_TEST/opennet-ca.crt"
+
+	openvpn --mtu-test --config "$config_file" 2>&1 &
+	local pid=$!
 	local wait_loops=40
 	local mtu_out
 	while [ "$wait_loops" -gt 0 ]; do
-		mtu_out=$(grep "MTU test completed" "$out_file")
+		mtu_out=$(grep "MTU test completed" "$log_file")
 		# for example
 		# Thu Jul  3 22:23:01 2014 NOTE: Empirical MTU test completed [Tried,Actual] local->remote=[1573,1573] remote->local=[1573,1573]
 		if [ -n "$mtu_out" ]; then
@@ -337,7 +368,7 @@ openvpn_get_mtu() {
 	done
 	# sicherheitshalber brechen wir den Prozess ab und loeschen alle Dateien
 	kill "$pid" >/dev/null 2>&1 || true
-	rm -f "$pid_file" "$out_file" "$config_file"
+	rm -f "$config_file"
 	# ist der Zaehler abgelaufen?
 	[ "$wait_loops" -eq 0 ] && msg_info "timeout for openvpn_get_mtu '$host' - aborting."
 	return 0

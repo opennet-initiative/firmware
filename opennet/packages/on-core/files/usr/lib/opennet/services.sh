@@ -11,6 +11,7 @@ DEFAULT_SERVICE_SORTING=etx
 # unbedingt synchron halten mit "_is_persistent_service_attribute" (der Effizienz wegen getrennt)
 PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset disabled"
 LOCAL_BIAS_MODULO=10
+SERVICES_LOG_BASE=/var/log/on-services
 
 
 get_service_name() {
@@ -731,6 +732,25 @@ get_service_as_csv() {
 	done
 	# mit Zeilenumbruch abschliessen
 	echo
+}
+
+
+## @fn get_service_log_filename()
+## @brief Ermittle den Namen der Log-Datei für diesen Dienst. Zusätzliche Details (z.B. "openvpn mtu") sind möglich.
+## @param service Name eines Dienstes.
+## @param other Eine beliebige Anzahl weiterer Parameter ist erlaubt: diese erweitern den typischen Log-Dateinamen für diesen Dienst.
+## @details Die Funktion stellt sicher, dass das Verzeichnis der ermittelten Log-Datei anschließend existiert.
+get_service_log_filename() {
+	local service_name="$1"
+	shift
+	local filename="$service_name"
+	while [ $# -gt 0 ]; do
+		filename="${filename}.$1"
+		shift
+	done
+	local full_filename="$SERVICES_LOG_BASE/$(get_safe_filename "$filename").log"
+	mkdir -p "$(dirname "$full_filename")"
+	echo -n "$full_filename"
 }
 
 # Ende der Doku-Gruppe

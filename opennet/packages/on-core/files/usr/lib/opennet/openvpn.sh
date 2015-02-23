@@ -97,6 +97,15 @@ _change_openvpn_config_setting() {
 }
 
 
+## @fn _get_openvpn_config_setting()
+## @brief Lies den Wert einer OpenVPN-Einstellung aus einer Konfigurationsdatei.
+_get_openvpn_config_setting() {
+	local config_file="$1"
+	local key="$2"
+	_get_file_dict_value "$config_file" "$key"
+}
+
+
 ## @fn get_openvpn_config()
 ## @brief liefere openvpn-Konfiguration eines Dienstes zurück
 ## @param service_name Name eines Dienstes
@@ -344,6 +353,9 @@ openvpn_get_mtu() {
 	local service_name="$1"
 	local config_file="/tmp/openvpn_mtutest_${service_name}.conf"
 	local log_file="$(get_service_log_filename "$service_name" "openvpn" "mtu")"
+	local filename
+	local key
+	local default
 
 	get_openvpn_config "$service_name" >"$config_file"
 
@@ -359,10 +371,16 @@ openvpn_get_mtu() {
 	_change_openvpn_config_setting "$config_file" "up" ""
 	_change_openvpn_config_setting "$config_file" "down" ""
 
-	# Test-Schluessel verwenden
-	_change_openvpn_config_setting "$config_file" "key" "$VPN_DIR_TEST/on_aps.key"
-	_change_openvpn_config_setting "$config_file" "cert" "$VPN_DIR_TEST/on_aps.crt"
-	_change_openvpn_config_setting "$config_file" "ca" "$VPN_DIR_TEST/opennet-ca.crt"
+	# Test-Schluessel verwenden, falls kein echter Schluessel vorhanden ist
+	# TOOD: Aktuell funktioniert der MTU-Test nicht mit dem Testzertifikat (es wurde von der falschen CA ausgestellt)
+	while read key default; do
+		filename="$(_get_openvpn_config_setting "$config_file" "key")"
+		[ -e "$filename" ] || _change_openvpn_config_setting "$config_file" "$key" "$default"
+	done <<- EOF
+ca   $VPN_DIR_TEST/opennet-ca.crt
+key  $VPN_DIR_TEST/on_aps.key
+cert $VPN_DIR_TEST/on_aps.crt
+EOF
 
 	openvpn --mtu-test --config "$config_file" 2>&1 &
 	local pid=$!

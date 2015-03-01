@@ -281,7 +281,8 @@ end
 
 function status_neighbors()
 	luci.http.prepare_content("text/plain")
-	output = luci.sys.exec("echo \"/links\" | nc localhost 2006 | awk 'BEGIN {out=0} { if (out == 1 \&\& \$0 != \"\") printf \"<tr><td><a href=\\\"http://\"$2\"\\\">\"\$2\"</a></td><td>\"\$4\"</td><td>\"\$5\"</td><td>\"\$6\"</td></tr>\"; if (\$1 == \"Local\") out = 1;}'")
+	-- TODO: Verschiebung der Ermittlung direkter Nachbarn in eine shell-Funktion
+	output = luci.sys.exec("echo /links | on-function request_olsrd_txtinfo | awk 'BEGIN {out=0} { if (out == 1 \&\& \$0 != \"\") printf \"<tr><td><a href=\\\"http://\"$2\"\\\">\"\$2\"</a></td><td>\"\$4\"</td><td>\"\$5\"</td><td>\"\$6\"</td></tr>\"; if (\$1 == \"Local\") out = 1;}'")
 	if output ~= "" then
 		luci.http.write('<table class="status_page_table"><tr><th>' ..
 			luci.i18n.translate("IP Address") .. "</th><th>" ..

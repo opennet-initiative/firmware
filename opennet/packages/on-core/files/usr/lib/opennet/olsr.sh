@@ -7,6 +7,7 @@ OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 SERVICES_FILE=/var/run/services_olsr
 OLSR_SERVICE_UPDATE_MARKER=/var/run/waiting_for_olsr_services_update
 OLSR_HTTP_PORT=8080
+NETCAT_BIN=$( (which ncat nc; echo nc) | head -1)
 
 
 # uebertrage die Netzwerke, die derzeit der Zone "opennet" zugeordnet sind, in die olsr-Konfiguration
@@ -259,7 +260,7 @@ run_scheduled_olsrd_service_updates() {
 ##   Das Resultat ist auf der Standardausgabe verfügbar.
 ##   Bei Problemen mit dem Verbindungsaufbau erscheint ein Hinweis im syslog.
 request_olsrd_txtinfo() {
-	nc -w 2 localhost 2006 2>/dev/null || msg_info "get_olsrd_txtinfo: olsrd is not running"
+	"$NETCAT_BIN" -w 2 localhost 2006 2>/dev/null || msg_info "get_olsrd_txtinfo: olsrd is not running"
 }
 
 # Ende der Doku-Gruppe

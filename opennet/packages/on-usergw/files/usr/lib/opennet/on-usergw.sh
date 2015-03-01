@@ -226,7 +226,7 @@ measure_upload_speed() {
 	local host="$1"
 	local target_dev=$(get_target_route_interface "$host")
 	# UDP-Verkehr laesst sich auch ohne einen laufenden Dienst auf der Gegenseite erzeugen
-	nc -u "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
+	"$NETCAT_BIN" -u "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
 	local pid="$!"
 	sleep 3
 	[ ! -d "/proc/$pid" ] && return

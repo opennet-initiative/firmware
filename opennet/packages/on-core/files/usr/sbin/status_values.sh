@@ -58,7 +58,7 @@ create_database() {
 
 
 print_interfaces_2_6() {
-  olsr_interfaces=$(echo \"/int\" | nc localhost 2006 2>/dev/null)
+  olsr_interfaces=$(echo /int | on-function request_olsrd_txtinfo)
   for if_name in $(ls /sys/class/net/ | awk '!/lo/ {print $0}'); do
     iface_up=$(cat "/sys/class/net/${if_name}/operstate")
     # sometimes the up-state is not recognized by /sys, than check with 'ip link'
@@ -224,7 +224,7 @@ on_core_insttime="$(opkg status on-core | awk '{if (/Installed-Time/) printf $2;
 on_packages="$(opkg status | awk '{if ($1 == "Package:" && $2 ~ "^on-" && $2 != "on-core") printf $2" "}')"
 
 on_olsrd_status="$(pidof olsrd >/dev/null && echo "1" || echo "0")"
-on_olsr_mainip="$(echo \"/config\" | nc localhost 2006 2>/dev/null | awk '/MainIp/ {print $2}')"
+on_olsr_mainip="$(echo /config | on-function request_olsrd_txtinfo | awk '/MainIp/ {print $2}')"
 
 ## @todo auf nodogsplash umstellen
 on_wifidog_status="$(pidof wifidog >/dev/null && echo "1" || echo "0")"

@@ -378,6 +378,15 @@ Die Funktion ``uci_delete`` entspricht ihrem Äquivalent (``uci delete``) bis au
     uci_delete CONFIG_KEY
 
 
+### Zuordnung von git commits hash und ONI Versionsnummern generieren
+
+Die Opennet Versionsnummern entsprechen dem Commit Zähler. Ab und zu ist es nötig zu wissen, welcher konkrete Commit zu welcher Versionsnummer gehört. Hier gibt es eine einfache Kommandozeile
+
+    git log --oneline | sed -n '1!G;h;$p' | nl
+
+Dies listet alle Commit mit entsprechender ONI Versionsnummer auf und einem Abstrakt der Commit Nachricht.
+
+
 lua-Skripte {#lua}
 -----------
 

@@ -633,6 +633,13 @@ get_potential_error_messages() {
 	#    Falls das wlan-Interface beim Bootvorgang noch nicht aktiv ist, wenn olsrd startet, dann erscheint diese
 	#    harmlose Meldung.
 	filters="${filters}|olsrd.*Interface.*not found"
+	# 12) dropbear[...]: Exit (root): Error reading: Connection reset by peer
+	#    Verbindungsverlust einer ssh-Verbindung. Dies darf passieren.
+	filters="${filters}|dropbear*Connection reset by peer"
+	# 13) cron-error: nc.*: short write
+	#    Falls die Routen via nc während eines olsrd-Neustarts ausgelesen werden, reisst eventuell die Socket-
+	#    Verbindung ab - dies ist akzeptabel.
+	filters="${filters}|nc: short write"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

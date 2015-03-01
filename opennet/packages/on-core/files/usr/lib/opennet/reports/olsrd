@@ -10,10 +10,10 @@ OLSRD_CONFIG=/var/etc/olsrd.conf
 [ -e "$OLSRD_CONFIG" ] && cat "$OLSRD_CONFIG" >olsrd.conf
 
 # Konfiguration des laufenden Prozess
-echo /config | on-function request_olsrd_txtinfo >olsrd_runtime.conf
+on-function request_olsrd_txtinfo config >olsrd_runtime.conf
 
 # Routen, Nachbarn, usw.
-echo /all | on-function request_olsrd_txtinfo >olsrd_routes.log
+on-function request_olsrd_txtinfo all >olsrd_routes.log
 
 OLSRD_SERVICES=/var/run/services_olsr
 [ -e "$OLSRD_SERVICES" ] && cat "$OLSRD_SERVICES" >services_olsr

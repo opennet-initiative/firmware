@@ -256,11 +256,11 @@ run_scheduled_olsrd_service_updates() {
 
 ## @fn request_olsrd_txtinfo()
 ## @brief Sende eine Anfrage an das txtinfo-Interface von olsrd
-## @details Über die Standardeingabe können Anfragen (z.B.: '/hna') übergeben werden.
-##   Das Resultat ist auf der Standardausgabe verfügbar.
-##   Bei Problemen mit dem Verbindungsaufbau erscheint ein Hinweis im syslog.
+## @param request Der zu sende Request-Pfad (z.B. "links" oder "neighbours")
+## @details Bei Problemen mit dem Verbindungsaufbau erscheint ein Hinweis im syslog.
 request_olsrd_txtinfo() {
-	"$NETCAT_BIN" -w 2 localhost 2006 2>/dev/null || msg_info "get_olsrd_txtinfo: olsrd is not running"
+	local request="$1"
+	echo "/$request" | "$NETCAT_BIN" -w 2 localhost 2006 2>/dev/null || msg_info "get_olsrd_txtinfo: olsrd is not running"
 }
 
 # Ende der Doku-Gruppe

@@ -441,6 +441,22 @@ Hilfreiche Werkzeuge {#tools}
 Das Skript ``opennet/tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
 
 
+Debugging {#debugging}
+----------------------
+
+Mehr Log-Ausgaben (debug) ins syslog (*logread*) schreiben:
+
+  uci set on-core.settings.debug=true
+
+Ein Skript mit detaillierter Ausführungsverfolgung starten:
+
+  ON_DEBUG=1 on-function print_services
+
+Fehlermeldungen des Web-Interface ausgeben:
+
+  killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-*; uhttpd -h /www -p 80 -f
+
+
 Übersetzungen {#translations}
 =============
 

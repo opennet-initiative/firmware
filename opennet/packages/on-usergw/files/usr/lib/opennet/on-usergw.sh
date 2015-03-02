@@ -208,30 +208,6 @@ measure_upload_speed() {
 }
 
 
-# Abschalten eines UGW-Dienstes
-# Die Firewall-Regel, die von der ugw-Weiterleitung stammt, wird geloescht.
-# olsrd-nameservice-Ankuendigungen werden entfernt.
-# Es wird kein "uci commit" oder "apply_changes olsrd" durchgefuehrt.
-disable_ugw_service() {
-	local config_name=$1
-	local uci_prefix
-	local service
-	# Portweiterleitung loeschen
-	uci_prefix=$(uci_get "$(find_first_uci_section on-usergw uplink "name=$config_name").firewall_rule")
-	[ -n "$uci_prefix" ] && uci_delete "$uci_prefix"
-	service=$(uci_get "${uci_prefix}.olsr_service")
-	[ -n "$service" ] && uci del_list "$(get_and_enable_olsrd_library_uci_prefix nameservice).service=$service"
-	update_one_openvpn_setup "$config_name" "on-usergw" "uplink"
-	uci set "openvpn.${config_name}.enable=0"
-	apply_changes openvpn
-	# unabhaengig von moeglichen Aenderungen: laufende Dienste stoppen
-	/etc/init.d/openvpn reload
-	apply_changes on-usergw
-	apply_changes firewall
-	apply_changes olsrd
-}
-
-
 # Anlegen der on-usergw-Konfiguration, sowie Erzeugung ueblicher Sektionen.
 # Diese Funktion sollte vor Scheibzugriffen in diesem Bereich aufgerufen werden.
 prepare_on_usergw_uci_settings() {

@@ -362,9 +362,8 @@ apply_changes() {
 			/etc/init.d/openvpn reload || true
 			;;
 		on-usergw)
-			update_openvpn_ugw_settings
+			# TODO: verwenden wir ueberhaupt eine uci-Konfiguration?
 			/etc/init.d/openvpn reload || true
-			/etc/init.d/olsrd restart || true
 			reload_config || true
 			;;
 		on-core)

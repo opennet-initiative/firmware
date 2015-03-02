@@ -1,0 +1,38 @@
+Verkehr:
+
+= neu =
+== Quelle: Opennet ==
+ * olsr
+ * main
+
+== Quelle: Tunnel ==
+ * main
+
+== Quelle: LAN/Router ==
+ * LAN: main
+ * sonst: olsr
+ * final: tunnel
+
+== gesamt ==
+ * mesh olsr
+ * alle main
+ * olsr
+ * tunnel
+
+
+=== Probleme ===
+==== lokales Netzwerk als HNA ====
+* lokales Paket ins Opennet
+* Antwort-Paket kommt am Router an
+* falls meine lokale IP (172.16.0.x) via HNA im olsr announciert wird, dann lenkt mein Router das Antwort-Paket zurueck ins Opennet
+
+
+= Bisher =
+ * Router main
+ * all default
+ * free tunnel
+ * Router tunnel
+ * all olsrd
+ * all olsrd-default
+ * all main
+

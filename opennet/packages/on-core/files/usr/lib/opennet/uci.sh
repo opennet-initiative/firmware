@@ -37,37 +37,73 @@ uci_get() {
 }
 
 
-# Funktion ist vergleichbar mit "uci add_list". Es werden jedoch keine doppelten Einträge erzeugt.
-# Somit entfällt die Prüfung auf Vorhandensein des Eintrags.
-# Parameter: uci-Pfad
-# Parameter: neuer Eintrag
+## @fn uci_add_list()
+## @brief Füge einen neuen Wert zu einer UCI-Liste hinzu und achte dabei auf Einmaligkeit.
+## @param uci_path Der UCI-Pfad des Listenelements.
+## @param new_item Der neue Wert, der zur Liste hinzugefügt werden soll.
+## @details Die Funktion ist vergleichbar mit "uci add_list". Es werden jedoch keine doppelten Einträge erzeugt.
+##   Somit entfällt die Prüfung auf Vorhandensein des Eintrags.
 uci_add_list() {
-	local uci_path=$1
-	local new_item=$2
-	local old_items=$(uci_get "$uci_path")
+	local uci_path="$1"
+	local new_item="$2"
 	# ist der Eintrag bereits vorhanden?
-	echo " $old_items " | grep -q "\s$new_item\s" && return
+	local index=$(uci_get_list_index "$uci_path" "$new_item")
+	# schon vorhanden? Fertig ...
+	[ -n "$index" ] && return 0
 	uci add_list "$uci_path=$new_item"
 }
 
 
-uci_delete() {
-	uci -q delete "$1" || true
+## @fn uci_get_list()
+## @brief Liefere alle einzelenen Elemente einer UCI-Liste zurück.
+## @param uci_path Der UCI-Pfad eines Elements.
+## @returns Die Einträge sind zeilenweise voneinander getrennt.
+uci_get_list() {
+	local uci_path="$1"
+	uci show -d "_=_=_=_=_" "$uci_path" | cut -f 2- -d = | sed 's/_=_=_=_=_/\n/g'
 }
 
 
-# zeilenweise Rueckgabe von Listenelementen
-# Enthaltene Leerzeichen verhindern die direkte Auswertung des Ergebnis von "uci show".
-# ACHTUNG: lediglich der Name der Option wird geprueft - nicht die Sektion!
-# Diese Funktion ist daher nur in Ausnahmefaellen sinnvoll einsetzbar.
-# Parameter: Konfiguration (z.B. "olsrd")
-# Parameter: Optionsname
-uci_get_list() {
-	config=$1
-	listname=$2
-	config_file=/etc/config/$config
-	[ ! -e "$config_file" ] && continue
-	grep "list[ \t]\+$listname[ \t]\+" <"$config_file" | cut -f 2- -d "'" | sed "s/'$//"
+## @fn uci_get_list_index()
+## @brief Ermittle die ID eines UCI-Listenelements.
+## @param uci_path Der UCI-Pfad der Liste.
+## @param value Der Inhalt des zu suchenden Elements.
+## @returns Die ID des Listenelements (beginnend bei Null) wird zurückgeliefert.
+## @details Falls das Element nicht gefunden wird, ist das Ergebnis leer.
+uci_get_list_index() {
+	local uci_path="$1"
+	local value="$2"
+	local current
+	local index=0
+	uci_get_list "$uci_path" | while read current; do
+		[ "$current" = "$value" ] && echo "$index" && return 0
+		: $((index++))
+	done
+	return 0
+}
+
+
+## @fn uci_delete_list()
+## @brief Lösche ein Element einer UCI-Liste
+## @param uci_path Der UCI-Pfad der Liste.
+## @param value Der Inhalt des zu löschenden Elements. Es findet ein Vergleich auf Identität (kein Muster) statt.
+## @details Falls das Element nicht existiert, endet die Funktion stillschweigend ohne Fehlermeldung.
+uci_delete_list() {
+	local uci_path="$1"
+	local value="$2"
+	local index=$(uci_get_list_index "$uci_path" "$value")
+	[ -n "$index" ] && uci_delete "${uci_path}=${index}"
+	return 0
+}
+
+
+## @fn uci_delete()
+## @brief Lösche ein UCI-Element.
+## @param uci_path Der UCI-Pfad des Elements.
+## @details Keine Fehlermeldung, falls das Element nicht existiert.
+uci_delete() {
+	local uci_path="$1"
+	uci -q delete "$uci_path" || true
 }
 
 

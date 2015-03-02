@@ -238,6 +238,15 @@ Eine Beschreibung des Dienstanbieters (beispielsweise der Hosting-Standort: "Het
 Die ermittelten Dienst-Anbieter werden durch die Dienste-Verwaltung gespeichert. Darin werden alle für den Verbindungsaufbau notwendigen Daten abgelegt.
 
 
+Dienst-Weiterleitung: Service-Relay {#service-relay}
+-----------------------------------
+
+Internet-Spender betreiben APs, die im Wesentlichen die beiden folgenden Aufgaben erfüllen:
+
+* eine Routing-Verbindung der lokalen Wolke mit der mesh-Wolke herstellen
+* relevante Dienste (z.B. VPN-Verbindungen zu Exit-Knoten) weiterleiten
+
+
 Datensammlung: ondataservice {#ondataservice}
 ----------------------------
 

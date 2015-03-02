@@ -9,7 +9,7 @@ PERSISTENT_SERVICE_STATUS_DIR=/etc/on-services.d
 DEFAULT_SERVICE_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
 # unbedingt synchron halten mit "_is_persistent_service_attribute" (der Effizienz wegen getrennt)
-PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset disabled"
+PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset disabled local_port"
 LOCAL_BIAS_MODULO=10
 SERVICES_LOG_BASE=/var/log/on-services
 
@@ -334,6 +334,7 @@ _is_persistent_service_attribute() {
 		-o "$1" = "rank" \
 		-o "$1" = "offset" \
 		-o "$1" = "disabled" \
+		-o "$1" = "local_port" \
 		] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }

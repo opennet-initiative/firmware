@@ -18,11 +18,11 @@ $Id: index.htm 5448 2009-10-31 15:54:11Z jow $
 	<div class="cbi-map"><fieldset class="cbi-section">
 		<p><%:The following points are useful if you like to specifically change some Accesspoint behavior. They are not required for proper work of your Accesspoint, but can be really useful if you like to extend the functionality of your Accesspoint.%></p>
 		<ul>
-			<% if on_bool_function("is_package_installed", {"on-openvpn"}) then %>
+			<% if on_bool_function("is_function_available", {"has_mig_openvpn_credentials"}) then %>
 				<li><a href="<%=REQUEST_URI%>/vpn_gateways"><%:VPN Gateways%></a><p><%:This is the place where you can configure your Opennet-Internet-Gateways. Select, how they are ordered and add or blacklist specific Gateways%></p></li>
 			<% end %>
 			<li><a href="<%=REQUEST_URI%>/portmapping"><%:Port-Mapping%></a><p><%:If you like to forward ports from the outside (for instance the Internet) to Computers in your local network, configure it here.%></p></li>
-			<% if on_bool_function("is_package_installed", {"on-usergw"}) then %>
+			<% if on_bool_function("is_function_available", {"has_mesh_openvpn_credentials"}) then %>
 				<li><a href="<%=REQUEST_URI%>/ugw_tunnel"><%:Internet Sharing%></a><p><%:You have some WAN-connection like DSL and like to share the Internet? Here you can create and manage the required VPN-Certificates to turn your Accesspoint into a User-Gateway. If you like to enable or disable the Internet-Sharing, this is the place to choose%></p></li>
 			<% end %>
 		</ul>

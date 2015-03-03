@@ -60,7 +60,7 @@ uci_add_list() {
 ## @returns Die Einträge sind zeilenweise voneinander getrennt.
 uci_get_list() {
 	local uci_path="$1"
-	uci show -d "_=_=_=_=_" "$uci_path" | cut -f 2- -d = | sed 's/_=_=_=_=_/\n/g'
+	uci_get "_=_=_=_=_" "$uci_path" | cut -f 2- -d = | sed 's/_=_=_=_=_/\n/g'
 }
 
 

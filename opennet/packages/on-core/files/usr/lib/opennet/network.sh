@@ -51,7 +51,7 @@ query_srv_records() {
 get_ping_time() {
 	local target="$1"
 	local duration="${2:-5}"
-	local ip=$(query_dns "$target")
+	local ip=$(query_dns "$target" | filter_routable_addresses | tail -1)
 	[ -z "$ip" ] && return 0
 	ping -w "$duration" -q "$ip" 2>/dev/null \
 		| grep "min/avg/max" \

@@ -66,7 +66,8 @@ get_target_route_interface() {
 		#    root@AP-1-193:/tmp/log/on-services# ip route get 2a01:4f8:140:1222::1:7
 		#    12 2a01:4f8:140:1222::1:7 from :: dev lo  src fe80::26a4:3cff:fefd:7649  metric -1  error -1
 		# Wir ignorieren also Zeilen, die auf "error -1" enden.
-		ip route get "$ipaddr" | grep -v ^failed_policy | grep -v "error -1$" | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
+		# Fehlermeldungen (ip: RTNETLINK answers: Network is unreachable) werden ebenfalls ignoriert.
+		ip route get "$ipaddr" 2>/dev/null | grep -v ^failed_policy | grep -v "error -1$" | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
 	done | head -1
 }
 

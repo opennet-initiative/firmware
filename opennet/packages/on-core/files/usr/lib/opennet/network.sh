@@ -168,6 +168,9 @@ get_zone_devices() {
 		for result in $(uci_get "network.${iface}.ifname"); do
 			echo "$result"
 		done
+		# Namen von Bridge-Interfaces werden explizit vergeben
+		[ "$(uci_get "network.${iface}.type")" = "bridge" ] && echo "br-$iface"
+		true
 	done
 }
 

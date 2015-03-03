@@ -128,13 +128,13 @@ add_service_relay_forward_rule() {
 	local target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
 	# wir verwenden nur die erste aufgeloeste IP, zu welcher wir eine Route haben.
 	# z.B. faellt IPv6 aus, falls wir kein derartiges Uplink-Interface sehen
-	local uci_match=$(find_first_uci_section on-usergw redirect \
+	local uci_match=$(find_first_uci_section firewall redirect \
 		"target=DNAT" "name=${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}" "proto=$protocol" \
 		"src=$ZONE_MESH" "src_dip=$main_ip" \
 		"dest=$ZONE_WAN" "dest_port=$port" "dest_ip=$target_ip")
 	# perfekt passende Regel gefunden? Fertig ...
 	[ -n "$uci_match" ] && return 0
-	local uci_match=$(find_first_uci_section on-usergw redirect "target=DNAT" "name=$service_name")
+	local uci_match=$(find_first_uci_section firewall redirect "target=DNAT" "name=$service_name")
 	# unvollstaendig passendes Ergebnis? Loesche es (der Ordnung halber) ...
 	[ -n "$uci_match" ] && uci_delete "$uci_match"
 	# neue Regel anlegen

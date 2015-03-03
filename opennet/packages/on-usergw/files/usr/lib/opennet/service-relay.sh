@@ -118,6 +118,7 @@ delete_unused_service_relay_forward_rules() {
 add_service_relay_forward_rule() {
 	trap "error_trap add_service_relay_forward_rule '$*'" $GUARD_TRAPS
 	local service_name="$1"
+	local rule_name="${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
 	local port=$(get_service_value "$service_name" "port")
 	local host=$(get_service_value "$service_name" "host")
 	local protocol=$(get_service_value "$service_name" "protocol")
@@ -129,18 +130,18 @@ add_service_relay_forward_rule() {
 	# wir verwenden nur die erste aufgeloeste IP, zu welcher wir eine Route haben.
 	# z.B. faellt IPv6 aus, falls wir kein derartiges Uplink-Interface sehen
 	local uci_match=$(find_first_uci_section firewall redirect \
-		"target=DNAT" "name=${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}" "proto=$protocol" \
+		"target=DNAT" "name=$rule_name" "proto=$protocol" \
 		"src=$ZONE_MESH" "src_dip=$main_ip" \
 		"dest=$ZONE_WAN" "dest_port=$port" "dest_ip=$target_ip")
 	# perfekt passende Regel gefunden? Fertig ...
 	[ -n "$uci_match" ] && return 0
-	local uci_match=$(find_first_uci_section firewall redirect "target=DNAT" "name=$service_name")
+	local uci_match=$(find_first_uci_section firewall redirect "target=DNAT" "name=$rule_name")
 	# unvollstaendig passendes Ergebnis? Loesche es (der Ordnung halber) ...
 	[ -n "$uci_match" ] && uci_delete "$uci_match"
 	# neue Regel anlegen
 	local uci_prefix=firewall.$(uci add firewall redirect)
 	# der Name ist wichtig fuer spaetere Aufraeumaktionen
-	uci set "${uci_prefix}.name=${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
+	uci set "${uci_prefix}.name=$rule_name"
 	uci set "${uci_prefix}.target=DNAT"
 	uci set "${uci_prefix}.proto=$protocol"
 	uci set "${uci_prefix}.src=$ZONE_MESH"

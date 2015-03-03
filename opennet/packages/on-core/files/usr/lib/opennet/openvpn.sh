@@ -142,14 +142,14 @@ verify_vpn_connection() {
 	local key_file=${2:-}
 	local cert_file=${3:-}
 	local ca_file=${4:-}
-	local temp_config_file="/tmp/vpn_test_${service_name}-$$.conf"
+	local config_file=$(mktemp)
 	local log_file="$(get_service_log_filename "$service_name" "openvpn" "verify")"
 	local file_opts
 	local wan_dev
 	local hostname
 	local status_output
 
-	msg_debug "start vpn test of <$temp_config_file>"
+	msg_debug "start vpn test of <$config_file>"
 
 
 	# erstelle die config-Datei
@@ -184,43 +184,43 @@ verify_vpn_connection() {
 		echo "tls-exit"
 		echo "ns-cert-type server"
 
-	) >"$temp_config_file"
+	) >"$config_file"
 
 	# kein Netzwerkinterface erzeugen
-	_change_openvpn_config_setting "$temp_config_file" "dev" "null"
+	_change_openvpn_config_setting "$config_file" "dev" "null"
 	# keine PID-Datei anlegen
-	_change_openvpn_config_setting "$temp_config_file" "writepid" ""
+	_change_openvpn_config_setting "$config_file" "writepid" ""
 	# keine Netzwerkkonfiguration via up/down
-	_change_openvpn_config_setting "$temp_config_file" "up" ""
-	_change_openvpn_config_setting "$temp_config_file" "down" ""
+	_change_openvpn_config_setting "$config_file" "up" ""
+	_change_openvpn_config_setting "$config_file" "down" ""
 	# TLS-Pruefung immer fehlschlagen lassen
-	_change_openvpn_config_setting "$temp_config_file" "tls-verify" "/bin/false"
+	_change_openvpn_config_setting "$config_file" "tls-verify" "/bin/false"
 	# Log-Datei anlegen
-	_change_openvpn_config_setting "$temp_config_file" "log" "$log_file"
+	_change_openvpn_config_setting "$config_file" "log" "$log_file"
 
 	# nur fuer tcp-Verbindungen (ipv4/ipv6)
 	#   connect-retry: Sekunden Wartezeit zwischen Versuchen
 	#   connect-timeout: Dauer eines Versuchs
 	#   connect-retry-max: Anzahl moeglicher Wiederholungen
-	if grep -q "^proto[ \t]\+tcp" "$temp_config_file"; then
+	if grep -q "^proto[ \t]\+tcp" "$config_file"; then
 		echo "connect-retry 1"
 		echo "connect-timeout 15"
 		echo "connect-retry-max 1"
-	fi >>"$temp_config_file"
+	fi >>"$config_file"
 
 	# Schluessel und Zertifikate bei Bedarf austauschen
 	[ -n "$key_file" ] && \
-		_change_openvpn_config_setting "$temp_config_file" "key" "$key_file"
+		_change_openvpn_config_setting "$config_file" "key" "$key_file"
 	[ -n "$cert_file" ] && \
-		_change_openvpn_config_setting "$temp_config_file" "cert" "$cert_file"
+		_change_openvpn_config_setting "$config_file" "cert" "$cert_file"
 	[ -n "$ca_file" ] && \
-		_change_openvpn_config_setting "$temp_config_file" "ca" "$ca_file"
+		_change_openvpn_config_setting "$config_file" "ca" "$ca_file"
 
 	# Aufbau der VPN-Verbindung bis zum Timeout oder bis zum Verbindungsabbruch via "tls-exit" (/bin/false)
-	openvpn --config "$temp_config_file" || true
+	openvpn --config "$config_file" || true
 	# read the additional options from the config file (for debug purposes)
-	file_opts=$(grep -v "^$" "$temp_config_file" | grep -v "^#" | sed 's/^/--/' | tr '\n' ' ')
-	rm -f "$temp_config_file"
+	file_opts=$(grep -v "^$" "$config_file" | grep -v "^#" | sed 's/^/--/' | tr '\n' ' ')
+	rm -f "$config_file"
 	grep -q "Initial packet" "$log_file" && return 0
 	msg_debug "openvpn test failed: openvpn $file_opts"
 	trap "" $GUARD_TRAPS && return 1

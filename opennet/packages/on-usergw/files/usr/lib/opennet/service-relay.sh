@@ -194,7 +194,7 @@ announce_olsr_service_relay() {
 	# loesche alte Dienst-Announcements mit demselben Prefix
 	local current_description
 	uci_get_list "${uci_prefix}.service" | while read current_description; do
-		[ "$(echo "$current_description" | cut -f 1 -d " ")" = "$service_unique" ] && uci_delete_list "${uci_prefix}.service" "$current_description"
+		[ "$(echo "$current_description" | awk '{print $1}')" = "$service_unique" ] && uci_delete_list "${uci_prefix}.service" "$current_description"
 		true
 	done
 	uci_add_list "${uci_prefix}.service" "$service_description"

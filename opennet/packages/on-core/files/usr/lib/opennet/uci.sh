@@ -60,7 +60,10 @@ uci_add_list() {
 ## @returns Die Einträge sind zeilenweise voneinander getrennt.
 uci_get_list() {
 	local uci_path="$1"
-	uci_get "_=_=_=_=_" "$uci_path" | cut -f 2- -d = | sed 's/_=_=_=_=_/\n/g'
+	# falls es den Schlüssel nicht gibt, liefert "uci show" eine Fehlermeldung und Müll - das wollen wir abfangen
+	[ -z "$(uci_get "$uci_path")" ] && return 0
+	# ansonsten: via "uci show" mit speziellem Trenner abfragen und zeilenweise separieren
+	uci show -d "_=_=_=_=_" "$uci_path" | cut -f 2- -d = | sed 's/_=_=_=_=_/\n/g'
 }
 
 

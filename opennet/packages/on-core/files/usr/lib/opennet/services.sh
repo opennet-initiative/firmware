@@ -770,21 +770,21 @@ update_service_wan_status() {
 	trap "error_trap ugw_update_wan_status '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local host=$(get_service_value "$service_name" "host")
-	local outgoing_interface=$(get_target_route_interface "$host")
+	local outgoing_device=$(get_target_route_interface "$host")
 	local ping_time
 	local outgoing_zone
-	if is_device_in_zone "$outgoing_interface" "$ZONE_WAN"; then
+	if is_device_in_zone "$outgoing_device" "$ZONE_WAN"; then
 		set_service_value "$service_name" "wan_status" "true"
 		ping_time=$(get_ping_time "$host")
 		set_service_value "$service_name" "wan_ping" "$ping_time"
-		msg_debug "target '$host' routing through wan device: $outgoing_interface"
+		msg_debug "target '$host' routing through wan device: $outgoing_device"
 		msg_debug "average ping time for $host: ${ping_time}ms"
 	else
-		outgoing_zone=$(get_zone_of_interface "$outgoing_interface")
+		outgoing_zone=$(get_zone_of_device "$outgoing_device")
 		# ausfuehrliche Erklaerung, falls das Routing zuvor noch akzeptabel war
 		uci_is_true "$(get_service_value "$service_name" "wan_status")" \
-			&& msg_info "Routing switched away from WAN interface to '$outgoing_interface'"
-		msg_debug "warning: target '$host' is routed via interface '$outgoing_interface' (zone '$outgoing_zone') instead of the expected WAN zone ($ZONE_WAN)"
+			&& msg_info "Routing switched away from WAN interface to '$outgoing_device'"
+		msg_debug "warning: target '$host' is routed via interface '$outgoing_device' (zone '$outgoing_zone') instead of the expected WAN zone ($ZONE_WAN)"
 		set_service_value "$service_name" "wan_status" "false"
 		set_service_value "$service_name" "wan_ping" ""
 	fi

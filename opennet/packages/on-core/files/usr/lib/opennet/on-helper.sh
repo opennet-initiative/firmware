@@ -48,6 +48,7 @@ error_trap() {
 # Module laden
 for fname in core.sh network.sh olsr.sh routing.sh uci.sh services.sh service-relay.sh openvpn.sh on-openvpn.sh on-usergw.sh; do
 	fname=${IPKG_INSTROOT:-}/usr/lib/opennet/$fname
-	[ -e "$fname" ] && . "$fname" || true
+	[ -e "$fname" ] && . "$fname"
+	true
 done
 

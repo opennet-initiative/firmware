@@ -166,19 +166,6 @@ enable_service_relay() {
 }
 
 
-## @fn disable_service_relay()
-## @brief Deaktiviere die Weiterleitung eines öffentlichen Diensts.
-## @param service_name Name des durchzuleitenden Diensts
-## @attention Anschließend müssen die uci-Sektion 'olsrd' und 'firewall' committed werden.
-disable_service_relay() {
-	trap "error_trap disable_service_relay '$*'" $GUARD_TRAPS
-	local service_name="$1"
-	delete_service_relay_forward_rule "$service_name"
-	# dies wird hier ein bisschen zu häufig aufgerufen
-	deannounce_unused_olsr_service_relays
-}
-
-
 ## @fn announce_olsr_service_relay()
 ## @brief Verkuende das lokale Relay eines öffentlichen Dienstes inkl. Geschwindigkeitsdaten via olsr nameservice.
 ## @param service_name Name des zu veröffentlichenden Diensts
@@ -242,7 +229,6 @@ is_service_relay_possible() {
 	local wan_routing
 	enabled=$(get_service_value "$service_name" "true")
 	uci_is_false "$enabled" && trap "" $GUARD_TRAPS && return 1
-	update_service_wan_status "$service_name"
 	wan_routing=$(get_service_value "$service_name" "wan_status" "false")
 	uci_is_false "$wan_routing" && trap "" $GUARD_TRAPS && return 1
 	return 0
@@ -256,6 +242,7 @@ update_service_relay_status() {
 	local service_name
 	get_services "igw" | while read service_name; do
 		is_service_relay_possible "$service_name" && enable_service_relay "$service_name"
+		true
 	done
 	delete_unused_service_relay_forward_rules
 	deannounce_unused_olsr_service_relays

@@ -7,7 +7,10 @@ OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 SERVICES_FILE=/var/run/services_olsr
 OLSR_SERVICE_UPDATE_MARKER=/var/run/waiting_for_olsr_services_update
 OLSR_HTTP_PORT=8080
-NETCAT_BIN=$( (which ncat nc; echo nc) | head -1)
+# suche einen passenden nc-Kandidaten
+# Die busybox-netcat-Implementation ist nicht geeignet, da ihr der "-w"-Schalter fehlt.
+# Die Filterung erfolgt via "tail" anstelle von "head", um keine "SIGPIPE"-Fehler in cron-Jobs auszuloesen.
+NETCAT_BIN=$( (echo nc; which nc ncat) | tail -1)
 
 
 # uebertrage die Netzwerke, die derzeit der Zone "opennet" zugeordnet sind, in die olsr-Konfiguration

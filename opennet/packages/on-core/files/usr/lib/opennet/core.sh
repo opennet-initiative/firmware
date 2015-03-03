@@ -778,7 +778,8 @@ get_memory_size() {
 
 
 run_parts() {
-	local rundir=$1
+	trap "error_trap run_parts '$*'" $GUARD_TRAPS
+	local rundir="$1"
 	local fname
 	find "$rundir" -type f | while read fname; do
 		# ignoriere verwaiste symlinks

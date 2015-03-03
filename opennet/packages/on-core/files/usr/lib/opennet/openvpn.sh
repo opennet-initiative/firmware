@@ -358,7 +358,12 @@ openvpn_get_mtu() {
 	local key
 	local default
 
-	get_openvpn_config "$service_name" >"$config_file"
+	(
+		get_openvpn_config "$service_name"
+		# kein Netzwerk konfigurieren
+		echo "ifconfig-noexec"
+		echo "route-noexec"
+	) >"$config_file"
 
 	# kein Netzwerkinterface, keine pid-Datei
 	_change_openvpn_config_setting "$config_file" "dev" "null"

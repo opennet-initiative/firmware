@@ -31,7 +31,10 @@ get_and_enable_olsrd_library_uci_prefix() {
 	local lib_file
 	local uci_prefix=
 	local library=olsrd_$1
-	local current=$(uci show olsrd | grep "^olsrd\.@LoadPlugin\[[0-9]\+\]\.library=$library\.so")
+	local current=$(find_all_uci_sections olsrd LoadPlugin | while read uci_prefix; do
+			# die Bibliothek beginnt mit dem Namen - danach folgt die genaue Versionsnummer
+			uci_get "${uci_prefix}.library" | grep -q "^$library\.so" && echo "$uci_prefix"
+		done | tail -1)
 	if [ -n "$current" ]; then
 		uci_prefix=$(echo "$current" | cut -f 1 -d = | sed 's/\.library$//')
 	else

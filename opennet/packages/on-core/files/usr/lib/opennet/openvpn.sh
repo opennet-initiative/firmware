@@ -142,7 +142,7 @@ verify_vpn_connection() {
 	local key_file=${2:-}
 	local cert_file=${3:-}
 	local ca_file=${4:-}
-	local config_file=$(mktemp -t "VERIFY-${service_name}-XXXXX")
+	local config_file=$(mktemp -t "VERIFY-${service_name}-XXXXXXX")
 	local log_file="$(get_service_log_filename "$service_name" "openvpn" "verify")"
 	local file_opts
 	local wan_dev
@@ -351,7 +351,7 @@ prepare_openvpn_service() {
 openvpn_get_mtu() {
 	trap "error_trap openvpn_get_mtu '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local config_file=$(mktemp -t "MTU-${service_name}-XXXXX")
+	local config_file=$(mktemp -t "MTU-${service_name}-XXXXXXX")
 	local pid_file="$(mktemp)"
 	local log_file="$(get_service_log_filename "$service_name" "openvpn" "mtu")"
 	local filename

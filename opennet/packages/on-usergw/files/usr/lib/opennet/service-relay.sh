@@ -125,7 +125,7 @@ add_service_relay_forward_rule() {
 	[ -z "$local_port" ] && local_port=$(get_local_service_relay_port "$service_name") \
 			&& set_service_value "$service_name" "local_port" "$local_port"
 	local main_ip=$(get_main_ip)
-	local target_ip=$(query_dns "$host" | filter_routable_addresses | head -n 1)
+	local target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
 	# wir verwenden nur die erste aufgeloeste IP, zu welcher wir eine Route haben.
 	# z.B. faellt IPv6 aus, falls wir kein derartiges Uplink-Interface sehen
 	local uci_match=$(find_first_uci_section on-usergw redirect \

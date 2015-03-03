@@ -92,7 +92,7 @@ _add_local_bias_to_host() {
 	# Die resultierende host_number darf nicht zu gross sein (z.B. mit Exponentendarstellung),
 	# da andernfalls awk die Berechnung fehlerhaft durchführt.
 	local host_number=$(echo "$ip$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g' | dd bs=8 count=1 2>/dev/null)
-	head -1 | awk '{ print $1 + ('$host_number' % '$LOCAL_BIAS_MODULO') }'
+	tail -1 | awk '{ print $1 + ('$host_number' % '$LOCAL_BIAS_MODULO') }'
 }
 
 

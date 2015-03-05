@@ -675,14 +675,6 @@ set_service_detail() {
 }
 
 
-get_service_age() {
-	local service_name="$1"
-	local timestamp=$(get_service_value "$service_name" "timestamp")
-	[ -z "$timestamp" ] && return 0
-	echo "$(get_time_minute)" "$timestamp" | awk '{ print $1 - $2 }'
-}
-
-
 # Liefere eine Semikolon-separierte Liste von Service-Eigenschaften zurueck.
 # Jede Eigenschaft wird folgendermassen ausgedrueckt:
 #  type|source|key[|default]

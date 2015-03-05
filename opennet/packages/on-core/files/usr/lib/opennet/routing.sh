@@ -79,16 +79,6 @@ delete_policy_rule() {
 }
 
 
-# Entferne alle throw-Regeln aus einer Tabelle
-# Parameter: Tabelle
-delete_throw_routes() {
-	local table=$1
-	ip route show table "$table" | grep "^throw " | while read throw pattern; do
-		ip route del table "$table" $pattern
-	done
-}
-
-
 # erzeuge Policy-Rules entsprechend der IP-Bereiche eines Netzwerks
 # Parameter: logisches Netzwerkinterface
 # weitere Parameter: Rule-Spezifikation
@@ -123,7 +113,6 @@ add_zone_policy_rules_by_iif() {
 ## @fn initialize_olsrd_policy_routing()
 ## @brief Policy-Routing-Initialisierung nach dem System-Boot und nach Interface-Hotplug-Ereignissen
 ## @details Folgende Seiteneffekte treten ein:
-##   * alle throw-Routen aus den Tabellen olsrd/olsrd-default/main werden gelöscht
 ##   * alle Policy-Rules mit Bezug zu den Tabellen olsrd/olsrd-default/main werden gelöscht
 ##   * die neuen Policy-Rules für die obigen Tabellen werden an anderer Stelle erzeugt
 ##   Kurz gesagt: alle bisherigen Policy-Rules sind hinterher kaputt

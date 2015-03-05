@@ -178,14 +178,6 @@ function get_wan()
 end
 
 
-function update_wan()
-  local path = luci.dispatcher.context.requestpath
-  local count = path[#path]
-  luci.sys.exec("/usr/sbin/on_usergateway_check checkWan "..count)
-  get_wan()
-end
-
-
 function get_wan_ping()
   local path = luci.dispatcher.context.requestpath
   local count = path[#path]
@@ -220,14 +212,6 @@ function get_speed()
 end
 
 
-function update_speed()
-  local path = luci.dispatcher.context.requestpath
-  local count = path[#path]
-  luci.sys.exec("/usr/sbin/on_usergateway_check checkSpeed "..count)
-  get_speed()
-end
-
-
 function get_mtu()
   local path = luci.dispatcher.context.requestpath
   local count = path[#path]
@@ -249,14 +233,6 @@ function get_mtu()
 end
 
 
-function update_mtu()
-  local path = luci.dispatcher.context.requestpath
-  local count = path[#path]
-  luci.sys.exec("/usr/sbin/on_usergateway_check checkMtu "..count)
-  get_mtu()
-end
-
-
 function get_vpn()
   local path = luci.dispatcher.context.requestpath
   local count = path[#path]
@@ -271,17 +247,6 @@ function get_vpn()
       ..[[">&#x00A0;&#x00A0;&#x00A0;&#x00A0;</abbr></div>]])
   end
   luci.http.write(get_html_loading_spinner("vpn_spinner", "display:none;"));
-end
-
-
-function update_vpn()
-  local path = luci.dispatcher.context.requestpath
-  local count = path[#path]
-  cursor:delete("on-usergw", "opennet_ugw"..count, "age")
-  cursor:commit("on-usergw")
-  cursor:unload("on-usergw")
-  luci.sys.exec("/usr/sbin/on_usergateway_check checkVpn "..count)
-  get_vpn()
 end
 
 

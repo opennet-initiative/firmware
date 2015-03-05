@@ -208,18 +208,6 @@ measure_upload_speed() {
 }
 
 
-# Anlegen der on-usergw-Konfiguration, sowie Erzeugung ueblicher Sektionen.
-# Diese Funktion sollte vor Scheibzugriffen in diesem Bereich aufgerufen werden.
-prepare_on_usergw_uci_settings() {
-	local section
-	# on-usergw-Konfiguration erzeugen, falls noetig
-	[ -e /etc/config/on-usergw ] || touch /etc/config/on-usergw
-	for section in ugw_sharing; do
-		uci show | grep -q "^on-usergw\.${section}\." || uci set "on-usergw.${section}=$section"
-	done
-}
-
-
 # Liefere die aktiven VPN-Verbindungen (mit Mesh-Hubs) zurueck.
 # Diese Funktion bracht recht viel Zeit.
 get_active_ugw_connections() {

@@ -78,21 +78,6 @@ add_zone_forward() {
 }
 
 
-# Loesche eine Weiterleitungsregel fuer die firewall (Quelle -> Ziel)
-# WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
-# Parameter: Quell-Zone und Ziel-Zone
-delete_zone_forward() {
-	trap "error_trap delete_zone_forward '$*'" $GUARD_TRAPS
-	local source=$1
-	local dest=$2
-	local uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
-	# die Weiterleitungsregel existiert nicht -> Ende
-	[ -z "$uci_prefix" ] && return 0
-	# Regel loeschen
-	uci_delete "$uci_prefix"
-}
-
-
 # Das Masquerading in die Opennet-Zone soll nur fuer bestimmte Quell-Netze erfolgen.
 # Diese Funktion wird bei hotplug-Netzwerkaenderungen ausgefuehrt.
 update_opennet_zone_masquerading() {

@@ -781,9 +781,10 @@ run_parts() {
 	trap "error_trap run_parts '$*'" $GUARD_TRAPS
 	local rundir="$1"
 	local fname
-	find "$rundir" -type f | while read fname; do
+	find "$rundir" -maxdepth 1 | while read fname; do
 		# ignoriere verwaiste symlinks
 		[ ! -f "$fname" ] && continue
+		msg_debug "on-run-parts: executing $fname"
 		# ignoriere Fehler bei der Ausfuehrung
 		"$fname" || true
 	done

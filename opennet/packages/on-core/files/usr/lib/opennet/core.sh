@@ -634,7 +634,7 @@ get_potential_error_messages() {
 	filters="${filters}|olsrd.*Interface.*not found"
 	# 12) dropbear[...]: Exit (root): Error reading: Connection reset by peer
 	#    Verbindungsverlust einer ssh-Verbindung. Dies darf passieren.
-	filters="${filters}|dropbear*Connection reset by peer"
+	filters="${filters}|dropbear.*Connection reset by peer"
 	# 13) cron-error: nc.*: short write
 	#    Falls die Routen via nc während eines olsrd-Neustarts ausgelesen werden, reisst eventuell die Socket-
 	#    Verbindung ab - dies ist akzeptabel.

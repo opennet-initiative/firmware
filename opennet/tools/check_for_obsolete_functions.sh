@@ -59,7 +59,7 @@ get_shell_func_calls() {
 	# shell-Funktionsaufruf
 	(
 		grep -E "^(.*[^a-zA-Z0-9_]|)$funcname([^a-zA-Z0-9_].*|)$" "$fname" || true
-	) | grep -vE "(trap|$funcname\(|#)" || true
+	) | grep -vE "(trap|$funcname\()" | grep -v "^[ \t]*#" || true
 }
 
 

@@ -36,9 +36,12 @@ case "$ACTION" in
 			if [ -n "$success_attribute" ]; then
 				# wir wollen das Ergebnis erst am Ende des if-Blocks auswerten: dafuer sorgt " && true"
 				uci_is_true "$(get_service_value "$service_name" "$success_attribute")" && true
-			else
+			elif [ "$ACTION" = checkSpeed ]; then
 				# Geschwindkeitstestwerte gesetzt?
-				[ "$ACTION" = checkSpeed ] && [ -n "$(get_service_value "$service_name" "wan_speed_download")" ]
+				[ -n "$(get_service_value "$service_name" "wan_speed_download")" ]
+			else
+				# kein Abbruch - aber ein Fehlerwert
+				false && false
 			fi && echo "OK" || echo "FEHLER"
 		done
 		;;

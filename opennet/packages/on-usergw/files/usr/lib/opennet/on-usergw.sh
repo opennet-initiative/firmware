@@ -177,6 +177,7 @@ sync_mesh_openvpn_connection_processes() {
 get_device_traffic() {
 	local device="$1"
 	local seconds="$2"
+	! which ifstat >/dev/null && msg_info "ERROR: Missing ifstat for 'get_device_traffic'" && return 0
 	ifstat -q -b -i "$device" "$seconds" 1 | tail -n 1 | awk '{print int($1 + 0.5) "\t" int($2 + 0.5)}'
 }
 

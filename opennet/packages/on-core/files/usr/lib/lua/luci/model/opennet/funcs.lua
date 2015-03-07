@@ -41,11 +41,15 @@ end
 
 
 --- @brief Liefere zu einem boolean-Wert das html-geeignete "y" / "n" oder "" zurück.
---- @param text textuelle Repräsentation eines Wahrheitswerts
+--- @param value Eingangswert: entweder ein boolean-Wert oder ein String, der als "uci boolean" interpretiert wird.
 --- @returns "y" / "n" oder ""
 --- @details Leere Eingaben werden mit einem leeren String quittiert. Nicht erkannte Eingaben werden als "false" gewertet.
-function bool_string_to_yn(value)
-	if (not value) or (value == "") then
+function bool_to_yn(value)
+	if value == true then
+		return "y"
+	elseif value == false then
+		return "n"
+	elseif (not value) or (value == "") then
 		return ""
 	elseif uci_to_bool(value) then
 		return "y"

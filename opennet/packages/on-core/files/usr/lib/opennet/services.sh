@@ -9,7 +9,14 @@ PERSISTENT_SERVICE_STATUS_DIR=/etc/on-services.d
 DEFAULT_SERVICE_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
 # unbedingt synchron halten mit "_is_persistent_service_attribute" (der Effizienz wegen getrennt)
-PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency rank offset disabled local_port"
+# Gruende fuer ausgefallene Attribute:
+#   uci_dependency: später zu beräumende uci-Einträge wollen wir uns merken
+#   file_dependency: siehe uci_dependency
+#   priority: DNS-entdeckte Dienste enthalten ein "priority"-Attribut, nach einem reboot wieder verfügbar sein sollte
+#   rank/offset: Attribute zur Ermittlung der Dienstreihenfolge
+#   disabled: der Dienst wurde vom Nutzenden an- oder abgewählt
+#   local_port: der lokale Port, der für eine Dienst-Weiterleitung verwendet wird - er sollte über reboots hinweg stabil sein
+PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency priority rank offset disabled local_port"
 LOCAL_BIAS_MODULO=10
 SERVICES_LOG_BASE=/var/log/on-services
 
@@ -331,6 +338,7 @@ _is_persistent_service_attribute() {
 		-o "$1" = "path" \
 		-o "$1" = "uci_dependency" \
 		-o "$1" = "file_dependency" \
+		-o "$1" = "priority" \
 		-o "$1" = "rank" \
 		-o "$1" = "offset" \
 		-o "$1" = "disabled" \

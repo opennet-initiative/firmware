@@ -23,29 +23,29 @@ You may obtain a copy of the License at
 
 
 
-<h3><%:Mesh and Internet Gateways%></h3>
+<h3><%: Mesh and Internet Gateways %></h3>
 <div class="cbi-map">
 <fieldset class="cbi-section">
-<div class="cbi-section-comment"><%=luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste"))%></div>
+<div class="cbi-section-comment"><%= luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste")) %></div>
 <fieldset class="cbi-section-node">
-	<form name="gateways" method="post" action="<%=REQUEST_URI%>">
+	<form name="gateways" method="post" action="<%= REQUEST_URI %>">
 	<table class="cbi-section-table" id="on-gateway-list">
 	<tr class="cbi-section-table-titles">
 		<th colspan = "1" />
-		<th class="cbi-section-table-cell"><%:active%></th>
-		<th class="cbi-section-table-cell"><%:Gateway%></th>
-		<th class="cbi-section-table-cell"><%:Priority%></th>
+		<th class="cbi-section-table-cell"><%: active %></th>
+		<th class="cbi-section-table-cell"><%: Gateway %></th>
+		<th class="cbi-section-table-cell"><%: Priority %></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN%></abbr></th>
+			<abbr title="<%: The route to the gateway should point at a WAN interface. %>"><%: WAN %></abbr></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%:The configured Maximum Transmission Unit can cause subtle problems. Thus it needs to be tested carefully.%>"><%:MTU%></abbr></th>
+			<abbr title="<%: Connection to an Mesh VPN service succeeded. %>"><%: VPN %></abbr></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%:Connection to an Mesh VPN service succeeded.%>"><%:VPN%></abbr></th>
+			<abbr title="<%: The configured Maximum Transmission Unit can cause subtle problems. Thus it needs to be tested carefully. %>"><%: MTU %></abbr></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%:Estimated upload and download speed to this exit gateway.%>"><%:Speed%></abbr></th>
+			<abbr title="<%: Estimated upload and download speed to this exit gateway. %>"><%: Speed %></abbr></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%:Ping latency describes the travelling time of a small packet to the gateway and back.%>"><%:Ping%></abbr></th>
-		<th class="cbi-section-table-cell"><%:Actions%></th>
+			<abbr title="<%: Ping latency describes the travelling time of a small packet to the gateway and back. %>"><%: Ping %></abbr></th>
+		<th class="cbi-section-table-cell"><%: Actions %></th>
 		<th />
 	</tr>
 	<%
@@ -71,49 +71,58 @@ You may obtain a copy of the License at
             local label = gateway.host
 	    -- falls das Ziel nicht wie eine IP (v4/v6) aussehen sollte, dann nimm den Text-Bestandteil vor dem ersten Punkt
             if not string.match(label or "", "^[0-9a-fA-F:.]+$") then label = dot_split(label)[1] end
+            -- Port immer hinzufügen (bis v0.4-5 war 1602 der Standard-Wert für das Mesh)
+	    if label and (gateway.port ~= tonumber(on_function("get_variable", {"DEFAULT_MESH_OPENVPN_PORT"}))) then
+              label = label .. ":" .. gateway.port
+            end
             if not label then label = service_name end
 	%>
-	<tr id="cbi-network-lan" class="cbi-section-table-row cbi-opennet-gateways" disabled="<%= bool_string_to_yn(gateway.disabled) %>">
+	<tr id="cbi-network-lan" class="cbi-section-table-row cbi-opennet-gateways" disabled="<%= bool_to_yn(gateway.disabled) %>">
 		<td class="cbi-value-field" style="text-align:right;"><%= index %>.</td>
 		<td class="cbi-value-field">
 			<div class="opennet-bool" status="<%= gateway.active and "y" or "" %>">&nbsp;</div></td>
-		<td id="name_<%=service_name%>">
-			<div title="<%=gateway.host%>:<%=gateway.port%>"><%=label%></div></td>
+		<td id="name_<%= service_name %>">
+			<div title="<%= gateway.host %>:<%= gateway.port %>"><%= label %></div></td>
 		<!-- begin of other status section -->
 		<td class="cbi-value-field">
 			<% if gateway.offset ~= 0 then %>
-				(<%=gateway.offset%>)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:reset offset%>" name="reset_offset" />
+				(<%= gateway.offset %>)<input class="cbi-button cbi-button-clear cbi-button-small"
+					type="submit" value="<%= gateway.id %>" title="<%: reset offset %>" name="reset_offset" />
 			<% end %>
 			<%= gateway.priority + gateway.offset %></td>
 		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= bool_string_to_yn(gateway.wan_status) %>" /></td>
+			<div class="opennet-bool" status="<%= bool_to_yn(gateway.wan_status) %>" /></td>
 		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= bool_string_to_yn(gateway.mtu_status) %>" title="<%= luci.util.pcdata(gateway.mtu_msg) %>"/></td>
+			<div class="opennet-bool" status="<%= bool_to_yn(gateway.vpn_status) %>" /></td>
 		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= bool_string_to_yn(gateway.vpn_status) %>" /></td>
+			<div class="opennet-bool" status="<%= bool_to_yn(gateway.mtu_status) %>"
+				title="<%= luci.util.pcdata(gateway.mtu_msg) %>"/></td>
 		<td class="cbi-value-field">
 			<% if (gateway.wan_speed_upload or gateway.wan_speed_download) then
 				local speed = (gateway.wan_speed_upload or '?') .. " kbps / " .. (gateway.wan_speed_upload or '?') .. " kbps";
-				local speed_abbr = luci.i18n.translatef('upload to Internet %s kbit/s | download from Internet %s kbit/s', gateway.wan_speed_upload or "?", gateway.wan_speed_download or "?")
+				local speed_abbr = luci.i18n.translatef('upload to Internet %s kBit/s | download from Internet %s kBit/s', gateway.wan_speed_upload or "?", gateway.wan_speed_download or "?")
 			%>
 				<div class="vpn-wan-speed" name="speed" id="cbi-opennet-gateways-speed">
-					<abbr title="<%=speed_abbr%>"><%=speed%></abbr></div></div>
+					<abbr title="<%= speed_abbr %>"><%= speed %></abbr></div>
 			<% end %></td>
-		<td id="wan_ping_<%=service_name%>" class="cbi-value-field"><%=gateway.wan_ping%></td>
+		<td id="wan_ping_<%= service_name %>" class="cbi-value-field"><%= gateway.wan_ping %></td>
 		<!-- end of other status section -->
 		<td class="cbi-value-field">
-			<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:move up%>" name="move_up" />
-			<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:move down%>" name="move_down" />
+			<input class="cbi-button cbi-button-up cbi-button-small" type="submit"
+				value="<%= gateway.id %>" title="<%: move up %>" name="move_up" />
+			<input class="cbi-button cbi-button-down cbi-button-small" type="submit"
+				value="<%= gateway.id %>" title="<%: move down %>" name="move_down" />
 			<% if gateway.source ~= "manual" then %>
 				<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
-				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%=gateway.id%>"
-					title="<%:auto-discovered services cannot be deleted%>" name="delete_service" disabled="disabled" />
+				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%= gateway.id %>"
+					title="<%: auto-discovered services cannot be deleted %>" name="delete_service" disabled="disabled" />
 			<% else %>
 				<%# Loeschen ist moeglich %>
-				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%=gateway.id%>"
-					title="<%:delete%>" name="delete_service" />
+				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%= gateway.id %>"
+					title="<%: delete %>" name="delete_service" />
 			<% end %>
-			<input class="cbi-button cbi-button-disable cbi-button-small" type="submit" value="<%=gateway.id%>" title="<%:disable%>" name="disable_service" />
+			<input class="cbi-button cbi-button-disable cbi-button-small" type="submit"
+				value="<%= gateway.id %>" title="<%: disable %>" name="disable_service" />
 		</td>
 	</tr>
 	<% end %>
@@ -126,17 +135,17 @@ You may obtain a copy of the License at
 
 <%# Manuelles Hinzufügen weiterer Mesh-Gateways %>
 <fieldset class="cbi-section-node">
-	<form name="gateways" method="post" action="<%=REQUEST_URI%>">
+	<form name="gateways" method="post" action="<%= REQUEST_URI %>">
 	<div class="cbi-value">
 		<div class="cbi-value-field">
-			<label for="new_gateway_ip"><%:Manually add Mesh Gateway%>:</label>
+			<label for="new_gateway_ip"><%: Manually add Mesh Gateway %>:</label>
 			<input class="cbi-input-text" name="new_gateway_host" id="new_gateway_host" size="16" />
-			<label for="new_gateway_port"><%:Port%>:</label>
+			<label for="new_gateway_port"><%: Port %>:</label>
 			<input class="cbi-input-text" name="new_gateway_port"
 				id="new_gateway_ip" size="5"
-				value="<%=on_function("get_variable", {"DEFAULT_MESH_OPENVPN_PORT"})%>" />
+				value="<%= on_function("get_variable", {"DEFAULT_MESH_OPENVPN_PORT"}) %>" />
 			<input class="cbi-button cbi-button-apply" type="submit"
-				id="add_gateway_mesh" name="add_gateway_mesh" value="<%:Add%>" />
+				id="add_gateway_mesh" name="add_gateway_mesh" value="<%: Add %>" />
 		</div>
 	</div>
 	</form>
@@ -144,17 +153,17 @@ You may obtain a copy of the License at
 
 <%# Manuelles Hinzufügen weiterer Internet-Gateways %>
 <fieldset class="cbi-section-node">
-	<form name="gateways" method="post" action="<%=REQUEST_URI%>">
+	<form name="gateways" method="post" action="<%= REQUEST_URI %>">
 	<div class="cbi-value">
 		<div class="cbi-value-field">
-			<label for="new_gateway_ip"><%:Manually add Exit Gateway%>:</label>
+			<label for="new_gateway_ip"><%: Manually add Exit Gateway %>:</label>
 			<input class="cbi-input-text" name="new_gateway_host" id="new_gateway_host" size="16" />
-			<label for="new_gateway_port"><%:Port%>:</label>
+			<label for="new_gateway_port"><%: Port %>:</label>
 			<input class="cbi-input-text" name="new_gateway_port"
 				id="new_gateway_ip" size="5"
-				value="<%=on_function("get_variable", {"DEFAULT_MIG_PORT"})%>" />
+				value="<%= on_function("get_variable", {"DEFAULT_MIG_PORT"}) %>" />
 			<input class="cbi-button cbi-button-apply" type="submit"
-				id="add_gateway_igw" name="add_gateway_igw" value="<%:Add%>" />
+				id="add_gateway_igw" name="add_gateway_igw" value="<%: Add %>" />
 		</div>
 	</div>
 	</form>

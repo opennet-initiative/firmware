@@ -70,15 +70,11 @@ require("luci.model.opennet.funcs")
 		</fieldset>
 			<div class="cbi-value-description">
 				<% if certstatus.on_crt_exists and certstatus.on_key_exists and (certstatus.on_crt_modulus ~= certstatus.on_key_modulus) then
-					if certstatus.on_csr_modulus == certstatus.on_key_modulus then %>
-						<div class="errorbox">
-							<%:Private Key and Certificate do not match. Please replace Certificate!%>
-						</div>
-					<% else %>
-						<div class="errorbox">
-							<%:Private Key and Certificate do not match. Certificate-Request also does not match Private Key, therefore sending the Certificate Request to opennet authority will not help. Please replace Certificate or Private Key or regenerate Key and Certificate Request.%>
-						</div>
-					<% end
+					if certstatus.on_csr_modulus == certstatus.on_key_modulus then
+						write(html_error_box(luci.i18n.translate("Private Key and Certificate do not match. Please replace Certificate!")))
+					else
+						write(html_error_box(luci.i18n.translate("Private Key and Certificate do not match. Certificate-Request also does not match Private Key, therefore sending the Certificate Request to opennet authority will not help. Please replace Certificate or Private Key or regenerate Key and Certificate Request.")))
+					end
 				end %>
 			</div>
 			<div class="cbi-value-description">

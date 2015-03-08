@@ -3,6 +3,7 @@
 --- @{
 
 require "luci.config"
+require "luci.util"
 html_resource_base = luci.config.main.resourcebase
 
 
@@ -293,6 +294,14 @@ function parse_hostname_string(text)
 	local text = text or ""
 	-- IPv4/IPv6 oder Hostname (sehr tolerante Filter - ausreichend fuer die Erkennung boeser Eingaben)
 	return string.match(text, "^[0-9A-Fa-f:.]$") or string.match(text, "^[a-zA-Z0-9.-]+$")
+end
+
+
+--- @brief Liefere den HTML-Code für eine Fehlerausgabe zurück.
+--- @param text Fehlertext
+--- @returns ein html-String
+function html_error_box(text)
+	return '<div class="errorbox"><h4>' .. luci.i18n.translatef("Error: %s", luci.util.pcdata(text)) .. '</h4></div>'
 end
 
 -- Ende der Doku-Gruppe

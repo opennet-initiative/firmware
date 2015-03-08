@@ -17,7 +17,7 @@ require("luci.model.opennet.funcs")
 %>
 
 		<fieldset class="cbi-section">
-			<legend><%: Key/Cert Status %></legend>
+			<legend><%:Key/Cert Status%></legend>
 			<fieldset class="cbi-section-node">
 			<table class="cert-status">
 			<tr>
@@ -83,7 +83,7 @@ require("luci.model.opennet.funcs")
 		</fieldset>
 
 <fieldset class="cbi-section">
-<legend><%: Key Management %></legend>
+<legend><%:Key Management%></legend>
 			<%# Sende den CSR an die CA %>
 			<% if certstatus.on_keycsr_ok and (not(certstatus.on_crt_exists) or not(certstatus.on_keycrt_ok)) then
 				local contact_email = on_function("get_on_core_default", {"csr_contact"})

@@ -421,6 +421,11 @@ Zum Debuggen von Fehlern im Web-Interface sind folgende Kommandos sinnvoll:
 
     killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-*; uhttpd -h /www -p 80 -f
 
+Denselben Effekt erreichst du mit der Funktion *run_httpd_debug* (blockierend - inkl. Fehler-Ausgaben des Webservers), sowie *clean_luci_restart* (Webserver neustarten und im Hintergrund ausführen):
+
+    on-function run_httpd_debug		# Debug
+    on-function clean_luci_restart	# Daemon
+
 
 Hotplug-System {#hotplug}
 --------------
@@ -439,6 +444,15 @@ Hilfreiche Werkzeuge {#tools}
 ### Unbenutzte Funktionen finden {#tools-unused}
 
 Das Skript ``opennet/tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
+
+
+### Lokale Änderungen auf einen AP übertragen {#tools-copy}
+
+Das Skript ``opennet/tools/copy-package-files-to-AP.sh`` kopiert die Inhalte der lokalen Entwicklungsverzeichnisse direkt auf einen angebenen AP. Dies ist möglich, da in unseren Pakete lediglich Interpreter-Code (shell/lua) vorhanden ist und somit kein Build-Prozess erforderlich ist.
+
+Falls auf dem Ziel-AP *rsync* installiert ist, wird die Übertragung deutlich beschleunigt.
+
+  opennet/tools/copy-package-files-to-AP.sh 172.16.0.1
 
 
 Debugging {#debugging}

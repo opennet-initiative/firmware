@@ -17,15 +17,11 @@ You may obtain a copy of the License at
 %>
 
 
-<!-- hidden label to store running status and name button -->
-<div id="running_status" hidden="true" status="on"/>
-<div id="hidden_name_button" hidden="true"><h3 count="1" /></div>
 
-
-
-<h3><%: Mesh and Internet Gateways %></h3>
 <div class="cbi-map">
+<h2><%: Mesh Gateways %></h2>
 <fieldset class="cbi-section">
+<legend>Known Mesh Gateways</legend>
 <div class="cbi-section-comment"><%= luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste")) %></div>
 <fieldset class="cbi-section-node">
 	<form name="gateways" method="post" action="<%= REQUEST_URI %>">

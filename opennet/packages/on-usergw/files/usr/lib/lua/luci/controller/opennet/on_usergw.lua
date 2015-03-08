@@ -23,13 +23,65 @@ function index()
 
     require ("luci.model.opennet.on_usergw")
     entry({"opennet", "opennet_2", "ugw_tunnel", "check_ugw_status"}, call("check_ugw_status"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "get_wan"}, call("get_wan"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "get_wan_ping"}, call("get_wan_ping"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "get_speed"}, call("get_speed"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "get_mtu"}, call("get_mtu"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "get_vpn"}, call("get_vpn"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "get_name_button"}, call("get_name_button"), nil).leaf = true
-    entry({"opennet", "opennet_2", "ugw_tunnel", "check_running"}, call("check_running"), nil).leaf = true
+
+    -- sichtbare Unterseiten
+    page = entry({"opennet", "opennet_2", "ugw_tunnel", "openvpn_mesh_keys"},
+        call("action_on_openvpn_mesh_keys"),
+        luci.i18n.translate("Key Management"), 1)
+    page.css = "opennet.css"
+    page.i18n = "on_usergw"
+    page.leaf = true
+
+    page = entry({"opennet", "opennet_2", "ugw_tunnel", "mesh_connections"},
+        call("action_on_mesh_connections"),
+        luci.i18n.translate("Mesh Connections"), 2)
+    page.css = "opennet.css"
+    page.i18n = "on_usergw"
+    page.leaf = true
+
+    entry({"opennet", "opennet_2", "ugw_tunnel", "service_relay"},
+        call("action_on_service_relay"),
+        luci.i18n.translate("Service Relay"), 3)
+    page.css = "opennet.css"
+    page.i18n = "on_usergw"
+    page.leaf = true
+end
+
+
+function action_on_openvpn_mesh_keys()
+    require("luci.model.opennet.on_vpn_management")
+
+    if luci.http.formvalue("upload") then upload_file("ugw") end
+
+    local download = luci.http.formvalue("download")
+    if download then download_file("ugw", download) end
+
+    local openssl = {}
+    fill_openssl("on-usergw", openssl)
+    if luci.http.formvalue("generate") then generate_csr("ugw", openssl) end
+
+    local certstatus = {}
+    check_cert_status("ugw", certstatus)
+
+    local force_show_uploadfields = luci.http.formvalue("force_show_uploadfields") or not certstatus.on_keycrt_ok
+    local force_show_generatefields = luci.http.formvalue("force_show_generatefields") or (not certstatus.on_keycrt_ok and not certstatus.on_keycsr_ok)
+
+    luci.template.render("opennet/on_openvpn_mesh_keys", {
+        certstatus=certstatus,
+	openssl=openssl,
+	force_show_uploadfields=force_show_uploadfields,
+	force_show_generatefields=force_show_generatefields
+    })
+end
+
+
+function action_on_mesh_connections()
+    luci.template.render("opennet/on_mesh_connections")
+end
+
+
+function action_on_service_relay()
+    luci.template.render("opennet/on_service_relay")
 end
 
 
@@ -85,40 +137,5 @@ function action_on_usergw()
     get_ugw_status(ugw_status)
     action_on_usergwNG(ugw_status)
 
-    local uci = require "luci.model.uci"
-    local cursor = uci.cursor()
-
-    if luci.http.formvalue("disable_sharing") then
-      cursor:set("on-usergw", "ugw_sharing", "shareInternet", "off")
-    elseif luci.http.formvalue("enable_sharing") then
-      cursor:set("on-usergw", "ugw_sharing", "shareInternet", "on")
-      cursor:delete("on-usergw", "ugw_sharing", "unblock_time")
-    elseif luci.http.formvalue("suspend") then
-      cursor:set("on-usergw", "ugw_sharing", "unblock_time", os.time()+luci.http.formvalue("suspend_time")*60)
-      cursor:set("on-usergw", "ugw_sharing", "shareInternet", "off")
-    end
-    if luci.http.formvalue("disable_sharing") or luci.http.formvalue("enable_sharing") or luci.http.formvalue("suspend") then
-      cursor:commit("on-usergw")
-      cursor:unload("on-usergw")
-      os.execute("/usr/sbin/on_usergateway_check shareInternet &")
-    end
-
-    if luci.http.formvalue("upload") then upload_file("ugw") end
-
-    local download = luci.http.formvalue("download")
-    if download then download_file("ugw", download) end
-
-    local openssl = {}
-    fill_openssl("on-usergw", openssl)
-    if luci.http.formvalue("generate") then generate_csr("ugw", openssl) end
-
-    local certstatus = {}
-    check_cert_status("ugw", certstatus)
-
-    local force_show_uploadfields = luci.http.formvalue("force_show_uploadfields") or not certstatus.on_keycrt_ok
-    local force_show_generatefields = luci.http.formvalue("force_show_generatefields") or (not certstatus.on_keycrt_ok and not certstatus.on_keycsr_ok)
-
-    luci.template.render("opennet/on_usergw", {
-        ugw_status=ugw_status, certstatus=certstatus, openssl=openssl, force_show_uploadfields=force_show_uploadfields, force_show_generatefields=force_show_generatefields
-    })
+    luci.template.render("opennet/on_usergw", { ugw_status=ugw_status })
 end

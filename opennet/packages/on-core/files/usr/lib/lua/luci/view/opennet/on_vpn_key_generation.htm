@@ -10,21 +10,21 @@ You may obtain a copy of the License at
 	http://www.apache.org/licenses/LICENSE-2.0
 
 -%>
-<h3><%:Key Generation%></h3>
-<% if certstatus.on_key_exists and (certstatus.on_csr_exists or certstatus.on_crt_exists) and not force_show_generatefields then %>
-	<form method="post" action="<%=REQUEST_URI%>">
-	<input type="submit" name="force_show_generatefields" class="cbi-button-plain" value="<%:...show...%>" />
-	</form>
-<% else %>
 
-<% if (openssl.commonName == "") then
-	openssl.commonName=test
-end %>
+<fieldset class="cbi-section">
+  <legend><%:Key Generation%></legend>
 
-<form method="post" action="<%=REQUEST_URI%>?generate=true">
-<div class="cbi-map">
-	<fieldset class="cbi-section">
-		<fieldset class="cbi-section-node">
+  <% if certstatus.on_key_exists and (certstatus.on_csr_exists or certstatus.on_crt_exists) and not force_show_generatefields then %>
+    <form method="post" action="<%=REQUEST_URI%>">
+      <input type="submit" name="force_show_generatefields" class="cbi-button-plain" value="<%:...show...%>" />
+    </form>
+  <% else
+
+    if (openssl.commonName == "") then
+      openssl.commonName=test
+    end %>
+
+    <form method="post" action="<%=REQUEST_URI%>?generate=true">
 			<div class="cbi-value">
 				<label class="cbi-value-title"><%:Country%></label>
 				<div class="cbi-value-field">
@@ -71,8 +71,6 @@ end %>
 				<label class="cbi-value-title" />
 				<div class="cbi-value-field"><input type="submit" name="gen_csr" value="<%:generate%>" /></div>
 			</div>
-		</fieldset>
-	</fieldset>
-</div>
-</form>
+    </form>
 <% end %>
+</fieldset>

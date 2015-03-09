@@ -56,7 +56,7 @@ Der entsprechende ``nameservice``-Block in der ``olsrd.conf`` des DNS-Servers ka
 
     LoadPlugin "olsrd_nameservice.so.0.3"
     {
-        PlParam "service" "dns://192.168.0.247:53|udp|dns" 
+        PlParam "service" "dns://192.168.0.247:53|udp|dns"
     }
 
 **Wichtig**: Die angegebene IP muss unbedingt auf einem der von olsr verwalteten Netzwerk-Interfaces konfiguriert sein. Andernfalls wird das ``nameservice``-Plugin stillschweigend die Verteilung unterlassen. In der ``/var/run/services_olsr`` auf dem Host ist sofort zu erkennen, ob der Dienst-Eintrag verteilt wird.
@@ -155,6 +155,15 @@ Die volatilen Informationen liegen unter ``/tmp/on-services-volatile.d``.
 Internet-Freigabe (Usergateways) {#ugw}
 --------------------------------
 
+Internet-Spender betreiben APs, die im Wesentlichen die beiden folgenden Aufgaben erfüllen:
+
+* eine Routing-Verbindung der lokalen Wolke mit der mesh-Wolke herstellen
+* relevante Dienste (z.B. VPN-Verbindungen zu Exit-Knoten) weiterleiten
+
+Die mesh-Verbindung wird mittels einer oder mehrerer openvpn-Verbindungen zu verschiedenen Mesh-Gateways aufgebaut.
+Die Dienst-Durchleitung erfolgt mittel Portweiterleitungen verbunden mit olsrd-nameservice-Announcements.
+
+
 ### Datenspeicherung {#ugw-storage}
 
 Für jeden externen Gateway werden dauerhafte und wechselhafte Eigenschaften gespeichert.
@@ -238,13 +247,19 @@ Eine Beschreibung des Dienstanbieters (beispielsweise der Hosting-Standort: "Het
 Die ermittelten Dienst-Anbieter werden durch die Dienste-Verwaltung gespeichert. Darin werden alle für den Verbindungsaufbau notwendigen Daten abgelegt.
 
 
-Dienst-Weiterleitung: Service-Relay {#service-relay}
------------------------------------
+### Dienst-Weiterleitung: Service-Relay {#service-relay}
 
-Internet-Spender betreiben APs, die im Wesentlichen die beiden folgenden Aufgaben erfüllen:
+Jeder weiterzuleitende Dienst stellt eine Belastung für die Internet-Spender dar. Daher dürften diese Announcierungen nicht via olsrd erfolgen, um eine unerwünschte Nutzung der Internetfreigabe durch triviale olsr-Announcements zu verhindern.
 
-* eine Routing-Verbindung der lokalen Wolke mit der mesh-Wolke herstellen
-* relevante Dienste (z.B. VPN-Verbindungen zu Exit-Knoten) weiterleiten
+Stattdesen erfolgt die Announcierung mittels der unter administrativer Kontrolle stehenden Opennet-Domain in Form von DNS-SRV-Einträgen.
+
+Die DNS-Einträge werden regelmäßig abgefragt und in lokale Dienstbeschreibungen verwandelt. Anhand der Dienst-Einträge werden die Port-Weiterleitungen und die olsr-nameservice-Announcierungen erstellt.
+
+Folgende Dienste werden weitergereicht:
+
+* _igw-openvpn._udp.opennet-initiative.de -> "gw"-Dienst
+
+Es werden nur diejenigen Dienste weitergereicht und announciert, die über das WAN-Interface route-bar sind.
 
 
 Datensammlung: ondataservice {#ondataservice}
@@ -419,7 +434,7 @@ Usergateway {#firmware04-ugw}
 -----------
 Im Paket *on-usergw* sind zwei VPN-Konfigurationen (opennet_ugw, opennet_vpntest) enthalten.
 
-Außerdem ist ein Skript für 
+Außerdem ist ein Skript (``/usr/sbin/on_usergateway_check``) für folgende Funktionen in Verwendung:
 
 * VPN-Auf- und Abbau (opennet_ugw_up.sh, opennet_ugw_down.sh)
 * Geschwindigkeitstest  (on_speed_check)
@@ -429,7 +444,7 @@ Außerdem ist ein Skript für
 
 Cronjob alle 5min:
 
-* rufe Script on_usergateway_check auf mit folgenden Funktionen: (solange gleiches Script nicht bereits läuft) 
+* rufe Script on_usergateway_check auf mit folgenden Funktionen: (solange gleiches Script nicht bereits läuft)
     * ugw_syncVPNConfig - transfer UGW config from on-usergw to openvpn
     * ugw_checkWANs - check if routes to UGW go through WAN-device, detect ping-time
     * ugw_checkVPNs - check Vpn availability of gateway on port 1600
@@ -453,8 +468,7 @@ Die Datei /etc/config_presets/on-usergw enthält default Einstellungen für die 
 Wifidog {#firmware04-wifidog}
 -------
 
-Das allgemeine Wifidog-Konzept wird unter https://wiki.opennet-initiative.de/wiki/Projekt_Wifidog#DHCP-Ablauf_der_Wifidog-Implementierung 
-beschrieben. 
+Das allgemeine Wifidog-Konzept wird unter https://wiki.opennet-initiative.de/wiki/Projekt_Wifidog#DHCP-Ablauf_der_Wifidog-Implementierung beschrieben.
 
 * Für Wifidog-Knoten ist der 10.3. / 16 Bereich reserviert (config_presets/on-wifidog).
 * Als Authentifizierungsserver wird inez.opennet-initiative.de genutzt. Hier können Nutzer gemanaged/geblockt/... werden. (wifidog.conf.opennet_template).

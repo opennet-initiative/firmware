@@ -141,7 +141,7 @@ You may obtain a copy of the License at
 		} else {
 			result += '<td class="cbi-value-field">';
 			if (gateway.distance && (gateway.offset != 0)) {
-				result += String.format('(%d)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_offset" />', gateway.offset, gateway.id, gateway);
+				result += String.format('(%d)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_service_offset" />', gateway.offset, gateway.id, gateway);
 			}
 			<% if sorting == "etx" then %>
 				distance = gateway.distance;
@@ -162,9 +162,9 @@ You may obtain a copy of the License at
 		if (gateway.disabled) {
 			result += String.format('<input class="cbi-button cbi-button-enable cbi-button-small" type="submit" value="%s" title="<%:enable%>" name="enable_service" />', gateway.id);
 		} else {
-			result += String.format('<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="%s" title="<%:move to top and connect immediately%>" name="move_top" />', gateway.id);
-			result += String.format('<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="%s" title="<%:move up%>" name="move_up" />', gateway.id);
-			result += String.format('<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="%s" title="<%:move down%>" name="move_down" />', gateway.id);
+			result += String.format('<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="%s" title="<%:move to top and connect immediately%>" name="move_service_top" />', gateway.id);
+			result += String.format('<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="%s" title="<%:move up%>" name="move_service_up" />', gateway.id);
+			result += String.format('<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="%s" title="<%:move down%>" name="move_service_down" />', gateway.id);
 			// den Loeschen-Knopf deaktivieren wir visuell, falls die Quelle nicht "manuell" sein sollte
 			if (gateway.source != "manual") {
 				// Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten
@@ -199,6 +199,8 @@ You may obtain a copy of the License at
 
 <%# Ein paar Infos zu Gateways im Allgemeinen %>
 <h2><a id="content" name="content"><%:Opennet OpenVPN Gateways%></a></h2>
+<%= html_display_error_list(on_errors) %>
+
 <div class="cbi-map">
 	<fieldset class="cbi-section">
 		<div class="cbi-section-comment">
@@ -226,9 +228,9 @@ You may obtain a copy of the License at
 
 
 <%# Dynamisch erzeugte Gateway-Liste, sowie Eingabe manueller Gateways %>
-<h3><%:Gateway-List%></h3>
 <div class="cbi-map">
 	<fieldset class="cbi-section">
+		<legend><%:Gateway-List%></legend>
 		<div class="cbi-section-comment"><%=luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste"))%></div>
 		<fieldset class="cbi-section-node">
 			<form name="gateways" method="post" action="<%=REQUEST_URI%>">
@@ -271,14 +273,19 @@ You may obtain a copy of the License at
 			<form name="gateways" method="post" action="<%=REQUEST_URI%>">
 			<div class="cbi-value">
 				<div class="cbi-value-field">
-					<label for="new_gateway_ip"><%:Add Gateway manually%>:</label>
-					<input class="cbi-input-text" name="new_gateway_ip" id="new_gateway_ip" size="16" />
-					<label for="new_gateway_port"><%:Port%>:</label>
-					<input class="cbi-input-text" name="new_gateway_port"
-						id="new_gateway_ip" size="5"
+					<input type="hidden" name="service_type" value="gw" />
+					<input type="hidden" name="service_path" value="/" />
+					<input type="hidden" name="service_scheme" value="openvpn" />
+					<input type="hidden" name="service_protocol" value="udp" />
+					<input type="hidden" name="service_details" value="" />
+					<label for="service_host"><%:Add Gateway manually%>:</label>
+					<input class="cbi-input-text" name="service_host" id="service_host" size="16" />
+					<label for="service_port"><%:Port%>:</label>
+					<input class="cbi-input-text" name="service_port"
+						id="service_port" size="5"
 						value="<%=on_function("get_variable", {"DEFAULT_MIG_PORT"})%>" />
 					<input class="cbi-button cbi-button-apply" type="submit"
-						id="new_gateway" name="new_gateway" value="<%:Add%>" />
+						id="add_service" name="add_service" value="<%:Add%>" />
 				</div>
 			</div>
 			</form>

@@ -2,6 +2,7 @@
 Opennet Firmware
 
 Copyright 2010 Rene Ejury <opennet@absorb.it>
+Copyright 2015 Lars Kruse <devel@sumpfralle.de>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,36 +13,39 @@ You may obtain a copy of the License at
 -%>
 
 <%
-	require ("luci.model.opennet.on_usergw")
+	require("luci.model.opennet.on_usergw")
 	require("luci.model.opennet.funcs")
 %>
 
-
+<%+header%>
 
 <div class="cbi-map">
-<h2><%: Mesh Gateways %></h2>
-<fieldset class="cbi-section">
-<legend>Known Mesh Gateways</legend>
-<div class="cbi-section-comment"><%= luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste")) %></div>
-<fieldset class="cbi-section-node">
+  <h2><a id="content" name="content"><%:Mesh Gateways%></a></h2>
+
+  <%= html_display_error_list(on_errors) %>
+
+  <fieldset class="cbi-section">
+    <legend>Known Mesh Gateways</legend>
+    <div class="cbi-section-comment"><%= luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste")) %></div>
+    <fieldset class="cbi-section-node">
 	<form name="gateways" method="post" action="<%= REQUEST_URI %>">
 	<table class="cbi-section-table" id="on-gateway-list">
 	<tr class="cbi-section-table-titles">
 		<th colspan = "1" />
-		<th class="cbi-section-table-cell"><%: active %></th>
-		<th class="cbi-section-table-cell"><%: Gateway %></th>
-		<th class="cbi-section-table-cell"><%: Priority %></th>
+		<th class="cbi-section-table-cell"><%:active%></th>
+		<th class="cbi-section-table-cell"><%:Gateway%></th>
+		<th class="cbi-section-table-cell"><%:Priority%></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%: The route to the gateway should point at a WAN interface. %>"><%: WAN %></abbr></th>
+			<abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN%></abbr></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%: Connection to an Mesh VPN service succeeded. %>"><%: VPN %></abbr></th>
+			<abbr title="<%:Connection to an Mesh VPN service succeeded.%>"><%:VPN%></abbr></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%: The configured Maximum Transmission Unit can cause subtle problems. Thus it needs to be tested carefully. %>"><%: MTU %></abbr></th>
+			<abbr title="<%:The configured Maximum Transmission Unit can cause subtle problems. Thus it needs to be tested carefully.%>"><%:MTU%></abbr></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%: Estimated upload and download speed to this exit gateway. %>"><%: Speed %></abbr></th>
+			<abbr title="<%:Estimated upload and download speed to this exit gateway.%>"><%:Speed%></abbr></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%: Ping latency describes the travelling time of a small packet to the gateway and back. %>"><%: Ping %></abbr></th>
-		<th class="cbi-section-table-cell"><%: Actions %></th>
+			<abbr title="<%:Ping latency describes the travelling time of a small packet to the gateway and back.%>"><%:Ping%></abbr></th>
+		<th class="cbi-section-table-cell"><%:Actions%></th>
 		<th />
 	</tr>
 	<%
@@ -83,7 +87,7 @@ You may obtain a copy of the License at
 		<td class="cbi-value-field">
 			<% if gateway.offset ~= 0 then %>
 				(<%= gateway.offset %>)<input class="cbi-button cbi-button-clear cbi-button-small"
-					type="submit" value="<%= gateway.id %>" title="<%: reset offset %>" name="reset_offset" />
+					type="submit" value="<%= gateway.id %>" title="<%:reset offset%>" name="reset_service_offset" />
 			<% end %>
 			<%= gateway.priority + gateway.offset %></td>
 		<td class="cbi-value-field">
@@ -105,20 +109,20 @@ You may obtain a copy of the License at
 		<!-- end of other status section -->
 		<td class="cbi-value-field">
 			<input class="cbi-button cbi-button-up cbi-button-small" type="submit"
-				value="<%= gateway.id %>" title="<%: move up %>" name="move_up" />
+				value="<%= gateway.id %>" title="<%:move up%>" name="move_service_up" />
 			<input class="cbi-button cbi-button-down cbi-button-small" type="submit"
-				value="<%= gateway.id %>" title="<%: move down %>" name="move_down" />
+				value="<%= gateway.id %>" title="<%:move down%>" name="move_service_down" />
 			<% if gateway.source ~= "manual" then %>
 				<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
 				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%= gateway.id %>"
-					title="<%: auto-discovered services cannot be deleted %>" name="delete_service" disabled="disabled" />
+					title="<%:auto-discovered services cannot be deleted%>" name="delete_service" disabled="disabled" />
 			<% else %>
 				<%# Loeschen ist moeglich %>
 				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%= gateway.id %>"
-					title="<%: delete %>" name="delete_service" />
+					title="<%:delete%>" name="delete_service" />
 			<% end %>
 			<input class="cbi-button cbi-button-disable cbi-button-small" type="submit"
-				value="<%= gateway.id %>" title="<%: disable %>" name="disable_service" />
+				value="<%= gateway.id %>" title="<%:disable%>" name="disable_service" />
 		</td>
 	</tr>
 	<% end %>
@@ -126,45 +130,33 @@ You may obtain a copy of the License at
 
 	</table>
 	</form>
-	<center><%= get_html_loading_spinner('gateway-list-spinner', 'vertical-align:middle;') %></center>
+	<% if not services then write(html_error_box(luci.i18n.translate("No Mesh Gateways were found. Probably there is no DNS service available. Maybe you want to verify your internet connection."))) end %>
+    </fieldset>
 </fieldset>
 
 <%# Manuelles Hinzufügen weiterer Mesh-Gateways %>
-<fieldset class="cbi-section-node">
+<fieldset class="cbi-section">
+	<legend><%:Manually add a Mesh Gateway%></legend>
 	<form name="gateways" method="post" action="<%= REQUEST_URI %>">
 	<div class="cbi-value">
 		<div class="cbi-value-field">
-			<label for="new_gateway_ip"><%: Manually add Mesh Gateway %>:</label>
-			<input class="cbi-input-text" name="new_gateway_host" id="new_gateway_host" size="16" />
-			<label for="new_gateway_port"><%: Port %>:</label>
-			<input class="cbi-input-text" name="new_gateway_port"
-				id="new_gateway_ip" size="5"
+			<input type="hidden" name="service_type" value="mesh" />
+			<input type="hidden" name="service_path" value="/" />
+			<input type="hidden" name="service_scheme" value="openvpn" />
+			<input type="hidden" name="service_protocol" value="udp" />
+			<input type="hidden" name="service_details" value="" />
+			<label for="service_host"><%:Manually add Mesh Gateway%>:</label>
+			<input class="cbi-input-text" name="service_host" id="service_host" size="16" />
+			<label for="service_port"><%:Port%>:</label>
+			<input class="cbi-input-text" name="service_port"
+				id="service_port" size="5"
 				value="<%= on_function("get_variable", {"DEFAULT_MESH_OPENVPN_PORT"}) %>" />
 			<input class="cbi-button cbi-button-apply" type="submit"
-				id="add_gateway_mesh" name="add_gateway_mesh" value="<%: Add %>" />
+				id="add_service" name="add_service" value="<%:Add%>" />
 		</div>
 	</div>
 	</form>
 </fieldset>
 
-<%# Manuelles Hinzufügen weiterer Internet-Gateways %>
-<fieldset class="cbi-section-node">
-	<form name="gateways" method="post" action="<%= REQUEST_URI %>">
-	<div class="cbi-value">
-		<div class="cbi-value-field">
-			<label for="new_gateway_ip"><%: Manually add Exit Gateway %>:</label>
-			<input class="cbi-input-text" name="new_gateway_host" id="new_gateway_host" size="16" />
-			<label for="new_gateway_port"><%: Port %>:</label>
-			<input class="cbi-input-text" name="new_gateway_port"
-				id="new_gateway_ip" size="5"
-				value="<%= on_function("get_variable", {"DEFAULT_MIG_PORT"}) %>" />
-			<input class="cbi-button cbi-button-apply" type="submit"
-				id="add_gateway_igw" name="add_gateway_igw" value="<%: Add %>" />
-		</div>
-	</div>
-	</form>
-</fieldset>
-
-</fieldset>
 </div>
-
+<%+footer%>

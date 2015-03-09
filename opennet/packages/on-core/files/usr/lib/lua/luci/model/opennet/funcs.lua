@@ -4,7 +4,9 @@
 
 require "luci.config"
 require "luci.util"
+
 html_resource_base = luci.config.main.resourcebase
+SYSROOT = os.getenv("LUCI_SYSROOT") or ""
 
 
 function _quote_parameters(parameters)
@@ -297,11 +299,201 @@ function parse_hostname_string(text)
 end
 
 
+--[[
+@brief Liefere die um führende oder abschließende Leerzeichen bereinigte Zeichenkette zurück, sofern nur die angegebenen Zeichen enthalten sind.
+@param text die zu filternde Zeichenkette
+@param characters eine Reihe gültiger Zeichen im Format eines regex-Zeichensatzes (z.B. "a-zA-Z").
+@details Auch ein leerer String (also null gültige Zeichen) ist zulässig, solange keine unzulässigen Zeichen vorgefunden werden.
+--]]
+function parse_string_pattern(text, characters)
+	if not text then return nil end
+	return string.match(text, "^%s*[" .. characters .. "]*%s*$")
+end
+
+
 --- @brief Liefere den HTML-Code für eine Fehlerausgabe zurück.
 --- @param text Fehlertext
 --- @returns ein html-String
 function html_error_box(text)
 	return '<div class="errorbox"><h4>' .. luci.i18n.translatef("Error: %s", luci.util.pcdata(text)) .. '</h4></div>'
+end
+
+
+--[[
+@brief Liefere den HTML-Code für eine potentielle Liste von Fehlern zurück.
+@param errors eine Table mit Fehlermeldungen
+@returns ein html-String
+--]]
+function html_display_error_list(errors)
+	local result = ""
+	for _, value in pairs(errors or {}) do
+		result = result .. html_error_box(value)
+	end
+	return result
+end
+
+
+--[[
+@brief Verarbeite ein HTML-Formular und erzeuge - falls möglich - einen neuen Dienst aus den gegebenen Informationen.
+@details Die folgenden HTML-Formularvariablen werden verarbeitet:
+    add_service: für nil findet keine weitere Verarbeitung statt
+    service_host: der Hostname oder die IP des Diensts
+    service_port: der Port des Diensts (eine Zahl)
+    service_scheme: Dienst-Schema (z.B. 'openvpn' - nur Kleinbuchstaben)
+    service_protocol: Dienst-Protokoll (udp/tcp - nur Kleinbuchstaben)
+    service_type: die Art des angebotenen Diensts (z.B. "mesh", "dns" oder "igw")
+    service_path: eine Pfad-Angabe für den Dienst, falls erforderlich (typischerweise "/")
+    service_details: zusätzliche Details für den Dienst
+  Falls irgendeiner dieser Parameter fehlt oder unübliche Zeichen enthält, dann liefert
+  die Funktion als Ergebnis eine Fehlermeldung zurück.
+@returns Im Fehlerfall liefert die Funktion einen Fehlertext zurück.
+  Im Erfolgsfall ist das Ergebnis 'true' (Änderungen wurden vorgenommen) oder 'false' (keine Änderungen).
+--]]
+function process_add_service_form()
+    local add_service = luci.http.formvalue("add_service")
+    local host = luci.http.formvalue("service_host")
+    local port = luci.http.formvalue("service_port")
+    local scheme = luci.http.formvalue("service_scheme")
+    local protocol = luci.http.formvalue("service_protocol")
+    local stype = luci.http.formvalue("service_type")
+    local path = luci.http.formvalue("service_path")
+    local details = luci.http.formvalue("service_details")
+
+    if add_service and host and port and protocol and stype and path and details then
+        host = parse_hostname_string(host)
+	if not host then return luci.i18n.translate("Invalid host") end
+        port = parse_number_string(port)
+	if not port then return luci.i18n.translate("Invalid port") end
+	if (protocol ~= "udp") and (protocol ~= "tcp") then return luci.i18n.translate("Unknown protocol") end
+	scheme = parse_string_pattern(scheme, "a-z")
+	if not scheme then return luci.i18n.translate("Invalid service scheme") end
+	stype = parse_string_pattern(stype, "a-z")
+	if not stype then return luci.i18n.translate("Invalid service type") end
+	path = parse_string_pattern(path, "a-zA-Z0-9._/-")
+	if not path then return luci.i18n.translate("Invalid path") end
+	details = parse_string_pattern(details, "a-zA-Z0-9._/:%s-")
+	if not details then return luci.i18n.translate("Invalid service details") end
+        on_function("notify_service", {stype, scheme, host, port, protocol, path, details, "manual"})
+	return true
+    else
+        return false
+    end
+end
+
+
+--[[
+@brief Verarbeite ein HTML-Formular und führe die angeforderten Aktionen für Dienste aus.
+@param service_type Der Dienst-Typ (z.B. "mesh" oder "gw") ist für die Änderung der Reihenfolge notwendig.
+@details Die folgenden HTML-Formularvariablen werden verarbeitet:
+    move_up/move_down/move_top/delete/disable/enable/reset_offset
+  Diese Variablen werden jeweils als Dienstname interpretiert und lösen die Anwendung der im
+  Variablennamen angedeuteten Aktion aus. Die Verschiebungen (move_up|down|top) beziehen sich
+  dabei jeweils auf den als Paramter übergebenen 'service_type'.
+  Falls irgendeiner dieser Parameter fehlt oder unübliche Zeichen enthält, dann liefert
+  die Funktion als Ergebnis eine Fehlermeldung zurück.
+@returns Im Fehlerfall liefert die Funktion einen Fehlertext zurück.
+  Im Erfolgsfall ist das Ergebnis 'true' (Änderungen wurden vorgenommen) oder 'false' (keine Änderungen).
+--]]
+function process_service_action_form(service_type)
+    filter_func = function(text) return parse_string_pattern(text, "a-zA-Z0-9_") end
+    local move_up = filter_func(luci.http.formvalue("move_service_up"))
+    local move_down = filter_func(luci.http.formvalue("move_service_down"))
+    local move_top = filter_func(luci.http.formvalue("move_service_top"))
+    local delete = filter_func(luci.http.formvalue("delete_service"))
+    local disable = filter_func(luci.http.formvalue("disable_service"))
+    local enable = filter_func(luci.http.formvalue("enable_service"))
+    local reset_offset = filter_func(luci.http.formvalue("reset_service_offset"))
+
+    -- Prüfe alle Eingaben auf ihre Tauglichkeit als Dienst-Name.
+    -- Dies ist nicht relevant für die Funktionalität (da die Eingaben ohnehin gefiltert werden),
+    -- sondern eher eine Debug-Hilfe.
+    for _, key in pairs({"move_service_up", "move_service_down", "move_service_top",
+            "delete_service", "disable_service", "enable_service", "reset_service_offset"}) do
+        local value = luci.http.formvalue(key)
+	if value and (value ~= filter_func(value)) then
+            return luci.i18n.translate("Service Action: Invalid service name")
+        end
+    end
+     
+    -- Prüfe, ob 'move'-Aktionen von einem 'service_type' begleitet werden - andernfalls melden wir einen Fehler.
+    if not service_type and (move_up or move_down or move_top) then
+        return luci.i18n.translate("Service Action: missing 'service_type' for 'move' action")
+    end
+
+    if move_up or move_down or move_top or delete or disable or enable or reset_offset then
+        if move_up then
+            on_function("move_service_up", {move_up, service_type})
+        end
+        if move_down then
+            on_function("move_service_down", {move_down, service_type})
+        end
+        if move_top then
+            on_function("move_service_top", {move_top, service_type})
+        end
+        if delete then
+            on_function("delete_service", {delete})
+        end
+        if disable then
+            set_service_value(disable, "disabled", "1")
+        end
+        if enable then
+            delete_service_value(enable, "disabled")
+        end
+        if reset_offset then
+            delete_service_value(reset_offset, "offset")
+        end
+        return true
+    else
+        return false
+    end
+end
+
+
+--[[
+@brief Verarbeite ein HTML-Formular und führe die angeforderten Aktionen für OpenVPN-Zertifikate aus.
+@param key_type Der Zertifikatstyp ("user" oder "ugw") ist für die Auswahl des Zielverzeichnis relevant.
+@details Die folgenden HTML-Formularvariablen werden verarbeitet:
+    force_show_uploadfields: Nutzereingabe erzwingt die Anzeige des Upload-Formulars
+    force_show_generatefields: Nutzereingabe erzwingt die Anzeige des "Erzeuge CSR"-Formulars
+    upload: zu importierende Datei (@see upload_file)
+    download: zu exportierende Datei (@see download_file)
+    generate: soll ein CSR erzeugt werden? (dabei werden weitere Attribute ausgelesen - @see generate_csr)
+@returns Eine table mit den folgenden Werten wird zurückgegeben:
+    openssl: Werte zum Ausfüllen des CSR-Dialogs ("Organization", usw.)
+    certstatus: Auswertung des Zertifikatszustands (@see check_cert_status)
+    force_show_uploadfields: Soll die Anzeige des Datei-Upload-Formulars erzwungen werden?
+    force_show_generatefields: Soll die Anzeige des CSR-Erzeugen-Formulars erzwungen werden?
+--]]
+function process_openvpn_certificate_form(key_type)
+    require("luci.model.opennet.on_vpn_management")
+
+    local result = {}
+
+    if luci.http.formvalue("upload") then upload_file(key_type) end
+
+    local download = luci.http.formvalue("download")
+    if download then download_file(key_type, download) end
+
+    local openssl = {}
+    local openssl_domain
+    if key_type == "user" then
+        openssl_domain = "on-openvpn"
+    elseif key_type == "ugw" then
+        openssl_domain = "on-usergw"
+    end
+    fill_openssl(openssl_domain, openssl)
+
+    if luci.http.formvalue("generate") then generate_csr(key_type, openssl) end
+
+    local certstatus = {}
+    check_cert_status(key_type, certstatus)
+
+    result.force_show_uploadfields = luci.http.formvalue("force_show_uploadfields") or not certstatus.on_keycrt_ok
+    result.force_show_generatefields = luci.http.formvalue("force_show_generatefields") or (not certstatus.on_keycrt_ok and not certstatus.on_keycsr_ok)
+    result.certstatus = certstatus
+    result.openssl = openssl
+
+    return result
 end
 
 -- Ende der Doku-Gruppe

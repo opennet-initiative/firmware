@@ -28,51 +28,32 @@ end
 
 
 function action_vpn_gateways()
-	local move_up = luci.http.formvalue("move_up")
-	local move_down = luci.http.formvalue("move_down")
-	local move_top = luci.http.formvalue("move_top")
-	local delete_service = luci.http.formvalue("delete_service")
-	local disable_service = luci.http.formvalue("disable_service")
-	local enable_service = luci.http.formvalue("enable_service")
-	local reset_offset = luci.http.formvalue("reset_offset")
 	local reset_connection_test_timestamps = luci.http.formvalue("reset_connection_test_timestamps")
-	local new_gateway = luci.http.formvalue("new_gateway")
+	local on_errors = {}
 	
-	if move_up or move_down or move_top or delete_service or disable_service or enable_service or reset_offset then
-		if move_up then
-			on_function("move_service_up", {move_up, "gw", "ugw"})
-		elseif move_down then
-			on_function("move_service_down", {move_down, "gw", "ugw"})
-		elseif move_top then
-			on_function("move_service_top", {move_top, "gw", "ugw"})
-		elseif delete_service then
-			on_function("delete_service", {delete_service})
-		elseif disable_service then
-			set_service_value(disable_service, "disabled", "1")
-		elseif enable_service then
-			delete_service_value(enable_service, "disabled")
-		elseif reset_offset then
-			delete_service_value(reset_offset, "offset")
-		end
+	-- Neuen Dienst hinzufügen
+	local service_result = process_add_service_form()
+	if (service_result ~= true) and (service_result ~= false) then table.insert(on_errors, service_result) end
+
+	-- Dienst-Aktionen ausführen
+	service_result = process_service_action_form("gw")
+	if service_result == true then
+		-- Irgendeine Änderung der Reihenfolge wurde vorgenommen.
 		-- Forciere sofortigen Wechsel zum aktuell besten Gateway.
 		-- Dies ist nicht immer notwendig - aber sofortige Änderungen
 		-- entsprechen wahrscheinlich der Erwartungshaltung des Nutzenden.
 		on_function("find_and_select_best_gateway", {"true"})
-	elseif reset_connection_test_timestamps then
+	elseif service_result ~= false then
+		-- ungleich true und ungleich false: es ist eine Fehlermeldung
+		table.insert(on_errors, service_result)
+	end
+
+	if reset_connection_test_timestamps then
 		on_function("reset_all_mig_connection_test_timestamps")
-	elseif new_gateway then
-		local new_gateway_host = parse_hostname_string(luci.http.formvalue("new_gateway_ip"))
-		local new_gateway_port = parse_number_string(luci.http.formvalue("new_gateway_port"))
-				or on_function("get_variable", {"DEFAULT_MIG_PORT"})
-		if new_gateway_host and new_gateway_port then
-			on_function("notify_service", {"gw", "openvpn", new_gateway_host, new_gateway_port, "udp", "/", "", "manual"})
-		else
-			-- Fehlermeldung?
-		end
 	end
 
 	local show_more_info = luci.http.formvalue("show_more_info")
-	luci.template.render("opennet/on_gateways", { show_more_info=show_more_info })
+	luci.template.render("opennet/on_gateways", { show_more_info=show_more_info, on_errors=on_errors })
 end
 
 

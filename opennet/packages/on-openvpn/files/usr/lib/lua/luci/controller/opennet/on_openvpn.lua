@@ -27,38 +27,27 @@ function index()
 end
 
 function action_on_openvpn()
-	require ("luci.model.opennet.on_vpn_management")
-	
 	if luci.http.formvalue("restartvpn") then os.execute("vpn_status restart opennet_user") end
 	
-	if luci.http.formvalue("upload") then upload_file("user") end
-	
-	local download = luci.http.formvalue("download")
-	if download then download_file("user", download) end
-	
-	local submit = luci.http.formvalue("submit")
-	if submit then
+	local on_errors = {}
+
+	local submit_url = luci.http.formvalue("submit")
+	if submit_url then
 		-- zeige lediglich die Ausgabe von curl an
-		local result = on_function("submit_csr_via_http", {submit, "/etc/openvpn/opennet_user/on_aps.csr"})
+		local result = on_function("submit_csr_via_http", {submit_url, "/etc/openvpn/opennet_user/on_aps.csr"})
 		if not result or (result == "") then
-			result = luci.i18n.translate("Failed to send Certificate Signing Request. You may want to use a manual approach instead. Sorry!")
+			table.insert(on_errors, luci.i18n.translate("Failed to send Certificate Signing Request. You may want to use a manual approach instead. Sorry!"))
 		end
-		luci.http.write(result)
 		return
 	end
 
-	local openssl = {}
-	fill_openssl("on-openvpn", openssl)
-	if luci.http.formvalue("generate") then generate_csr("user", openssl) end
+	local cert_result = process_openvpn_certificate_form("user")
 	
-	local certstatus = {}
-	check_cert_status("user", certstatus)
-
-	local force_show_uploadfields = luci.http.formvalue("force_show_uploadfields") or not certstatus.on_keycrt_ok
-	local force_show_generatefields = luci.http.formvalue("force_show_generatefields") or (not certstatus.on_keycrt_ok and not certstatus.on_keycsr_ok)
-
 	luci.template.render("opennet/on_openvpn", {
-		certstatus=certstatus, openssl=openssl, force_show_uploadfields=force_show_uploadfields,
-		force_show_generatefields=force_show_generatefields
-		})
+		on_errors=on_errors,
+		certstatus=cert_result.certstatus,
+		openssl=cert_result.openssl,
+		force_show_uploadfields=cert_result.force_show_uploadfields,
+		force_show_generatefields=cert_result.force_show_generatefields
+	})
 end

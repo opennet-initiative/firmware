@@ -30,7 +30,7 @@ get_service_name() {
 	local path="$6"
 	local name="${service}_${scheme}_${host}_${port}_${protocol}"
 	[ -n "${path#/}" ] && name="${name}_${path#/}"
-       	echo "$name" | sed 's/[^A-Za-z0-9_]/_/g'
+	echo "$name" | sed 's/[^A-Za-z0-9_]/_/g'
 }
 
 

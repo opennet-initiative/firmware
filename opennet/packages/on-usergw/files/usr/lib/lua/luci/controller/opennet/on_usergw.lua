@@ -7,24 +7,25 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 ]]--
+
 module("luci.controller.opennet.on_usergw", package.seeall)
 require("luci.model.opennet.funcs")
+
 
 function index()
     luci.i18n.loadc("on-usergw")
 
-    local page = entry({"opennet", "opennet_2", "ugw_tunnel"}, call("action_on_usergw"), luci.i18n.translate("Internet Sharing"), 3)
+    local page = entry({"opennet", "opennet_2", "ugw_tunnel"},
+        template("opennet/on_usergw"),
+        luci.i18n.translate("Internet Sharing"), 3)
     page.css = "opennet.css"
     page.i18n = "on_usergw"
 
-    require ("luci.model.opennet.on_usergw")
-    entry({"opennet", "opennet_2", "ugw_tunnel", "check_ugw_status"}, call("check_ugw_status"), nil).leaf = true
-
-    -- sichtbare Unterseiten
+    -- Unterseiten
     page = entry({"opennet", "opennet_2", "ugw_tunnel", "openvpn_mesh_keys"},
         call("action_on_openvpn_mesh_keys"),
         luci.i18n.translate("Key Management"), 1)

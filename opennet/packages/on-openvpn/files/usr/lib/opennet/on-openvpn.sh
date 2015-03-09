@@ -255,7 +255,7 @@ get_client_cn() {
 ## @fn get_mig_port_forward_range()
 ## @brief Liefere den ersten und letzten Port der Nutzertunnel-Portweiterleitung zurück.
 ## @param [optional] common name des Nutzer-Zertifikats
-## @returns zwei Zahlen durch Tabulatoren getrennt
+## @returns zwei Zahlen durch Tabulatoren getrennt / keine Ausgabe, falls keine Main-ID gefunden wurde
 ## @details Jeder AP bekommt einen Bereich von zehn Ports fuer die Port-Weiterleitung zugeteilt.
 get_mig_port_forward_range() {
 	trap "error_trap get_mig_port_forward_range '$*'" $GUARD_TRAPS
@@ -267,7 +267,7 @@ get_mig_port_forward_range() {
 	local first_port
 	local last_port
 
-	[ -z "$client_cn" ] && msg_debug "$(basename "$0"): failed to get Common Name - maybe there is no certificate?" && return 0
+	[ -z "$client_cn" ] && msg_debug "get_mig_port_forward_range: failed to get Common Name - maybe there is no certificate?" && return 0
 
 	if echo "$client_cn" | grep -q '^\(\(1\.\)\?[0-9][0-9]\?[0-9]\?\.aps\.on\)$'; then
 		portbase=10000
@@ -288,12 +288,11 @@ get_mig_port_forward_range() {
 
 	if [ -z "$cn_address" ] || [ "$cn_address" -lt 1 ] || [ "$cn_address" -gt 255 ]; then
 		msg_info "$(basename "$0"): invalidate certificate Common Name ($client_cn)"
-		trap "" $GUARD_TRAPS && return 1
+	else
+		first_port=$((portbase + (cn_address-1) * port_count))
+		last_port=$((first_port + port_count - 1))
+		echo -e "$first_port\t$last_port"
 	fi
-
-	first_port=$((portbase + (cn_address-1) * port_count))
-	last_port=$((first_port + port_count - 1))
-	echo -e "$first_port\t$last_port"
 }
 
 # Ende der Doku-Gruppe

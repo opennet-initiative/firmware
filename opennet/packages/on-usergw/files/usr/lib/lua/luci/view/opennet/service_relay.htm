@@ -1,0 +1,52 @@
+<%#
+Opennet Firmware
+
+Copyright 2015 Lars Kruse <devel@sumpfralle.de>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+
+<% require("luci.model.opennet.funcs") %>
+
+<%+header%>
+
+
+<div class="cbi-map">
+  <h2><a id="content" name="content"><%:Relaying external Services for the Opennet Mesh%></a></h2>
+
+  <%= html_display_error_list(on_errors) %>
+
+  <fieldset class="cbi-section">
+    <legend><%:Available Services to be relayed%></legend>
+  </fieldset>
+
+  <%# Manuelles Hinzufügen weiterer Service-Relays %>
+  <fieldset class="cbi-section">
+    <legend><%:Manually add a Service Relay%></legend>
+    <form name="gateways" method="post" action="<%= REQUEST_URI %>">
+      <div class="cbi-value">
+        <div class="cbi-value-field">
+          <input type="hidden" name="service_type" value="mesh" />
+          <input type="hidden" name="service_path" value="/" />
+          <input type="hidden" name="service_scheme" value="openvpn" />
+          <input type="hidden" name="service_protocol" value="udp" />
+          <input type="hidden" name="service_details" value="" />
+          <label for="service_host"><%:Manually add Exit Gateway%>:</label>
+          <input class="cbi-input-text" name="service_host" id="service_host" size="16" />
+          <label for="service_port"><%:Port%>:</label>
+          <input class="cbi-input-text" name="service_port" id="service_port" size="5"
+              value="<%= on_function("get_variable", {"DEFAULT_MIG_PORT"}) %>" />
+          <input class="cbi-button cbi-button-apply" type="submit"
+              id="add_service" name="add_service" value="<%:Add%>" />
+        </div>
+      </div>
+    </form>
+  </fieldset>
+
+</div>
+<%+footer%>

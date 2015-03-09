@@ -13,6 +13,12 @@ msgstr ""
 msgid "-- CN %s"
 msgstr ""
 
+msgid "...show..."
+msgstr ""
+
+msgid "AccessPoint (type users)"
+msgstr ""
+
 msgid "Available Report"
 msgstr ""
 
@@ -39,6 +45,23 @@ msgid ""
 "network-id?"
 msgstr ""
 
+msgid "Certificate (.crt)"
+msgstr ""
+
+msgid "Certificate Name"
+msgstr ""
+
+msgid "Certificate Request (.csr)"
+msgstr ""
+
+msgid ""
+"Choose one of the following options for submitting your certificate signing "
+"request"
+msgstr ""
+
+msgid "Country"
+msgstr ""
+
 msgid "DNS (Name resolution)"
 msgstr ""
 
@@ -60,10 +83,16 @@ msgid ""
 "a technical issue. This summary does not contain any private information."
 msgstr ""
 
+msgid "Download the CSR file and upload it manually"
+msgstr ""
+
 msgid "ETX: Routing Distance (default)"
 msgstr ""
 
 msgid "Enable or disable services and change their sorting order."
+msgstr ""
+
+msgid "Error: %s"
 msgstr ""
 
 msgid ""
@@ -156,7 +185,34 @@ msgstr ""
 msgid "Internet-Sharing:"
 msgstr ""
 
+msgid "Invalid host"
+msgstr ""
+
+msgid "Invalid path"
+msgstr ""
+
+msgid "Invalid port"
+msgstr ""
+
+msgid "Invalid service details"
+msgstr ""
+
+msgid "Invalid service scheme"
+msgstr ""
+
+msgid "Invalid service type"
+msgstr ""
+
 msgid "Issue Indicators"
+msgstr ""
+
+msgid "Key Generation"
+msgstr ""
+
+msgid "Key Management"
+msgstr ""
+
+msgid "Key/Cert Status"
 msgstr ""
 
 msgid "LOCAL"
@@ -168,10 +224,19 @@ msgstr ""
 msgid "Loading"
 msgstr ""
 
+msgid "Locality"
+msgstr ""
+
 msgid "MAC"
 msgstr ""
 
 msgid "Manual: choose your preferred order"
+msgstr ""
+
+msgid "Member Email Address"
+msgstr ""
+
+msgid "Member Name"
 msgstr ""
 
 msgid "NTP (Time synchronization)"
@@ -228,6 +293,9 @@ msgstr ""
 msgid "Opennet-ID / Network ID"
 msgstr ""
 
+msgid "Organizational Unit"
+msgstr ""
+
 msgid ""
 "Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your "
 "first Opennet-Network-Interface, any change will reconfigure your network "
@@ -238,6 +306,22 @@ msgid "Port-Mapping"
 msgstr ""
 
 msgid "Portmapping - Forwarding of Ports"
+msgstr ""
+
+msgid "Private Key (.key)"
+msgstr ""
+
+msgid ""
+"Private Key and Certificate do not match. Certificate-Request also does not "
+"match Private Key, therefore sending the Certificate Request to opennet "
+"authority will not help. Please replace Certificate or Private Key or "
+"regenerate Key and Certificate Request."
+msgstr ""
+
+msgid "Private Key and Certificate do not match. Please replace Certificate!"
+msgstr ""
+
+msgid "Province"
 msgstr ""
 
 msgid "Report"
@@ -253,6 +337,23 @@ msgid "SSID"
 msgstr ""
 
 msgid "Save"
+msgstr ""
+
+msgid ""
+"Send Certificate Request (.csr) <b>and only this file</b> to <a href='mailto:"
+"%s?subject=Certificate Request for %s %s&amp;body=[please attach the "
+"Certificate Request (.csr) - and only this file - to this mail and write "
+"some nice words to the administrator]'>%s</a> in order to get the required "
+"certificate."
+msgstr ""
+
+msgid "Send your request with one click"
+msgstr ""
+
+msgid "Service Action: Invalid service name"
+msgstr ""
+
+msgid "Service Action: missing 'service_type' for 'move' action"
 msgstr ""
 
 msgid "Service settings"
@@ -274,6 +375,9 @@ msgid "Status"
 msgstr ""
 
 msgid "Status Information"
+msgstr ""
+
+msgid "Submit certificate request"
 msgstr ""
 
 msgid "System"
@@ -328,6 +432,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"The specified opennet ID is invalid. Please try again (input format: 'X."
+"YYY')."
+msgstr ""
+
+msgid ""
 "The target should be an IP-Address in your local network. Additionally you "
 "can enter the target port in the related field."
 msgstr ""
@@ -354,7 +463,13 @@ msgid ""
 "Select, how they are ordered and add or blacklist specific Gateways"
 msgstr ""
 
+msgid "Unknown protocol"
+msgstr ""
+
 msgid "Uptime"
+msgstr ""
+
+msgid "UserGateway (type user gateway)"
 msgstr ""
 
 msgid "Usergateway-Tunnel active"
@@ -402,11 +517,35 @@ msgstr ""
 msgid "device"
 msgstr ""
 
+msgid "download"
+msgstr ""
+
+msgid "generate"
+msgstr ""
+
 msgid "related network addresses"
+msgstr ""
+
+msgid "search file"
 msgstr ""
 
 msgid "start / limit / leasetime"
 msgstr ""
 
+msgid "upload"
+msgstr ""
+
+msgid "upload Certificate (.crt) or Private Key (.key)"
+msgstr ""
+
+msgid "uploaded or generated on this date."
+msgstr ""
+
 msgid "use"
+msgstr ""
+
+msgid "via Internet"
+msgstr ""
+
+msgid "via Opennet"
 msgstr ""

@@ -4,12 +4,6 @@ msgstr "Content-Type: text/plain; charset=UTF-8"
 msgid "...more Information..."
 msgstr ""
 
-msgid "...show..."
-msgstr ""
-
-msgid "AccessPoint (type users)"
-msgstr ""
-
 msgid "Actions"
 msgstr ""
 
@@ -29,15 +23,6 @@ msgstr ""
 msgid "Announced Upload / Download Speed."
 msgstr ""
 
-msgid "Certificate (.crt)"
-msgstr ""
-
-msgid "Certificate Name"
-msgstr ""
-
-msgid "Certificate Request (.csr)"
-msgstr ""
-
 msgid "Certificate contents"
 msgstr ""
 
@@ -47,21 +32,10 @@ msgstr ""
 msgid "Certificate-Request contents"
 msgstr ""
 
-msgid ""
-"Choose one of the following options for submitting your certificate signing "
-"request"
-msgstr ""
-
 msgid "Connection log"
 msgstr ""
 
-msgid "Country"
-msgstr ""
-
 msgid "Distance"
-msgstr ""
-
-msgid "Download the CSR file and upload it manually"
 msgstr ""
 
 msgid "ETX"
@@ -92,76 +66,27 @@ msgid ""
 "\"offset/distance\" column for this purpose."
 msgstr ""
 
-msgid "Key Generation"
-msgstr ""
-
-msgid "Key Management"
-msgstr ""
-
-msgid "Key/Cert Status"
-msgstr ""
-
 msgid "Loading"
 msgstr ""
 
-msgid "Locality"
-msgstr ""
-
-msgid "Member Email Address"
-msgstr ""
-
-msgid "Member Name"
+msgid ""
+"Members of the Opennet Initiative e.V. can access the Internet through the "
+"Internet Gateways provided by the association."
 msgstr ""
 
 msgid "Number of Hops to the Gateway"
 msgstr ""
 
-msgid "Open Virtual Privat Network"
-msgstr ""
-
 msgid "Opennet OpenVPN Gateways"
 msgstr ""
 
-msgid "Organizational Unit"
-msgstr ""
-
 msgid "Port"
-msgstr ""
-
-msgid "Private Key (.key)"
-msgstr ""
-
-msgid ""
-"Private Key and Certificate do not match. Certificate-Request also does not "
-"match Private Key, therefore sending the Certificate Request to opennet "
-"authority will not help. Please replace Certificate or Private Key or "
-"regenerate Key and Certificate Request."
-msgstr ""
-
-msgid "Private Key and Certificate do not match. Please replace Certificate!"
-msgstr ""
-
-msgid "Province"
-msgstr ""
-
-msgid ""
-"Send Certificate Request (.csr) <b>and only this file</b> to <a href='mailto:"
-"%s?subject=Certificate Request for %s %s&amp;body=[please attach the "
-"Certificate Request (.csr) - and only this file - to this mail and write "
-"some nice words to the administrator]'>%s</a> in order to get the required "
-"certificate."
-msgstr ""
-
-msgid "Send your request with one click"
 msgstr ""
 
 msgid "Speed"
 msgstr ""
 
 msgid "Status"
-msgstr ""
-
-msgid "Submit certificate request"
 msgstr ""
 
 msgid ""
@@ -199,7 +124,7 @@ msgstr ""
 msgid "Tunnel starting"
 msgstr ""
 
-msgid "UserGateway (type user gateway)"
+msgid "VPN Certificate and Internet Access"
 msgstr ""
 
 msgid "VPN Gateways"
@@ -214,6 +139,11 @@ msgstr ""
 msgid ""
 "You can change the sorting mechanism of gateways in the <a href=\"%s"
 "\">Service Settings section</a>."
+msgstr ""
+
+msgid ""
+"You need to request your own VPN certificate in order to use these Internet "
+"Gateways."
 msgstr ""
 
 msgid ""
@@ -234,13 +164,7 @@ msgstr ""
 msgid "disable"
 msgstr ""
 
-msgid "download"
-msgstr ""
-
 msgid "enable"
-msgstr ""
-
-msgid "generate"
 msgstr ""
 
 msgid "move down"
@@ -261,9 +185,6 @@ msgstr ""
 msgid "restart VPN Tunnel"
 msgstr ""
 
-msgid "search file"
-msgstr ""
-
 msgid "see"
 msgstr ""
 
@@ -276,20 +197,5 @@ msgstr ""
 msgid "unreachable"
 msgstr ""
 
-msgid "upload"
-msgstr ""
-
-msgid "upload Certificate (.crt) or Private Key (.key)"
-msgstr ""
-
 msgid "upload to Internet %s kbit/s; download from Internet %s kbit/s"
-msgstr ""
-
-msgid "uploaded or generated on this date."
-msgstr ""
-
-msgid "via Internet"
-msgstr ""
-
-msgid "via Opennet"
 msgstr ""

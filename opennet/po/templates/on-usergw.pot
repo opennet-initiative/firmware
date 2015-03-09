@@ -1,36 +1,36 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-msgid "(tried/measured) to Gateway: %s/%s from Gateway: %s/%s"
+msgid "Actions"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid ""
+"Allowing certain public services to be reachable within your local "
+"neighbourhood. The most notable example is the Internet Gateway Service "
+"which is used by all people accesing the Internet via Opennet."
+msgstr ""
+
+msgid "Available Services to be relayed"
 msgstr ""
 
 msgid "Central Gateways connected locally"
 msgstr ""
 
 msgid ""
-"Check MTU to and from the Gateways (again). This will take approximately 5 "
-"minutes per Gateway."
+"Connecting your local neighbourhood with the complete mesh of all Opennet "
+"nodes."
 msgstr ""
 
-msgid ""
-"Check VPN availability of Gateways (again). This will take approximately 10 "
-"seconds per Gateway."
+msgid "Connection to an Mesh VPN service succeeded."
 msgstr ""
 
-msgid ""
-"Check route trough WAN and ping-time of Gateways (again). This will take "
-"approximately 5 seconds per Gateway."
+msgid "Estimated upload and download speed to this exit gateway."
 msgstr ""
 
-msgid ""
-"Check speed to and from the Gateways (again). This will take approximately 1 "
-"minute per Gateway."
-msgstr ""
-
-msgid "Click in order to switch Forwarding to Gateway %s (IP: %s)"
-msgstr ""
-
-msgid "Gateway Name"
+msgid "Gateway"
 msgstr ""
 
 msgid "Gateway-Forward activated"
@@ -39,38 +39,7 @@ msgstr ""
 msgid "Gateway-Forward from %s to %s activated"
 msgstr ""
 
-msgid ""
-"If Forwarding is activated, all received VPN-Traffic is routed to the "
-"external Gateway. Only one forward can exist at a time."
-msgstr ""
-
-msgid ""
-"If Tunnel is activated, a central Gateway-IP is mapped to the local Router. "
-"Multiple Tunnels can exist in parallel."
-msgstr ""
-
-msgid "Indicates Upload / Download Speed."
-msgstr ""
-
-msgid ""
-"Indicates if route to Gateway points trough WAN-device, this is required. "
-"Check/reconfigure your WAN connection is this test fails."
-msgstr ""
-
-msgid ""
-"Indicates if the Gateway supports VPN for the users. This is at least "
-"required to sucessfully use VPN-Forwarding."
-msgstr ""
-
-msgid ""
-"Indicates the Ping-Time in miliseconds. If a Gateway cannot be reached or "
-"the ping-time is high, it is probably (temporarily) down."
-msgstr ""
-
 msgid "Internet Sharing"
-msgstr ""
-
-msgid "Internet Sharing Status Overview"
 msgstr ""
 
 msgid "Internet not shared"
@@ -101,54 +70,86 @@ msgid ""
 "Minutes. You can enable it manually if you like."
 msgstr ""
 
+msgid "Key Management"
+msgstr ""
+
 msgid "Loading"
 msgstr ""
 
-msgid "MTU-Status"
+msgid "MTU"
 msgstr ""
 
 msgid "Manage Internet-Sharing"
 msgstr ""
 
+msgid "Manually add Exit Gateway"
+msgstr ""
+
+msgid "Manually add Mesh Gateway"
+msgstr ""
+
+msgid "Manually add a Mesh Gateway"
+msgstr ""
+
+msgid "Manually add a Service Relay"
+msgstr ""
+
+msgid "Mesh Connections"
+msgstr ""
+
+msgid "Mesh Gateways"
+msgstr ""
+
 msgid ""
-"Maximum Transmission Unit - match of configured and measured values is "
-"required to share your Internet in any case."
+"No Mesh Gateways were found. Probably there is no DNS service available. "
+"Maybe you want to verify your internet connection."
 msgstr ""
 
-msgid "No IP-Address found for Gateway-Name, Gateway cannot be used"
+msgid ""
+"Openvpn does not support mtu-check, please compile openvpn without \"--"
+"enable-small\" option."
 msgstr ""
 
-msgid "Opennet Usergateways"
+msgid "Ping"
 msgstr ""
 
-msgid "Ping Time"
+msgid ""
+"Ping latency describes the travelling time of a small packet to the gateway "
+"and back."
+msgstr ""
+
+msgid "Port"
+msgstr ""
+
+msgid "Priority"
+msgstr ""
+
+msgid "Relaying external Services for the Opennet Mesh"
+msgstr ""
+
+msgid "Service Relay"
+msgstr ""
+
+msgid "Sharing your Internet connection"
+msgstr ""
+
+msgid ""
+"Sharing your internet connection with the Opennet Community usually consists "
+"of two distinct parts:"
 msgstr ""
 
 msgid "Speed"
 msgstr ""
 
-msgid "Status Details, all checks have to be successful"
-msgstr ""
-
 msgid "Status Internet-Sharing"
 msgstr ""
 
-msgid "This will take approximately 1 minute per Gateway"
+msgid ""
+"The configured Maximum Transmission Unit can cause subtle problems. Thus it "
+"needs to be tested carefully."
 msgstr ""
 
-msgid "This will take approximately 10 seconds per Gateway"
-msgstr ""
-
-msgid "This will take approximately 5 minutes per Gateway"
-msgstr ""
-
-msgid "This will take approximately 5 seconds per Gateway"
-msgstr ""
-
-msgid "UGW Tunnel"
-msgstr ""
-
-msgid "Usergateway-Status"
+msgid "The route to the gateway should point at a WAN interface."
 msgstr ""
 
 msgid "Usergateway-Tunnel active"
@@ -157,20 +158,29 @@ msgstr ""
 msgid "Usergateway-Tunnel not running"
 msgstr ""
 
-msgid "VPN Forwarding"
+msgid "VPN"
 msgstr ""
 
-msgid "VPN Status"
+msgid "VPN Certificate for Mesh Connection"
 msgstr ""
 
 msgid "WAN"
 msgstr ""
 
-msgid "add"
+msgid ""
+"You can change the sorting mechanism of gateways in the <a href=\"%s"
+"\">Service Settings section</a>."
 msgstr ""
 
 msgid ""
-"automated check is running, manual modifications are temporarily disabled"
+"You need an OpenVPN certificate if you want to use your Internet connection "
+"in order to connect your local neighbourhood with the Opennet Mesh network."
+msgstr ""
+
+msgid "active"
+msgstr ""
+
+msgid "auto-discovered services cannot be deleted"
 msgstr ""
 
 msgid "central Gateway-IP %s connected trough tunnel"
@@ -179,31 +189,16 @@ msgstr ""
 msgid "central Gateway-IPs %s connected trough tunnel"
 msgstr ""
 
-msgid "check MTU"
-msgstr ""
-
-msgid "check Speed"
-msgstr ""
-
-msgid "check VPN"
-msgstr ""
-
-msgid "check WAN-Connection"
-msgstr ""
-
-msgid "click in order to forward to this gateway immediately"
-msgstr ""
-
 msgid "day"
 msgstr ""
 
 msgid "delete"
 msgstr ""
 
-msgid "disable Sharing"
+msgid "disable"
 msgstr ""
 
-msgid "down"
+msgid "disable Sharing"
 msgstr ""
 
 msgid "enable Sharing"
@@ -215,19 +210,19 @@ msgstr ""
 msgid "hours"
 msgstr ""
 
-msgid "inactive"
-msgstr ""
-
-msgid "irrelevant"
-msgstr ""
-
 msgid "minutes"
+msgstr ""
+
+msgid "move down"
+msgstr ""
+
+msgid "move up"
 msgstr ""
 
 msgid "no central Gateway-IPs connected trough tunnel"
 msgstr ""
 
-msgid "ok"
+msgid "reset offset"
 msgstr ""
 
 msgid "suspend Internet-Sharing for"
@@ -236,11 +231,5 @@ msgstr ""
 msgid "suspend now"
 msgstr ""
 
-msgid "tested %s minutes ago"
-msgstr ""
-
-msgid "up"
-msgstr ""
-
-msgid "upload to Gateway %s kbit/s; download from Gateway %s kbit/s"
+msgid "upload to Internet %s kBit/s | download from Internet %s kBit/s"
 msgstr ""

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-01-10 21:46+0200\n"
+"PO-Revision-Date: 2015-03-09 03:59+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -23,6 +23,12 @@ msgstr "-- AP %s"
 
 msgid "-- CN %s"
 msgstr "-- CN %s"
+
+msgid "...show..."
+msgstr "...anzeigen..."
+
+msgid "AccessPoint (type users)"
+msgstr "Access-Point (Nutzer)"
 
 msgid "Available Report"
 msgstr "Vorhandener Bericht"
@@ -58,6 +64,24 @@ msgstr ""
 "Kontakt zu Deinem Router kurz verlieren könntest. Möchtest Du wirklich die "
 "Netzwerk-ID aktualisieren?"
 
+msgid "Certificate (.crt)"
+msgstr "Zertifikat (.crt)"
+
+msgid "Certificate Name"
+msgstr "Zertifikat-Name"
+
+msgid "Certificate Request (.csr)"
+msgstr "Zertifikat-Anfrage (.csr)"
+
+msgid ""
+"Choose one of the following options for submitting your certificate signing "
+"request"
+msgstr ""
+"Wähle einen der folgenden Wege für die Einreichung Deiner Zertifikat-Anfrage"
+
+msgid "Country"
+msgstr "Land"
+
 msgid "DNS (Name resolution)"
 msgstr "DNS (Namensauflösung)"
 
@@ -86,6 +110,9 @@ msgstr ""
 "Du ein Anliegen oder ein technisches Problem mit anderen diskutieren "
 "möchtest. Diese Zusammenfassung enthält keine private Informationen."
 
+msgid "Download the CSR file and upload it manually"
+msgstr "Lade die Zertifikatsanfrage (CSR) herunter und lade sie manuell hoch"
+
 msgid "ETX: Routing Distance (default)"
 msgstr "ETX: Routing-Entfernung (Voreinstellung)"
 
@@ -93,6 +120,9 @@ msgid "Enable or disable services and change their sorting order."
 msgstr ""
 "Auswählen oder Abschalten von von Diensten, sowie die Änderung ihrer "
 "Reihenfolge."
+
+msgid "Error: %s"
+msgstr "Fehler: %s"
 
 msgid ""
 "Expected Transmission Count: Quality of the Connection to the Gateway "
@@ -194,8 +224,35 @@ msgstr "Internet-Freigabe ist möglich"
 msgid "Internet-Sharing:"
 msgstr "Internet-Freigabe:"
 
+msgid "Invalid host"
+msgstr "Ungültiger Host"
+
+msgid "Invalid path"
+msgstr "Ungültiger Pfad"
+
+msgid "Invalid port"
+msgstr "Ungültiger Port"
+
+msgid "Invalid service details"
+msgstr "Ungültige Dienstdetails"
+
+msgid "Invalid service scheme"
+msgstr "Ungültiges Dienstschema"
+
+msgid "Invalid service type"
+msgstr "Ungültiger Diensttyp"
+
 msgid "Issue Indicators"
 msgstr "Problemindikatoren"
+
+msgid "Key Generation"
+msgstr "Schlüsselerzeugung"
+
+msgid "Key Management"
+msgstr "Schlüsselverwaltung"
+
+msgid "Key/Cert Status"
+msgstr "Status Schlüssel/Zertifikat"
 
 msgid "LOCAL"
 msgstr "LOKAL"
@@ -207,11 +264,20 @@ msgstr ""
 msgid "Loading"
 msgstr "Lade"
 
+msgid "Locality"
+msgstr "Ort"
+
 msgid "MAC"
 msgstr "MAC"
 
 msgid "Manual: choose your preferred order"
 msgstr "Manuell: wähle Deine bevorzugte Reihenfolge"
+
+msgid "Member Email Address"
+msgstr "Deine EMail Adresse"
+
+msgid "Member Name"
+msgstr "Dein Name"
 
 msgid "NTP (Time synchronization)"
 msgstr "NTP (Zeitsynchronisation)"
@@ -273,6 +339,9 @@ msgstr ""
 msgid "Opennet-ID / Network ID"
 msgstr "Opennet-ID / Netzwerk ID"
 
+msgid "Organizational Unit"
+msgstr "Organisations-Einheit"
+
 msgid ""
 "Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your "
 "first Opennet-Network-Interface, any change will reconfigure your network "
@@ -288,6 +357,28 @@ msgstr "Port-Mapping"
 msgid "Portmapping - Forwarding of Ports"
 msgstr "Portmapping - Weiterleitung von Ports"
 
+msgid "Private Key (.key)"
+msgstr "Geheimer Schlüssel (.key)"
+
+msgid ""
+"Private Key and Certificate do not match. Certificate-Request also does not "
+"match Private Key, therefore sending the Certificate Request to opennet "
+"authority will not help. Please replace Certificate or Private Key or "
+"regenerate Key and Certificate Request."
+msgstr ""
+"Der private Schlüsel und das Zertifikat passen nicht zueinander. Die "
+"Zertifikatsanfrage passt ebenfalls nicht zum Schlüssel. Daher ist ist nicht "
+"sinnvoll, die Zertifikatsanfrage einzureichen. Erzeuge bitte einfach einen "
+"neuen Schlüssel, ein neues Zertifikat oder eine neue Zertifikatsanfrage."
+
+msgid "Private Key and Certificate do not match. Please replace Certificate!"
+msgstr ""
+"Der private Schlüssel passt nicht zum Zertifikat. Bitte ersetze das "
+"Zertifikat!"
+
+msgid "Province"
+msgstr "Bundesland"
+
 msgid "Report"
 msgstr "Zusammenfassung"
 
@@ -302,6 +393,28 @@ msgstr "SSID"
 
 msgid "Save"
 msgstr "Speichern"
+
+msgid ""
+"Send Certificate Request (.csr) <b>and only this file</b> to <a href='mailto:"
+"%s?subject=Certificate Request for %s %s&amp;body=[please attach the "
+"Certificate Request (.csr) - and only this file - to this mail and write "
+"some nice words to the administrator]'>%s</a> in order to get the required "
+"certificate."
+msgstr ""
+"Sende die Zertifikatanfrage (.csr) <b>und nur diese Datei</b> an <a "
+"href='mailto:%s?subject=Zertifikatsanfrage für %s %s&amp;body=[bitte die "
+"Zertifikatsanfrage (.csr) - und nichts anderes - an diese Email anhängen. "
+"Ein paar nette Worte an die Administratoren sind auch immer gern "
+"gesehen.]'>%s</a>, um das erforderliche Zertifikat zu erhalten."
+
+msgid "Send your request with one click"
+msgstr "Sende Deine Anfrage mit einem Klick"
+
+msgid "Service Action: Invalid service name"
+msgstr "Dienstaktions: ungültiger Dienstname"
+
+msgid "Service Action: missing 'service_type' for 'move' action"
+msgstr "Dienstaktion: fehlender 'service_type' für 'move'-Aktion"
 
 msgid "Service settings"
 msgstr "Einstellungen für Dienste"
@@ -323,6 +436,9 @@ msgstr "Status"
 
 msgid "Status Information"
 msgstr "Status Information"
+
+msgid "Submit certificate request"
+msgstr "Sende deine Zertifikatsanfrage"
 
 msgid "System"
 msgstr "System"
@@ -398,6 +514,13 @@ msgstr ""
 "Netzwerk weitergeleitet. Sie sind vom Internet aus direkt erreichbar."
 
 msgid ""
+"The specified opennet ID is invalid. Please try again (input format: 'X."
+"YYY')."
+msgstr ""
+"Die angegebene Opennet-ID ist ungültig. Versuch es bitte noch einmal "
+"(Eingabeformat: 'X.YYY')."
+
+msgid ""
 "The target should be an IP-Address in your local network. Additionally you "
 "can enter the target port in the related field."
 msgstr ""
@@ -434,8 +557,14 @@ msgstr ""
 "diese sortiert werde und füge spezifische Gateways hinzu oder blockiere "
 "diese."
 
+msgid "Unknown protocol"
+msgstr "Unbekanntes Protokoll"
+
 msgid "Uptime"
 msgstr "Gerätelaufzeit"
+
+msgid "UserGateway (type user gateway)"
+msgstr "Usergateway (Internet-Freigabe)"
 
 msgid "Usergateway-Tunnel active"
 msgstr "Usergateway-Tunnel ist aktiv"
@@ -489,14 +618,38 @@ msgstr ""
 msgid "device"
 msgstr "Schnittstelle"
 
+msgid "download"
+msgstr "Herunterladen"
+
+msgid "generate"
+msgstr "Erzeugen"
+
 msgid "related network addresses"
 msgstr "zugehörige Netzwerkadressen"
+
+msgid "search file"
+msgstr "suche Datei"
 
 msgid "start / limit / leasetime"
 msgstr "Beginn / Anzahl / Lease-Laufzeit"
 
+msgid "upload"
+msgstr "hochladen"
+
+msgid "upload Certificate (.crt) or Private Key (.key)"
+msgstr "Hochladen von Zertifikat (.crt) oder geheimem Schlüssel (.key)"
+
+msgid "uploaded or generated on this date."
+msgstr "hochgeladen oder erzeugt an diesem Tag"
+
 msgid "use"
 msgstr "übernehmen"
+
+msgid "via Internet"
+msgstr "über das Internet"
+
+msgid "via Opennet"
+msgstr "im Opennet"
 
 #~ msgid "Generate Report:"
 #~ msgstr "Zusammenfassung erzeugen:"

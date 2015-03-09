@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-01-11 02:15+0200\n"
+"PO-Revision-Date: 2015-03-09 04:01+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -14,12 +14,6 @@ msgstr ""
 
 msgid "...more Information..."
 msgstr "...mehr Informationen..."
-
-msgid "...show..."
-msgstr "...anzeigen..."
-
-msgid "AccessPoint (type users)"
-msgstr "Access-Point (Nutzer)"
 
 msgid "Actions"
 msgstr "Aktionen"
@@ -46,15 +40,6 @@ msgstr ""
 msgid "Announced Upload / Download Speed."
 msgstr "Vom Gateway ermittelte Upload/Download-Bandbreite"
 
-msgid "Certificate (.crt)"
-msgstr "Zertifikat (.crt)"
-
-msgid "Certificate Name"
-msgstr "Zertifikat-Name"
-
-msgid "Certificate Request (.csr)"
-msgstr "Zertifikat-Anfrage (.csr)"
-
 msgid "Certificate contents"
 msgstr "Zertifikatsdetails"
 
@@ -64,23 +49,11 @@ msgstr "Zertifikatsverwaltung"
 msgid "Certificate-Request contents"
 msgstr "Details der Zertifikatsanfrage"
 
-msgid ""
-"Choose one of the following options for submitting your certificate signing "
-"request"
-msgstr ""
-"Wähle einen der folgenden Wege für die Einreichung Deiner Zertifikat-Anfrage"
-
 msgid "Connection log"
 msgstr "Verbindungsprotokoll"
 
-msgid "Country"
-msgstr "Land"
-
 msgid "Distance"
 msgstr "Entfernung"
-
-msgid "Download the CSR file and upload it manually"
-msgstr "Lade die Zertifikatsanfrage (CSR) und lade sie manuell hoch"
 
 msgid "ETX"
 msgstr "ETX"
@@ -120,88 +93,30 @@ msgstr ""
 "Änderungen der Gateway-Reihenfolge zurückzusetzen. Klicke dazu auf das "
 "kleine Pinsel-Symbol in der Spalte \"Offset/Entfernung\"."
 
-msgid "Key Generation"
-msgstr "Schlüssel Erzeugung"
-
-msgid "Key Management"
-msgstr "Schlüssel Verwaltung"
-
-msgid "Key/Cert Status"
-msgstr "Status Schlüssel/Zertifikat"
-
 msgid "Loading"
 msgstr "Lade"
 
-msgid "Locality"
-msgstr "Ort"
-
-msgid "Member Email Address"
-msgstr "Deine EMail Adresse"
-
-msgid "Member Name"
-msgstr "Dein Name"
+msgid ""
+"Members of the Opennet Initiative e.V. can access the Internet through the "
+"Internet Gateways provided by the association."
+msgstr ""
+"Mitglieder des Opennet Initiative e.V. können mittels der vom Verein "
+"betriebenen Internet-Gateways auf das Internet zugreifen."
 
 msgid "Number of Hops to the Gateway"
 msgstr "Anzahl der Hops bis zum Gateway"
 
-msgid "Open Virtual Privat Network"
-msgstr "Open Virtual Privat Network"
-
 msgid "Opennet OpenVPN Gateways"
 msgstr "Opennet OpenVPN Gateways"
 
-msgid "Organizational Unit"
-msgstr "Organisations-Einheit"
-
 msgid "Port"
 msgstr "Port"
-
-msgid "Private Key (.key)"
-msgstr "Geheimer Schlüssel (.key)"
-
-msgid ""
-"Private Key and Certificate do not match. Certificate-Request also does not "
-"match Private Key, therefore sending the Certificate Request to opennet "
-"authority will not help. Please replace Certificate or Private Key or "
-"regenerate Key and Certificate Request."
-msgstr ""
-"Der private Schlüsel und das Zertifikat passen nicht zueinander. Die "
-"Zertifikatsanfrage passt ebenfalls nicht zum Schlüssel. Daher ist ist nicht "
-"sinnvoll, die Zertifikatsanfrage einzureichen. Erzeuge bitte einfach einen "
-"neuen Schlüssel, ein neues Zertifikat oder eine neue Zertifikatsanfrage."
-
-msgid "Private Key and Certificate do not match. Please replace Certificate!"
-msgstr ""
-"Der private Schlüssel passt nicht zum Zertifikat. Bitte ersetze das "
-"Zertifikat!"
-
-msgid "Province"
-msgstr "Bundesland"
-
-msgid ""
-"Send Certificate Request (.csr) <b>and only this file</b> to <a href='mailto:"
-"%s?subject=Certificate Request for %s %s&amp;body=[please attach the "
-"Certificate Request (.csr) - and only this file - to this mail and write "
-"some nice words to the administrator]'>%s</a> in order to get the required "
-"certificate."
-msgstr ""
-"Sende die Zertifikatanfrage (.csr) <b>und nur diese Datei</b> an <a "
-"href='mailto:%s?subject=Zertifikatsanfrage für %s %s&amp;body=[bitte die "
-"Zertifikatsanfrage (.csr) - und nichts anderes - an diese Email anhängen. "
-"Ein paar nette Worte an die Administratoren sind auch immer gern gesehen.]'>"
-"%s</a>, um das erforderliche Zertifikat zu erhalten."
-
-msgid "Send your request with one click"
-msgstr "Sende Deine Anfrage mit einem Klick"
 
 msgid "Speed"
 msgstr "Geschwindigkeit"
 
 msgid "Status"
 msgstr "Status"
-
-msgid "Submit certificate request"
-msgstr "Sende Deine Zertifikatsanfrage"
 
 msgid ""
 "Take a look at the Opennet wiki, if you would like to know more about the "
@@ -249,8 +164,8 @@ msgstr "Tunnel ist nicht aktiv"
 msgid "Tunnel starting"
 msgstr "Tunnel ist im Aufbau"
 
-msgid "UserGateway (type user gateway)"
-msgstr "Usergateway (Internet-Freigabe)"
+msgid "VPN Certificate and Internet Access"
+msgstr "VPN-Zertifikate und Internetzugang"
 
 msgid "VPN Gateways"
 msgstr "VPN Gateways"
@@ -267,6 +182,13 @@ msgid ""
 msgstr ""
 "Du kannst die Sortier-Methode der Gateway-Liste in den <a href=\"%s"
 "\">Dienste-Einstellungen</a> ändern."
+
+msgid ""
+"You need to request your own VPN certificate in order to use these Internet "
+"Gateways."
+msgstr ""
+"Du musst Dein eigenes VPN-Zertifikat erfragen, um Dich mit den Internet-"
+"Gateways verbinden zu können."
 
 msgid ""
 "Your router periodically tries to connect to all available Gateways in the "
@@ -289,14 +211,8 @@ msgstr "löschen"
 msgid "disable"
 msgstr "abschalten"
 
-msgid "download"
-msgstr "herunterladen"
-
 msgid "enable"
 msgstr "aktivieren"
-
-msgid "generate"
-msgstr "erzeuge Schlüssel"
 
 msgid "move down"
 msgstr "nach unten bewegen"
@@ -316,9 +232,6 @@ msgstr "zurücksetzen"
 msgid "restart VPN Tunnel"
 msgstr "Neustart des VPN-Tunnels"
 
-msgid "search file"
-msgstr "suche Datei"
-
 msgid "see"
 msgstr "siehe"
 
@@ -331,23 +244,132 @@ msgstr "vor %d Minuten getestet"
 msgid "unreachable"
 msgstr "nicht erreichbar"
 
-msgid "upload"
-msgstr "hochladen"
-
-msgid "upload Certificate (.crt) or Private Key (.key)"
-msgstr "hochladen von Zertifikat (.crt) oder Geheimem Schlüssel (.key)"
-
 msgid "upload to Internet %s kbit/s; download from Internet %s kbit/s"
 msgstr "Upload ins Internet %s kbit/s; Download aus dem Internet %s kbit/s"
 
-msgid "uploaded or generated on this date."
-msgstr "bei dieser Zeit erstellt oder hochgeladen"
+#~ msgid "...show..."
+#~ msgstr "...anzeigen..."
 
-msgid "via Internet"
-msgstr "über das Internet"
+#~ msgid "AccessPoint (type users)"
+#~ msgstr "Access-Point (Nutzer)"
 
-msgid "via Opennet"
-msgstr "im Opennet"
+#~ msgid "Certificate (.crt)"
+#~ msgstr "Zertifikat (.crt)"
+
+#~ msgid "Certificate Name"
+#~ msgstr "Zertifikat-Name"
+
+#~ msgid "Certificate Request (.csr)"
+#~ msgstr "Zertifikat-Anfrage (.csr)"
+
+#~ msgid ""
+#~ "Choose one of the following options for submitting your certificate "
+#~ "signing request"
+#~ msgstr ""
+#~ "Wähle einen der folgenden Wege für die Einreichung Deiner Zertifikat-"
+#~ "Anfrage"
+
+#~ msgid "Country"
+#~ msgstr "Land"
+
+#~ msgid "Download the CSR file and upload it manually"
+#~ msgstr ""
+#~ "Lade die Zertifikatsanfrage (CSR) herunter und lade sie anschließend "
+#~ "manuell hoch"
+
+#~ msgid "Key Generation"
+#~ msgstr "Schlüsselerzeugung"
+
+#~ msgid "Key Management"
+#~ msgstr "Schlüsselverwaltung"
+
+#~ msgid "Key/Cert Status"
+#~ msgstr "Status Schlüssel/Zertifikat"
+
+#~ msgid "Locality"
+#~ msgstr "Ort"
+
+#~ msgid "Member Email Address"
+#~ msgstr "Deine EMail Adresse"
+
+#~ msgid "Member Name"
+#~ msgstr "Dein Name"
+
+#~ msgid "Open Virtual Privat Network"
+#~ msgstr "Open Virtual Privat Network"
+
+#~ msgid "Organizational Unit"
+#~ msgstr "Organisations-Einheit"
+
+#~ msgid "Private Key (.key)"
+#~ msgstr "Geheimer Schlüssel (.key)"
+
+#~ msgid ""
+#~ "Private Key and Certificate do not match. Certificate-Request also does "
+#~ "not match Private Key, therefore sending the Certificate Request to "
+#~ "opennet authority will not help. Please replace Certificate or Private "
+#~ "Key or regenerate Key and Certificate Request."
+#~ msgstr ""
+#~ "Der private Schlüsel und das Zertifikat passen nicht zueinander. Die "
+#~ "Zertifikatsanfrage passt ebenfalls nicht zum Schlüssel. Daher ist ist "
+#~ "nicht sinnvoll, die Zertifikatsanfrage einzureichen. Erzeuge bitte "
+#~ "einfach einen neuen Schlüssel, ein neues Zertifikat oder eine neue "
+#~ "Zertifikatsanfrage."
+
+#~ msgid ""
+#~ "Private Key and Certificate do not match. Please replace Certificate!"
+#~ msgstr ""
+#~ "Der private Schlüssel passt nicht zum Zertifikat. Bitte ersetze das "
+#~ "Zertifikat!"
+
+#~ msgid "Province"
+#~ msgstr "Bundesland"
+
+#~ msgid ""
+#~ "Send Certificate Request (.csr) <b>and only this file</b> to <a "
+#~ "href='mailto:%s?subject=Certificate Request for %s %s&amp;body=[please "
+#~ "attach the Certificate Request (.csr) - and only this file - to this mail "
+#~ "and write some nice words to the administrator]'>%s</a> in order to get "
+#~ "the required certificate."
+#~ msgstr ""
+#~ "Sende die Zertifikatanfrage (.csr) <b>und nur diese Datei</b> an <a "
+#~ "href='mailto:%s?subject=Zertifikatsanfrage für %s %s&amp;body=[bitte die "
+#~ "Zertifikatsanfrage (.csr) - und nichts anderes - an diese Email anhängen. "
+#~ "Ein paar nette Worte an die Administratoren sind auch immer gern "
+#~ "gesehen.]'>%s</a>, um das erforderliche Zertifikat zu erhalten."
+
+#~ msgid "Send your request with one click"
+#~ msgstr "Sende Deine Anfrage mit einem Klick"
+
+#~ msgid "Submit certificate request"
+#~ msgstr "Sende Deine Zertifikatsanfrage"
+
+#~ msgid "UserGateway (type user gateway)"
+#~ msgstr "Usergateway (Internet-Freigabe)"
+
+#~ msgid "download"
+#~ msgstr "herunterladen"
+
+#~ msgid "generate"
+#~ msgstr "erzeuge Schlüssel"
+
+#~ msgid "search file"
+#~ msgstr "suche Datei"
+
+#~ msgid "upload"
+#~ msgstr "hochladen"
+
+#~ msgid "upload Certificate (.crt) or Private Key (.key)"
+#~ msgstr "hochladen von Zertifikat (.crt) oder Geheimem Schlüssel (.key)"
+
+#~ msgid "uploaded or generated on this date."
+#~ msgstr "bei dieser Zeit erstellt oder hochgeladen"
+
+#~ msgid "via Internet"
+#~ msgstr "über das Internet"
+
+#~ msgid "via Opennet"
+#~ msgstr "im Opennet"
 
 #~ msgid ""
 #~ "The first reachable and not blocked Gateway is not the current active "

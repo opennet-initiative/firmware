@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-01-28 22:09+0200\n"
+"PO-Revision-Date: 2015-03-09 04:13+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -12,44 +12,42 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
 
-msgid "(tried/measured) to Gateway: %s/%s from Gateway: %s/%s"
-msgstr "(versucht/gemessen) zum Gateway: %s/s vom Gateway: %s/%s"
+msgid "Actions"
+msgstr "Aktionen"
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid ""
+"Allowing certain public services to be reachable within your local "
+"neighbourhood. The most notable example is the Internet Gateway Service "
+"which is used by all people accesing the Internet via Opennet."
+msgstr ""
+"Ermögliche die Erreichbarkeit bestimmter öffentlicher Dienste in Deiner "
+"lokalen Opennet-Nachbarschaft. Das wichtigste Beispiel für derlei Dienste "
+"ist der Internet-Zugang mittels der Internet-Gateways des Vereins."
+
+msgid "Available Services to be relayed"
+msgstr "Weiterzureichende Dienste"
 
 msgid "Central Gateways connected locally"
 msgstr "Externe Gateways sind lokal verbunden"
 
 msgid ""
-"Check MTU to and from the Gateways (again). This will take approximately 5 "
-"minutes per Gateway."
+"Connecting your local neighbourhood with the complete mesh of all Opennet "
+"nodes."
 msgstr ""
-"Prüfe die MTU von und zu den Gateways. Dies dauert etwa 5 Minuten je Gateway."
+"Verbindung Deine lokalen Opennet-Nachbarn mit dem gesamten Mesh-Netzwerk der "
+"Opennet-Knoten."
 
-msgid ""
-"Check VPN availability of Gateways (again). This will take approximately 10 "
-"seconds per Gateway."
-msgstr ""
-"Prüfe die Verfügbarkeit von VPN an den Gateways. Dies dauert etwa 10 "
-"Sekunden je Gateway."
+msgid "Connection to an Mesh VPN service succeeded."
+msgstr "Verbindung zu einem Mesh-VPN-Dienst erfolgreich hergestellt."
 
-msgid ""
-"Check route trough WAN and ping-time of Gateways (again). This will take "
-"approximately 5 seconds per Gateway."
-msgstr ""
-"Prüfe, dass die Route durch den WAN-Anschluss geht und die ping-Zeit der "
-"Gateways. Dies dauert etwa 5 Sekunden je Gateway."
+msgid "Estimated upload and download speed to this exit gateway."
+msgstr "Geschätzte Upload- und Download-Geschwindigkeit zu diesem Mesh-Gateway."
 
-msgid ""
-"Check speed to and from the Gateways (again). This will take approximately 1 "
-"minute per Gateway."
-msgstr ""
-"Prüfe die Übertragungsgeschwindigkeit von und zu den Gateways. Dies dauert "
-"etwa eine Minute je Gateway."
-
-msgid "Click in order to switch Forwarding to Gateway %s (IP: %s)"
-msgstr "Klicke hier um die Weiterleitung zu Gateway %s (IP: %s) zu wechseln"
-
-msgid "Gateway Name"
-msgstr "Gateway-Name"
+msgid "Gateway"
+msgstr "Gateway"
 
 msgid "Gateway-Forward activated"
 msgstr "Gateway-Weiterleitung aktiviert"
@@ -57,51 +55,8 @@ msgstr "Gateway-Weiterleitung aktiviert"
 msgid "Gateway-Forward from %s to %s activated"
 msgstr "Gateway-Weiterleitung von %s nach %s aktiviert"
 
-msgid ""
-"If Forwarding is activated, all received VPN-Traffic is routed to the "
-"external Gateway. Only one forward can exist at a time."
-msgstr ""
-"Falls die Weiterleitung aktiv ist, werden alle eingehenden Nutzer-Tunnel-"
-"Verbindungen an den externen Gateway weitergeleitet. Es kann jeweils nur "
-"eine Weiterleitung aktiv sein. "
-
-msgid ""
-"If Tunnel is activated, a central Gateway-IP is mapped to the local Router. "
-"Multiple Tunnels can exist in parallel."
-msgstr ""
-"Sofern ein Tunnel aufgebaut ist, können Mesh-Verbindungen mit der Opennet-"
-"Wolken darüber hergestellt werden. Mehrere Tunnel können parallel existieren."
-
-msgid "Indicates Upload / Download Speed."
-msgstr "Abschätzung der Upload/Download-Bandbreite"
-
-msgid ""
-"Indicates if route to Gateway points trough WAN-device, this is required. "
-"Check/reconfigure your WAN connection is this test fails."
-msgstr ""
-"Die Verbindung zu den externen Opennet-Gateways muss durch dein WAN-"
-"Interface verlaufen. Falls dieser Test fehlschlägt, ist Dein Router "
-"fehlkonfiguriert oder die Verbindung zum Internet ist nicht verfügbar."
-
-msgid ""
-"Indicates if the Gateway supports VPN for the users. This is at least "
-"required to sucessfully use VPN-Forwarding."
-msgstr ""
-"Zeigt an, ob das Gateway einen VPN-Dienst für die Benutzer anbietet. Dies "
-"ist die Voraussetzung für seine Nutzung als externer Gateway."
-
-msgid ""
-"Indicates the Ping-Time in miliseconds. If a Gateway cannot be reached or "
-"the ping-time is high, it is probably (temporarily) down."
-msgstr ""
-"Die Ping-Laufzeit in Millisekunden ist ein Hinweis für die Erreichbarkeit "
-"eines Gateways."
-
 msgid "Internet Sharing"
 msgstr "Internet Freigabe"
-
-msgid "Internet Sharing Status Overview"
-msgstr "Internet-Freigabe Status"
 
 msgid "Internet not shared"
 msgstr "Internet nicht freigegeben"
@@ -136,59 +91,101 @@ msgstr ""
 "Die Internetfreigabe wird automatisch in den nächsten 5 Minuten erneut "
 "aktiviert. Du kannst sie bei Bedarf vorzeitig manuell aktivieren."
 
+msgid "Key Management"
+msgstr "Schlüsselverwaltung"
+
 msgid "Loading"
 msgstr "Lade"
 
-msgid "MTU-Status"
-msgstr "MTU-Status"
+msgid "MTU"
+msgstr "MTU"
 
 msgid "Manage Internet-Sharing"
 msgstr "Verwaltung der Internetfreigabe"
 
+msgid "Manually add Exit Gateway"
+msgstr "Internet-Gateway manuell hinzufügen"
+
+msgid "Manually add Mesh Gateway"
+msgstr "Mesh-Gateway manuell hinzufügen"
+
+msgid "Manually add a Mesh Gateway"
+msgstr "Mesh-Gateway manuell hinzufügen"
+
+msgid "Manually add a Service Relay"
+msgstr "Eine Dienst-Weiterleitung manuell anlegen"
+
+msgid "Mesh Connections"
+msgstr "Mesh-Verbindungen"
+
+msgid "Mesh Gateways"
+msgstr "Mesh-Gateways"
+
 msgid ""
-"Maximum Transmission Unit - match of configured and measured values is "
-"required to share your Internet in any case."
+"No Mesh Gateways were found. Probably there is no DNS service available. "
+"Maybe you want to verify your internet connection."
 msgstr ""
-"Maximum Transmission Unit - die konfigurierten und gemessenen Werte müssen "
-"für eine funktionierende Internetfreigabe übereinstimmen."
+"Es wurden keine Mesh-Gateways gefunden. Wahrscheinlich ist kein DNS-Server "
+"erreichbar. Vielleicht möchtest Du die Internet-Anbindung überprüfen."
 
-msgid "No IP-Address found for Gateway-Name, Gateway cannot be used"
+msgid ""
+"Openvpn does not support mtu-check, please compile openvpn without \"--"
+"enable-small\" option."
 msgstr ""
-"Die Namensauflösung des Gateway-Namens schlug fehl. Der Gateway kann nicht "
-"verwendet werden."
+"Die aktuell installierte OpenVPN-Version unterstützt keine MTU-Prüfung. "
+"Kompiliere bitte OpenVPN ohne die \"--enable-small\"-Option bzw. lade das "
+"Opennet-spezifischen OpenVPN-Paket mit der Paketverwaltung herunter."
 
-msgid "Opennet Usergateways"
-msgstr "Opennet Internet-Freigabe / Usergateways"
+#, fuzzy
+msgid "Ping"
+msgstr "Ping"
 
-msgid "Ping Time"
-msgstr "Ping-Zeit"
+msgid ""
+"Ping latency describes the travelling time of a small packet to the gateway "
+"and back."
+msgstr ""
+"Die Ping-Latenz beschreibt die den zeitlichen Abstand zwischen dem Versand "
+"einer Anfrage und der Ankunft der dazugehörigen Antwort."
+
+msgid "Port"
+msgstr "Port"
+
+msgid "Priority"
+msgstr "Priorität"
+
+msgid "Relaying external Services for the Opennet Mesh"
+msgstr "Weiterleitung externer Dienste für das Opennet-Mesh-Netzwerk"
+
+#, fuzzy
+msgid "Service Relay"
+msgstr "Dienstweiterleitung"
+
+msgid "Sharing your Internet connection"
+msgstr "Freigeben Deiner Internetverbindung"
+
+msgid ""
+"Sharing your internet connection with the Opennet Community usually consists "
+"of two distinct parts:"
+msgstr ""
+"Das Teilen Deiner Internetverbindung mit der Opennet-Gemeinschaft beinhaltet "
+"zwei Aspekte:"
 
 msgid "Speed"
 msgstr "Geschwindigkeit"
 
-msgid "Status Details, all checks have to be successful"
-msgstr "Status Details, alle Tests müssen erfolgreich sein"
-
 msgid "Status Internet-Sharing"
 msgstr "Status Internet-Freigabe"
 
-msgid "This will take approximately 1 minute per Gateway"
-msgstr "Dies wird etwa eine Minute je Gateway dauern"
+msgid ""
+"The configured Maximum Transmission Unit can cause subtle problems. Thus it "
+"needs to be tested carefully."
+msgstr ""
+"Die konfigurierte MTU (Maximum Transmission Unit) kann subtile Probleme bei "
+"der Nutzung des VPN auslösen. Daher muss dieser Parameter sorgfältig "
+"getestet werden."
 
-msgid "This will take approximately 10 seconds per Gateway"
-msgstr "Dies wird etwa 10 Sekunden je Gateway dauern"
-
-msgid "This will take approximately 5 minutes per Gateway"
-msgstr "Dies wird etwa 5 Minuten je Gateway dauern"
-
-msgid "This will take approximately 5 seconds per Gateway"
-msgstr "Dies wird etwa 5 Sekunden je Gateway dauern"
-
-msgid "UGW Tunnel"
-msgstr "UGW-Tunnel"
-
-msgid "Usergateway-Status"
-msgstr "Usergateway-Status"
+msgid "The route to the gateway should point at a WAN interface."
+msgstr "Die Route zum Gateway sollte über das WAN-Interface verlaufen."
 
 msgid "Usergateway-Tunnel active"
 msgstr "Usergateway-Tunnel ist aktiv"
@@ -196,22 +193,34 @@ msgstr "Usergateway-Tunnel ist aktiv"
 msgid "Usergateway-Tunnel not running"
 msgstr "Usergateway-Tunnel ist nicht aktiv"
 
-msgid "VPN Forwarding"
-msgstr "VPN-Weiterleitung"
+msgid "VPN"
+msgstr "VPN"
 
-msgid "VPN Status"
-msgstr "VPN-Status"
+msgid "VPN Certificate for Mesh Connection"
+msgstr "VPN-Zertifikat für Mesh-Verbindung"
 
 msgid "WAN"
 msgstr "WAN"
 
-msgid "add"
-msgstr "hinzufügen"
+msgid ""
+"You can change the sorting mechanism of gateways in the <a href=\"%s"
+"\">Service Settings section</a>."
+msgstr ""
+"Du kannst die Sortier-Methode der Gateway-Liste in den <a href=\"%s\""
+">Dienste-Einstellungen</a> ändern."
 
 msgid ""
-"automated check is running, manual modifications are temporarily disabled"
+"You need an OpenVPN certificate if you want to use your Internet connection "
+"in order to connect your local neighbourhood with the Opennet Mesh network."
 msgstr ""
-"automatische Prüfung läuft, Änderungen sind vorübergehend nicht möglich"
+"Du benötigst ein OpenVPN-Zertifikat, um deine lokale Opennet-Nachbarschaft "
+"mit der Opennet-Mesh-Wolke zu verbinden."
+
+msgid "active"
+msgstr "Aktiv"
+
+msgid "auto-discovered services cannot be deleted"
+msgstr "automatisch entdeckte Dienste können nicht gelöscht werden"
 
 msgid "central Gateway-IP %s connected trough tunnel"
 msgstr "externe Gateway-IP %s ist über den Tunnel verbunden"
@@ -219,33 +228,17 @@ msgstr "externe Gateway-IP %s ist über den Tunnel verbunden"
 msgid "central Gateway-IPs %s connected trough tunnel"
 msgstr "externe Gateway-IPs %s sind über den Tunnel verbunden"
 
-msgid "check MTU"
-msgstr "prüfe MTU"
-
-msgid "check Speed"
-msgstr "prüfe Geschwindigkeit"
-
-msgid "check VPN"
-msgstr "prüfe VPN"
-
-msgid "check WAN-Connection"
-msgstr "prüfe WAN-Verbindung"
-
-msgid "click in order to forward to this gateway immediately"
-msgstr ""
-"klicke hier um die Weiterleitung zu diesem Gateway unverzüglich zu aktivieren"
-
 msgid "day"
 msgstr "Tag"
 
 msgid "delete"
 msgstr "löschen"
 
+msgid "disable"
+msgstr "abschalten"
+
 msgid "disable Sharing"
 msgstr "Freigabe abschalten"
-
-msgid "down"
-msgstr "runter"
 
 msgid "enable Sharing"
 msgstr "Freigabe aktivieren"
@@ -256,20 +249,20 @@ msgstr "Stunde"
 msgid "hours"
 msgstr "Stunden"
 
-msgid "inactive"
-msgstr "deaktiviert"
-
-msgid "irrelevant"
-msgstr "unwichtig"
-
 msgid "minutes"
 msgstr "Minuten"
+
+msgid "move down"
+msgstr "nach unten bewegen"
+
+msgid "move up"
+msgstr "nach oben bewegen"
 
 msgid "no central Gateway-IPs connected trough tunnel"
 msgstr "keine externen Gateway-IPs sind über den Tunnel verbunden"
 
-msgid "ok"
-msgstr "ok"
+msgid "reset offset"
+msgstr "Offset zurücksetzen"
 
 msgid "suspend Internet-Sharing for"
 msgstr "Internetfreigabe kurzfristig abschalten"
@@ -277,14 +270,184 @@ msgstr "Internetfreigabe kurzfristig abschalten"
 msgid "suspend now"
 msgstr "jetzt aussetzen"
 
-msgid "tested %s minutes ago"
-msgstr "vor %s Minuten getestet"
+msgid "upload to Internet %s kBit/s | download from Internet %s kBit/s"
+msgstr ""
+"Hochladen ins Internet %s kBit/s | Herunterladen aus dem Internet %s kBit/s"
 
-msgid "up"
-msgstr "hoch"
+#~ msgid "(tried/measured) to Gateway: %s/%s from Gateway: %s/%s"
+#~ msgstr "(versucht/gemessen) zum Gateway: %s/s vom Gateway: %s/%s"
 
-msgid "upload to Gateway %s kbit/s; download from Gateway %s kbit/s"
-msgstr "Upload ins Internet %s kbit/s; Download aus dem Internet %s kbit/s"
+#~ msgid "Click in order to switch Forwarding to Gateway %s (IP: %s)"
+#~ msgstr "Klicke hier um die Weiterleitung zu Gateway %s (IP: %s) zu wechseln"
+
+#~ msgid "No IP-Address found for Gateway-Name, Gateway cannot be used"
+#~ msgstr ""
+#~ "Die Namensauflösung des Gateway-Namens schlug fehl. Der Gateway kann "
+#~ "nicht verwendet werden."
+
+#~ msgid "Opennet Usergateways"
+#~ msgstr "Opennet Internet-Freigabe / Usergateways"
+
+#~ msgid ""
+#~ "automated check is running, manual modifications are temporarily disabled"
+#~ msgstr ""
+#~ "automatische Prüfung läuft, Änderungen sind vorübergehend nicht möglich"
+
+#~ msgid "inactive"
+#~ msgstr "deaktiviert"
+
+#~ msgid "irrelevant"
+#~ msgstr "unwichtig"
+
+#~ msgid "ok"
+#~ msgstr "ok"
+
+#~ msgid "tested %s minutes ago"
+#~ msgstr "vor %s Minuten getestet"
+
+#~ msgid "upload to Gateway %s kbit/s; download from Gateway %s kbit/s"
+#~ msgstr "Upload ins Internet %s kbit/s; Download aus dem Internet %s kbit/s"
+
+#~ msgid ""
+#~ "Check MTU to and from the Gateways (again). This will take approximately "
+#~ "5 minutes per Gateway."
+#~ msgstr ""
+#~ "Prüfe die MTU von und zu den Gateways. Dies dauert etwa 5 Minuten je "
+#~ "Gateway."
+
+#~ msgid ""
+#~ "Check VPN availability of Gateways (again). This will take approximately "
+#~ "10 seconds per Gateway."
+#~ msgstr ""
+#~ "Prüfe die Verfügbarkeit von VPN an den Gateways. Dies dauert etwa 10 "
+#~ "Sekunden je Gateway."
+
+#~ msgid ""
+#~ "Check route trough WAN and ping-time of Gateways (again). This will take "
+#~ "approximately 5 seconds per Gateway."
+#~ msgstr ""
+#~ "Prüfe, dass die Route durch den WAN-Anschluss geht und die ping-Zeit der "
+#~ "Gateways. Dies dauert etwa 5 Sekunden je Gateway."
+
+#~ msgid ""
+#~ "Check speed to and from the Gateways (again). This will take "
+#~ "approximately 1 minute per Gateway."
+#~ msgstr ""
+#~ "Prüfe die Übertragungsgeschwindigkeit von und zu den Gateways. Dies "
+#~ "dauert etwa eine Minute je Gateway."
+
+#~ msgid "Gateway Name"
+#~ msgstr "Gateway-Name"
+
+#~ msgid ""
+#~ "If Forwarding is activated, all received VPN-Traffic is routed to the "
+#~ "external Gateway. Only one forward can exist at a time."
+#~ msgstr ""
+#~ "Falls die Weiterleitung aktiv ist, werden alle eingehenden Nutzer-Tunnel-"
+#~ "Verbindungen an den externen Gateway weitergeleitet. Es kann jeweils nur "
+#~ "eine Weiterleitung aktiv sein. "
+
+#~ msgid ""
+#~ "If Tunnel is activated, a central Gateway-IP is mapped to the local "
+#~ "Router. Multiple Tunnels can exist in parallel."
+#~ msgstr ""
+#~ "Sofern ein Tunnel aufgebaut ist, können Mesh-Verbindungen mit der Opennet-"
+#~ "Wolken darüber hergestellt werden. Mehrere Tunnel können parallel "
+#~ "existieren."
+
+#~ msgid "Indicates Upload / Download Speed."
+#~ msgstr "Abschätzung der Upload/Download-Bandbreite"
+
+#~ msgid ""
+#~ "Indicates if route to Gateway points trough WAN-device, this is required. "
+#~ "Check/reconfigure your WAN connection is this test fails."
+#~ msgstr ""
+#~ "Die Verbindung zu den externen Opennet-Gateways muss durch dein WAN-"
+#~ "Interface verlaufen. Falls dieser Test fehlschlägt, ist Dein Router "
+#~ "fehlkonfiguriert oder die Verbindung zum Internet ist nicht verfügbar."
+
+#~ msgid ""
+#~ "Indicates if the Gateway supports VPN for the users. This is at least "
+#~ "required to sucessfully use VPN-Forwarding."
+#~ msgstr ""
+#~ "Zeigt an, ob das Gateway einen VPN-Dienst für die Benutzer anbietet. Dies "
+#~ "ist die Voraussetzung für seine Nutzung als externer Gateway."
+
+#~ msgid ""
+#~ "Indicates the Ping-Time in miliseconds. If a Gateway cannot be reached or "
+#~ "the ping-time is high, it is probably (temporarily) down."
+#~ msgstr ""
+#~ "Die Ping-Laufzeit in Millisekunden ist ein Hinweis für die Erreichbarkeit "
+#~ "eines Gateways."
+
+#~ msgid "Internet Sharing Status Overview"
+#~ msgstr "Internet-Freigabe Status"
+
+#~ msgid "MTU-Status"
+#~ msgstr "MTU-Status"
+
+#~ msgid ""
+#~ "Maximum Transmission Unit - match of configured and measured values is "
+#~ "required to share your Internet in any case."
+#~ msgstr ""
+#~ "Maximum Transmission Unit - die konfigurierten und gemessenen Werte "
+#~ "müssen für eine funktionierende Internetfreigabe übereinstimmen."
+
+#~ msgid "Ping Time"
+#~ msgstr "Ping-Zeit"
+
+#~ msgid "Status Details, all checks have to be successful"
+#~ msgstr "Status Details, alle Tests müssen erfolgreich sein"
+
+#~ msgid "This will take approximately 1 minute per Gateway"
+#~ msgstr "Dies wird etwa eine Minute je Gateway dauern"
+
+#~ msgid "This will take approximately 10 seconds per Gateway"
+#~ msgstr "Dies wird etwa 10 Sekunden je Gateway dauern"
+
+#~ msgid "This will take approximately 5 minutes per Gateway"
+#~ msgstr "Dies wird etwa 5 Minuten je Gateway dauern"
+
+#~ msgid "This will take approximately 5 seconds per Gateway"
+#~ msgstr "Dies wird etwa 5 Sekunden je Gateway dauern"
+
+#~ msgid "UGW Tunnel"
+#~ msgstr "UGW-Tunnel"
+
+#~ msgid "Usergateway-Status"
+#~ msgstr "Usergateway-Status"
+
+#~ msgid "VPN Forwarding"
+#~ msgstr "VPN-Weiterleitung"
+
+#~ msgid "VPN Status"
+#~ msgstr "VPN-Status"
+
+#~ msgid "add"
+#~ msgstr "hinzufügen"
+
+#~ msgid "check MTU"
+#~ msgstr "prüfe MTU"
+
+#~ msgid "check Speed"
+#~ msgstr "prüfe Geschwindigkeit"
+
+#~ msgid "check VPN"
+#~ msgstr "prüfe VPN"
+
+#~ msgid "check WAN-Connection"
+#~ msgstr "prüfe WAN-Verbindung"
+
+#~ msgid "click in order to forward to this gateway immediately"
+#~ msgstr ""
+#~ "klicke hier um die Weiterleitung zu diesem Gateway unverzüglich zu "
+#~ "aktivieren"
+
+#~ msgid "down"
+#~ msgstr "runter"
+
+#~ msgid "up"
+#~ msgstr "hoch"
 
 #~ msgid "[[No IP-Address found for Gateway-Name, Gateway cannot be used]]"
 #~ msgstr ""

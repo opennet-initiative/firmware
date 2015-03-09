@@ -784,7 +784,7 @@ update_service_wan_status() {
 	else
 		outgoing_zone=$(get_zone_of_device "$outgoing_device")
 		# ausfuehrliche Erklaerung, falls das Routing zuvor noch akzeptabel war
-		uci_is_true "$(get_service_value "$service_name" "wan_status")" \
+		uci_is_true "$(get_service_value "$service_name" "wan_status" "false")" \
 			&& msg_info "Routing switched away from WAN interface to '$outgoing_device'"
 		msg_debug "warning: target '$host' is routed via interface '$outgoing_device' (zone '$outgoing_zone') instead of the expected WAN zone ($ZONE_WAN)"
 		set_service_value "$service_name" "wan_status" "false"

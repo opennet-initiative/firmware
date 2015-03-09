@@ -28,7 +28,8 @@ require("luci.model.opennet.funcs")
 				<td class="cert_infotable" rowspan="5"><% display_csr_infotable(certtype) %></td>
 				<td>
 					<label><%:Certificate Request (.csr)%></label><br />
-					<abbr title='<%:uploaded or generated on this date.%>'><div class="cbi-value-description"><% print(os.date("%c", certstatus.on_csr_date)) %></div></abbr>
+					<abbr title='<%:uploaded or generated on this date.%>'>
+						<div class="cbi-value-description"><%= os.date("%c", certstatus.on_csr_date) %></div></abbr>
 				</td>
 				<td>
 					<div class="cert_available" status="ok">&nbsp;&nbsp;&nbsp;</div>
@@ -42,7 +43,7 @@ require("luci.model.opennet.funcs")
 				<td>
 					<label><%:Private Key (.key)%></label><br />
 					<% if certstatus.on_key_exists then %>
-						<abbr title='<%:uploaded or generated on this date.%>'><div class="cbi-value-description"><% print(os.date("%c", certstatus.on_key_date)) %></div></abbr>
+						<abbr title='<%:uploaded or generated on this date.%>'><div class="cbi-value-description"><%= os.date("%c", certstatus.on_key_date) %></div></abbr>
 						</td><td>
 						<div class="cert_available" status="ok">&nbsp;&nbsp;&nbsp;</div>
 						</td><td>
@@ -56,7 +57,7 @@ require("luci.model.opennet.funcs")
 				<td>
 					<label><%:Certificate (.crt)%></label><br />
 					<% if certstatus.on_crt_exists then %>
-						<abbr title='<%:uploaded or generated on this date.%>'><div class="cbi-value-description"><% print(os.date("%c", certstatus.on_crt_date)) %></div></abbr>
+						<abbr title='<%:uploaded or generated on this date.%>'><div class="cbi-value-description"><%= os.date("%c", certstatus.on_crt_date) %></div></abbr>
 						</td><td>
 						<div class="cert_available" status="ok">&nbsp;&nbsp;&nbsp;</div>
 						</td><td>
@@ -102,7 +103,7 @@ require("luci.model.opennet.funcs")
 						<ul>
 							<li><%:Send your request with one click%>: <a href="<%=REQUEST_URI%>?submit=<%=get_default_value('on-core', 'csr_api_opennet')%>" target="_blank"><%:via Opennet%></a> / <a href="<%=REQUEST_URI%>?submit=<%=get_default_value('on-core', 'csr_api_public')%>" target="_blank"><%:via Internet%></a></li>
 							<li><%:Download the CSR file and upload it manually%>: <a href="<%=get_default_value('on-core', 'csr_form_opennet')%>"><%:via Opennet%></a> / <a href="<%=get_default_value('on-core', 'csr_form_public')%>"><%:via Internet%></a></li>
-							<li><% print(luci.i18n.translatef([[Send Certificate Request (.csr) <b>and only this file</b> to <a href='mailto:%s?subject=Certificate Request for %s %s&amp;body=[please attach the Certificate Request (.csr) - and only this file - to this mail and write some nice words to the administrator]'>%s</a> in order to get the required certificate.]], contact_email, type, on_id, contact_email)) %></li>
+							<li><%= luci.i18n.translatef([[Send Certificate Request (.csr) <b>and only this file</b> to <a href='mailto:%s?subject=Certificate Request for %s %s&amp;body=[please attach the Certificate Request (.csr) - and only this file - to this mail and write some nice words to the administrator]'>%s</a> in order to get the required certificate.]], contact_email, type, on_id, contact_email) %></li>
 						</ul>
 					</div>
 				</div>

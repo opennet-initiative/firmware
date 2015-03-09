@@ -237,14 +237,14 @@ on_vpn_gw="$(get_active_mig_connections | pipe_service_attribute host)"
 on_vpn_autosearch="$([ "$(uci_get on-core.settings.service_sorting)" = "manual" ] && echo "0" || echo "1")"
 on_vpn_sort="$(uci_get on-core.settings.service_sorting)"
 
-on_vpn_gws=$(get_services "gw" "ugw" | while read service_name; do
+on_vpn_gws=$(get_services "gw" | while read service_name; do
 		gw_ipaddr=$(get_service_value "$service_name" "host")
 		age=$(get_mig_connection_test_age "$service_name")
 		status=$(get_service_value "$service_name" "status")
 		echo "${gw_ipaddr}:${status}:${age}"
 	done | tr '\n' ' ')
 
-on_vpn_blist=$(get_services "gw" "ugw" | filter_enabled_services | pipe_service_attribute host | tr '\n' ' ')
+on_vpn_blist=$(get_services "gw" | filter_enabled_services | pipe_service_attribute host | tr '\n' ' ')
 
 ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '/dev tap/ {printf $1" "}'; done)
 on_ugw_status="$([ "$(echo "$ugw_status_centralips" | wc -w)" -ge "1" ] && echo "1" || echo "0")"

@@ -30,7 +30,7 @@ print_status()
 	local format_string="%6s %-16s %18s %7s %4s\n"
 
 	printf "$format_string" "active" "IP" "Quality" "VPN" "Age"
-	get_services "gw" "ugw" | sort_services_by_priority | while read service_name; do
+	get_services "gw" | sort_services_by_priority | while read service_name; do
 		host=$(get_service_value "$service_name" "host")
 		if uci_is_true "$(get_service_value "$service_name" "disabled" "false")"; then
 			# der Dienst wird ignoriert
@@ -80,22 +80,22 @@ print_usage()
 
 _get_gateway_service_from_ip() {
 	local host="$1"
-	local service_name=$(get_services "ugw" "gw" | filter_services_by_value "host=$host" | head -1)
+	local service_name=$(get_services "gw" | filter_services_by_value "host=$host" | head -1)
 	echo "$service_name"
 }
 
 
 # Bewege ein Gateway in der Liste
-move_top()	{ move_service_top	"$1" gw ugw; }
-move_up()	{ move_service_up	"$1" gw ugw; }
-move_down()	{ move_service_down	"$1" gw ugw; }
+move_top()	{ move_service_top	"$1" "gw"; }
+move_up()	{ move_service_up	"$1" "gw"; }
+move_down()	{ move_service_down	"$1" "gw"; }
 
 
 add_gw() {
 	trap "error_trap add_gw '$*'" $GUARD_TRAPS
 	local ipaddr="$1"
 	local port="${2:-$DEFAULT_MIG_PORT}"
-	notify_service "ugw" "openvpn" "$ipaddr" "$port" udp / "" manual
+	notify_service "gw" "openvpn" "$ipaddr" "$port" udp / "" manual
 }
 
 

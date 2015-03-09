@@ -93,7 +93,7 @@ select_mig_connection() {
 	trap "error_trap select_mig_connection '$*'" $GUARD_TRAPS
 	local wanted="$1"
 	local one_service
-	get_services "gw" "ugw" | while read one_service; do
+	get_services "gw" | while read one_service; do
 		# loesche Flags fuer die Vorselektion
 		set_service_value "$one_service" "switch_candidate_timestamp" ""
 		# erst nach der Abschaltung der alten Dienste wollen wir den/die neuen Dienste anschalten (also nur Ausgabe)
@@ -125,7 +125,7 @@ find_and_select_best_gateway() {
 	msg_debug "Trying to find a better gateway"
 	# suche nach dem besten und dem bisher verwendeten Gateway
 	# Ignoriere dabei alle nicht-verwendbaren Gateways.
-	result=$(get_services "gw" "ugw" \
+	result=$(get_services "gw" \
 			| filter_reachable_services \
 			| filter_enabled_services \
 			| sort_services_by_priority \
@@ -200,7 +200,7 @@ find_and_select_best_gateway() {
 get_active_mig_connections() {
 	trap "error_trap get_active_mig_connections '$*'" $GUARD_TRAPS
 	local service_name
-	get_services "gw" "ugw" | while read service_name; do
+	get_services "gw" | while read service_name; do
 		is_openvpn_service_active "$service_name" && echo "$service_name" || true
 	done
 }
@@ -222,7 +222,7 @@ reset_mig_connection_test_timestamp() {
 ## @sa reset_mig_connection_test_timestamp
 reset_all_mig_connection_test_timestamps() {
 	local service_name
-	get_services gw ugw | while read service_name; do
+	get_services "gw" | while read service_name; do
 		reset_mig_connection_test_timestamp "$service_name"
 	done
 }

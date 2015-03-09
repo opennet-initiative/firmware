@@ -613,7 +613,7 @@ move_service_down() {
 ## @fn move_service_top()
 ## @brief Verschiebe einen Dienst an die Spitze der Dienst-Sortierung
 ## @param service_name der zu verschiebende Dienst
-## @param service_types ein oder mehrere Dienst-Typen, auf die die Ermittlung der Dienst-Liste begrenzt werden soll (z.B. "gw" "ugw")
+## @param service_types ein oder mehrere Dienst-Typen, auf die die Ermittlung der Dienst-Liste begrenzt werden soll (z.B. "gw")
 ## @details Der Dienst steht anschließend direkt vor dem bisher führenden Dienst der ausgewählten Typen (falls angegeben).
 ##   Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste an die Spitze.
 move_service_top() {

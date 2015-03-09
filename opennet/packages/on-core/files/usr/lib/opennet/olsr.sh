@@ -182,7 +182,7 @@ parse_olsr_service_definitions() {
 		# Firmware-Versionen bis v0.4-5 veroeffentlichten folgendes Format:
 		#    http://192.168.0.40:8080|tcp|ugw upload:50 download:15300 ping:23
 		[ "$scheme" = "http" -a "$port" = "8080" -a "$proto" = "tcp" ] && \
-			[ "$service" = "gw" -o "$service" = "ugw" ] && scheme=openvpn && port=1600 && proto=udp
+			[ "$service" = "gw" -o "$service" = "ugw" ] && scheme=openvpn && port=1600 && proto=udp && service=gw
 		echo -e "$scheme\t$host\t$port\t$path\t$proto\t$service\t$details"
 	done
 }
@@ -193,7 +193,7 @@ parse_olsr_service_definitions() {
 # Beispielhafte Eintraege:
 #   http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108         #192.168.2.15
 #   dns://192.168.10.4:53|udp|dns                                           #192.168.10.4
-# Parameter: service-Type (z.B. "gw", "ugw", "dns", "ntp")
+# Parameter: service-Type (z.B. "gw", "dns", "ntp", "mesh")
 # Ergebnis (tab-separiert):
 #   SCHEME IP PORT PATH PROTO SERVICE DETAILS
 # Im Fall von "http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108" entspricht dies:

@@ -52,3 +52,7 @@ for fname in core.sh devel.sh network.sh olsr.sh routing.sh uci.sh services.sh s
 	true
 done
 
+
+# erzeuge das Profiling-Verzeichnis (vorsorglich - es wird wohl unbenutzt bleiben)
+mkdir -p "$PROFILING_DIR"
+

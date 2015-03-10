@@ -4,6 +4,10 @@
 ## @{
 
 
+# Ablage fuer profiling-Ergebnisse
+PROFILING_DIR=/var/run/on-profiling
+
+
 ## @fn list_installed_packages_by_size()
 ## @brief Zeige alle installierten Pakete und ihren Größenbedarf an.
 ## @details Dies erlaubt die Analyse des Flash-Bedarfs.
@@ -36,6 +40,46 @@ run_httpd_debug() {
 	trap "" INT
 	uhttpd -h /www -p 80 -f
 	/etc/init.d/uhttpd start
+}
+
+
+## @fn enable_profiling()
+## @brief Manipuliere die Funktionsheader in allen shell-Skripten der opennet-Pakete für das Sammeln von profiling-Informationen.
+## @details Diese Operation ist irreversibel - eine erneute Installation der Pakete ist der einzige saubere Weg zurück.
+##   Die Ergebnisse sind anschließend im PROFILING_DIR verfügbar.
+## @see summary_profiling
+enable_profiling() {
+	local message=
+	which bash >/dev/null || message="Failed to enable profiling - due to missing bash"
+	[ -e /usr/bin/date ] || message="Failed to enable profiling - due to missing coreutils-date"
+	if [ -z "$message" ]; then
+		# ersetze das shebang in allen Opennet-Skripten
+		cat /usr/lib/opkg/info/on-*.list | grep -E "(bin/|\.sh$|etc/cron\.|/etc/hotplug\.d/|lib/opennet)" \
+			| xargs -n 200 -r sed -i -f "${IPKG_INSTROOT:-}/usr/lib/opennet/profiling.sed"
+	else
+		logger -t "on-profile" "$message"
+		echo >&2 "$message"
+		return 1
+	fi
+}
+
+
+## @fn summary_profiling()
+## @brief Werte gesammelte profiling-Informationen aus.
+## @returns Jede Zeile beschreibt das kumulative Profiling einer Funktion:
+##   Gesamtzeit, Anzahl der Aufrufe, durchschnittliche Verarbeitungszeit, Funktionsname
+## @details Als Verarbeitungszeit einer Funktion gilt dabei der gesamte Zeitunterschied zwischen Funktionseintritt und -ende.
+## @see enable_profiling
+summary_profiling() {
+	local fname
+	local lines
+	local sum
+	find "$PROFILING_DIR" -type f | while read fname; do
+		awk <"$fname" '
+			BEGIN { summe=0; counter=0 }
+			{ summe+=($1/1000); counter+=1 }
+			END { printf "%16d %16d %16d %s\n", summe, counter, int(summe/counter), "'$fname'"}'
+	done | sort -n
 }
 
 # Ende der Doku-Gruppe

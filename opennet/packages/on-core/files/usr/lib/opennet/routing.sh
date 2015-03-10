@@ -104,7 +104,7 @@ add_zone_policy_rules_by_iif() {
 	shift
 	local device
 	for device in $(get_zone_devices "$zone"); do
-		[ -n "$device" ] && ip rule add iif "$device" "$@" || true
+		[ -n "$device" -a "$device" != "none" ] && ip rule add iif "$device" "$@" || true
 	done
 	return 0
 }

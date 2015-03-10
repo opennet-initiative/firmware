@@ -1,4 +1,6 @@
 #!/bin/sh
 
+set -eu
+
 on-function update_olsr_services
 

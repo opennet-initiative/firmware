@@ -12,8 +12,6 @@
 #
 
 
-set -eu
-
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 

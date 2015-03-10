@@ -8,9 +8,6 @@
 #
 
 
-# lieber strikte Fehlerpruefungen - wir wollen nix kaputtmachen, wenn es nicht den Erwartungen entspricht
-set -eu
-
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 

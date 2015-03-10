@@ -6,8 +6,6 @@
 #   http://wiki.openwrt.org/doc/uci#defaults
 #
 
-set -eu
-
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 

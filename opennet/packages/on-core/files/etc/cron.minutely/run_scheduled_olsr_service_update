@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eu
+
 # Im 5-Minuten-Takt wird ein cron-Job ausgefuehrt, der _immer_ zur Aktualisierung der Dienste fuehrt.
 # Wir wollen unsere (bedigte) Aktualisierung nicht zeitgleich starten (Speicherbedarf auf kleinen Geraeten reduzieren).
 # Abbruch, falls die Zahl auf 0 oder 5 enden sollte

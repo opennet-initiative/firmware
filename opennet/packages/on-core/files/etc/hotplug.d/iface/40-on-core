@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eu
+
 case "$ACTION" in
         ifup)
 		. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"

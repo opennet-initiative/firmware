@@ -259,7 +259,10 @@ Folgende Dienste werden weitergereicht:
 
 * _igw-openvpn._udp.opennet-initiative.de -> "gw"-Dienst
 
-Es werden nur diejenigen Dienste weitergereicht und announciert, die über das WAN-Interface route-bar sind.
+Es werden nur diejenigen Dienste weitergereicht und announciert, die den folgenden Bedingungen genügen:
+
+* die Route zum Ziel-Host verläuft über das WAN-Interface
+* die Quelle (*source*) des Dienstes ist *manual* (selbstverwaltet) oder *dns-srv* (durch den Verein verwaltet)
 
 
 Datensammlung: ondataservice {#ondataservice}

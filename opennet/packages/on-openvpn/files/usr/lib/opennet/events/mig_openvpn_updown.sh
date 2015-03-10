@@ -13,23 +13,27 @@
 #
 
 
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+set -eu
 
 MSG_FILE=/tmp/openvpn_msg.txt
+# die PATH-Umgebungsvariable beim Ausfuehren des openvpn-Skripts beinhaltet leider nicht die sbin-Verzeichnisse
+IP_BIN=$(PATH=$PATH:/sbin:/usr/sbin which ip)
 
 
 # Allgemeine openvpn-Ereignisbehandlung
-log_openvpn_events_and_disconnect_if_requested "mig-openvpn-connections"
+on-function log_openvpn_events_and_disconnect_if_requested "mig-openvpn-connections"
 
 # Sonder-Aktionen für mig-Verbindungen
 case "$script_type" in
 	up)
 		echo "vpn-tunnel active" >"$MSG_FILE"	# a short message for the web frontend
-		ip route add default via "$route_vpn_gateway" table "$ROUTING_TABLE_ON_UPLINK" || true
+		uplink_table=$(on-function get_variable "ROUTING_TABLE_ON_UPLINK")
+		"$IP_BIN" route add default via "$route_vpn_gateway" table "$uplink_table" || true
 		;;
 	down)
 		rm -f "$MSG_FILE"
-esac
+		;;
+esac 2>&1 | logger -t mig-updown
 
 exit 0
 

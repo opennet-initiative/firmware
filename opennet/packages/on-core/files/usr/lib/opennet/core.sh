@@ -181,6 +181,13 @@ add_banner_event() {
 }
 
 
+clean_restart_log() {
+	awk '{if ($1 != "-") print}' /etc/banner >/tmp/banner
+	mv /tmp/banner /etc/banner
+	sync
+}
+
+
 ## @fn _get_file_dict_value()
 ## @brief Auslesen eines Werts aus einer Schlüssel/Wert-Datei
 ## @param status_file der Name der Schlüssel/Wert-Datei
@@ -716,7 +723,8 @@ is_function_available() {
 	local func_name="$1"
 	# "ash" liefert leider nicht den korrekten Wert "function" nach einem Aufruf von "type -t".
 	# Also verwenden wir die Textausgabe von "type".
-	echo "$(type "$func_name")" | grep -q "function$" && return 0
+	# Die Fehlerausgabe von type wird ignoriert - im Falle der bash gibt es sonst unnoetige Ausgaben.
+	type "$func_name" 2>/dev/null | grep -q "function$" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

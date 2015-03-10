@@ -1,6 +1,0 @@
-#!/bin/sh
-
-awk '{if ($1 != "-") print}' /etc/banner >/tmp/banner
-mv /tmp/banner /etc/banner
-sync
-echo "* restart log cleaned."

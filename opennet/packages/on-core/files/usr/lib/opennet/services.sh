@@ -124,13 +124,10 @@ get_service_priority() {
 			echo "$((priority + offset))"
 		else
 			# wir benoetigen Informationen fuer Ziele mit Routing-Metriken
-			local distance=$(get_service_value "$service_name" "distance")
 			# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
 			[ -z "$sorting" ] && sorting=$(get_service_sorting)
 			if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
-				# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
-				[ -z "$distance" ] && return 0
-				get_distance_with_offset "$service_name"
+				get_distance_with_offset "$service_name" "$sorting"
 			elif [ "$sorting" = "manual" ]; then
 				get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
 			else
@@ -146,7 +143,9 @@ get_service_priority() {
 get_distance_with_offset() {
 	trap "error_trap get_distance_with_offset '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local sorting=$(get_service_sorting)
+	local sorting="${2:-}"
+	# aus Performance-Gruenden wird manchmal das sorting von aussen vorgegeben
+	[ -z "$sorting" ] && sorting=$(get_service_sorting)
 	local distance=$(get_service_value "$service_name" "distance")
 	local base_value=
 	[ -z "$distance" ] && return 0
@@ -595,8 +594,8 @@ move_service_top() {
 	# kein top-Service oder wir sind bereits ganz oben -> Ende
 	[ -z "$top_service" -o "$top_service" = "$service_name" ] && return 0
 	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
-		top_distance=$(get_distance_with_offset "$top_service")
-		our_distance=$(get_distance_with_offset "$service_name")
+		top_distance=$(get_distance_with_offset "$top_service" "$sorting")
+		our_distance=$(get_distance_with_offset "$service_name" "$sorting")
 		[ -z "$our_distance" ] && msg_info "Failed to move unreachable service ('$service_name') to top" && return 0
 		current_offset=$(get_service_value "$service_name" "offset" 0)
 		# wir verschieben unseren Offset, auf dass wir knapp ueber "top" stehen

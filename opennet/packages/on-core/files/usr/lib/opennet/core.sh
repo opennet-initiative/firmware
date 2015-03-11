@@ -229,7 +229,7 @@ _set_file_dict_value() {
 	# Schreibvorgaenge (=Wahrscheinlichkeit von gleichzeitigem Zugriff) zu reduzieren.
 	(
 		grep -v -w -s "$field" "$status_file"
-		echo "$field $value"
+		echo "$field $new_value"
 	) | sort | update_file_if_changed "$status_file" || true
 }
 

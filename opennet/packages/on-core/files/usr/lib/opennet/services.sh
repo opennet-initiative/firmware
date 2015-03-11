@@ -48,15 +48,14 @@ notify_service() {
 	local source="$8"
 	local service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 	local now=$(get_time_minute)
-	if ! is_existing_service "$service_name"; then
-		# diese Attribute sind Bestandteil des Namens und aendern sich nicht
-		set_service_value "$service_name" "service" "$service"
-		set_service_value "$service_name" "scheme" "$scheme"
-		set_service_value "$service_name" "host" "$host"
-		set_service_value "$service_name" "port" "$port"
-		set_service_value "$service_name" "protocol" "$protocol"
-		set_service_value "$service_name" "path" "$path"
-	fi
+	# diese Attribute sind Bestandteil des Namens und aendern sich eigentlich nicht
+	set_service_value "$service_name" "service" "$service"
+	set_service_value "$service_name" "scheme" "$scheme"
+	set_service_value "$service_name" "host" "$host"
+	set_service_value "$service_name" "port" "$port"
+	set_service_value "$service_name" "protocol" "$protocol"
+	set_service_value "$service_name" "path" "$path"
+	# dies sind die flexiblen Attribute
 	set_service_value "$service_name" "details" "$details"
 	set_service_value "$service_name" "timestamp" "$now"
 	set_service_value "$service_name" "source" "$source"
@@ -234,10 +233,11 @@ sort_services_by() {
 filter_reachable_services() {
 	local service_name
 	while read service_name; do
-		( [ -n "$(get_service_value "$service_name" "distance")" ] \
+		{ [ -n "$(get_service_value "$service_name" "distance")" ] \
 			|| [ -n "$(get_service_value "$service_name" "priority")" ] \
 			|| [ "$(get_service_value "$service_name" "source")" = "manual" ]
-		) && echo "$service_name" || true
+		} && echo "$service_name"
+		true
 	done
 }
 

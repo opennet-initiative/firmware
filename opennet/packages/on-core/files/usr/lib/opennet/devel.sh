@@ -68,6 +68,7 @@ enable_profiling() {
 ## @brief Werte gesammelte profiling-Informationen aus.
 ## @returns Jede Zeile beschreibt das kumulative Profiling einer Funktion:
 ##   Gesamtzeit, Anzahl der Aufrufe, durchschnittliche Verarbeitungszeit, Funktionsname
+##   Die Zeiten sind jeweils in Millisekunden angegeben.
 ## @details Als Verarbeitungszeit einer Funktion gilt dabei der gesamte Zeitunterschied zwischen Funktionseintritt und -ende.
 ## @see enable_profiling
 summary_profiling() {

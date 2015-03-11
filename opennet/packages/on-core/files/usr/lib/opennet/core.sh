@@ -198,32 +198,15 @@ clean_restart_log() {
 ##   ein beliebiges whitespace-Zeichen getrennt.
 ##   Dieses Dateiformat wird beispielsweise für die Dienst-Zustandsdaten verwendet.
 ##   Zusätzlich ist diese Funktion auch zum Parsen von openvpn-Konfigurationsdateien geeignet.
-_get_file_dict_value() {
-	local status_file=$1
-	local field=$2
-	local key
-	local value
-	# fehlende Datei -> kein Ergebnis
-	[ -e "$status_file" ] || return 0
-	while read key value; do
-		[ "$field" = "$key" ] && echo -n "$value" && return || true
-	done < "$status_file"
-	return 0
-}
+_get_file_dict_value() { local key="$1"; shift; grep -w -s "^$key" "$@" | while read key value; do echo -n "$value"; done; }
 
 
 ## @fn _get_file_dict_keys()
 ## @brief Liefere alle Schlüssel aus einer Schlüssel/Wert-Datei.
-## @param status_file der Name der Schlüssel/Wert-Datei
+## @param status_files Namen der Schlüssel/Wert-Dateien
 ## @returns Liste aller Schlüssel aus der Schlüssel/Wert-Datei.
 ## @sa _get_file_dict_value
-_get_file_dict_keys() {
-	local status_file=$1
-	# fehlende Datei -> kein Ergebnis
-	[ -e "$status_file" ] || return 0
-	awk '{ print $1 }' < "$status_file"
-	return 0
-}
+_get_file_dict_keys() { cat "$@" 2>/dev/null | cut -f 1 -d " "; }
 
 
 ## @fn _set_file_dict_value()
@@ -237,19 +220,16 @@ _set_file_dict_value() {
 	local field=$2
 	local new_value=$3
 	local fieldname
-	local value
-	# fehlende Datei? Leer erzeugen ...
-	[ -e "$status_file" ] || touch "$status_file"
+	local value=$(_get_file_dict_value "$field" "$status_file")
+	# Wert ist korrekt? Wir sind fertig ...
+	[ "$value" = "$new_value" ] && return 0
 	# Filtere bisherige Zeilen mit dem key heraus.
 	# Fuege anschliessend die Zeile mit dem neuen Wert an.
 	# Die Sortierung sorgt fuer gute Vergleichbarkeit, um die Anzahl der
 	# Schreibvorgaenge (=Wahrscheinlichkeit von gleichzeitigem Zugriff) zu reduzieren.
 	(
-		while read fieldname value; do
-			[ "$field" != "$fieldname" -a -n "$fieldname" ] && echo "$fieldname $value" || true
-		 done <"$status_file"
-		# leerer Wert -> loeschen
-		[ -n "$new_value" ] && echo "$field $new_value"
+		grep -v -w -s "$field" "$status_file"
+		echo "$field $value"
 	) | sort | update_file_if_changed "$status_file" || true
 }
 
@@ -259,7 +239,7 @@ _set_file_dict_value() {
 ## @param key Name des Schlüssels
 ## @details Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
 ##   Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfügbar.
-get_on_core_default() { _get_file_dict_value "$ON_CORE_DEFAULTS_FILE" "$1"; }
+get_on_core_default() { _get_file_dict_value "$1" "$ON_CORE_DEFAULTS_FILE"; }
 
 
 ## @fn get_on_firmware_version()
@@ -507,12 +487,6 @@ set_in_key_value_list() {
 # Wandle einen uebergebenene Parameter in eine Zeichenkette um, die sicher als Dateiname verwendet werden kann
 get_safe_filename() {
 	echo "$1" | sed 's/[^a-zA-Z0-9._\-]/_/g'
-}
-
-
-# multipliziere eine nicht-ganze Zahl mit einem Faktor und liefere das ganzzahlige Ergebnis zurueck
-get_int_multiply() {
-	awk '{print int('$1'*$0)}'
 }
 
 

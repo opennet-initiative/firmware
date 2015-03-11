@@ -13,7 +13,7 @@ MESH_OPENVPN_SRV_DNS_NAME=_mesh-openvpn._udp.systemausfall.org
 # hole einen der default-Werte der aktuellen Firmware
 # Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
 # Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfuegbar.
-get_on_usergw_default() { _get_file_dict_value "$ON_USERGW_DEFAULTS_FILE" "$1"; }
+get_on_usergw_default() { _get_file_dict_value "$1" "$ON_USERGW_DEFAULTS_FILE"; }
 
 
 ## @fn has_mesh_openvpn_credentials()

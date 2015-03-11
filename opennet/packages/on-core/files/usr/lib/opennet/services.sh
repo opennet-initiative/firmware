@@ -8,7 +8,7 @@ PERSISTENT_SERVICE_STATUS_DIR=/etc/on-services.d
 # eine grosse Zahl sorgt dafuer, dass neu entdeckte Dienste hinten angehaengt werden
 DEFAULT_SERVICE_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
-# unbedingt synchron halten mit "_is_persistent_service_attribute" (der Effizienz wegen getrennt)
+# Die folgenden Attribute werden dauerhaft (im Flash) gespeichert. Häufige Änderungen sind also eher unerwünscht.
 # Gruende fuer ausgefallene/unintuitive Attribute:
 #   uci_dependency: später zu beräumende uci-Einträge wollen wir uns merken
 #   file_dependency: siehe uci_dependency
@@ -117,26 +117,29 @@ get_service_priority() {
 	local priority=$(get_service_value "$service_name" "priority")
 	local rank
 	# priority wird von nicht-olsr-Clients verwendet (z.B. mesh-Gateways mit oeffentlichen IPs)
-	if [ -n "$priority" ]; then
-		# dieses Ziel traegt anscheinend keine Routing-Metrik
-		local offset=$(get_service_value "$service_name" "offset" "0")
-		echo "$((priority + offset))"
-	else
-		# wir benoetigen Informationen fuer Ziele mit Routing-Metriken
-		local distance=$(get_service_value "$service_name" "distance")
-		# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
-		[ -z "$sorting" ] && sorting=$(get_service_sorting)
-		if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
-			# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
-			[ -z "$distance" ] && return 0
-			get_distance_with_offset "$service_name"
-		elif [ "$sorting" = "manual" ]; then
-			get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
+	local base_priority=$(
+		if [ -n "$priority" ]; then
+			# dieses Ziel traegt anscheinend keine Routing-Metrik
+			local offset=$(get_service_value "$service_name" "offset" "0")
+			echo "$((priority + offset))"
 		else
-			msg_info "Unknown sorting method for services: $sorting"
-			echo 1
-		fi
-	fi | get_int_multiply 1000 | _add_local_bias_to_host "$(get_service_value "$service_name" "host")"
+			# wir benoetigen Informationen fuer Ziele mit Routing-Metriken
+			local distance=$(get_service_value "$service_name" "distance")
+			# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
+			[ -z "$sorting" ] && sorting=$(get_service_sorting)
+			if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
+				# keine Entfernung -> nicht erreichbar -> leeres Ergebnis
+				[ -z "$distance" ] && return 0
+				get_distance_with_offset "$service_name"
+			elif [ "$sorting" = "manual" ]; then
+				get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
+			else
+				msg_info "Unknown sorting method for services: $sorting"
+				echo 1
+			fi
+		fi | cut -f 1 -d .
+	)
+	echo $(( ${base_priority:-$DEFAULT_SERVICE_RANK} * 1000)) | _add_local_bias_to_host "$(get_service_value "$service_name" "host")"
 }
 
 
@@ -245,8 +248,11 @@ filter_reachable_services() {
 ##   die Standardausgabe weitergeleitet, falls der Dienst nicht abgewählt wurde.
 filter_enabled_services() {
 	local service_name
+	local disabled
 	while read service_name; do
-		uci_is_false "$(get_service_value "$service_name" "disabled" "false")" && echo "$service_name" || true
+		disabled=$(get_service_value "$service_name" "disabled")
+		[ -n "$disabled" ] && uci_is_true "$disabled" && continue
+		echo "$service_name"
 	done
 }
 
@@ -277,31 +283,23 @@ pipe_service_attribute() {
 
 
 ## @fn get_services()
-## @param service_types ein oder mehrere Service-Typen
-## @brief Liefere alle Dienste zurueck, die einem der angegebenen Typen zugeordnet sind.
-## Falls keine Parameter übergeben wurden, dann werden alle Dienste ungeachtet ihres Typs ausgegeben.
+## @param service_type (optional) ein Service-Typ
+## @brief Liefere alle Dienste zurueck, die dem angegebenen Typ zugeordnet sind.
+##    Falls kein Typ angegben wird, dann werden alle Dienste ungeachtet ihres Typs ausgegeben.
 get_services() {
 	trap "error_trap get_services '$*'" $GUARD_TRAPS
 	local services
-	local service_type
 	local fname_persist
-	if [ $# -eq 0 ]; then
-		# alle Dienste ausgeben
-		# kein Dienste-Verzeichnis? Keine Ergebnisse ...
-		[ -e "$PERSISTENT_SERVICE_STATUS_DIR" ] || return 0
-		find "$PERSISTENT_SERVICE_STATUS_DIR" -type f | while read fname_persist; do
-			# leere Dateien ignorieren; die anderen als Dienstnamen ausgeben
-			[ -s "$fname_persist" ] && basename "$fname_persist" || true
-		done
-	else
-		# liefere alle Dienste mit dem passenden "service"-Attribut
-		services=$(get_services)
-		# falls keine Dienste bekannt sind, dann liefere auch keine Leerzeile zurueck
-		[ -z "$services" ] && return 0
-		for service_type in "$@"; do
-			echo "$services" | filter_services_by_value "service=$service_type"
-		done
-	fi
+	# alle Dienste ausgeben
+	# kein Dienste-Verzeichnis? Keine Ergebnisse ...
+	[ -e "$PERSISTENT_SERVICE_STATUS_DIR" ] || return 0
+	find "$PERSISTENT_SERVICE_STATUS_DIR" -type f -size +1c -print0 \
+		| xargs -0 -r -n 1 basename \
+		| if [ $# -gt 0 ]; then
+			filter_services_by_value "service=$1"
+		else
+			cat -
+		fi
 }
 
 
@@ -327,29 +325,6 @@ filter_services_by_value() {
 }
 
 
-# Pruefe ob der Schluessel in der persistenten oder der volatilen Datenbank gespeichert werden soll.
-# Ziel ist erhoehte Geschwindigkeit und verringerte Schreibzugriffe.
-# Diese Liste muss synchron gehalten werden mit PERSISTENT_SERVICE_ATTRIBUTES.
-_is_persistent_service_attribute() {
-	[ "$1" = "service" \
-		-o "$1" = "scheme" \
-		-o "$1" = "host" \
-		-o "$1" = "port" \
-		-o "$1" = "protocol" \
-		-o "$1" = "path" \
-		-o "$1" = "uci_dependency" \
-		-o "$1" = "file_dependency" \
-		-o "$1" = "priority" \
-		-o "$1" = "rank" \
-		-o "$1" = "offset" \
-		-o "$1" = "disabled" \
-		-o "$1" = "source" \
-		-o "$1" = "local_port" \
-		] && return 0
-	trap "" $GUARD_TRAPS && return 1
-}
-
-
 # Setzen eines Werts fuer einen Dienst.
 # Je nach Schluesselname wird der Inhalt in die persistente uci- oder
 # die volatile tmpfs-Datenbank geschrieben.
@@ -361,7 +336,7 @@ set_service_value() {
 	[ -z "$service_name" ] \
 		&& msg_info "Error: no service given for attribute change ($attribute=$value)" \
 		&& trap "" $GUARD_TRAPS && return 1
-	if _is_persistent_service_attribute "$attribute"; then
+	if echo "$PERSISTENT_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
 		dirname="$PERSISTENT_SERVICE_STATUS_DIR"
 	else
 		dirname="$VOLATILE_SERVICE_STATUS_DIR"
@@ -386,12 +361,7 @@ get_service_value() {
 	[ -z "$service_name" ] \
 		&& msg_info "Error: no service given for attribute request ('$attribute')" \
 		&& trap "" $GUARD_TRAPS && return 1
-	if _is_persistent_service_attribute "$attribute"; then
-		dirname="$PERSISTENT_SERVICE_STATUS_DIR"
-	else
-		dirname="$VOLATILE_SERVICE_STATUS_DIR"
-	fi
-	value=$(_get_file_dict_value "$dirname/$service_name" "$attribute")
+	value=$(_get_file_dict_value "$attribute" "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" "$VOLATILE_SERVICE_STATUS_DIR/$service_name")
 	[ -n "$value" ] && echo -n "$value" || echo -n "$default"
 	return 0
 }
@@ -399,16 +369,12 @@ get_service_value() {
 
 # Liefere die Suffixe aller Schluessel aus der Service-Attribut-Datenbank,
 # die mit dem gegebenen Praefix uebereinstimmen.
-get_service_attributes() {
-	local service_name="$1"
-	_get_file_dict_keys "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" ""
-	_get_file_dict_keys "$VOLATILE_SERVICE_STATUS_DIR/$service_name" ""
-}
+get_service_attributes() { _get_file_dict_keys "$PERSISTENT_SERVICE_STATUS_DIR/$1" "$VOLATILE_SERVICE_STATUS_DIR/$1"; }
 
 
 ## @fn print_services()
 ## @brief menschenfreundliche Ausgabe der aktuell angemeldeten Dienste
-## @param service_types (optional) Liste von gewünschten Service-Typen (falls leer: alle)
+## @param service_type (optional) ein Service-Type
 ## @returns Ausgabe der bekannten Dienste (für Menschen - nicht parsebar)
 print_services() {
 	trap "error_trap print_services '$*'" $GUARD_TRAPS
@@ -528,6 +494,7 @@ _distribute_service_ranks() {
 ## @fn move_service_up()
 ## @brief Verschiebe einen Dienst in der Dienst-Sortierung um eine Stufe nach oben
 ## @param service_name der zu verschiebende Dienst
+## @param service_type der Service-Typ innerhalb derer Mitglieder die Verschiebung stattfinden soll
 ## @details Für verschiedene Sortier-Modi hat dies verschiedene Auswirkungen:
 ##   * manual: Verschiebung vor den davorplatzierten Dienst desselben Typs
 ##   * etx/hop: Reduzierung des Offsets um eins
@@ -574,6 +541,7 @@ move_service_up() {
 ## @fn move_service_down()
 ## @brief Verschiebe einen Dienst in der Dienst-Sortierung um eine Stufe nach unten
 ## @param service_name der zu verschiebende Dienst
+## @param service_type der Service-Typ innerhalb derer Mitglieder die Verschiebung stattfinden soll
 ## @details Für verschiedene Sortier-Modi hat dies verschiedene Auswirkungen:
 ##   * manual: Verschiebung hinter den dahinterliegenden Dienst desselben Typs
 ##   * etx/hop: Erhöhung des Offsets um eins

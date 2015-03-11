@@ -97,15 +97,6 @@ _change_openvpn_config_setting() {
 }
 
 
-## @fn _get_openvpn_config_setting()
-## @brief Lies den Wert einer OpenVPN-Einstellung aus einer Konfigurationsdatei.
-_get_openvpn_config_setting() {
-	local config_file="$1"
-	local key="$2"
-	_get_file_dict_value "$config_file" "$key"
-}
-
-
 ## @fn get_openvpn_config()
 ## @brief liefere openvpn-Konfiguration eines Dienstes zurück
 ## @param service_name Name eines Dienstes
@@ -241,8 +232,8 @@ openvpn_service_has_certificate_and_key() {
 	[ -z "$config_template" ] && return 0
 	# Verweis auf lokale config-Datei (keine uci-basierte Konfiguration)
 	if [ -e "$config_template" ]; then
-		cert_file=$(_get_file_dict_value "$config_template" "cert")
-		key_file=$(_get_file_dict_value "$config_template" "key")
+		cert_file=$(_get_file_dict_value "cert" "$config_template")
+		key_file=$(_get_file_dict_value "key" "$config_template")
 	else
 		# im Zweifelsfall: liefere "wahr"
 		return 0
@@ -282,8 +273,8 @@ submit_csr_via_http() {
 has_openvpn_credentials_by_template() {
 	trap "error_trap has_openvpn_credentials_by_template '$*'" $GUARD_TRAPS
 	local template_file="$1"
-	local cert_file=$(_get_file_dict_value "$template_file" "cert")
-	local key_file=$(_get_file_dict_value "$template_file" "key")
+	local cert_file=$(_get_file_dict_value "cert" "$template_file")
+	local key_file=$(_get_file_dict_value "key" "$template_file")
 	# im Zweifel: liefere "wahr"
 	[ -z "$key_file" -o -z "$cert_file" ] && return 0
 	# beide Dateien existieren
@@ -380,7 +371,7 @@ openvpn_get_mtu() {
 	# Test-Schluessel verwenden, falls kein echter Schluessel vorhanden ist
 	# TOOD: Aktuell funktioniert der MTU-Test nicht mit dem Testzertifikat (es wurde von der falschen CA ausgestellt)
 	while read key default; do
-		filename="$(_get_openvpn_config_setting "$config_file" "key")"
+		filename="$(_get_file_dict_value "key" "$config_file")"
 		[ -e "$filename" ] || _change_openvpn_config_setting "$config_file" "$key" "$default"
 	done <<- EOF
 ca   $VPN_DIR_TEST/opennet-ca.crt

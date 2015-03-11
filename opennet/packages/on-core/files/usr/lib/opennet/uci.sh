@@ -137,11 +137,12 @@ _find_uci_sections() {
 	local section
 	local condition
 	# dieser Cache beschleunigt den Vorgang wesentlich
-	local uci_cache=$(uci -X show "$config")
-	echo "$uci_cache" | grep "^$config\.[^.]\+=$stype$" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
+	local uci_cache_file=$(mktemp)
+	uci -X show "$config" >"$uci_cache_file"
+	grep "^$config\.[^.]\+=$stype$" "$uci_cache_file" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
 		for condition in "$@"; do
 			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt
-			echo "$uci_cache" | grep -q "^$config\.$section\.$condition$" || continue 2
+			grep -q "^$config\.$section\.$condition$" "$uci_cache_file" || continue 2
 		done
 		# alle Bedingungen trafen zu
 		echo "$config.$section"
@@ -149,6 +150,7 @@ _find_uci_sections() {
 		[ "$max_num" = 0 ] && continue
 		[ "$counter" -ge "$max_num" ] && break
 	done | sort
+	rm -f "$uci_cache_file"
 	return 0
 }
 

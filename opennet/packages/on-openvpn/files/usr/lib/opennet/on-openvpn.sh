@@ -12,9 +12,7 @@ DEFAULT_MIG_PORT=1600
 ## @brief Liefere einen der default-Werte der aktuellen Firmware zurück (Paket on-openvpn).
 ## @param key Name des Schlüssels
 ## @sa get_on_core_default
-get_on_openvpn_default() {
-	_get_file_dict_value "$ON_OPENVPN_DEFAULTS_FILE" "$1"
-}
+get_on_openvpn_default() { _get_file_dict_value "$1" "$ON_OPENVPN_DEFAULTS_FILE"; }
 
 
 ## @fn has_mig_openvpn_credentials()
@@ -37,19 +35,20 @@ test_mig_connection() {
 	local service_name="$1"
 	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
 	prepare_openvpn_service "$service_name" "$MIG_OPENVPN_CONFIG_TEMPLATE_FILE"
-	local host=$(get_service_value "$service_name" "host")
 	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
-	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)
 	local now=$(get_time_minute)
 	local nonworking_timeout=$(($recheck_age + $(get_on_openvpn_default vpn_nonworking_timeout)))
-	local status=$(get_service_value "$service_name" "status")
 	if [ -n "$timestamp" ] && is_timestamp_older_minutes "$timestamp" "$nonworking_timeout"; then
 		# if there was no vpn-availability for a while (nonworking_timeout minutes), declare vpn-status as not working
 		set_service_value "$service_name" "status" "n"
 		# In den naechsten 'vpn_recheck_age' Minuten wollen wir keine Pruefungen durchfuehren.
 		set_service_value "$service_name" "timestamp_connection_test" "$now"
 		trap "" $GUARD_TRAPS && return 1
-	elif [ -z "$timestamp" ] || [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age"; then
+	fi
+	local host=$(get_service_value "$service_name" "host")
+	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)
+	local status=$(get_service_value "$service_name" "status")
+	if [ -z "$timestamp" ] || [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age"; then
 		# Neue Pruefung, falls:
 		# 1) noch nie eine Pruefung stattfand
 		# oder

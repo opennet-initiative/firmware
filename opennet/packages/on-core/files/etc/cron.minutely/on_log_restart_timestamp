@@ -58,7 +58,7 @@ if [ -z "$time_offset" ] || [ "$time_offset" -gt "$ACCEPTABLE_TIME_OFFSET" ]; th
 else
 	# unsere Zeit ist synchronisert - wir koennen das reboot-Log schreiben
 	# Ziehe von der aktuellen Zeit die uptime ab
-	boot_time=$(($(date +%s) - $uptime))
+	boot_time=$(($(date +%s) - uptime))
 	timestamp=$(date "@$boot_time")
 fi
 # Schreibe den Zeitstempel

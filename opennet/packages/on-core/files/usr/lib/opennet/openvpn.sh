@@ -345,6 +345,7 @@ openvpn_get_mtu() {
 	local config_file=$(mktemp -t "MTU-${service_name}-XXXXXXX")
 	local pid_file="$(mktemp)"
 	local log_file="$(get_service_log_filename "$service_name" "openvpn" "mtu")"
+	local host=$(get_service_value "$service_name" "host")
 	local filename
 	local key
 	local default
@@ -387,7 +388,8 @@ EOF
 	local mtu_out
 	local mtu_out_filtered
 	while [ "$wait_loops" -gt 0 ]; do
-		mtu_out=$(grep "MTU test completed" "$log_file")
+		# keine Fehlermeldungen (-s) falls die Log-Datei noch nicht existiert
+		mtu_out=$(grep -s "MTU test completed" "$log_file" || true)
 		# for example
 		# Thu Jul  3 22:23:01 2014 NOTE: Empirical MTU test completed [Tried,Actual] local->remote=[1573,1573] remote->local=[1573,1573]
 		if [ -n "$mtu_out" ]; then
@@ -404,7 +406,7 @@ EOF
 			break
 		fi
 		if [ -z "$pid" -o ! -d "/proc/$pid" ]; then
-			msg_info "failed to verify MTU resctrictions for $(get_service_value "$service_name" "host")"
+			msg_info "failed to verify MTU resctrictions for '$host'"
 			break
 		fi
 		sleep 10

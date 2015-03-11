@@ -312,12 +312,11 @@ aquire_lock() {
 
 
 clean_stale_pid_file() {
-	local pidfile=$1
-	local pid
-	[ -e "$pidfile" ] || return 0
-	pid=$(cat "$pidfile" | sed 's/[^0-9]//g')
-	[ -z "$pid" ] && msg_debug "removing broken PID file: $pidfile" && rm "$pidfile" && return 0
-	[ ! -e "/proc/$pid" ] && msg_debug "removing stale PID file: $pidfile" && rm "$pidfile" && return 0
+	local pid_file=$1
+	[ -e "$pid_file" ] || return 0
+	local pid=$(cat "$pid_file" | sed 's/[^0-9]//g')
+	[ -z "$pid" ] && msg_debug "removing broken PID file: $pid_file" && rm "$pid_file" && return 0
+	[ ! -e "/proc/$pid" ] && msg_debug "removing stale PID file: $pid_file" && rm "$pid_file" && return 0
 	return 0
 }
 
@@ -473,12 +472,12 @@ get_from_key_value_list() {
 }
 
 
-## @fn set_in_key_value_list()
+## @fn replace_in_key_value_list()
 ## @brief Ermittle aus einer mit Tabulatoren oder Leerzeichen getrennten Liste von Schlüssel-Wert-Paaren den Inhalt des Werts zu einem Schlüssel.
 ## @param search_key der Name des Schlüsselworts
 ## @param separator der Name des Trennzeichens zwischen Wert und Schlüssel
 ## @returns die korrigierte Schlüssel-Wert-Liste wird ausgegeben (eventuell mit veränderten Leerzeichen oder Tabulatoren)
-set_in_key_value_list() {
+replace_in_key_value_list() {
 	local search_key="$1"
 	local separator="$2"
 	local value="$3"

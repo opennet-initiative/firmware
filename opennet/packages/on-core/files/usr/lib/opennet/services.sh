@@ -211,16 +211,16 @@ sort_services_by_priority() {
 
 
 ## @fn sort_services_by()
-## @brief Sortiere den eingegeben Strom von Dienstnamen und gib eine sortierte Liste entsprechende des Arguments aus.
-## @param sort_column Die Spalte, anhand deren Inhalt die Auswertung und Sortierung stattfinden soll.
+## @brief Sortiere den eingegebenen Strom von Dienstnamen und gib eine sortierte Liste entsprechende des Arguments aus.
+## @param sort_key Der Dienst-Wert, anhand dessen  die Auswertung und Sortierung stattfinden soll.
 sort_services_by() {
 	trap "error_trap sort_services_by '$*'" $GUARD_TRAPS
-	local sort_column="$1"
+	local sort_key="$1"
 	local service_name
 	while read service_name; do
-		value=$(get_service_value "$service_name" "$sort_column" "_")
+		value=$(get_service_value "$service_name" "$sort_key" "_")
 		echo "$value" "$service_name"
-	done | sort -n | awk '{print $2}'
+	done | sort -n | cut -f 2- -d " "
 }
 
 
@@ -642,7 +642,7 @@ set_service_detail() {
 	local service_name="$1"
 	local key="$2"
 	local value="$3"
-	local new_details=$(get_service_value "$service_name" "details" | set_in_key_value_list "$key" ":" "$value")
+	local new_details=$(get_service_value "$service_name" "details" | replace_in_key_value_list "$key" ":" "$value")
 	set_service_value "$service_name" "details" "$new_details"
 	return 0
 }

@@ -471,6 +471,28 @@ Fehlermeldungen des Web-Interface ausgeben:
   killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-*; uhttpd -h /www -p 80 -f
 
 
+Profiling {#profiling}
+---------
+
+Für Performance-Optimierungen sind Daten zum Zeitbedarf der verschiedenen Funktionen sehr hilfreich.
+
+Mit dem folgenden Kommando werden alle Shell-Skripte der opennet-Pakete derart manipuliert, dass fortan der Zeitbedarf jedes Funktionsaufrufs aufgezeichnet wird:
+
+  on-function enable_profiling
+
+Vor der Manipulation der Shell-Skripte prüft das obige Skript, ob die notwendigen Zusatzpakete (z.B. *bash*) intalliert sind.
+
+Die obige Aktion ist irreversibel. Die einzige Möglichkeit, das Profiling wieder abzuschalten, ist die erneute Installation der Pakete.
+
+Die Ergebnisse des Profiling werden unter `/var/run/on-profiling` abgelegt. Für jede Funktion wird eine Datei erzeugt. Jede Zeile in diesen Dateien entspricht dabei einem Funktionsdurchlauf. Die gemessene Zeit entspricht dem zeitlichen Abstand von Funktionseintritt und -ende. Die Verarbeitungszeit der aufgerufenen Funktionen geht also in den Zeitbedarf der sie aufrufenden Funktion ein.
+
+Die Auswertung des Profiling ist folgendermaßen möglich:
+
+  on-function summary_profiling
+
+Mit fortlaufendem Profiling wird das tmp-Verzeichnis (bzw. der RAM) schrittweise gefüllt. Ein Host mit aktiviertem Profiling darf also nicht im produktiven Einsatz sein, da im Verlauf von Stunden eine Speichermangel-Situation droht.
+
+
 Übersetzungen {#translations}
 =============
 

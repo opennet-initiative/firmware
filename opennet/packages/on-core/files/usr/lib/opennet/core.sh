@@ -16,6 +16,9 @@ DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 REPORTS_FILE=/tmp/on_report.tar.gz
 ## @var Basis-Verzeichnis für Log-Dateien
 LOG_BASE_DIR=/var/log
+# beim ersten Pruefen wird der Debug-Modus ermittelt
+DEBUG_ENABLED=
+
 
 
 ## @fn msg_debug()
@@ -24,9 +27,10 @@ LOG_BASE_DIR=/var/log
 ## @details Die Debug-Nachrichten landen im syslog (siehe ``logread``).
 ## Falls das aktuelle Log-Level bei ``info`` oder niedriger liegt, wird keine Nachricht ausgegeben.
 msg_debug() {
-	[ -z "$DEBUG" ] && DEBUG=$(uci_get on-core.settings.debug)
-	[ -z "$DEBUG" ] && DEBUG=false
-	uci_is_true "$DEBUG" && logger -t "$(basename "$0")[$$]" "$1" || true
+	# bei der ersten Ausfuehrung dauerhaft speichern
+	[ -z "$DEBUG_ENABLED" ] && \
+		DEBUG_ENABLED=$(uci_is_true "$(uci_get on-core.settings.debug false)" && echo 1 || echo 0)
+	[ "$DEBUG_ENABLED" = "0" ] || logger -t "$(basename "$0")[$$]" "$1"
 }
 
 
@@ -35,9 +39,7 @@ msg_debug() {
 ## @brief Informationen und Fehlermeldungen ins syslog schreiben
 ## @details Die Nachrichten landen im syslog (siehe ``logread``).
 ## Die info-Nachrichten werden immer ausgegeben, da es kein höheres Log-Level gibt.
-msg_info() {
-	logger -t "$(basename "$0")[$$]" "$1"
-}
+msg_info() { logger -t "$(basename "$0")[$$]" "$1"; }
 
 
 ## @fn append_to_custom_log()

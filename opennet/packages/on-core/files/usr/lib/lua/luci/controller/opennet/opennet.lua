@@ -37,8 +37,6 @@ function index()
 	entry({"opennet", "on_status", "on_status_neighbors"}, call("status_neighbors")).leaf = true
 	entry({"opennet", "on_status", "on_status_network"}, call("status_network")).leaf = true
 	entry({"opennet", "on_status", "on_status_wireless"}, call("status_wireless")).leaf = true
-	entry({"opennet", "on_status", "on_status_mig_connection"}, call("status_mig_connection")).leaf = true
-	entry({"opennet", "on_status", "on_status_ugw_connection"}, call("status_ugw_connection")).leaf = true
 	entry({"opennet", "on_status", "on_status_issues"}, call("status_issues")).leaf = true
 
 	-- separate top-level Auswahl fuer das olsr-Web-Interface

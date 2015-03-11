@@ -35,98 +35,6 @@ function get_firmware_title()
 end
 
 
-function status_mig_connection()
-	luci.http.prepare_content("text/plain")
-	if not on_bool_function("is_function_available", {"get_active_mig_connections"}) then return end
-	local services = line_split(on_function("get_active_mig_connections"))
-	local result
-	function get_service_host(service_name)
-		return get_service_value(service_name, "host")
-	end
-	local remotes = string_join(map_table(services, get_service_host), ", ")
-	if remotes then
-		result = luci.i18n.translatef("VPN-Tunnel active (%s)", remotes)
-	else
-		result = luci.i18n.translate("VPN-Tunnel not active, for details check the System Log.")
-	end
-	luci.http.write(result)
-end
-
-
-function status_ugw_connection()
-	-- check if package on-usergw is installed
-	if not on_bool_function("is_function_available", {"get_active_ugw_connections"}) then return end
-
-	luci.http.prepare_content("text/plain")
-
-	local ugw_status = {}
-	-- central gateway-IPs reachable over tap-devices
-	ugw_status.connections = on_function("get_active_ugw_connections")
-	local service_name
-	local central_ips_table = {}
-	for service_name in line_split(ugw_status.connections) do
-		table.insert(central_ips_table, get_service_value(service_name, "host"))
-	end
-	ugw_status.centralips = string_join(central_ips_table, ", ")
-	ugw_status.centralip_status = (ugw_status.centralips ~= "")
-	-- tunnel active
-	ugw_status.tunnel_active = to_bool(ugw_status.centralips)
-	-- sharing possible
-	ugw_status.usergateways_no = 0
-	-- TODO: Struktur ab hier weiter umsetzen
-	cursor:foreach ("on-usergw", "usergateway", function() ugw_status.usergateways_no = ugw_status.usergateways_no + 1 end)
-	ugw_status.sharing_possible = false
-	local count = 1
-	while count <= ugw_status.usergateways_no do
-		local onusergw = cursor:get_all("on-usergw", "opennet_ugw"..count)
-		if uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu_status) then
-			ugw_status.sharing_possible = true
-			break
-		end
-		count = count + 1
-	end
-	-- sharing enabled
-	ugw_status.sharing_enabled = uci_to_bool(cursor:get("on-usergw", "ugw_sharing", "shareInternet"))
-	-- forwarding enabled
-	local ugw_port_forward = tab_split(on_function("get_ugw_portforward"))
-	ugw_status.forwarded_ip = ugw_port_forward[1]
-	ugw_status.forwarded_gw = ugw_port_forward[2]
-
-
-	local result = ""
-	if ugw_status.sharing_enabled or ugw_status.sharing_possible then
-		result = result .. [[<tr class='cbi-section-table-titles'><td class='cbi-section-table-cell'>]] ..
-			luci.i18n.translate("Internet-Sharing:") .. [[</td><td class='cbi-section-table-cell'>]]
-		if uci_to_bool(ugw_status.centralip_status) or (ugw_status.forwarded_gw ~= "") then
-			result = result .. luci.i18n.translate("Internet shared")
-			if ugw_status.centralips then
-				result = result .. luci.i18n.translate("(no central Gateway-IPs connected trough tunnel)")
-			else
-				result = result .. luci.i18n.translatef("(central Gateway-IPs (%s) connected trough tunnel)", ugw_status.centralips)
-			end
-			if ugw_status.forwarded_gw ~= "" then
-				result = result .. ", " .. luci.i18n.translatef("Gateway-Forward for %s (to %s) activated", ugw_status.forwarded_ip, ugw_status.forwarded_gw)
-			end
-		elseif ugw_status.tunnel_active then
-			result = result .. luci.i18n.translate("Internet not shared")
-			    .. " ( " .. luci.i18n.translate("Internet-Sharing enabled")
-			    .. ", " .. luci.i18n.translate("Usergateway-Tunnel active") .. " )"
-		elseif ugw_status.sharing_enabled then
-			result = result .. luci.i18n.translate("Internet not shared")
-			    .. " ( "..  luci.i18n.translate("Internet-Sharing enabled")
-			    .. ", " .. luci.i18n.translate("Usergateway-Tunnel not running") .. " )"
-		elseif ugw_status.sharing_possible then
-			result = result .. luci.i18n.translate("Internet not shared")
-			    .. ", " .. luci.i18n.translate("Internet-Sharing possible")
-		else
-			result = result .. luci.i18n.translate("Internet-Sharing possible")
-		end
-		result = result .. '</td></tr>'
-		luci.http.write(result)
-	end
-end
-
-
 function status_network()
 	luci.http.prepare_content("text/plain")
 	printZoneLine(on_function("get_variable", {"ZONE_LOCAL"}))
@@ -134,6 +42,7 @@ function status_network()
 	printZoneLine(on_function("get_variable", {"ZONE_WAN"}))
 	printZoneLine(on_function("get_variable", {"ZONE_FREE"}))
 end
+
 
 function printZoneLine(zoneName)
 	networks = on_function("get_zone_interfaces", {zoneName})
@@ -153,6 +62,7 @@ function printZoneLine(zoneName)
 	end
 end
 
+
 function relevant(networks)
 	for network in networks:gmatch("%S+") do
 		local devices = luci.sys.exec(". \"${IPKG_INSTROOT:-}/lib/functions.sh\"; include \"${IPKG_INSTROOT:-}/lib/network\"; scan_interfaces; "..
@@ -166,6 +76,7 @@ function relevant(networks)
 	end
 	return false
 end
+
 
 function printInterfaces(networks, zoneName)
 	luci.http.write([[<table id='network_table_]]..zoneName..[[' class='status_page_table'><tr><th>]]..
@@ -181,6 +92,7 @@ function printInterfaces(networks, zoneName)
 	end
 	luci.http.write([[</table>]])
 end
+
 
 function printNetworkInterfaceValues(network)
 	-- get physical interface name
@@ -217,6 +129,7 @@ function printNetworkInterfaceValues(network)
 		luci.http.write([[</td></tr>]])
 	end
 end
+
 
 function status_wireless()
 	luci.http.prepare_content("text/plain")
@@ -278,6 +191,7 @@ function status_wireless()
 		end
 	end
 end
+
 
 function status_neighbors()
 	luci.http.prepare_content("text/plain")

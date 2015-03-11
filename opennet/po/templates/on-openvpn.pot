@@ -4,7 +4,13 @@ msgstr "Content-Type: text/plain; charset=UTF-8"
 msgid "...more Information..."
 msgstr ""
 
+msgid "<a href=\"%s\">A certificate is required</a>."
+msgstr ""
+
 msgid "Actions"
+msgstr ""
+
+msgid "Active VPN-Tunnel: %s"
 msgstr ""
 
 msgid "Add"
@@ -24,6 +30,9 @@ msgid "Announced Upload / Download Speed."
 msgstr ""
 
 msgid "Certificate management"
+msgstr ""
+
+msgid "Check the <a href=\"%s\">System Log</a> for details."
 msgstr ""
 
 msgid "Connection log"
@@ -93,6 +102,9 @@ msgstr ""
 msgid ""
 "The \"distance\" column indicates the routing distance to this Gateway. The "
 "selection of your preferred gateway is based on this value."
+msgstr ""
+
+msgid "The VPN-Tunnel is not active,"
 msgstr ""
 
 msgid ""

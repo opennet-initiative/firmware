@@ -1,6 +1,12 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+msgid "(central Gateway-IPs (%s) connected trough tunnel)"
+msgstr ""
+
+msgid "(no central Gateway-IPs connected trough tunnel)"
+msgstr ""
+
 msgid "Actions"
 msgstr ""
 
@@ -36,6 +42,9 @@ msgstr ""
 msgid "Gateway-Forward activated"
 msgstr ""
 
+msgid "Gateway-Forward for %s (to %s) activated"
+msgstr ""
+
 msgid "Gateway-Forward from %s to %s activated"
 msgstr ""
 
@@ -68,6 +77,9 @@ msgstr ""
 msgid ""
 "Internet-Sharing will be automatically reenabled in between the next 5 "
 "Minutes. You can enable it manually if you like."
+msgstr ""
+
+msgid "Internet-Sharing:"
 msgstr ""
 
 msgid "Key Management"

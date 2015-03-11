@@ -69,3 +69,29 @@ function on_vpn_status_form()
 	luci.http.write('" />')
 end
 
+
+function status_mig_connection()
+	luci.http.prepare_content("text/plain")
+	local services = line_split(on_function("get_active_mig_connections"))
+	local result
+	function get_service_host(service_name)
+		return get_service_value(service_name, "host")
+	end
+	local remotes = string_join(map_table(services, get_service_host), ", ")
+	if remotes then
+		result = luci.i18n.translatef('Active VPN-Tunnel: %s', remotes)
+	else
+		if on_bool_function("has_mig_openvpn_credentials") then
+			-- Zertifikat vorhanden - syslog?
+			result = luci.i18n.translatef('Check the <a href="%s">System Log</a> for details.',
+					luci.dispatcher.build_url("admin", "status", "syslog"))
+		else
+			-- das Zertifikat fehlt
+			result = luci.i18n.translatef('<a href="%s">A certificate is required</a>.',
+					luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel"))
+		end
+		result = luci.i18n.translate('The VPN-Tunnel is not active,') .. " " .. result
+	end
+	luci.http.write(result)
+end
+

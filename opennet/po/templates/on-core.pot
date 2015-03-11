@@ -1,12 +1,6 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-msgid "(central Gateway-IPs (%s) connected trough tunnel)"
-msgstr ""
-
-msgid "(no central Gateway-IPs connected trough tunnel)"
-msgstr ""
-
 msgid "-- AP %s"
 msgstr ""
 
@@ -124,9 +118,6 @@ msgstr ""
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr ""
 
-msgid "Gateway-Forward for %s (to %s) activated"
-msgstr ""
-
 msgid "Generate"
 msgstr ""
 
@@ -174,21 +165,6 @@ msgid "Interface"
 msgstr ""
 
 msgid "Internet Sharing"
-msgstr ""
-
-msgid "Internet not shared"
-msgstr ""
-
-msgid "Internet shared"
-msgstr ""
-
-msgid "Internet-Sharing enabled"
-msgstr ""
-
-msgid "Internet-Sharing possible"
-msgstr ""
-
-msgid "Internet-Sharing:"
 msgstr ""
 
 msgid "Invalid host"
@@ -478,22 +454,10 @@ msgstr ""
 msgid "UserGateway (type user gateway)"
 msgstr ""
 
-msgid "Usergateway-Tunnel active"
-msgstr ""
-
-msgid "Usergateway-Tunnel not running"
-msgstr ""
-
 msgid "VPN Gateways"
 msgstr ""
 
 msgid "VPN Tunnel"
-msgstr ""
-
-msgid "VPN-Tunnel active (%s)"
-msgstr ""
-
-msgid "VPN-Tunnel not active, for details check the System Log."
 msgstr ""
 
 msgid "WAN"

@@ -24,8 +24,9 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 		function(x) {
 			var cell = document.getElementById(table_cell_name);
 			if (!cell) {
+				// die Zeile wurde nicht gefunden?
 				return;
-			}else if (x.responseText) {
+			} else if (x.responseText) {
 				// die Zelle mit neuem Inhalt fuellen (und das "loading"-Icon ueberschreiben
 				cell.innerHTML = x.responseText;
 			} else {
@@ -37,6 +38,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 
 //]]></script>
 
+
 <h2><a id="content" name="content"><%=get_firmware_title() %></a></h2>
 <div class="cbi-map">
 	<h3 class="on_title"><%:This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to the requirements of the Opennet Initiative e.V.%></h3>
@@ -46,7 +48,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 <div class="cbi-map"><fieldset class="cbi-section">
 	<table class="cbi-section-table" id="status_table">
 		<%
-		local hardware_info = luci.sys.exec("echo -e \"Model: \$(cat /proc/diag/model 2>/dev/null)\\n\$(cat /proc/cpuinfo)\" | awk 'BEGIN {FS=\":\"; no=0} /Processor|Hardware|system type|machine|Model|vendor_id/ {gsub(\"[\\t]\", \"\"); if (no > 0) printf \" / \"; if (\$2) { no=1; printf \$1\" :\"\$2}} END {printf \"\\n\";}'")
+		local hardware_info = luci.sys.exec("echo -e \"Model: \$(cat /proc/diag/model 2>/dev/null)\\n\$(cat /proc/cpuinfo)\" | awk 'BEGIN {FS=\":\"; no=0} /Processor|Hardware|system type|machine|Model|vendor_id/ {gsub(\"[\\t]\", \"\"); if (no > 0) printf \" | \"; if (\$2) { no=1; printf \$1\":\"\$2}} END {printf \"\\n\";}'")
 
 		for _, item in ipairs({
 				  {"networks_section", luci.i18n.translate("Networks"), url="on_status_network"},

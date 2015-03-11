@@ -24,6 +24,9 @@ function index()
 	require ("luci.model.opennet.on_vpn_status")
 	entry({"opennet", "opennet_1", "vpn_tunnel", "on_vpn_status_label"}, call("on_vpn_status_label"), nil).leaf = true
 	entry({"opennet", "opennet_1", "vpn_tunnel", "on_vpn_status_form"}, call("on_vpn_status_form"), nil).leaf = true
+
+	-- wir veröffentlichen unseren Status unterhalb der core-Seite, um die URL-Erstellung dort zu erleichtern
+	entry({"opennet", "on_status", "on_status_mig_connection"}, call("status_mig_connection")).leaf = true
 end
 
 function action_on_openvpn()

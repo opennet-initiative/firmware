@@ -46,6 +46,11 @@ function index()
     page.css = "opennet.css"
     page.i18n = "on_usergw"
     page.leaf = true
+
+
+    -- Funktionen
+    -- Einbindung in die Status-Seite mit dortigem Link
+    entry({"opennet", "on_status", "on_status_ugw_connection"}, call("status_ugw_connection")).leaf = true
 end
 
 
@@ -85,4 +90,75 @@ function action_on_service_relay()
     if (service_result ~= true) and (service_result ~= false) then table.insert(on_errors, service_result) end
 
     luci.template.render("opennet/service_relay", { on_errors=on_errors })
+end
+
+
+function status_ugw_connection()
+    luci.http.prepare_content("text/plain")
+
+    local ugw_status = {}
+    -- central gateway-IPs reachable over tap-devices
+    ugw_status.connections = on_function("get_active_ugw_connections")
+    local service_name
+    local central_ips_table = {}
+    for service_name in line_split(ugw_status.connections) do
+        table.insert(central_ips_table, get_service_value(service_name, "host"))
+    end
+    ugw_status.centralips = string_join(central_ips_table, ", ")
+    ugw_status.centralip_status = (ugw_status.centralips ~= "")
+    -- tunnel active
+    ugw_status.tunnel_active = to_bool(ugw_status.centralips)
+    -- sharing possible
+    ugw_status.usergateways_no = 0
+    -- TODO: Struktur ab hier weiter umsetzen
+    cursor:foreach ("on-usergw", "usergateway", function() ugw_status.usergateways_no = ugw_status.usergateways_no + 1 end)
+    ugw_status.sharing_possible = false
+    local count = 1
+    while count <= ugw_status.usergateways_no do
+        local onusergw = cursor:get_all("on-usergw", "opennet_ugw"..count)
+        if uci_to_bool(onusergw.wan) and uci_to_bool(onusergw.mtu_status) then
+            ugw_status.sharing_possible = true
+            break
+        end
+        count = count + 1
+    end
+    -- sharing enabled
+    ugw_status.sharing_enabled = uci_to_bool(cursor:get("on-usergw", "ugw_sharing", "shareInternet"))
+    -- forwarding enabled
+    local ugw_port_forward = tab_split(on_function("get_ugw_portforward"))
+    ugw_status.forwarded_ip = ugw_port_forward[1]
+    ugw_status.forwarded_gw = ugw_port_forward[2]
+
+
+    local result = ""
+    if ugw_status.sharing_enabled or ugw_status.sharing_possible then
+        result = result .. [[<tr class='cbi-section-table-titles'><td class='cbi-section-table-cell'>]] ..
+                luci.i18n.translate("Internet-Sharing:") .. [[</td><td class='cbi-section-table-cell'>]]
+        if uci_to_bool(ugw_status.centralip_status) or (ugw_status.forwarded_gw ~= "") then
+            result = result .. luci.i18n.translate("Internet shared")
+            if ugw_status.centralips then
+                result = result .. luci.i18n.translate("(no central Gateway-IPs connected trough tunnel)")
+            else
+                result = result .. luci.i18n.translatef("(central Gateway-IPs (%s) connected trough tunnel)", ugw_status.centralips)
+            end
+            if ugw_status.forwarded_gw ~= "" then
+                result = result .. ", " .. luci.i18n.translatef("Gateway-Forward for %s (to %s) activated", ugw_status.forwarded_ip, ugw_status.forwarded_gw)
+            end
+        elseif ugw_status.tunnel_active then
+            result = result .. luci.i18n.translate("Internet not shared")
+                    .. " ( " .. luci.i18n.translate("Internet-Sharing enabled")
+                    .. ", " .. luci.i18n.translate("Usergateway-Tunnel active") .. " )"
+        elseif ugw_status.sharing_enabled then
+            result = result .. luci.i18n.translate("Internet not shared")
+                    .. " ( "..  luci.i18n.translate("Internet-Sharing enabled")
+                    .. ", " .. luci.i18n.translate("Usergateway-Tunnel not running") .. " )"
+        elseif ugw_status.sharing_possible then
+            result = result .. luci.i18n.translate("Internet not shared")
+                    .. ", " .. luci.i18n.translate("Internet-Sharing possible")
+        else
+            result = result .. luci.i18n.translate("Internet-Sharing possible")
+        end
+        result = result .. '</td></tr>'
+        luci.http.write(result)
+    end
 end

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-03-09 04:01+0200\n"
+"PO-Revision-Date: 2015-03-12 00:08+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -15,8 +15,14 @@ msgstr ""
 msgid "...more Information..."
 msgstr "...mehr Informationen..."
 
+msgid "<a href=\"%s\">A certificate is required</a>."
+msgstr "<a href=\"%s\">Das Zertifikat fehlt</a>."
+
 msgid "Actions"
 msgstr "Aktionen"
+
+msgid "Active VPN-Tunnel: %s"
+msgstr "Aktiver VPN-Tunnel: %s"
 
 msgid "Add"
 msgstr "Hinzufügen"
@@ -42,6 +48,9 @@ msgstr "Vom Gateway ermittelte Upload/Download-Bandbreite"
 
 msgid "Certificate management"
 msgstr "Zertifikatsverwaltung"
+
+msgid "Check the <a href=\"%s\">System Log</a> for details."
+msgstr "Eventuell hilft Dir das im <a href=\"%s\">Systemprotokoll</a> weiter."
 
 msgid "Connection log"
 msgstr "Verbindungsprotokoll"
@@ -129,6 +138,9 @@ msgid ""
 msgstr ""
 "Die \"Distanz\"-Spalte enthält die Routing-Entfernung zu diesem Gateway. Der "
 "bevorzugte Gateway wird anhand dieses Werts automatisch ausgewählt."
+
+msgid "The VPN-Tunnel is not active,"
+msgstr "Der VPN-Tunnel ist nicht aktiv,"
 
 msgid ""
 "The first reachable Gateway is currently not in use. The Tunnel will be "

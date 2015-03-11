@@ -12,12 +12,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
 
-msgid "(central Gateway-IPs (%s) connected trough tunnel)"
-msgstr "(externe Gateway-IPs (%s) sind über den Tunnel verbunden)"
-
-msgid "(no central Gateway-IPs connected trough tunnel)"
-msgstr "(keine externen Gateway-IPs sind über den Tunnel verbunden)"
-
 msgid "-- AP %s"
 msgstr "-- AP %s"
 
@@ -155,9 +149,6 @@ msgstr "Weiterleitung aus dem Opennet"
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
 
-msgid "Gateway-Forward for %s (to %s) activated"
-msgstr "Gateway-Weiterleitung für %s (nach %s) ist aktiviert"
-
 msgid "Generate"
 msgstr "Erzeugen"
 
@@ -214,21 +205,6 @@ msgstr "Schnittstelle"
 
 msgid "Internet Sharing"
 msgstr "Internet Freigabe"
-
-msgid "Internet not shared"
-msgstr "Internet nicht freigegeben"
-
-msgid "Internet shared"
-msgstr "Internet freigegeben"
-
-msgid "Internet-Sharing enabled"
-msgstr "Internet-Freigabe aktiviert"
-
-msgid "Internet-Sharing possible"
-msgstr "Internet-Freigabe ist möglich"
-
-msgid "Internet-Sharing:"
-msgstr "Internet-Freigabe:"
 
 msgid "Invalid host"
 msgstr "Ungültiger Host"
@@ -572,23 +548,11 @@ msgstr "Gerätelaufzeit"
 msgid "UserGateway (type user gateway)"
 msgstr "Usergateway (Internet-Freigabe)"
 
-msgid "Usergateway-Tunnel active"
-msgstr "Usergateway-Tunnel ist aktiv"
-
-msgid "Usergateway-Tunnel not running"
-msgstr "Usergateway-Tunnel ist nicht aktiv"
-
 msgid "VPN Gateways"
 msgstr "VPN Gateways"
 
 msgid "VPN Tunnel"
 msgstr "VPN Tunnel"
-
-msgid "VPN-Tunnel active (%s)"
-msgstr "VPN-Tunnel ist aktiv (%s)"
-
-msgid "VPN-Tunnel not active, for details check the System Log."
-msgstr "VPN-Tunnel ist nicht aktiv. Eventuell ist kein Zertifikat vorhanden."
 
 msgid "WAN"
 msgstr "WAN"
@@ -656,6 +620,43 @@ msgstr "über das Internet"
 
 msgid "via Opennet"
 msgstr "im Opennet"
+
+#~ msgid "(central Gateway-IPs (%s) connected trough tunnel)"
+#~ msgstr "(externe Gateway-IPs (%s) sind über den Tunnel verbunden)"
+
+#~ msgid "(no central Gateway-IPs connected trough tunnel)"
+#~ msgstr "(keine externen Gateway-IPs sind über den Tunnel verbunden)"
+
+#~ msgid "Gateway-Forward for %s (to %s) activated"
+#~ msgstr "Gateway-Weiterleitung für %s (nach %s) ist aktiviert"
+
+#~ msgid "Internet not shared"
+#~ msgstr "Internet nicht freigegeben"
+
+#~ msgid "Internet shared"
+#~ msgstr "Internet freigegeben"
+
+#~ msgid "Internet-Sharing enabled"
+#~ msgstr "Internet-Freigabe aktiviert"
+
+#~ msgid "Internet-Sharing possible"
+#~ msgstr "Internet-Freigabe ist möglich"
+
+#~ msgid "Internet-Sharing:"
+#~ msgstr "Internet-Freigabe:"
+
+#~ msgid "Usergateway-Tunnel active"
+#~ msgstr "Usergateway-Tunnel ist aktiv"
+
+#~ msgid "Usergateway-Tunnel not running"
+#~ msgstr "Usergateway-Tunnel ist nicht aktiv"
+
+#~ msgid "VPN-Tunnel active (%s)"
+#~ msgstr "VPN-Tunnel ist aktiv (%s)"
+
+#~ msgid "VPN-Tunnel not active, for details check the System Log."
+#~ msgstr ""
+#~ "VPN-Tunnel ist nicht aktiv. Eventuell ist kein Zertifikat vorhanden."
 
 #~ msgid "Generate Report:"
 #~ msgstr "Zusammenfassung erzeugen:"

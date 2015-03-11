@@ -76,7 +76,8 @@ summary_profiling() {
 	local lines
 	local sum
 	find "$PROFILING_DIR" -type f | while read fname; do
-		awk <"$fname" '
+		# filtere Fehlmessungen (irgendwie tauchen dort Zahlen wie "27323677987" auf)
+		grep -v "^27[0-9]\{9\}$" "$fname" | awk '
 			BEGIN { summe=0; counter=0 }
 			{ summe+=($1/1000); counter+=1 }
 			END { printf "%16d %16d %16d %s\n", summe, counter, int(summe/counter), "'$fname'"}'

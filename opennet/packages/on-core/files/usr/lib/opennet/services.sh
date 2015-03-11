@@ -91,15 +91,16 @@ is_existing_service() {
 }
 
 
-# Addiere eine Zahl von 0 bis (LOCAL_BIAS_MODULO-1) - abhaengig von der lokalen IP und der IP der Gegenstelle.
+# Ermittle eine reproduzierbare Zahl von 0 bis (LOCAL_BIAS_MODULO-1) - abhaengig von der lokalen IP und der IP der Gegenstelle.
 # Dadurch koennen wir beim Sortieren strukturelle Ungleichgewichte (z.B. durch alphabetische Sortierung) verhindern.
-# TODO: pruefen, ob diese Funktion nicht eventuell furchtbar langsam ist (relevant fuer sortierte Dienstlisten)
-_add_local_bias_to_host() {
+_get_local_bias_for_host() {
 	local ip="$1"
 	# Die resultierende host_number darf nicht zu gross sein (z.B. mit Exponentendarstellung),
 	# da andernfalls awk die Berechnung fehlerhaft durchführt.
-	local host_number=$(echo "$ip$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g' | dd bs=8 count=1 2>/dev/null)
-	tail -1 | awk '{ print $1 + ('$host_number' % '$LOCAL_BIAS_MODULO') }'
+	local host_number=$(echo "$ip$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g')
+	# Laenge von 'host_number' reduzieren (die Berechnung schlaegt sonst fehl)
+	# Wir fuegen die 1 an den Beginn, um die Interpretation als octal-Zahl zu verhindern (fuehrende Null).
+	echo $(( 1${host_number:0:6} % LOCAL_BIAS_MODULO))
 }
 
 
@@ -136,9 +137,9 @@ get_service_priority() {
 				msg_info "Unknown sorting method for services: $sorting"
 				echo 1
 			fi
-		fi | cut -f 1 -d .
-	)
-	echo $(( ${base_priority:-$DEFAULT_SERVICE_RANK} * 1000)) | _add_local_bias_to_host "$(get_service_value "$service_name" "host")"
+		fi | cut -f 1 -d .)
+	local host_bias=$(_get_local_bias_for_host "$(get_service_value "$service_name" "host")")
+	echo $(( ${base_priority:-$DEFAULT_SERVICE_RANK} * 1000 + host_bias))
 }
 
 

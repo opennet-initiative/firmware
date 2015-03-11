@@ -631,6 +631,9 @@ get_potential_error_messages() {
 	#    Falls die Routen via nc während eines olsrd-Neustarts ausgelesen werden, reisst eventuell die Socket-
 	#    Verbindung ab - dies ist akzeptabel.
 	filters="${filters}|nc: short write"
+	# 14) openvpn(___service_name___)[...]: write UDPv4: Network is unreachable
+	#    Beispielsweise bei einem olsrd-Neustart reisst die Verbindung zum UGW-Server kurz ab.
+	filters="${filters}|openvpn.*Network is unreachable"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

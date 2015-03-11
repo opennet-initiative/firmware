@@ -39,7 +39,9 @@ msg_debug() {
 ## @brief Informationen und Fehlermeldungen ins syslog schreiben
 ## @details Die Nachrichten landen im syslog (siehe ``logread``).
 ## Die info-Nachrichten werden immer ausgegeben, da es kein höheres Log-Level gibt.
-msg_info() { logger -t "$(basename "$0")[$$]" "$1"; }
+msg_info() {
+	logger -t "$(basename "$0")[$$]" "$1"
+}
 
 
 ## @fn append_to_custom_log()
@@ -200,7 +202,11 @@ clean_restart_log() {
 ##   ein beliebiges whitespace-Zeichen getrennt.
 ##   Dieses Dateiformat wird beispielsweise für die Dienst-Zustandsdaten verwendet.
 ##   Zusätzlich ist diese Funktion auch zum Parsen von openvpn-Konfigurationsdateien geeignet.
-_get_file_dict_value() { local key="$1"; shift; grep -w -s "^$key" "$@" | while read key value; do echo -n "$value"; done; }
+_get_file_dict_value() {
+	local key="$1"
+	shift
+	grep -w -s "^$key" "$@" | while read key value; do echo -n "$value"; done
+}
 
 
 ## @fn _get_file_dict_keys()
@@ -208,7 +214,9 @@ _get_file_dict_value() { local key="$1"; shift; grep -w -s "^$key" "$@" | while 
 ## @param status_files Namen der Schlüssel/Wert-Dateien
 ## @returns Liste aller Schlüssel aus der Schlüssel/Wert-Datei.
 ## @sa _get_file_dict_value
-_get_file_dict_keys() { cat "$@" 2>/dev/null | cut -f 1 -d " "; }
+_get_file_dict_keys() {
+	cat "$@" 2>/dev/null | while read key value; do echo -n "$value"; done
+}
 
 
 ## @fn _set_file_dict_value()
@@ -241,7 +249,9 @@ _set_file_dict_value() {
 ## @param key Name des Schlüssels
 ## @details Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
 ##   Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfügbar.
-get_on_core_default() { _get_file_dict_value "$1" "$ON_CORE_DEFAULTS_FILE"; }
+get_on_core_default() {
+	_get_file_dict_value "$1" "$ON_CORE_DEFAULTS_FILE"
+}
 
 
 ## @fn get_on_firmware_version()

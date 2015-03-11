@@ -12,7 +12,9 @@ DEFAULT_MIG_PORT=1600
 ## @brief Liefere einen der default-Werte der aktuellen Firmware zurück (Paket on-openvpn).
 ## @param key Name des Schlüssels
 ## @sa get_on_core_default
-get_on_openvpn_default() { _get_file_dict_value "$1" "$ON_OPENVPN_DEFAULTS_FILE"; }
+get_on_openvpn_default() {
+	_get_file_dict_value "$1" "$ON_OPENVPN_DEFAULTS_FILE"
+}
 
 
 ## @fn has_mig_openvpn_credentials()

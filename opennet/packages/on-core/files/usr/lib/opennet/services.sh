@@ -362,7 +362,9 @@ get_service_value() {
 
 # Liefere die Suffixe aller Schluessel aus der Service-Attribut-Datenbank,
 # die mit dem gegebenen Praefix uebereinstimmen.
-get_service_attributes() { _get_file_dict_keys "$PERSISTENT_SERVICE_STATUS_DIR/$1" "$VOLATILE_SERVICE_STATUS_DIR/$1"; }
+get_service_attributes() {
+	_get_file_dict_keys "$PERSISTENT_SERVICE_STATUS_DIR/$1" "$VOLATILE_SERVICE_STATUS_DIR/$1"
+}
 
 
 ## @fn print_services()

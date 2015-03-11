@@ -13,8 +13,14 @@ NETWORK_FREE=free
 
 
 # Liefere alle IPs fuer diesen Namen zurueck
-query_dns() { nslookup "$1" | sed '1,/^Name:/d' | awk '{print $3}' | sort -n; }
-query_dns_reverse() { nslookup "$1" 2>/dev/null | tail -n 1 | awk '{ printf "%s", $4 }'; }
+query_dns() {
+	nslookup "$1" | sed '1,/^Name:/d' | awk '{print $3}' | sort -n
+}
+
+
+query_dns_reverse() {
+	nslookup "$1" 2>/dev/null | tail -n 1 | awk '{ printf "%s", $4 }'
+}
 
 
 ## @fn query_srv_record()

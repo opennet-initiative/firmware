@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-03-09 04:13+0200\n"
+"PO-Revision-Date: 2015-03-11 23:22+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -25,7 +25,7 @@ msgid ""
 msgstr ""
 "Ermögliche die Erreichbarkeit bestimmter öffentlicher Dienste in Deiner "
 "lokalen Opennet-Nachbarschaft. Das wichtigste Beispiel für derlei Dienste "
-"ist der Internet-Zugang mittels der Internet-Gateways des Vereins."
+"ist der Internet-Zugang über die Internet-Gateways des Vereins."
 
 msgid "Available Services to be relayed"
 msgstr "Weiterzureichende Dienste"
@@ -37,14 +37,15 @@ msgid ""
 "Connecting your local neighbourhood with the complete mesh of all Opennet "
 "nodes."
 msgstr ""
-"Verbindung Deine lokalen Opennet-Nachbarn mit dem gesamten Mesh-Netzwerk der "
+"Verbinde Deine lokalen Opennet-Nachbarn mit dem gesamten Mesh-Netzwerk der "
 "Opennet-Knoten."
 
 msgid "Connection to an Mesh VPN service succeeded."
 msgstr "Verbindung zu einem Mesh-VPN-Dienst erfolgreich hergestellt."
 
 msgid "Estimated upload and download speed to this exit gateway."
-msgstr "Geschätzte Upload- und Download-Geschwindigkeit zu diesem Mesh-Gateway."
+msgstr ""
+"Geschätzte Upload- und Download-Geschwindigkeit zu diesem Mesh-Gateway."
 
 msgid "Gateway"
 msgstr "Gateway"
@@ -94,6 +95,9 @@ msgstr ""
 msgid "Key Management"
 msgstr "Schlüsselverwaltung"
 
+msgid "Known Mesh Gateways"
+msgstr "Bekannte Mesh-Gateways"
+
 msgid "Loading"
 msgstr "Lade"
 
@@ -136,7 +140,6 @@ msgstr ""
 "Kompiliere bitte OpenVPN ohne die \"--enable-small\"-Option bzw. lade das "
 "Opennet-spezifischen OpenVPN-Paket mit der Paketverwaltung herunter."
 
-#, fuzzy
 msgid "Ping"
 msgstr "Ping"
 
@@ -156,7 +159,6 @@ msgstr "Priorität"
 msgid "Relaying external Services for the Opennet Mesh"
 msgstr "Weiterleitung externer Dienste für das Opennet-Mesh-Netzwerk"
 
-#, fuzzy
 msgid "Service Relay"
 msgstr "Dienstweiterleitung"
 
@@ -206,14 +208,14 @@ msgid ""
 "You can change the sorting mechanism of gateways in the <a href=\"%s"
 "\">Service Settings section</a>."
 msgstr ""
-"Du kannst die Sortier-Methode der Gateway-Liste in den <a href=\"%s\""
-">Dienste-Einstellungen</a> ändern."
+"Du kannst die Sortier-Methode der Gateway-Liste in den <a href=\"%s"
+"\">Dienste-Einstellungen</a> ändern."
 
 msgid ""
 "You need an OpenVPN certificate if you want to use your Internet connection "
 "in order to connect your local neighbourhood with the Opennet Mesh network."
 msgstr ""
-"Du benötigst ein OpenVPN-Zertifikat, um deine lokale Opennet-Nachbarschaft "
+"Du benötigst ein OpenVPN-Zertifikat, um Deine lokale Opennet-Nachbarschaft "
 "mit der Opennet-Mesh-Wolke zu verbinden."
 
 msgid "active"

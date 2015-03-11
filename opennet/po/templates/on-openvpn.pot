@@ -23,13 +23,7 @@ msgstr ""
 msgid "Announced Upload / Download Speed."
 msgstr ""
 
-msgid "Certificate contents"
-msgstr ""
-
 msgid "Certificate management"
-msgstr ""
-
-msgid "Certificate-Request contents"
 msgstr ""
 
 msgid "Connection log"

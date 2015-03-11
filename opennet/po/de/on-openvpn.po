@@ -40,14 +40,8 @@ msgstr ""
 msgid "Announced Upload / Download Speed."
 msgstr "Vom Gateway ermittelte Upload/Download-Bandbreite"
 
-msgid "Certificate contents"
-msgstr "Zertifikatsdetails"
-
 msgid "Certificate management"
 msgstr "Zertifikatsverwaltung"
-
-msgid "Certificate-Request contents"
-msgstr "Details der Zertifikatsanfrage"
 
 msgid "Connection log"
 msgstr "Verbindungsprotokoll"
@@ -246,6 +240,12 @@ msgstr "nicht erreichbar"
 
 msgid "upload to Internet %s kbit/s; download from Internet %s kbit/s"
 msgstr "Upload ins Internet %s kbit/s; Download aus dem Internet %s kbit/s"
+
+#~ msgid "Certificate contents"
+#~ msgstr "Zertifikatsdetails"
+
+#~ msgid "Certificate-Request contents"
+#~ msgstr "Details der Zertifikatsanfrage"
 
 #~ msgid "...show..."
 #~ msgstr "...anzeigen..."

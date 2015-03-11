@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-03-09 03:59+0200\n"
+"PO-Revision-Date: 2015-03-11 23:21+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -72,6 +72,12 @@ msgstr "Zertifikat-Name"
 
 msgid "Certificate Request (.csr)"
 msgstr "Zertifikat-Anfrage (.csr)"
+
+msgid "Certificate contents"
+msgstr "Zertifikatsdaten"
+
+msgid "Certificate-Request contents"
+msgstr "Details der Zertifikatsanfrage"
 
 msgid ""
 "Choose one of the following options for submitting your certificate signing "
@@ -404,8 +410,8 @@ msgstr ""
 "Sende die Zertifikatanfrage (.csr) <b>und nur diese Datei</b> an <a "
 "href='mailto:%s?subject=Zertifikatsanfrage für %s %s&amp;body=[bitte die "
 "Zertifikatsanfrage (.csr) - und nichts anderes - an diese Email anhängen. "
-"Ein paar nette Worte an die Administratoren sind auch immer gern "
-"gesehen.]'>%s</a>, um das erforderliche Zertifikat zu erhalten."
+"Ein paar nette Worte an die Administratoren sind auch immer gern gesehen.]'>"
+"%s</a>, um das erforderliche Zertifikat zu erhalten."
 
 msgid "Send your request with one click"
 msgstr "Sende Deine Anfrage mit einem Klick"

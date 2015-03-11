@@ -54,6 +54,12 @@ msgstr ""
 msgid "Certificate Request (.csr)"
 msgstr ""
 
+msgid "Certificate contents"
+msgstr ""
+
+msgid "Certificate-Request contents"
+msgstr ""
+
 msgid ""
 "Choose one of the following options for submitting your certificate signing "
 "request"

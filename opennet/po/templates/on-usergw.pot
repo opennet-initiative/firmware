@@ -73,6 +73,9 @@ msgstr ""
 msgid "Key Management"
 msgstr ""
 
+msgid "Known Mesh Gateways"
+msgstr ""
+
 msgid "Loading"
 msgstr ""
 

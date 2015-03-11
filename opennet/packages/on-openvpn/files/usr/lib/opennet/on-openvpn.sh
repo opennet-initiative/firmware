@@ -37,6 +37,7 @@ test_mig_connection() {
 	prepare_openvpn_service "$service_name" "$MIG_OPENVPN_CONFIG_TEMPLATE_FILE"
 	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
 	local now=$(get_time_minute)
+	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)
 	local nonworking_timeout=$(($recheck_age + $(get_on_openvpn_default vpn_nonworking_timeout)))
 	if [ -n "$timestamp" ] && is_timestamp_older_minutes "$timestamp" "$nonworking_timeout"; then
 		# if there was no vpn-availability for a while (nonworking_timeout minutes), declare vpn-status as not working
@@ -46,7 +47,6 @@ test_mig_connection() {
 		trap "" $GUARD_TRAPS && return 1
 	fi
 	local host=$(get_service_value "$service_name" "host")
-	local recheck_age=$(get_on_openvpn_default vpn_recheck_age)
 	local status=$(get_service_value "$service_name" "status")
 	if [ -z "$timestamp" ] || [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$recheck_age"; then
 		# Neue Pruefung, falls:

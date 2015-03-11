@@ -71,7 +71,10 @@ update_mesh_services_via_dns() {
 		set_service_value "$service_name" "priority" "$priority"
 	done
 	# veraltete Dienste entfernen
-	get_services "mesh" | filter_services_by_value "scheme=openvpn" "source=dns-srv" | while read service_name; do
+	get_services "mesh" \
+			| filter_services_by_value "scheme" "openvpn" \
+			| filter_services_by_value "source" "dns-srv" \
+			| while read service_name; do
 		timestamp=$(get_service_value "$service_name" "timestamp" 0)
 		# der Service ist zu lange nicht aktualisiert worden
 		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
@@ -152,7 +155,7 @@ sync_mesh_openvpn_connection_processes() {
 	# diese Festlegung ist recht willkürlich: auf Geräten mit nur 32 MB scheinen wir jedenfalls nahe der Speichergrenze zu arbeiten
 	[ "$(get_memory_size)" -gt 32 ] && max_connections=5
 	get_services "mesh" \
-			| filter_services_by_value "scheme=openvpn" \
+			| filter_services_by_value "scheme" "openvpn" \
 			| filter_enabled_services \
 			| sort_services_by_priority \
 			| while read service_name; do

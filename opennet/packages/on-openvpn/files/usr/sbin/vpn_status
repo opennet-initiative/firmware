@@ -80,7 +80,7 @@ print_usage()
 
 _get_gateway_service_from_ip() {
 	local host="$1"
-	local service_name=$(get_services "gw" | filter_services_by_value "host=$host" | head -1)
+	local service_name=$(get_services "gw" | filter_services_by_value "host" "$host" | head -1)
 	echo "$service_name"
 }
 

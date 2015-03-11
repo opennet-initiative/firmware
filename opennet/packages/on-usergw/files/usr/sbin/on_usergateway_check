@@ -26,7 +26,7 @@ case "$ACTION" in
 		[ "$ACTION" = checkSpeed ] && func=update_public_gateway_speed_estimation && success_attribute=
 		if [ "$#" -gt 0 ]; then
 			# filtere die Dienste, die mit der einen angegebenen IP assoziiert sind
-			get_services "mesh" | filter_services_by_value "host=$1"
+			get_services "mesh" | filter_services_by_value "host" "$1"
 		else
 			get_services "mesh"
 		fi | filter_reachable_services | filter_enabled_services | while read service_name; do
@@ -48,7 +48,8 @@ case "$ACTION" in
 	auto)
 		cleanup_stale_openvpn_services
 		update_mesh_services_via_dns
-		get_services "mesh" | filter_services_by_value "scheme=openvpn" \
+		get_services "mesh" \
+				| filter_services_by_value "scheme" "openvpn" \
 				| filter_reachable_services \
 				| filter_enabled_services \
 				| while read service_name; do

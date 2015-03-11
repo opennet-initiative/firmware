@@ -39,7 +39,7 @@ case "${1:-}" in
 		shift
 		if [ "$#" -gt 0 ]; then
 			# filtere die Dienste, die mit der einen angegebenen IP assoziiert sind
-			get_services "gw" | filter_services_by_value "host=$1"
+			get_services "gw" | filter_services_by_value "host" "$1"
 		else
 			get_services "gw"
 		fi | filter_reachable_services | filter_enabled_services | while read service_name; do

@@ -297,7 +297,7 @@ get_services() {
 	find "$PERSISTENT_SERVICE_STATUS_DIR" -type f -size +1c -print0 \
 		| xargs -0 -r -n 1 basename \
 		| if [ $# -gt 0 ]; then
-			filter_services_by_value "service=$1"
+			filter_services_by_value "service" "$1"
 		else
 			cat -
 		fi
@@ -305,24 +305,17 @@ get_services() {
 
 
 ## @fn filter_services_by_value()
-## @param key_values beliebige Anzahl von "SCHLUESSEL=WERT"-Kombinationen
-## @details Als Parameter koennen beliebig viele "key=value"-Schluesselpaare angegeben werden.
-## Nur diejenigen Dienste, auf die alle Bedingungen zutreffen, werden zurueckgeliefert.
-## Sind keine Parameter gegeben, dann werden alle eingegebenen Dienste ausgeliefert
+## @param key ein Schlüssel
+## @param value ein Wert
+## @details Als Parameter kann ein "key/value"-Schluesselpaar angegeben werden.
+##   Nur diejenigen Dienste, auf die diese Bedingung zutrifft, werden zurueckgeliefert.
 filter_services_by_value() {
+	local key="$1"
+	local value="$2"
 	local service_name
-	local key
-	local value
 	while read service_name; do
-		for condition in "$@"; do
-			key=$(echo "$condition" | cut -f 1 -d =)
-			value=$(echo "$condition" | cut -f 2- -d =)
-			[ "$value" = "$(get_service_value "$service_name" "$key")" ] || continue 2
-		done
-		# alle Bedingungen trafen zu
-		echo "$service_name"
+		[ "$value" = "$(get_service_value "$service_name" "$key")" ] && echo "$service_name" || true
 	done
-	return 0
 }
 
 

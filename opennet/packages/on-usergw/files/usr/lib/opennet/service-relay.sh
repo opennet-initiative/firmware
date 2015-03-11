@@ -38,7 +38,10 @@ update_igw_services_via_dns() {
 		set_service_value "$service_name" "priority" "$priority"
 	done
 	# veraltete Dienste entfernen
-	get_services "igw" | filter_services_by_value "scheme=openvpn" "source=dns-srv" | while read service_name; do
+	get_services "igw" \
+			| filter_services_by_value "scheme" "openvpn" \
+			| filter_services_by_value "source" "dns-srv" \
+			| while read service_name; do
 		timestamp=$(get_service_value "$service_name" "timestamp" 0)
 		# der Service ist zu lange nicht aktualisiert worden
 		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
@@ -61,7 +64,7 @@ get_ugw_portforward() {
 # Pruefung ob ein lokaler Port bereits fuer einen ugw-Dienst weitergeleitet wird
 _is_local_service_relay_port_unused() {
 	local port="$1"
-	local collisions=$(get_services | filter_services_by_value "local_port=$1")
+	local collisions=$(get_services | filter_services_by_value "local_port" "$port")
 	[ -n "$collisions" ] && trap "" $GUARD_TRAPS && return 1
 	# keine Kollision entdeckt
 	return 0

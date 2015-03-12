@@ -26,11 +26,12 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 			if (!cell) {
 				// die Zeile wurde nicht gefunden?
 				return;
-			} else if (x.responseText) {
+			// leider liefert luci in jedem Fall einen Text aus - notfalls "No page is registered at ..." :(
+			} else if ((x.responseText) && (x.responseText.indexOf('No page is registered at') != 0)) {
 				// die Zelle mit neuem Inhalt fuellen (und das "loading"-Icon ueberschreiben
 				cell.innerHTML = x.responseText;
 			} else {
-				// die ganze Zeile verstecken
+				// keine Antwort - die ganze Zeile verstecken
 				cell.parentNode.style.display = "none";
 			}
 	});

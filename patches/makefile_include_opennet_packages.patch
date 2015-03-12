@@ -1,7 +1,7 @@
 die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 --- /dev/null
 +++ b/openwrt/include/opennet.mk
-@@ -0,0 +1,46 @@
+@@ -0,0 +1,47 @@
 +# fuer "VERSION_NUMBER"
 +include $(INCLUDE_DIR)/version.mk
 +
@@ -23,7 +23,8 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +	$(CP) -a -R "$(PKG_BUILD_DIR)/files/." "$(1)/"
 +	@# Zertifikate hashen, falls noetig (nur fuer on-core relevant; notwendig fuer csr-Upload via https)
 +	[ -d "$(1)/etc/ssl/certs" ] && c_rehash "$(1)/etc/ssl/certs" || true
-+	$(CP) -a -R "$(PKG_BUILD_DIR)/ipkg/." "$(1)/CONTROL"
++	@# falls es keine ipkg-Dateien gibt, existiert das Quell-Verzeichnis in git nicht
++	$(CP) -a -R "$(PKG_BUILD_DIR)/ipkg/." "$(1)/CONTROL" || true
 +	$(INSTALL_DIR) "$(1)/usr/lib/lua/luci/i18n"
 +	# leere po-Dateien fuehren zu fehlenden lmo-Dateien (z.B. on-core) - das koennen wir ignorieren
 +	$(CP) "$(PKG_BUILD_DIR)/lmo"/*.lmo "$(1)/usr/lib/lua/luci/i18n/" || true

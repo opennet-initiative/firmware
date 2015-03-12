@@ -8,9 +8,9 @@ define Package/on-usergw
   SECTION:=opennet
   CATEGORY:=Opennet
   URL:=http://www.opennet-initiative.de/
-  MAINTAINER:=Rene Ejury <opennet@absorb.it>
+  MAINTAINER:=Lars Kruse <devel@sumpfralle.de>
   TITLE:=Usergateway extensions
-  DEPENDS+=+on-core +on-openvpn +ifstat +drill
+  DEPENDS+=+on-core +openvpn-openssl +openssl-util +liblzo +kmod-tun +curl +ifstat +drill
 endef
 
 define Package/on-usergw/description

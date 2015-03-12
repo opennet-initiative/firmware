@@ -47,7 +47,6 @@ notify_service() {
 	local details="$7"
 	local source="$8"
 	local service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
-	local now=$(get_time_minute)
 	if ! is_existing_service "$service_name"; then
 		# diese Attribute sind Bestandteil des Namens und aendern sich eigentlich nicht
 		set_service_value "$service_name" "service" "$service"
@@ -59,7 +58,7 @@ notify_service() {
 	fi
 	# dies sind die flexiblen Attribute
 	set_service_value "$service_name" "details" "$details"
-	set_service_value "$service_name" "timestamp" "$now"
+	set_service_value "$service_name" "timestamp" "$(get_time_minute)"
 	set_service_value "$service_name" "source" "$source"
 	update_service_routing_distance "$service_name"
 }

@@ -628,6 +628,9 @@ get_potential_error_messages() {
 	# 14) openvpn(___service_name___)[...]: write UDPv4: Network is unreachable
 	#    Beispielsweise bei einem olsrd-Neustart reisst die Verbindung zum UGW-Server kurz ab.
 	filters="${filters}|openvpn.*Network is unreachable"
+	# 15) wget: can't connect to remote host
+	#    Eine frühe Geschwindigkeitsmessung (kurz nach dem Booten) darf fehlschlagen.
+	filters="${filters}|wget: can.t connect to remote host"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

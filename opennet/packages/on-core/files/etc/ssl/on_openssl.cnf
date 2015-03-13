@@ -1,0 +1,28 @@
+HOME			= .
+RANDFILE		= $ENV::HOME/.rnd
+
+[ req ]
+# 2048 Bit benoetigen typischerweise weniger als 10 Sekunden - dies ist akzeptabel
+default_bits		= 2048
+default_keyfile 	= privkey.pem
+distinguished_name	= req_distinguished_name
+attributes		= req_attributes
+
+string_mask		= nombstr
+prompt			= no
+
+
+[ req_distinguished_name ]
+countryName		= $ENV::openssl_countryName
+stateOrProvinceName	= $ENV::openssl_provinceName
+localityName		= $ENV::openssl_localityName
+0.organizationName	= $ENV::openssl_organizationName
+organizationalUnitName	= $ENV::openssl_organizationalUnitName
+commonName		= $ENV::openssl_commonName
+emailAddress		= $ENV::openssl_EmailAddress
+
+
+[ req_attributes ]
+challengePassword	= A challenge password
+unstructuredName	= An optional company name
+

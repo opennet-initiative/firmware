@@ -12,6 +12,7 @@ You may obtain a copy of the License at
 $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 ]]--
 
+
 function replace_file(source, target)
 	if nixio.fs.access(target) then
 		nixio.fs.move(target, target .. "_bak")
@@ -24,27 +25,25 @@ end
 
 -- type is user or ugw
 function upload_file(type)
-	local SYSROOT = os.getenv("LUCI_SYSROOT") or ""
 	local filename = "on_aps"
 	if type == "ugw" then filename = "on_ugws" end
-	local upload_exists = nixio.fs.access(tmpfile)
+	local upload_exists = nixio.fs.access(upload_file_location)
 	local upload_value = luci.http.formvalue("opensslfile")
 	if not upload_exists then return end
 	if not nixio.fs.access(SYSROOT .. "/etc/openvpn/opennet_" .. type) then nixio.fs.mkdirr(SYSROOT .. "/etc/openvpn/opennet_" .. type) end
 	if (string.find(upload_value, ".key")) then
-		replace_file(tmpfile, SYSROOT .. "/etc/openvpn/opennet_" .. type .. "/" .. filename .. ".key")
+		replace_file(upload_file_location, SYSROOT .. "/etc/openvpn/opennet_" .. type .. "/" .. filename .. ".key")
 	elseif (string.find(upload_value, ".crt")) then
-		replace_file(tmpfile, SYSROOT .. "/etc/openvpn/opennet_" .. type .. "/" .. filename .. ".crt")
+		replace_file(upload_file_location, SYSROOT .. "/etc/openvpn/opennet_" .. type .. "/" .. filename .. ".crt")
 	else
 		-- unbekannter Datentyp? Wir muessen die Datei loeschen - sonst wird sie beim naechsten Upload wiederverwendet.
-		nixio.fs.remove(tmpfile)
+		nixio.fs.remove(upload_file_location)
 	end
 end
 
 
 -- type is user or ugw
 function download_file(type, download)
-	local SYSROOT = os.getenv("LUCI_SYSROOT") or ""
 	local filename = "on_aps"
 	if type == "ugw" then filename = "on_ugws" end
 	local download_fpi = io.open(SYSROOT .. "/etc/openvpn/opennet_" .. type .. "/" .. filename .. "." .. download, "r")
@@ -58,8 +57,7 @@ end
 
 
 function check_cert_status(type, certstatus)
-	local SYSROOT = os.getenv("LUCI_SYSROOT") or ""
-	local filename = SYSROOT.."/etc/openvpn/opennet_user/on_aps."
+	local filename = SYSROOT .. "/etc/openvpn/opennet_user/on_aps."
 	if type == "ugw" then filename = SYSROOT.."/etc/openvpn/opennet_ugw/on_ugws." end
 	certstatus.on_csr_exists = nixio.fs.access(filename.."csr")
 	if certstatus.on_csr_exists then
@@ -90,16 +88,20 @@ function check_cert_status(type, certstatus)
 end
 
 
-local SYSROOT = os.getenv("LUCI_SYSROOT") or ""
-tmpfile = SYSROOT .. "/tmp/key.file"
--- Install upload handler
+
+SYSROOT = os.getenv("LUCI_SYSROOT") or ""
+upload_file_location = SYSROOT .. "/tmp/key.file"
 local file
+
+-- installiere eine Upload-Handler
+-- Diese Funktion muss in der index-Funktion eines controllers ausgefuehrt werden.
 luci.http.setfilehandler(
 	function(meta, chunk, eof)
-		if not nixio.fs.access(tmpfile) and not file and chunk and #chunk > 0 then
-			file = io.open(tmpfile, "w")
+		if not nixio.fs.access(upload_file_location) and not file and chunk and #chunk > 0 then
+			file = io.open(upload_file_location, "w")
 		end
 		if file and chunk then file:write(chunk) end
 		if file and eof then file:close() end
 	end
 )
+

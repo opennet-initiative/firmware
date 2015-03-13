@@ -51,6 +51,9 @@ function index()
     -- Funktionen
     -- Einbindung in die Status-Seite mit dortigem Link
     entry({"opennet", "on_status", "on_status_ugw_connection"}, call("status_ugw_connection")).leaf = true
+
+    -- importiere den file-upload-Handler
+    require("luci.model.opennet.on_vpn_management")
 end
 
 

@@ -2,6 +2,7 @@
 Opennet Firmware
 
 Copyright 2010 Rene Ejury <opennet@absorb.it>
+Copyright 2015 Lars Kruse <devel@sumpfralle.de>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,9 +23,11 @@ require("luci.model.opennet.funcs")
 function get_firmware_title()
 	local on_version = on_function("get_on_firmware_version")
 	local on_id = cursor:get("on-core", "settings", "on_id")
-	local client_cn = on_function("get_client_cn")
-	local result
-	result = luci.i18n.translatef("Opennet Firmware version %s", on_version)
+	local client_cn = nil
+	if on_bool_function("is_function_available", {"get_client_cn"}) then
+		client_cn = on_function("get_client_cn")
+	end
+	local result = luci.i18n.translatef("Opennet Firmware version %s", on_version)
 	if on_id then
 		result = result .. luci.i18n.translatef("-- AP %s", on_id)
 	end

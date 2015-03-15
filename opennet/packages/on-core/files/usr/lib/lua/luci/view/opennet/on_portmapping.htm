@@ -59,16 +59,15 @@ require("luci.model.opennet.funcs")
 
 <h2><a id="content" name="content"><%:Portmapping - Forwarding of Ports%></a></h2>
 
-<% if cursor:get("network", "on_vpn") then %>
-<h3><%:Forwarding from the Internet through your OpenVPN tunnel%></h3>
-<%	require("luci.sys")
-	local portrange = tab_split(on_function("get_mig_port_forward_range"))
-	local client_cn = on_function("get_client_cn")
-	%>
+<% if on_bool_function("is_function_available", {"get_client_cn"}) then %>
+	<h3><%:Forwarding from the Internet through your OpenVPN tunnel%></h3>
 	<div class="cbi-map">
 		<fieldset class="cbi-section">
 			<div class="cbi-section-comment">
-			<% if client_cn and client_cn ~= "" then %>
+			<%
+			local portrange = tab_split(on_function("get_mig_port_forward_range"))
+			local client_cn = on_function("get_client_cn")
+			if client_cn and client_cn ~= "" then %>
 				<%=luci.i18n.translatef('Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.', client_cn, portrange[1], portrange[2])%>
 			<% end %>
 			<%:The target should be an IP-Address in your local network. Additionally you can enter the target port in the related field.%></div>

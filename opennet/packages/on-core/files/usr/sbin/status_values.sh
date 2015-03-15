@@ -13,6 +13,9 @@
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
+# Fehler sind akzeptabel
+set +e
+
 
 DATABASE_VERSION="0.2"          # we start with 0.2 to have space for the old firmware database, which is 0.1
 DATABASE_FILE="/tmp/database"   # ".json" will be added if it is exported as JSON
@@ -226,42 +229,77 @@ on_packages="$(opkg status | awk '{if ($1 == "Package:" && $2 ~ "^on-" && $2 != 
 on_olsrd_status="$(pidof olsrd >/dev/null && echo "1" || echo "0")"
 on_olsr_mainip="$(on-function request_olsrd_txtinfo config | awk '/MainIp/ {print $2}')"
 
+
 ## @todo auf nodogsplash umstellen
-on_wifidog_status="$(pidof wifidog >/dev/null && echo "1" || echo "0")"
-on_wifidog_id="$([ -e /etc/wifidog.conf ] && awk '{if ($1 == "GatewayID") print $2}' /etc/wifidog.conf 2>/dev/null || true)"
+if false; then
+	on_wifidog_status="$(pidof wifidog >/dev/null && echo "1" || echo "0")"
+	on_wifidog_id="$([ -e /etc/wifidog.conf ] && awk '{if ($1 == "GatewayID") print $2}' /etc/wifidog.conf 2>/dev/null || true)"
+else
+	on_wifidog_status=
+	on_wifidog_id=
+fi
 
 
-on_vpn_status="$([ -e /tmp/openvpn_msg.txt ] && echo 1 || echo 0)"
-on_vpn_cn="$(get_client_cn)"
-on_vpn_gw="$(get_active_mig_connections | pipe_service_attribute host)"
-on_vpn_autosearch="$([ "$(uci_get on-core.settings.service_sorting)" = "manual" ] && echo "0" || echo "1")"
-on_vpn_sort="$(uci_get on-core.settings.service_sorting)"
+if is_function_available "get_active_mig_connections"; then
+	on_vpn_cn="$(get_client_cn)"
+	on_vpn_gw="$(get_active_mig_connections | pipe_service_attribute host)"
+	on_vpn_status="$([ -n "$on_vpn_gw" ] && echo 1 || echo 0)"
+	on_vpn_autosearch="$([ "$(uci_get on-core.settings.service_sorting)" = "manual" ] && echo "0" || echo "1")"
+	on_vpn_sort="$(uci_get on-core.settings.service_sorting)"
 
-on_vpn_gws=$(get_services "gw" | while read service_name; do
-		gw_ipaddr=$(get_service_value "$service_name" "host")
-		age=$(get_mig_connection_test_age "$service_name")
-		status=$(get_service_value "$service_name" "status")
-		echo "${gw_ipaddr}:${status}:${age}"
-	done | tr '\n' ' ')
+	on_vpn_gws=$(get_services "gw" | while read service_name; do
+			gw_ipaddr=$(get_service_value "$service_name" "host")
+			age=$(get_mig_connection_test_age "$service_name")
+			status=$(get_service_value "$service_name" "status")
+			echo "${gw_ipaddr}:${status}:${age}"
+		done | tr '\n' ' ')
 
-on_vpn_blist=$(get_services "gw" | filter_enabled_services | pipe_service_attribute host | tr '\n' ' ')
+	# liste alle deaktivierten Dienste auf
+	on_vpn_blist=$(get_services "gw" | while read service_name; do
+			uci_is_true "$(get_service_value "$service_name" "disabled" "false")" && echo "$service_name" || true
+		done | pipe_service_attribute host | tr '\n' ' ')
+else
+	on_vpn_cn=
+	on_vpn_gw=
+	on_vpn_status=
+	on_vpn_autosearch=
+	on_vpn_sort=
+	on_vpn_gws=
+	on_vpn_blist=
+fi
 
-ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '/dev tap/ {printf $1" "}'; done)
-on_ugw_status="$([ "$(echo "$ugw_status_centralips" | wc -w)" -ge "1" ] && echo "1" || echo "0")"
-on_ugw_enabled="$(uci_is_true "$(uci_get on-usergw.ugw_sharing.shareInternet)" && echo "1" || echo "0")"
 
-index=1; ugw_status_sharing_possible=0;
-while [ -n "$(uci_get on-usergw.opennet_ugw${index})" ]; do
-  wan_status=$(uci_get on-usergw.opennet_ugw${index}.wan_status)
-  mtu_status=$(uci_get on-usergw.opennet_ugw${index}.mtu_status)
-  uci_is_true "$wan_status" && uci_is_true "$mtu_status" && ugw_status_sharing_possible=1 && break
-  : $((index++))
-done
-on_ugw_possible="$ugw_status_sharing_possible"
-on_ugw_tunnel="$([ -n "$(ls /tmp/opennet_ugw*.txt 2>/dev/null)" ] && echo "1" || echo "0")"
-on_ugw_connected="${ugw_status_centralips# }"
-on_ugw_presetips="$(uci_get on-usergw.@usergw[0].centralIP)"
-on_ugw_presetnames="$(uci_get on-usergw.@usergw[0].name)"
+if is_function_available "get_active_ugw_connections"; then
+	ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '/dev tap/ {printf $1" "}'; done)
+	on_ugw_status="$([ "$(echo "$ugw_status_centralips" | wc -w)" -ge "1" ] && echo "1" || echo "0")"
+	on_ugw_enabled="$(uci_is_true "$(uci_get on-usergw.ugw_sharing.shareInternet)" && echo "1" || echo "0")"
+
+	index=1
+	ugw_status_sharing_possible=0
+	while [ -n "$(uci_get on-usergw.opennet_ugw${index})" ]; do
+	  wan_status=$(uci_get on-usergw.opennet_ugw${index}.wan_status)
+	  mtu_status=$(uci_get on-usergw.opennet_ugw${index}.mtu_status)
+	  uci_is_true "$wan_status" && uci_is_true "$mtu_status" && ugw_status_sharing_possible=1 && break
+	  : $((index++))
+	done
+	on_ugw_possible="$ugw_status_sharing_possible"
+	on_ugw_tunnel="$([ -n "$(ls /tmp/opennet_ugw*.txt 2>/dev/null)" ] && echo "1" || echo "0")"
+	on_ugw_connected="${ugw_status_centralips# }"
+	on_ugw_presetips="$(uci_get on-usergw.@usergw[0].centralIP)"
+	on_ugw_presetnames="$(uci_get on-usergw.@usergw[0].name)"
+else
+	ugw_status_centralips=
+	on_ugw_status=
+	on_ugw_enabled=
+
+	ugw_status_sharing_possible=
+	on_ugw_possible=
+	on_ugw_tunnel=
+	on_ugw_connected=
+	on_ugw_presetips=
+	on_ugw_presetnames=
+fi
+
 
 db_time="$(date)"
 

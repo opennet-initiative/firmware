@@ -1,10 +1,10 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-msgid "-- AP %s"
+msgid "AP %s"
 msgstr ""
 
-msgid "-- CN %s"
+msgid "CN %s"
 msgstr ""
 
 msgid "...show..."

@@ -28,13 +28,18 @@ function get_firmware_title()
 		client_cn = on_function("get_client_cn")
 	end
 	local result = luci.i18n.translatef("Opennet Firmware version %s", on_version)
+	local suffix
 	if on_id then
-		result = result .. luci.i18n.translatef("-- AP %s", on_id)
+		suffix = luci.i18n.translatef("AP %s", on_id)
 	end
 	if client_cn and client_cn ~= "" then
-		result = result .. luci.i18n.translatef("-- CN %s", client_cn)
+		suffix = luci.i18n.translatef("CN %s", client_cn)
 	end
-	return result
+	if suffix then
+		return result .. " -- " .. suffix
+	else
+		return result
+	end
 end
 
 

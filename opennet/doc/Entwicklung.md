@@ -282,7 +282,7 @@ Zusammensetzung einer config-Datei {#config-assemble}
 
 Da die opennet-Firmware verschiedene Ziel-Plattformen (ar71xx, ixp44, x86, ...) unterstützt, müssen verschiedene Konfigurationen gepflegt werden. Zur Erleichterung der Pflege und zur Vermeidung von Doppelungen gibt es für jede Ziel-Plattform eine separate Datei (z.B. *opennet/config/ar71xx*), sowie eine Datei mit Einstellungen, die für alle Zielplattformen gelten (*opennet/config/common*). Letztere ist für den Entwicklungsprozess wohl die wichtigere.
 
-Die plattform-spezifische config-Datei wird mit der allgemeinen zusammengefügt. Anschließend werden folgende Ersetzungen vorgenommen:
+Die plattform-spezifische config-Datei wird durch *opennet/config/Makefile* mit der allgemeinen config-Datei zusammengefügt. Anschließend werden folgende Ersetzungen vorgenommen:
 * der Platzhalter ``__PKG_STATUS__`` wird durch *stable* oder *snapshots* ersetzt (je nachdem, ob der aktuelle git-commit ein Versions-Tag trägt)
 * die Variable *CONFIG_VERSION_NUMBER* wird durch ein eventuell vorhandenes git-tag ersetzt (falls vorhanden) oder um das Suffix *-unstable-GIT_COMMIT_COUNT* erweitert
 
@@ -553,6 +553,16 @@ Bei RAM-Mangel (erkennbar am spontanen reboot ohne Änderungen nach dem Upload d
     for a in collectd dnsmasq sysntpd cron; do /etc/init.d/$a stop; done
 
 Alterantiv koennen diese Dienste via ``Administration -> System -> Systemstart`` gestoppt (nicht deaktiviert!) werden.
+
+
+Release {#release}
+=======
+
+Für ein Release sind lediglich folgende Schritte durchzuführen:
+
+* einen letzten commit (z.B. mit Doku) erstellen
+* den Commit taggen: ``git tag -a v0.5.1``
+* den Commit und das Tag zum Server pushen: ``git push --tags``
 
 
 Externe Dokumentationen {#doc-external}

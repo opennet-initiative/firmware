@@ -40,7 +40,7 @@ $(BIGCONFIG) $(SMALLCONFIG):
 	@test -n "$(SUBARCH)" && sed -i 's/^\(CONFIG_TARGET_$@_\).*_\?Default\(=y\)$$/\1$(SUBARCH)\2/' "$(CURRENT_CONFIG)" || true
 	@# Release eintragen (eventuell ein echtes - oder einen snapshot mit einer commit-Zahl)
 	@if [ -n "$(GIT_CURRENT_RELEASE_TAG)" ]; then \
-		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(GIT_CURRENT_RELEASE_TAG)"/' "$(CURRENT_CONFIG)"; \
+		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(GIT_CURRENT_RELEASE_TAG)-$(GIT_COMMIT_COUNT)"/' "$(CURRENT_CONFIG)"; \
 		sed -i '/^CONFIG_VERSION_REPO=/s/__PKG_STATUS__/stable/' "$(CURRENT_CONFIG)"; \
 	else \
 		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(NEXT_VERSION)-unstable-$(GIT_COMMIT_COUNT)"/' "$(CURRENT_CONFIG)"; \

@@ -2,7 +2,7 @@
 CONFIG_IMAGEOPT=y
 CONFIG_VERSIONOPT=y
 CONFIG_VERSION_MANUFACTURER="Opennet Initiative e.V."
-CONFIG_VERSION_NUMBER="0.5.1"
+CONFIG_VERSION_NUMBER="0.5.2"
 CONFIG_VERSION_REPO="http://downloads.on/openwrt/__PKG_STATUS__/%R/%T/packages"
 
 # fuer die umgekehrte  Ausgabe des openvpn-Verbindungsprotokolls

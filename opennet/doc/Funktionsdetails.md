@@ -321,13 +321,47 @@ Relevante Vorgänge (Booten, OLSR-Neustarts) werden im Ereignislog (/etc/banner)
 Um den korrekten Zeitstempel für das Boot-Ereignis sicherzustellen prüft das obige Skript zuerst, ob es eine Verbindung mit NTP-Servern (siehe @ref #ntp) aufbauen kann. Bei Erfolg wird eine Datei erzeugt (*/var/run/on_boot_time_logged*). Die Existenz dieser Datei sorgt bei allen weiteren Ausführungen für ein sofortiges Ende des Skripts.
 
 
+SSL-Zertifikate {#ssl-certs}
+---------------
+
+### CA-Verwaltung
+
+Die Opennet-CA-Zertifikate liegen im Verzeichnis */etc/ssl/certs/opennet*. Dies ist ein Unterverzeichnis des allgemein üblichen */etc/ssl/certs*-Verzeichnis. Die Separierung ermöglicht es bestimmten Anwendungen, ausschließlich Opennet-betriebenen Gegenstellen zu vertrauen (also beispielsweise nicht von der Telekom oder anderen verbreiteten CAs signierten Zertifikaten).
+
+Alle Opennet-CA-Zertifikate liegen als einzelne Datei mit selbsterklärendem Dateinamen in dem obigen Verzeichnis. Zur besseren Übersicht sind in die Zertifikate die menschenlesbaren Zertifikatsinformationen eingebettet:
+
+  openssl x509 -in cert.pem -text >cert_mit_Text.pem
+
+Beim Erstellen der Opennet-Pakete werden zusätzlich zu den Zertifikatsdatein in demselben Verzeichnis Symlinks erzeugt, die die effiziente Verfolgung von Vertrauensketten ermöglichen:
+
+  c_rehash /etc/ssl/certs/opennet
+
+Somit entspricht das Verzeichnis den üblichen Konventionen, die von SSL-tauglichen Clients verwendet werden (typischerweise: *capath*-Parameter).
+
+### Verwendung
+
+#### OpenVPN-Verbindungen (Nutzer, UGW, Test)
+
+Die OpenVPN-Clients auf den APs verwenden ein von der User-CA (bzw. von der UGW-CA) unterschriebenes Zertifikat. Die Clients verwenden die folgenden ssl-relevanten Optionen:
+
+  capath /etc/ssl/certs/opennet
+  ns-cert-type server
+
+Es werden also alle Server-Zertifikate akzeptiert, die von einer der in dem Verzeichnis angegebenen CAs unterschrieben wurden.
+
+@todo: Kann dies eventuell zu Problemen führen, falls wir mit unserer CA Server-Zertifikate für Dienste ausstellen, die von Nutzern und nicht von uns betrieben werden?
+
+#### CSR-Upload
+
+Zur vereinfachten Übertragung der Zertifikatsanfragen von Nutzern überträgt die AP-Firmware via curl das CSR zu https://ca.on/.
+
+Curl wird dabei mit dem Parameter *--cacert=/etc/ssl/certs/opennet/opennet-server-ca.pem* ausgeführt. Somit akzeptiert curl ausschließlich Gegenstellen, die von unserer Server-CA unterschrieben wurden. Würden wir an dieser Stelle *capath* anstelle von *cacert* verwenden, dann würde curl auch unerwünschte Zertifikate (z.B. Nutzer-Zertifikate) akzeptieren.
+
 
 Debugging {#debug}
 ---------
 
-Jedes Skript und jede Funktionalität lässt sich folgendermaßen im Detail debuggen:
-
-  ON_DEBUG=1 on_usergateway_check
+@see debugging
 
 
 Firmware 0.4 {#firmware04}

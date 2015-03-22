@@ -43,8 +43,7 @@ update_mesh_openvpn_connection_state() {
 	local host=$(get_service_value "$service_name" "host")
 	if verify_vpn_connection "$service_name" \
 			"$VPN_DIR_TEST/on_aps.key" \
-			"$VPN_DIR_TEST/on_aps.crt" \
-			"$VPN_DIR_TEST/opennet-ca.crt"; then
+			"$VPN_DIR_TEST/on_aps.crt"; then
 		msg_debug "vpn-availability of gw $host successfully tested"
 		set_service_value "$service_name" "vpn_status" "y"
 	else

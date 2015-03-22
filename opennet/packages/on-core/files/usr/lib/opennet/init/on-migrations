@@ -310,6 +310,28 @@ remove_ntpclient_config() {
 }
 
 
+## @fn remove_opennet_ca_certificates_from_previous_location()
+## @brief Löschung alter CA-Dateien an nicht mehr verwendeten Orten.
+## @details Bis Version v0.5.1 wurden die CA-Zertifikate für die OpenVPN-Verbindungen
+##   im openvpn-Verzeichnis neben den persönlichen Schlüsseln und Zertifikaten gespeichert.
+##   Da diese Verzeichnisse jedoch von luci als zu erhaltender Bereich bei einem Upgrade
+##   konfiguriert ist (luci.flash_keep.openvpn=/etc/openvpn), blieben diese Dateien bei einem
+##   Upgrade der Firmware unverändert. Der Austausch eines CA-Zertifikats war somit nicht
+##   möglich.
+##   Mit der Verschiebung aller Opennet-Zertifikate an einen nicht-zu-sichernden Ort
+##   (/etc/ssl/certs/opennet) können nun die alten CA-Zertifikate an ihrem ursprünglichen
+##   Ort gelöscht werden.
+##   Folgende Orte sind betroffen:
+##     /etc/openvpn/opennet_user/opennet-ca.crt
+##     /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
+##     /etc/openvpn/opennet_vpntest/opennet-ca.crt
+remove_opennet_ca_certificates_from_previous_location() {
+	rm -f /etc/openvpn/opennet_user/opennet-ca.crt
+	rm -f /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
+	rm -f /etc/openvpn/opennet_vpntest/opennet-ca.crt
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -340,4 +362,6 @@ rename_firewall_zone "local" "$ZONE_LOCAL"
 # Diese Aktion startet mit 10 Minuten Verzoegerung im Hintergrund, um vorher ein Empfangen der
 # olsrd-Announcements zu ermoeglichen.
 run_delayed_in_background 600 transfer_gateway_uci_settings
+
+remove_opennet_ca_certificates_from_previous_location
 

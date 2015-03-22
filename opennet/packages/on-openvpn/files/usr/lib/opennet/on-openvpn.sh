@@ -61,8 +61,7 @@ test_mig_connection() {
 		# In jedem Fall kann der Zeitstempel gesetzt werden - egal welches Ergebnis die Pruefung hat.
 		if verify_vpn_connection "$service_name" \
 				"$VPN_DIR_TEST/on_aps.key" \
-				"$VPN_DIR_TEST/on_aps.crt" \
-				"$VPN_DIR_TEST/opennet-ca.crt"; then
+				"$VPN_DIR_TEST/on_aps.crt"; then
 			msg_debug "vpn-availability of gw $host successfully tested"
 			set_service_value "$service_name" "status" "y"
 			set_service_value "$service_name" "timestamp_connection_test" "$now"

@@ -1,6 +1,9 @@
-ca /etc/openvpn/opennet_user/opennet-ca.crt
-cert /etc/openvpn/opennet_user/on_aps.crt
-key /etc/openvpn/opennet_user/on_aps.key
+capath /etc/ssl/certs/opennet
+ns-cert-type server
+
+cd /etc/openvpn/opennet_user
+cert on_aps.crt
+key on_aps.key
 
 client
 nobind
@@ -28,7 +31,6 @@ mute-replay-warnings
 dev tun
 dev-type tun
 
-ns-cert-type server
 script-security 2 execve
 
 up /usr/lib/opennet/events/mig_openvpn_updown.sh

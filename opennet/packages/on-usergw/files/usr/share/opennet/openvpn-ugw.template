@@ -1,6 +1,9 @@
-ca /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
-cert /etc/openvpn/opennet_ugw/on_ugws.crt
-key /etc/openvpn/opennet_ugw/on_ugws.key
+capath /etc/ssl/certs/opennet
+ns-cert-type server
+
+cd /etc/openvpn/opennet_ugw
+cert on_ugws.crt
+key on_ugws.key
 
 client
 nobind

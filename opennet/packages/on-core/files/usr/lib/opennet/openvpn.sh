@@ -125,14 +125,12 @@ get_openvpn_config() {
 ## @param service_name Name eines Dienstes
 ## @param key [optional] Schluesseldatei: z.B. $VPN_DIR/on_aps.key
 ## @param cert [optional] Zertifikatsdatei: z.B. $VPN_DIR/on_aps.crt
-## @param ca-cert [optional] CA-Zertifikatsdatei: z.B. $VPN_DIR/opennet-ca.crt
 ## @returns Exitcode=0 falls die Verbindung aufgebaut werden konnte
 verify_vpn_connection() {
 	trap "error_trap verify_vpn_connection '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local key_file=${2:-}
 	local cert_file=${3:-}
-	local ca_file=${4:-}
 	local config_file=$(mktemp -t "VERIFY-${service_name}-XXXXXXX")
 	local log_file="$(get_service_log_filename "$service_name" "openvpn" "verify")"
 	local file_opts
@@ -204,8 +202,6 @@ verify_vpn_connection() {
 		_change_openvpn_config_setting "$config_file" "key" "$key_file"
 	[ -n "$cert_file" ] && \
 		_change_openvpn_config_setting "$config_file" "cert" "$cert_file"
-	[ -n "$ca_file" ] && \
-		_change_openvpn_config_setting "$config_file" "ca" "$ca_file"
 
 	# Aufbau der VPN-Verbindung bis zum Timeout oder bis zum Verbindungsabbruch via "tls-exit" (/bin/false)
 	openvpn --config "$config_file" || true
@@ -260,7 +256,12 @@ submit_csr_via_http() {
 	local csr_file="$2"
 	local helper="${3:-}"
 	local helper_email="${4:-}"
-	curl -q --silent --capath /etc/ssl/certs --form "file=@$csr_file" --form "opt_name=$helper" --form "opt_mail=$helper_email" "$upload_url" && return 0
+	# wir verlassen uns nicht auf das gesamte Opennet-CA-Verzeichnis, sondern lediglich auf die CA fuer Server-Zertifikate
+	# (wir wollen keine Nutzer-AP-Zertifikate akzeptieren)
+	curl -q --silent --cacert /etc/ssl/certs/opennet/opennet-server-ca.pem \
+		--form "file=@$csr_file" \
+		--form "opt_name=$helper" \
+		--form "opt_mail=$helper_email" "$upload_url" && return 0
 	# ein technischer Verbindungsfehler trat auf
 	trap "" $GUARD_TRAPS && return 1
 }
@@ -375,7 +376,6 @@ openvpn_get_mtu() {
 		filename="$(_get_file_dict_value "key" "$config_file")"
 		[ -e "$filename" ] || _change_openvpn_config_setting "$config_file" "$key" "$default"
 	done <<- EOF
-ca   $VPN_DIR_TEST/opennet-ca.crt
 key  $VPN_DIR_TEST/on_aps.key
 cert $VPN_DIR_TEST/on_aps.crt
 EOF

@@ -326,15 +326,13 @@ SSL-Zertifikate {#ssl-certs}
 
 ### CA-Verwaltung
 
-Die Opennet-CA-Zertifikate liegen im Verzeichnis */etc/ssl/certs/opennet*. Dies ist ein Unterverzeichnis des allgemein üblichen */etc/ssl/certs*-Verzeichnis. Die Separierung ermöglicht es bestimmten Anwendungen, ausschließlich Opennet-betriebenen Gegenstellen zu vertrauen (also beispielsweise nicht von der Telekom oder anderen verbreiteten CAs signierten Zertifikaten).
+Die Opennet-CA-Zertifikate liegen im Verzeichnis */etc/ssl/certs/opennet-initiative.de*. Dies ist ein Unterverzeichnis des allgemein üblichen */etc/ssl/certs*-Verzeichnis. Die Separierung ermöglicht es bestimmten Anwendungen, ausschließlich Opennet-betriebenen Gegenstellen zu vertrauen (also beispielsweise nicht von der Telekom oder anderen verbreiteten CAs signierten Zertifikaten).
 
-Alle Opennet-CA-Zertifikate liegen als einzelne Datei mit selbsterklärendem Dateinamen in dem obigen Verzeichnis. Zur besseren Übersicht sind in die Zertifikate die menschenlesbaren Zertifikatsinformationen eingebettet:
+Alle Opennet-CA-Zertifikate liegen als einzelne Datei mit selbsterklärendem Dateinamen in dem obigen Verzeichnis. Die Dateinamen entsprechen dem Muster des CA-Bundles (siehe https://ca.opennet-initiative.de/ca.html) zuzüglich einer angehängten Jahreszahl der Erstellung.
 
-  openssl x509 -in cert.pem -text >cert_mit_Text.pem
+Beim Bauen der Opennet-Pakete werden zusätzlich zu den Zertifikatsdatein in demselben Verzeichnis Symlinks erzeugt, die die effiziente Verfolgung von Vertrauensketten ermöglichen:
 
-Beim Erstellen der Opennet-Pakete werden zusätzlich zu den Zertifikatsdatein in demselben Verzeichnis Symlinks erzeugt, die die effiziente Verfolgung von Vertrauensketten ermöglichen:
-
-  c_rehash /etc/ssl/certs/opennet
+  c_rehash /etc/ssl/certs/opennet-initiative.de
 
 Somit entspricht das Verzeichnis den üblichen Konventionen, die von SSL-tauglichen Clients verwendet werden (typischerweise: *capath*-Parameter).
 
@@ -342,9 +340,9 @@ Somit entspricht das Verzeichnis den üblichen Konventionen, die von SSL-tauglic
 
 #### OpenVPN-Verbindungen (Nutzer, UGW, Test)
 
-Die OpenVPN-Clients auf den APs verwenden ein von der User-CA (bzw. von der UGW-CA) unterschriebenes Zertifikat. Die Clients verwenden die folgenden ssl-relevanten Optionen:
+Die OpenVPN-Clients auf den APs verwenden ein von der User-CA (bzw. von der UGW-CA) unterschriebenes Zertifikat. Die Clients nutzen die folgenden ssl-relevanten Optionen:
 
-  capath /etc/ssl/certs/opennet
+  capath /etc/ssl/certs/opennet-initiative.de
   ns-cert-type server
 
 Es werden also alle Server-Zertifikate akzeptiert, die von einer der in dem Verzeichnis angegebenen CAs unterschrieben wurden.
@@ -353,9 +351,9 @@ Es werden also alle Server-Zertifikate akzeptiert, die von einer der in dem Verz
 
 #### CSR-Upload
 
-Zur vereinfachten Übertragung der Zertifikatsanfragen von Nutzern überträgt die AP-Firmware via curl das CSR zu https://ca.on/.
+Zur vereinfachten Übermittlung der Zertifikatsanfragen von Nutzern überträgt die AP-Firmware via curl das CSR zu https://ca.on/.
 
-Curl wird dabei mit dem Parameter *--cacert=/etc/ssl/certs/opennet/opennet-server-ca.pem* ausgeführt. Somit akzeptiert curl ausschließlich Gegenstellen, die von unserer Server-CA unterschrieben wurden. Würden wir an dieser Stelle *capath* anstelle von *cacert* verwenden, dann würde curl auch unerwünschte Zertifikate (z.B. Nutzer-Zertifikate) akzeptieren.
+Curl wird dabei mit dem Parameter *--cacert=/etc/ssl/certs/opennet-initiative.de/opennet-server.pem* ausgeführt. Somit akzeptiert curl ausschließlich Gegenstellen, die von unserer Server-CA unterschrieben wurden. Verwendeten wir an dieser Stelle *capath* anstelle von *cacert*, dann würde curl auch unerwünschte Zertifikate (z.B. Nutzer-Zertifikate) akzeptieren.
 
 
 Debugging {#debug}

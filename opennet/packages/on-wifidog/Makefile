@@ -22,7 +22,7 @@ define Package/on-wifidog/compile
 endef
 
 define Package/on-wifidog/install
-	# this template  is defined in ../../../openwrt/include/opennet.mk ( uses luci localisation)
+	# dieses Template wird via patches/makefile_include_opennet_packages.patch definiert
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 

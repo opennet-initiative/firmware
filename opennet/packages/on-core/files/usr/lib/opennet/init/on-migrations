@@ -319,7 +319,7 @@ remove_ntpclient_config() {
 ##   Upgrade der Firmware unverändert. Der Austausch eines CA-Zertifikats war somit nicht
 ##   möglich.
 ##   Mit der Verschiebung aller Opennet-Zertifikate an einen nicht-zu-sichernden Ort
-##   (/etc/ssl/certs/opennet) können nun die alten CA-Zertifikate an ihrem ursprünglichen
+##   (/etc/ssl/certs/opennet-initiative.de) können nun die alten CA-Zertifikate an ihrem ursprünglichen
 ##   Ort gelöscht werden.
 ##   Folgende Orte sind betroffen:
 ##     /etc/openvpn/opennet_user/opennet-ca.crt

@@ -1,29 +1,26 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=on-openvpn
+PKG_NAME:=on-certificates
 
 include $(INCLUDE_DIR)/opennet.mk
 
-define Package/on-openvpn
+define Package/on-certificates
   SECTION:=opennet
   CATEGORY:=Opennet
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
-  TITLE:=VPN extensions
-  DEPENDS+=+on-core +openvpn-openssl +openssl-util +liblzo +kmod-tun +curl
+  TITLE:=CA Certificates for OpenVPN and http clients
 endef
 
-define Package/on-openvpn/description
-	Opennet-specific additions to OpenVPN:
-	- scripts for selecting and detecting uplink VPN gateways
-	- web-based private key and CSR generation
+define Package/on-certificates/description
+	Opennet CA certificates
 endef
 
 # dummy fuer den openwrt-Buildprozess
-define Package/on-openvpn/compile
+define Package/on-certificates/compile
 endef
 
-define Package/on-openvpn/install
+define Package/on-certificates/install
 	# dieses Template wird via patches/makefile_include_opennet_packages.patch definiert
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef

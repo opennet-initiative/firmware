@@ -8,9 +8,9 @@ define Package/on-core
   SECTION:=opennet
   CATEGORY:=Opennet
   URL:=http://www.opennet-initiative.de/
-  MAINTAINER:=Rene Ejury <opennet@absorb.it>
+  MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=System and Webinterface
-  DEPENDS+=+luci-mod-admin-core +olsrd +olsrd-mod-httpinfo +olsrd-mod-txtinfo +olsrd-mod-nameservice +ip +ncat +coreutils +coreutils-tac +diffutils
+  DEPENDS+=+on-certificates +luci-mod-admin-core +olsrd +olsrd-mod-httpinfo +olsrd-mod-txtinfo +olsrd-mod-nameservice +ip +ncat +coreutils +coreutils-tac +diffutils
 endef
 
 define Package/on-core/description
@@ -22,7 +22,7 @@ define Package/on-core/compile
 endef
 
 define Package/on-core/install
-	# this template  is defined in ../../../openwrt/include/opennet.mk ( uses luci localisation)
+	# dieses Template wird via patches/makefile_include_opennet_packages.patch definiert
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 

@@ -1,4 +1,4 @@
-capath /etc/ssl/certs/opennet
+capath /etc/ssl/certs/opennet-initiative.de
 ns-cert-type server
 
 cd /etc/openvpn/opennet_user

@@ -50,7 +50,7 @@ update_mesh_openvpn_connection_state() {
 		set_service_value "$service_name" "vpn_status" "n"
 		msg_debug "failed to test vpn-availability of gw $host"
 	fi
-	set_service_value "$service_name" "timestamp_connection_test" "$(get_uptime_minutes)"
+	set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
 }
 
 

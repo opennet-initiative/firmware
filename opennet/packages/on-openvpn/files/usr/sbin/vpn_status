@@ -40,7 +40,7 @@ print_status()
 			printf "$format_string" "" "[$host]" "unreachable" "" ""
 		else
 			# der Dienst wurde nicht abgeschaltet
-			timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
+			timestamp=$(get_service_value "$service_name" "status_timestamp")
 			if [ -n "$timestamp" ]; then
 				age=$((now-timestamp))
 			else

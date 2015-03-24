@@ -237,11 +237,11 @@ get_active_mig_connections() {
 ## @fn reset_mig_connection_test_timestamp()
 ## @brief Löse eine erneute Prüfung dieses Gateways beim nächsten Prüflauf aus.
 ## @param Name eines Diensts
-## @details Das Löschen des *timestamp_connection_test* Werts führt zu einer
+## @details Das Löschen des *status_timestamp* Werts führt zu einer
 ##   erneuten Prüfung zum nächstmöglichen Zeitpunkt.
 reset_mig_connection_test_timestamp() {
 	local service_name="$1"
-	set_service_value "$service_name" "timestamp_connection_test" ""
+	set_service_value "$service_name" "status_timestamp" ""
 }
 
 
@@ -262,7 +262,7 @@ reset_all_mig_connection_test_timestamps() {
 ## @details Anhand des Test-Alters lässt sich der Zeitpunkt der nächsten Prüfung abschätzen.
 get_mig_connection_test_age() {
 	local service_name="$1"
-	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
+	local timestamp=$(get_service_value "$service_name" "status_timestamp")
 	# noch keine Tests durchgefuehrt?
 	[ -z "$timestamp" ] && return 0
 	local now=$(get_uptime_minutes)

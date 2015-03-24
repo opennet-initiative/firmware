@@ -276,6 +276,10 @@ has_openvpn_credentials_by_template() {
 	local template_file="$1"
 	local cert_file=$(_get_file_dict_value "cert" "$template_file")
 	local key_file=$(_get_file_dict_value "key" "$template_file")
+	# Pruefe, ob eine "cd"-Direktive enthalten ist - vervollständige damit relative Pfade
+	local base_dir=$(_get_file_dict_value "cd" "$template_file")
+	[ -n "$base_dir" -a "${cert_file:0:1}" != "/" ] && cert_file="$base_dir/$cert_file"
+	[ -n "$base_dir" -a "${key_file:0:1}" != "/" ] && key_file="$base_dir/$key_file"
 	# im Zweifel: liefere "wahr"
 	[ -z "$key_file" -o -z "$cert_file" ] && return 0
 	# beide Dateien existieren

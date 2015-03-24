@@ -13,7 +13,7 @@ set -eu
 
 
 FLAG_FILE=/var/run/on_boot_time_logged
-MAX_UPTIME_SECONDS=300
+MAX_UPTIME_SECONDS=420
 ACCEPTABLE_TIME_OFFSET=180
 
 

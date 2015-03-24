@@ -334,7 +334,7 @@ Beim Bauen der Opennet-Pakete werden zusätzlich zu den Zertifikatsdatein in dem
 
   c_rehash /etc/ssl/certs/opennet-initiative.de
 
-Somit entspricht das Verzeichnis den üblichen Konventionen, die von SSL-tauglichen Clients verwendet werden (typischerweise: *capath*-Parameter).
+Somit entspricht das Verzeichnis den üblichen Konventionen, die von SSL-tauglichen Clients verwendet werden (typischerweise: *capath*-Parameter). Für die Verwendung mit openvpn ist dieses Verzeichnis jedoch nicht geeignet, da openvpn zwingend die Anwesenheit aktueller CRL-Dateien erfordert. Da wir nicht regelmäßig CRL-Dateien aktualisieren wollen, verwenden wir für openvpn weiterhin einzelne CA-Zertifikatsdateien.
 
 ### Verwendung
 
@@ -342,10 +342,10 @@ Somit entspricht das Verzeichnis den üblichen Konventionen, die von SSL-tauglic
 
 Die OpenVPN-Clients auf den APs verwenden ein von der User-CA (bzw. von der UGW-CA) unterschriebenes Zertifikat. Die Clients nutzen die folgenden ssl-relevanten Optionen:
 
-  capath /etc/ssl/certs/opennet-initiative.de
+  ca /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem
   ns-cert-type server
 
-Es werden also alle Server-Zertifikate akzeptiert, die von einer der in dem Verzeichnis angegebenen CAs unterschrieben wurden.
+Es werden also alle Opennet-Server-Zertifikate akzeptiert, die von der Server-CA (oder der älteren root-CA) unterschrieben wurden.
 
 @todo: Kann dies eventuell zu Problemen führen, falls wir mit unserer CA Server-Zertifikate für Dienste ausstellen, die von Nutzern und nicht von uns betrieben werden?
 

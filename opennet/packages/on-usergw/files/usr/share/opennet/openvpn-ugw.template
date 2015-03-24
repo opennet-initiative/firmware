@@ -1,4 +1,4 @@
-capath /etc/ssl/certs/opennet-initiative.de
+ca /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem
 ns-cert-type server
 
 cd /etc/openvpn/opennet_ugw

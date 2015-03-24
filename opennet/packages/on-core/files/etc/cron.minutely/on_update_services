@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+uptime=$(get_uptime_minutes)
+
+# kurz nach dem Starten des AP, sowie im 3-Minuten-Takt und bei Aenderungen werden die Dienste aktualisiert
+if [ -e "$OLSR_SERVICE_UPDATE_MARKER" ] || [ "$uptime" -lt 7 ] || [ "$((uptime % 3))" -lt 3 ]; then
+	# die Marker-Datei wird von nameservice-change-Trigger-Skript erstellt, sobald sich Dienste aendern
+	rm -f "$OLSR_SERVICE_UPDATE_MARKER"
+	# Aktualisiere die mehrfach verwendete Routen-Cache-Datei
+	update_olsr_route_cache
+	update_olsr_services
+fi
+

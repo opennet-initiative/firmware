@@ -247,19 +247,6 @@ update_olsr_services() {
 }
 
 
-schedule_olsrd_service_update() {
-	touch "$OLSR_SERVICE_UPDATE_MARKER"
-}
-
-
-run_scheduled_olsrd_service_updates() {
-	[ -e "$OLSR_SERVICE_UPDATE_MARKER" ] || return 0
-	# zuerst loeschen - sonst verpassen wir eventuell ein Ereignis
-	rm -f "$OLSR_SERVICE_UPDATE_MARKER"
-	update_olsr_services
-}
-
-
 ## @fn request_olsrd_txtinfo()
 ## @brief Sende eine Anfrage an das txtinfo-Interface von olsrd
 ## @param request Der zu sende Request-Pfad (z.B. "links" oder "neighbours")

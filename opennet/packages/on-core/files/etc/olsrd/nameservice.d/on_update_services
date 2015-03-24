@@ -2,6 +2,8 @@
 
 set -eu
 
-# unbedingt im Hintegrund (oder schnell) ausfuehren - sonst stockt der single-thread olsrd-Prozess (v0.5.x?)
-on-function schedule_olsrd_service_update
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+# unbedingt im Hintergrund (oder schnell) ausfuehren - sonst stockt der single-thread olsrd-Prozess
+touch "$OLSR_SERVICE_UPDATE_MARKER"
 

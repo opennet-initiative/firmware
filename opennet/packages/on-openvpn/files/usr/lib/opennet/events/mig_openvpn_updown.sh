@@ -26,7 +26,7 @@ on-function log_openvpn_events_and_disconnect_if_requested "mig-openvpn-connecti
 # Sonder-Aktionen für mig-Verbindungen
 case "$script_type" in
 	up)
-		echo "vpn-tunnel active" >"$MSG_FILE"	# a short message for the web frontend
+		echo "vpn-tunnel active" >"$MSG_FILE"
 		uplink_table=$(on-function get_variable "ROUTING_TABLE_ON_UPLINK")
 		"$IP_BIN" route add default via "$route_vpn_gateway" table "$uplink_table" || true
 		;;

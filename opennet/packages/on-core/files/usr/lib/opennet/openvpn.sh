@@ -308,8 +308,9 @@ log_openvpn_events_and_disconnect_if_requested() {
 			if [ "${signal:-}" = "ping-restart" ]; then
 				append_to_custom_log "$log_target" "down" \
 					"Lost connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
-				# Verbindung trennen
-				set_service_value "$service_name" "status" "n"
+				# Verbindung als unklar definieren
+				set_service_value "$service_name" "status" ""
+				set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
 				disable_openvpn_service "$service_name"
 				[ -n "$pid_file" ] && rm -f "$pid_file" || true
 			else

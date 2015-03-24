@@ -103,9 +103,10 @@ Gateway-Auswahl {#mig}
 ### Gateway-Liste {#mig-list}
 
 Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank.
-Minütlich wird via cronjob die Datei ``/usr/sbin/on_vpngateway_check`` ausgeführt. Dieser führt folgende Aktionen aus:
+Minütlich wird via cronjob die Datei ``/usr/sbin/mig_gateway_check`` ausgeführt. Dieser führt folgende Aktionen aus:
 
-* Test jedes einzelnen announcierten GW- oder UGW-Dienstes (falls die Wartezeit abgelaufen ist)
+* Durchlaufen aller Gateways bis ein Test erfolgreich abgeschlossen wurde ("frische" Tests werden nicht wiederholt)
+* Falls kein Test erfolgreich durchgeführt wurde (z.B. weil alle Zeitstempel recht frisch sind), dann wird der älteste als defekt markierte Gateway getestet. Dies minimiert die Ausfallzeit nach einer globalen Nicht-Erreichbarkeit aller Gateways.
 * Ermittlung des aktuell besten Gateways und seine Aktivierung, falls er seit mehreren Minuten besser ist oder falls aktuell kein Gateway konfiguriert ist
 
 

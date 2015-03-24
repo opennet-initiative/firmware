@@ -41,6 +41,17 @@ You may obtain a copy of the License at
 	// loese die Anfrage nach allen Dienst-IDs aus - diese werden anschliessend einzeln nacheinander abgefragt
 	XHR.get('<%=luci.dispatcher.build_url("opennet", "opennet_2", "vpn_gateway_list")%>', null, build_table);
 
+	function uci_to_yn(token) {
+		var token = token.toLowerCase();
+		if ((token == "1") || (token == "yes") || (token == "y") || (token == "on") || (token == "true")) {
+			return "y";
+		} else if (token) {
+			return "n";
+		} else {
+			return "";
+		}
+	}
+
 	function build_table(dummy, services) {
 		// splitte die Liste der Dienste in mehrere parallele Ablaeufe
 		// ein Wert groesser als drei scheint keine Beschleunigung zu bringen (mit einem TL-WDR4300)
@@ -125,7 +136,7 @@ You may obtain a copy of the License at
 			active = null;
 		}
 		// best_gateway setzen, falls noch ungesetzt oder weiter oben, als der bisher beste
-		if ((gateway.status == "y") && !gateway.disabled && !gateway.unreachable
+		if ((uci_to_yn(gateway.status) == "y") && !gateway.disabled && !gateway.unreachable
 				&& (!best_gateway || (service_dict[best_gateway] > service_dict[gateway.id]))) {
 			best_gateway = gateway.id;
 			update_gateway_change_indicator();
@@ -157,7 +168,7 @@ You may obtain a copy of the License at
 			result += String.format('<div class="vpn-wan-speed" name="speed" id="cbi-opennet-gateways-speed" ><abbr title="%s">%s</abbr></div>', speed_abbr, speed);
 		}
 		result += '</td>';
-		result += String.format('<td class="cbi-value-field" title="<%:tested %d minutes ago%>"><div id="cbi-opennet-gateways-status" status="%s">&nbsp;</div></td>', gateway.age, gateway.status);
+		result += String.format('<td class="cbi-value-field" title="<%:tested %d minutes ago%>"><div id="cbi-opennet-gateways-status" status="%s">&nbsp;</div></td>', gateway.age, uci_to_yn(gateway.status));
 		result += '<td class="cbi-value-field"><div id="cbi-opennet-gateways-actions">';
 		if (gateway.disabled) {
 			result += String.format('<input class="cbi-button cbi-button-enable cbi-button-small" type="submit" value="%s" title="<%:enable%>" name="enable_service" />', gateway.id);

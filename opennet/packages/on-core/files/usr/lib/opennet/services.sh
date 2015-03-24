@@ -58,7 +58,7 @@ notify_service() {
 	fi
 	# dies sind die flexiblen Attribute
 	set_service_value "$service_name" "details" "$details"
-	set_service_value "$service_name" "timestamp" "$(get_time_minute)"
+	set_service_value "$service_name" "timestamp" "$(get_uptime_minutes)"
 	set_service_value "$service_name" "source" "$source"
 	update_service_routing_distance "$service_name"
 }

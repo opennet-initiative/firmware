@@ -231,7 +231,7 @@ update_olsr_services() {
 	local details
 	local timestamp
 	local service_name
-	local min_timestamp=$(($(get_time_minute) - $(get_on_core_default "service_expire_minutes")))
+	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "service_expire_minutes")))
 	# aktuell verbreitete Dienste benachrichtigen
 	get_olsr_services | while read scheme ip port path proto service details; do
 		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "$details" "olsr"

@@ -25,7 +25,7 @@ print_status()
 	local active
 	local offset
 	local quality
-	local now=$(get_time_minute)
+	local now=$(get_uptime_minutes)
 	local sorting=$(get_service_sorting)
 	local format_string="%6s %-16s %18s %7s %4s\n"
 

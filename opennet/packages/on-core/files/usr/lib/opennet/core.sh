@@ -495,8 +495,11 @@ get_safe_filename() {
 }
 
 
-get_time_minute() {
-	date +%s | awk '{print int($1/60)}'
+## @fn get_uptime_minutes()
+## @brief Ermittle die seit dem Systemstart vergangene Zeit in Minuten
+## @details Diese Zeit ist naturgemäß nicht für die Speicherung an Orten geeignet, die einen reboot überleben.
+get_uptime_minutes() {
+	awk '{print int($1/60)}' /proc/uptime
 }
 
 
@@ -506,11 +509,16 @@ get_file_modification_timestamp_minutes() {
 }
 
 
+## @fn is_timestamp_older_minutes()
+## @brief Prüfe, ob ein gegebener Zeitstempel älter ist, als die vorgegebene Zeitdifferenz.
+## @param timestamp_minute der zu prüfende Zeitstempel (in Minuten seit dem Systemstart)
+## @param difference zulässige Zeitdifferenz zwischen jetzt und dem Zeitstempel
+## @returns Exitcode Null (Erfolg), falls der gegebene Zeitstempel mindestens 'difference' Minuten zurückliegt.
 # Achtung: Zeitstempel aus der Zukunft gelten immer als veraltet.
 is_timestamp_older_minutes() {
 	local timestamp_minute="$1"
 	local difference="$2"
-	local now="$(get_time_minute)"
+	local now="$(get_uptime_minutes)"
 	# it is older
 	[ "$now" -ge "$((timestamp_minute+difference))" ] && return 0
 	# timestamp in future -> invalid -> let's claim it is too old

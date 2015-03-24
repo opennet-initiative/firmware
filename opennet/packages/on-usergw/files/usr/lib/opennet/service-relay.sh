@@ -30,7 +30,7 @@ update_igw_services_via_dns() {
 	local hostname
 	local service_name
 	local timestamp
-	local min_timestamp=$(($(get_time_minute) - $(get_on_core_default "service_expire_minutes")))
+	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "service_expire_minutes")))
 	query_srv_records "$IGW_OPENVPN_SRV_DNS_NAME" | while read priority weight port hostname; do
 		notify_service "igw" "openvpn" "$hostname" "$port" "udp" "/" "" "dns-srv"
 		service_name=$(get_service_name "igw" "openvpn" "$hostname" "$port" "udp" "/")

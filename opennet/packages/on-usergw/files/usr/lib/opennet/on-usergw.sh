@@ -50,7 +50,7 @@ update_mesh_openvpn_connection_state() {
 		set_service_value "$service_name" "vpn_status" "n"
 		msg_debug "failed to test vpn-availability of gw $host"
 	fi
-	set_service_value "$service_name" "timestamp_connection_test" "$(get_time_minute)"
+	set_service_value "$service_name" "timestamp_connection_test" "$(get_uptime_minutes)"
 }
 
 
@@ -64,7 +64,7 @@ update_mesh_services_via_dns() {
 	local hostname
 	local service_name
 	local timestamp
-	local min_timestamp=$(($(get_time_minute) - $(get_on_core_default "service_expire_minutes")))
+	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "service_expire_minutes")))
 	query_srv_records "$MESH_OPENVPN_SRV_DNS_NAME" | while read priority weight port hostname; do
 		notify_service "mesh" "openvpn" "$hostname" "$port" "udp" "/" "" "dns-srv"
 		service_name=$(get_service_name "mesh" "openvpn" "$hostname" "$port" "udp" "/")
@@ -101,7 +101,7 @@ update_public_gateway_speed_estimation() {
 	local prev_upload=$(get_service_detail "$service_name" "wan_speed_upload" "${upload_speed:-0}")
 	set_service_detail "$service_name" "wan_speed_download" "$(((3 * download_speed + prev_download) / 4))"
 	set_service_detail "$service_name" "wan_speed_upload" "$(((3 * download_speed + prev_upload) / 4))"
-	set_service_value "$service_name" "wan_speed_timestamp" "$(get_time_minute)"
+	set_service_value "$service_name" "wan_speed_timestamp" "$(get_uptime_minutes)"
 }
 
 
@@ -139,7 +139,7 @@ update_mesh_gateway_mtu() {
 	set_service_value "$service_name" "mtu_out_real" "$out_real"
 	set_service_value "$service_name" "mtu_in_wanted" "$in_wanted"
 	set_service_value "$service_name" "mtu_in_real" "$in_real"
-	set_service_value "$service_name" "mtu_timestamp" "$(get_time_minute)"
+	set_service_value "$service_name" "mtu_timestamp" "$(get_uptime_minutes)"
 	set_service_value "$service_name" "mtu_status" "$state"
 
 	msg_debug "mtu [$state]: update_mesh_gateway_mtu for '$host' done"

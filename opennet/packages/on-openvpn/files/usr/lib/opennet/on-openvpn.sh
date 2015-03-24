@@ -120,7 +120,7 @@ find_and_select_best_gateway() {
 	local current_priority
 	local best_priority
 	local switch_candidate_timestamp
-	local now=$(get_time_minute)
+	local now=$(get_uptime_minutes)
 	local bettergateway_timeout=$(get_on_openvpn_default vpn_bettergateway_timeout)
 	msg_debug "Trying to find a better gateway"
 	# suche nach dem besten und dem bisher verwendeten Gateway
@@ -237,7 +237,7 @@ get_mig_connection_test_age() {
 	local timestamp=$(get_service_value "$service_name" "timestamp_connection_test")
 	# noch keine Tests durchgefuehrt?
 	[ -z "$timestamp" ] && return 0
-	local now=$(get_time_minute)
+	local now=$(get_uptime_minutes)
 	echo "$timestamp" "$now" | awk '{ print $2 - $1 }'
 }
 

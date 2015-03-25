@@ -54,7 +54,9 @@ enable_profiling() {
 	[ -e /usr/bin/date ] || message="Failed to enable profiling - due to missing coreutils-date"
 	if [ -z "$message" ]; then
 		# ersetze das shebang in allen Opennet-Skripten
+		# eventuell fehlen ein paar Dateien (Umbennungen usw. im Vergleich zum installierten Paket) -> überspringen
 		cat /usr/lib/opkg/info/on-*.list | grep -E "(bin/|\.sh$|etc/cron\.|/etc/hotplug\.d/|lib/opennet)" \
+			| while read fname; do [ -e "$fname" ] && echo "$fname"; true; done \
 			| xargs -n 200 -r sed -i -f "${IPKG_INSTROOT:-}/usr/lib/opennet/profiling.sed"
 	else
 		logger -t "on-profile" "$message"

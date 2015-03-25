@@ -91,6 +91,8 @@ update_file_if_changed() {
 		trap "" $GUARD_TRAPS && return 1
 	else
 		# updated content
+		local dirname=$(dirname "$target_filename")
+		[ -d "$dirname" ] || mkdir -p "$dirname"
 		echo "$content" > "$target_filename"
 		return 0
 	fi

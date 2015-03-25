@@ -92,16 +92,24 @@ is_existing_service() {
 }
 
 
-# Ermittle eine reproduzierbare Zahl von 0 bis (LOCAL_BIAS_MODULO-1) - abhaengig von der lokalen IP und der IP der Gegenstelle.
-# Dadurch koennen wir beim Sortieren strukturelle Ungleichgewichte (z.B. durch alphabetische Sortierung) verhindern.
-_get_local_bias_for_host() {
-	local ip="$1"
-	# Die resultierende host_number darf nicht zu gross sein (z.B. mit Exponentendarstellung),
-	# da andernfalls awk die Berechnung fehlerhaft durchführt.
-	local host_number=$(echo "$ip$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g')
-	# Laenge von 'host_number' reduzieren (die Berechnung schlaegt sonst fehl)
-	# Wir fuegen die 1 an den Beginn, um die Interpretation als octal-Zahl zu verhindern (fuehrende Null).
-	echo $(( 1${host_number:0:6} % LOCAL_BIAS_MODULO))
+## @fn _get_local_bias_for_service()
+## @brief Ermittle eine reproduzierbare Zahl von 0 bis (LOCAL_BIAS_MODULO-1) - abhängig von der lokalen IP und dem Dienstnamen.
+## @param service_name der Name des Diensts für den ein Bias-Wert zu ermitteln ist.
+## @details Dadurch können wir beim Sortieren strukturelle Bevorzugungen (z.B. durch alphabetische Sortierung) verhindern.
+_get_local_bias_for_service() {
+	local service_name="$1"
+	# lade den Wert aus dem Cache, falls moeglich
+	local bias_cache=$(get_service_value "$service_name" "local_bias")
+	if [ -z "$bias_cache" ]; then
+		# Die resultierende host_number darf nicht zu gross sein (z.B. mit Exponentendarstellung),
+		# da andernfalls awk die Berechnung fehlerhaft durchführt.
+		local host_number=$(echo "$service_name$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g')
+		# Laenge von 'host_number' reduzieren (die Berechnung schlaegt sonst fehl)
+		# Wir fuegen die 1 an den Beginn, um die Interpretation als octal-Zahl zu verhindern (fuehrende Null).
+		bias_cache=$(( 1${host_number:0:6} % LOCAL_BIAS_MODULO))
+		set_service_value "$service_name" "local_bias" "$bias_cache"
+	fi
+	echo -n "$bias_cache"
 }
 
 
@@ -136,8 +144,8 @@ get_service_priority() {
 				echo 1
 			fi
 		fi | cut -f 1 -d .)
-	local host_bias=$(_get_local_bias_for_host "$(get_service_value "$service_name" "host")")
-	echo $(( ${base_priority:-$DEFAULT_SERVICE_RANK} * 1000 + host_bias))
+	local service_bias=$(_get_local_bias_for_service "$service_name")
+	echo $(( ${base_priority:-$DEFAULT_SERVICE_RANK} * 1000 + service_bias))
 }
 
 
@@ -326,16 +334,17 @@ set_service_value() {
 	local service_name="$1"
 	local attribute="$2"
 	local value="$3"
-	local dirname
+	# unverändert? Schnell beenden
+	[ -n "$service_name" -a "$value" = "$(get_service_value "$service_name" "$attribute")" ] && return 0
 	[ -z "$service_name" ] \
 		&& msg_info "Error: no service given for attribute change ($attribute=$value)" \
 		&& trap "" $GUARD_TRAPS && return 1
+	local dirname
 	if echo "$PERSISTENT_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
 		dirname="$PERSISTENT_SERVICE_STATUS_DIR"
 	else
 		dirname="$VOLATILE_SERVICE_STATUS_DIR"
 	fi
-	mkdir -p "$dirname"
 	_set_file_dict_value "$dirname/$service_name" "$attribute" "$value"
 }
 

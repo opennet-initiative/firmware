@@ -6,7 +6,7 @@
 uptime=$(get_uptime_minutes)
 
 # kurz nach dem Starten des AP, sowie im 3-Minuten-Takt und bei Aenderungen werden die Dienste aktualisiert
-if [ -e "$OLSR_SERVICE_UPDATE_MARKER" ] || [ "$((uptime % 3))" -eq 0 ] || [ "$uptime" -lt 7 ]; then
+if [ -e "$OLSR_SERVICE_UPDATE_MARKER" -o "$((uptime % 3))" -eq 0 -o "$uptime" -lt 7 ]; then
 	# die Marker-Datei wird von nameservice-change-Trigger-Skript erstellt, sobald sich Dienste aendern
 	rm -f "$OLSR_SERVICE_UPDATE_MARKER"
 	# Aktualisiere die mehrfach verwendete Routen-Cache-Datei

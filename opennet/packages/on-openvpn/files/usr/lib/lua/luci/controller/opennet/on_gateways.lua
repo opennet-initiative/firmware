@@ -65,7 +65,7 @@ function gateway_info(service_name)
 			status="string|value|status", active="bool|function|is_openvpn_service_active",
 			disabled="bool|value|disabled|false", distance="number|value|distance",
 			hop_count="number|value|hop_count|0", offset="number|value|offset|0",
-			download="number|detail|download", upload="number|detail|upload",
+			wan_speed_download="number|detail|download", wan_speed_upload="number|detail|upload",
 			age="number|function|get_mig_connection_test_age", source="string|value|source"})
 	if info then
 		luci.http.prepare_content("application/json")

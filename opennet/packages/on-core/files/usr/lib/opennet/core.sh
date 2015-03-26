@@ -773,6 +773,8 @@ run_parts() {
 	trap "error_trap run_parts '$*'" $GUARD_TRAPS
 	local rundir="$1"
 	local fname
+	# Abbruch, falls es das Verzeichnis nicht gibt
+	[ -e "$rundir" ] || return 0
 	find "$rundir" -maxdepth 1 | while read fname; do
 		# ignoriere verwaiste symlinks
 		[ ! -f "$fname" ] && continue

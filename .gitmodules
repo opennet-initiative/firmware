@@ -7,9 +7,6 @@
 [submodule "routing"]
 	path = routing
 	url = http://github.com/openwrt-routing/packages.git
-[submodule "telephony"]
-	path = telephony
-	url = http://feeds.openwrt.nanl.de/openwrt/telephony.git
 [submodule "openwrt"]
 	path = openwrt
 	url = git://git.openwrt.org/14.07/openwrt.git

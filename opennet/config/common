@@ -186,4 +186,4 @@ CONFIG_OPENVPN_polarssl_ENABLE_SERVER=n
 CONFIG_OPENVPN_polarssl_ENABLE_SMALL=n
 
 # traceroute und mtr mit ONI Ortsinformationen
-CONFIG_PACKAGE_traceroute-oni-names=m
+CONFIG_PACKAGE_traceroute-oni-names=y

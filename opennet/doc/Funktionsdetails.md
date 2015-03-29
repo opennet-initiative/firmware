@@ -286,7 +286,7 @@ Das Plugin versendet standardmäßig im 3-Stunden-Takt olsr-Message-Pakete (Mess
 
 Zur detaillierten Beobachtung kann es hilfreich sein, den Versand-Intervall (kurzzeitig) zu reduzieren (siehe *interval* in der *ondataservice_light*-Konfiguration in */etc/config/olsrd*).
 
-Im [https://wiki.opennet-initiative.de/wiki/Firmware_Status](Wiki) findest du einige Stunden später deinen AP aufgeführt. Dort findest du auch APs mit alter Firmware, sofern sie von der Kompatibilitätsschnittstelle unseres Datensammlers *geronimo* erfasst werden.
+Im [https://wiki.opennet-initiative.de/wiki/Firmware_Status](Wiki) findest du im Verlauf des nächstes Tages deinen AP aufgeführt. Dort findest du auch APs mit alter Firmware, sofern sie von der Kompatibilitätsschnittstelle unseres Datensammlers *geronimo* erfasst werden.
 
 
 Erstkonfiguration {#initial-installation}
@@ -310,6 +310,16 @@ Die Existenz einer Datei in diesem Verzeichnis deutet also auf ein Konfiguration
 Das Skript ``/etc/uci-defaults/on-configure-network`` prüft, ob der uci-Wert ``on-core.settings.default_ip_configured`` gesetzt ist.
 Sollte dies nicht der Fall sein, dann wird die IP-Adresse aus der //on-core//-Defaults-Datei ausgelesen und konfiguriert.
 Anschließend wird das obige uci-Flag gesetzt, um eine erneute Konfiguration anch einem Update zu verhindern.
+
+
+### Paket-Quellen (opkg) {#opkg-repositories}
+
+Die Firmware wird mit einer Original-openwrt-Repository-Datei (*/etc/opkg.conf*) erstellt.
+Im Zuge der uci-defaults-Initialisierung (nach der Erst-Installation oder nach einem Firmware-Upgrade) wird das Opennet-Repository hinzugefügt, z.B.:
+
+  src/gz opennet http://downloads.on/openwrt/stable/0.5.1/ar71xx/packages/opennet
+
+Siehe dazu die Datei */etc/uci-defaults/10-on-core-init* und die Funktion *set_opkg_download_version*.
 
 
 Dauerhaftes Ereignisprotokoll {#bootlog}

@@ -651,7 +651,18 @@ get_potential_error_messages() {
 # Parameter: URL-Bestandteile (z.B. "stable/0.5.0")
 set_opkg_download_version() {
 	local version="$1"
-	sed -i "s#\(/openwrt\)/[^/]\+/[^/]\+/#\1/$version/#" /etc/opkg.conf
+	local opkg_file=/etc/opkg.conf
+	local base_url=$(
+		# importiere das DISTRIB_TARGET
+		. /etc/openwrt_release
+		# bei "ar71xx/generic" ignorieren wir den Teil nach dem slash - unsere Repo-Struktur hat diese Ebene nicht
+		echo "http://downloads.on/openwrt/$version/${DISTRIB_TARGET%/generic}/packages"
+	)
+	# entferne Zeilen, die auf opennet-Domains verweisen
+	(
+		grep -vF "//downloads.on/" "$opkg_file" | grep -vF "//downloads.opennet-initiative.de/"
+		echo "src/gz opennet $base_url/opennet"
+	) | update_file_if_changed "$opkg_file" || true
 }
 
 

@@ -41,10 +41,8 @@ $(BIGCONFIG) $(SMALLCONFIG):
 	@# Release eintragen (eventuell ein echtes - oder einen snapshot mit einer commit-Zahl)
 	@if [ -n "$(GIT_CURRENT_RELEASE_TAG)" ]; then \
 		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(GIT_CURRENT_RELEASE_TAG)-$(GIT_COMMIT_COUNT)"/' "$(CURRENT_CONFIG)"; \
-		sed -i '/^CONFIG_VERSION_REPO=/s/__PKG_STATUS__/stable/' "$(CURRENT_CONFIG)"; \
 	else \
 		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(NEXT_VERSION)-unstable-$(GIT_COMMIT_COUNT)"/' "$(CURRENT_CONFIG)"; \
-		sed -i '/^CONFIG_VERSION_REPO=/s/__PKG_STATUS__/snapshots/' "$(CURRENT_CONFIG)"; \
 	fi
 	@$(MAKE) check-old-config
 

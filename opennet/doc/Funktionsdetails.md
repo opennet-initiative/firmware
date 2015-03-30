@@ -364,7 +364,7 @@ Es werden also alle Opennet-Server-Zertifikate akzeptiert, die von der Server-CA
 
 Zur vereinfachten Übermittlung der Zertifikatsanfragen von Nutzern überträgt die AP-Firmware via curl das CSR zu https://ca.on/.
 
-Curl wird dabei mit dem Parameter *--cacert=/etc/ssl/certs/opennet-initiative.de/opennet-server.pem* ausgeführt. Somit akzeptiert curl ausschließlich Gegenstellen, die von unserer Server-CA unterschrieben wurden. Verwendeten wir an dieser Stelle *capath* anstelle von *cacert*, dann würde curl auch unerwünschte Zertifikate (z.B. Nutzer-Zertifikate) akzeptieren.
+Curl wird dabei mit dem Parameter *--cacert=/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem* ausgeführt. Somit akzeptiert curl ausschließlich Gegenstellen, die von unserer Server-CA unterschrieben wurden. Verwendeten wir an dieser Stelle *capath* anstelle von *cacert*, dann würde curl auch unerwünschte Zertifikate (z.B. Nutzer-Zertifikate) akzeptieren.
 
 
 Debugging {#debug}

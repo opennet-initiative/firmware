@@ -258,7 +258,7 @@ submit_csr_via_http() {
 	local helper_email="${4:-}"
 	# wir verlassen uns nicht auf das gesamte Opennet-CA-Verzeichnis, sondern lediglich auf die CA fuer Server-Zertifikate
 	# (wir wollen keine Nutzer-AP-Zertifikate akzeptieren)
-	curl -q --silent --cacert /etc/ssl/certs/opennet-initiative.de/opennet-server.pem \
+	curl -q --silent --cacert /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem \
 		--form "file=@$csr_file" \
 		--form "opt_name=$helper" \
 		--form "opt_mail=$helper_email" "$upload_url" && return 0

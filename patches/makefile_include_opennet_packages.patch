@@ -20,11 +20,11 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +
 +
 +define Package/opennet/install/template
-+	$(CP) -L "$(PKG_BUILD_DIR)/files/." "$(1)/"
++	$(CP) "$(PKG_BUILD_DIR)/files/." "$(1)/"
 +	@# Zertifikate hashen, falls noetig (nur fuer on-core relevant; notwendig fuer csr-Upload via https)
 +	[ -d "$(1)/etc/ssl/certs/opennet-initiative.de" ] && c_rehash "$(1)/etc/ssl/certs/opennet-initiative.de" || true
 +	@# falls es keine ipkg-Dateien gibt, existiert das Quell-Verzeichnis in git nicht
-+	$(CP) "$(PKG_BUILD_DIR)/ipkg/." "$(1)/CONTROL" || true
++	$(CP) -L "$(PKG_BUILD_DIR)/ipkg/." "$(1)/CONTROL" || true
 +	$(INSTALL_DIR) "$(1)/usr/lib/lua/luci/i18n"
 +	# leere po-Dateien fuehren zu fehlenden lmo-Dateien (z.B. on-core) - das koennen wir ignorieren
 +	$(CP) "$(PKG_BUILD_DIR)/lmo"/*.lmo "$(1)/usr/lib/lua/luci/i18n/" || true

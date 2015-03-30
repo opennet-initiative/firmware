@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Reset des Luci-Cache - sonst sind neue Web-Interface-Elemente nicht sichtbar
+rm -f /tmp/luci-indexcache
+

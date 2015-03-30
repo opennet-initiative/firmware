@@ -4,7 +4,6 @@
 ## @{
 
 
-VPN_DIR_TEST=/etc/openvpn/opennet_vpntest
 OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
 
 
@@ -375,16 +374,6 @@ openvpn_get_mtu() {
 	_change_openvpn_config_setting "$config_file" "up" ""
 	_change_openvpn_config_setting "$config_file" "down" ""
 
-	# Test-Schluessel verwenden, falls kein echter Schluessel vorhanden ist
-	# TOOD: Aktuell funktioniert der MTU-Test nicht mit dem Testzertifikat (es wurde von der falschen CA ausgestellt)
-	while read key default; do
-		filename="$(_get_file_dict_value "key" "$config_file")"
-		[ -e "$filename" ] || _change_openvpn_config_setting "$config_file" "$key" "$default"
-	done <<- EOF
-key  $VPN_DIR_TEST/on_aps.key
-cert $VPN_DIR_TEST/on_aps.crt
-EOF
-
 	openvpn --mtu-test --config "$config_file" 2>&1 &
 	# warte auf den Startvorgang
 	sleep 3
@@ -409,8 +398,7 @@ EOF
 			# wir ersetzen alle eventuell vorhandenen Tabulatoren in der Statusausgabe - zur Vereinfachung des Parsers
 			echo -n "$mtu_out" | tr '\t' ' '
 			break
-		fi
-		if [ -z "$pid" -o ! -d "/proc/$pid" ]; then
+		elif [ -z "$pid" -o ! -d "/proc/$pid" ]; then
 			msg_info "failed to verify MTU resctrictions for '$host'"
 			break
 		fi

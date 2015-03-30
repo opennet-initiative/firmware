@@ -737,31 +737,23 @@ get_service_log_filename() {
 }
 
 
-## @fn update_service_wan_status()
-## @brief Pruefe ob der Verkehr zum Anbieter des Diensts über ein WAN-Interface verlaufen würde. Das "wan_status"-Flag des Diensts wird daraufhin aktualisiert.
+## @fn is_service_routed_via_wan()
+## @brief Pruefe ob der Verkehr zum Anbieter des Diensts über ein WAN-Interface verlaufen würde.
 ## @param service_name der Name des Diensts
-## @details Diese Operation dauert ca. 5s, da zusätzlich die Ping-Zeit des Zielhosts ermittelt wird.
-update_service_wan_status() {
-	trap "error_trap ugw_update_wan_status '$*'" $GUARD_TRAPS
+## @returns Exitcode == 0, falls das Routing über das WAN-Interface verläuft.
+is_service_routed_via_wan() {
+	trap "error_trap is_service_routed_via_wan '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local host=$(get_service_value "$service_name" "host")
 	local outgoing_device=$(get_target_route_interface "$host")
-	local ping_time
 	local outgoing_zone
 	if is_device_in_zone "$outgoing_device" "$ZONE_WAN"; then
-		set_service_value "$service_name" "wan_status" "true"
-		ping_time=$(get_ping_time "$host")
-		set_service_value "$service_name" "wan_ping" "$ping_time"
 		msg_debug "target '$host' routing through wan device: $outgoing_device"
-		msg_debug "average ping time for $host: ${ping_time}ms"
+		return 0
 	else
 		outgoing_zone=$(get_zone_of_device "$outgoing_device")
-		# ausfuehrliche Erklaerung, falls das Routing zuvor noch akzeptabel war
-		uci_is_true "$(get_service_value "$service_name" "wan_status" "false")" \
-			&& msg_info "Routing switched away from WAN interface to '$outgoing_device'"
 		msg_debug "warning: target '$host' is routed via interface '$outgoing_device' (zone '$outgoing_zone') instead of the expected WAN zone ($ZONE_WAN)"
-		set_service_value "$service_name" "wan_status" "false"
-		set_service_value "$service_name" "wan_ping" ""
+		trap "" $GUARD_TRAPS && return 1
 	fi
 }
 

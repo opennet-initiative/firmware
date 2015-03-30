@@ -1,6 +1,5 @@
-openvpn_recheck_period		15
-wan_speed_recheck_period	1440
-mtu_recheck_period		120
+test_period_minutes		120
+test_max_fail_attempts		5
 
 certificate_countryName		de
 certificate_provinceName	Mecklenburg-Vorpommern

@@ -735,6 +735,14 @@ is_function_available() {
 }
 
 
+## @fn get_random()
+## @brief Liefere eine Zufallszahl innerhalb des gegebenen Bereichs.
+## @returns Eine zufällige Ganzzahl.
+get_random() {
+	local range="$1"
+	echo "$range" | awk '{srand(systime()); print int(rand() * $1); }'
+}
+
 ## @fn get_local_bias_numer()
 ## @brief Ermittle eine lokale einzigartige Zahl, die als dauerhaft unveränderlich angenommen werden kann.
 ## @returns Eine (initial zufällig ermittelte) Zahl zwischen 0 und 10^8-1, die unveränderlich zu diesem AP gehört. 
@@ -747,7 +755,7 @@ get_local_bias_number() {
 	# der Bias-Wert ist schon vorhanden - wir liefern ihn aus
 	if [ -z "$bias" ]; then
 		# wir müssen einen Bias-Wert erzeugen: beliebige gehashte Inhalte ergeben eine akzeptable Zufallszahl
-		bias=$( (logread; dmesg; ps; date) | md5sum | tr "abcdef" "012345" | cut -c 1-8)
+		bias=$(get_random 100000000)
 		uci set "on-core.settings.local_bias_number=$bias"
 		uci commit on-core
 	fi

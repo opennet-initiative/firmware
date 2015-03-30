@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Durchlaufe alle Gateways bis mindestens ein Gateway-Test erfolgreich war (oder die Liste durchlaufen wurde).
+#
+
+# include helper functions
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+# alte Verbindungen loeschen
+cleanup_stale_openvpn_services
+
+# verfuegbare mesh-Gateways ermitteln
+update_mesh_services_via_dns
+
+# die Gateway-Tests sind nur moeglich, falls ein Test-Schluessel vorhanden ist
+if has_mesh_openvpn_credentials; then
+	verify_mesh_gateways
+	sync_mesh_openvpn_connection_processes
+fi
+

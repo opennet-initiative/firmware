@@ -28,29 +28,125 @@ has_mesh_openvpn_credentials() {
 }
 
 
-## @fn update_mesh_openvpn_connection_state()
-## @brief Prüfe, ob ein Verbindungsaufbau mit einem openvpn-Dienst möglich ist.
-## @param Name eines Diensts
-## @returns exitcode=0 falls der Test erfolgreich war
-## @details Die UGW-Tests dürfen eher träger Natur sein, da die Nutzer-VPN-Tests für schnelle Wechsel im Fehlerfall
-##   sorgen und jedes UGW typischerweise mehrere Gateway-Dienste via Portweiterleitung anbietet.
-## @attention Seiteneffekt: die Zustandsinformationen des Diensts (Status und Test-Zeitstempel) werden verändert.
-update_mesh_openvpn_connection_state() {
-	trap "error_trap update_mesh_openvpn_connection_state '$*'" $GUARD_TRAPS
+_notify_mesh_success() {
 	local service_name="$1"
-	# sicherstellen, dass alle vpn-relevanten Einstellungen gesetzt wurden
-	prepare_openvpn_service "$service_name" "$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
-	local host=$(get_service_value "$service_name" "host")
-	if verify_vpn_connection "$service_name" \
-			"$VPN_DIR_TEST/on_aps.key" \
-			"$VPN_DIR_TEST/on_aps.crt"; then
-		msg_debug "vpn-availability of gw $host successfully tested"
-		set_service_value "$service_name" "vpn_status" "y"
+	set_service_value "$service_name" "status" "true"
+	set_service_value "$service_name" "status_fail_counter" ""
+	set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
+}
+
+
+_notify_mesh_failure() {
+	local service_name="$1"
+	# erhoehe den Fehlerzaehler
+	local fail_counter=$(( $(get_service_value "$service_name" "status_fail_counter" "0") + 1))
+	set_service_value "$service_name" "status_fail_counter" "$fail_counter"
+	# Pruefe, ob der Fehlerzaehler gross genug ist, um seinen Status auf "fail" zu setzen.
+	if [ "$fail_counter" -ge "$(get_on_usergw_default "test_max_fail_attempts")" ]; then
+		# Die maximale Anzahl von aufeinanderfolgenden fehlgeschlagenen Tests wurde erreicht:
+		# markiere ihn als kaputt.
+		set_service_value "$service_name" "status" "false"
+	elif uci_is_true "$(get_service_value "$service_name" "status")"; then
+		# Bisher galt der Dienst als funktionsfaehig - wir setzen ihn auf "neutral" bis
+		# die maximale Anzahl aufeinanderfolgender Fehler erreicht ist.
+		set_service_value "$service_name" "status" ""
 	else
-		set_service_value "$service_name" "vpn_status" "n"
-		msg_debug "failed to test vpn-availability of gw $host"
+		# er gilt wohl schon als fehlerhaft - das kann so bleiben
+		true
 	fi
 	set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
+}
+
+
+## @fn verify_mesh_gateways()
+## @brief Durchlaufe die Liste der Gateways bis mindestens ein Test erfolgreich ist
+## @details Die Gateways werden in der Reihenfolge ihrer Priorität geprüft.
+##   Nach dem ersten Durchlauf dieser Funktion sollte also der nächstgelegene nutzbare Gateway als
+##   funktionierend markiert sein.
+##   Falls kein Gateway positiv getestet wurde (beispielsweise weil alle Zeitstempel zu frisch sind),
+##   dann wird in jedem Fall der älteste nicht-funktionsfähige Gateway getestet. Dies minimiert die Ausfallzeit im
+#    Falle einer globalen Nicht-Erreichbarkeit aller Gateways ohne auf den Ablauf der Test-Periode warten zu müssen.
+## @attention Seiteneffekt: die Zustandsinformationen des getesteten Diensts (Status, Test-Zeitstempel) werden verändert.
+verify_mesh_gateways() {
+	trap "error_trap verify_mesh_gateways '$*'" $GUARD_TRAPS
+	local service_name
+	local timestamp
+	local status
+	local test_period_minutes=$(get_on_usergw_default "test_period_minutes")
+	get_services "mesh" \
+			| filter_reachable_services \
+			| filter_enabled_services \
+			| sort_services_by_priority \
+			| while read service_name; do
+		timestamp=$(get_service_value "$service_name" "status_timestamp" "0")
+		status=$(get_service_value "$service_name" "status")
+		if [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$test_period_minutes"; then
+			if is_mesh_gateway_usable "$service_name"; then
+				msg_debug "usability of mesh gateway $(get_service_value "$service_name" "host") successfully tested"
+				_notify_mesh_success "$service_name"
+				# wir sind fertig - keine weiteren Tests
+				return
+			else
+				msg_debug "failed to verify usability of mesh gw $(get_service_value "$service_name" "host")"
+				_notify_mesh_failure "$service_name"
+			fi
+			set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
+		elif uci_is_false "$status"; then
+			# Junge "kaputte" Gateways sind potentielle Kandidaten fuer einen vorzeitigen Test, falls
+			# ansonsten kein Gateway positiv getestet wurde.
+			echo "$timestamp $service_name"
+		else
+			# funktionsfaehige "alte" Dienste - es gibt nichts fuer sie zu tun
+			true
+		fi
+	done | sort -n | while read timestamp service_name; do
+		# Hier landen wir nur, falls alle defekten Gateways zu jung fuer einen Test waren und
+		# gleichzeitig kein Gateway erfolgreich getestet wurde.
+		# Dies stellt sicher, dass nach einer kurzen Nicht-Erreichbarkeit aller Gateways (z.B. olsr-Ausfall)
+		# relativ schnell wieder ein funktionierender Gateway gefunden wird, obwohl alle Test-Zeitstempel noch recht
+		# frisch sind.
+		msg_debug "vpn-test: there is nothing to be done - thus we pick the gateway with the oldest test timestamp: $service_name"
+		is_mesh_gateway_usable "$service_name" && _notify_mesh_success "$service_name" || _notify_mesh_failure "$service_name"
+		# wir wollen nur genau einen Test durchfuehren
+		break
+	done
+}
+
+
+is_mesh_gateway_usable() {
+	trap "error_trap is_mesh_gateway_usable '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local failed=
+	# WAN-Routing
+	if is_service_routed_via_wan "$service_name"; then
+		set_service_value "$service_name" "wan_status" "true"
+	else
+		failed=1
+		set_service_value "$service_name" "wan_status" "false"
+	fi
+	# VPN-Verbindung
+	if [ -n "$failed" ]; then
+		set_service_value "$service_name" "vpn_status" ""
+	else
+		prepare_openvpn_service "$service_name" "$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
+		if verify_vpn_connection "$service_name"; then
+			set_service_value "$service_name" "vpn_status" "true"
+		else
+			set_service_value "$service_name" "vpn_status" "false"
+		fi
+	fi
+	# MTU-Pruefung
+	if [ -n "$failed" ]; then
+		for key in "mtu_msg" "mtu_out_wanted" "mtu_out_real" "mtu_in_wanted" "mtu_in_real" "mtu_timestamp" "mtu_status"; do
+			set_service_value "$service_value" "$key" ""
+		done
+	else
+		local mtu_result=$(openvpn_get_mtu "$service_name")
+		echo "$mtu_result" | update_mesh_gateway_mtu_state "$service_name"
+		uci_is_true "$(get_service_value "$service_name" "mtu_status")" || failed=1
+	fi
+	[ -z "$failed" ] && return 0
+	trap "" $GUARD_TRAPS && return 1
 }
 
 
@@ -105,30 +201,28 @@ update_public_gateway_speed_estimation() {
 }
 
 
-## @fn update_mesh_gateway_mtu()
+## @fn update_mesh_gateway_mtu_state()
 ## @brief Falls auf dem Weg zwischen Router und öffentlichem Gateway ein MTU-Problem existiert, dann werden die Daten nur bruchstückhaft fließen, auch wenn alle anderen Symptome (z.B. Ping) dies nicht festellten. Daher müssen wir auch den MTU-Pfad auswerten lassen.
 ## @param service_name der Name des Diensts
-## @returns keine Ausgabe - als Seiteneffekt wird der MTU des Diensts verändert
-update_mesh_gateway_mtu() {
-	trap "error_trap update_update_mesh_gateway_mtu '$*'" $GUARD_TRAPS
+## @returns Es erfolgt keine Ausgabe - als Seiteneffekt wird der MTU-Status des Diensts verändert.
+## @details Als Eingabestrom wird die Ausgabe von 'openvpn_get_mtu' erwartet.
+update_mesh_gateway_mtu_state() {
+	trap "error_trap update_mesh_gateway_mtu_state '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local host=$(get_service_value "$service_name" "host")
 	local state
 
-	msg_debug "starting update_mesh_gateway_mtu for '$host'"
-	msg_debug "update_mesh_gateway_mtu will take around 5 minutes per gateway"
+	msg_debug "starting update_mesh_gateway_mtu_state for '$host'"
+	msg_debug "update_mesh_gateway_mtu_state will take around 5 minutes per gateway"
 
-	# sicherstellen, dass die config-Datei existiert
-	prepare_openvpn_service "$service_name" "$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
+	local mtu_result=$(cat -)
+	local out_wanted=$(echo "$mtu_result" | cut -f 1)
+	local out_real=$(echo "$mtu_result" | cut -f 2)
+	local in_wanted=$(echo "$mtu_result" | cut -f 3)
+	local in_real=$(echo "$mtu_result" | cut -f 4)
+	local status_output=$(echo "$mtu_result" | cut -f 5)
 
-	local result=$(openvpn_get_mtu "$service_name")
-	local out_wanted=$(echo "$result" | cut -f 1)
-	local out_real=$(echo "$result" | cut -f 2)
-	local in_wanted=$(echo "$result" | cut -f 3)
-	local in_real=$(echo "$result" | cut -f 4)
-	local status_output=$(echo "$result" | cut -f 5)
-
-	if [ -n "$result" ] && [ "$out_wanted" -le "$out_real" ] && [ "$in_wanted" -le "$in_real" ]; then
+	if [ -n "$mtu_result" ] && [ "$out_wanted" -le "$out_real" ] && [ "$in_wanted" -le "$in_real" ]; then
 		state="true"
 	else
 		state="false"
@@ -139,10 +233,9 @@ update_mesh_gateway_mtu() {
 	set_service_value "$service_name" "mtu_out_real" "$out_real"
 	set_service_value "$service_name" "mtu_in_wanted" "$in_wanted"
 	set_service_value "$service_name" "mtu_in_real" "$in_real"
-	set_service_value "$service_name" "mtu_timestamp" "$(get_uptime_minutes)"
 	set_service_value "$service_name" "mtu_status" "$state"
 
-	msg_debug "mtu [$state]: update_mesh_gateway_mtu for '$host' done"
+	msg_debug "mtu [$state]: update_mesh_gateway_mtu_state for '$host' done"
 	msg_debug "mtu [$state]: $status_output"
 }
 

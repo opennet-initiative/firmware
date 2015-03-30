@@ -168,8 +168,8 @@ get_zone_devices() {
 # Ist das gegebene physische Netzwer-Interface Teil einer Firewall-Zone?
 is_device_in_zone() {
 	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
-	local device=$1
-	local zone=$2
+	local device="$1"
+	local zone="$2"
 	local item
 	for log_interface in $(get_zone_interfaces "$2"); do
 		for item in $(uci_get "network.${log_interface}.ifname"); do

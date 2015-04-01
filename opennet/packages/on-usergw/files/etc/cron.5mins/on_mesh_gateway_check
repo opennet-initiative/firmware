@@ -8,7 +8,8 @@
 
 
 # alte Verbindungen loeschen
-cleanup_stale_openvpn_services
+# eventuell laeuft zeitgleich dieselbe Pruefung im Rahmen von on_mig_gateway_check ab - also warten wir vorher ein wenig
+sleep 15 && cleanup_stale_openvpn_services
 
 # verfuegbare mesh-Gateways ermitteln
 update_mesh_services_via_dns

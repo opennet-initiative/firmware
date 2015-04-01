@@ -345,7 +345,7 @@ Beim Bauen der Opennet-Pakete werden zusätzlich zu den Zertifikatsdatein in dem
 
   c_rehash /etc/ssl/certs/opennet-initiative.de
 
-Somit entspricht das Verzeichnis den üblichen Konventionen, die von SSL-tauglichen Clients verwendet werden (typischerweise: *capath*-Parameter). Für die Verwendung mit openvpn ist dieses Verzeichnis jedoch nicht geeignet, da openvpn zwingend die Anwesenheit aktueller CRL-Dateien erfordert. Da wir nicht regelmäßig CRL-Dateien aktualisieren wollen, verwenden wir für openvpn weiterhin einzelne CA-Zertifikatsdateien.
+Somit entspricht das Verzeichnis den üblichen Konventionen, die von SSL-tauglichen Clients verwendet werden (typischerweise: *capath*-Parameter). OpenVPN ist bei Verwendung des *capath*-Parameters darauf angewiesen, dass aktuell gültige CRLs für alle notwendigen Zertifikate vorliegen. Andernfalls werden die dazugehörigen Zertifikate ignoriert und die Verbindung zur Gegenstelle abgelehnt.
 
 ### Verwendung
 
@@ -365,6 +365,21 @@ Es werden also alle Opennet-Server-Zertifikate akzeptiert, die von der Server-CA
 Zur vereinfachten Übermittlung der Zertifikatsanfragen von Nutzern überträgt die AP-Firmware via curl das CSR zu https://ca.on/.
 
 Curl wird dabei mit dem Parameter *--cacert=/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem* ausgeführt. Somit akzeptiert curl ausschließlich Gegenstellen, die von unserer Server-CA unterschrieben wurden. Verwendeten wir an dieser Stelle *capath* anstelle von *cacert*, dann würde curl auch unerwünschte Zertifikate (z.B. Nutzer-Zertifikate) akzeptieren.
+
+### Aktualisierung
+
+Seit Version 0.5.2 sind alle CA-Zertifikate in dem separaten Paket *on-certificates* zusammengefasst. Teil dieses Pakets ist außerdem ein Skript, das für die tägliche Aktualisierung dieses Pakets sorgt. Diese häufige Aktualisierung ist erforderlich, da andernfalls die Widerrufslisten (CRL) veralten und die dazugehörigen CA-Zertifikate nicht mehr verwendbar sind (im Falle des *capath*-Modus).
+
+Dieses Skript wird zu den folgenden Zeitpunkten ausgeführt:
+
+* einmal täglich (daily cronjob)
+* stündlich innerhalb der ersten 120 Minuten nach dem Booten
+
+Der stündliche cronjob, der nur kurz nach dem Booten wirksam ist, stellt sicher, dass unregelmäßig angeschaltete (bzw. verbundene) APs eine gute Chance haben, auch innerhalb einer kurzen Laufzeit ihre Zertifikate zu aktualisieren. Sollte dies mehr als 30 Tage lang nicht gelingen, dann verzögert sich anschließend die VPN-Verbindung, bis eine Zertifikatsaktualisierung erfolgreich abgeschlossen wird.
+
+Die Aktualisierung wird sowohl über den opennet-internen (*downloads.on*) Domainnamen, als auch über den öffentlich nutzbaren Namen (*downloads.opennet-initiative.de*) versucht. Dies ermöglicht sowohl den direkten Teilnehmern des Mesh-Netzes, als auch für den UGW-Hosts die Aktualisierung.
+
+Bei der Installation neuer Versionen des Opennet-Zertifikat-Pakets werden von *opkg* leider keine Signaturen und auch keine https-Verbindung unterstützt. Somit ist auf diesem Weg das Unterschieben eines manipulierten CA-Zertifikats durch einen Dritten möglich.
 
 
 Debugging {#debug}

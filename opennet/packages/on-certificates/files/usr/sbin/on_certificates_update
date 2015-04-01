@@ -1,0 +1,66 @@
+#!/bin/sh
+#
+# Aktualisierung des on-certificate-Pakets
+#
+# ACHTUNG: dieses Skript muss versionsunabhängig sein - es darf keine Dateien außerhalb dieses Pakets laden
+#
+
+set -eu
+
+OPKG_CONF=$(mktemp)
+LISTS_DIR=/var/opkg-lists-on-certificates
+PACKAGE=on-certificates
+
+
+is_temp_dir() {
+	local path="$1"
+	local mountpoint=$( (df "$path" 2>/dev/null || true) | tail -1 | awk '{print $1}')
+	if [ "$mountpoint" = "tmpfs" ]; then
+		return 0
+	elif [ -z "$mountpoint" ]; then
+		# frage das darueberliegende Verzeichnis
+		[ "$path" != "/" ] && is_temp_dir "$(dirname "$path")" && return 0
+		return 1
+	else
+		# falsches Dateisystem (kein tmpfs)
+		return 1
+	fi
+}
+
+
+cleanup() {
+	rm -f "$OPKG_CONF"
+	# Loeschen des Paket-Cache
+	is_temp_dir "$LISTS_DIR" && rm -rf "$LISTS_DIR"
+	return 0
+}
+
+
+create_config_file() {
+	local config_file="$1"
+	local host="$2"
+	cat - >"$config_file" <<-EOF
+		dest root /
+		lists_dir ext $LISTS_DIR
+		option overlay_root /overlay
+		src/gz on_certificates_public http://$host/openwrt/stable/certificates
+EOF
+}
+
+
+[ -z "$LISTS_DIR" ] && echo >&2 "ERROR: empty list directory for on-certificate upgrade" && exit 1
+[ ! -e "$OPKG_CONF" ] && echo >&2 "ERROR: missing opkg config file for on-certificate upgrade ($OPKG_CONF)" && exit 2
+
+trap "cleanup" EXIT
+# Probiere beide Ziel-Hosts (oeffentlich und opennet-intern).
+# Die Schleife endet mit einem Fehler, falls beide fehlschlagen.
+for host in "downloads.on" "downloads.opennet-initiative.de"; do
+	create_config_file "$OPKG_CONF" "$host"
+	opkg --conf "$OPKG_CONF" update >/dev/null 2>&1 && break
+done && opkg --conf "$OPKG_CONF" upgrade "$PACKAGE" && exit 0
+
+# hier landen wir nur, falls es einen Fehler gab
+logger -t "$(basename "$0")" "Failed to update opennet certificates"
+
+# beim Beenden wird das Cleanup via trap durchgefuehrt
+

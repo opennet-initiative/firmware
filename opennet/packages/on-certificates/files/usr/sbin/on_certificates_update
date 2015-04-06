@@ -1,66 +1,68 @@
 #!/bin/sh
 #
-# Aktualisierung des on-certificate-Pakets
+# Aktualisierung der lokalen CRL-Dateien
+# Da die CRL-Dateien typischerweise eine Verfallszeit von 30 Tagen haben, sollte
+# dieses Skript ca. täglich als cronjob ausgeführt werden.
 #
 # ACHTUNG: dieses Skript muss versionsunabhängig sein - es darf keine Dateien außerhalb dieses Pakets laden
 #
 
 set -eu
 
-OPKG_CONF=$(mktemp)
-LISTS_DIR=/var/opkg-lists-on-certificates
-PACKAGE=on-certificates
+
+CRL_LIST="root.crl vpnugw.crl vpnuser.crl client.crl server.crl"
+BASE_URLS="https://ca.on https://ca.opennet-initiative.de"
+CA_DIR=/etc/ssl/certs/opennet-initiative.de
+# wir verwenden "cacert" anstelle von "capath", da wir den Opennet-Client-Zertifikaten nicht vertrauen wollen
+CURL_OPTIONS="-q --silent --fail --cacert ${CA_DIR}/opennet-server_bundle.pem"
 
 
-is_temp_dir() {
-	local path="$1"
-	local mountpoint=$( (df "$path" 2>/dev/null || true) | tail -1 | awk '{print $1}')
-	if [ "$mountpoint" = "tmpfs" ]; then
-		return 0
-	elif [ -z "$mountpoint" ]; then
-		# frage das darueberliegende Verzeichnis
-		[ "$path" != "/" ] && is_temp_dir "$(dirname "$path")" && return 0
-		return 1
-	else
-		# falsches Dateisystem (kein tmpfs)
-		return 1
-	fi
+verify_crl() {
+	local hash="$1"
+	local cert_file=$(ls "$CA_DIR" | grep "^$hash\.[0-9]$" | sort -n | tail -1)
+	[ -z "$cert_file" ] && echo >&2 "Failed to find certificate belonging to CRL '$hash'" && return 1
+	# Ausgabe des CRL-Resultats ("verify OK" oder aehnliches) umlenken - bei Erfolg sofort beenden
+	openssl crl -CAfile "$cert_file" -noout 2>/dev/null && return 0
+	echo >&2 "CRL validation failed for '$hash'" && return 2
 }
 
 
-cleanup() {
-	rm -f "$OPKG_CONF"
-	# Loeschen des Paket-Cache
-	is_temp_dir "$LISTS_DIR" && rm -rf "$LISTS_DIR"
-	return 0
+safely_replace_file() {
+	local target_filename="$CA_DIR/${hash}.r0"
+	local content=$(cat -)
+	# Datei mit identischem Inhalt existiert bereits - wir sind fertig
+	[ -e "$target_filename" ] && echo "$content" | cmp -s "$target_filename" - && return 0
+	# vorsichtiges Ersetzen: in dasselbe Verzeichnis schreiben und anschließend als atomare Operation umbenennen
+	local tmp_filename="${target_filename}_new"
+	# bei Abbruch die Loeschung der temporaeren Datei sicherstellen
+	trap "rm -f '$tmp_filename'" EXIT
+	echo "$content" >"$tmp_filename"
+	mv "$tmp_filename" "$target_filename"
 }
 
 
-create_config_file() {
-	local config_file="$1"
-	local host="$2"
-	cat - >"$config_file" <<-EOF
-		dest root /
-		lists_dir ext $LISTS_DIR
-		option overlay_root /overlay
-		src/gz on_certificates_public http://$host/openwrt/stable/certificates
-EOF
+update_crl() {
+	local crl_name="$1"
+	local base_url
+	local content=
+	for base_url in $BASE_URLS; do
+		[ -n "$content" ] && break
+		content=$(curl $CURL_OPTIONS "$base_url/$crl_name")
+	done
+	[ -z "$content" ] && echo >&2 "Failed to download CRL '$crl_name'" && return 1
+	local hash=$(echo "$content" | openssl crl -hash -noout)
+	[ -z "$hash" ] && echo >&2 "Failed to parse hash of CRL '$crl_name'" && return 2
+	echo "$content" | verify_crl "$hash" || return 1
+	# die CRL-Daten sind korrekt - wir koennen sie schreiben
+	# wir gehen hier davon aus, dass es keine Hash-Duplikate in unseren Zertifikaten gibt ("r0")
+	echo "$content" | safely_replace_file "$CA_DIR/${hash}.r0"
 }
 
 
-[ -z "$LISTS_DIR" ] && echo >&2 "ERROR: empty list directory for on-certificate upgrade" && exit 1
-[ ! -e "$OPKG_CONF" ] && echo >&2 "ERROR: missing opkg config file for on-certificate upgrade ($OPKG_CONF)" && exit 2
-
-trap "cleanup" EXIT
-# Probiere beide Ziel-Hosts (oeffentlich und opennet-intern).
-# Die Schleife endet mit einem Fehler, falls beide fehlschlagen.
-for host in "downloads.on" "downloads.opennet-initiative.de"; do
-	create_config_file "$OPKG_CONF" "$host"
-	opkg --conf "$OPKG_CONF" update >/dev/null 2>&1 && break
-done && opkg --conf "$OPKG_CONF" upgrade "$PACKAGE" && exit 0
-
-# hier landen wir nur, falls es einen Fehler gab
-logger -t "$(basename "$0")" "Failed to update opennet certificates"
-
-# beim Beenden wird das Cleanup via trap durchgefuehrt
+# alle CRLs aktualisieren
+for crl_file in $CRL_LIST; do
+	echo "Starting update of CRL '$crl_file'"
+	# falls die Aktualisierung einer CRL fehlschlaegt, wollen wir trotzdem die anderen CRLs aktualisieren
+	update_crl "$crl_file" || true
+done
 

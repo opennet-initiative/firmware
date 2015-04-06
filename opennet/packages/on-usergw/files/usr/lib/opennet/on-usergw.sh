@@ -28,89 +28,15 @@ has_mesh_openvpn_credentials() {
 }
 
 
-_notify_mesh_success() {
-	local service_name="$1"
-	set_service_value "$service_name" "status" "true"
-	set_service_value "$service_name" "status_fail_counter" ""
-	set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
-}
-
-
-_notify_mesh_failure() {
-	local service_name="$1"
-	# erhoehe den Fehlerzaehler
-	local fail_counter=$(( $(get_service_value "$service_name" "status_fail_counter" "0") + 1))
-	set_service_value "$service_name" "status_fail_counter" "$fail_counter"
-	# Pruefe, ob der Fehlerzaehler gross genug ist, um seinen Status auf "fail" zu setzen.
-	if [ "$fail_counter" -ge "$(get_on_usergw_default "test_max_fail_attempts")" ]; then
-		# Die maximale Anzahl von aufeinanderfolgenden fehlgeschlagenen Tests wurde erreicht:
-		# markiere ihn als kaputt.
-		set_service_value "$service_name" "status" "false"
-	elif uci_is_true "$(get_service_value "$service_name" "status")"; then
-		# Bisher galt der Dienst als funktionsfaehig - wir setzen ihn auf "neutral" bis
-		# die maximale Anzahl aufeinanderfolgender Fehler erreicht ist.
-		set_service_value "$service_name" "status" ""
-	else
-		# er gilt wohl schon als fehlerhaft - das kann so bleiben
-		true
-	fi
-	set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
-}
-
-
 ## @fn verify_mesh_gateways()
-## @brief Durchlaufe die Liste der Gateways bis mindestens ein Test erfolgreich ist
-## @details Die Gateways werden in der Reihenfolge ihrer Priorität geprüft.
-##   Nach dem ersten Durchlauf dieser Funktion sollte also der nächstgelegene nutzbare Gateway als
-##   funktionierend markiert sein.
-##   Falls kein Gateway positiv getestet wurde (beispielsweise weil alle Zeitstempel zu frisch sind),
-##   dann wird in jedem Fall der älteste nicht-funktionsfähige Gateway getestet. Dies minimiert die Ausfallzeit im
-#    Falle einer globalen Nicht-Erreichbarkeit aller Gateways ohne auf den Ablauf der Test-Periode warten zu müssen.
-## @attention Seiteneffekt: die Zustandsinformationen des getesteten Diensts (Status, Test-Zeitstempel) werden verändert.
+## @brief Durchlaufe die Liste aller Mesh-Gateway-Dienste und aktualisiere deren Status.
+## @see run_cyclic_service_tests
 verify_mesh_gateways() {
-	trap "error_trap verify_mesh_gateways '$*'" $GUARD_TRAPS
-	local service_name
-	local timestamp
-	local status
+	local max_fail_attempts=$(get_on_usergw_default "test_max_fail_attempts")
 	local test_period_minutes=$(get_on_usergw_default "test_period_minutes")
-	get_services "mesh" \
-			| filter_reachable_services \
-			| filter_enabled_services \
-			| sort_services_by_priority \
-			| while read service_name; do
-		timestamp=$(get_service_value "$service_name" "status_timestamp" "0")
-		status=$(get_service_value "$service_name" "status")
-		if [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$test_period_minutes"; then
-			if is_mesh_gateway_usable "$service_name"; then
-				msg_debug "usability of mesh gateway $(get_service_value "$service_name" "host") successfully tested"
-				_notify_mesh_success "$service_name"
-				# wir sind fertig - keine weiteren Tests
-				return
-			else
-				msg_debug "failed to verify usability of mesh gw $(get_service_value "$service_name" "host")"
-				_notify_mesh_failure "$service_name"
-			fi
-			set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
-		elif uci_is_false "$status"; then
-			# Junge "kaputte" Gateways sind potentielle Kandidaten fuer einen vorzeitigen Test, falls
-			# ansonsten kein Gateway positiv getestet wurde.
-			echo "$timestamp $service_name"
-		else
-			# funktionsfaehige "alte" Dienste - es gibt nichts fuer sie zu tun
-			true
-		fi
-	done | sort -n | while read timestamp service_name; do
-		# Hier landen wir nur, falls alle defekten Gateways zu jung fuer einen Test waren und
-		# gleichzeitig kein Gateway erfolgreich getestet wurde.
-		# Dies stellt sicher, dass nach einer kurzen Nicht-Erreichbarkeit aller Gateways (z.B. olsr-Ausfall)
-		# relativ schnell wieder ein funktionierender Gateway gefunden wird, obwohl alle Test-Zeitstempel noch recht
-		# frisch sind.
-		msg_debug "vpn-test: there is nothing to be done - thus we pick the gateway with the oldest test timestamp: $service_name"
-		is_mesh_gateway_usable "$service_name" && _notify_mesh_success "$service_name" || _notify_mesh_failure "$service_name"
-		# wir wollen nur genau einen Test durchfuehren
-		break
-	done
+	run_cyclic_service_tests "ugw" "is_mesh_gateway_usable" "$test_period_minutes" "$max_fail_attempts"
 }
+
 
 
 is_mesh_gateway_usable() {

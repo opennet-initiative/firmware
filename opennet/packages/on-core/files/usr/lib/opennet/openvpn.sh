@@ -19,6 +19,8 @@ enable_openvpn_service() {
 		msg_info "Refuse to enable openvpn server ('$service_name'): missing key or certificate"
 		trap "" $GUARD_TRAPS && return 1
 	fi
+	# ermittle die openvpn-config-Vorlagedatei
+	prepare_openvpn_service "$service_name"
 	local uci_prefix="openvpn.$service_name"
 	local config_file=$(get_service_value "$service_name" "config_file")
 	# zukuenftige config-Datei referenzieren
@@ -136,10 +138,9 @@ verify_vpn_connection() {
 	local wan_dev
 	local hostname
 	local status_output
-
+	# wir benoetigen die template-Datei fuer das Erzeugen der Basis-Konfiguration
+	prepare_openvpn_service "$service_name"
 	msg_debug "start vpn test of $service_name"
-
-
 	# erstelle die config-Datei
 	(
 		# filtere Einstellungen heraus, die wir ueberschreiben wollen
@@ -250,7 +251,7 @@ openvpn_service_has_certificate_and_key() {
 ## @returns Das Ergebnis ist die html-Ausgabe des Upload-Formulars.
 submit_csr_via_http() {
 	trap "error_trap submit_csr_via_http '$*'" $GUARD_TRAPS
-        # upload_url: z.B. http://ca.on/csr/csr_upload.php
+	# upload_url: z.B. http://ca.on/csr/csr_upload.php
 	local upload_url="$1"
 	local csr_file="$2"
 	local helper="${3:-}"
@@ -326,14 +327,27 @@ log_openvpn_events_and_disconnect_if_requested() {
 
 ## @fn prepare_openvpn_service()
 ## @param Name eines Diensts
-## @param template_file Name einer openvpn-Konfigurationsvorlage
 ## @brief Erzeuge oder aktualisiere einen OpenVPN-Dienst
 prepare_openvpn_service() {
 	trap "error_trap prepare_openvpn_service '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local template_file="$2"
 	local pid_file="/var/run/${service_name}.pid"
 	local config_file="$OPENVPN_CONFIG_BASEDIR/${service_name}.conf"
+	local service_type=$(get_service_value "$service_name" "service")
+	local template_file
+	# Diese Stelle ist hier eigentlich falsch, da sie Kenntnisse und Variablen
+	# vorraussetzt, die nicht in "on-core" definiert sind.
+	# Aufgrund der Wiederverwendung der generischen
+	# "run_cyclic_service_tests"-Funktion ist eine Separierung dieser Auswahl
+	# jedoch leider nur mit großem Aufwand möglich.
+	if [ "$service_type" = "gw" ]; then
+		template_file="$MIG_OPENVPN_CONFIG_TEMPLATE_FILE"
+	elif [ "$service_type" = "ugw" ]; then
+		template_file="$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
+	else
+		msg_info "Error: unknown service type for openvpn config preparation: $service_type"
+		return 1
+	fi
 	set_service_value "$service_name" "template_file" "$template_file"
 	set_service_value "$service_name" "config_file" "$config_file"
 	set_service_value "$service_name" "pid_file" "$pid_file"
@@ -387,7 +401,7 @@ openvpn_get_mtu() {
 		# for example
 		# Thu Jul  3 22:23:01 2014 NOTE: Empirical MTU test completed [Tried,Actual] local->remote=[1573,1573] remote->local=[1573,1573]
 		if [ -n "$mtu_out" ]; then
-                        # Ausgabe der vier Zahlen getrennt durch Tabulatoren
+			# Ausgabe der vier Zahlen getrennt durch Tabulatoren
 			mtu_out_filtered="$(echo "$mtu_out" | tr '[' ',' | tr ']' ',')"
 			# Leider koennen wir nicht alle Felder auf einmal ausgeben (tab-getrennt),
 			# da das busybox-cut nicht den --output-delimiter unterstützt.

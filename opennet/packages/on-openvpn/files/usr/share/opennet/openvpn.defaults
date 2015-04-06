@@ -1,5 +1,6 @@
 test_period_minutes		30
 test_max_fail_attempts		5
+vpn_bettergateway_timeout	10
 
 certificate_countryName		de
 certificate_provinceName	Mecklenburg-Vorpommern

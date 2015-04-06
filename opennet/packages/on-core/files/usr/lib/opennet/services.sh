@@ -757,5 +757,100 @@ is_service_routed_via_wan() {
 	fi
 }
 
+
+_notify_service_success() {
+	local service_name="$1"
+	set_service_value "$service_name" "status" "true"
+	set_service_value "$service_name" "status_fail_counter" ""
+	set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
+}
+
+
+_notify_service_failure() {
+	local service_name="$1"
+	local max_fail_attempts="$2"
+	# erhoehe den Fehlerzaehler
+	local fail_counter=$(( $(get_service_value "$service_name" "status_fail_counter" "0") + 1))
+	set_service_value "$service_name" "status_fail_counter" "$fail_counter"
+	# Pruefe, ob der Fehlerzaehler gross genug ist, um seinen Status auf "fail" zu setzen.
+	if [ "$fail_counter" -ge "$max_fail_attempts" ]; then
+		# Die maximale Anzahl von aufeinanderfolgenden fehlgeschlagenen Tests wurde erreicht:
+		# markiere ihn als kaputt.
+		set_service_value "$service_name" "status" "false"
+	elif uci_is_true "$(get_service_value "$service_name" "status")"; then
+		# Bisher galt der Dienst als funktionsfaehig - wir setzen ihn auf "neutral" bis
+		# die maximale Anzahl aufeinanderfolgender Fehler erreicht ist.
+		set_service_value "$service_name" "status" ""
+	else
+		# Der Test gilt wohl schon als fehlerhaft - das kann so bleiben.
+		true
+	fi
+	set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
+}
+
+
+## @fn run_cyclic_service_tests()
+## @brief Durchlaufe alle Dienste eines Typs bis mindestens ein Test erfolgreich ist
+## @param service_type der zu prüfende Dienste-Typ (z.B. "gw")
+## @param test_function der Name der zu verwendenden Test-Funktion für einen Dienst (z.B. "verify_vpn_connection")
+## @param test_period_minutes Wiederholungsperiode der Dienst-Prüfung
+## @param max_fail_attempts Anzahl von Fehlversuchen, bis ein Dienst von "gut" oder "unklar" zu "schlecht" wechselt
+## @details Die Diensteanbieter werden in der Reihenfolge ihrer Priorität geprüft.
+##   Nach dem ersten Durchlauf dieser Funktion sollte also der nächstgelegene nutzbare Dienst als
+##   funktionierend markiert sein.
+##   Falls nach dem Durchlauf aller Dienste keiner positiv getestet wurde (beispielsweise weil alle Zeitstempel zu frisch sind),
+##   dann wird in jedem Fall der älteste nicht-funktionsfähige Dienst getestet. Dies minimiert die Ausfallzeit im
+##   Falle einer globalen Nicht-Erreichbarkeit aller Dienstenanbieter ohne auf den Ablauf der Test-Periode warten zu müssen.
+## @attention Seiteneffekt: die Zustandsinformationen des getesteten Diensts (Status, Test-Zeitstempel) werden verändert.
+run_cyclic_service_tests() {
+	trap "error_trap test_openvpn_service_type '$*'" $GUARD_TRAPS
+	local service_type="$1"
+	local test_function="$2"
+	local test_period_minutes="$3"
+	local max_fail_attempts="$4"
+	local service_name
+	local timestamp
+	local status
+	get_services "$service_type" \
+			| filter_reachable_services \
+			| filter_enabled_services \
+			| sort_services_by_priority \
+			| while read service_name; do
+		timestamp=$(get_service_value "$service_name" "status_timestamp" "0")
+		status=$(get_service_value "$service_name" "status")
+		if [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$test_period_minutes"; then
+			if "$test_function" "$service_name"; then
+				msg_debug "service $service_name successfully tested"
+				_notify_service_success "$service_name"
+				# wir sind fertig - keine weiteren Tests
+				return
+			else
+				msg_debug "failed to verify $service_name"
+				_notify_service_failure "$service_name" "$max_fail_attempts"
+			fi
+			set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
+		elif uci_is_false "$status"; then
+			# Junge "kaputte" Dienste sind potentielle Kandidaten fuer einen vorzeitigen Test, falls
+			# ansonsten kein Dienste positiv getestet wurde.
+			echo "$timestamp $service_name"
+		else
+			# funktionsfaehige "alte" Dienste - es gibt nichts fuer sie zu tun
+			true
+		fi
+	done | sort -n | while read timestamp service_name; do
+		# Hier landen wir nur, falls alle defekten Gateways zu jung fuer einen Test waren und
+		# gleichzeitig kein Gateway erfolgreich getestet wurde.
+		# Dies stellt sicher, dass nach einer kurzen Nicht-Erreichbarkeit aller Gateways (z.B. olsr-Ausfall)
+		# relativ schnell wieder ein funktionierender Gateway gefunden wird, obwohl alle Test-Zeitstempel noch recht
+		# frisch sind.
+		msg_debug "service test ($service_type) there is nothing to be done - thus we pick the service with the oldest test timestamp: $service_name"
+		"$test_function" "$service_name" \
+			&& _notify_service_success "$service_name" \
+			|| _notify_service_failure "$service_name" "$max_fail_attempts"
+		# wir wollen nur genau einen Test durchfuehren
+		break
+	done
+}
+
 # Ende der Doku-Gruppe
 ## @}

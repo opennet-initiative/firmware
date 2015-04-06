@@ -136,13 +136,15 @@ _find_uci_sections() {
 	local counter=0
 	local section
 	local condition
-	# dieser Cache beschleunigt den Vorgang wesentlich
-	local uci_cache_file=$(mktemp)
-	uci -X show "$config" >"$uci_cache_file"
+	# Seit Chaos Calmer liefert 'uci show' die Werte (nach dem "=") mit Single-Quotes zurück.
+	# Dies ist schön für die Splittung von Listen, aber nervig für unsere Bedingungsprüfung.
+	# Wir entfernen die Quotes daher.
+	# Der Cache beschleunigt den Vorgang wesentlich.
+	uci_cache=$(uci -X show "$config" | sed "s/^\([^=]\+\)=['\"]\(.*\)['\"]$/\1=\2/")
 	grep "^$config\.[^.]\+=$stype$" "$uci_cache_file" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
 		for condition in "$@"; do
 			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt
-			grep -q "^$config\.$section\.$condition$" "$uci_cache_file" || continue 2
+			echo "$uci_cache" | grep -q "^$config\.$section\.$condition$" || continue 2
 		done
 		# alle Bedingungen trafen zu
 		echo "$config.$section"
@@ -150,7 +152,6 @@ _find_uci_sections() {
 		[ "$max_num" = 0 ] && continue
 		[ "$counter" -ge "$max_num" ] && break
 	done | sort
-	rm -f "$uci_cache_file"
 	return 0
 }
 

@@ -24,14 +24,19 @@ configure_olsrd_httpinfo_port() {
 }
 
 
+# das txtinfo-Modul ist notwendig fuer die Dienstverwaltung (Routen-Entfernung)
+olsrd_enable_txtinfo() {
+	trap "error_trap olsrd_enable_txtinfo '$*'" $GUARD_TRAPS
+	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "txtinfo")
+	uci set "${uci_prefix}.ignore=0"
+}
+
+
 # das jsoninfo-Modul ist notwendig fuer die luci-Integration von olsrd
 # (nett, aber unwichtig)
 olsrd_enable_jsoninfo() {
 	trap "error_trap olsrd_enable_jsoninfo '$*'" $GUARD_TRAPS
-	local uci_prefix
-
-	# add and activate jsoninfo plugin
-	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "jsoninfo")
+	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "jsoninfo")
 	uci set "${uci_prefix}.ignore=0"
 }
 
@@ -43,6 +48,7 @@ disable_missing_olsr_modules
 olsr_set_main_ip
 olsr_sync_routing_tables
 configure_olsrd_httpinfo_port "$OLSR_HTTP_PORT"
+olsrd_enable_txtinfo
 olsrd_enable_jsoninfo
 
 apply_changes olsrd

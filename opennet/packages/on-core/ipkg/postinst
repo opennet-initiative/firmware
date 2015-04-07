@@ -2,4 +2,7 @@
 
 # Reset des Luci-Cache - sonst sind neue Web-Interface-Elemente nicht sichtbar
 rm -f /tmp/luci-indexcache
+# Paket-Initialisierungen durchfuehren
+. /etc/functions.sh
+uci_apply_defaults
 

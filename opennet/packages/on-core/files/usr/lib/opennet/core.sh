@@ -651,7 +651,7 @@ get_potential_error_messages() {
 # Parameter: URL-Bestandteile (z.B. "stable/0.5.0")
 set_opkg_download_version() {
 	local version="$1"
-	local opkg_file=/etc/opkg.conf
+	local opkg_file="${IPKG_INSTROOT:-}/etc/opkg.conf"
 	local base_url=$(
 		# importiere das DISTRIB_TARGET
 		. /etc/openwrt_release

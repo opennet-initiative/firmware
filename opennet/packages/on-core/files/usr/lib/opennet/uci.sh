@@ -141,7 +141,7 @@ _find_uci_sections() {
 	# Wir entfernen die Quotes daher.
 	# Der Cache beschleunigt den Vorgang wesentlich.
 	uci_cache=$(uci -X show "$config" | sed "s/^\([^=]\+\)=['\"]\(.*\)['\"]$/\1=\2/")
-	grep "^$config\.[^.]\+=$stype$" "$uci_cache_file" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
+	echo "$uci_cache" | grep "^$config\.[^.]\+=$stype$" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
 		for condition in "$@"; do
 			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt
 			echo "$uci_cache" | grep -q "^$config\.$section\.$condition$" || continue 2

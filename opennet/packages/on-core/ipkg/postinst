@@ -1,8 +1,9 @@
 #!/bin/sh
 
 # Reset des Luci-Cache - sonst sind neue Web-Interface-Elemente nicht sichtbar
-rm -f /tmp/luci-indexcache
+rm -f "${IPKG_INSTROOT:-}/tmp/luci-indexcache"
+
 # Paket-Initialisierungen durchfuehren
-. /etc/functions.sh
+. "${IPKG_INSTROOT:-}/etc/functions.sh"
 uci_apply_defaults
 

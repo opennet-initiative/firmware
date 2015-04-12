@@ -126,8 +126,20 @@ find_first_uci_section() {
 }
 
 
+## @fn filter_uci_show_value_quotes()
+## @brief Entferne fuehrende und abschliessende Quotes um die Werte der "uci show"-Ausgabe herum.
+## @details Seit Chaos Calmer liefert 'uci show' die Werte (nach dem "=") mit Single-Quotes zurück.
+##   Dies ist schön für die Splittung von Listen, aber nervig für unsere Bedingungsprüfung.
+##   Wir entfernen die Quotes daher.
+## @attention Das Ergebnis ist fuer die Verarbeitung von Listen-Elemente unbrauchbar, da diese separiert
+##   von Quotes umgeben sind.
+filter_uci_show_value_quotes() {
+	sed "s/^\([^=]\+\)=['\"]\(.*\)['\"]$/\1=\2/"
+}
+
+
 # Aus Performance-Gruenden brechen wir frueh ab, falls die gewuenschte Anzahl an Ergebnissen erreicht ist.
-# Die meisten Anfragen suchen nur einen Treffen ("find_first_uci_section") - daher koennen wir hier viel Zeit sparen.
+# Die meisten Anfragen suchen nur einen Treffer ("find_first_uci_section") - daher koennen wir hier viel Zeit sparen.
 _find_uci_sections() {
 	local max_num=$1
 	local config=$2
@@ -136,11 +148,8 @@ _find_uci_sections() {
 	local counter=0
 	local section
 	local condition
-	# Seit Chaos Calmer liefert 'uci show' die Werte (nach dem "=") mit Single-Quotes zurück.
-	# Dies ist schön für die Splittung von Listen, aber nervig für unsere Bedingungsprüfung.
-	# Wir entfernen die Quotes daher.
 	# Der Cache beschleunigt den Vorgang wesentlich.
-	uci_cache=$(uci -X show "$config" | sed "s/^\([^=]\+\)=['\"]\(.*\)['\"]$/\1=\2/")
+	uci_cache=$(uci -X show "$config" | filter_uci_show_value_quotes)
 	echo "$uci_cache" | grep "^$config\.[^.]\+=$stype$" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
 		for condition in "$@"; do
 			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt

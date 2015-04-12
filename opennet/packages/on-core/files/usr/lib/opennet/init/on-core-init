@@ -9,11 +9,11 @@
 
 
 # Die Einstellungen "use_olsrd_dns" und "use_olsrd_ntp" sind mit v0.5 hinzugekommen.
-add_use_settings() {
+add_default_settings() {
 	prepare_on_uci_settings
 	# erzeuge die services-Node, falls noetig
 	for setting in use_olsrd_dns use_olsrd_ntp; do
-		uci show on-core | grep -q "^on-core\.settings\.$setting=" && continue
+		[ -n "$(uci_get "on-core.settings.$setting")" ] && continue
 		uci set "on-core.settings.$setting=1"
 	done
 	apply_changes on-core
@@ -63,7 +63,7 @@ set_timezone_berlin() {
 }
 
 
-add_use_settings
+add_default_settings
 disable_cron_logging
 configure_dnsmasq
 add_crontab_entries

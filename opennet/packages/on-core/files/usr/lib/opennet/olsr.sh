@@ -57,40 +57,6 @@ get_and_enable_olsrd_library_uci_prefix() {
 }
 
 
-enable_ondataservice() {
-	trap "error_trap enable_ondataservice '$*'" $GUARD_TRAPS
-	local uci_prefix
-
-	# schon vorhanden? Unberuehrt lassen ...
-	[ -n "$(uci show olsrd | grep ondataservice)" ] && return
-
-	# add and activate ondataservice plugin
-	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "ondataservice_light")
-	uci set "${uci_prefix}.interval=10800"
-	uci set "${uci_prefix}.inc_interval=5"
-	uci set "${uci_prefix}.database=/tmp/database.json"
-}
-
-
-enable_nameservice() {
-	trap "error_trap enable_nameservice '$*'" $GUARD_TRAPS
-	local current_trigger
-	local uci_prefix
-
-	# fuer NTP, DNS und die Gateway-Auswahl benoetigen wir das nameservice-Plugin
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	if [ -z "$uci_prefix" ]; then
-	       msg_info "Failed to find olsrd_nameservice plugin"
-	else
-		# Option 'services-change-script' setzen
-		current_trigger=$(uci_get "${uci_prefix}.services_change_script" || true)
-		[ -n "$current_trigger" ] && [ "$current_trigger" != "$OLSR_NAMESERVICE_SERVICE_TRIGGER" ] && \
-			msg_info "WARNING: overwriting 'services-change-script' option of olsrd nameservice plugin with custom value. You should place a script below /etc/olsrd/nameservice.d/ instead."
-		uci set "${uci_prefix}.services_change_script=$OLSR_NAMESERVICE_SERVICE_TRIGGER"
-	fi
-}
-
-
 # Setze die Einstellung MainIP in der olsr-Konfiguration:
 # Quelle 1: der erste Parameter
 # Quelle 2: on-core.settings.on_id

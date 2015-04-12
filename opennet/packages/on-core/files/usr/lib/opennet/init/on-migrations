@@ -15,7 +15,7 @@
 # seit Version v0.5 muss die Einstellung einen der folgenden Werte haben: yes/no/adaptive
 # bzw. seit Version v0.5 gibt es Sektion nicht mehr (openvpn.opennet_user)
 # Status in v0.4-5:
-#   ~# uci show|grep lzo
+#   ~# uci show | grep lzo
 #   on-usergw.opennet_ugw.comp_lzo=1
 #   openvpn.opennet_user.comp_lzo=1
 #   openvpn.opennet_ugw_erina_on_i_de.comp_lzo=1
@@ -87,22 +87,19 @@ EOF
 # bis Version v0.4-5: "firewall reload" fuehrte auch die "include"-Dateien aus (z.B. /etc/firewall.opennet)
 # Ab Version v0.5 verwenden wir diese Datei nicht mehr.
 # Beispiel (v0.4-5):
-#  uci show firewall | grep @include
+#  ~# uci show firewall | grep @include
 #  firewall.@include[0]=include
 #  firewall.@include[0].path=/etc/firewall.opennet
 #  firewall.@include[1]=include
 #  firewall.@include[1].path=/etc/firewall.user
 fix_firewall_reload() {
 	local filename=/etc/firewall.opennet
-	local key
-	local value
-	uci show firewall | grep "@include\[[0-9]\+\]\.path=" | while read line; do
-		key=$(echo "$line" | cut -f 1 -d =)
-		value=$(echo "$line" | cut -f 2- -d =)
-		[ "$value" != "$filename" ] && continue
+	local uci_prefix
+	find_all_uci_sections "firewall" "include" | while read uci_prefix; do
+		[ "$(uci_get "${uci_prefix}.path")" != "$filename" ] && continue
 		# gesamte "include"-Abzweigung loeschen
-		uci_delete "${key%.path}"
-		uci commit firewall
+		uci_delete "$uci_prefix"
+		uci commit "firewall"
 		rm -f "$filename"
 		reload_config || true
 		break
@@ -172,7 +169,7 @@ remove_tunnel_openvpn_settings() {
 # Da die openvpn-Konfigurationen nun ein anderes Namensformat haben, loeschen wir sie.
 remove_usergw_openvpn_configs() {
 	local uci_prefix
-	uci show openvpn | grep "^openvpn\.openvpn_ugw_[^.]\+=openvpn$" | cut -f 1 -d = | while read uci_prefix; do
+	find_all_uci_sections "openvpn" "openvpn" | grep "^openvpn\.opennet_ugw_" | while read uci_prefix; do
 		uci delete "$uci_prefix"
 	done
 	return 0

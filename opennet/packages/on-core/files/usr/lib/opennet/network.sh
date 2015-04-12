@@ -288,7 +288,9 @@ get_sorted_opennet_interfaces() {
 # Liefere alle vorhandenen logischen Netzwerk-Schnittstellen (lan, wan, ...) zurueck.
 get_all_network_interfaces() {
 	local interface
-	uci show network | grep "^network\.[^.]\+=interface$" | cut -f 2 -d . | cut -f 1 -d = | while read interface; do
+	# Die uci-network-Spezifikation sieht keine anonymen uci-Sektionen fuer Netzwerk-Interfaces vor.
+	# Somit ist es wohl korrekt, auf die Namen als Teil des uci-Pfads zu vertrauen.
+	find_all_uci_sections "network" "interface" | cut -f 2 -d . | while read interface; do
 		# ignoriere loopback-Interface
 		[ "$interface" = "loopback" ] && continue
 		# alle uebrigen sind reale Interfaces

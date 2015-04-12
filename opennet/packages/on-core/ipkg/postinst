@@ -4,6 +4,6 @@
 rm -f "${IPKG_INSTROOT:-}/tmp/luci-indexcache"
 
 # Paket-Initialisierungen durchfuehren
-. "${IPKG_INSTROOT:-}/etc/functions.sh"
+. "${IPKG_INSTROOT:-}/etc/init.d/boot"
 uci_apply_defaults
 

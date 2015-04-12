@@ -4,6 +4,10 @@
 rm -f "${IPKG_INSTROOT:-}/tmp/luci-indexcache"
 
 # Paket-Initialisierungen durchfuehren
-. "${IPKG_INSTROOT:-}/etc/init.d/boot"
-uci_apply_defaults
+uci_apply_defaults_libfile="${IPKG_INSTROOT:-}/etc/init.d/boot"
+# schoen vorsichtig: bei der opkg-Paketierung gibt es die externe Datei nicht
+if [ -e "$uci_apply_defaults_libfile" ]; then
+	. "$uci_apply_defaults_libfile"
+	uci_apply_defaults
+fi
 

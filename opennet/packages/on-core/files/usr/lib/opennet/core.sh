@@ -641,6 +641,10 @@ get_potential_error_messages() {
 	# 15) wget: can't connect to remote host
 	#    Eine frühe Geschwindigkeitsmessung (kurz nach dem Booten) darf fehlschlagen.
 	filters="${filters}|wget: can.t connect to remote host"
+	# 16) openvpn(...)[...]: Options error: Unrecognized option or missing parameter(s) in [PUSH-OPTIONS]:11: explicit-exit-notify (2.3.6)
+	#    OpenVPN-Versionen, die ohne die "--extras"-Option gebaut wurden, unterstuetzen keine exit-Notification.
+	#    Dies ist unproblematisch - es ist eher eine Sache der Höflichkeit..
+	filters="${filters}|openvpn.*Options error.*explicit-exit-notify"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

@@ -22,13 +22,13 @@ verify_crl() {
 	local cert_file=$(ls "$CA_DIR" | grep "^$hash\.[0-9]$" | sort -n | tail -1)
 	[ -z "$cert_file" ] && echo >&2 "Failed to find certificate belonging to CRL '$hash'" && return 1
 	# Ausgabe des CRL-Resultats ("verify OK" oder aehnliches) umlenken - bei Erfolg sofort beenden
-	openssl crl -CAfile "$cert_file" -noout 2>/dev/null && return 0
+	openssl crl -CAfile "$CA_DIR/$cert_file" -noout 2>/dev/null && return 0
 	echo >&2 "CRL validation failed for '$hash'" && return 2
 }
 
 
 safely_replace_file() {
-	local target_filename="$CA_DIR/${hash}.r0"
+	local target_filename="$1"
 	local content=$(cat -)
 	# Datei mit identischem Inhalt existiert bereits - wir sind fertig
 	[ -e "$target_filename" ] && echo "$content" | cmp -s "$target_filename" - && return 0

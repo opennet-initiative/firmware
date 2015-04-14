@@ -1,6 +1,5 @@
 oni-feeds.patch
 luci_show_dfs_channels.patch
-wifidog_iptables_long_table_names.patch
 makefile_include_opennet_packages.patch
 dnsmasq_option_servers_file.patch
 luci_wireless_client_isolation.patch

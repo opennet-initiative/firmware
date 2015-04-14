@@ -27,7 +27,6 @@ update_olsr_interfaces() {
 # Das Ergebnis ist die uci-Sektion (z.B. "olsrd.@LoadPlugin[1]") als String.
 get_and_enable_olsrd_library_uci_prefix() {
 	trap "error_trap get_and_enable_olsrd_library_uci_prefix '$*'" $GUARD_TRAPS
-	local new_section
 	local lib_file
 	local uci_prefix=
 	local library=olsrd_$1
@@ -43,8 +42,7 @@ get_and_enable_olsrd_library_uci_prefix() {
 			msg_info "FATAL ERROR: Failed to find olsrd '$library' plugin. Some Opennet services will fail."
 			trap "" $GUARD_TRAPS && return 1
 		fi
-		new_section=$(uci add olsrd LoadPlugin)
-		uci_prefix=olsrd.${new_section}
+		uci_prefix="olsrd.$(uci add olsrd LoadPlugin)"
 		uci set "${uci_prefix}.library=$(basename "$lib_file")"
 	fi
 	# Plugin aktivieren; Praefix ausgeben

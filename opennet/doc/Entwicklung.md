@@ -435,7 +435,7 @@ Skripte liegen unter ``/etc/hotplug.d/``. Für unsere netzwerkbasierten Ereignis
 
 Der Aufruf von hotplug-Skripten lässt sich folgendermaßen emulieren:
 
-    ACTION=ifup hotplug-call iface
+    ACTION=ifup INTERFACE=on_mesh hotplug-call iface
 
 
 Hilfreiche Werkzeuge {#tools}

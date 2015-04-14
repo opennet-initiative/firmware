@@ -12,9 +12,14 @@
 configure_free_network() {
 	local uci_prefix="network.$NETWORK_FREE"
 	# es wurde bereits einmalig konfiguriert
-	[ -n "$(uci show "$uci_prefix")" ] && return
-	uci set "${uci_prefix}.ipaddr=$(get_on_nodogsplash_default free_ipaddress)"
-	uci set "${uci_prefix}.netmask=$(get_on_core_default free_netmask)"
+	[ -n "$(uci_get "$uci_prefix")" ] && return
+	uci set "${uci_prefix}=interface"
+	uci set "${uci_prefix}.ifname=none"
+	uci set "${uci_prefix}.proto=static"
+	uci set "${uci_prefix}.ipaddr=$(get_on_captive_portal_default free_ipaddress)"
+	uci set "${uci_prefix}.netmask=$(get_on_captive_portal_default free_netmask)"
+	# wir aktivieren das Interface manuell via hotplug
+	uci set "${uci_prefix}.auto=0"
 	apply_changes network
 }
 
@@ -26,6 +31,7 @@ configure_free_zone() {
 	uci_prefix=firewall.$(uci add firewall zone)
 	uci set "$uci_prefix=zone"
 	uci set "$uci_prefix.name=$ZONE_FREE"
+	add_interface_to_zone "$ZONE_FREE" "$NETWORK_FREE"
 	# wir lassen ein paar wenige Ports via nodogsplash zu
 	uci set "$uci_prefix.input=REJECT"
 	# ausgehende Pakete sind OK
@@ -34,15 +40,16 @@ configure_free_zone() {
 	uci set "$uci_prefix.forward=REJECT"
 	# die Nutzer duerfen nie in lokale WANs, sondern lediglich in VPN-Tunnel hinein kommunizieren
 	add_zone_forward "$ZONE_FREE" "$ZONE_TUNNEL"
+	apply_changes firewall
 }
 
 
-init_nodogsplash() {
-	nodogsplash_get_or_create_config >/dev/null
-	uci commit nodogsplash
+init_captive_portal() {
+	captive_portal_get_or_create_config >/dev/null
+	captive_portal_apply
 }
 
 
 configure_free_network
 configure_free_zone
-init_nodogsplash
+init_captive_portal

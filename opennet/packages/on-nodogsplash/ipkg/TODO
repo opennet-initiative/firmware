@@ -1,2 +1,0 @@
-change openwrt/inlcude/opennet.mk file so this directory is not needed for compatibility any more
-all things done here before have to be moved to ../Makefile

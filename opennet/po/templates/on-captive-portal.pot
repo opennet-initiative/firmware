@@ -1,0 +1,42 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid ""
+"Disable the Hotspot feature by removing the physical device from the 'free' "
+"network interface."
+msgstr ""
+
+msgid "Hotspot Name"
+msgstr ""
+
+msgid "Hotspot Settings"
+msgstr ""
+
+msgid "Ignoring the URL due to invalid characters."
+msgstr ""
+
+msgid "Ignoring the node name due to invalid characters."
+msgstr ""
+
+msgid "Public Hotspot"
+msgstr ""
+
+msgid "Redirection URL"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "This requires a working VPN connection:"
+msgstr ""
+
+msgid "VPN Tunnel"
+msgstr ""
+
+msgid "You may want to run a public hotspot in your area."
+msgstr ""
+
+msgid ""
+"You need to attach a physical network device to the 'free' interface in "
+"order to enable the Hotspot feature."
+msgstr ""

@@ -230,10 +230,9 @@ on_olsrd_status="$(pidof olsrd >/dev/null && echo "1" || echo "0")"
 on_olsr_mainip="$(on-function request_olsrd_txtinfo config | awk '/MainIp/ {print $2}')"
 
 
-## @todo auf nodogsplash umstellen
-if false; then
-	on_wifidog_status="$(pidof wifidog >/dev/null && echo "1" || echo "0")"
-	on_wifidog_id="$([ -e /etc/wifidog.conf ] && awk '{if ($1 == "GatewayID") print $2}' /etc/wifidog.conf 2>/dev/null || true)"
+if is_function_available "captive_portal_get_property"; then
+	on_wifidog_status="$(pidof nodogsplash >/dev/null && echo "1" || echo "0")"
+	on_wifidog_id=$(captive_portal_get_property "name")
 else
 	on_wifidog_status=
 	on_wifidog_id=

@@ -313,6 +313,25 @@ get_all_network_interfaces() {
 }
 
 
+## @fn delete_firewall_zone()
+## @brief Lösche eine Firewall-Zone, sowie alle Regeln, die sich auf diese Zone beziehen.
+## @param zone Name der Zone
+## @attention Anschließend ist ein "apply_changes firewall" erforderlich.
+delete_firewall_zone() {
+	local zone="$1"
+	local section
+	local key
+	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
+	uci_delete "$uci_prefix"
+	for section in "forwarding" "redirect" "rule"; do
+		for key in "src" "dest"; do
+			find_all_uci_sections firewall "$section" "${key}=$zone" | while read uci_prefix; do
+				uci_delete "$uci_prefix"
+			done
+		done
+	done
+}
+
 rename_firewall_zone() {
 	trap "error_trap rename_firewall_zone '$*'" $GUARD_TRAPS
 	local old_zone="$1"

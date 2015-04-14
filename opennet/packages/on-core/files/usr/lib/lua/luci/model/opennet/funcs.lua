@@ -159,8 +159,8 @@ function get_default_value(domain, key)
 		func_name = "get_on_openvpn_default"
 	elseif domain == "on-usergw" then
 		func_name = "get_on_usergw_default"
-	elseif domain == "on-wifidog" then
-		func_name = "get_on_wifidog_default"
+	elseif domain == "on-captive-portal" then
+		func_name = "get_on_captive_portal_default"
 	else
 		return nil
 	end

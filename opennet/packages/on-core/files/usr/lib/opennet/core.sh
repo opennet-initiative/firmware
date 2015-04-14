@@ -346,10 +346,13 @@ apply_changes() {
 			reload_config || true
 			;;
 		olsrd)
-			/etc/init.d/olsrd restart || true
+			/etc/init.d/olsrd reload || true
 			;;
 		openvpn)
 			/etc/init.d/openvpn reload || true
+			;;
+		nodogsplash)
+			/etc/init.d/nodogsplash reload || true
 			;;
 		on-usergw)
 			# TODO: verwenden wir ueberhaupt eine uci-Konfiguration?
@@ -376,7 +379,6 @@ apply_changes() {
 # 2) IPs fuer alle Opennet-Interfaces setzen
 # 3) Main-IP in der olsr-Konfiguration setzen
 # 4) IP des Interface "free" setzen
-# 5) DHCP-Redirect fuer wifidog setzen
 set_opennet_id() {
 	trap "error_trap set_opennet_id '$*'" $GUARD_TRAPS
 	local new_id=$1
@@ -414,17 +416,6 @@ set_opennet_id() {
 	# OLSR-MainIP konfigurieren
 	olsr_set_main_ip "$main_ipaddr"
 	apply_changes olsrd
-	# wifidog-Interface konfigurieren
-	if is_function_available "get_on_wifidog_default"; then
-		ipschema=$(get_on_wifidog_default free_ipschema)
-		netmask=$(get_on_wifidog_default free_netmask)
-		free_ipaddr=$(get_on_ip "$new_id" "$ipschema" 0)
-		uci_prefix="network.$NETWORK_FREE"
-		uci set "${uci_prefix}=interface"
-		uci set "${uci_prefix}.proto=static"
-		uci set "${uci_prefix}.ipaddr=$free_ipaddr"
-		uci set "${uci_prefix}.netmask=$netmask"
-	fi
 	apply_changes network
 	# DHCP-Forwards fuer wifidog
 	# Ziel ist beispielsweise folgendes Setup:

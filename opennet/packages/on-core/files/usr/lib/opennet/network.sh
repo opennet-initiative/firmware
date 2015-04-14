@@ -6,10 +6,7 @@
 ZONE_LOCAL=lan
 ZONE_WAN=wan
 ZONE_MESH=on_mesh
-ZONE_TUNNEL=on_vpn
-ZONE_FREE=free
-NETWORK_TUNNEL=on_vpn
-NETWORK_FREE=free
+NETWORK_LOCAL=lan
 
 
 # Liefere alle IPs fuer diesen Namen zurueck

@@ -6,10 +6,6 @@
 
 ## @var Quelldatei für Standardwerte des Kern-Pakets
 ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
-## @var Quelldatei für Standardwerte des Nutzer-VPN-Pakets
-ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
-## @var Quelldatei für Standardwerte des Hotspot-Pakets
-ON_WIFIDOG_DEFAULTS_FILE=/usr/share/opennet/wifidog.defaults
 ## @var Pfad zur dnsmasq-Server-Datei zur dynamischen Aktualisierung durch Dienste-Erkennung
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 ## @var Dateiname für erstellte Zusammenfassungen

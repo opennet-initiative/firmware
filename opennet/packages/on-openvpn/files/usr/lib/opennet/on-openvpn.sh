@@ -6,6 +6,10 @@
 MIG_OPENVPN_DIR=/etc/openvpn/opennet_user
 MIG_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
 DEFAULT_MIG_PORT=1600
+## @var Quelldatei für Standardwerte des Nutzer-VPN-Pakets
+ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
+ZONE_TUNNEL=on_vpn
+NETWORK_TUNNEL=on_vpn
 
 
 ## @fn get_on_openvpn_default()

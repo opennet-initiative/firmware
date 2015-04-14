@@ -145,16 +145,17 @@ get_zone_interfaces() {
 }
 
 
-# Liefere die physischen Netzwerk-Schnittstellen einer Zone zurueck.
+## @fn get_zone_devices()
+## @brief Liefere die physischen Netzwerk-Geräte einer Zone zurueck.
+## @param zone Der Name einer Netzwerk-Zone.
+## @details Es werden sowohl echte physische Netzwerk-Geräte, als auch Bridge-Interfaces zurückgegeben.
 get_zone_devices() {
 	trap "error_trap get_zone_devices '$*'" $GUARD_TRAPS
 	local zone="$1"
 	local iface
 	local result
 	for iface in $(get_zone_interfaces "$zone"); do
-		for result in $(uci_get "network.${iface}.ifname"); do
-			echo "$result"
-		done
+		get_devices_of_interface "$iface"
 		# Namen von Bridge-Interfaces werden explizit vergeben
 		[ "$(uci_get "network.${iface}.type")" = "bridge" ] && echo "br-$iface"
 		true
@@ -169,9 +170,9 @@ is_device_in_zone() {
 	local zone="$2"
 	local item
 	for log_interface in $(get_zone_interfaces "$2"); do
-		for item in $(uci_get "network.${log_interface}.ifname"); do
-			# Entferne den Teil nach Doppelpunkten - fuer Alias-Interfaces
-			[ "$device" = "$(echo "$item" | cut -f 1 -d :)" ] && return 0 || true
+		for item in $(get_devices_of_interface "$log_interface"); do
+			[ "$device" != "$item" ] || continue
+			return 0
 		done
 	done
 	trap "" $GUARD_TRAPS && return 1
@@ -180,13 +181,29 @@ is_device_in_zone() {
 
 # Ist das gegebene logische Netzwerk-Interface Teil einer Firewall-Zone?
 is_interface_in_zone() {
-	local interface=$1
-	local zone=$2
+	local interface="$1"
+	local zone="$2"
 	local item
-	for item in $(get_zone_interfaces "$2"); do
+	for item in $(get_zone_interfaces "$zone"); do
 		[ "$item" = "$interface" ] && return 0 || true
 	done
 	trap "" $GUARD_TRAPS && return 1
+}
+
+
+## @fn get_devices_of_interface()
+## @brief Ermittle die physischen Netzwerk-Geräte, die zu einem logischen Netzwerk-Interface gehören.
+## @details Im Fall eines Bridge-Interface werden nur die beteiligten Komponenten zurückgeliefert.
+## @returns Der Name des physischen Netzwerk-Geräts oder nichts.
+get_devices_of_interface() {
+	local interface="$1"
+	local device
+	for device in $(uci_get "network.${interface}.ifname"); do
+		# entferne Alias-Nummerierungen
+		device=$(echo "$device" | cut -f 1 -d :)
+		[ -z "$device" -o "$device" = "none" ] && continue
+		echo "$device"
+	done
 }
 
 
@@ -257,8 +274,8 @@ get_zone_of_interface() {
 # 3. alphabetische Sortierung der Netzwerknamen
 get_sorted_opennet_interfaces() {
 	trap "error_trap get_sorted_opennet_interfaces '$*'" $GUARD_TRAPS
-	local uci_prefix
 	local order
+	local network
 	# wir vergeben einfach statische Ordnungsnummern:
 	#   10 - konfigurierte Interfaces
 	#   20 - nicht konfigurierte Interfaces
@@ -267,9 +284,8 @@ get_sorted_opennet_interfaces() {
 	#   2 - on_eth*
 	#   3 - alle anderen
 	for network in $(get_zone_interfaces "$ZONE_MESH"); do
-		uci_prefix=network.$network
 		order=10
-		[ "$(uci_get "${uci_prefix}.ifname")" == "none" ] && order=20
+		[ -z "$(get_devices_of_interface "$network")" ] && order=20
 		if [ "${network#on_wifi}" != "$network" ]; then
 			order=$((order+1))
 		elif [ "${network#on_eth}" != "$network" ]; then

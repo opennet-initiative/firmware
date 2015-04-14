@@ -63,7 +63,7 @@ uci_get_list() {
 	# falls es den Schlüssel nicht gibt, liefert "uci show" eine Fehlermeldung und Müll - das wollen wir abfangen
 	[ -z "$(uci_get "$uci_path")" ] && return 0
 	# ansonsten: via "uci show" mit speziellem Trenner abfragen und zeilenweise separieren
-	uci show -d "_=_=_=_=_" "$uci_path" | cut -f 2- -d = | sed 's/_=_=_=_=_/\n/g'
+	uci show -d "_=_=_=_=_" "$uci_path" | cut -f 2- -d = | sed 's/_=_=_=_=_/\n/g' | sed "s/^'\(.*\)'$/\1/"
 }
 
 
@@ -134,7 +134,7 @@ find_first_uci_section() {
 ## @attention Das Ergebnis ist fuer die Verarbeitung von Listen-Elemente unbrauchbar, da diese separiert
 ##   von Quotes umgeben sind.
 filter_uci_show_value_quotes() {
-	sed "s/^\([^=]\+\)=['\"]\(.*\)['\"]$/\1=\2/"
+	sed "s/^\([^=]\+\)='\(.*\)'$/\1=\2/"
 }
 
 

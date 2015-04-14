@@ -1,13 +1,10 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-msgid "AP %s"
-msgstr ""
-
-msgid "CN %s"
-msgstr ""
-
 msgid "...show..."
+msgstr ""
+
+msgid "AP %s"
 msgstr ""
 
 msgid "AccessPoint (type users)"
@@ -37,6 +34,9 @@ msgid ""
 "Be aware that the network will be restarted immediately,\\n and you might "
 "loose the contact to your router.\\n\\nAre you really wan\\'t to update the "
 "network-id?"
+msgstr ""
+
+msgid "CN %s"
 msgstr ""
 
 msgid "Certificate (.crt)"

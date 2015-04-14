@@ -20,7 +20,9 @@ require("luci.model.opennet.funcs")
 function index()
 	luci.i18n.loadc("on-openvpn")
 	
-	local page = entry({"opennet", "opennet_1", "vpn_tunnel"}, call("action_on_openvpn"), luci.i18n.translate("VPN Tunnel"), 2)
+	local page = entry({"opennet", "opennet_1", "vpn_tunnel"}, call("action_on_openvpn"))
+	page.title = luci.i18n.translate("VPN Tunnel")
+	page.order = 20
 	page.i18n = "on_openvpn"
 	page.css = "opennet.css"
 

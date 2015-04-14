@@ -35,19 +35,19 @@ function index()
 	
 	page = entry({"opennet", "opennet_1", "funknetz"}, template("opennet/on_network"))
 	page.title = i18n("Network")
-	page.order = 2
+	page.order = 10
 	page.i18n = "on_network"
 	page.css = "opennet.css"
 
 	page = entry({"opennet", "opennet_1", "dienste"}, call("services"))
 	page.title = i18n("Services")
-	page.order = 3
+	page.order = 40
 	page.i18n = "on_services"
 	page.css = "opennet.css"
 
 	page = entry({"opennet", "opennet_1", "bericht"}, call("report"))
 	page.title = i18n("Report")
-	page.order = 4
+	page.order = 50
 	page.i18n = "on_report"
 	page.css = "opennet.css"
 

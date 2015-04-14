@@ -56,13 +56,13 @@ function printZoneLine(zoneName)
 	networks = on_function("get_zone_interfaces", {zoneName})
 	if networks and relevant(networks) then
 		luci.http.write([[<h3>]])
-		if zoneName == "lan" then
+		if zoneName == on_function("get_variable", {"ZONE_LOCAL"}) then
 			luci.http.write('<abbr title="' .. luci.i18n.translate("These addresses are used locally and usually protected by your firewall. Connections to the Internet are routed through your VPN-Tunnel if it is active.") .. '">' .. luci.i18n.translate("LOCAL") .. '</abbr> ' .. luci.i18n.translate('IP Address(es):'))
-		elseif zoneName == "on_mesh" then
+		elseif zoneName == on_function("get_variable", {"ZONE_MESH"}) then
 			luci.http.write('<abbr title="' .. luci.i18n.translate("Opennet-Addresses are usually given to the Access-Point based on your Opennet-ID. These are the interfaces on which OLSR is running.") .. '">' .. luci.i18n.translate("OPENNET") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
-		elseif zoneName == "wan" then
+		elseif zoneName == on_function("get_variable", {"ZONE_WAN"}) then
 			luci.http.write('<abbr title="' .. luci.i18n.translate("The WAN Interface is used for your local Internet-Connection (for instance DSL). It will be used for your local traffic and to map Usergateways into Opennet = Share your Internet Connection if you choose to.") .. '">' .. luci.i18n.translate("WAN") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
-		elseif zoneName == "free" then
+		elseif zoneName == on_function("get_variable", {"ZONE_FREE"}) then
 			luci.http.write('<abbr title="' .. luci.i18n.translate("The FREE Interface will be used to publicly share Opennet with Wifidog.") .. '">' .. luci.i18n.translate("FREE") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
 		end
 		luci.http.write([[</h3>]])

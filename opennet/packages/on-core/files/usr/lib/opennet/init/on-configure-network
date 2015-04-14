@@ -14,7 +14,7 @@ OPENWRT_DEFAULT_LOCAL_IP=192.168.1.1
 
 
 configure_local_network() {
-	local uci_prefix=network.lan
+	local uci_prefix="network.$NETWORK_LOCAL"
 	# wurde die Standard-IP bereits veraendert?
 	[ "$(uci_get "${uci_prefix}.ipaddr")" !=  "$OPENWRT_DEFAULT_LOCAL_IP" ] && return 0
 	uci set "${uci_prefix}.ipaddr=$(get_on_core_default lan_ipaddr)"

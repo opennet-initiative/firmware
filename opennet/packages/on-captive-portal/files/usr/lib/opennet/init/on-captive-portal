@@ -8,7 +8,6 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
-
 configure_free_network() {
 	local uci_prefix="network.$NETWORK_FREE"
 	# es wurde bereits einmalig konfiguriert
@@ -25,7 +24,7 @@ configure_free_network() {
 
 
 configure_free_zone() {
-	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_FREE")
+	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$ZONE_FREE")
 	# Zone existiert? Keine Aenderungen ...
 	[ -n "$uci_prefix" ] && return 0
 	uci_prefix=firewall.$(uci add firewall zone)
@@ -52,4 +51,5 @@ init_captive_portal() {
 
 configure_free_network
 configure_free_zone
+configure_captive_portal_firewall_script true
 init_captive_portal

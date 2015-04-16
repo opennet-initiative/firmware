@@ -3,8 +3,6 @@
 # Reset des Luci-Cache - sonst sind neue Web-Interface-Elemente nicht sichtbar
 rm -f "${IPKG_INSTROOT:-}/tmp/luci-indexcache"
 
-exit 0
-
 # Paket-Initialisierungen durchfuehren, falls wir in einem echten System sind
 # In der Paket-Bau-Phase funktioniert die untenstehende Aktion nicht, da eine
 # Datei fehlt, die in der /etc/init.d/boot geladen wird.

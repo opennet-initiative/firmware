@@ -135,8 +135,9 @@ initialize_olsrd_policy_routing() {
 	delete_policy_rule table main
 	delete_policy_rule table default
 
-	# free-Verkehr geht immer in den Tunnel
-	add_zone_policy_rules_by_iif "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK" prio "$((priority++))"
+	# free-Verkehr geht immer in den Tunnel (falls das Paket installiert ist)
+	[ -n "${ZONE_FREE:-}" ] \
+		&& add_zone_policy_rules_by_iif "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK" prio "$((priority++))"
 
 	# sehr wichtig - also zuerst: keine vorbeifliegenden Mesh-Pakete umlenken
 	add_zone_policy_rules_by_iif "$ZONE_MESH" table "$ROUTING_TABLE_MESH" prio "$((priority++))"

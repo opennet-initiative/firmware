@@ -111,13 +111,14 @@ fix_firewall_reload() {
 # bis Version 0.4-5 sind die folgenden beiden Firewall-Einstellungen gesetzt:
 #   firewall.zone_on_vpn.forward=ACCEPT
 #   firewall.zone_on_mesh.forward=ACCEPT
-# Dieser erlauben die Paketweiterleitung aus unerwuenschten Netzen heraus.
+# Diese erlauben die Paketweiterleitung aus unerwuenschten Netzen heraus.
 disable_unwanted_forward() {
 	local zone_name
 	local forward
 	find_all_uci_sections firewall zone | while read uci_prefix; do
 		zone_name=$(uci_get "${uci_prefix}.name")
-		if [ "$zone_name" = "$ZONE_MESH" -o "$zone_name" = "$ZONE_TUNNEL" ]; then
+		# eventuell ist ZONE_TUNNEL nicht definiert (falls on-openvpn nicht installiert ist)
+		if [ "$zone_name" = "$ZONE_MESH" -o "$zone_name" = "${ZONE_TUNNEL:-on_vpn}" ]; then
 			forward=$(uci_get "${uci_prefix}.forward")
 			[ "$forward" = "ACCEPT" ] && uci set "${uci_prefix}.forward=REJECT" || true
 		fi

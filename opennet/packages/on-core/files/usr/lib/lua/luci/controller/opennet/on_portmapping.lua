@@ -25,12 +25,13 @@ function action_portmapping()
 	local uci = require "luci.model.uci"
 	local cursor = uci.cursor()
 	
-	zones = {
-		on_function("get_variable", {"ZONE_TUNNEL"}),
-		on_function("get_variable", {"ZONE_MESH"}),
-		on_function("get_variable", {"ZONE_LOCAL"}),
-		on_function("get_variable", {"ZONE_WAN"}),
-	}
+	zones = {}
+	if on_bool_function("is_function_available", {"get_active_mig_connections"}) then
+		table.insert(zones, on_function("get_variable", {"ZONE_TUNNEL"}))
+	end
+	table.insert(zones, on_function("get_variable", {"ZONE_MESH"}))
+	table.insert(zones, on_function("get_variable", {"ZONE_LOCAL"}))
+	table.insert(zones, on_function("get_variable", {"ZONE_WAN"}))
 	
 	local zone
 	for index = 1, #zones do if luci.http.formvalue(zones[index]) then zone = zones[index] end end

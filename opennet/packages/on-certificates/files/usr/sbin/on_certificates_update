@@ -59,9 +59,15 @@ update_crl() {
 }
 
 
+is_interactive() {
+	# pruefe ob stdin ein Terminal ist
+	[ -t 0 ]
+}
+
+
 # alle CRLs aktualisieren
 for crl_file in $CRL_LIST; do
-	echo "Starting update of CRL '$crl_file'"
+	is_interactive && echo "Starting update of CRL '$crl_file'"
 	# falls die Aktualisierung einer CRL fehlschlaegt, wollen wir trotzdem die anderen CRLs aktualisieren
 	update_crl "$crl_file" || true
 done

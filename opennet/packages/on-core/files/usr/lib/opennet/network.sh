@@ -304,11 +304,11 @@ get_all_network_interfaces() {
 	# Die uci-network-Spezifikation sieht keine anonymen uci-Sektionen fuer Netzwerk-Interfaces vor.
 	# Somit ist es wohl korrekt, auf die Namen als Teil des uci-Pfads zu vertrauen.
 	find_all_uci_sections "network" "interface" | cut -f 2 -d . | while read interface; do
-		# ignoriere loopback-Interface
-		[ "$interface" = "loopback" ] && continue
+		# ignoriere loopback-Interfaces und ungueltige
+		[ -z "$interface" -o "$interface" = "none" -o "$interface" = "loopback" ] && continue
 		# alle uebrigen sind reale Interfaces
 		echo "$interface"
-	done
+	done | sort | uniq
 	return 0
 }
 

@@ -12,11 +12,7 @@ process_captive_portal_triggers() {
 	# das Opennet-VPN-Interface triggert die Aktivierung/Deaktivierung des hotspot-Interface
 	if [ "$INTERFACE" = "$NETWORK_TUNNEL" ]; then
 		msg_info "Trigger activation of Captive Portal interface following the state of the VPN tunnel"
-		if [ "$ACTION" = "ifup" ]; then
-			ifup "$NETWORK_FREE"
-		elif [ "$ACTION" = "ifdown" ]; then
-			ifdown "$NETWORK_FREE"
-		fi
+		sync_captive_portal_state_with_mig_connections
 	fi
 
 

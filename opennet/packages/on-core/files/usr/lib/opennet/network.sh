@@ -332,6 +332,12 @@ delete_firewall_zone() {
 	done
 }
 
+
+## @fn rename_firewall_zone()
+## @brief Ändere den Namen einer Firewall-Zone.
+## @param old_zone Bisheriger Name der Firewall-Zone
+## @param new_zone Zukünftiger Name der Firewall-Zone
+## @details Alle abhängigen Firewall-Regeln (offene Ports, Weiterleitungen, Umleitungen) werden auf die neue Zone umgelenkt.
 rename_firewall_zone() {
 	trap "error_trap rename_firewall_zone '$*'" $GUARD_TRAPS
 	local old_zone="$1"
@@ -362,6 +368,21 @@ rename_firewall_zone() {
 	# fertig - wir loeschen die alte Zone
 	uci_delete "$old_uci_prefix"
 	apply_changes firewall
+}
+
+
+## @fn is_interface_up()
+## @brief Prüfe ob ein logisches Netzwerk-Interface aktiv ist.
+## @param interface Zu prüfendes logisches Netzwerk-Interface
+is_interface_up() {
+	trap "error_trap is_interface_up '$*'" $GUARD_TRAPS
+	local interface="$1"
+	local device
+	for device in $(get_devices_of_interface "$interface"); do
+		ip link show dev "$device" | grep -q "[\t ]state UP[\ ]" && return 0
+		true
+	done
+	trap "" $GUARD_TRAPS && return 1
 }
 
 # Ende der Doku-Gruppe

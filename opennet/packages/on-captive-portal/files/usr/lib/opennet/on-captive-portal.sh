@@ -134,5 +134,16 @@ configure_captive_portal_firewall_script() {
 	apply_changes firewall
 }
 
+
+sync_captive_portal_state_with_mig_connections() {
+	local mig_active=$(get_active_mig_connections)
+	local device_active=$(is_interface_up "$NETWORK_FREE" && echo 1)
+	if [ -n "$device_active" -a -z "$mig_active" ]; then
+		ifdown "$NETWORK_FREE"
+	elif [ -z "$device_active" -a -n "$mig_active" ]; then
+		ifup "$NETWORK_FREE"
+	fi
+}
+
 # Ende der Doku-Gruppe
 ## @}

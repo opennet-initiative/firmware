@@ -20,6 +20,14 @@ configure_free_network() {
 	# wir aktivieren das Interface manuell via hotplug
 	uci set "${uci_prefix}.auto=0"
 	apply_changes network
+	# konfiguriere DHCP
+	uci_prefix=$(find_first_uci_section "dhcp" "dhcp" "interface=$NETWORK_FREE")
+	# beenden, falls vorhanden
+	[ -n "$uci_prefix" ] && return
+	# anlegen
+	uci_prefix=$(uci add "dhcp" "dhcp")
+	uci set "${uci_prefix}.interface=$NETWORK_FREE"
+	apply_changes dhcp
 }
 
 

@@ -496,5 +496,26 @@ function process_openvpn_certificate_form(key_type)
     return result
 end
 
+
+--[[
+@brief Liefere einen String zurück, der das Alter eines Zeitstempels (Sekunden seit Epoch) beschreibt.
+@details Die Ausgabe erfolgt entweder als Angabe des Beginns (bei einem alten Zeitstempel) oder 
+    in Form von "x Tage und y Stunden" als Abstand zum jetzigen Zeitpunkt.
+--]]
+function get_timestamp_age_string(timestamp)
+	local now = os.time()
+	local age = now - timestamp
+	if (timestamp > now) or (age > 3600 * 24 * 7) then
+		-- in der Zukunft oder älter als eine Woche
+		return os.date(luci.i18n.translate("%d.%m.%Y - %H:%M Uhr"), timestamp)
+	elseif (now - timestamp > 3600 * 24) then
+		return luci.i18n.translatef("%d Tage und %d Stunden", math.floor(age / (3600 * 24)), math.floor((age / 3600) % 24))
+	elseif (now - timestamp > 3600) then
+		return luci.i18n.translatef("%d Stunden und %d Minuten", math.floor(age / (60 * 60)), math.floor((age / 60) % 60))
+	else
+		return luci.i18n.translatef("%d Minuten und %d Sekunden", math.floor(age / 60), math.floor(age % 60))
+	end
+end
+
 -- Ende der Doku-Gruppe
 --- @}

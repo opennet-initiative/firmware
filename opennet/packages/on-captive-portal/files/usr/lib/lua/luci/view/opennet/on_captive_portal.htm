@@ -10,20 +10,31 @@ You may obtain a copy of the License at
 	http://www.apache.org/licenses/LICENSE-2.0
 
 -%>
+
+<%
+	require("luci.model.opennet.funcs")
+%>
 <%+header%>
 
-<h2><a id="content" name="content"><abbr title="<%:Public Hotspot%>">OpenVPN</abbr></a></h2>
+<h2><a id="content" name="content"><%:Public Hotspot%></a></h2>
 <%= html_display_error_list(on_errors) %>
 
 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 <div class="cbi-map">
+<div class="cbi-map-descr">
+	<p><%:You may want to run a public hotspot in your area.%></p>
+	<p><%:This requires a working VPN connection:%>
+		<a href="<%=luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel")%>"><%:VPN Tunnel%></a></p>
+	<p><%:Disable the Hotspot feature by removing the physical device from the 'free' network interface.%></p>
+	<p><%:Users do not need to authenticate themselves. Basic information about using a public Opennet hotspot is presented during the first http connection attempt.%></p>
+</div>
+
+<%# hotspot settings %>
 <fieldset class="cbi-section">
 	<legend><%:Hotspot Settings%></legend>
 	<div class="cbi-section-descr">
-		<p><%:You may want to run a public hotspot in your area.%></p>
-		<p><%:This requires a working VPN connection:%>
-			<a href="<%=luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel")%>"><%:VPN Tunnel%></a></p>
-		<p><%:Disable the Hotspot feature by removing the physical device from the 'free' network interface.%></p>
+		<p><%:The hotspot name describes the location of this hotspot (informal).%></p>
+		<p><%:The redirection URL is delivered by an HTTP Redirect (307) during the first HTTP connection attempt of a client.%></p>
 	</div>
 	<div class="cbi-section-node">
 		<div class="cbi-value">
@@ -42,6 +53,44 @@ You may obtain a copy of the License at
 		</div>
 	</div>
 </fieldset>
+
+<%# list of hotspot clients %>
+<fieldset class="cbi-section">
+	<legend><%:Hotspot Clients%></legend>
+	<div class="cbi-section-descr">
+		<%:The hotspot client list is only available locally.%>
+	</div>
+	<table class="cbi-section-table">
+		<tr class="cbi-section-table-titles">
+			<th><%:Nummer%></th>
+			<th><%:Local IP Address%></th>
+			<th><%:Client MAC Address%></th>
+			<th><%:Connected since%></th>
+			<th><%:Last activity%></th>
+			<th><%:Download (MB)%></th>
+			<th><%:Upload (MB)%></th>
+		</tr>
+		<% for index, client_info in ipairs(line_split(on_function("get_captive_portal_clients"))) do %>
+		<tr class="cbi-section-table-row">
+			<td class="cbi-value-field"><%=index%></td>
+			<% local details = tab_split(client_info) %>
+			<%# IP-Adresse %>
+			<td class="cbi-value-field"><%= details[1] %></td>
+			<%# MAC-Adresse %>
+			<td class="cbi-value-field"><%= details[2] %></td>
+			<%# Verbindungsbeginn %>
+			<td class="cbi-value-field"><%= luci.util.pcdata(get_timestamp_age_string(tonumber(details[3]))) %></td>
+			<%# letzte Aktivität %>
+			<td class="cbi-value-field"><%= luci.util.pcdata(get_timestamp_age_string(tonumber(details[4]))) %></td>
+			<%# Download %>
+			<td class="cbi-value-field"><%= math.floor(details[5] / 1000) %></td>
+			<%# Upload %>
+			<td class="cbi-value-field"><%= math.floor(details[6] / 1000) %></td>
+		</tr>
+		<% end %>
+	</table>
+</fieldset>
+
 </div>
 <div class="cbi-page-actions">
 	<input class="cbi-button cbi-button-save" type="submit" name="save" value="<%:Save%>" />

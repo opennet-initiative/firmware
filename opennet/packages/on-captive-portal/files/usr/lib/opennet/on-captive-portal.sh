@@ -157,5 +157,50 @@ sync_captive_portal_state_with_mig_connections() {
 	fi
 }
 
+
+## @fn get_captive_portal_clients()
+## @brief Zeilenweise aller aktuellen Clients inklusive ihrer relevanten Kenngrößen.
+## @details In jeder Zeile wird ein Client beschrieben, wobei die folgenden Detailinformationen durch Tabulatoren getrennt sind:
+##   * IP-Adresse
+##   * MAC-Adresse
+##   * Zeitpunkt des Verbindungsaufbaus (seit epoch)
+##   * Zeitpunkt der letzten Aktivität (seit epoch)
+##   * Download-Verkehrsvolumen (kByte)
+##   * Upload-Verkehrsvolumen (kByte)
+get_captive_portal_clients() {
+	local line
+	local key
+	local value
+	local ip_address=
+	local mac_address=
+	local connection_timestamp=
+	local activity_timestamp=
+	local traffic_download=
+	local traffic_upload=
+	# erzwinge eine leere Zeile am Ende fuer die finale Ausgabe des letzten Clients
+	(ndsctl clients; echo) | while read line; do
+		key=$(echo "$line" | cut -f 1 -d =)
+		value=$(echo "$line" | cut -f 2- -d =)
+		[ "$key" = "ip" ] && ip_address="$value"
+		[ "$key" = "mac" ] && mac_address="$value"
+		[ "$key" = "added" ] && connection_timestamp="$value"
+		[ "$key" = "active" ] && activity_timestamp="$value"
+		[ "$key" = "downloaded" ] && traffic_download="$value"
+		[ "$key" = "uploaded" ] && traffic_upload="$value"
+		if [ -z "$key" -a -n "$ip_address" ]; then
+			# leere Eingabezeile trennt Clients: Ausgabe des vorherigen Clients
+			printf "%s\t%s\t%s\t%s\t%s\t%s\n" \
+				"$ip_address" "$mac_address" "$connection_timestamp" \
+				"$activity_timestamp" "$traffic_download" "$traffic_upload"
+			ip_address=
+			mac_address=
+			connection_timestamp=
+			activity_timestamp=
+			traffic_download=
+			traffic_upload=
+		fi
+	done
+}
+
 # Ende der Doku-Gruppe
 ## @}

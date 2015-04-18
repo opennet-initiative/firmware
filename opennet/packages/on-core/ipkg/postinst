@@ -11,5 +11,8 @@ if [ -z "$IPKG_INSTROOT" ]; then
 	# koennen wir die obige Bedingung irgendwann entfernen.
 	. "${IPKG_INSTROOT:-}/etc/init.d/boot"
 	uci_apply_defaults
+
+	# dies ist erstmal nur fuer on-captive-portal relevant - aber es schadet nichts
+	enable_munin_plugins
 fi
 

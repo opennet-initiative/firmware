@@ -11,6 +11,10 @@ ON_CAPTIVE_PORTAL_DEFAULTS_FILE=/usr/share/opennet/captive-portal.defaults
 ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT=/usr/lib/opennet/events/on-captive-portal-firewall-reload.sh
 
 
+## @fn captive_portal_get_or_create_config()
+## @brief Liefere die uci-captive-Portal-Konfigurationssektion zurück.
+## @details Typischerweise ist dies so etwas wie nodogsplash.cfgXXXX. Falls die uci-Sektion noch
+##   nicht existieren sollte, dann wird sie erzeugt und zurückgeliefert.
 captive_portal_get_or_create_config() {
 	local uci_prefix=$(find_first_uci_section "nodogsplash" "instance" "network=$NETWORK_FREE")
 	# gefunden? Zurueckliefern ...
@@ -119,6 +123,10 @@ captive_portal_has_devices() {
 }
 
 
+## @fn configure_captive_portal_firewall_script()
+## @brief Aktiviere oder deaktiviere das captive-portal-Firewall-Skript.
+## @param state Ein uci-Wahrheitswert bestimmt die Aktivierung oder Deaktivierung des firewall-Skripts.
+## @details Das Skript sorgt für die Integration von nodogsplash in das openwrt-Firewall-System.
 configure_captive_portal_firewall_script() {
 	local state="$1"
 	local uci_prefix=$(find_first_uci_section "firewall" "include" "path=$ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT")
@@ -135,6 +143,10 @@ configure_captive_portal_firewall_script() {
 }
 
 
+## @fn sync_captive_portal_state_with_mig_connections()
+## @brief Synchronisiere den Zustand (up/down) des free-Interface mit dem des VPN-Tunnel-Interface.
+## @details Diese Funktion wird nach Statusänderungen des VPN-Interface, sowie innerhalb eines
+##   regelmäßigen cronjobs ausgeführt.
 sync_captive_portal_state_with_mig_connections() {
 	local mig_active=$(get_active_mig_connections)
 	local device_active=$(is_interface_up "$NETWORK_FREE" && echo 1)

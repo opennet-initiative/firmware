@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+if [ "${1:-}" = "config" ]; then
+	echo "graph_title Nutzende des Zugangsknotens"
+	echo "graph_args --lower-limit 0"
+	echo "graph_vlabel Anzahl"
+	echo "graph_category opennet"
+	echo "current_client_count.label Verbundene Clients"
+	echo "current_client_count.type GAUGE"
+
+else
+	echo "current_client_count.value $(ndsctl clients | head -1)"
+fi

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+if [ "${1:-}" = "config" ]; then
+	echo "graph_title Verkehr ueber den Zugangsknoten"
+	echo "graph_args --base 1000 --lower-limit 0"
+	echo "graph_vlabel bits Upload (-) / Download (+) per \${graph_period}"
+	echo "graph_category opennet"
+	echo "traffic_volume_rx.label bps"
+	echo "traffic_volume_rx.type DERIVE"
+	echo "traffic_volume_rx.min 0"
+	echo "traffic_volume_rx.graph no"
+	echo "traffic_volume_rx.cdef traffic_volume_rx,8,*"
+	echo "traffic_volume_tx.label Up-/Download"
+	echo "traffic_volume_tx.type DERIVE"
+	echo "traffic_volume_tx.min 0"
+	echo "traffic_volume_tx.negative traffic_volume_rx"
+	echo "traffic_volume_tx.cdef traffic_volume_tx,8,*"
+
+else
+	# Ermittlung des Verkehrs ist leider nicht via ndsctl möglich.
+	# typischerweise: zone_on_free_forward
+	forward_chain_name="zone_${ZONE_FREE}_forward"
+	# typischerweise: zone_on_vpn_dest_ACCEPT
+	target_chain_name="zone_${ZONE_TUNNEL}_dest_ACCEPT"
+	incoming_volume=$(iptables -L "$forward_chain_name" -vnx | grep "$target_chain_name" | awk '{ print $2 }')
+	echo "traffic_volume_rx.value $incoming_volume"
+	outgoing_volume=$(iptables -L ndsNET -vnx | grep RETURN | awk '{ print $2 }')
+	echo "traffic_volume_tx.value $outgoing_volume"
+fi

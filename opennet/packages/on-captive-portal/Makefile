@@ -10,8 +10,7 @@ define Package/on-captive-portal
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Philipp Markwardt <philipp.markwardt@on-i.de>
   TITLE:=Captive Portal Extension
-  # wir benoetigen mehr als 0.9_beta9.8 - vorher gibt es keine uci-Konfiguration
-  DEPENDS+=+on-openvpn +nodogsplash>=0.9_beta9.9.9 +muninlite
+  DEPENDS+=+on-openvpn +nodogsplash +muninlite
 endef
 
 define Package/on-captive-portal/description

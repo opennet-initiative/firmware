@@ -158,6 +158,23 @@ sync_captive_portal_state_with_mig_connections() {
 }
 
 
+## @fn is_captive_portal_running()
+## @brief Prüfe ob der Captive-Portal-Dienst läuft.
+is_captive_portal_running() {
+	[ -n "$(pidof nodogsplash)" ] && return 0
+	trap "" $GUARD_TRAPS && return 1
+}
+
+
+## @fn get_captive_portal_client_count()
+## @brief Ermittle die Anzahl der verbundenen Clients.
+get_captive_portal_client_count() {
+	local count=0
+	is_captive_portal_running && count=$(ndsctl clients | head -1)
+	echo -n "$count"
+}
+
+
 ## @fn get_captive_portal_clients()
 ## @brief Zeilenweise aller aktuellen Clients inklusive ihrer relevanten Kenngrößen.
 ## @details In jeder Zeile wird ein Client beschrieben, wobei die folgenden Detailinformationen durch Tabulatoren getrennt sind:

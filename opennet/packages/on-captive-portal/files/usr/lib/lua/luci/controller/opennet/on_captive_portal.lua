@@ -22,6 +22,10 @@ function index()
 		luci.i18n.translate("Public Hotspot"), 7)
 	page.i18n = "on_captive_portal"
 	page.css = "opennet.css"
+
+	-- Funktionen
+	-- Einbindung in die Status-Seite mit dortigem Link
+	entry({"opennet", "on_status", "on_status_captive_portal"}, call("action_on_status_captive_portal")).leaf = true
 end
 
 
@@ -51,4 +55,30 @@ function action_on_captive_portal()
 		portal_url=on_function("captive_portal_get_property", {"url"}),
 		on_errors=on_errors,
 	})
+end
+
+
+function action_on_status_captive_portal()
+	luci.http.prepare_content("text/plain")
+	local status
+	local free_device = on_function("get_variable", {"NETWORK_FREE"})
+	if on_bool_function("is_captive_portal_running") then
+		status = luci.i18n.translatef("Connected clients: %d", on_function("get_captive_portal_client_count"))
+	else
+		-- die Funktion ist nicht aktiv - Ursachenforschung ...
+		if on_bool_function("captive_portal_has_devices") then
+			if on_function("get_active_mig_connections") ~= "" then
+				if on_bool_function("is_interface_up", {free_device}) then
+					status = luci.i18n.translate("Disabled: failed to start the 'nodogsplash' service.")
+				else
+					status = luci.i18n.translatef("Disabled: failed to enable the '%s' network interface.", free_device)
+				end
+			else
+				status = luci.i18n.translate("Disabled: the VPN tunnel is not running.")
+			end
+		else
+			status = luci.i18n.translatef("Disabled: no network device is assigned to the '%s' zone.", free_device)
+		end
+	end
+	luci.http.write(status)
 end

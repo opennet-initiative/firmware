@@ -76,7 +76,7 @@ You may obtain a copy of the License at
             end
             if not label then label = service_name end
 	%>
-	<tr id="cbi-network-lan" class="cbi-section-table-row cbi-opennet-gateways" disabled="<%= bool_to_yn(gateway.disabled) %>">
+	<tr class="cbi-section-table-row cbi-opennet-gateways" disabled="<%= bool_to_yn(gateway.disabled) %>">
 		<td class="cbi-value-field" style="text-align:right;"><%= index %>.</td>
 		<td class="cbi-value-field">
 			<div class="opennet-bool" status="<%= gateway.active and "y" or "" %>">&nbsp;</div></td>

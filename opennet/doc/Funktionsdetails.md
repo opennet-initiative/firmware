@@ -266,6 +266,77 @@ Es werden nur diejenigen Dienste weitergereicht und announciert, die den folgend
 * die Quelle (*source*) des Dienstes ist *manual* (selbstverwaltet) oder *dns-srv* (durch den Verein verwaltet)
 
 
+Offene Zugangspunkte / Captive Portal {#captive}
+-------------------------------------
+
+Offene Zugangspunkte stellen ihrer Umgebung Zugang zum Internet zur Verfügung. Verkehr wird dabei erst nach dem ersten Aufbau einer http-Verbindung durchgelassen. Dies ermöglicht uns die einmalige Einblendung einer Portal-Webseite.
+
+Jeder offene Zugangspunkt trägt ein VPN-Zertifikat, mittels dessen er eine Verbindung zum Internet aufbaut.
+
+Verkehr aus dem offenen Interface wird ausschließlich in das VPN-Tunnel-Interface geroutet. Verkehr in das Opennet-Mesh wird blockiert.
+
+Die Funktionalität wird mittels des Pakets *on-captive-portal* bereitgestellt.
+
+
+### Konfiguration des AP
+
+1. VPN-Nutzertunnel einrichten
+2. ein physisches Interface der *on_free*-Zone zuordnen (typischerweise ein WLAN mit der SSID *join.opennet-initiative.de*)
+
+
+### Ablauf
+
+Der hotplug-Trigger */etc/hotplug.d/iface/on-captive-portal-hotplug.sh* reagiert auf die folgenden Ereignisse:
+
+* Aktivierung oder Deaktivierung des VPN-Tunnel-Interface: die Funktion *sync_captive_portal_state_with_mig_connections* sorgt für eine entsprechende Statusänderung des *on_free*-Interface
+* Aktivierung oder Deaktivierung des *on_free*-Interface: *nodogsplash* wird via *reload* zum Starten oder Stoppen veranlasst
+
+Somit folgt die offene Netzwerk-Schnittstelle dem Status des VPN-Tunnels: bei abgeschaltetem Tunnel-Interface ist das offene Netzwerk-Interface nicht sichtbar.
+
+
+### nodogsplash-Konfiguration
+
+Die leichtgewichtige captive-portal-Software *nodogsplash* wird verwendet. Sie erfüllt folgende Aufgaben:
+
+* Hinzufügen und Entfernen von mac-basierten Firewall-Forward-Regeln abhängig von der Authentifikation
+* die Authentifikation besteht lediglich aus der einmaligen Auslieferung einer Portal-Webseite als Antwort auf die erste vom Client versandte http-Anfrage
+* alle externen Dienste sind zugelassen - es findet keine Portfilterung o.ä. statt
+
+### Firewall-Konfiguration
+
+*nodogsplash* fügt eine Regel zu Beginn der folgenden iptables-Chains ein:
+
+* filter: INPUT und FORWARD
+* mangle: PREROUTING und POSTROUTING
+* nat: PREROUTING
+
+Diese Regel verweist jeweils auf die passende iptables-Chain, die von *nodogsplash* verwaltet wird. Damit die obigen Regeln bei jeder Neukonfiguration der openwrt-Firewall vorhanden sind, wird bei jedem Reload der Firewall-Konfiguration *nodogsplash* neugestartet (siehe */usr/lib/opennet/events/on-captive-portal-firewall-reload.sh*). Die Integration dieses Skripts in die openwrt-Firewall-Konfiguration erfolgt mit Hilfe der Funktion *configure_captive_portal_firewall_script* im Rahmen der uci-defaults-Initialisierung. Bei diesem Vorgang gehen bestehende Client-Authentifikationen verloren - da die Authentifikation aber sehr schmerzfrei ist, dürfte dieses seltene Ereignis kein Problem darstellen.
+
+Falls die *nodogsplash*-Firewall-Regeln fehlen, dann ist ein direkter Zugang zum VPN-Tunnel möglich (ohne Anzeige der Portal-Seite). Dies ist unerwünscht, aber nicht kritisch.
+
+Der Zugang ins Mesh-Netz ist für Clients aufgrund der Firewall-Policy (unabhängig von *nodogsplash*) nicht zulässig.
+
+### Roaming
+
+Im Unterschied zur wifidog-basierten Implementierung (bis v0.4-5) ist die nahtlose Übergabe eines Clients an einen anderen offenen Zugangspunkt nicht möglich, da die DHCP-Leases und die Authentifikationszustände nur lokal am AP der Anmeldung vorliegen. Bei einem Netzwechsel wird also erneut die Portal-Seite präsentiert.
+
+### Monitoring
+
+Das *on-captive-portal*-Paket hängt von *muninlite* ab. Aktuell sind die Installationen offener Zugangspunkte typischerweise keine privaten APs sondern werden vom Verein betrieben - daher dürfte sich aus der statistischen Erfassung (gesamter Netzwerkvehr und Anzahl der Clients am Zugangspunkt im Zeitverlauf) kein Datenschutzproblem ergeben. Der muninlite-Dienst kann bei Bedarf abgeschaltet werden.
+
+Die Speicherung und Visualisierung der munin-Daten erfolgt auf einem separaten munin-Server (z.B. *yurika*).
+
+### Debugging
+
+Auf dem AP sind folgende Aktionen bei der Fehlersuche eventuell hilfreich:
+
+* Verfügbarkeit des Internet-Tunnels auf dem AP prüfen (dieser wird von den Clients des Zugangspunkts verwendet)
+* `ndsctl status`: Anzeige des *nodogsplash*-Status (Konfiguration, Clients, Statistik)
+* `on-function get_devices_of_interface on_free`: Auflistung der Netzwerkschnittstellen, die der Zone *on_free* zugeordnet sind
+* `sync_captive_portal_state_with_mig_connections`: zwangsweise Angleichung des Netzwerk-Interface-Zustands (up/down) für *on_free* an die VPN-Tunnel-Schnittstelle (anschließend sollten beide aktiv oder beide inaktiv sein)
+* `iptables -L | grep nds`: Vorhandensein von *nodogsplash*-Firewall-Regeln prüfen (keine Regeln -> freier Zugang ohne Portalseite)
+
+
 Datensammlung: ondataservice {#ondataservice}
 ----------------------------
 

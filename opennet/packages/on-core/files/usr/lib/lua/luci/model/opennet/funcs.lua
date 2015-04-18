@@ -507,13 +507,13 @@ function get_timestamp_age_string(timestamp)
 	local age = now - timestamp
 	if (timestamp > now) or (age > 3600 * 24 * 7) then
 		-- in der Zukunft oder älter als eine Woche
-		return os.date(luci.i18n.translate("%d.%m.%Y - %H:%M Uhr"), timestamp)
+		return os.date(luci.i18n.translate("%Y/%m/%d - %H:%M"), timestamp)
 	elseif (now - timestamp > 3600 * 24) then
-		return luci.i18n.translatef("%d Tage und %d Stunden", math.floor(age / (3600 * 24)), math.floor((age / 3600) % 24))
+		return luci.i18n.translatef("%d days and %d hours", math.floor(age / (3600 * 24)), math.floor((age / 3600) % 24))
 	elseif (now - timestamp > 3600) then
-		return luci.i18n.translatef("%d Stunden und %d Minuten", math.floor(age / (60 * 60)), math.floor((age / 60) % 60))
+		return luci.i18n.translatef("%d hours and %d minutes", math.floor(age / (60 * 60)), math.floor((age / 60) % 60))
 	else
-		return luci.i18n.translatef("%d Minuten und %d Sekunden", math.floor(age / 60), math.floor(age % 60))
+		return luci.i18n.translatef("%d minutes and %d seconds", math.floor(age / 60), math.floor(age % 60))
 	end
 end
 

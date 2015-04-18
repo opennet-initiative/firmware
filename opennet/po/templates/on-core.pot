@@ -1,6 +1,18 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+msgid "%Y/%m/%d - %H:%M"
+msgstr ""
+
+msgid "%d days and %d hours"
+msgstr ""
+
+msgid "%d hours and %d minutes"
+msgstr ""
+
+msgid "%d minutes and %d seconds"
+msgstr ""
+
 msgid "...show..."
 msgstr ""
 
@@ -303,7 +315,15 @@ msgstr ""
 msgid "Private Key and Certificate do not match. Please replace Certificate!"
 msgstr ""
 
+msgid ""
+"Provide Internet Access to your neighbourhood. Traffic flows through the "
+"Opennet-Internet-Gateway connection."
+msgstr ""
+
 msgid "Province"
+msgstr ""
+
+msgid "Public Hotspot"
 msgstr ""
 
 msgid "Report"

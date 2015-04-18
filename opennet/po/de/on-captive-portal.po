@@ -1,7 +1,7 @@
 # Lars Kruse <devel@sumpfralle.de>, 2015.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2015-04-14 18:37+0200\n"
+"PO-Revision-Date: 2015-04-18 21:08+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -10,12 +10,39 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
 
+msgid "Client MAC Address"
+msgstr "MAC-Adresse des Geräts"
+
+msgid "Connected clients: %d"
+msgstr "Verbundene Geräte: %d"
+
+msgid "Connected since"
+msgstr "Verbunden seit"
+
 msgid ""
 "Disable the Hotspot feature by removing the physical device from the 'free' "
 "network interface."
 msgstr ""
 "Die offener-Zugangspunkt-Funktion kann durch Entfernen des physischen "
 "Netzwerk-Gerät von der Schnittstelle 'free' abgeschaltet werden."
+
+msgid "Disabled: failed to enable the '%s' network interface."
+msgstr "Inaktiv: die Netzwerkschnittstelle '%s' konnte nicht aktivert werden."
+
+msgid "Disabled: failed to start the 'nodogsplash' service."
+msgstr "Inaktiv: Fehler beim Starten des Diensts \"nodogsplash\"."
+
+msgid "Disabled: no network device is assigned to the '%s' zone."
+msgstr "Inaktiv: der '%s'-Zone wurde kein Netzwerk-Gerät zugewiesen."
+
+msgid "Disabled: the VPN tunnel is not running."
+msgstr "Inaktiv: der VPN-Tunnel ist nicht aufgebaut."
+
+msgid "Download (MB)"
+msgstr "Download (MB)"
+
+msgid "Hotspot Clients"
+msgstr "Hotspot-Nutzende"
 
 msgid "Hotspot Name"
 msgstr "Name des offenen Zugangspunkts"
@@ -29,6 +56,15 @@ msgstr "Die neue URL wurde aufgrund von ungültigen Zeichen ignoriert."
 msgid "Ignoring the node name due to invalid characters."
 msgstr "Der neue Name wurde aufgrund von ungültigen Zeichen ignoriert."
 
+msgid "Last activity"
+msgstr "Letzte Aktivität"
+
+msgid "Local IP Address"
+msgstr "Lokale IP-Adresse"
+
+msgid "Number"
+msgstr "Nummer"
+
 msgid "Public Hotspot"
 msgstr "Offener Zugangspunkt"
 
@@ -38,8 +74,33 @@ msgstr "Umleitungs-URL"
 msgid "Save"
 msgstr "Speichern"
 
+msgid "The hotspot client list is only available locally."
+msgstr "Die Hotspot-Geräteliste ist nur lokal verfügbar."
+
+msgid "The hotspot name describes the location of this hotspot (informal)."
+msgstr "Der Hotspot-Name beschreibt den Ort dieses Hotspots (formlos)."
+
+msgid ""
+"The redirection URL is delivered by an HTTP Redirect (307) during the first "
+"HTTP connection attempt of a client."
+msgstr ""
+"Die Umleitungs-URL wird als HTTP-Umleitung (307) beim ersten Versuch eines "
+"HTTP-Verbindungsaufbaus an den Client ausgeliefert."
+
 msgid "This requires a working VPN connection:"
 msgstr "Dies erfordert eine funktionierende VPN Verbindung:"
+
+msgid "Upload (MB)"
+msgstr "Upload (MB)"
+
+msgid ""
+"Users do not need to authenticate themselves. Basic information about using "
+"a public Opennet hotspot is presented during the first http connection "
+"attempt."
+msgstr ""
+"Nutzende müssen sich nicht authentifizieren. Grundlegende Informationen "
+"bezüglich der Nutzung eines offenen Opennet-Zugangspunkts werden während des "
+"ersten HTTP-Verbindungsaufbaus ausgeliefert."
 
 msgid "VPN Tunnel"
 msgstr "VPN-Tunnel"

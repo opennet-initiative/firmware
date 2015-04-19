@@ -1,7 +1,7 @@
 # Lars Kruse <devel@sumpfralle.de>, 2015.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2015-04-18 21:08+0200\n"
+"PO-Revision-Date: 2015-04-19 04:44+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -13,8 +13,8 @@ msgstr ""
 msgid "Client MAC Address"
 msgstr "MAC-Adresse des Geräts"
 
-msgid "Connected clients: %d"
-msgstr "Verbundene Geräte: %d"
+msgid "Connected clients: %d | Hotspot name: %s"
+msgstr "Verbundene Geräte: %d | Hotspot-Name: %s"
 
 msgid "Connected since"
 msgstr "Verbunden seit"
@@ -116,3 +116,6 @@ msgid ""
 msgstr ""
 "Du musst ein physisches Netzwerk-Gerät mit der 'free'-Schnittstelle "
 "verbinden, um die Funktionalität des offenen Zugangspunkts zu aktivieren."
+
+#~ msgid "Connected clients: %d"
+#~ msgstr "Verbundene Geräte: %d"

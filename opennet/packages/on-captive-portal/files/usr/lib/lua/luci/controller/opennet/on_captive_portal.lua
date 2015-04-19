@@ -63,7 +63,9 @@ function action_on_status_captive_portal()
 	local status
 	local free_device = on_function("get_variable", {"NETWORK_FREE"})
 	if on_bool_function("is_captive_portal_running") then
-		status = luci.i18n.translatef("Connected clients: %d", on_function("get_captive_portal_client_count"))
+		status = luci.i18n.translatef("Connected clients: %d | Hotspot name: %s",
+				on_function("get_captive_portal_client_count"),
+				on_function("captive_portal_get_property", {"name"}))
 	else
 		-- die Funktion ist nicht aktiv - Ursachenforschung ...
 		if on_bool_function("captive_portal_has_devices") then

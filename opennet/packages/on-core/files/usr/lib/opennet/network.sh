@@ -198,12 +198,26 @@ is_interface_in_zone() {
 get_devices_of_interface() {
 	local interface="$1"
 	local device
+	# kabelgebundene Geräte
 	for device in $(uci_get "network.${interface}.ifname"); do
 		# entferne Alias-Nummerierungen
 		device=$(echo "$device" | cut -f 1 -d :)
 		[ -z "$device" -o "$device" = "none" ] && continue
 		echo "$device"
 	done
+	# wlan-Geräte
+	# "uci show network" enthält aus irgendeinem Grund keine wlan-Geräte. Daher müssen
+	# wir dort separat nachschauen.
+	local uci_prefix
+	local current_interface
+	find_all_uci_sections "wireless" "wifi-iface" | while read uci_prefix; do
+		for current_interface in $(uci_get "${uci_prefix}.network"); do
+			[ "$current_interface" != "$interface" ] && continue
+			uci_get "${uci_prefix}.ifname"
+		done
+	done
+	# Der folgende Weg (via ubus) wirkt wohl nur bei aktiven Interfaces:
+	#(local ifname; . /lib/functions/network.sh; network_get_device ifname on_free; echo "$ifname")
 }
 
 

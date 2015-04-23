@@ -5,7 +5,6 @@
 
 OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 SERVICES_FILE=/var/run/services_olsr
-OLSR_SERVICE_UPDATE_MARKER=/var/run/waiting_for_olsr_services_update
 OLSR_HTTP_PORT=8080
 # suche einen passenden nc-Kandidaten
 # Die busybox-netcat-Implementation ist nicht geeignet, da ihr der "-w"-Schalter fehlt.

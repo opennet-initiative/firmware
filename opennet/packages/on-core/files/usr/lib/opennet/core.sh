@@ -12,6 +12,8 @@ DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
 REPORTS_FILE=/tmp/on_report.tar.gz
 ## @var Basis-Verzeichnis für Log-Dateien
 LOG_BASE_DIR=/var/log
+## @var Verzeichnis für auszuführende Aktionen
+SCHEDULING_DIR=/var/run/on-scheduling.d
 # beim ersten Pruefen wird der Debug-Modus ermittelt
 DEBUG_ENABLED=
 
@@ -807,6 +809,40 @@ enable_munin_plugins() {
 	grep -q "^PLUGINS=.*plugindir_" "$target" && return 0
 	# "plugindir_" einfuegen
 	sed -i "/^PLUGINS=\".*\"$/s/^PLUGINS=\"/PLUGINS=\"plugindir_ /" "$target"
+}
+
+
+## @fn run_scheduled_tasks()
+## @brief Führe die zwischenzeitlich für die spätere Ausführung vorgemerkten Aufgaben aus.
+## @details Unabhängig vom Ausführungsergebnis wird das Skript anschließend gelöscht.
+run_scheduled_tasks() {
+	trap "error_trap run_scheduled_tasks '$*'" $GUARD_TRAPS
+	local fname
+	local temp_fname
+	find "$SCHEDULING_DIR" -type f | grep -v "\.running$" | while read fname; do
+		temp_fname="${fname}.running"
+		# zuerst schnell wegbewegen, damit wir keine Ereignisse verpassen
+		mv "$fname" "$temp_fname"
+		/bin/sh "$temp_fname" || true
+		rm -f "$temp_fname"
+	done
+}
+
+
+## @fn schedule_task()
+## @brief Erzeuge ein Start-Skript für die baldige Ausführung einer Aktion.
+## @details Diese Methode sollte für Aufgaben verwendet werden, die nicht unmittelbar ausgeführt
+##   werden müssen und im Zweifelsfall nicht parallel ablaufen sollen (ressourcenschonend).
+schedule_task() {
+	trap "error_trap schedule_task '$*'" $GUARD_TRAPS
+	# wir sorgen fuer die Wiederverwendung des Dateinamens, um doppelte Ausführungen zu verhindern
+	local script_content=$(cat -)
+	local unique_key=$(echo "$script_content" | md5sum | awk '{ print $1 }')
+	mkdir -p "$SCHEDULING_DIR"
+	local target_file="$SCHEDULING_DIR/$unique_key"
+	# das Skript existiert? Nichts zu tun ...
+	[ -e "$target_file" ] && return 0
+	echo "$script_content" >"$target_file"
 }
 
 # Ende der Doku-Gruppe

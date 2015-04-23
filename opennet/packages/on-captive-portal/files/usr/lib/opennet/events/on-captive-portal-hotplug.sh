@@ -12,19 +12,18 @@ process_captive_portal_triggers() {
 	# das Opennet-VPN-Interface triggert die Aktivierung/Deaktivierung des hotspot-Interface
 	if [ "$INTERFACE" = "$NETWORK_TUNNEL" ]; then
 		msg_info "Trigger activation of Captive Portal interface following the state of the VPN tunnel"
-		sync_captive_portal_state_with_mig_connections
+		echo "on-function sync_captive_portal_state_with_mig_connections" | schedule_task
 	fi
 
 
 	# das Hotspot-Interface triggert die Aktivierung des nodogsplash-Dienst
 	if [ "$INTERFACE" = "$NETWORK_FREE" ]; then
-		if [ "$ACTION" = "ifup" -o "$ACTION" = "ifdown" ]; then
-			msg_info "Trigger reload of Captive Portal service due to interface status change ($INTERFACE -> $ACTION)"
-			# eventuell läuft er schon für andere Zwecke - "reload" sollte immer funktionieren
-			captive_portal_reload
-		fi
+		msg_info "Trigger reload of Captive Portal service due to interface status change ($INTERFACE -> $ACTION)"
+		# eventuell läuft er schon für andere Zwecke - "reload" sollte immer funktionieren
+		echo "on-function captive_portal_reload" | schedule_task
 	fi
 }
 
-process_captive_portal_triggers 2>&1 >/dev/null | logger -t captive-portal-discovery
+[ "$ACTION" = "ifup" -o "$ACTION" = "ifdown" ] && process_captive_portal_triggers
+true
 

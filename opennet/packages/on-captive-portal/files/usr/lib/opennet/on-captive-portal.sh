@@ -185,6 +185,9 @@ sync_captive_portal_state_with_mig_connections() {
 	elif [ -z "$device_active" -a -n "$mig_active" ]; then
 		ifup "$NETWORK_FREE"
 	fi
+	# warte auf das Netzwerk-Interface
+	sleep 2
+	captive_portal_reload
 }
 
 

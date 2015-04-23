@@ -4,9 +4,4 @@
 # Andernfalls verpassen wir eventuell einen Zustandswechsel (z.B. beim Booten).
 #
 
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-
-sync_captive_portal_state_with_mig_connections
-sleep 3
-# reload richtet keinen Schaden an
-captive_portal_reload
+on-function sync_captive_portal_state_with_mig_connections

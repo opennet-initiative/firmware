@@ -13,7 +13,7 @@ set -eu
 
 
 FLAG_FILE=/var/run/on_boot_time_logged
-MAX_UPTIME_SECONDS=420
+MAX_UPTIME_SECONDS=360
 ACCEPTABLE_TIME_OFFSET=180
 
 
@@ -28,7 +28,7 @@ get_current_time_offset_milliseconds() {
 	[ -z "$peer_args" ] && return 0
 	# Alle konfigurierten Zeitserver abfragen.
 	# Wir sind lediglich am "offset"-Wert interessiert.
-	offsets=$(timeout -t 4 -s INT ntpd -w -n -q $peer_args 2>&1 \
+	offsets=$(timeout -s INT 4 ntpd -w -n -q $peer_args 2>&1 \
 		| grep "offset:" \
 		| cut -f 4 -d : \
 		| cut -f 1 -d " ")

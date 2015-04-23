@@ -1,10 +1,12 @@
 #!/bin/sh
-
-set -eu
-
+#
 # Wir wollen regelmaessig sicherstellen, dass die captive-Portal-Funktion der VPN-Tunnel folgt.
 # Andernfalls verpassen wir eventuell einen Zustandswechsel (z.B. beim Booten).
-on-function sync_captive_portal_state_with_mig_connections
+#
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+sync_captive_portal_state_with_mig_connections
 sleep 3
 # reload richtet keinen Schaden an
-/etc/init.d/nodogsplash reload >/dev/null
+captive_portal_reload

@@ -352,7 +352,7 @@ apply_changes() {
 			/etc/init.d/openvpn reload || true
 			;;
 		nodogsplash)
-			/etc/init.d/nodogsplash reload || true
+			captive_portal_reload || true
 			;;
 		on-usergw)
 			# TODO: verwenden wir ueberhaupt eine uci-Konfiguration?

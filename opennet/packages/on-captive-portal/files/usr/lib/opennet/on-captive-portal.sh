@@ -16,6 +16,7 @@ ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT=/usr/lib/opennet/events/on-captive-portal-fire
 ## @details Typischerweise ist dies so etwas wie nodogsplash.cfgXXXX. Falls die uci-Sektion noch
 ##   nicht existieren sollte, dann wird sie erzeugt und zurückgeliefert.
 captive_portal_get_or_create_config() {
+	trap "error_trap captive_portal_get_or_create_config '$*'" $GUARD_TRAPS
 	local uci_prefix=$(find_first_uci_section "nodogsplash" "instance" "network=$NETWORK_FREE")
 	# gefunden? Zurueckliefern ...
 	if [ -z "$uci_prefix" ]; then
@@ -114,6 +115,33 @@ captive_portal_apply() {
 }
 
 
+## @fn captive_portal_restart()
+## @brief Führe einen Neustart der Captive-Portal-Software mit minimalen Seiteneffekten durch.
+## @details Aktuelle Verbindungen bleiben nach Möglichkeit erhalten.
+captive_portal_restart() {
+	trap "error_trap captive_portal_restart '$*'" $GUARD_TRAPS
+	# alte Clients-Liste sichern; keine Fehlerausgabe bei gestopptem Prozess
+	local clients=$(ndsctl clients 2>/dev/null | grep "^ip=" | cut -f 2 -d =)
+	# Prozess neustarten (reload legt wohl keine iptables-Regeln an)
+	/etc/init.d/nodogsplash restart >/dev/null
+	# kein laufender Prozess? Keine Wiederherstellung von Clients ...
+	[ -z "$(pidof nodogsplash)" ] && return 0
+	# Client-Liste wiederherstellen
+	local ip
+	echo "$clients" | while read ip; do
+		ndsctl auth "$ip"
+	done
+}
+
+
+## @fn captive_portal_reload()
+## @brief Neukonfiguration der Captive-Portal-Software, falls Änderungen aufgetreten sind.
+## @details Bestehende Verbindungen bleiben erhalten.
+captive_portal_reload() {
+	/etc/init.d/nodogsplash reload >/dev/null
+}
+
+
 ## @fn captive_portal_has_devices()
 ## @brief Prüfe, ob dem Captive Portal mindestens ein physisches Netzwerk-Gerät zugeordnet ist.
 ## @details Sobald ein Netzwerk-Gerät konfiguriert ist, gilt der Captive-Portal-Dienst als aktiv.
@@ -128,6 +156,7 @@ captive_portal_has_devices() {
 ## @param state Ein uci-Wahrheitswert bestimmt die Aktivierung oder Deaktivierung des firewall-Skripts.
 ## @details Das Skript sorgt für die Integration von nodogsplash in das openwrt-Firewall-System.
 configure_captive_portal_firewall_script() {
+	trap "error_trap configure_captive_portal_firewall_script '$*'" $GUARD_TRAPS
 	local state="$1"
 	local uci_prefix=$(find_first_uci_section "firewall" "include" "path=$ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT")
 	if uci_is_true "$state" && [ -z "$uci_prefix" ]; then
@@ -148,6 +177,7 @@ configure_captive_portal_firewall_script() {
 ## @details Diese Funktion wird nach Statusänderungen des VPN-Interface, sowie innerhalb eines
 ##   regelmäßigen cronjobs ausgeführt.
 sync_captive_portal_state_with_mig_connections() {
+	trap "error_trap sync_captive_portal_state_with_mig_connections '$*'" $GUARD_TRAPS
 	local mig_active=$(get_active_mig_connections)
 	local device_active=$(is_interface_up "$NETWORK_FREE" && echo 1)
 	if [ -n "$device_active" -a -z "$mig_active" ]; then
@@ -185,6 +215,7 @@ get_captive_portal_client_count() {
 ##   * Download-Verkehrsvolumen (kByte)
 ##   * Upload-Verkehrsvolumen (kByte)
 get_captive_portal_clients() {
+	trap "error_trap get_captive_portal_clients '$*'" $GUARD_TRAPS
 	local line
 	local key
 	local value

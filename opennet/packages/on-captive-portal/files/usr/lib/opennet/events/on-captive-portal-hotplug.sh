@@ -5,7 +5,7 @@
 #
 
 
-# wir verwenden explizit ein sub-Shell um Seiteneffekte für andere hotplug-Skripte zu vermeiden
+# wir verwenden explizit eine sub-Shell um Seiteneffekte für andere hotplug-Skripte zu vermeiden
 process_captive_portal_triggers() {
 	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
@@ -21,7 +21,7 @@ process_captive_portal_triggers() {
 		if [ "$ACTION" = "ifup" -o "$ACTION" = "ifdown" ]; then
 			msg_info "Trigger reload of Captive Portal service due to interface status change ($INTERFACE -> $ACTION)"
 			# eventuell läuft er schon für andere Zwecke - "reload" sollte immer funktionieren
-			/etc/init.d/nodogsplash reload
+			captive_portal_reload
 		fi
 	fi
 }

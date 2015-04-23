@@ -11,5 +11,8 @@ if [ "${1:-}" = "config" ]; then
 	echo "current_client_count.type GAUGE"
 
 else
-	echo "current_client_count.value $(ndsctl clients | head -1)"
+	# Fehler koennen wir ignorieren (nodogsplash ist wohl abgeschaltet)
+	client_count=$(ndsctl clients 2>/dev/null | head -1)
+	[ -n "$client_count" ] && echo "current_client_count.value $client_count"
+	true
 fi

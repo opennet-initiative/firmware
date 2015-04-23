@@ -24,8 +24,10 @@ else
 	forward_chain_name="zone_${ZONE_FREE}_forward"
 	# typischerweise: zone_on_vpn_dest_ACCEPT
 	target_chain_name="zone_${ZONE_TUNNEL}_dest_ACCEPT"
-	incoming_volume=$(iptables -L "$forward_chain_name" -vnx | grep "$target_chain_name" | awk '{ print $2 }')
-	echo "traffic_volume_rx.value $incoming_volume"
-	outgoing_volume=$(iptables -L ndsNET -vnx | grep RETURN | awk '{ print $2 }')
-	echo "traffic_volume_tx.value $outgoing_volume"
+	# Fehler koennen wir ignorieren (nodogsplash laeuft nicht)
+	incoming_volume=$(iptables -L "$forward_chain_name" -vnx 2>/dev/null | grep "$target_chain_name" | awk '{ print $2 }')
+	[ -n "$incoming_volume" ] && echo "traffic_volume_rx.value $incoming_volume"
+	outgoing_volume=$(iptables -L ndsNET -vnx 2>/dev/null | grep RETURN | awk '{ print $2 }')
+	[ -n "$outgoing_volume" ] && echo "traffic_volume_tx.value $outgoing_volume"
+	true
 fi

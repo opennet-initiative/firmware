@@ -155,6 +155,4 @@ uci commit firewall
 # loese via procd alle erforderlichen Dienste-Reloads aus
 # Fehler duerfen hier passieren
 reload_config || true
-
-exit 0
-
+true

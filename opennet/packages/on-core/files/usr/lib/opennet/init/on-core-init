@@ -68,4 +68,3 @@ disable_cron_logging
 configure_dnsmasq
 add_crontab_entries
 set_timezone_berlin
-

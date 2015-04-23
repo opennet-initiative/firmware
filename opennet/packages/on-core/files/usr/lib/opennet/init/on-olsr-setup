@@ -90,5 +90,6 @@ configure_olsrd_httpinfo_port "$OLSR_HTTP_PORT"
 olsrd_enable_txtinfo
 olsrd_enable_jsoninfo
 
+# Neuinitialisierung des Policy-Routing - auch nach einer Paket-Installation hilfreich
+initialize_olsrd_policy_routing
 apply_changes olsrd
-

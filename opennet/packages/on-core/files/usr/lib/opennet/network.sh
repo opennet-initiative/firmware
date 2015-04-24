@@ -388,9 +388,18 @@ rename_firewall_zone() {
 ## @fn is_interface_up()
 ## @brief Prüfe ob ein logisches Netzwerk-Interface aktiv ist.
 ## @param interface Zu prüfendes logisches Netzwerk-Interface
+## @details Im Fall eines Bridge-Interface wird sowohl der Status der Bridge (muss aktiv sein), als
+##   auch der Status der Bridge-Teilnehmer (mindestens einer muss aktiv sein) geprüft.
 is_interface_up() {
 	trap "error_trap is_interface_up '$*'" $GUARD_TRAPS
 	local interface="$1"
+	# falls es ein uebergeordnetes Bridge-Interface geben sollte, dann muss dies ebenfalls aktiv sein
+	if [ "$(uci_get "network.${interface}.type")" = "bridge" ]; then
+		# das Bridge-Interface existiert nicht (d.h. es ist down)
+		[ -z "$(ip link show dev "br-${interface}" 2>/dev/null)" ] && trap "" $GUARD_TRAPS && return 1
+		# Bridge ist aus? Damit ist das befragte Interface ebenfalls aus ...
+		ip link show dev "br-${interface}" | grep -q "[\t ]state DOWN[\ ]" && trap "" $GUARD_TRAPS && return 1
+	fi
 	local device
 	for device in $(get_devices_of_interface "$interface"); do
 		ip link show dev "$device" | grep -q "[\t ]state UP[\ ]" && return 0

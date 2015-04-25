@@ -1,7 +1,7 @@
 Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 --- a/routing/olsrd/Makefile
 +++ b/routing/olsrd/Makefile
-@@ -95,6 +95,18 @@ define Package/olsrd-mod-nameservice
+@@ -96,6 +96,18 @@ define Package/olsrd-mod-nameservice
    TITLE:=Lightweight hostname resolver plugin
  endef
  
@@ -20,7 +20,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  define Package/olsrd-mod-p2pd
    $(call Package/olsrd/template)
    DEPENDS:=olsrd
-@@ -162,7 +174,7 @@ MAKE_FLAGS+= \
+@@ -163,7 +175,7 @@ MAKE_FLAGS+= \
  	DESTDIR="$(PKG_INSTALL_DIR)" \
  	STRIP="true" \
  	INSTALL_LIB="true" \
@@ -29,7 +29,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  
  define Build/Compile
  	$(call Build/Compile/Default,all)
-@@ -229,6 +241,16 @@ define Package/olsrd-mod-nameservice/ins
+@@ -230,6 +242,16 @@ define Package/olsrd-mod-nameservice/ins
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/nameservice/olsrd_nameservice.so.* $(1)/usr/lib/
  endef
  
@@ -46,7 +46,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  define Package/olsrd-mod-p2pd/install
  	$(INSTALL_DIR) $(1)/usr/lib
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/p2pd/olsrd_p2pd.so.* $(1)/usr/lib/
-@@ -287,6 +309,8 @@ $(eval $(call BuildPackage,olsrd-mod-htt
+@@ -288,6 +310,8 @@ $(eval $(call BuildPackage,olsrd-mod-htt
  $(eval $(call BuildPackage,olsrd-mod-jsoninfo))
  $(eval $(call BuildPackage,olsrd-mod-mdns))
  $(eval $(call BuildPackage,olsrd-mod-nameservice))

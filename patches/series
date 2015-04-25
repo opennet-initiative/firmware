@@ -1,14 +1,9 @@
 oni-feeds.patch
-luci_show_dfs_channels.patch
+#luci_show_dfs_channels.patch
 makefile_include_opennet_packages.patch
 dnsmasq_option_servers_file.patch
 luci_wireless_client_isolation.patch
 hostapd_option_chanlist.patch
-no_dhcp_log.patch
-curl_enable_https.patch
-led_input_trigger_warnings.patch
+#curl_enable_https.patch
 luci_olsr_fix_empty_result.patch
 olsrd_add_ondataservice.patch
-openwrt_backport_r43776.patch
-kernel_enable_ag71xx_debug.patch
-openwrt_backport_loco_xw.patch

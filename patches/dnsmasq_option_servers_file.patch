@@ -2,9 +2,9 @@ Add dnsmasq option '--servers-file' which is available since v2.69.
 
 Signed-off-by: Lars Kruse <devel@sumpfralle.de>
 
---- a/luci/modules/admin-full/luasrc/model/cbi/admin_network/dhcp.lua
-+++ b/luci/modules/admin-full/luasrc/model/cbi/admin_network/dhcp.lua
-@@ -100,6 +100,11 @@ s:taboption("advanced", Flag, "nonegcach
+--- a/luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/dhcp.lua
++++ b/luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/dhcp.lua
+@@ -89,6 +89,11 @@ s:taboption("advanced", Flag, "nonegcach
  	translate("No negative cache"),
  	translate("Do not cache negative replies, e.g. for not existing domains"))
  
@@ -16,13 +16,3 @@ Signed-off-by: Lars Kruse <devel@sumpfralle.de>
  s:taboption("advanced", Flag, "strictorder",
  	translate("Strict order"),
  	translate("<abbr title=\"Domain Name System\">DNS</abbr> servers will be queried in the " ..
---- a/openwrt/package/network/services/dnsmasq/files/dnsmasq.init
-+++ b/openwrt/package/network/services/dnsmasq/files/dnsmasq.init
-@@ -141,6 +141,7 @@ dnsmasq() {
- 	config_list_foreach "$cfg" "bogusnxdomain" append_bogusnxdomain
- 	append_parm "$cfg" "leasefile" "--dhcp-leasefile"
- 	append_parm "$cfg" "resolvfile" "--resolv-file"
-+	append_parm "$cfg" "serversfile" "--servers-file"
- 	append_parm "$cfg" "tftp_root" "--tftp-root"
- 	append_parm "$cfg" "dhcp_boot" "--dhcp-boot"
- 	append_parm "$cfg" "local_ttl" "--local-ttl"

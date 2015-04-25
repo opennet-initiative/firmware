@@ -1,7 +1,7 @@
 Show "client isolation" setting even for non-madwifi drivers.
---- a/luci/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
-+++ b/luci/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
-@@ -503,6 +503,10 @@ if hwtype == "mac80211" then
+--- a/luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
++++ b/luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
+@@ -473,6 +473,10 @@ if hwtype == "mac80211" then
  	wmm:depends({mode="ap"})
  	wmm:depends({mode="ap-wds"})
  	wmm.default = wmm.enabled

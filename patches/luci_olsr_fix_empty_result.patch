@@ -2,9 +2,9 @@ Handle empty json request result gracefully.
 
 Signed-off-by: Lars Kruse <devel@sumpfralle.de>
 
---- a/luci/applications/luci-olsr/luasrc/controller/olsr.lua
-+++ b/luci/applications/luci-olsr/luasrc/controller/olsr.lua
-@@ -414,9 +414,9 @@ function fetch_jsoninfo(otable)
+--- a/luci/applications/luci-app-olsr/luasrc/controller/olsr.lua
++++ b/luci/applications/luci-app-olsr/luasrc/controller/olsr.lua
+@@ -384,9 +384,9 @@ function fetch_jsoninfo(otable)
  
  	if jsonreq4 ~= "" then
  		has_v4 = 1

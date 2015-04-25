@@ -1,0 +1,26 @@
+Hier sammeln wir Aenderungsnotizen fuer die aktuelle Firmware (seit dem letzten Release).
+Im Fall eines Release dienen die Notizen zum Befüllen des Changelogs im Wiki:
+ https://wiki.opennet-initiative.de/wiki/Opennet_Firmware_Versionen
+Anschließend kann diese Liste wieder geleert werden.
+
+
+= Änderungen aus Nutzersicht =
+* Funktionalität für öffentliche Zugangspunkte (zuvor: "wifidog") integriert
+* Nutzer-VPN-Tunnel wird innerhalb von ca. drei Minuten nach dem Booten aufgebaut (zuvor: ca. acht Minuten)
+* keine VPN-Verbindungstests ohne Zertifikat
+** weniger Load für Infrastruktur-APs, leichte Verzögerung nach Zertifikatsupload
+* verschlüsselte Verbindung mit dem Web-Interface (z.B. https://172.16.0.1/) ist möglich
+* Verfallsdatum des eigenen Zertifikats wird angezeigt
+* reduzierter RAM-Speicherbedarf
+** auf Geräten mit 32 MB RAM gab es zuvor gelegentlich Neustarts durch Speichermangel
+* Korrekturen:
+** lokale IP wird nicht mehr auf 172.16.0.1 zurückgesetzt
+** Geschwindigkeitsanzeige in der Gatewayliste
+** Zeitstempel-Ermittlung für reboot-Logeintrag (/etc/banner)
+
+= Interne Änderungen =
+* neue CA-Zertifikate sind nun in einem separaten Paket untergebracht
+** zuvor führte ein Upgrade nicht zu einer CA-Aktualisierung
+
+
+= Bemerkenswertes / Fehler / Mängel =

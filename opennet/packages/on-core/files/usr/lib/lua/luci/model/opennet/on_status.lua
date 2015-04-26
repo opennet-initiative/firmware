@@ -45,44 +45,38 @@ end
 
 function status_network()
 	luci.http.prepare_content("text/plain")
-	printZoneLine(on_function("get_variable", {"ZONE_LOCAL"}))
-	printZoneLine(on_function("get_variable", {"ZONE_MESH"}))
-	printZoneLine(on_function("get_variable", {"ZONE_WAN"}))
-	printZoneLine(on_function("get_variable", {"ZONE_FREE"}))
-end
-
-
-function printZoneLine(zoneName)
-	networks = on_function("get_zone_interfaces", {zoneName})
-	if networks and relevant(networks) then
-		luci.http.write([[<h3>]])
-		if zoneName == on_function("get_variable", {"ZONE_LOCAL"}) then
-			luci.http.write('<abbr title="' .. luci.i18n.translate("These addresses are used locally and usually protected by your firewall. Connections to the Internet are routed through your VPN-Tunnel if it is active.") .. '">' .. luci.i18n.translate("LOCAL") .. '</abbr> ' .. luci.i18n.translate('IP Address(es):'))
-		elseif zoneName == on_function("get_variable", {"ZONE_MESH"}) then
-			luci.http.write('<abbr title="' .. luci.i18n.translate("Opennet-Addresses are usually given to the Access-Point based on your Opennet-ID. These are the interfaces on which OLSR is running.") .. '">' .. luci.i18n.translate("OPENNET") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
-		elseif zoneName == on_function("get_variable", {"ZONE_WAN"}) then
-			luci.http.write('<abbr title="' .. luci.i18n.translate("The WAN Interface is used for your local Internet-Connection (for instance DSL). It will be used for your local traffic and to map Usergateways into Opennet = Share your Internet Connection if you choose to.") .. '">' .. luci.i18n.translate("WAN") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
-		elseif zoneName == on_function("get_variable", {"ZONE_FREE"}) then
-			luci.http.write('<abbr title="' .. luci.i18n.translate("The FREE Interface will be used to publicly share Opennet with Wifidog.") .. '">' .. luci.i18n.translate("FREE") .. '</abbr> ' .. luci.i18n.translate("IP Address(es):"))
-		end
-		luci.http.write([[</h3>]])
-		printInterfaces(networks, zoneName)
+	printZoneLine("ZONE_LOCAL")
+	printZoneLine("ZONE_MESH")
+	printZoneLine("ZONE_WAN")
+	if on_bool_function("is_function_available", {"captive_portal_get_or_create_config"}) then
+		printZoneLine("ZONE_FREE")
 	end
 end
 
 
-function relevant(networks)
-	for network in networks:gmatch("%S+") do
-		local devices = luci.sys.exec(". \"${IPKG_INSTROOT:-}/lib/functions.sh\"; include \"${IPKG_INSTROOT:-}/lib/network\"; scan_interfaces; "..
-			"[ -n \"$(config_get "..network.." ipaddr)\" ] && config_get "..network.." device")
-		devices = devices.gsub(devices, "%c+", "")
-		if devices ~= "" then
-			for device in devices:gmatch("%S+") do
-				if luci.sys.exec("ip link show "..device.." 2>/dev/null | grep UP") ~= "" then return true end
-			end
+function printZoneLine(zone_variable_name)
+	local zone_name = on_function("get_variable", {zone_variable_name})
+	local network_interface = on_function("get_zone_interfaces", {zone_name})
+	if network_interface and on_bool_function("is_interface_up", {network_interface}) then
+		local title
+		local interface_name
+		if zone_variable_name == "ZONE_LOCAL" then
+			title = luci.i18n.translate("These addresses are used locally and usually protected by your firewall. Connections to the Internet are routed through your VPN-Tunnel if it is active.")
+			interface_name = luci.i18n.translate("LOCAL")
+		elseif zone_variable_name == "ZONE_MESH" then
+			title = luci.i18n.translate("Opennet-Addresses are usually given to the Access-Point based on your Opennet-ID. These are the interfaces on which OLSR is running.")
+			interface_name = luci.i18n.translate("OPENNET")
+		elseif zone_variable_name == "ZONE_WAN" then
+			title = luci.i18n.translate("The WAN Interface is used for your local Internet-Connection (for instance DSL). It will be used for your local traffic and to map Usergateways into Opennet = Share your Internet Connection if you choose to.")
+			interface_name = luci.i18n.translate("WAN")
+		elseif zone_variable_name == "ZONE_FREE" then
+			title = luci.i18n.translate("The FREE Interface will be used to publicly share Opennet with Wifidog.")
+			interface_name = luci.i18n.translate("FREE")
 		end
+		luci.http.write('<h3><abbr title="' .. title .. '">' .. interface_name .. '</abbr>&nbsp;'
+				.. luci.i18n.translate('IP Address(es):') .. '</h3>')
+		printInterfaces(network_interface, zone_name)
 	end
-	return false
 end
 
 
@@ -102,18 +96,15 @@ function printInterfaces(networks, zoneName)
 end
 
 
-function printNetworkInterfaceValues(network)
-	-- get physical interface name
-	ifname = luci.sys.exec(". \"${IPKG_INSTROOT:-}/lib/functions.sh\"; include \"${IPKG_INSTROOT:-}/lib/network\"; scan_interfaces; config_get "..network.." ifname")
-	ifname = ifname.gsub(ifname, "%c+", "")
-	if not ifname or ifname == "" then return end
-	-- skip alias and disabled interfaces
-	if luci.sys.exec("ip link show "..ifname.." 2>/dev/null | grep UP") == "" then return end
-	output = luci.sys.exec([[ip address show label ]]..ifname..[[ | awk 'BEGIN{ mac="---";ip="---";ip6="---"; }  { if ($1 ~ /link/) mac=$2; if ($1 ~ /inet$/) ip=$2; if ($1 ~ /inet6/) ip6=$2; } END{ printf "<td>]]..ifname..[[</td><td>"ip"</td><td>"ip6"</td><td>"mac"</td>"}']])
+function printNetworkInterfaceValues(network_interface)
+	-- ignoriere abgeschaltete Interfaces
+	if not on_bool_function("is_interface_up", {network_interface}) then return end
+	local ifname = on_function("get_device_of_interface", {network_interface})
+	local output = luci.sys.exec([[ip address show label ]]..ifname..[[ | awk 'BEGIN{ mac="---";ip="---";ip6="---"; }  { if ($1 ~ /link/) mac=$2; if ($1 ~ /inet$/) ip=$2; if ($1 ~ /inet6/) ip6=$2; } END{ printf "<td>]]..ifname..[[</td><td>"ip"</td><td>"ip6"</td><td>"mac"</td>"}']])
 	if output and output ~= "" then
 		luci.http.write([[<tr>]]..output..[[<td>]])
 		-- add DHCP information
-		local dhcp = cursor:get_all("dhcp", network)
+		local dhcp = cursor:get_all("dhcp", network_interface)
 		if dhcp and dhcp.ignore ~= "1" then
 			-- we provide DHCP for this network
 			luci.http.write(dhcp.start.." / "..dhcp.limit.." / "..dhcp.leasetime)

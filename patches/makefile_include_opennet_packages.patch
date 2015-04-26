@@ -7,8 +7,8 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +
 +# Wir verwenden die Version des Gesamt-Builds
 +# Wir teilen die VERSION_NUMBER (z.B. "0.5.0-694" oder "0.5.1-unstable-810") an der Stelle des letzten Bindestrichs
-+PKG_VERSION := $(shell echo "$(VERSION_NUMBER)" | sed 's/-[0-9]\+$$//g')
-+PKG_RELEASE := $(shell echo "$(VERSION_NUMBER)" | sed 's/^.*-\([0-9]\+\)$$/\1/g')
++PKG_VERSION = $(shell echo "$(VERSION_NUMBER)" | sed 's/-[0-9]\+$$//g')
++PKG_RELEASE = $(shell echo "$(VERSION_NUMBER)" | sed 's/^.*-\([0-9]\+\)$$/\1/g')
 +PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 +PKG_BUILD_DEPENDS := $(if $(STAGING_DIR_ROOT),lua/host)
 +

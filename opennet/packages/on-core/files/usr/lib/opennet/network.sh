@@ -170,7 +170,7 @@ is_device_in_zone() {
 	local zone="$2"
 	local item
 	for log_interface in $(get_zone_interfaces "$2"); do
-		for item in $(get_devices_of_interface "$log_interface"); do
+		for item in $(get_subdevices_of_interface "$log_interface"); do
 			[ "$device" != "$item" ] || continue
 			return 0
 		done
@@ -191,11 +191,22 @@ is_interface_in_zone() {
 }
 
 
-## @fn get_devices_of_interface()
+## @fn get_device_of_interface()
+## @brief Ermittle das physische Netzwerk-Gerät, das einem logischen Netzwerk entspricht.
+## @details Ein Bridge-Interface wird als Gerät betrachtet und zurückgeliefert (nicht seine Einzelteile).
+get_device_of_interface() {
+	local interface="$1"
+	[ "$(uci_get "network.${interface}.type")" = "bridge" ] \
+		&& echo "br-$interface" \
+		|| get_subdevices_of_interface "$interface"
+}
+
+
+## @fn get_subdevices_of_interface()
 ## @brief Ermittle die physischen Netzwerk-Geräte, die zu einem logischen Netzwerk-Interface gehören.
 ## @details Im Fall eines Bridge-Interface werden nur die beteiligten Komponenten zurückgeliefert.
 ## @returns Der Name des physischen Netzwerk-Geräts oder nichts.
-get_devices_of_interface() {
+get_subdevices_of_interface() {
 	local interface="$1"
 	local device
 	# kabelgebundene Geräte
@@ -250,13 +261,20 @@ get_zone_of_device() {
 	local uci_prefix
 	local devices
 	local zone
+	local interface
+	local current_device
 	find_all_uci_sections firewall zone | while read uci_prefix; do
 		zone=$(uci_get "${uci_prefix}.name")
-		devices=$(get_zone_devices "$zone")
-		is_in_list "$device" "$devices" && echo -n "$zone" && return 0 || true
+		for interface in $(get_zone_interfaces "$zone"); do
+			for current_device in \
+					$(get_device_of_interface "$interface") \
+					$(get_subdevices_of_interface "$interface"); do
+				[ "$current_device" = "$device" ] && echo "$device" && return 0
+				true
+			done
+		done
 	done
-	# ein leerer Rueckgabewert gilt als Fehler
-	return 0
+	# keine Zone gefunden
 }
 
 
@@ -299,7 +317,7 @@ get_sorted_opennet_interfaces() {
 	#   3 - alle anderen
 	for network in $(get_zone_interfaces "$ZONE_MESH"); do
 		order=10
-		[ -z "$(get_devices_of_interface "$network")" ] && order=20
+		[ -z "$(get_subdevices_of_interface "$network")" ] && order=20
 		if [ "${network#on_wifi}" != "$network" ]; then
 			order=$((order+1))
 		elif [ "${network#on_eth}" != "$network" ]; then
@@ -401,7 +419,7 @@ is_interface_up() {
 		ip link show dev "br-${interface}" | grep -q "[\t ]state DOWN[\ ]" && trap "" $GUARD_TRAPS && return 1
 	fi
 	local device
-	for device in $(get_devices_of_interface "$interface"); do
+	for device in $(get_subdevices_of_interface "$interface"); do
 		ip link show dev "$device" | grep -q "[\t ]state UP[\ ]" && return 0
 		true
 	done

@@ -146,7 +146,7 @@ captive_portal_reload() {
 ## @brief Prüfe, ob dem Captive Portal mindestens ein physisches Netzwerk-Gerät zugeordnet ist.
 ## @details Sobald ein Netzwerk-Gerät konfiguriert ist, gilt der Captive-Portal-Dienst als aktiv.
 captive_portal_has_devices() {
-	[ -n "$(get_devices_of_interface "$NETWORK_FREE")" ] && return 0
+	[ -n "$(get_subdevices_of_interface "$NETWORK_FREE")" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

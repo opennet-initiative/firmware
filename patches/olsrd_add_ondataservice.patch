@@ -900,7 +900,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  /* send buffer: huge */
 ++  char buffer[10240];
 ++  union olsr_message *message = (union olsr_message *)buffer;
-++  struct interface *ifn;
+++  struct interface_olsr *ifn;
 ++  int ondatasize;
 ++
 ++  /* fill message */
@@ -951,7 +951,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++ * Parse ondata olsr message of ONDATA type
 ++ */
 ++bool
-++olsr_parser(union olsr_message *m, struct interface *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr __attribute__ ((unused)))
+++olsr_parser(union olsr_message *m, struct interface_olsr *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr __attribute__ ((unused)))
 ++{
 ++  struct ondatamsg *ondatamessage;
 ++  union olsr_ip_addr originator;
@@ -1320,7 +1320,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++#define MAX_FILE 		255
 ++
 ++/* Parser function to register with the scheduler */
-++bool olsr_parser(union olsr_message *, struct interface *, union olsr_ip_addr *);
+++bool olsr_parser(union olsr_message *, struct interface_olsr *, union olsr_ip_addr *);
 ++
 ++/* callback for periodic timer */
 ++void olsr_ondatasvc_gen(void *);
@@ -2623,7 +2623,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  /* send buffer: huge */
 ++  char buffer[10240];
 ++  union olsr_message *message = (union olsr_message *)buffer;
-++  struct interface *ifn;
+++  struct interface_olsr *ifn;
 ++  int ondatasize;
 ++
 ++  /* fill message */
@@ -2863,7 +2863,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++#define MAX_FILE 		255
 ++
 ++/* Parser function to register with the scheduler */
-++bool olsr_parser(union olsr_message *, struct interface *, union olsr_ip_addr *);
+++bool olsr_parser(union olsr_message *, struct interface_olsr *, union olsr_ip_addr *);
 ++
 ++/* callback for periodic timer */
 ++void olsr_ondatasvc_gen(void *);

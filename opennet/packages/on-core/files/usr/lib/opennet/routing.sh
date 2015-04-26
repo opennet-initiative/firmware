@@ -100,11 +100,19 @@ add_network_policy_rule_by_destination() {
 ## @param route Spezifikation einer Route (siehe 'ip route add ...')
 add_zone_policy_rules_by_iif() {
 	trap "error_trap add_zone_policy_rules '$*'" $GUARD_TRAPS
-	local zone=$1
+	local zone="$1"
 	shift
+	local interface
 	local device
-	for device in $(get_zone_devices "$zone"); do
-		[ -n "$device" -a "$device" != "none" ] && ip rule add iif "$device" "$@" || true
+	# ermittle alle physischen Geräte inklusive Bridge-Interfaces, die zu dieser Zone gehören
+	for interface in $(get_zone_interfaces "$zone"); do
+		get_device_of_interface "$interface"
+		for device in $(get_subdevices_of_interface "$interface"); do
+			echo "$device"
+		done
+	done | sort | uniq | while read device; do
+		[ -n "$device" -a "$device" != "none" ] && ip rule add iif "$device" "$@"
+		true
 	done
 	return 0
 }

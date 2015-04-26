@@ -145,25 +145,7 @@ get_zone_interfaces() {
 }
 
 
-## @fn get_zone_devices()
-## @brief Liefere die physischen Netzwerk-Geräte einer Zone zurueck.
-## @param zone Der Name einer Netzwerk-Zone.
-## @details Es werden sowohl echte physische Netzwerk-Geräte, als auch Bridge-Interfaces zurückgegeben.
-get_zone_devices() {
-	trap "error_trap get_zone_devices '$*'" $GUARD_TRAPS
-	local zone="$1"
-	local iface
-	local result
-	for iface in $(get_zone_interfaces "$zone"); do
-		get_devices_of_interface "$iface"
-		# Namen von Bridge-Interfaces werden explizit vergeben
-		[ "$(uci_get "network.${iface}.type")" = "bridge" ] && echo "br-$iface"
-		true
-	done
-}
-
-
-# Ist das gegebene physische Netzwer-Interface Teil einer Firewall-Zone?
+# Ist das gegebene physische Netzwerk-Interface Teil einer Firewall-Zone?
 is_device_in_zone() {
 	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
 	local device="$1"

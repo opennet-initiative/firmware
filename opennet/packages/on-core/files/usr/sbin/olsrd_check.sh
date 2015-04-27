@@ -32,8 +32,8 @@ check_for_empty_routing_table() {
 		# (es gibt einen Bug, bei dem olsrd vergisst, die Routen zu konfigurieren)
 		# Wir duerfen sofort mit Erfolg beenden, da es nix weiter zu tun gibt.
 		ip route show table "$ROUTING_TABLE_MESH" | grep -q "^[0-9]" && exit 0
-		# Topologie ebenfalls leer? Dann ist es ok (wir haben kein Netz).
-		on-function request_olsrd_txtinfo topology | grep -q "^[0-9]" || exit 0
+		# Laueft txtinfo und ist die Topologie trotzdem leer? Dann ist es ok (wir haben kein Netz).
+		( [ -n "$(request_olsrd_txtinfo all)" ] && request_olsrd_txtinfo topology | grep -q "^[0-9]" ) || exit 0
 		# es gibt also Topologie-Informationen, jedoch keine Routen -> ein Bug
 		/etc/init.d/olsrd restart >/dev/null || true
 	else

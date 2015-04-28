@@ -819,6 +819,7 @@ run_scheduled_tasks() {
 	trap "error_trap run_scheduled_tasks '$*'" $GUARD_TRAPS
 	local fname
 	local temp_fname
+	[ -d "$SCHEDULING_DIR" ] || return 0
 	find "$SCHEDULING_DIR" -type f | grep -v "\.running$" | while read fname; do
 		temp_fname="${fname}.running"
 		# zuerst schnell wegbewegen, damit wir keine Ereignisse verpassen

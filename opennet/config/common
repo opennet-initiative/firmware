@@ -176,10 +176,10 @@ CONFIG_PACKAGE_vpnc=m
 CONFIG_PACKAGE_vpnc-scripts=m
 
 # VOIP
-CONFIG_PACKAGE_kamailio4=m
-CONFIG_PACKAGE_rtpproxy=m
-CONFIG_PACKAGE_siproxd=m
-CONFIG_PACKAGE_sipsak=m
+#CONFIG_PACKAGE_kamailio4=m
+#CONFIG_PACKAGE_rtpproxy=m
+#CONFIG_PACKAGE_siproxd=m
+#CONFIG_PACKAGE_sipsak=m
 
 # SSL-Alternative
 CONFIG_PACKAGE_libpolarssl=m

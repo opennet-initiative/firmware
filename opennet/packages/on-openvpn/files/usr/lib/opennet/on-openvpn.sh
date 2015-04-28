@@ -251,5 +251,19 @@ get_mig_port_forward_range() {
 	fi
 }
 
+
+## @fn update_connection_status()
+## @brief Prüfe die VPN-Verbindungen bis mindestens eine Verbindung aufgebaut wurde.
+## @details Diese Funktion sollte regelmäßig als cronjob ausgeführt werden.
+update_mig_connection_status() {
+	# alte Verbindungen loeschen
+	cleanup_stale_openvpn_services
+	# die Gateway-Tests sind nur moeglich, falls ein Test-Schluessel vorhanden ist
+	if has_mig_openvpn_credentials; then
+		verify_mig_gateways
+		find_and_select_best_gateway
+	fi
+}
+
 # Ende der Doku-Gruppe
 ## @}

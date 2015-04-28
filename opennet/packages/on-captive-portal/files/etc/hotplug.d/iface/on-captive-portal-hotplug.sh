@@ -1,1 +1,0 @@
-../../../usr/lib/opennet/events/on-captive-portal-hotplug.sh

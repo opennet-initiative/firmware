@@ -11,5 +11,9 @@ if [ -z "$IPKG_INSTROOT" ]; then
 	# koennen wir die obige Bedingung irgendwann entfernen.
 	. "${IPKG_INSTROOT:-}/etc/init.d/boot"
 	uci_apply_defaults
+
+	# Boot-Skript aktivieren und ausführen
+	/etc/init.d/on-core enable
+	/etc/init.d/on-core start
 fi
 

@@ -8,11 +8,12 @@
 # Wartezeit ueberschritten ist. Anschliessend erfolgt die Ausgabe mit einem
 # passenden Text ("no time retrieved").
 #
+# Falls die maximal zulässige Zeit noch nicht abgelaufen ist, wird eine erneute
+# Ausführung via 'schedule_task' veranlasst.
 
-set -eu
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
-FLAG_FILE=/var/run/on_boot_time_logged
 MAX_UPTIME_SECONDS=360
 ACCEPTABLE_TIME_OFFSET=180
 
@@ -22,7 +23,7 @@ get_current_time_offset_milliseconds() {
 	local peer
 	local offsets
 	# Die Liste der konfigurierten Zeitserver auslesen und als Argumente fuer ntpd zusammensetzen.
-	for peer in $(on-function uci_get system.ntp.server); do
+	for peer in $(uci_get system.ntp.server); do
 		[ -n "$peer" ] && peer_args="$peer_args -p $peer" || true
 	done
 	[ -z "$peer_args" ] && return 0
@@ -42,17 +43,14 @@ get_current_time_offset_milliseconds() {
 }
 
 
-# Wurde das Log bereits geschrieben? Dann beenden wir uns sofort.
-[ -e "$FLAG_FILE" ] && exit 0
-
 # Uptime und Zeitsynchronitaet ermitteln
 time_offset=$(get_current_time_offset_milliseconds)
-uptime=$(on-function get_uptime_seconds)
+uptime=$(get_uptime_seconds)
 # beide Bedingungen voneinander trennen - sonst liefert ash eine Fehlermeldung, falls "time_offset" leer ist
 if [ -z "$time_offset" ] || [ "$time_offset" -gt "$ACCEPTABLE_TIME_OFFSET" ]; then
 	# bisher fand kein Zeitabgleich statt - wir pruefen, ob die uptime inzwischen abgelaufen ist
 	# Ist die maximale Uptime abgelaufen? Falls nicht, dann warten wir auf den naechsten Versuch.
-	[ "$uptime" -lt "$MAX_UPTIME_SECONDS" ] && exit 0
+	[ "$uptime" -lt "$MAX_UPTIME_SECONDS" ] && echo "$0" | schedule_task && exit 0
 	# Die Zeit ist um - wir schreiben den ungueltigen Zeitstempel.
 	timestamp="(no time retrieved)"
 else
@@ -61,9 +59,7 @@ else
 	boot_time=$(($(date +%s) - uptime))
 	timestamp=$(date "@$boot_time")
 fi
+
 # Schreibe den Zeitstempel
-on-function add_banner_event "system restart" "$timestamp"
-
-# Verhindere eine erneute Ausfuehrung.
-echo "$timestamp" > "$FLAG_FILE"
-
+add_banner_event "system restart" "$timestamp"
+# wir sind fertig

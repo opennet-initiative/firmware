@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Führe innerhalb der ersten sieben Minuten Gerätelaufzeit im Minutentakt eine Aktualisierung
+# der Dienstliste durch. Dies ermöglicht nach dem Booten den zeitnahen Aufbaue einer VPN-Verbindung.
+#
+# Falls die uptime weniger als sieben Minuten beträgt, wird eine erneute
+# Ausführung via 'schedule_task' veranlasst.
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+# das nameservice-Trigger-Skript sorgt fuer eine baldige Aktualisierung
+"${IPKG_INSTROOT:-}/etc/olsrd/nameservice.d/on_update_services"
+
+
+# Prüfung, ob wir die schnelle Aktualisierung beenden können
+# Sind weniger als sieben Minuten seit dem Booten vergangen? Dann wünschen wir eine erneut Ausführung.
+[ "$(get_uptime_minutes)" -lt 7 ] && schedule_task "$0"
+exit 0

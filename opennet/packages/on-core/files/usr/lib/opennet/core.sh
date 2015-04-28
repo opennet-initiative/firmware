@@ -823,7 +823,7 @@ run_scheduled_tasks() {
 		temp_fname="${fname}.running"
 		# zuerst schnell wegbewegen, damit wir keine Ereignisse verpassen
 		mv "$fname" "$temp_fname"
-		/bin/sh "$temp_fname" || true
+		/bin/sh "$temp_fname" 2>&1 | logger -t on-scheduled
 		rm -f "$temp_fname"
 	done
 }

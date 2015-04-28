@@ -393,6 +393,12 @@ Im Zuge der uci-defaults-Initialisierung (nach der Erst-Installation oder nach e
 Siehe dazu die Datei */etc/uci-defaults/10-on-core-init* und die Funktion *set_opkg_download_version*.
 
 
+Bootvorgang
+-----------
+
+Am Ende des Boot-Vorgangs werden alle Skripte, die sich im Verzeichnis */usr/lib/opennet/boot/* befinden, für die Ausführung beim nächsten minütlichen cron-Job angemeldet (siehe *schedule_task*). Einige dieser Skripte sollen nicht direkt nach dem Booten, sondern etwas verzögert gestartet werden. Diese Skripte sorgen ebenfalls durch *schedule_task* dafür, dass sie erneut ausgeführt werden, solange ihre Zeit noch nicht gekommen ist.
+
+
 Dauerhaftes Ereignisprotokoll {#bootlog}
 -----------------------------
 

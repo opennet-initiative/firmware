@@ -1,0 +1,19 @@
+#!/bin/sh /etc/rc.common
+#
+# Ausführung von opennet-relevanten Boot-Aktionen.
+#
+
+START=99
+STOP=2
+
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+boot() {
+	local fname
+	# sorge dafür, dass alle Skripte im opennet-boot-Verzeichnis zeitnah ausgeführt werden
+	find /usr/lib/opennet/boot -type f -perm +100 | while read fname; do
+		echo "$fname" | schedule_task
+	done
+}

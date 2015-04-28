@@ -15,5 +15,5 @@
 
 # Prüfung, ob wir die schnelle Aktualisierung beenden können
 # Sind weniger als sieben Minuten seit dem Booten vergangen? Dann wünschen wir eine erneut Ausführung.
-[ "$(get_uptime_minutes)" -lt 7 ] && schedule_task "$0"
+[ "$(get_uptime_minutes)" -lt 7 ] && echo "$0" | schedule_task
 exit 0

@@ -12,8 +12,8 @@ if [ -z "$IPKG_INSTROOT" ]; then
 	. "${IPKG_INSTROOT:-}/etc/init.d/boot"
 	uci_apply_defaults
 
-	# Boot-Skript aktivieren und ausführen
-	/etc/init.d/on-core enable
+	# Boot-Skript aktivieren und ausführen (falls noch nicht geschehen)
+	/etc/init.d/on-core enable 2>/dev/null || true
 	/etc/init.d/on-core start
 fi
 

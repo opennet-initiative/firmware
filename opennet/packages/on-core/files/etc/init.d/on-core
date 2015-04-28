@@ -3,14 +3,14 @@
 # Ausführung von opennet-relevanten Boot-Aktionen.
 #
 
+USE_PROCD=1
 START=99
 STOP=2
 
 
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-
-
 boot() {
+	# wir dürfen die Einbindung nicht im globalen Namensraum vornehmen, da rc.common nicht im strikten Modus funktioniert
+	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 	local fname
 	# sorge dafür, dass alle Skripte im opennet-boot-Verzeichnis zeitnah ausgeführt werden
 	find /usr/lib/opennet/boot -type f -perm +100 | while read fname; do

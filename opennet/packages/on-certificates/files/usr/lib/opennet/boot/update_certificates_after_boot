@@ -4,7 +4,7 @@
 
 
 # innerhalb der ersten fünf Minuten warten wir einfach ab (bis die mesh-Verbindungen aller Wahrscheinlichkeit nach aufgebaut sind)
-[ "$(get_uptime_minutes)" -lt 5 ] && schedule_task "$0" && exit 0
+[ "$(get_uptime_minutes)" -lt 5 ] && echo "$0" | schedule_task && exit 0
 
 # die Wartezeit ist abgelaufen - wir versuchen eine Aktualisierung
 /usr/sbin/on_certificates_update

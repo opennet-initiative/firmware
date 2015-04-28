@@ -42,13 +42,14 @@ You may obtain a copy of the License at
 	XHR.get('<%=luci.dispatcher.build_url("opennet", "opennet_2", "vpn_gateway_list")%>', null, build_table);
 
 	function uci_to_yn(token) {
+		if (!token) {
+			return "";
+		}
 		var token = token.toLowerCase();
 		if ((token == "1") || (token == "yes") || (token == "y") || (token == "on") || (token == "true")) {
 			return "y";
-		} else if (token) {
-			return "n";
 		} else {
-			return "";
+			return "n";
 		}
 	}
 
@@ -67,12 +68,6 @@ You may obtain a copy of the License at
 			result += '</tr>';
 			service_dict[services[index]] = index;
 		}
-		// die letzte Zeile unter der Tabelle einfuegen (z.B. fuer "reset counter")
-		result += '<tr id="cbi-opennet-gateways" class="cbi-section-table-row">'
-			+ '	<td colspan="5" />'
-			+ '	<td class="cbi-value-field"><input class="cbi-button" type="submit" name="reset_connection_test_timestamps" value="<%:reset test counter%>" /></td>'
-			+ '	<td />'
-			+ '</tr>';
 		target_table.innerHTML += result;
 		// Aktivitaetsindikator verstecken
 		if (in_progress_spinner) in_progress_spinner.style.display = 'none';

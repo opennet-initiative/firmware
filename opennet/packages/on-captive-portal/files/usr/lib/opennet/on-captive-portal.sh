@@ -178,23 +178,30 @@ configure_captive_portal_firewall_script() {
 ##   regelmäßigen cronjobs ausgeführt.
 sync_captive_portal_state_with_mig_connections() {
 	trap "error_trap sync_captive_portal_state_with_mig_connections '$*'" $GUARD_TRAPS
+	# Abbruch, falls keine Netzwerk-Interfaces zugeordnet wurden
+	captive_portal_has_devices || return 0
 	local mig_active=$(get_active_mig_connections)
 	local device_active=$(is_interface_up "$NETWORK_FREE" && echo 1)
 	if [ -n "$device_active" -a -z "$mig_active" ]; then
 		ifdown "$NETWORK_FREE"
+		# reload fuehrt zum sanften Stoppen
+		is_captive_portal_running && sleep 1 && captive_portal_reload
+		true
 	elif [ -z "$device_active" -a -n "$mig_active" ]; then
 		ifup "$NETWORK_FREE"
 	fi
 	# warte auf das Netzwerk-Interface
-	sleep 2
-	captive_portal_reload
+	sleep 3
+	# Portalsoftware neu laden, falls das Interface aktiv ist, jedoch kein Prozess laeuft
+	[ -n "$mig_active" ] && ! is_captive_portal_running && captive_portal_reload
+	true
 }
 
 
 ## @fn is_captive_portal_running()
 ## @brief Prüfe ob der Captive-Portal-Dienst läuft.
 is_captive_portal_running() {
-	[ -n "$(pidof nodogsplash)" ] && return 0
+	[ -n "$(pgrep "^/usr/bin/nodogsplash$")" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

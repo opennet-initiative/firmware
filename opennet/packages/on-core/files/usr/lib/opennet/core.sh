@@ -781,15 +781,33 @@ get_memory_size() {
 }
 
 
+# Liefere alle Dateien in einem Verzeichnis zurück, die entsprechend der "run-parts"-Funktionalität
+# beachtet werden sollten.
+_get_parts_dir_files() {
+	local parts_dir="$1"
+	local fname
+	# Abbruch, falls es das Verzeichnis nicht gibt
+	[ -e "$parts_dir" ] || return 0
+	# ignoriere Dateinamen mit ungueltigen Zeichen (siehe 'man run-parts')
+	find "$parts_dir" -maxdepth 1 | grep "/[a-zA-Z0-9_-]\+$" | while read fname; do
+		# ignoriere verwaiste symlinks
+		[ -f "$fname" ] || continue
+		# ignoriere Dateien ohne Ausführungsrechte
+		[ -x "$fname" ] || continue
+		echo "$fname"
+	done
+}
+
+
+## @fn run_parts()
+## @brief Führe alle Skripte aus, die in einem bestimmten Verzeichnis liegen und gewissen Konventionen genügen.
+## @details Die Namenskonventionen und das Verhalten entspricht dem verbreiteten 'run-parts'-Werkzeug.
+##     Die Dateien müssen ausführbar sein.
 run_parts() {
 	trap "error_trap run_parts '$*'" $GUARD_TRAPS
 	local rundir="$1"
 	local fname
-	# Abbruch, falls es das Verzeichnis nicht gibt
-	[ -e "$rundir" ] || return 0
-	find "$rundir" -maxdepth 1 | while read fname; do
-		# ignoriere verwaiste symlinks
-		[ ! -f "$fname" ] && continue
+	_get_parts_dir_files "$rundir" | while read fname; do
 		msg_debug "on-run-parts: executing $fname"
 		# ignoriere Fehler bei der Ausfuehrung
 		"$fname" || true
@@ -844,6 +862,22 @@ schedule_task() {
 	# das Skript existiert? Nichts zu tun ...
 	[ -e "$target_file" ] && return 0
 	echo "$script_content" >"$target_file"
+}
+
+
+## @fn schedule_parts()
+## @brief Merke alle Skripte in einem Verzeichnis für die spätere Ausführung via 'run_scheduled_tasks' vor.
+## @details Die Namenskonventionen und das Verhalten entspricht dem verbreiteten 'run-parts'-Werkzeug.
+##     Die Dateien müssen ausführbar sein.
+schedule_parts() {
+	trap "error_trap schedule_parts '$*'" $GUARD_TRAPS
+	local schedule_dir="$1"
+	local fname
+	_get_parts_dir_files "$schedule_dir" | while read fname; do
+		msg_debug "on-schedule-parts: scheduling $fname"
+		# ignoriere Fehler bei der Ausfuehrung
+		echo "$fname" | schedule_task
+	done
 }
 
 # Ende der Doku-Gruppe

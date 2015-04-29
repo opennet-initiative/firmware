@@ -1,5 +1,5 @@
 test_period_minutes		120
-test_max_fail_attempts		5
+test_max_fail_attempts		2
 
 certificate_countryName		de
 certificate_provinceName	Mecklenburg-Vorpommern

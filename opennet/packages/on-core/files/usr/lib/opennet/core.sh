@@ -8,6 +8,8 @@
 ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
 ## @var Pfad zur dnsmasq-Server-Datei zur dynamischen Aktualisierung durch Dienste-Erkennung
 DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
+## @var DNS-Suffix, das vorrangig von den via olsrd publizierten Nameservern ausgeliefert werden soll
+INTERN_DNS_DOMAIN=on
 ## @var Dateiname für erstellte Zusammenfassungen
 REPORTS_FILE=/tmp/on_report.tar.gz
 ## @var Basis-Verzeichnis für Log-Dateien
@@ -124,6 +126,10 @@ update_dns_servers() {
 		port=$(get_service_value "$service" "port")
 		[ -n "$port" -a "$port" != "53" ] && host="$host#$port"
 		echo "server=$host"
+		# Die interne Domain soll vorranging von den via olsrd verbreiteten DNS-Servern bedient werden.
+		# Dies ist vor allem fuer UGW-Hosts wichtig, die über eine zweite DNS-Quelle (lokaler uplink)
+		# verfügen.
+		echo "server=/$INTERN_DNS_DOMAIN/$host"
 	done | update_file_if_changed "$servers_file" || return 0
 	# es gab eine Aenderung
 	msg_info "updating DNS servers"

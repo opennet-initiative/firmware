@@ -886,5 +886,15 @@ schedule_parts() {
 	done
 }
 
+
+## @fn run_curl()
+## @brief Rufe den Inhalt ab, auf den eine URL verweist.
+## @param URL die Quell-Adresse
+## @details Eventuelle SSL-Zertifikate werden gegenueber der Opennet-CA-Liste abgeglichen.
+##     Zusätzlich zur URL können auch (davor) curl-spezifischen Optionen angebeben werden.
+run_curl() {
+	curl -q --silent --cacert /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem "$@"
+}
+
 # Ende der Doku-Gruppe
 ## @}

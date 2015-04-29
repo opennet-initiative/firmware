@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Portweiterleitungen abgleichen
+on-function update_service_relay_status

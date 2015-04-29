@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-# olsrd ist single-threaded und wartet auf dieses Script - wir duerfen kein Lock riskieren
-on-function update_ugw_services &
-

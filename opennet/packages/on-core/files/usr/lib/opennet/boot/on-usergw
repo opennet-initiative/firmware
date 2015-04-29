@@ -1,0 +1,3 @@
+#!/bin/sh
+
+on-function sync_mesh_openvpn_connection_processes

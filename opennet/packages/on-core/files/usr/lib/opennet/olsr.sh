@@ -215,7 +215,15 @@ update_olsr_services() {
 ## @details Bei Problemen mit dem Verbindungsaufbau erscheint ein Hinweis im syslog.
 request_olsrd_txtinfo() {
 	local request="$1"
-	echo "/$request" | "$NETCAT_BIN" -w 2 localhost 2006 2>/dev/null || msg_info "get_olsrd_txtinfo: olsrd is not running"
+	if echo "/$request" | "$NETCAT_BIN" -w 2 localhost 2006 2>/dev/null; then
+		true
+	else
+		if "$NETCAT_BIN" -w 2 localhost 2006 2>&1 >/dev/null | grep -q "^Usage:"; then
+			msg_info "request_olsrd_txtinfo (error): I suspect that '$NETCAT_BIN' does not support the '-w' parameter - please install 'ncat'"
+		else
+			msg_info "request_olsrd_txtinfo (error): olsrd is not running"
+		fi
+	fi
 }
 
 # Ende der Doku-Gruppe

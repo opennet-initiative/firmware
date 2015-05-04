@@ -893,7 +893,8 @@ schedule_parts() {
 ## @details Eventuelle SSL-Zertifikate werden gegenueber der Opennet-CA-Liste abgeglichen.
 ##     Zusätzlich zur URL können auch (davor) curl-spezifischen Optionen angebeben werden.
 run_curl() {
-	curl -q --silent --cacert /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem "$@"
+	curl -q --silent --cacert /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem "$@" \
+		|| msg_info "Failed to retrieve data from URL '$@' via curl"
 }
 
 # Ende der Doku-Gruppe

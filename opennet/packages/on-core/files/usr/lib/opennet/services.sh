@@ -35,7 +35,9 @@ get_service_name() {
 }
 
 
-# Aktualisiere den Zeitstempel und die Entfernung (etx) eines Dienstes
+## @fn notify_service()
+## @brief Aktualisiere den Zeitstempel und die Entfernung (etx) eines Dienstes
+## @returns Der Dienstname wird ausgegeben.
 notify_service() {
 	trap "error_trap notify_service '$*'" $GUARD_TRAPS
 	local service="$1"
@@ -44,8 +46,8 @@ notify_service() {
 	local port="$4"
 	local protocol="$5"
 	local path="$6"
-	local details="$7"
-	local source="$8"
+	local source="$7"
+	local details="$8"
 	local service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 	if ! is_existing_service "$service_name"; then
 		# diese Attribute sind Bestandteil des Namens und aendern sich eigentlich nicht
@@ -61,6 +63,7 @@ notify_service() {
 	set_service_value "$service_name" "timestamp" "$(get_uptime_minutes)"
 	set_service_value "$service_name" "source" "$source"
 	update_service_routing_distance "$service_name"
+	echo "$service_name"
 }
 
 
@@ -831,7 +834,7 @@ run_cyclic_service_tests() {
 			set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
 		elif uci_is_false "$status"; then
 			# Junge "kaputte" Dienste sind potentielle Kandidaten fuer einen vorzeitigen Test, falls
-			# ansonsten kein Dienste positiv getestet wurde.
+			# ansonsten kein Dienst positiv getestet wurde.
 			echo "$timestamp $service_name"
 		else
 			# funktionsfaehige "alte" Dienste - es gibt nichts fuer sie zu tun

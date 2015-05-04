@@ -64,7 +64,7 @@ get_ugw_portforward() {
 # Pruefung ob ein lokaler Port bereits fuer einen ugw-Dienst weitergeleitet wird
 _is_local_service_relay_port_unused() {
 	local port="$1"
-	local collisions=$(get_services | filter_services_by_value "local_port" "$port")
+	local collisions=$(get_services | filter_services_by_value "local_relay_port" "$port")
 	[ -n "$collisions" ] && trap "" $GUARD_TRAPS && return 1
 	# keine Kollision entdeckt
 	return 0
@@ -74,21 +74,25 @@ _is_local_service_relay_port_unused() {
 # Liefere den Port zurueck, der einer Dienst-Weiterleitung lokal zugewiesen wurde.
 # Falls noch kein Port definiert ist, dann waehle einen neuen Port.
 # Parameter: config_name
-get_local_service_relay_port() {
+pick_local_service_relay_port() {
 	local service_name="$1"
-	local port
-	# suche einen unbenutzten lokalen Port
-	# fuer IGW-Verbindungen: belege zuerst den alten Standard-Port (fuer alte Clients)
-	if [ "$(get_service_value "$service_name" "service")" = "igw" ]; then
-		port="$UGW_LOCAL_SERVICE_PORT_LEGACY"
-		_is_local_service_relay_port_unused "$port" && echo "$port" && return 0
-		true
+	local port=$(get_service_value "$service_name" "local_relay_port")
+	# falls unbelegt: suche einen unbenutzten lokalen Port
+	if [ -z "$port" ]; then
+		# fuer IGW-Verbindungen: belege zuerst den alten Standard-Port (fuer alte Clients)
+		if [ "$(get_service_value "$service_name" "service")" = "gw" ]; then
+			_is_local_service_relay_port_unused "$UGW_LOCAL_SERVICE_PORT_LEGACY" \
+				&& port="$UGW_LOCAL_SERVICE_PORT_LEGACY"
+			true
+		fi
 	fi
-	port="$SERVICE_RELAY_LOCAL_PORT_START"
-	until _is_local_service_relay_port_unused "$port"; do
-		: $((port++))
-	done
-	echo "$port"
+	if [ -z "$port" ]; then
+		port="$SERVICE_RELAY_LOCAL_RELAY_PORT_START"
+		until _is_local_service_relay_port_unused "$port"; do
+			: $((port++))
+		done
+	fi
+	set_service_value "$service_name" "local_relay_port" "$port"
 }
 
 
@@ -125,9 +129,7 @@ add_service_relay_forward_rule() {
 	local port=$(get_service_value "$service_name" "port")
 	local host=$(get_service_value "$service_name" "host")
 	local protocol=$(get_service_value "$service_name" "protocol")
-	local local_port=$(get_service_value "$service_name" "local_port")
-	[ -z "$local_port" ] && local_port=$(get_local_service_relay_port "$service_name") \
-			&& set_service_value "$service_name" "local_port" "$local_port"
+	local local_relay_port=$(get_service_value "$service_name" "local_relay_port")
 	local main_ip=$(get_main_ip)
 	local target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
 	# wir verwenden nur die erste aufgeloeste IP, zu welcher wir eine Route haben.
@@ -149,7 +151,7 @@ add_service_relay_forward_rule() {
 	uci set "${uci_prefix}.proto=$protocol"
 	uci set "${uci_prefix}.src=$ZONE_MESH"
 	uci set "${uci_prefix}.src_dip=$main_ip"
-	uci set "${uci_prefix}.src_dport=$local_port"
+	uci set "${uci_prefix}.src_dport=$local_relay_port"
 	uci set "${uci_prefix}.dest=$ZONE_WAN"
 	uci set "${uci_prefix}.dest_port=$port"
 	uci set "${uci_prefix}.dest_ip=$target_ip"

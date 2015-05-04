@@ -9,44 +9,10 @@ SPEEDTEST_SECONDS=20
 UGW_LOCAL_SERVICE_PORT_LEGACY=1600
 DEFAULT_MESH_OPENVPN_PORT=1602
 ## falls mehr als ein GW-Dienst weitergereicht wird, wird dieser Port und die folgenden verwendet
-SERVICE_RELAY_LOCAL_PORT_START=5100
+SERVICE_RELAY_LOCAL_RELAY_PORT_START=5100
 # Markierung fuer firewall-Regeln, die zu Dienst-Weiterleitungen gehören
 SERVICE_RELAY_CREATOR=on_service_relay
 SERVICE_RELAY_FIREWALL_RULE_PREFIX=on_service_relay_
-
-## @todo vorerst unter einer fremden Domain, bis wir ueber das Konzept entschieden haben
-IGW_OPENVPN_SRV_DNS_NAME=_igw-openvpn._udp.systemausfall.org
-#IGW_OPENVPN_SRV_DNS_NAME=_igw-openvpn._udp.opennet-initiative.de
-
-
-## @fn update_igw_services_via_dns()
-## @brief Frage den Sammel-Domainnamen für alle Exit-Gateways ab, erzeuge Weiterleitungen
-##    und/oder olsr-Announcements und beräume alte Einträge.
-## @details Diese Funktion sollte gelegentlich via cronjob ausgeführt werden.
-update_igw_services_via_dns() {
-	local priority
-	local weight
-	local port
-	local hostname
-	local service_name
-	local timestamp
-	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "service_expire_minutes")))
-	query_srv_records "$IGW_OPENVPN_SRV_DNS_NAME" | while read priority weight port hostname; do
-		notify_service "igw" "openvpn" "$hostname" "$port" "udp" "/" "" "dns-srv"
-		service_name=$(get_service_name "igw" "openvpn" "$hostname" "$port" "udp" "/")
-		# wir ignorieren das SRV-Attribut "weight" - nur "priority" ist fuer uns relevant
-		set_service_value "$service_name" "priority" "$priority"
-	done
-	# veraltete Dienste entfernen
-	get_services "igw" \
-			| filter_services_by_value "scheme" "openvpn" \
-			| filter_services_by_value "source" "dns-srv" \
-			| while read service_name; do
-		timestamp=$(get_service_value "$service_name" "timestamp" 0)
-		# der Service ist zu lange nicht aktualisiert worden
-		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
-	done
-}
 
 
 # Ermittle den aktuell definierten UGW-Portforward.
@@ -246,7 +212,7 @@ is_service_relay_possible() {
 update_service_relay_status() {
 	trap "error_trap update_service_relay_status '$*'" $GUARD_TRAPS
 	local service_name
-	get_services "igw" | while read service_name; do
+	get_services | filter_relay_services | while read service_name; do
 		is_service_relay_possible "$service_name" && enable_service_relay "$service_name"
 		true
 	done
@@ -254,6 +220,19 @@ update_service_relay_status() {
 	deannounce_unused_olsr_service_relays
 	apply_changes firewall
 	apply_changes olsrd
+}
+
+
+## @fn filter_relay_services()
+## @brief Filtere aus einer Reihe eingehender Dienste diejenigen heraus, die als Dienst-Relay fungieren.
+## @details Die Dienst-Namen werden über die Standardeingabe gelesen und an die Standardausgabe
+##   weitergeleitet, falls es sich um einen Relay-Dienst handelt.
+filter_relay_services() {
+	local service_name
+	while read service_name; do
+		[ -n "$(get_service_value "$service_name" "local_relay_port")" ] && echo "$service_name"
+		true
+	done
 }
 
 # Ende der Doku-Gruppe

@@ -5,9 +5,7 @@
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 MESH_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-ugw.template
-## @todo vorerst unter einer fremden Domain, bis wir ueber das Konzept entschieden haben
-MESH_OPENVPN_SRV_DNS_NAME=_mesh-openvpn._udp.systemausfall.org
-#MESH_OPENVPN_SRV_DNS_NAME=_mesh-openvpn._udp.opennet-initiative.de
+TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-services.csv
 
 
 # hole einen der default-Werte der aktuellen Firmware
@@ -36,7 +34,6 @@ verify_mesh_gateways() {
 	local test_period_minutes=$(get_on_usergw_default "test_period_minutes")
 	run_cyclic_service_tests "ugw" "is_mesh_gateway_usable" "$test_period_minutes" "$max_fail_attempts"
 }
-
 
 
 is_mesh_gateway_usable() {
@@ -76,32 +73,59 @@ is_mesh_gateway_usable() {
 }
 
 
-## @fn update_mesh_services_via_dns()
-## @brief Frage den Sammel-Domainnamen für alle Mesh-Gateways ab, erzeuge Dienste für alle angegebenen Namen und lösche veraltete Einträge der Liste.
-## @details Diese Funktion sollte gelegentlich via cronjob ausgeführt werden.
-update_mesh_services_via_dns() {
-	local priority
-	local weight
+## @fn update_trusted_service_list()
+## @brief Hole die vertrauenswürdigen Dienste von signierten Opennet-Quellen.
+## @details Diese Dienste führen beispielsweise auf UGW-APs zur Konfiguration von Portweiterleitungen
+##   ins Internet. Daher sind sie nur aus vertrauenswürdiger Quelle zu aktzeptieren (oder manuell).
+update_trusted_service_list() {
+	local line
+	local service_type
+	local scheme
+	local host
 	local port
-	local hostname
+	local protocol
+	local priority
+	local details
 	local service_name
-	local timestamp
-	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "service_expire_minutes")))
-	query_srv_records "$MESH_OPENVPN_SRV_DNS_NAME" | while read priority weight port hostname; do
-		notify_service "mesh" "openvpn" "$hostname" "$port" "udp" "/" "" "dns-srv"
-		service_name=$(get_service_name "mesh" "openvpn" "$hostname" "$port" "udp" "/")
-		# wir ignorieren das SRV-Attribut "weight" - nur "priority" ist fuer uns relevant
+	local is_proxy
+	run_curl "$TRUSTED_SERVICES_URL" | grep -v "^#" | while read line; do
+		service_type=$(echo "$line" | cut -f 1)
+		# falls der Dienst-Typ mit "proxy-" beginnt, soll er weitergeleitet werden
+		if [ "${service_type#proxy-}" = "$service_type" ]; then
+			# kein Proxy-Dienst
+			is_proxy=
+		else
+			# ein Proxy-Dienst
+			is_proxy=1
+			# entferne das Praefix
+			service_type="${service_type#proxy-}"
+		fi
+		scheme=$(echo "$line" | cut -f 2)
+		host=$(echo "$line" | cut -f 3)
+		port=$(echo "$line" | cut -f 4)
+		protocol=$(echo "$line" | cut -f 5)
+		priority=$(echo "$line" | cut -f 6)
+		details=$(echo "$line" | cut -f 7-)
+		service_name=$(notify_service "$service_type" "$scheme" "$host" "$port" "$protocol" "/" "trusted" "$details")
 		set_service_value "$service_name" "priority" "$priority"
+		[ -n "$is_proxy" ] && pick_local_service_relay_port "$service_name"
+		true
 	done
 	# veraltete Dienste entfernen
-	get_services "mesh" \
-			| filter_services_by_value "scheme" "openvpn" \
-			| filter_services_by_value "source" "dns-srv" \
-			| while read service_name; do
-		timestamp=$(get_service_value "$service_name" "timestamp" 0)
-		# der Service ist zu lange nicht aktualisiert worden
-		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
-	done
+	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "trusted_service_expire_minutes")))
+	# falls die uptime kleiner ist als die Verfallszeit, dann ist ein Test sinnfrei
+	if [ "$min_timestamp" -gt 0 ]; then
+		get_services "mesh" \
+				| filter_services_by_value "source" "trusted" \
+				| while read service_name; do
+			timestamp=$(get_service_value "$service_name" "timestamp" 0)
+			# der Service ist zu lange nicht aktualisiert worden
+			[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
+			true
+		done
+	fi
+	# aktualisiere DNS- und NTP-Dienste
+	apply_changes on-core
 }
 
 

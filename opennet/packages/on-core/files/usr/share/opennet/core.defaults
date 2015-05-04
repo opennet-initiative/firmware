@@ -9,7 +9,10 @@ csr_form_public	https://ca.opennet-initiative.de/csr/
 lan_ipaddr	172.16.0.1
 lan_netmask	255.255.255.0
 
-service_expire_minutes	30
+# via olsr verteilte Dienste haben eine kurze Gueltigkeitsdauer
+olsr_service_expire_minutes	30
+# trusted services sind 50 Stunden lang gueltig (eine taegliche Aktualisierung darf fehlschlagen)
+trusted_service_expire_minutes	3000
 
 # no is the numer of the interface, starting from 0
 # check /etc/init.d/on_config for usage

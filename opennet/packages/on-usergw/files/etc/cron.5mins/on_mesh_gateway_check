@@ -12,7 +12,7 @@
 sleep 15 && cleanup_stale_openvpn_services
 
 # verfuegbare mesh-Gateways ermitteln
-update_mesh_services_via_dns
+update_trusted_service_list
 
 # die Gateway-Tests sind nur moeglich, falls ein Test-Schluessel vorhanden ist
 if has_mesh_openvpn_credentials; then

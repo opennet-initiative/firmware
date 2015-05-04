@@ -135,7 +135,7 @@ parse_olsr_service_definitions() {
 	local port
 	local path
 	# verwende "|" und Leerzeichen als Separatoren
-	IFS='| '
+	local IFS='| '
 	while read url proto service details; do
 		scheme=$(echo "$url" | cut -f 1 -d :)
 		host=$(echo "$url" | cut -f 3 -d / | cut -f 1 -d :)
@@ -182,6 +182,10 @@ get_olsr_services() {
 }
 
 
+## @fn update_olsr_services()
+## @brief Verarbeite die aktuelle Dienst-Liste aus dem olsrd-nameservice-Plugin.
+## @details Veraltete Dienste werden entfernt. Eventuelle Änderungen der DNS- und NTP-Serverliste
+##   werden angewandt.
 update_olsr_services() {
 	trap "error_trap update_olsr_services '$*'" $GUARD_TRAPS
 	local scheme
@@ -191,19 +195,22 @@ update_olsr_services() {
 	local proto
 	local service
 	local details
-	local timestamp
-	local service_name
-	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "service_expire_minutes")))
 	# aktuell verbreitete Dienste benachrichtigen
 	get_olsr_services | while read scheme ip port path proto service details; do
-		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "$details" "olsr"
+		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "$details" "olsr" >/dev/null
 	done
-	# veraltete Dienste entfernen
-	get_services | filter_services_by_value "source" "olsr" | while read service_name; do
-		timestamp=$(get_service_value "$service_name" "timestamp" 0)
-		# der Service ist zu lange nicht aktualisiert worden
-		[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name" || true
-	done
+	local service_name
+	local timestamp
+	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "olsr_service_expire_minutes")))
+	# veraltete Dienste entfernen (nur falls die uptime groesser ist als die Verfallszeit)
+	if [ "$min_timestamp" -gt 0 ]; then
+		get_services | filter_services_by_value "source" "olsr" | while read service_name; do
+			timestamp=$(get_service_value "$service_name" "timestamp" 0)
+			# der Service ist zu lange nicht aktualisiert worden
+			[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
+			true
+		done
+	fi
 	# aktualisiere DNS- und NTP-Dienste
 	apply_changes on-core
 }

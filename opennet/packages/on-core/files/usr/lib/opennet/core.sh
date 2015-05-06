@@ -897,5 +897,38 @@ run_curl() {
 		|| msg_info "Failed to retrieve data from URL '$@' via curl"
 }
 
+
+## @fn generate_flash_backup
+## @brief Erzeuge ein tar-gz-Archiv mit den herstellerspezifischen Informationen für diesen AP.
+## @details Alle mtd-Partition bis auf den Kernel und die Firmware werden einzeln kopiert und dann komprimiert.
+generate_flash_backup() {
+	local temp_dir=$(mktemp -d)
+	local name
+	local size
+	local blocksize
+	local label
+	local target_filename
+	local start_address=0
+	local target_dir="$temp_dir/flash-backup"
+	mkdir -p "$target_dir"
+	cat /proc/mtd >"$target_dir/mtd.list"
+	grep "^mtd[0-9]\+:" /proc/mtd | while read name size blocksize label; do
+		# Doppelpunkt entfernen
+		name=${name%:}
+		# hexadezimal-Zahl umrechnen
+		size=$(echo | awk "{print 0x$size }")
+		# Anfuehrungszeichen entfernen
+		label=$(echo "$label" | cut -f 2 -d '"')
+		# Start-Adresse weiterzaehlen
+		start_address=$((start_address + size))
+		# Firmware-Partitionen ueberspringen
+		[ "$label" = "kernel" -o "$label" = "rootfs" -o "$label" = "rootfs_data" -o "$label" = "firmware" ] && continue
+		target_filename="$target_dir/${name}_${start_address}_${label}.img"
+		cat "/dev/$name" >"$target_filename"
+	done
+	tar czf - -C "$temp_dir" "flash-backup"
+	rm -rf "$temp_dir"
+}
+
 # Ende der Doku-Gruppe
 ## @}

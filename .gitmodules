@@ -9,4 +9,4 @@
 	url = http://github.com/openwrt-routing/packages.git
 [submodule "openwrt"]
 	path = openwrt
-	url = git://git.openwrt.org/14.07/openwrt.git
+	url = git://git.openwrt.org/openwrt.git

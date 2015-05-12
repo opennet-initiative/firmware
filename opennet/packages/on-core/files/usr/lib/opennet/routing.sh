@@ -17,9 +17,10 @@ OLSR_ROUTE_CACHE_FILE=/tmp/olsr_routes.cache
 ## @fn is_ipv4()
 ## @brief Prüfe ob der übergebene Text eine IPv4-Adresse ist
 ## @param target eine Zeichenkette (wahrscheinlich ein DNS-Name, eine IPv4- oder IPv6-Adresse)
+## @details Die IP-Adresse darf mit einem Netzwerkpraefix enden.
 is_ipv4() {
 	local target="$1"
-	echo "$target" | grep -q -E "^[0-9]+(\.[0-9]+){3}$"
+	echo "$target" | grep -q -E "^[0-9]+(\.[0-9]+){3}(/[0-9]+)?$"
 }
 
 
@@ -29,7 +30,7 @@ is_ipv4() {
 ## @details Achtung: der Test ist recht oberflächlich und kann falsche Positive liefern.
 is_ipv6() {
 	local target="$1"
-	echo "$target" | grep -q "^[0-9a-fA-F:]\+$"
+	echo "$target" | grep -q -E "^[0-9a-fA-F:]+(/[0-9]+)?$"
 }
 
 
@@ -87,8 +88,11 @@ add_network_policy_rule_by_destination() {
 	local network="$1"
 	shift
 	local network_with_prefix
+	local ip_version
 	for network_with_prefix in $(get_current_addresses_of_network "$network"); do
-		[ -n "$network_with_prefix" ] && ip rule add to "$network_with_prefix" "$@" || true
+		[ -z "$network_with_prefix" ] && continue
+		is_ipv4 "$network_with_prefix" && ip_version="-4" || ip_version="-6"
+		ip "$ip_version" rule add to "$network_with_prefix" "$@" || true
 	done
 	return 0
 }

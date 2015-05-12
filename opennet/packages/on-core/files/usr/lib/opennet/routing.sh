@@ -86,9 +86,9 @@ add_network_policy_rule_by_destination() {
 	trap "error_trap add_network_policy_rule_by_destination '$*'" $GUARD_TRAPS
 	local network="$1"
 	shift
-	local networkprefix
-	for networkprefix in $(get_address_of_network "$network"); do
-		[ -n "$networkprefix" ] && ip rule add to "$networkprefix" "$@" || true
+	local network_with_prefix
+	for network_with_prefix in $(get_current_addresses_of_network "$network"); do
+		[ -n "$network_with_prefix" ] && ip rule add to "$network_with_prefix" "$@" || true
 	done
 	return 0
 }

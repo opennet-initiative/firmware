@@ -86,7 +86,7 @@ add_zone_forward() {
 update_opennet_zone_masquerading() {
 	trap "error_trap update_opennet_zone_masquerading '$*'" $GUARD_TRAPS
 	local network
-	local networkprefix
+	local network_with_prefix
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
 	# Abbruch, falls die Zone fehlt
 	[ -z "$uci_prefix" ] && msg_info "failed to find opennet mesh zone ($ZONE_MESH)" && return 0
@@ -94,8 +94,8 @@ update_opennet_zone_masquerading() {
 	uci_delete "${uci_prefix}.masq_src"
 	# aktuelle Netzwerke wieder hinzufuegen
 	for network in $(get_zone_interfaces "$ZONE_LOCAL"); do
-		networkprefix=$(get_address_of_network "$network")
-		uci_add_list "${uci_prefix}.masq_src" "$networkprefix"
+		network_with_prefix=$(get_current_addresses_of_network "$network")
+		uci_add_list "${uci_prefix}.masq_src" "$network_with_prefix"
 	done
 	# leider ist masq_src im Zweifelfall nicht "leer", sondern enthaelt ein Leerzeichen
 	if uci_get "${uci_prefix}.masq_src" | grep -q "[^ \t]"; then
@@ -110,22 +110,15 @@ update_opennet_zone_masquerading() {
 }
 
 
-# Liefere die IP-Adresse eines logischen Interface inkl. Praefix-Laenge (z.B. 172.16.0.1/24).
-# Parameter: logisches Netzwerk-Interface
-get_address_of_network() {
-	trap "error_trap get_address_of_network '$*'" $GUARD_TRAPS
+## @fn get_current_addresses_of_network()
+## @brief Liefere die IP-Adressen eines logischen Interface inkl. Praefix-Laenge (z.B. 172.16.0.1/24).
+## @param network logisches Netzwerk-Interface
+## @details Es werden sowohl IPv4- als auch IPv6-Adressen zurückgeliefert.
+get_current_addresses_of_network() {
+	trap "error_trap get_current_addresses_of_network '$*'" $GUARD_TRAPS
 	local network="$1"
-	local ranges
-	# Kurzzeitig den eventuellen strikten Modus abschalten.
-	# (lib/functions.sh kommt mit dem strikten Modus nicht zurecht)
-	(
-		set +eu
-		. "${IPKG_INSTROOT:-}/lib/functions/network.sh"
-		__network_ifstatus "ranges" "$network" "['ipv4-address'][*]['address','mask']" "/"
-		echo "$ranges"
-		set -eu
-	)
-	return 0
+	local device=$(get_device_of_interface "$network")
+	ip addr show dev "$device" | awk '{ if (($1 == "inet") || ($1 == "inet6")) print $2; }'
 }
 
 

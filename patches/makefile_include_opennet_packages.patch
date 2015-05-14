@@ -16,7 +16,7 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +include $(INCLUDE_DIR)/package.mk
 +
 +
-+PO_CONV = ../../../luci/build/po2lmo
++PO_CONV = ../../../luci/modules/luci-base/src/po2lmo
 +
 +
 +define Package/opennet/install/template
@@ -42,7 +42,7 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +		--exclude=dist | \
 +			$(TAR) x -C $(PKG_BUILD_DIR)/
 +	@# po2lmo bauen, falls nicht vorhanden
-+	[ -x "$(PO_CONV)" ] || make -C ../../../luci/libs/web/ host-install
++	[ -x "$(PO_CONV)" ] || make -C ../../../luci/modules/luci-base/src/ po2lmo
 +	@# "find" liefert leider keine Fehlermeldung, falls "-exec" fehlschlaegt - also loesen wir es manuell aus
 +	[ -x "$(PO_CONV)" ] || { echo >&2 "ERROR: po2lmo does not exist"; exit 1; }
 +	@# TODO: mehrere Sprachen?

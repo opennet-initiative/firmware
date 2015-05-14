@@ -73,7 +73,6 @@ Folgende Voraussetzungen müssen gegeben sein:
 
 * ``dnsmasq`` läuft
 * das Plugin ``nameservice`` ist aktiviert
-* das ``dnsmasq``-init-Skript ist gepatcht, um die ``servers-file``-Option zu beachten
 
 
 

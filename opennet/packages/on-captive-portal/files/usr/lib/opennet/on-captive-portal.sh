@@ -181,7 +181,16 @@ sync_captive_portal_state_with_mig_connections() {
 	# Abbruch, falls keine Netzwerk-Interfaces zugeordnet wurden
 	captive_portal_has_devices || return 0
 	local mig_active=$(get_active_mig_connections)
-	local device_active=$(is_interface_up "$NETWORK_FREE" && echo 1)
+	local address
+	local device_active=
+	if is_interface_up "$NETWORK_FREE"; then
+		# Pruefe ob mindestens eine IPv4-Adresse konfiguriert ist.
+		# (aus unbekannten Gruenden kann es vorkommen, dass die IPv4-Adresse spontan wegfaellt)
+		for address in $(get_current_addresses_of_network "$NETWORK_FREE"); do
+			is_ipv4 "$address" && device_active=1 && break
+			true
+		done
+	fi
 	if [ -n "$device_active" -a -z "$mig_active" ]; then
 		ifdown "$NETWORK_FREE"
 		# reload fuehrt zum sanften Stoppen

@@ -9,7 +9,7 @@ set -eu
 TARGET_HOST="root@$1"
 BASE_DIR=$(cd "$(dirname "$0")/.."; pwd)
 
-RSYNC_OPTS="-ax --exclude '.*.swp' --usermap=':root,*:root' --groupmap=':root,*:root'"
+RSYNC_OPTS="-ax --exclude=.*.swp --usermap=:root,*:root --groupmap=:root,*:root"
 SCP_OPTS="-rp"
 
 

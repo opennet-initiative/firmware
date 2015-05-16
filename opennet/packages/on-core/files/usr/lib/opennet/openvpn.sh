@@ -413,7 +413,7 @@ openvpn_get_mtu() {
 			echo -n "$mtu_out" | tr '\t' ' '
 			break
 		elif [ -z "$pid" -o ! -d "/proc/$pid" ]; then
-			msg_info "failed to verify MTU resctrictions for '$host'"
+			msg_info "Failed to verify MTU resctrictions for '$host'"
 			break
 		fi
 		sleep 10

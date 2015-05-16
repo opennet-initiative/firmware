@@ -143,11 +143,11 @@ is_device_in_zone() {
 	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
 	local device="$1"
 	local zone="$2"
+	local log_interface
 	local item
 	for log_interface in $(get_zone_interfaces "$2"); do
 		for item in $(get_subdevices_of_interface "$log_interface"); do
-			[ "$device" != "$item" ] || continue
-			return 0
+			[ "$device" = "$item" ] && return 0 || true
 		done
 	done
 	trap "" $GUARD_TRAPS && return 1

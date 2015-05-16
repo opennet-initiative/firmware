@@ -13,8 +13,7 @@
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
-print_status()
-{
+print_status() {
 	local ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get "$gw" 2>/dev/null | awk '{if ($5 ~ "tap") print $1}' ; done)
 	local ugw_status_centralips_no=$(echo "$ugw_status_centralips" | wc -w)
 
@@ -108,9 +107,8 @@ print_usage()
 	echo -e "checkMTU       \t- will check MTU through WAN"
 }
 
-ugw_suspend()
-{
-	suspend_time=$1
+ugw_suspend() {
+	local suspend_time=$1
 	if [ -n "$suspend_time" ]; then
 		uci -q set on-usergw.ugw_sharing.shareInternet="off"
 		uci -q set "on-usergw.ugw_sharing.blockSharing=$((suspend_time+5))"
@@ -119,10 +117,9 @@ ugw_suspend()
 	uci commit on-usergw	# commit after every change to prevent uci memory problems
 }
 
-toggle_sharing()
-{
-	sharing=$(uci_get on-usergw.ugw_sharing.shareInternet)
-	uci_is_true "$sharing"; then
+toggle_sharing() {
+	local sharing=$(uci_get on-usergw.ugw_sharing.shareInternet)
+	if uci_is_true "$sharing"; then
 		sharing="false"
 	else
 		sharing="true"

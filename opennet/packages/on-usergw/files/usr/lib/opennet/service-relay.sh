@@ -59,6 +59,7 @@ pick_local_service_relay_port() {
 		done
 	fi
 	set_service_value "$service_name" "local_relay_port" "$port"
+	echo "$port"
 }
 
 
@@ -157,7 +158,7 @@ announce_olsr_service_relay() {
 	local service_type=$(get_service_value "$service_name" "service")
 	local scheme=$(get_service_value "$service_name" "scheme")
 	local host=$(get_service_value "$service_name" "host")
-	local port=$(get_local_service_relay_port "$service_name")
+	local port=$(pick_local_service_relay_port "$service_name")
 	local protocol=$(get_service_value "$service_name" "protocol")
 
 	# announce the service

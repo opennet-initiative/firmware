@@ -120,7 +120,7 @@ configure_olsr_interfaces() {
 	# Suche nach WLAN-Interfaces
 	/sbin/wifi detect > /etc/config/wireless
 
-	iface_index=0
+	local iface_index=0
 	while [ -n "$(uci_get "wireless.@wifi-iface[${iface_index}]")" ]; do
 		on_ipaddr=$(get_on_ip "$on_id" "$on_ipschema" "$iface_index")
 		iface_phys=wlan$iface_index

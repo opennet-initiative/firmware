@@ -61,7 +61,7 @@ is_mesh_gateway_usable() {
 	# MTU-Pruefung
 	if [ -n "$failed" ]; then
 		for key in "mtu_msg" "mtu_out_wanted" "mtu_out_real" "mtu_in_wanted" "mtu_in_real" "mtu_timestamp" "mtu_status"; do
-			set_service_value "$service_value" "$key" ""
+			set_service_value "$service_name" "$key" ""
 		done
 	else
 		local mtu_result=$(openvpn_get_mtu "$service_name")

@@ -88,7 +88,7 @@ update_trusted_service_list() {
 	local details
 	local service_name
 	local is_proxy
-	run_curl "$TRUSTED_SERVICES_URL" | grep -v "^#" | while read line; do
+	run_curl "$TRUSTED_SERVICES_URL" | grep -v "^#" | sed 's/\t\+/\t/g' | while read line; do
 		service_type=$(echo "$line" | cut -f 1)
 		# falls der Dienst-Typ mit "proxy-" beginnt, soll er weitergeleitet werden
 		if [ "${service_type#proxy-}" = "$service_type" ]; then

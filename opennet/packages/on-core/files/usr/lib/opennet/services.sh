@@ -793,29 +793,26 @@ _notify_service_failure() {
 
 
 ## @fn run_cyclic_service_tests()
-## @brief Durchlaufe alle Dienste eines Typs bis mindestens ein Test erfolgreich ist
-## @param service_type der zu prüfende Dienste-Typ (z.B. "gw")
+## @brief Durchlaufe alle via STDIN angegebenen Dienste bis mindestens ein Test erfolgreich ist
 ## @param test_function der Name der zu verwendenden Test-Funktion für einen Dienst (z.B. "verify_vpn_connection")
 ## @param test_period_minutes Wiederholungsperiode der Dienst-Prüfung
 ## @param max_fail_attempts Anzahl von Fehlversuchen, bis ein Dienst von "gut" oder "unklar" zu "schlecht" wechselt
 ## @details Die Diensteanbieter werden in der Reihenfolge ihrer Priorität geprüft.
-##   Nach dem ersten Durchlauf dieser Funktion sollte also der nächstgelegene nutzbare Dienst als
-##   funktionierend markiert sein.
+##   Nach dem ersten Durchlauf dieser Funktion sollte typischerweise der nächstgelegene nutzbare Dienst
+##   als funktionierend markiert sein.
 ##   Falls nach dem Durchlauf aller Dienste keiner positiv getestet wurde (beispielsweise weil alle Zeitstempel zu frisch sind),
 ##   dann wird in jedem Fall der älteste nicht-funktionsfähige Dienst getestet. Dies minimiert die Ausfallzeit im
 ##   Falle einer globalen Nicht-Erreichbarkeit aller Dienstenanbieter ohne auf den Ablauf der Test-Periode warten zu müssen.
 ## @attention Seiteneffekt: die Zustandsinformationen des getesteten Diensts (Status, Test-Zeitstempel) werden verändert.
 run_cyclic_service_tests() {
 	trap "error_trap test_openvpn_service_type '$*'" $GUARD_TRAPS
-	local service_type="$1"
-	local test_function="$2"
-	local test_period_minutes="$3"
-	local max_fail_attempts="$4"
+	local test_function="$1"
+	local test_period_minutes="$2"
+	local max_fail_attempts="$3"
 	local service_name
 	local timestamp
 	local status
-	get_services "$service_type" \
-			| filter_reachable_services \
+	filter_reachable_services \
 			| filter_enabled_services \
 			| sort_services_by_priority \
 			| while read service_name; do
@@ -846,7 +843,7 @@ run_cyclic_service_tests() {
 		# Dies stellt sicher, dass nach einer kurzen Nicht-Erreichbarkeit aller Gateways (z.B. olsr-Ausfall)
 		# relativ schnell wieder ein funktionierender Gateway gefunden wird, obwohl alle Test-Zeitstempel noch recht
 		# frisch sind.
-		msg_debug "service test ($service_type) there is nothing to be done - thus we pick the service with the oldest test timestamp: $service_name"
+		msg_debug "there is no service to be tested - thus we pick the service with the oldest test timestamp: $service_name"
 		"$test_function" "$service_name" \
 			&& _notify_service_success "$service_name" \
 			|| _notify_service_failure "$service_name" "$max_fail_attempts"

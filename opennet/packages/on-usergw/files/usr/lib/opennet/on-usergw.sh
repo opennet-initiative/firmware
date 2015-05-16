@@ -32,7 +32,7 @@ has_mesh_openvpn_credentials() {
 verify_mesh_gateways() {
 	local max_fail_attempts=$(get_on_usergw_default "test_max_fail_attempts")
 	local test_period_minutes=$(get_on_usergw_default "test_period_minutes")
-	run_cyclic_service_tests "ugw" "is_mesh_gateway_usable" "$test_period_minutes" "$max_fail_attempts"
+	get_services "mesh" | run_cyclic_service_tests "is_mesh_gateway_usable" "$test_period_minutes" "$max_fail_attempts"
 }
 
 

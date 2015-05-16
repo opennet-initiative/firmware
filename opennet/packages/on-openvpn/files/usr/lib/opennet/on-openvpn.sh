@@ -37,7 +37,7 @@ has_mig_openvpn_credentials() {
 verify_mig_gateways() {
 	local max_fail_attempts=$(get_on_openvpn_default "test_max_fail_attempts")
 	local test_period_minutes=$(get_on_openvpn_default "test_period_minutes")
-	run_cyclic_service_tests "gw" "verify_vpn_connection" "$test_period_minutes" "$max_fail_attempts"
+	get_services "gw" | run_cyclic_service_tests "verify_vpn_connection" "$test_period_minutes" "$max_fail_attempts"
 }
 
 

@@ -50,14 +50,14 @@ end
 
 function display_csr_infotable(type)
 	local crtname = "/etc/openvpn/opennet_user/on_aps.csr"
-	if type == "ugw" then crtname = "/etc/openvpn/opennet_ugw/on_ugws.csr" end
+	if type == "mesh" then crtname = "/etc/openvpn/opennet_ugw/on_ugws.csr" end
 	on_crt_data = split(luci.sys.exec("openssl req -in "..crtname.." -nameopt sep_comma_plus,lname -subject -enddate -noout"), '[,=\n]')
 	luci.http.write("<div><h4>" .. luci.i18n.translate("Certificate-Request contents") .. "</h4>")
 	write_infotable(on_crt_data)
 end
 function display_crt_infotable(type)
 	local crtname = "/etc/openvpn/opennet_user/on_aps.crt"
-	if type == "ugw" then crtname = "/etc/openvpn/opennet_ugw/on_ugws.crt" end
+	if type == "mesh" then crtname = "/etc/openvpn/opennet_ugw/on_ugws.crt" end
 	on_crt_data = split(luci.sys.exec("openssl x509 -in "..crtname.." -nameopt sep_comma_plus,lname -subject -enddate -noout"), '[,=\n]')
 	luci.http.write("<div><h4>" .. luci.i18n.translate("Certificate contents") .. "</h4>")
 	write_infotable(on_crt_data)

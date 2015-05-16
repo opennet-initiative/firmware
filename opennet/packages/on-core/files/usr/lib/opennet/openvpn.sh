@@ -342,7 +342,7 @@ prepare_openvpn_service() {
 	# jedoch leider nur mit großem Aufwand möglich.
 	if [ "$service_type" = "gw" ]; then
 		template_file="$MIG_OPENVPN_CONFIG_TEMPLATE_FILE"
-	elif [ "$service_type" = "ugw" ]; then
+	elif [ "$service_type" = "mesh" ]; then
 		template_file="$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
 	else
 		msg_info "Error: unknown service type for openvpn config preparation: $service_type"

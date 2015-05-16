@@ -58,7 +58,7 @@ end
 
 
 function action_on_openvpn_mesh_keys()
-    local result = process_openvpn_certificate_form("ugw")
+    local result = process_openvpn_certificate_form("mesh")
     luci.template.render("opennet/on_openvpn_mesh_keys", {
         certstatus=result.certstatus,
         openssl=result.openssl,

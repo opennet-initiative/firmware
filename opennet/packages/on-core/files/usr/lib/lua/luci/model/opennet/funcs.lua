@@ -211,7 +211,7 @@ end
 
 function generate_csr(type, openssl)
 	local filename = "on_aps"
-	if type == "ugw" then filename = "on_ugws" end
+	if type == "mesh" then filename = "on_ugws" end
 	if openssl.organizationName and openssl.commonName and openssl.EmailAddress then
 		local command = "export openssl_countryName='"..openssl.countryName.."'; "..
 						"export openssl_provinceName='"..openssl.provinceName.."'; "..
@@ -451,7 +451,7 @@ end
 
 --[[
 @brief Verarbeite ein HTML-Formular und führe die angeforderten Aktionen für OpenVPN-Zertifikate aus.
-@param key_type Der Zertifikatstyp ("user" oder "ugw") ist für die Auswahl des Zielverzeichnis relevant.
+@param key_type Der Zertifikatstyp ("user" oder "mesh") ist für die Auswahl des Zielverzeichnis relevant.
 @details Die folgenden HTML-Formularvariablen werden verarbeitet:
     force_show_uploadfields: Nutzereingabe erzwingt die Anzeige des Upload-Formulars
     force_show_generatefields: Nutzereingabe erzwingt die Anzeige des "Erzeuge CSR"-Formulars
@@ -478,7 +478,7 @@ function process_openvpn_certificate_form(key_type)
     local openssl_domain
     if key_type == "user" then
         openssl_domain = "on-openvpn"
-    elseif key_type == "ugw" then
+    elseif key_type == "mesh" then
         openssl_domain = "on-usergw"
     end
     fill_openssl(openssl_domain, openssl)

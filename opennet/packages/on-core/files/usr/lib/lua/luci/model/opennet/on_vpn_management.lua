@@ -23,10 +23,10 @@ function replace_file(source, target)
 end
 
 
--- type is user or ugw
+-- type is user or mesh
 function upload_file(type)
 	local filename = "on_aps"
-	if type == "ugw" then filename = "on_ugws" end
+	if type == "mesh" then filename = "on_ugws" end
 	local upload_exists = nixio.fs.access(upload_file_location)
 	local upload_value = luci.http.formvalue("opensslfile")
 	if not upload_exists then return end
@@ -42,10 +42,10 @@ function upload_file(type)
 end
 
 
--- type is user or ugw
+-- type is user or mesh
 function download_file(type, download)
 	local filename = "on_aps"
-	if type == "ugw" then filename = "on_ugws" end
+	if type == "mesh" then filename = "on_ugws" end
 	local download_fpi = io.open(SYSROOT .. "/etc/openvpn/opennet_" .. type .. "/" .. filename .. "." .. download, "r")
 	local on_id = on_function("uci_get", {"on-core.settings.on_id", "X.XX"})
 	luci.http.header('Content-Disposition',
@@ -58,7 +58,7 @@ end
 
 function check_cert_status(type, certstatus)
 	local filename = SYSROOT .. "/etc/openvpn/opennet_user/on_aps."
-	if type == "ugw" then filename = SYSROOT.."/etc/openvpn/opennet_ugw/on_ugws." end
+	if type == "mesh" then filename = SYSROOT.."/etc/openvpn/opennet_ugw/on_ugws." end
 	certstatus.on_csr_exists = nixio.fs.access(filename.."csr")
 	if certstatus.on_csr_exists then
 		certstatus.on_csr_date = nixio.fs.stat(filename.."csr", "mtime")

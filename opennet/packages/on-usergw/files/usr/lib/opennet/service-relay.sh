@@ -163,14 +163,27 @@ announce_olsr_service_relay() {
 
 	# announce the service
 	local service_unique="${scheme}://${main_ip}:${port}|${protocol}|${service_type}"
-	local service_description="$service_unique upload:$upload download:$download ping:$ping creator:$SERVICE_RELAY_CREATOR public_host:$host service_name:$service_name"
+	# das 'service_name'-Detail wird fuer die anschliessende Beraeumung (firewall-Regeln usw.) verwendet
+	local service_details="upload:$upload download:$download ping:$ping creator:$SERVICE_RELAY_CREATOR public_host:$host service_name:$service_name"
 	# loesche alte Dienst-Announcements mit demselben Prefix
-	local current_description
-	uci_get_list "${uci_prefix}.service" | while read current_description; do
-		[ "$(echo "$current_description" | awk '{print $1}')" = "$service_unique" ] && uci_delete_list "${uci_prefix}.service" "$current_description"
-		true
+	local this_unique
+	local this_details
+	uci_get_list "${uci_prefix}.service" \
+			| awk "{ if (\$1 == \"$service_unique\") print \$0; }" \
+			| cut -f 2- -d " " \
+			| while read this_details; do
+		# der Wert ist bereits korrekt - wir koennen abbrechen
+		[ "$this_details" = "$service_details" ] && break
+		# der Wert ist falsch: loeschen und am Ende neu hinzufuegen
+		msg_debug "Deleting outdated service-relay announcement: $service_unique $this_details"
+		uci_delete_list "${uci_prefix}.service" "$service_unique $this_details"
 	done
-	uci_add_list "${uci_prefix}.service" "$service_description"
+	local matches=$(uci_get_list "${uci_prefix}.service" | awk "{ if (\$1 == \"$service_unique\") print \$0; }")
+	# falls keine Treffer gibt, fuegen wir ein neues Announcement hinzu
+	if [ -z "$matches" ]; then
+		msg_debug "Adding new service-relay announcement: $service_unique $service_details"
+		uci_add_list "${uci_prefix}.service" "$service_unique $service_details"
+	fi
 }
 
 

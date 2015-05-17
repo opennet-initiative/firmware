@@ -65,6 +65,7 @@ is_mesh_gateway_usable() {
 		done
 	else
 		local mtu_result=$(openvpn_get_mtu "$service_name")
+		msg_debug "MTU test result ($service_name): $mtu_result"
 		echo "$mtu_result" | update_mesh_gateway_mtu_state "$service_name"
 		uci_is_true "$(get_service_value "$service_name" "mtu_status")" || failed=1
 	fi
@@ -172,10 +173,15 @@ update_mesh_gateway_mtu_state() {
 	local in_real=$(echo "$mtu_result" | cut -f 4)
 	local status_output=$(echo "$mtu_result" | cut -f 5)
 
-	if [ -n "$mtu_result" ] && [ "$out_wanted" -le "$out_real" ] && [ "$in_wanted" -le "$in_real" ]; then
+	if [ -z "$mtu_result" ]; then
+		state=""
+		state_label="unknown"
+	elif [ "$out_wanted" -le "$out_real" ] && [ "$in_wanted" -le "$in_real" ]; then
 		state="true"
+		state_label="OK"
 	else
 		state="false"
+		state_label="failure"
 	fi
 
 	set_service_value "$service_name" "mtu_msg" "$status_output"
@@ -185,8 +191,9 @@ update_mesh_gateway_mtu_state() {
 	set_service_value "$service_name" "mtu_in_real" "$in_real"
 	set_service_value "$service_name" "mtu_status" "$state"
 
-	msg_debug "mtu [$state]: update_mesh_gateway_mtu_state for '$host' done"
-	msg_debug "mtu [$state]: $status_output"
+	msg_debug "mtu [$state_label]: update_mesh_gateway_mtu_state for '$host' done"
+	[ -n "$status_output" ] && msg_debug "mtu [$state_label]: $status_output"
+	true
 }
 
 

@@ -345,7 +345,7 @@ prepare_openvpn_service() {
 	elif [ "$service_type" = "mesh" ]; then
 		template_file="$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
 	else
-		msg_info "Error: unknown service type for openvpn config preparation: $service_type"
+		msg_error "unknown service type for openvpn config preparation: $service_type"
 		return 1
 	fi
 	set_service_value "$service_name" "template_file" "$template_file"
@@ -423,7 +423,7 @@ openvpn_get_mtu() {
 	kill "$pid" >/dev/null 2>&1 || true
 	rm -f "$config_file" "$pid_file"
 	# ist der Zaehler abgelaufen?
-	[ "$wait_loops" -eq 0 ] && msg_info "timeout for openvpn_get_mtu '$host' - aborting."
+	[ "$wait_loops" -eq 0 ] && msg_info "Timeout for openvpn_get_mtu '$host' - aborting."
 	return 0
 }
 

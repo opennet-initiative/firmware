@@ -153,7 +153,7 @@ announce_olsr_service_relay() {
 	local ping=$(get_service_detail "$service_name" ping)
 
 	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	[ -z "$uci_prefix" ] && msg_info "FATAL ERROR: failed to enforce olsr nameservice plugin" && trap "" $GUARD_TRAPS && return 1
+	[ -z "$uci_prefix" ] && msg_error "Failed to enforce olsr nameservice plugin" && trap "" $GUARD_TRAPS && return 1
 
 	local service_type=$(get_service_value "$service_name" "service")
 	local scheme=$(get_service_value "$service_name" "scheme")

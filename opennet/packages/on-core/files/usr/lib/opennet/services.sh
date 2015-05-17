@@ -143,7 +143,7 @@ get_service_priority() {
 			elif [ "$sorting" = "manual" ]; then
 				get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
 			else
-				msg_info "Unknown sorting method for services: $sorting"
+				msg_error "Unknown sorting method for services: $sorting"
 				echo 1
 			fi
 		fi | cut -f 1 -d .)
@@ -181,7 +181,7 @@ set_service_sorting() {
 	local old_sorting=$(get_service_sorting)
 	[ "$old_sorting" = "$new_sorting" ] && return 0
 	[ "$new_sorting" != "manual" -a "$new_sorting" != "hop" -a "$new_sorting" != "etx" ] && \
-		msg_info "Warning: Ignoring unknown sorting method: $new_sorting" && \
+		msg_error "Ignoring unknown sorting method: $new_sorting" && \
 		trap "" $GUARD_TRAPS && return 1
 	uci set "on-core.settings.service_sorting=$new_sorting"
 	apply_changes on-core
@@ -200,7 +200,7 @@ get_service_sorting() {
 	else
 		# unbekannte Sortierung: dauerhaft setzen
 		# keine Warnung falls die Sortierung nicht gesetzt wurde
-		[ -n "$sorting" ] && msg_info "Warning: coercing unknown sorting method: $sorting -> $DEFAULT_SERVICE_SORTING"
+		[ -n "$sorting" ] && msg_error "coercing unknown sorting method: $sorting -> $DEFAULT_SERVICE_SORTING"
 		uci set "on-core.settings.service_sorting=$DEFAULT_SERVICE_SORTING"
 		echo -n "$DEFAULT_SERVICE_SORTING"
 	fi
@@ -340,7 +340,7 @@ set_service_value() {
 	# unverändert? Schnell beenden
 	[ -n "$service_name" -a "$value" = "$(get_service_value "$service_name" "$attribute")" ] && return 0
 	[ -z "$service_name" ] \
-		&& msg_info "Error: no service given for attribute change ($attribute=$value)" \
+		&& msg_error "No service given for attribute change ($attribute=$value)" \
 		&& trap "" $GUARD_TRAPS && return 1
 	local dirname
 	if echo "$PERSISTENT_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
@@ -365,7 +365,7 @@ get_service_value() {
 	local value
 	local dirname
 	[ -z "$service_name" ] \
-		&& msg_info "Error: no service given for attribute request ('$attribute')" \
+		&& msg_error "No service given for attribute request ('$attribute')" \
 		&& trap "" $GUARD_TRAPS && return 1
 	value=$(_get_file_dict_value "$attribute" "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" "$VOLATILE_SERVICE_STATUS_DIR/$service_name")
 	[ -n "$value" ] && echo -n "$value" || echo -n "$default"
@@ -477,7 +477,7 @@ get_service_description() {
 delete_service() {
 	trap "error_trap delete_service '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	[ -z "$service_name" ] && msg_info "Error: no service given for deletion" && trap "" $GUARD_TRAPS && return 1
+	[ -z "$service_name" ] && msg_error "No service given for deletion" && trap "" $GUARD_TRAPS && return 1
 	cleanup_service_dependencies "$service_name"
 	rm -f "$PERSISTENT_SERVICE_STATUS_DIR/$service_name"
 	rm -f "$VOLATILE_SERVICE_STATUS_DIR/$service_name"
@@ -541,7 +541,7 @@ move_service_up() {
 			prev_service="$current_service"
 		done
 	else
-		msg_info "Warning: [move_service_up] sorting method is not implemented: $sorting"
+		msg_info "Warning: [move_service_up] for this sorting method is not implemented: $sorting"
 	fi
 }
 
@@ -583,7 +583,7 @@ move_service_down() {
 			prev_service="$current_service"
 		done
 	else
-		msg_info "Warning: [move_service_down] sorting method is not implemented: $sorting"
+		msg_info "Warning: [move_service_down] for this sorting method is not implemented: $sorting"
 	fi
 }
 
@@ -624,7 +624,7 @@ move_service_top() {
 		# erneuere die Rang-Vergabe
 		_distribute_service_ranks
 	else
-		msg_info "Warning: [move_service_top] sorting method is not implemented: $sorting"
+		msg_info "Warning: [move_service_top] for this sorting method is not implemented: $sorting"
 	fi
 }
 
@@ -704,7 +704,7 @@ get_service_as_csv() {
 			elif [ "$source" = "detail" ]; then
 				value=$(get_service_detail "$service_name" "$key")
 			else
-				msg_info "Unknown service attribute requested: $specification"
+				msg_error "Unknown service attribute requested: $specification"
 				echo -n "${separator}"
 				continue
 			fi

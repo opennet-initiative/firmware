@@ -54,6 +54,17 @@ msg_info() {
 }
 
 
+## @fn msg_error()
+## @param message Fehlermeldung
+## @brief Die Fehlermeldungen werden in die Standard-Fehlerausgabe und ins syslog geschrieben
+## @details Jede Meldung wird mit "ERROR" versehen, damit diese Meldungen von
+##   "get_potential_error_messages" erkannt werden.
+## Die error-Nachrichten werden immer ausgegeben, da es kein höheres Log-Level als "debug" gibt.
+msg_error() {
+	echo "$1" | _split_lines "$LOG_MESSAGE_LENGTH" | logger -s -t "$(basename "$0")[$$]" "[ERROR] $1"
+}
+
+
 ## @fn append_to_custom_log()
 ## @brief Hänge eine neue Nachricht an ein spezfisches Protokoll an.
 ## @param log_name Name des Log-Ziels
@@ -578,7 +589,7 @@ generate_report() {
 	cd "$reports_dir"
 	find /usr/lib/opennet/reports -type f | while read fname; do
 		[ ! -x "$fname" ] && msg_info "skipping non-executable report script: $fname" && continue
-		"$fname" || msg_info "ERROR: reports script failed: $fname"
+		"$fname" || msg_error "reports script failed: $fname"
 	done
 	cd "$temp_dir"
 	tar czf "$tar_file" "report"
@@ -904,7 +915,7 @@ schedule_parts() {
 ##     Zusätzlich zur URL können auch (davor) curl-spezifischen Optionen angebeben werden.
 run_curl() {
 	curl -q --silent --cacert /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem "$@" \
-		|| msg_info "Failed to retrieve data from URL '$@' via curl"
+		|| msg_error "Failed to retrieve data from URL '$@' via curl"
 }
 
 

@@ -18,7 +18,7 @@
 override_opkg_repository_url() {
 	local firmware_version=$(get_on_firmware_version)
 	# leere Versionsnummer? Damit können wir nichts anfangen.
-	[ -z "$firmware_version" ] && msg_info "ERROR: Failed to retrieve opennet firmware version for opkg repository URL" && return 0
+	[ -z "$firmware_version" ] && msg_error "Failed to retrieve opennet firmware version for opkg repository URL" && return 0
 	# snapshots erkennen wir aktuell daran, dass auch Buchstaben in der Versionsnummer vorkommen
 	if echo "$firmware_version" | grep -q "[a-zA-Z]"; then
 		# ein Buchstabe wurde entdeckt: unstable

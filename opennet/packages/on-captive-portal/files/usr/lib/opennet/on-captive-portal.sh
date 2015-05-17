@@ -101,7 +101,7 @@ _captive_portal_get_mapped_attribute() {
 	elif [ "$attribute" = "url" ]; then
 		echo -n "redirecturl"
 	else
-		msg_info "Error: unknown captive portal attribute mapping requested: $attribute"
+		msg_error "unknown captive portal attribute mapping requested: $attribute"
 		return 1
 	fi
 }

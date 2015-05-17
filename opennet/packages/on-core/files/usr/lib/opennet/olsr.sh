@@ -38,7 +38,7 @@ get_and_enable_olsrd_library_uci_prefix() {
 	else
 		lib_file=$(find /usr/lib -type f -name "${library}.*")
 		if [ -z "$lib_file" ]; then
-			msg_info "FATAL ERROR: Failed to find olsrd '$library' plugin. Some Opennet services will fail."
+			msg_error "Failed to find olsrd '$library' plugin. Some Opennet services will fail."
 			trap "" $GUARD_TRAPS && return 1
 		fi
 		uci_prefix="olsrd.$(uci add olsrd LoadPlugin)"
@@ -226,9 +226,9 @@ request_olsrd_txtinfo() {
 		true
 	else
 		if "$NETCAT_BIN" -w 2 localhost 2006 2>&1 >/dev/null | grep -q "^Usage:"; then
-			msg_info "request_olsrd_txtinfo (error): I suspect that '$NETCAT_BIN' does not support the '-w' parameter - please install 'ncat'"
+			msg_error "request_olsrd_txtinfo: I suspect that '$NETCAT_BIN' does not support the '-w' parameter - please install 'ncat'"
 		else
-			msg_info "request_olsrd_txtinfo (error): olsrd is not running"
+			msg_error "request_olsrd_txtinfo: olsrd is not running"
 		fi
 	fi
 }

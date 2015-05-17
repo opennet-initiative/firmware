@@ -13,7 +13,7 @@ is_olsrd_running() {
 	if [ -z "$pid_file" ]; then
 		# Falls wir keine gueltige PID-Datei finden, dann pruefen wir lediglich,
 		# ob irgendein olsrd laeuft - dies ist natuerlich nicht sehr zuverlässig.
-		msg_info "ERROR: failed to find PID file location for olsrd"
+		msg_error "Failed to find PID file location for olsrd"
 		pidof olsrd >/dev/null && return 0 || true
 	else
 		system_service_check /usr/sbin/olsrd "$pid_file" && return 0 || true

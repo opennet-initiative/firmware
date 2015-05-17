@@ -40,7 +40,7 @@ query_srv_records() {
 		unbound-host -t SRV "$domain" \
 			| awk '{print $5, $6, $7, $8}'
 	else
-		msg_info "ERROR: Missing advanced DNS resolver for mesh gateway discovery"
+		msg_error "Missing advanced DNS resolver for mesh gateway discovery"
 	fi | sed 's/\.$//'
 	# (siehe oben) entferne den abschliessenden Top-Level-Domain-Punkt ("on-i.de." statt "on-i.de")
 }

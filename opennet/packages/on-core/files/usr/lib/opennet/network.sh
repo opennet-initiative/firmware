@@ -1,5 +1,5 @@
 ## @defgroup network Netzwerk
-## @brie Umgang mit uci-Netzwerk-Interfaces und Firewall-Zonen
+## @brief Umgang mit uci-Netzwerk-Interfaces und Firewall-Zonen
 # Beginn der Doku-Gruppe
 ## @{
 
@@ -137,6 +137,19 @@ get_zone_interfaces() {
 }
 
 
+## @fn get_zone_raw_devices()
+## @brief Ermittle die physischen Netzwerkinterfaces, die direkt einer Firewall-Zone zugeordnet sind.
+## @details Hier werden _nicht_ die logischen Interfaces in die physischen aufgeloest, sondern
+##   es wird lediglich der Inhalt des 'devices'-Eintrags einer Firewall-Zone ausgelesen.
+get_zone_raw_devices() {
+	trap "error_trap get_zone_raw_devices '$*'" $GUARD_TRAPS
+	local zone="$1"
+	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	[ -z "$uci_prefix" ] && msg_debug "Failed to retrieve raw devices of non-existing zone '$zone'" && return 0
+	uci_get_list "${uci_prefix}.device"
+}
+
+
 # Ist das gegebene physische Netzwerk-Interface Teil einer Firewall-Zone?
 is_device_in_zone() {
 	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
@@ -206,20 +219,128 @@ get_subdevices_of_interface() {
 }
 
 
+## @fn add_raw_device_to_zone()
+## @brief Fuege ein physisches Netzwerk-Interface zu einer Firewall-Zone hinzu.
+## @details Typischerweise ist diese Funktion nur fuer temporaere Netzwerkschnittstellen geeignet.
+add_raw_device_to_zone() {
+	local zone="$1"
+	local device="$2"
+	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	[ -z "$uci_prefix" ] && msg_debug "Failed to add raw device '$device' to non-existing zone '$zone'" && return 0
+}
+
+
+# Ist das gegebene physische Netzwerk-Interface Teil einer Firewall-Zone?
+is_device_in_zone() {
+	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
+	local device="$1"
+	local zone="$2"
+	local log_interface
+	local item
+	for log_interface in $(get_zone_interfaces "$2"); do
+		for item in $(get_subdevices_of_interface "$log_interface"); do
+			[ "$device" = "$item" ] && return 0 || true
+		done
+	done
+	trap "" $GUARD_TRAPS && return 1
+}
+
+
+# Ist das gegebene logische Netzwerk-Interface Teil einer Firewall-Zone?
+is_interface_in_zone() {
+	local interface="$1"
+	local zone="$2"
+	local item
+	for item in $(get_zone_interfaces "$zone"); do
+		[ "$item" = "$interface" ] && return 0 || true
+	done
+	trap "" $GUARD_TRAPS && return 1
+}
+
+
+## @fn get_device_of_interface()
+## @brief Ermittle das physische Netzwerk-Gerät, das einem logischen Netzwerk entspricht.
+## @details Ein Bridge-Interface wird als Gerät betrachtet und zurückgeliefert (nicht seine Einzelteile).
+get_device_of_interface() {
+	local interface="$1"
+	[ "$(uci_get "network.${interface}.type")" = "bridge" ] \
+		&& echo "br-$interface" \
+		|| get_subdevices_of_interface "$interface"
+}
+
+
+## @fn get_subdevices_of_interface()
+## @brief Ermittle die physischen Netzwerk-Geräte, die zu einem logischen Netzwerk-Interface gehören.
+## @details Im Fall eines Bridge-Interface werden nur die beteiligten Komponenten zurückgeliefert.
+## @returns Der Name des physischen Netzwerk-Geräts oder nichts.
+get_subdevices_of_interface() {
+	local interface="$1"
+	local device
+	# kabelgebundene Geräte
+	for device in $(uci_get "network.${interface}.ifname"); do
+		# entferne Alias-Nummerierungen
+		device=$(echo "$device" | cut -f 1 -d :)
+		[ -z "$device" -o "$device" = "none" ] && continue
+		echo "$device"
+	done
+	# wlan-Geräte
+	# "uci show network" enthält aus irgendeinem Grund keine wlan-Geräte. Daher müssen
+	# wir dort separat nachschauen.
+	local uci_prefix
+	local current_interface
+	find_all_uci_sections "wireless" "wifi-iface" | while read uci_prefix; do
+		for current_interface in $(uci_get "${uci_prefix}.network"); do
+			[ "$current_interface" != "$interface" ] && continue
+			uci_get "${uci_prefix}.ifname"
+		done
+	done
+	# Der folgende Weg (via ubus) wirkt wohl nur bei aktiven Interfaces:
+	#(local ifname; . /lib/functions/network.sh; network_get_device ifname on_free; echo "$ifname")
+}
+
+
+## @fn add_raw_device_to_zone()
+## @brief Fuege ein physisches Netzwerk-Interface zu einer Firewall-Zone hinzu.
+## @details Typischerweise ist diese Funktion nur fuer temporaere Netzwerkschnittstellen geeignet.
+add_raw_device_to_zone() {
+	local zone="$1"
+	local device="$2"
+	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	[ -z "$uci_prefix" ] && msg_debug "Failed to add raw device '$device' to non-existing zone '$zone'" && return 0
+	uci_add_list "${uci_prefix}.device" "$device"
+}
+
+
+## @fn add_interface_to_zone()
+## @brief Fuege ein logisches Netzwerk-Interface zu einer Firewall-Zone hinzu.
+## @details Typischerweise ist diese Funktion nur fuer temporaere Netzwerkschnittstellen geeignet.
 add_interface_to_zone() {
 	local zone=$1
 	local interface=$2
-	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
-	[ -z "$uci_prefix" ] && msg_debug "failed to add interface '$interface' to non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
+	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	[ -z "$uci_prefix" ] && msg_debug "Failed to add interface '$interface' to non-existing zone '$zone'" && return 0
 	uci_add_list "${uci_prefix}.network" "$interface"
 }
 
 
+## @fn del_raw_device_from_zone()
+## @brief Entferne ein physisches Netzwerk-Interface aus einer Firewall-Zone.
+del_raw_device_from_zone() {
+	local zone="$1"
+	local device="$2"
+	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	[ -z "$uci_prefix" ] && msg_debug "Failed to remove raw device '$device' from non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
+	uci del_list "${uci_prefix}.device=$device"
+}
+
+
+## @fn del_interface_from_zone()
+## @brief Entferne ein logisches Interface aus einer Firewall-Zone.
 del_interface_from_zone() {
-	local zone=$1
-	local interface=$2
-	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
-	[ -z "$uci_prefix" ] && msg_debug "failed to remove interface '$interface' from non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
+	local zone="$1"
+	local interface="$2"
+	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	[ -z "$uci_prefix" ] && msg_debug "Failed to remove interface '$interface' from non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
 	uci del_list "${uci_prefix}.network=$interface"
 }
 

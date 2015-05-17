@@ -14,11 +14,21 @@ INTERN_DNS_DOMAIN=on
 REPORTS_FILE=/tmp/on_report.tar.gz
 ## @var Basis-Verzeichnis für Log-Dateien
 LOG_BASE_DIR=/var/log
+## @var maximum length of message lines (logger seems to resctrict lines incl. timestamp to 512 characters)
+LOG_MESSAGE_LENGTH=420
 ## @var Verzeichnis für auszuführende Aktionen
 SCHEDULING_DIR=/var/run/on-scheduling.d
 # beim ersten Pruefen wird der Debug-Modus ermittelt
 DEBUG_ENABLED=
 
+
+# Aufteilung ueberlanger Zeilen
+_split_lines() {
+	local line_length="$1"
+	# ersetze alle whitespace-Zeichen durch Nul
+	# Gib anschliessend soviele Token wie moeglich aus, bis die Zeilenlaenge erreicht ist.
+	tr '\n\t ' '\0' | xargs -0 -s "$line_length" echo
+}
 
 
 ## @fn msg_debug()
@@ -30,7 +40,7 @@ msg_debug() {
 	# bei der ersten Ausfuehrung dauerhaft speichern
 	[ -z "$DEBUG_ENABLED" ] && \
 		DEBUG_ENABLED=$(uci_is_true "$(uci_get on-core.settings.debug false)" && echo 1 || echo 0)
-	[ "$DEBUG_ENABLED" = "0" ] || logger -t "$(basename "$0")[$$]" "$1"
+	[ "$DEBUG_ENABLED" = "0" ] || echo "$1" | _split_lines "$LOG_MESSAGE_LENGTH" | logger -t "$(basename "$0")[$$]"
 }
 
 
@@ -38,9 +48,9 @@ msg_debug() {
 ## @param message Log-Nachricht
 ## @brief Informationen und Fehlermeldungen ins syslog schreiben
 ## @details Die Nachrichten landen im syslog (siehe ``logread``).
-## Die info-Nachrichten werden immer ausgegeben, da es kein höheres Log-Level gibt.
+## Die info-Nachrichten werden immer ausgegeben, da es kein höheres Log-Level als "debug" gibt.
 msg_info() {
-	logger -t "$(basename "$0")[$$]" "$1"
+	echo "$1" | _split_lines "$LOG_MESSAGE_LENGTH" | logger -t "$(basename "$0")[$$]"
 }
 
 

@@ -17,24 +17,14 @@
 
 setup_mesh_interface() {
 	local ifname="$1"
-	local netname="$ifname"
-	uci set "network.${netname}=interface"
-	uci set "network.${netname}.proto=none"
-	uci set "network.${netname}.ifname=$ifname"
-	add_interface_to_zone "$ZONE_MESH" "$netname"
-	update_olsr_interfaces
-	apply_changes network
+	add_raw_device_to_zone "$ZONE_MESH" "$ifname"
 	apply_changes firewall
 }
 
 
 cleanup_mesh_interface() {
 	local ifname="$1"
-	local netname="$ifname"
-	uci_delete "network.${netname}"
-	del_interface_from_zone "$ZONE_MESH" "$netname"
-	update_olsr_interfaces
-	apply_changes network
+	del_raw_device_from_zone "$ZONE_MESH" "$ifname"
 	apply_changes firewall
 }
 

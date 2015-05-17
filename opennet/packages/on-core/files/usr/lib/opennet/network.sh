@@ -134,7 +134,6 @@ get_zone_interfaces() {
 	# siehe http://wiki.openwrt.org/doc/uci/firewall#zones
 	[ -z "$interfaces" ] && [ -z "$(uci_get "${uci_prefix}.device")" ] && interfaces="$(uci_get "${uci_prefix}.name")"
 	echo "$interfaces"
-	return 0
 }
 
 

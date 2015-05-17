@@ -19,8 +19,6 @@ configure_local_network() {
 	[ "$(uci_get "${uci_prefix}.ipaddr")" !=  "$OPENWRT_DEFAULT_LOCAL_IP" ] && return 0
 	uci set "${uci_prefix}.ipaddr=$(get_on_core_default lan_ipaddr)"
 	uci set "${uci_prefix}.netmask=$(get_on_core_default lan_netmask)"
-	apply_changes network
-	uci commit on-core
 }
 
 

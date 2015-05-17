@@ -364,41 +364,46 @@ check_pid_file() {
 }
 
 
+## @fn apply_changes()
+## @brief Kombination von uci-commit und anschliessender Inkraftsetzung fuer verschiedene uci-Sektionen.
+## @param configs Einer oder mehrere uci-Sektionsnamen.
+## @details Dienst-, Netzwerk- und Firewall-Konfigurationen werden bei Bedarf angewandt.
+##   Zuerst werden alle uci-Sektionen commited und anschliessend werden die Trigger ausgefuehrt.
 apply_changes() {
-	local config=$1
-	# keine Aenderungen?
-	# "on-core" achtet auch auf nicht-uci-Aenderungen (siehe PERSISTENT_SERVICE_STATUS_DIR)
-	[ -z "$(uci changes "$config")" -a "$config" != "on-core" ] && return 0
-	uci commit "$config"
-	case "$config" in
-		system|network|firewall|dhcp)
-			reload_config || true
-			;;
-		olsrd)
-			/etc/init.d/olsrd reload || true
-			;;
-		openvpn)
-			/etc/init.d/openvpn reload || true
-			;;
-		nodogsplash)
-			captive_portal_reload || true
-			;;
-		on-usergw)
-			# TODO: verwenden wir ueberhaupt eine uci-Konfiguration?
-			/etc/init.d/openvpn reload || true
-			reload_config || true
-			;;
-		on-core)
-			update_ntp_servers
-			update_dns_servers
-			;;
-		on-openvpn)
-			# es ist nichts zu tun
-			;;
-		*)
-			msg_info "no handler defined for applying config changes for '$config'"
-			;;
-	esac
+	local config
+	for config in "$@"; do
+		# keine Aenderungen?
+		# "on-core" achtet auch auf nicht-uci-Aenderungen (siehe PERSISTENT_SERVICE_STATUS_DIR)
+		[ -z "$(uci changes "$config")" -a "$config" != "on-core" ] && continue
+		uci commit "$config"
+		echo "$config"
+	done | sed 's/\(system\|network\|firewall\|dhcp\)/do_reload/' | sort | uniq | while read config; do
+		# wir wollen die Aktionen erst nach allen commits ausfuehren
+		# Dabei vermeiden wir Dopplungen (siehe "sort | uniq").
+		# Die "reload_config"-Trigger haben wir zuvor zu "do_reload" zusammengefasst, um
+		# auch hier Dopplungen zu vermeiden.
+		case "$config" in
+			do_reload)
+				reload_config || true
+				;;
+			olsrd)
+				/etc/init.d/olsrd reload || true
+				;;
+			openvpn)
+				/etc/init.d/openvpn reload || true
+				;;
+			nodogsplash)
+				captive_portal_reload || true
+				;;
+			on-core)
+				update_ntp_servers
+				update_dns_servers
+				;;
+			*)
+				msg_error "no handler defined for applying config changes for '$config'"
+				;;
+		esac
+	done
 	return 0
 }
 
@@ -444,8 +449,6 @@ set_opennet_id() {
 	done
 	# OLSR-MainIP konfigurieren
 	olsr_set_main_ip "$main_ipaddr"
-	apply_changes olsrd
-	apply_changes network
 	# DHCP-Forwards fuer wifidog
 	# Ziel ist beispielsweise folgendes Setup:
 	#   firewall.@redirect[0]=redirect
@@ -462,6 +465,7 @@ set_opennet_id() {
 		uci set "${uci_prefix}.src_dip=$main_ipaddr"
 	done
 	apply_changes firewall
+	apply_changes olsrd network
 }
 
 

@@ -147,12 +147,4 @@ configure_local_network
 configure_opennet_zone
 configure_olsr_interfaces
 
-# schreibe alle ui-Anederungen
-uci commit network
-uci commit wireless
-uci commit dhcp
-uci commit firewall
-# loese via procd alle erforderlichen Dienste-Reloads aus
-# Fehler duerfen hier passieren
-reload_config || true
-true
+apply_changes network wireless dhcp firewall

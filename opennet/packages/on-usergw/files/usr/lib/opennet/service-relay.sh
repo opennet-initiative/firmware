@@ -232,8 +232,7 @@ update_service_relay_status() {
 	done
 	delete_unused_service_relay_forward_rules
 	deannounce_unused_olsr_service_relays
-	apply_changes firewall
-	apply_changes olsrd
+	apply_changes firewall olsrd
 }
 
 

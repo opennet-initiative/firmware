@@ -449,22 +449,6 @@ set_opennet_id() {
 	done
 	# OLSR-MainIP konfigurieren
 	olsr_set_main_ip "$main_ipaddr"
-	# DHCP-Forwards fuer wifidog
-	# Ziel ist beispielsweise folgendes Setup:
-	#   firewall.@redirect[0]=redirect
-	#   firewall.@redirect[0].src=opennet
-	#   firewall.@redirect[0].proto=udp
-	#   firewall.@redirect[0].src_dport=67
-	#   firewall.@redirect[0].target=DNAT
-	#   firewall.@redirect[0].src_port=67
-	#   firewall.@redirect[0].dest_ip=10.3.1.210
-	#   firewall.@redirect[0].src_dip=192.168.1.210
-	find_all_uci_sections firewall redirect "src=$ZONE_MESH" proto=udp src_dport=67 src_port=67 target=DNAT | while read uci_prefix; do
-		uci set "${uci_prefix}.name=DHCP-Forward Opennet"
-		uci set "${uci_prefix}.dest_ip=$free_ipaddr"
-		uci set "${uci_prefix}.src_dip=$main_ipaddr"
-	done
-	apply_changes firewall
 	apply_changes olsrd network
 }
 

@@ -57,7 +57,7 @@ else
 	# unsere Zeit ist synchronisert - wir koennen das reboot-Log schreiben
 	# Ziehe von der aktuellen Zeit die uptime ab
 	boot_time=$(($(date +%s) - uptime))
-	timestamp=$(date "@$boot_time")
+	timestamp=$(date --date "@$boot_time")
 fi
 
 # Schreibe den Zeitstempel

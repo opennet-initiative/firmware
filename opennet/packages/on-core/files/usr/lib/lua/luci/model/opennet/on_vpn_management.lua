@@ -25,16 +25,23 @@ end
 
 -- type is user or mesh
 function upload_file(type)
-	local filename = "on_aps"
-	if type == "mesh" then filename = "on_ugws" end
+	local filename_prefix
+	local cert_dir
+	if type == "mesh" then
+		cert_dir = SYSROOT .. "/etc/openvpn/opennet_ugw"
+		filename_prefix = cert_dir .. "/on_ugws"
+	else
+		cert_dir = SYSROOT .. "/etc/openvpn/opennet_user"
+		filename_prefix = cert_dir .. "/on_aps"
+	end
 	local upload_exists = nixio.fs.access(upload_file_location)
 	local upload_value = luci.http.formvalue("opensslfile")
 	if not upload_exists then return end
-	if not nixio.fs.access(SYSROOT .. "/etc/openvpn/opennet_" .. type) then nixio.fs.mkdirr(SYSROOT .. "/etc/openvpn/opennet_" .. type) end
+	if not nixio.fs.access(cert_dir) then nixio.fs.mkdirr(cert_dir) end
 	if (string.find(upload_value, ".key")) then
-		replace_file(upload_file_location, SYSROOT .. "/etc/openvpn/opennet_" .. type .. "/" .. filename .. ".key")
+		replace_file(upload_file_location, filename_prefix .. ".key")
 	elseif (string.find(upload_value, ".crt")) then
-		replace_file(upload_file_location, SYSROOT .. "/etc/openvpn/opennet_" .. type .. "/" .. filename .. ".crt")
+		replace_file(upload_file_location, filename_prefix .. ".crt")
 	else
 		-- unbekannter Datentyp? Wir muessen die Datei loeschen - sonst wird sie beim naechsten Upload wiederverwendet.
 		nixio.fs.remove(upload_file_location)

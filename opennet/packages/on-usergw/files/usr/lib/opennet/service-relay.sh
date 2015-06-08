@@ -2,9 +2,6 @@
 # Beginn der Doku-Gruppe
 ## @{
 
-## eine beliebige Portnummer, auf der wir keinen udp-Dienst vermuten
-SPEEDTEST_UPLOAD_PORT=29418
-SPEEDTEST_SECONDS=20
 ## für die Kompatibilität mit Firmware vor v0.5
 UGW_LOCAL_SERVICE_PORT_LEGACY=1600
 DEFAULT_MESH_OPENVPN_PORT=1602

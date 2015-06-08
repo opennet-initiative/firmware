@@ -6,6 +6,9 @@ UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 MESH_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-ugw.template
 TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-services.csv
+## eine beliebige Portnummer, auf der wir keinen udp-Dienst vermuten
+SPEEDTEST_UPLOAD_PORT=29418
+SPEEDTEST_SECONDS=20
 
 
 # hole einen der default-Werte der aktuellen Firmware
@@ -227,12 +230,19 @@ sync_mesh_openvpn_connection_processes() {
 # Parameter: Anzahl von Sekunden der Messung
 # Ergebnis (tab-separiert):
 #   RX TX
-# (empfangene|gesendete KBytes/s)
+# (empfangene|gesendete KBits/s)
 get_device_traffic() {
 	local device="$1"
 	local seconds="$2"
-	! which ifstat >/dev/null && msg_error "Missing ifstat for 'get_device_traffic'" && return 0
-	ifstat -q -b -i "$device" "$seconds" 1 | tail -n 1 | awk '{print int($1 + 0.5) "\t" int($2 + 0.5)}'
+	local sys_path="/sys/class/net/$device"
+	[ ! -d "$sys_path" ] && msg_error "Failed to find '$sys_path' for 'get_device_traffic'" && return 0
+	{
+		cat "$sys_path/statistics/rx_bytes"
+		cat "$sys_path/statistics/tx_bytes"
+		sleep "$seconds"
+		cat "$sys_path/statistics/rx_bytes"
+		cat "$sys_path/statistics/tx_bytes"
+	} | tr '\n' ' ' | awk '{ print int((8 * ($3-$1)) / 1024 / '$seconds' + 0.5) "\t" int((8 * ($4-$2)) / 1024 / '$seconds' + 0.5) }'
 }
 
 

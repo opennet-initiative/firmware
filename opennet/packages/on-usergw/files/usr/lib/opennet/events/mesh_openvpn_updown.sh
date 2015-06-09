@@ -17,15 +17,28 @@
 
 setup_mesh_interface() {
 	local ifname="$1"
-	add_raw_device_to_zone "$ZONE_MESH" "$ifname"
-	apply_changes firewall
+	local netname=$(echo "$ifname" | sed 's/[^0-9a-zA-Z]/_/g')
+	uci set "network.${netname}=interface"
+	uci set "network.${netname}.proto=none"
+	uci set "network.${netname}.auto=0"
+	# wir duerfen das Interface nicht via uci hinzufuegen - andernfalls verliert das Interface durch netifd seine Konfiguration
+	# siehe https://lists.openwrt.org/pipermail/openwrt-devel/2015-June/033501.html
+	#uci set "network.${netname}.ifname=$ifname"
+	add_interface_to_zone "$ZONE_MESH" "$netname"
+	update_olsr_interfaces
+	apply_changes network firewall
+	# indirekte Interface/Network-Zuordnung (siehe obigen Mailinglisten-Beitrag)
+	# Auf diesem Weg bleibt die IP-Konfiguration des Device erhalten.
+	ubus call network.interface.${netname} add_device '{ "name": "'$ifname'" }'
 }
 
 
 cleanup_mesh_interface() {
 	local ifname="$1"
-	del_raw_device_from_zone "$ZONE_MESH" "$ifname"
-	apply_changes firewall
+	local netname=$(echo "$ifname" | sed 's/[^0-9a-zA-Z]/_/g')
+	uci_delete "network.${netname}"
+	del_interface_from_zone "$ZONE_MESH" "$netname"
+	apply_changes network firewall
 }
 
 

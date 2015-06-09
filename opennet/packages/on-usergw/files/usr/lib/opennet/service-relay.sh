@@ -12,18 +12,6 @@ SERVICE_RELAY_CREATOR=on_service_relay
 SERVICE_RELAY_FIREWALL_RULE_PREFIX=on_service_relay_
 
 
-# Ermittle den aktuell definierten UGW-Portforward.
-# Ergebnis (tab-separiert fuer leichte 'cut'-Behandlung des Output):
-#   lokale IP-Adresse fuer UGW-Forward
-#   externer Gateway
-# TODO: siehe auch http://dev.on-i.de/ticket/49 - wir duerfen uns nicht auf die iptables-Ausgabe verlassen
-get_ugw_portforward() {
-	local chain=zone_${ZONE_MESH}_prerouting
-	# TODO: vielleicht lieber den uci-Portforward mit einem Namen versehen?
-	iptables -L "$chain" -t nat -n | awk 'BEGIN{FS="[ :]+"} /udp dpt:1600 to:/ {printf $3 "\t" $5 "\t" $10; exit}'
-}
-
-
 # Pruefung ob ein lokaler Port bereits fuer einen ugw-Dienst weitergeleitet wird
 _is_local_service_relay_port_unused() {
 	local port="$1"

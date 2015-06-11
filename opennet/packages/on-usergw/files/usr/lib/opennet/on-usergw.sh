@@ -58,6 +58,7 @@ is_mesh_gateway_usable() {
 		if verify_vpn_connection "$service_name"; then
 			set_service_value "$service_name" "vpn_status" "true"
 		else
+			failed=1
 			set_service_value "$service_name" "vpn_status" "false"
 		fi
 	fi

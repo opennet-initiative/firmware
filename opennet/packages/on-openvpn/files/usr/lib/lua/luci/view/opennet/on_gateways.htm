@@ -98,7 +98,7 @@ You may obtain a copy of the License at
 		var target_row = document.getElementById(gateway.id);
 		if (!target_row) return;
 		var remote;
-		var active;
+		var connection_state;
 		var distance;
 		var speed;
 		var speed_abbr;
@@ -119,14 +119,15 @@ You may obtain a copy of the License at
 			target_row.setAttribute("disabled", "y");
 		}
 		// "active" als laeuft/kaputt/inaktive setzen
-		if (gateway.active) {
+		if (gateway.connection_state ~= "") {
 			current_gateway = gateway.id;
 			update_gateway_change_indicator();
-			<% if nixio.fs.access("/tmp/openvpn_msg.txt") then %>
+			if (gateway.connection_state == "active") {
 				active = "y";
-			<% else %>
-				active="n";
-			<% end %>
+			} else {
+				// Verbindung ist im Aufbau - bisher wird dies als "laeuft noch nicht" visualisiert
+				active = "n";
+			}
 		} else {
 			active = null;
 		}

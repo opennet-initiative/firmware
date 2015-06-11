@@ -206,6 +206,7 @@ sync_mesh_openvpn_connection_processes() {
 	local service_name
 	local max_connections=2
 	local conn_count=0
+	local service_state
 	# diese Festlegung ist recht willkürlich: auf Geräten mit nur 32 MB scheinen wir jedenfalls nahe der Speichergrenze zu arbeiten
 	[ "$(get_memory_size)" -gt 32 ] && max_connections=5
 	get_services "mesh" \
@@ -213,11 +214,12 @@ sync_mesh_openvpn_connection_processes() {
 			| filter_enabled_services \
 			| sort_services_by_priority \
 			| while read service_name; do
+		service_state=$(get_openvpn_service_state "$service_name")
 		if [ "$conn_count" -lt "$max_connections" ] && uci_is_true "$(get_service_value "$service_name" "status" "false")"; then
-			is_openvpn_service_active "$service_name" || enable_openvpn_service "$service_name"
+			[ -z "$service_state" ] && enable_openvpn_service "$service_name"
 			: $((conn_count++))
 		else
-			is_openvpn_service_active "$service_name" && disable_openvpn_service "$service_name"
+			[ -n "$service_state" ] && disable_openvpn_service "$service_name"
 			true
 		fi
 	done
@@ -277,7 +279,7 @@ measure_upload_speed() {
 # Diese Funktion bracht recht viel Zeit.
 get_active_ugw_connections() {
 	get_services "mesh" | while read one_service; do
-		is_openvpn_service_active "$one_service" && echo "$one_service" || true
+		[ "$(get_openvpn_service_state "$one_service")" = "active" ] && echo "$one_service" || true
 	done
 }
 

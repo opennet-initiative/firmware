@@ -101,7 +101,7 @@ find_and_select_best_gateway() {
 		# Wir brechen die Ausgabe jedoch nicht nach den ersten beiden Zeilen ab. Andernfalls muessten wir
 		# uns um das SIGPIPE-Signal kuemmern (vor allem in cron-Jobs).
 		[ -z "$best_gateway" ] && best_gateway="$service_name" && echo "$best_gateway"
-		is_openvpn_service_active "$service_name" && current_gateway="$service_name" && echo "$service_name" || true
+		[ -n "$(get_openvpn_service_state "$service_name")" ] && current_gateway="$service_name" && echo "$service_name" || true
 	done)
 	best_gateway=$(echo "$result" | sed -n 1p)
 	current_gateway=$(echo "$result" | sed -n 2p)
@@ -157,7 +157,20 @@ get_active_mig_connections() {
 	trap "error_trap get_active_mig_connections '$*'" $GUARD_TRAPS
 	local service_name
 	get_services "gw" | while read service_name; do
-		is_openvpn_service_active "$service_name" && echo "$service_name" || true
+		[ "$(get_openvpn_service_state "$service_name")" = "active" ] && echo "$service_name" || true
+	done
+}
+
+
+## @fn get_starting_mig_connections()
+## @brief Liefere die im Aufbau befindlichen VPN-Verbindungen (mit Mesh-Internet-Gateways) zurück.
+## @returns Liste der Namen aller Dienste, die aktuell beim Verbindungsaufbau sind.
+## @attention Diese Funktion braucht recht viel Zeit.
+get_starting_mig_connections() {
+	trap "error_trap get_starting_mig_connections '$*'" $GUARD_TRAPS
+	local service_name
+	get_services "gw" | while read service_name; do
+		[ "$(get_openvpn_service_state "$service_name")" = "connecting" ] && echo "$service_name" || true
 	done
 }
 

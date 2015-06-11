@@ -66,19 +66,31 @@ disable_openvpn_service() {
 }
 
 
-## @fn is_openvpn_service_active()
-## @brief Prüfung ob eine openvpn-Verbindung besteht.
+## @fn get_openvpn_service_state()
+## @brief Prüfe ob eine openvpn-Verbindung besteht bzw. im Aufbau ist.
 ## @param service_name Name eines Dienstes
 ## @details Die Prüfung wird anhand der PID-Datei und der Gültigkeit der enthaltenen PID vorgenommen.
-is_openvpn_service_active() {
+## @returns "active", "connecting" oder einen leeren String (unbekannt, bzw. keine Verbindung).
+get_openvpn_service_state() {
+	trap "error_trap get_openvpn_service_state '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local pid_file
-	local pid
 	# existiert ein VPN-Eintrag?
-	[ -z "$(uci_get "openvpn.$service_name")" ] && trap "" $GUARD_TRAPS && return 1
+	[ -z "$(uci_get "openvpn.$service_name")" ] && return
 	# gibt es einen Verweis auf eine passende PID-Datei?
-	check_pid_file "$(get_service_value "$service_name" "pid_file")" "openvpn" && return 0
-	trap "" $GUARD_TRAPS && return 1
+	if check_pid_file "$(get_service_value "$service_name" "pid_file")" "openvpn"; then
+		# Die "openvpn_established_indicator_file"-Variable wird vom up/down-Skript erzeugt.
+		# Die Variable verweist ebenfalls auf eine Datei mit der PID. Dies erlaubt die Unterscheidung
+		# einer Verbindung im Aufbau (bzw. in der Phase einer wiederholten Ablehnung) von einer
+		# beiderseits akzeptierten Datenverbindung. Dies ist insbesondere fuer die mesh-VPN-Verbindungen
+		# sinnvoll, da hier mehr Toleranz beim Verbindungsaufbau sinnvoll ist.
+		if check_pid_file "$(get_service_value "$service_name" "openvpn_established_indicator_file")" "openvpn"; then
+			echo -n "active"
+		else
+			echo -n "connecting"
+		fi
+	else
+		true
+	fi
 }
 
 
@@ -297,9 +309,16 @@ log_openvpn_events_and_disconnect_if_requested() {
 	# die config-Datei enthaelt den Dienst-Namen
 	local service_name=$(basename "${config%.conf}")
 	local pid_file=$(get_service_value "$service_name" "pid_file")
+	local established_indicator_file=$(get_service_value "$service_name" "openvpn_established_indicator_file")
+	if [ -z "$established_indicator_file" ]; then
+		established_indicator_file="${pid_file}.established"
+		set_service_value "$service_name" "openvpn_established_indicator_file" "$established_indicator_file"
+	fi
 	case "$script_type" in
 		up)
 			append_to_custom_log "$log_target" "up" "Connecting to ${remote_1}:${remote_port_1}"
+			[ -n "$pid_file" ] && cat "$pid_file" >"$established_indicator_file"
+			true
 			;;
 		down)
 			# der openwrt-Build von openvpn setzt wohl leider nicht die "time_duration"-Umgebungsvariable
@@ -312,7 +331,9 @@ log_openvpn_events_and_disconnect_if_requested() {
 				set_service_value "$service_name" "status" ""
 				set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
 				disable_openvpn_service "$service_name"
-				[ -n "$pid_file" ] && rm -f "$pid_file" || true
+				[ -n "$pid_file" ] && rm -f "$pid_file"
+				[ -n "$established_indicator_file" ] && rm -f "$established_indicator_file"
+				true
 			else
 				append_to_custom_log "$log_target" "down" \
 					"Closing connection with ${remote_1}:${remote_port_1} after ${time_duration}s"

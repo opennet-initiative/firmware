@@ -58,7 +58,7 @@ You may obtain a copy of the License at
 	local services = line_split(get_services_sorted_by_priority("mesh"))
         for index, service_name in ipairs(services) do
           local gateway = parse_csv_service(service_name, {
-              active="bool|function|is_openvpn_service_active",
+              connection_state="string|function|get_openvpn_service_state",
               disabled="string|value|disabled",
               host="string|value|host",
               mtu_status="string|value|mtu_status",
@@ -86,7 +86,17 @@ You may obtain a copy of the License at
 	<tr class="cbi-section-table-row cbi-opennet-gateways" disabled="<%= bool_to_yn(gateway.disabled) %>">
 		<td class="cbi-value-field" style="text-align:right;"><%= index %>.</td>
 		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= gateway.active and "y" or "" %>">&nbsp;</div></td>
+			<%
+				local conn_state_indicator
+				if gateway.connection_state == "active" then
+					conn_state_indicator = "y"
+				elseif gateway.connection_state == "connecting" then
+					conn_state_indicator = "n"
+				else
+					conn_state_indicator = ""
+				end
+			%>
+			<div class="opennet-bool" status="<%= conn_state_indicator %>">&nbsp;</div></td>
 		<td id="name_<%= service_name %>">
 			<div title="<%= gateway.host %>:<%= gateway.port %>"><%= label %></div></td>
 		<!-- begin of other status section -->

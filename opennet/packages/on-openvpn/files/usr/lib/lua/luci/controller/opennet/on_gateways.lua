@@ -62,7 +62,7 @@ end
 function gateway_info(service_name)
 	-- wir lesen "status" als string ein, um die drei moeglichen Werte (y/n/leer) zu unterscheiden
 	local info = parse_csv_service(service_name, {host="string|value|host", port="number|value|port",
-			status="string|value|status", active="bool|function|is_openvpn_service_active",
+			status="string|value|status", connection_state="string|function|get_openvpn_service_state",
 			disabled="bool|value|disabled|false", distance="number|value|distance",
 			hop_count="number|value|hop_count|0", offset="number|value|offset|0",
 			wan_speed_download="number|detail|download", wan_speed_upload="number|detail|upload",

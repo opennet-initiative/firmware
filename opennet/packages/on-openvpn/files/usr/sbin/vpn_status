@@ -56,7 +56,14 @@ print_status()
 			elif [ "$sorting" = "manual" ]; then
 				quality=$(get_service_value "$service_name" "rank")
 			fi
-			active=$(is_openvpn_service_active "$service_name" && echo "*" || true)
+			connection_state=$(get_openvpn_service_state "$service_name")
+			if [ "$connection_state" = "active" ]; then
+				active="*"
+			elif [ "$connection_state" = "connecting" ]; then
+				active="?"
+			else
+				active=""
+			fi
 			printf "$format_string" "$active" "$host" "$quality" "$status" "$age"
 		fi
 	done

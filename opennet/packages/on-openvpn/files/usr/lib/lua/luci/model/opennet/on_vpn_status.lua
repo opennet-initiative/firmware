@@ -21,15 +21,13 @@ require("nixio.fs")
 
 -- eine Tunnel-VPN-Verbindung scheint aufgebaut zu sein
 function is_tunnel_active()
-	local SYSROOT = os.getenv("LUCI_SYSROOT")
-	if not SYSROOT then SYSROOT = "" end
-	return nixio.fs.access(SYSROOT.."/tmp/openvpn_msg.txt")
+	return on_function("get_active_mig_connections") ~= ""
 end
 
 
 -- ein Tunnel-VPN-Prozess laeuft (eventuell steht die Verbindung noch nicht)
-function is_tunnel_starting()
-	return to_bool(on_function("get_active_mig_connections"))
+function is_tunnel_active()
+	return on_function("get_starting_mig_connections") ~= ""
 end
 
 

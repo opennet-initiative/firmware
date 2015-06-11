@@ -17,10 +17,13 @@ NETCAT_BIN=$( (echo nc; which nc ncat) | tail -1)
 # Dieses Skript sollte via hotplug bei Aenderungen der Netzwerkkonfiguration ausgefuehrt werden.
 update_olsr_interfaces() {
 	trap "error_trap update_olsr_interfaces '$*'" $GUARD_TRAPS
+	local value=
 	local interfaces=$(get_zone_interfaces "$ZONE_MESH")
 	# physische Interfaces werden beispielsweise durch die mesh-Interfaces erzeugt
 	local devices=$(get_zone_raw_devices "$ZONE_MESH")
-	uci set -q "olsrd.@Interface[0].interface=$interfaces $devices"
+	# fuehrende Leerzeichen entfernen
+	value=$(echo "$interfaces $devices" | sed 's/^ *//')
+	uci set -q "olsrd.@Interface[0].interface=$value"
 	apply_changes olsrd
 }
 

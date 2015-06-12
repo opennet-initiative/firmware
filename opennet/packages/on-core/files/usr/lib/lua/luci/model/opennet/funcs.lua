@@ -357,6 +357,7 @@ function process_add_service_form()
     local protocol = luci.http.formvalue("service_protocol")
     local stype = luci.http.formvalue("service_type")
     local path = luci.http.formvalue("service_path")
+    local priority = luci.http.formvalue("service_priority")
     local details = luci.http.formvalue("service_details")
 
     if add_service and host and port and protocol and stype and path and details then
@@ -373,7 +374,12 @@ function process_add_service_form()
 	if not path then return luci.i18n.translate("Invalid path") end
 	details = parse_string_pattern(details, "a-zA-Z0-9._/:%s-")
 	if not details then return luci.i18n.translate("Invalid service details") end
-        on_function("notify_service", {stype, scheme, host, port, protocol, path, "manual", details})
+        local service_name = on_function("notify_service", {stype, scheme, host, port, protocol, path, "manual", details})
+	-- die Prioritaet wird nur gesetzt, falls sie uebergeben wurde (z.B. fuer Mesh-Gateways)
+	if priority and (priority ~= "") then
+		priority = parse_number_string(priority)
+		if priority then set_service_value(service_name, "priority", priority) end
+	end
 	return true
     else
         return false

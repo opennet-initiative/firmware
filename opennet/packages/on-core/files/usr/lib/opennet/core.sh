@@ -649,6 +649,9 @@ get_potential_error_messages() {
 	#    OpenVPN-Versionen, die ohne die "--extras"-Option gebaut wurden, unterstuetzen keine exit-Notification.
 	#    Dies ist unproblematisch - es ist eher eine Sache der Höflichkeit..
 	filters="${filters}|openvpn.*Options error.*explicit-exit-notify"
+	# 17) ddns-scripts[...]: myddns_ipv4: ...
+	#    ddns meldet leidet beim Starten einen Fehler, solange es unkonfiguriert ist.
+	filters="${filters}|ddns-scripts.*myddns_ipv[46]"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" || true
 }

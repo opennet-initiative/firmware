@@ -50,6 +50,10 @@ is_mesh_gateway_usable() {
 		failed=1
 		set_service_value "$service_name" "wan_status" "false"
 	fi
+	# Ping-Zeit aktualisieren
+	local ping_time=
+	[ -z "$failed" ] && ping_time=$(get_ping_time "$(get_service_value "$service_name" "host")")
+	set_service_value "$service_name" "wan_ping" "$ping_time"
 	# VPN-Verbindung
 	if [ -n "$failed" ]; then
 		set_service_value "$service_name" "vpn_status" ""

@@ -15,9 +15,15 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
+get_netname() {
+	local ifname="$1"
+	echo "$ifname" | sed 's/[^0-9a-zA-Z]/_/g'
+}
+
+
 setup_mesh_interface() {
 	local ifname="$1"
-	local netname=$(echo "$ifname" | sed 's/[^0-9a-zA-Z]/_/g')
+	local netname=$(get_netname "$ifname")
 	uci set "network.${netname}=interface"
 	uci set "network.${netname}.proto=none"
 	uci set "network.${netname}.auto=0"
@@ -25,20 +31,26 @@ setup_mesh_interface() {
 	# siehe https://lists.openwrt.org/pipermail/openwrt-devel/2015-June/033501.html
 	#uci set "network.${netname}.ifname=$ifname"
 	add_interface_to_zone "$ZONE_MESH" "$netname"
-	update_olsr_interfaces
 	apply_changes network firewall
+	# falls wir hier nicht warten, wird olsrd zu frueh neugestartet (bevor tapX aktiv ist)
+	sleep 1
 	# indirekte Interface/Network-Zuordnung (siehe obigen Mailinglisten-Beitrag)
 	# Auf diesem Weg bleibt die IP-Konfiguration des Device erhalten.
-	ubus call network.interface.${netname} add_device '{ "name": "'$ifname'" }'
+	local ubus_dev="network.interface.${netname}"
+	ubus call "$ubus_dev" add_device '{ "name": "'$ifname'" }'
+	# die obige ubus-Aktion wird nebenlaeufig abgearbeitet - wir muessen das Ergebnis abwarten
+	ubus wait_for "$ubus_dev"
+	update_olsr_interfaces
 }
 
 
 cleanup_mesh_interface() {
 	local ifname="$1"
-	local netname=$(echo "$ifname" | sed 's/[^0-9a-zA-Z]/_/g')
-	uci_delete "network.${netname}"
+	local netname=$(get_netname "$ifname")
 	del_interface_from_zone "$ZONE_MESH" "$netname"
+	uci_delete "network.${netname}"
 	apply_changes network firewall
+	update_olsr_interfaces
 }
 
 
@@ -52,7 +64,7 @@ case "$script_type" in
 	down)
 		cleanup_mesh_interface "$dev"
 		;;
-esac
+esac 2>&1 | logger -t mesh-updown
 
 exit 0
 

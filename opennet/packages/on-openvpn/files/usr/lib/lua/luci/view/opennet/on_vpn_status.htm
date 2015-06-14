@@ -11,6 +11,8 @@ You may obtain a copy of the License at
 
 -%>
 
+<% require("luci.model.opennet.funcs") %>
+
 <script type="text/javascript">//<![CDATA[
 
 function update_vpn_status_item(item) {
@@ -23,13 +25,8 @@ function update_vpn_status_item(item) {
 }
 
 
-if (window.attachEvent) {
-	window.attachEvent('onload', init);
-} else if (window.addEventListener) {
-	window.addEventListener('load', init, false);
-} else {
-	document.addEventListener('load', init, false);
-}
+<%= register_javascript_function_onload("init") %>
+
 function init() {
 	["vpn_status_label", "vpn_status_form"].map(function(item) {
 		if (document.getElementById(item)) {

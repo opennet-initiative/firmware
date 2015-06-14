@@ -523,5 +523,20 @@ function get_timestamp_age_string(timestamp)
 	end
 end
 
+--[[
+@brief Liefere einen String zurueck, der eine gewuenschte Funktion an das "onload"-Ereignis der aktuellen Webseite haengt.
+@details Diese Funktion sollte innerhalb eines Javascript-Blocks aufgerufen werden.
+--]]
+function register_javascript_function_onload(func_name)
+	return [[
+		if (window.attachEvent) {
+			window.attachEvent('onload', ]] .. func_name .. [[);
+		} else if (window.addEventListener) {
+			window.addEventListener('load', ]] .. func_name .. [[, false);
+		} else {
+			document.addEventListener('load', ]] .. func_name .. [[, false);
+		}]]
+end
+
 -- Ende der Doku-Gruppe
 --- @}

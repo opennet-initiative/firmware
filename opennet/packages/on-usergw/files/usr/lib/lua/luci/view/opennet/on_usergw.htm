@@ -63,11 +63,11 @@ end %>
           local all_routes = on_function("get_olsr_route_count_by_device", {".*"})
         %>
         <div class="cbi-value">
-          <label class="cbi-value-title" for="mesh-connections-openvpn"><%:Routeable nodes via Mesh VPN%>:</label>
+          <label class="cbi-value-title" for="mesh-connections-openvpn"><%:Routeable addresses via Mesh VPN%>:</label>
           <div class="cbi-value-field"><%= vpn_routes %></div>
         </div>
         <div class="cbi-value">
-          <label class="cbi-value-title" for="mesh-connections-other"><%:Other routeable nodes%>:</label>
+          <label class="cbi-value-title" for="mesh-connections-other"><%:Other routeable addresses%>:</label>
           <div class="cbi-value-field"><%= tonumber(all_routes) - tonumber(vpn_routes) %></div>
         </div>
       </div>

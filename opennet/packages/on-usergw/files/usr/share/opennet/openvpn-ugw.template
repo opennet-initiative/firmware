@@ -9,11 +9,8 @@ client
 nobind
 comp-lzo yes
 
-# keine sanfte Abmeldung vom Server - sonst ueberschreibt dieses Signal das "ping-restart"-Signal bei einem Verbindungsabbruch
-#explicit-exit-notify 1
-# explizit kein "persist-tun" - damit wir Verbindungsabbrueche via down-Skript erkennen koennen
-#persist-tun
-
+explicit-exit-notify 1
+persist-tun
 persist-key
 
 # keine Fehlermeldungen bei scheinbaren "replay"-Angriffen
@@ -24,9 +21,7 @@ mute-replay-warnings
 dev tap-mesh
 dev-type tap
 
-ns-cert-type server
 script-security 2 execve
-
 up /usr/lib/opennet/events/mesh_openvpn_updown.sh
 down /usr/lib/opennet/events/mesh_openvpn_updown.sh
 

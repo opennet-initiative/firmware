@@ -63,9 +63,9 @@ end
 
 
 function get_html_loading_spinner(name, style)
-	return '<img class="loading_img_small" name="' .. name ..
-			'" src="' .. html_resource_base .. '/icons/loading.gif" alt="' ..
-			luci.i18n.translate("Loading") .. '" style="' .. (style or "") .. '" />'
+	return '<span id="' .. name .. '"><img class="loading_img_small"' ..
+			' src="' .. html_resource_base .. '/icons/loading.gif" alt="' ..
+			luci.i18n.translate("Loading") .. '" style="' .. (style or "") .. '" /></span>'
 end
 
 

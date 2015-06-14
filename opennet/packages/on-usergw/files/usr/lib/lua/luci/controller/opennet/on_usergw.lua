@@ -20,7 +20,7 @@ function index()
     luci.i18n.loadc("on-usergw")
 
     local page = entry({"opennet", "opennet_2", "ugw_tunnel"},
-        template("opennet/on_usergw"),
+        call("action_on_openvpn_mesh_overview"),
         luci.i18n.translate("Internet Sharing"), 3)
     page.css = "opennet.css"
     page.i18n = "on_usergw"
@@ -56,6 +56,11 @@ function index()
     require("luci.model.opennet.on_vpn_management")
 end
 
+
+function action_on_openvpn_mesh_overview()
+    local result = process_openvpn_certificate_form("mesh")
+    luci.template.render("opennet/on_usergw", { certstatus=result.certstatus })
+end
 
 function action_on_openvpn_mesh_keys()
     local result = process_openvpn_certificate_form("mesh")

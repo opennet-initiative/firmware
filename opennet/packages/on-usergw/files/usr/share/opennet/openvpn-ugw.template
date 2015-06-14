@@ -20,7 +20,8 @@ persist-key
 # man openvpn: Silence the output of replay warnings, which are a common false alarm on WiFi networks.
 mute-replay-warnings
 
-dev tap
+# mit der Variable "MESH_OPENVPN_DEVICE_PREFIX" synchron halten
+dev tap-mesh
 dev-type tap
 
 ns-cert-type server

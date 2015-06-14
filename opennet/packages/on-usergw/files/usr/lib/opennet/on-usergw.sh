@@ -9,6 +9,8 @@ TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-service
 ## eine beliebige Portnummer, auf der wir keinen udp-Dienst vermuten
 SPEEDTEST_UPLOAD_PORT=29418
 SPEEDTEST_SECONDS=20
+## dieser Wert muss mit der VPN-Konfigurationsvorlage synchron gehalten werden
+MESH_OPENVPN_DEVICE_PREFIX=tap-mesh
 
 
 # hole einen der default-Werte der aktuellen Firmware

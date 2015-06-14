@@ -14,7 +14,7 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 print_status() {
-	local ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get "$gw" 2>/dev/null | awk '{if ($5 ~ "tap") print $1}' ; done)
+	local ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get "$gw" 2>/dev/null | awk '{if ($5 ~ "$MESH_OPENVPN_DEVICE_PREFIX") print $1}' ; done)
 	local ugw_status_centralips_no=$(echo "$ugw_status_centralips" | wc -w)
 
 	local ugw_status_tunnel_active=$(ls /tmp/opennet_ugw-*.txt 2>/dev/null || true)

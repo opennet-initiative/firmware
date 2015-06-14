@@ -269,7 +269,7 @@ fi
 
 
 if is_function_available "get_active_ugw_connections"; then
-	ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '/dev tap/ {printf $1" "}'; done)
+	ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get $gw 2>/dev/null | awk '/dev $MESH_OPENVPN_DEVICE_PREFIX/ {printf $1" "}'; done)
 	on_ugw_status="$([ "$(echo "$ugw_status_centralips" | wc -w)" -ge "1" ] && echo "1" || echo "0")"
 	on_ugw_enabled="$(uci_is_true "$(uci_get on-usergw.ugw_sharing.shareInternet)" && echo "1" || echo "0")"
 

@@ -80,9 +80,10 @@ delete_policy_rule() {
 }
 
 
-# erzeuge Policy-Rules entsprechend der IP-Bereiche eines Netzwerks
-# Parameter: logisches Netzwerkinterface
-# weitere Parameter: Rule-Spezifikation
+## @fn add_network_policy_rule_by_destination()
+## @brief erzeuge Policy-Rules entsprechend der IP-Bereiche eines Netzwerks
+## @param network logisches Netzwerkinterface
+## @param more weitere Parameter: Policy-Rule-Spezifikation
 add_network_policy_rule_by_destination() {
 	trap "error_trap add_network_policy_rule_by_destination '$*'" $GUARD_TRAPS
 	local network="$1"

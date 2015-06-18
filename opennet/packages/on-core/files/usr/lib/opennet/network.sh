@@ -117,8 +117,8 @@ update_opennet_zone_masquerading() {
 get_current_addresses_of_network() {
 	trap "error_trap get_current_addresses_of_network '$*'" $GUARD_TRAPS
 	local network="$1"
-	local device=$(get_device_of_interface "$network")
-	ip addr show dev "$device" | awk '{ if (($1 == "inet") || ($1 == "inet6")) print $2; }'
+	local subnets=
+	(set +eu; . /lib/functions/network.sh; network_get_subnets subnets "$network"; echo "$subnets")
 }
 
 

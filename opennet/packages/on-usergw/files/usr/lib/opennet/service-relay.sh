@@ -211,7 +211,12 @@ is_service_relay_possible() {
 update_service_relay_status() {
 	trap "error_trap update_service_relay_status '$*'" $GUARD_TRAPS
 	local service_name
+	local wan_status
 	get_services | filter_relay_services | while read service_name; do
+		# WAN-Routing pruefen und aktualisieren
+		wan_status="true"
+		is_service_routed_via_wan "$service_name" || wan_status="false"
+		set_service_value "$service_name" "wan_status" "$wan_status"
 		is_service_relay_possible "$service_name" && enable_service_relay "$service_name"
 		true
 	done

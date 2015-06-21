@@ -202,7 +202,10 @@ update_olsr_services() {
 	local service
 	local details
 	# aktuell verbreitete Dienste benachrichtigen
-	get_olsr_services | while read scheme ip port path proto service details; do
+	local olsr_services=$(get_olsr_services)
+	# leere Liste? Keine Verbindung mit der Wolke? Keine Aktualisierung, keine Beraeumung ...
+	[ -z "$olsr_services" ] && return
+	echo "$olsr_services" | while read scheme ip port path proto service details; do
 		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "$details" "olsr" >/dev/null
 	done
 	local service_name

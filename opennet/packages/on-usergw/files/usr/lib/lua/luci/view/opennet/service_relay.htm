@@ -23,12 +23,89 @@ You may obtain a copy of the License at
 
   <fieldset class="cbi-section">
     <legend><%:Available Services to be relayed%></legend>
+    <div class="cbi-section-comment">
+        <%:The following services are announced by public Opennet Servers.%>
+	<%:Access points that are configured to share a local internet connection relay these services into the Opennet Mesh by default.%>
+	<%:The most important relayed service is the Mesh Internet Gateway service.%>
+	<%:You may disable any service relay below if you prefer so.%>
+	<%:Service relays are just traffic redirection rules - they do not consume processing resources.%>
+	<%:The list below is maintained by the Opennet Administration crew.%>
+    </div>
+    <fieldset class="cbi-section-node">
+	<form name="relay_services" method="post" action="<%= REQUEST_URI %>">
+	<table class="cbi-section-table" id="on-gateway-list">
+	<tr class="cbi-section-table-titles">
+		<th colspan = "1" />
+		<th class="cbi-section-table-cell"><%:active%></th>
+		<th class="cbi-section-table-cell"><%:Gateway%></th>
+		<th class="cbi-section-table-cell">
+			<abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN%></abbr></th>
+		<th class="cbi-section-table-cell"><%:Actions%></th>
+		<th />
+	</tr>
+	<%
+        for index, service_name in ipairs(relay_services) do
+          local service = parse_csv_service(service_name, {
+              relay_state="bool|function|is_service_relay_possible",
+              disabled="string|value|disabled",
+              host="string|value|host",
+              port="number|value|port",
+              local_relay_port="number|value|port",
+              source="string|value|source",
+              wan_status="string|value|wan_status",
+          })
+	  if service then
+            local label = service.host
+	    -- falls das Ziel nicht wie eine IP (v4/v6) aussehen sollte, dann nimm den Text-Bestandteil vor dem ersten Punkt
+            if not string.match(label or "", "^[0-9a-fA-F:.]+$") then label = dot_split(label)[1] end
+            -- Port immer hinzufügen (bis v0.4-5 war 1602 der Standard-Wert für das Mesh)
+	    if label then
+              label = label .. ":" .. service.port
+            else
+              label = service_name
+            end
+	%>
+	<tr class="cbi-section-table-row cbi-opennet-services" disabled="<%= bool_to_yn(service.disabled) %>">
+		<td class="cbi-value-field" style="text-align:right;"><%= index %>.</td>
+		<td class="cbi-value-field">
+			<%
+				local relay_state_indicator
+				if service.relay_state == "active" then
+					relay_state_indicator = "y"
+				else
+					relay_state_indicator = ""
+				end
+			%>
+			<div class="opennet-bool" status="<%= relay_state_indicator %>">&nbsp;</div></td>
+		<td id="name_<%= service_name %>">
+			<div title="<%= service.host %>:<%= service.port %>"><%= label %></div></td>
+		<td class="cbi-value-field">
+			<div class="opennet-bool" status="<%= bool_to_yn(service.wan_status) %>" /></td>
+		<td class="cbi-value-field">
+			<% if service.source ~= "manual" then %>
+				<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
+				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%= service.id %>"
+					title="<%:auto-discovered services cannot be deleted%>" name="delete_service" disabled="disabled" />
+			<% else %>
+				<%# Loeschen ist moeglich %>
+				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%= service.id %>"
+					title="<%:delete%>" name="delete_service" />
+			<% end %>
+			<input class="cbi-button cbi-button-disable cbi-button-small" type="submit"
+				value="<%= service.id %>" title="<%:disable%>" name="disable_service" />
+		</td>
+	</tr>
+	<% end %>
+	<% end %>
+
+	</table>
+	</form>
   </fieldset>
 
   <%# Manuelles Hinzufügen weiterer Service-Relays %>
   <fieldset class="cbi-section">
     <legend><%:Manually add a Service Relay%></legend>
-    <form name="gateways" method="post" action="<%= REQUEST_URI %>">
+    <form name="relay_services" method="post" action="<%= REQUEST_URI %>">
       <div class="cbi-value">
         <div class="cbi-value-field">
           <input type="hidden" name="service_type" value="mesh" />
@@ -36,6 +113,7 @@ You may obtain a copy of the License at
           <input type="hidden" name="service_scheme" value="openvpn" />
           <input type="hidden" name="service_protocol" value="udp" />
           <input type="hidden" name="service_details" value="" />
+          <input type="hidden" name="service_priority" value="5" />
           <label for="service_host"><%:Manually add Exit Gateway%>:</label>
           <input class="cbi-input-text" name="service_host" id="service_host" size="16" />
           <label for="service_port"><%:Port%>:</label>

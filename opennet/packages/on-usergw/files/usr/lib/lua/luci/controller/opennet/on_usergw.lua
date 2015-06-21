@@ -40,7 +40,7 @@ function index()
     page.i18n = "on_usergw"
     page.leaf = true
 
-    entry({"opennet", "opennet_2", "ugw_tunnel", "service_relay"},
+    page = entry({"opennet", "opennet_2", "ugw_tunnel", "service_relay"},
         call("action_on_service_relay"),
         luci.i18n.translate("Service Relay"), 3)
     page.css = "opennet.css"
@@ -97,7 +97,10 @@ function action_on_service_relay()
     service_result = process_service_action_form(nil)
     if (service_result ~= true) and (service_result ~= false) then table.insert(on_errors, service_result) end
 
-    luci.template.render("opennet/service_relay", { on_errors=on_errors })
+    -- Dienst-Liste ermitteln
+    local relay_services = line_split(luci.sys.exec("on-function get_services | on-function filter_relay_services"))
+
+    luci.template.render("opennet/service_relay", { on_errors=on_errors, relay_services=relay_services })
 end
 
 

@@ -26,6 +26,7 @@ _is_local_service_relay_port_unused() {
 # Falls noch kein Port definiert ist, dann waehle einen neuen Port.
 # Parameter: config_name
 pick_local_service_relay_port() {
+	trap "error_trap pick_local_service_relay_port '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local port=$(get_service_value "$service_name" "local_relay_port")
 	# falls unbelegt: suche einen unbenutzten lokalen Port
@@ -77,19 +78,7 @@ delete_unused_service_relay_forward_rules() {
 add_service_relay_forward_rule() {
 	trap "error_trap add_service_relay_forward_rule '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local rule_name="${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
-	local port=$(get_service_value "$service_name" "port")
-	local host=$(get_service_value "$service_name" "host")
-	local protocol=$(get_service_value "$service_name" "protocol")
-	local local_relay_port=$(get_service_value "$service_name" "local_relay_port")
-	local main_ip=$(get_main_ip)
-	local target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
-	# wir verwenden nur die erste aufgeloeste IP, zu welcher wir eine Route haben.
-	# z.B. faellt IPv6 aus, falls wir kein derartiges Uplink-Interface sehen
-	local uci_match=$(find_first_uci_section firewall redirect \
-		"target=DNAT" "name=$rule_name" "proto=$protocol" \
-		"src=$ZONE_MESH" "src_dip=$main_ip" \
-		"dest=$ZONE_WAN" "dest_port=$port" "dest_ip=$target_ip")
+	local uci_match=$(get_service_relay_port_forwarding "$service_name")
 	# perfekt passende Regel gefunden? Fertig ...
 	[ -n "$uci_match" ] && return 0
 	local uci_match=$(find_first_uci_section firewall redirect "target=DNAT" "name=$rule_name")
@@ -98,15 +87,15 @@ add_service_relay_forward_rule() {
 	# neue Regel anlegen
 	local uci_prefix=firewall.$(uci add firewall redirect)
 	# der Name ist wichtig fuer spaetere Aufraeumaktionen
-	uci set "${uci_prefix}.name=$rule_name"
+	uci set "${uci_prefix}.name=${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
 	uci set "${uci_prefix}.target=DNAT"
-	uci set "${uci_prefix}.proto=$protocol"
+	uci set "${uci_prefix}.proto=$(get_service_value "$service_name" "protocol")"
 	uci set "${uci_prefix}.src=$ZONE_MESH"
-	uci set "${uci_prefix}.src_dip=$main_ip"
-	uci set "${uci_prefix}.src_dport=$local_relay_port"
+	uci set "${uci_prefix}.src_dip=$(get_main_ip)"
+	uci set "${uci_prefix}.src_dport=$(get_service_value "$service_name" "local_relay_port")"
 	uci set "${uci_prefix}.dest=$ZONE_WAN"
-	uci set "${uci_prefix}.dest_port=$port"
-	uci set "${uci_prefix}.dest_ip=$target_ip"
+	uci set "${uci_prefix}.dest_port=$(get_service_value "$service_name" "port")"
+	uci set "${uci_prefix}.dest_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)"
 	# die Abhängigkeit speichern
 	service_add_uci_dependency "$service_name" "$uci_prefix"
 }
@@ -124,6 +113,31 @@ enable_service_relay() {
 }
 
 
+_get_service_relay_olsr_announcement_prefix() {
+	trap "error_trap _get_service_relay_olsr_announcement_prefix '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local main_ip=$(get_main_ip)
+	local service_type=$(get_service_value "$service_name" "service")
+	local scheme=$(get_service_value "$service_name" "scheme")
+	local host=$(get_service_value "$service_name" "host")
+	local port=$(pick_local_service_relay_port "$service_name")
+	local protocol=$(get_service_value "$service_name" "protocol")
+	# announce the service
+	echo "${scheme}://${main_ip}:${port}|${protocol}|${service_type}"
+}
+
+
+## @fn get_service_relay_olsr_announcement()
+## @brief Ermittle den oder die OLSR-Nameservice-Announcements, die zu dem Dienst gehoeren.
+get_service_relay_olsr_announcement() {
+	trap "error_trap get_service_relay_olsr_announcement '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local announce_unique=$(_get_service_relay_olsr_announcement_prefix "$service_name")
+	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
+	uci_get_list "${uci_prefix}.service" | grep -F "^$announce_unique " || true
+}
+
+
 ## @fn announce_olsr_service_relay()
 ## @brief Verkuende das lokale Relay eines öffentlichen Dienstes inkl. Geschwindigkeitsdaten via olsr nameservice.
 ## @param service_name Name des zu veröffentlichenden Diensts
@@ -131,48 +145,37 @@ enable_service_relay() {
 announce_olsr_service_relay() {
 	trap "error_trap announce_olsr_service_relay '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local main_ip=$(get_main_ip)
-
-	local download=$(get_service_detail "$service_name" download)
-	local upload=$(get_service_detail "$service_name" upload)
-	local ping=$(get_service_detail "$service_name" ping)
-
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	[ -z "$uci_prefix" ] && msg_error "Failed to enforce olsr nameservice plugin" && trap "" $GUARD_TRAPS && return 1
-
-	local service_type=$(get_service_value "$service_name" "service")
-	local scheme=$(get_service_value "$service_name" "scheme")
-	local host=$(get_service_value "$service_name" "host")
-	local port=$(pick_local_service_relay_port "$service_name")
-	local protocol=$(get_service_value "$service_name" "protocol")
-
-	# announce the service
-	local service_unique="${scheme}://${main_ip}:${port}|${protocol}|${service_type}"
+	local service_unique=$(_get_service_relay_olsr_announcement_prefix "$service_name")
 	# das 'service_name'-Detail wird fuer die anschliessende Beraeumung (firewall-Regeln usw.) verwendet
-	local service_details="upload:$upload download:$download ping:$ping creator:$SERVICE_RELAY_CREATOR public_host:$host service_name:$service_name"
+	# nur nicht-leere Attribute werden geschrieben
+	local service_details=$(while read key value; do [ -z "$value" ] && continue; echo "$key:$value"; done <<EOF
+		public_host $(get_service_value "$service_name" "host")
+		upload $(get_service_value "$service_name" wan_speed_upload)
+		download $(get_service_value "$service_name" wan_speed_download)
+		ping $(get_service_value "$service_name" wan_ping)
+		creator $SERVICE_RELAY_CREATOR
+		service_name $service_name
+EOF
+)
 	# loesche alte Dienst-Announcements mit demselben Prefix
 	local this_unique
 	local this_details
-	uci_get_list "${uci_prefix}.service" \
-			| awk "{ if (\$1 == \"$service_unique\") print \$0; }" \
-			| cut -f 2- -d " " \
-			| while read this_details; do
+	get_service_relay_olsr_announcement "$service_name" | while read this_unique this_details; do
 		# der Wert ist bereits korrekt - wir koennen abbrechen
 		[ "$this_details" = "$service_details" ] && break
 		# der Wert ist falsch: loeschen und am Ende neu hinzufuegen
 		msg_debug "Deleting outdated service-relay announcement: $service_unique $this_details"
 		uci_delete_list "${uci_prefix}.service" "$service_unique $this_details"
 	done
-	local matches=$(uci_get_list "${uci_prefix}.service" | awk "{ if (\$1 == \"$service_unique\") print \$0; }")
 	# falls keine Treffer gibt, fuegen wir ein neues Announcement hinzu
-	if [ -z "$matches" ]; then
+	if [ -z "$(get_service_relay_olsr_announcement "$service_name")" ]; then
 		msg_debug "Adding new service-relay announcement: $service_unique $service_details"
 		uci_add_list "${uci_prefix}.service" "$service_unique $service_details"
 	fi
 }
 
 
-# olsr-Nameservice-Beschreibungen entfernen
+# olsr-Nameservice-Beschreibungen entfernen falls der dazugehoerige Dienst nicht mehr relay-tauglich ist
 deannounce_unused_olsr_service_relays() {
 	local service_description
 	local extra_info
@@ -236,6 +239,28 @@ filter_relay_services() {
 		[ -n "$(get_service_value "$service_name" "local_relay_port")" ] && echo "$service_name"
 		true
 	done
+}
+
+
+## @fn get_service_relay_port_forwarding()
+## @brief Liefere den Namen der uci-Sektion des Relay-Service-Portforwarding zurueck.
+## @param service_name Name des Relay-Service-Diensts.
+## @returns Den uci-Namen oder nichts, falls keine Portweiterleitung existiert.
+get_service_relay_port_forwarding() {
+	trap "error_trap get_service_relay_port_forwarding '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local rule_name="${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
+	local port=$(get_service_value "$service_name" "port")
+	local host=$(get_service_value "$service_name" "host")
+	local protocol=$(get_service_value "$service_name" "protocol")
+	local main_ip=$(get_main_ip)
+	local target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
+	# wir verwenden nur die erste aufgeloeste IP, zu welcher wir eine Route haben.
+	# z.B. faellt IPv6 aus, falls wir kein derartiges Uplink-Interface sehen
+	find_first_uci_section firewall redirect \
+		"target=DNAT" "name=$rule_name" "proto=$protocol" \
+		"src=$ZONE_MESH" "src_dip=$main_ip" \
+		"dest=$ZONE_WAN" "dest_port=$port" "dest_ip=$target_ip"
 }
 
 # Ende der Doku-Gruppe

@@ -36,21 +36,26 @@ You may obtain a copy of the License at
 	<table class="cbi-section-table" id="on-gateway-list">
 	<tr class="cbi-section-table-titles">
 		<th colspan = "1" />
-		<th class="cbi-section-table-cell"><%:active%></th>
 		<th class="cbi-section-table-cell"><%:Gateway%></th>
+		<th class="cbi-section-table-cell"><%:Local Port%></th>
 		<th class="cbi-section-table-cell">
-			<abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN%></abbr></th>
+			<abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN Test%></abbr></th>
+		<th class="cbi-section-table-cell">
+			<abbr title="<%:The port forwarding will be active automatically soon after a successful WAN test.%>"><%:Port Forwarding%></abbr></th>
+		<th class="cbi-section-table-cell">
+			<abbr title="<%:The service announcement (via olsr) will be active soon after a successful WNA test.%>"><%:Announcement%></abbr></th>
 		<th class="cbi-section-table-cell"><%:Actions%></th>
 		<th />
 	</tr>
 	<%
         for index, service_name in ipairs(relay_services) do
           local service = parse_csv_service(service_name, {
-              relay_state="bool|function|is_service_relay_possible",
               disabled="string|value|disabled",
+              port_forwarding_uci_section="string|function|get_service_relay_port_forwarding",
+              olsr_announcement="string|function|get_service_relay_olsr_announcement",
               host="string|value|host",
               port="number|value|port",
-              local_relay_port="number|value|port",
+              local_relay_port="number|value|local_relay_port",
               source="string|value|source",
               wan_status="string|value|wan_status",
           })
@@ -67,20 +72,14 @@ You may obtain a copy of the License at
 	%>
 	<tr class="cbi-section-table-row cbi-opennet-services" disabled="<%= bool_to_yn(service.disabled) %>">
 		<td class="cbi-value-field" style="text-align:right;"><%= index %>.</td>
-		<td class="cbi-value-field">
-			<%
-				local relay_state_indicator
-				if service.relay_state then
-					relay_state_indicator = "y"
-				else
-					relay_state_indicator = ""
-				end
-			%>
-			<div class="opennet-bool" status="<%= relay_state_indicator %>">&nbsp;</div></td>
-		<td id="name_<%= service_name %>">
-			<div title="<%= service.host %>:<%= service.port %>"><%= label %></div></td>
+		<td><div title="<%= service.host %>:<%= service.port %>"><%= label %></div></td>
+		<td><%= service.local_relay_port %></td>
 		<td class="cbi-value-field">
 			<div class="opennet-bool" status="<%= bool_to_yn(service.wan_status) %>" /></td>
+		<td class="cbi-value-field">
+			<div class="opennet-bool" status="<%= bool_to_yn(service.port_forwarding_uci_section ~= "") %>" /></td>
+		<td class="cbi-value-field">
+			<div class="opennet-bool" status="<%= bool_to_yn(service.olsr_announcement ~= "") %>" /></td>
 		<td class="cbi-value-field">
 			<% if service.source ~= "manual" then %>
 				<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>

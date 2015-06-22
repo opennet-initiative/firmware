@@ -46,7 +46,7 @@ error_trap() {
 
 
 # Module laden
-for fname in core.sh devel.sh network.sh olsr.sh openvpn.sh routing.sh services.sh uci.sh \
+for fname in core.sh devel.sh hardware.sh network.sh olsr.sh openvpn.sh routing.sh services.sh uci.sh \
 		on-openvpn.sh \
 		on-usergw.sh service-relay.sh \
 		on-captive-portal.sh; do

@@ -25,7 +25,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  	STRIP="true" \
  	INSTALL_LIB="true" \
 -	SUBDIRS="arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog"
-+	SUBDIRS="arprefresh dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns nameservice ondataservice_light p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog"
++	SUBDIRS="httpinfo jsoninfo nameservice ondataservice_light txtinfo"
  
  define Build/Compile
  	$(call Build/Compile/Default,all)

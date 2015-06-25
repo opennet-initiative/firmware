@@ -2340,10 +2340,11 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 +index 0000000..729d784
 +--- /dev/null
 ++++ b/lib/ondataservice_light/src/crc16.h
-+@@ -0,0 +1,6 @@
++@@ -0,0 +1,7 @@
 ++
 ++// copied from http://stackoverflow.com/questions/3853670/are-there-any-free-crc-libraries-that-covers-a-lot-of-the-crc-algorithms
 ++
+++#include <sys/types.h>
 ++
 ++u_int16_t crcCalculate(char *buffer, unsigned int length);
 ++

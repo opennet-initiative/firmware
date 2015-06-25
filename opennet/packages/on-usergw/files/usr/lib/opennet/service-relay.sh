@@ -81,6 +81,8 @@ add_service_relay_forward_rule() {
 	local uci_match=$(get_service_relay_port_forwarding "$service_name")
 	# perfekt passende Regel gefunden? Fertig ...
 	[ -n "$uci_match" ] && return 0
+	local host=$(get_service_value "$service_name" "host")
+	local rule_name="${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
 	local uci_match=$(find_first_uci_section firewall redirect "target=DNAT" "name=$rule_name")
 	# unvollstaendig passendes Ergebnis? Loesche es (der Ordnung halber) ...
 	[ -n "$uci_match" ] && uci_delete "$uci_match"
@@ -157,9 +159,12 @@ announce_olsr_service_relay() {
 		service_name $service_name
 EOF
 )
+	# Zeilenumbrueche durch Leerzeichen ersetzen, abschliessendes Leerzeichen entfernen
+	service_details=$(echo "$service_details" | tr '\n' ' ' | sed 's/ $//')
 	# loesche alte Dienst-Announcements mit demselben Prefix
 	local this_unique
 	local this_details
+	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	get_service_relay_olsr_announcement "$service_name" | while read this_unique this_details; do
 		# der Wert ist bereits korrekt - wir koennen abbrechen
 		[ "$this_details" = "$service_details" ] && break

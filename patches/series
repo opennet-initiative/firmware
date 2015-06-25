@@ -7,5 +7,4 @@ hostapd_option_chanlist.patch
 #curl_enable_https.patch
 luci_olsr_fix_empty_result.patch
 olsrd_add_ondataservice.patch
-olsrd_update_v0.9.patch
 px5g_create_csr.patch

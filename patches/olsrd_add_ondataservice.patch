@@ -57,7 +57,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  $(eval $(call BuildPackage,olsrd-mod-pud))
 --- /dev/null
 +++ b/routing/olsrd/patches/023-ondataservice.patch
-@@ -0,0 +1,2895 @@
+@@ -0,0 +1,2897 @@
 +diff --git a/Makefile b/Makefile
 +index 8ce6dc5..cf3b410 100644
 +--- a/Makefile
@@ -488,10 +488,11 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 +index 0000000..729d784
 +--- /dev/null
 ++++ b/lib/ondataservice/src/crc16.h
-+@@ -0,0 +1,6 @@
++@@ -0,0 +1,7 @@
 ++
 ++// copied from http://stackoverflow.com/questions/3853670/are-there-any-free-crc-libraries-that-covers-a-lot-of-the-crc-algorithms
 ++
+++#include <sys/types.h>
 ++
 ++u_int16_t crcCalculate(char *buffer, unsigned int length);
 ++

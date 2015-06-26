@@ -125,7 +125,7 @@ function status_ugw_connection()
         -- kein Zertifikat vorhanden
 	result = '<p>' .. luci.i18n.translate("Certificate is missing") .. " (" ..
 	    luci.i18n.translate("see") ..
-	    '<a href="' .. luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel") ..
+	    '<a href="' .. luci.dispatcher.build_url("opennet", "opennet_2", "ugw_tunnel", "openvpn_mesh_keys") .. '">' ..
 	    luci.i18n.translate("Certificate management") .. "</a>).</p>"
     end
     luci.http.write(result)

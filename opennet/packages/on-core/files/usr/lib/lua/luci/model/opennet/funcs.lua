@@ -211,8 +211,16 @@ end
 
 function generate_csr(type, openssl)
 	local filename = "on_aps"
-	if type == "mesh" then filename = "on_ugws" end
+	local cert_dir
+	if type == "mesh" then
+		cert_dir = SYSROOT .. "/etc/openvpn/opennet_ugw"
+		filename = cert_dir .. "/" .. "on_ugws"
+	else if type == "user" then
+		cert_dir = SYSROOT .. "/etc/openvpn/opennet_user"
+		filename = cert_dir .. "/" .. "on_aps"
+	end
 	if openssl.organizationName and openssl.commonName and openssl.EmailAddress then
+		nixio.fs.mkdirr(cert_dir)
 		local command = "export openssl_countryName='"..openssl.countryName.."'; "..
 						"export openssl_provinceName='"..openssl.provinceName.."'; "..
 						"export openssl_localityName='"..openssl.localityName.."'; "..
@@ -221,11 +229,11 @@ function generate_csr(type, openssl)
 						"export openssl_commonName='"..openssl.commonName.."'; "..
 						"export openssl_EmailAddress='"..openssl.EmailAddress.."'; "..
 						"openssl req -config /etc/ssl/on_openssl.cnf -batch -nodes -new -days "..openssl.days..
-							" -keyout "..SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".key"..
-							" -out "..SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".csr >/tmp/ssl.out"
+							" -keyout ".. filename .. ".key"..
+							" -out ".. filename .. ".csr >/tmp/ssl.out"
 		os.execute(command)
-		nixio.fs.chmod(SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".key", 600)
-		nixio.fs.chmod(SYSROOT.."/etc/openvpn/opennet_"..type.."/"..filename..".csr", 600)
+		nixio.fs.chmod(filename .. ".key", 600)
+		nixio.fs.chmod(filename .. ".csr", 600)
 	end
 end
 

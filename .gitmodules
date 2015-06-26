@@ -6,7 +6,7 @@
 	url = http://github.com/openwrt-routing/packages.git
 [submodule "openwrt"]
 	path = openwrt
-	url = git://git.openwrt.org/openwrt.git
+	url = git://git.openwrt.org/15.05/openwrt.git
 [submodule "packages"]
 	path = packages
 	url = https://github.com/openwrt/packages.git

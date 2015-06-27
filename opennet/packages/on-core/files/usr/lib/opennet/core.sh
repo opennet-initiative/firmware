@@ -229,7 +229,7 @@ clean_restart_log() {
 ##   ein beliebiges whitespace-Zeichen getrennt.
 ##   Dieses Dateiformat wird beispielsweise für die Dienst-Zustandsdaten verwendet.
 ##   Zusätzlich ist diese Funktion auch zum Parsen von openvpn-Konfigurationsdateien geeignet.
-_get_file_dict_value() { local key="$1"; shift; sed -n "s/^$key[ \t]\+//p" "$@" 2>/dev/null || true; }
+_get_file_dict_value() { local key="$1"; shift; { grep "^$key[[:space:]]" "$@" 2>/dev/null || true; } | while read key value; do echo -n "$value"; done; }
 
 
 ## @fn _get_file_dict_keys()

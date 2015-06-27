@@ -128,9 +128,10 @@ Sollte die Verbindung zum aktuellen Gateway abreissen, muss der Gateway als unbr
 * Die Einstellung ``explicit-exit-notify`` muss abgeschaltet sein, da andernfalls der Grund des Endes der Verbindung im ``down``-Skript nicht erkennbar ist (die Status-Variable ``signal`` wird von ``explicit-exit-notify`` überschrieben).
 
 
-### Datenspeicherung {#mig-storage}
+Datenspeicherung {#storage}
+----------------
 
-Für jeden Gateway werden dauerhafte und wechselhafte Eigenschaften gespeichert.
+Für jeden Dienst (z.B. Gateways) werden dauerhafte und wechselhafte Eigenschaften gespeichert.
 
 Die folgenden Attribute sind persistent (siehe ``on-core/files/usr/lib/opennet/services.sh``):
 
@@ -150,6 +151,8 @@ Alle übrigen Attribute unterliegen lediglich der volatilen Speicherung.
 Die persistenten Informationen liegen unter ``/etc/on-services.d``.
 
 Die volatilen Informationen liegen unter ``/tmp/on-services-volatile.d``.
+
+Die meisten der obigen Attribute sind Dienst-spezifisch. Einige wenige jedoch (z.B. 'offset') sind nach Dienst-Anbietern (Hostname, bzw. IP) gruppiert. Diese Informationen befinden sich unter ``/etc/on-services./provider-specific`` in Dateien, die nach dem Attribut benannt sind.
 
 
 Internet-Freigabe (Usergateways) {#ugw}

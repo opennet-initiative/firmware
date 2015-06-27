@@ -229,7 +229,7 @@ clean_restart_log() {
 ##   ein beliebiges whitespace-Zeichen getrennt.
 ##   Dieses Dateiformat wird beispielsweise für die Dienst-Zustandsdaten verwendet.
 ##   Zusätzlich ist diese Funktion auch zum Parsen von openvpn-Konfigurationsdateien geeignet.
-_get_file_dict_value() { local key="$1"; shift; { grep "^$key[[:space:]]" "$@" 2>/dev/null || true; } | while read key value; do echo -n "$value"; done; }
+_get_file_dict_value() { local key="$1"; shift; { grep -s -w "^$key" "$@" || true; } | while read key value; do echo -n "$value"; done; }
 
 
 ## @fn _get_file_dict_keys()
@@ -247,20 +247,18 @@ _get_file_dict_keys() { sed 's/[ \t].*//' "$@" 2>/dev/null || true; }
 ## @param value der neue Wert
 ## @sa _get_file_dict_value
 _set_file_dict_value() {
-	local status_file=$1
-	local field=$2
-	local new_value=$3
-	local fieldname
-	local value=$(_get_file_dict_value "$field" "$status_file")
-	# Wert ist korrekt? Wir sind fertig ...
-	[ "$value" = "$new_value" ] && return 0
+	local status_file="$1"
+	local field="$2"
+	local new_value="$3"
 	# Filtere bisherige Zeilen mit dem key heraus.
 	# Fuege anschliessend die Zeile mit dem neuen Wert an.
 	# Die Sortierung sorgt fuer gute Vergleichbarkeit, um die Anzahl der
 	# Schreibvorgaenge (=Wahrscheinlichkeit von gleichzeitigem Zugriff) zu reduzieren.
 	(
-		grep -v -w -s "$field" "$status_file"
-		echo "$field $new_value"
+		# neuen Eintrag weglassen, falls der gewuenschte Wert leer ist
+		[ -n "$new_value" ] && echo "$field $new_value"
+		# Eintrag aus dem alten Inhalt herausfiltern
+		grep -v -w -s "^$field" "$status_file" || true
 	) | sort | update_file_if_changed "$status_file" || true
 }
 

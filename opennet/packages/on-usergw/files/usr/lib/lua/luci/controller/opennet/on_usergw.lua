@@ -63,6 +63,8 @@ function action_on_openvpn_mesh_overview()
 end
 
 function action_on_openvpn_mesh_keys()
+    -- sofortiges Ende, falls der Upload erfolgreich verlief
+    if process_csr_submission("mesh", on_errors) then return end
     local result = process_openvpn_certificate_form("mesh")
     luci.template.render("opennet/on_openvpn_mesh_keys", {
         certstatus=result.certstatus,
@@ -125,7 +127,7 @@ function status_ugw_connection()
         -- kein Zertifikat vorhanden
 	result = '<p>' .. luci.i18n.translate("Certificate is missing") .. " (" ..
 	    luci.i18n.translate("see") ..
-	    '<a href="' .. luci.dispatcher.build_url("opennet", "opennet_2", "ugw_tunnel", "openvpn_mesh_keys") .. '">' ..
+	    ' <a href="' .. luci.dispatcher.build_url("opennet", "opennet_2", "ugw_tunnel", "openvpn_mesh_keys") .. '">' ..
 	    luci.i18n.translate("Certificate management") .. "</a>).</p>"
     end
     luci.http.write(result)

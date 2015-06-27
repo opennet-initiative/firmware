@@ -512,6 +512,36 @@ end
 
 
 --[[
+@brief Liefere wahr zurueck, falls das CSR hochgeladen werden sollte und sofern dies erfolgreich verlief.
+@details Im Erfolgsfall wurde bereits eine html-Ausgabe geschrieben - die aufrufende Funktion kann anschliessend ohne weitere
+  Ausgabe beendet werden. Eventuelle Fehler werden in 'errors_table' eingefuegt.
+--]]
+function process_csr_submission(key_type, errors_table)
+    local submit_url = luci.http.formvalue("submit")
+    if submit_url then
+        local csr_filename
+        if key_type == "user" then
+            csr_filename = SYSROOT .. "/etc/openvpn/opennet_user/on_aps.csr"
+        elseif key_type == "mesh" then
+            csr_filename = SYSROOT .. "/etc/openvpn/opennet_ugw/on_ugws.csr"
+        end
+        -- zeige lediglich die Ausgabe von curl an
+        local result = on_function("submit_csr_via_http", {submit_url, csr_filename})
+        if result and (result ~= "") then
+            -- das Upload-Resultat sollte ausgegeben werden
+            luci.http.write(result)
+	    -- die wahr-Rueckgabe sollte in der aufrufenden Funktion zum unmittelbaren (fehlerfreien) Ende fuehren
+	    return true
+        else
+            table.insert(errors_table, luci.i18n.translate("Failed to send Certificate Signing Request. You may want to use a manual approach instead. Sorry!"))
+        end
+    end
+    -- keine Rueckgabe - die aufrufende Funktion sollte ihren Ablauf fortsetzen
+    return false
+end
+
+
+--[[
 @brief Liefere einen String zurück, der das Alter eines Zeitstempels (Sekunden seit Epoch) beschreibt.
 @details Die Ausgabe erfolgt entweder als Angabe des Beginns (bei einem alten Zeitstempel) oder 
     in Form von "x Tage und y Stunden" als Abstand zum jetzigen Zeitpunkt.

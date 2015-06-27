@@ -13,14 +13,15 @@ Anschließend kann diese Liste wieder geleert werden.
 * Verfallsdatum des eigenen Zertifikats wird angezeigt
 * reduzierter RAM-Speicherbedarf
 ** auf Geräten mit 32 MB RAM gab es zuvor gelegentlich Neustarts durch Speichermangel
+* POE-Weiterleitung kann via Web-Interface kontrolliert werden
 * Korrekturen:
 ** lokale IP wird nicht mehr auf 172.16.0.1 zurückgesetzt
-** Geschwindigkeitsanzeige in der Gatewayliste
-** Zeitstempel-Ermittlung für reboot-Logeintrag (/etc/banner)
+** Geschwindigkeitsanzeige in der Gatewayliste hinzugefügt
+** korrekte Zeitstempel-Ermittlung für reboot-Logeintrag (/etc/banner)
+** gemischte Mesh/lokal-Alias-Interfaces funktionieren
 
 = Interne Änderungen =
 * neue CA-Zertifikate sind nun in einem separaten Paket untergebracht
 ** zuvor führte ein Upgrade nicht zu einer CA-Aktualisierung
-
 
 = Bemerkenswertes / Fehler / Mängel =

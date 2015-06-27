@@ -215,7 +215,7 @@ function generate_csr(type, openssl)
 	if type == "mesh" then
 		cert_dir = SYSROOT .. "/etc/openvpn/opennet_ugw"
 		filename = cert_dir .. "/" .. "on_ugws"
-	else if type == "user" then
+	elseif type == "user" then
 		cert_dir = SYSROOT .. "/etc/openvpn/opennet_user"
 		filename = cert_dir .. "/" .. "on_aps"
 	end

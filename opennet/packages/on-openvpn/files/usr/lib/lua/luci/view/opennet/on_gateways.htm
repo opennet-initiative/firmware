@@ -98,7 +98,6 @@ You may obtain a copy of the License at
 		var target_row = document.getElementById(gateway.id);
 		if (!target_row) return;
 		var remote;
-		var connection_state;
 		var distance;
 		var speed;
 		var speed_abbr;
@@ -119,7 +118,7 @@ You may obtain a copy of the License at
 			target_row.setAttribute("disabled", "y");
 		}
 		// "active" als laeuft/kaputt/inaktive setzen
-		if (gateway.connection_state ~= "") {
+		if (gateway.connection_state && (gateway.connection_state != "")) {
 			current_gateway = gateway.id;
 			update_gateway_change_indicator();
 			if (gateway.connection_state == "active") {

@@ -30,11 +30,8 @@ CONFIG_LIBCURL_COOKIES=n
 CONFIG_LIBCURL_FTP=n
 # wir verwenden https-URLs
 # PolarSSL ist kleiner als openssl und eventuell bald auch fuer openvpn und Zertifikatsverwaltung verwendbar
-CONFIG_LIBCURL_POLARSSL=y
-
-# wifi-Treiber
-CONFIG_DRIVER_11N_SUPPORT=y
-CONFIG_DRIVER_WEXT_SUPPORT=y
+#CONFIG_LIBCURL_POLARSSL=y
+CONFIG_LIBCURL_OPENSSL=y
 
 # wireless-Dinge
 CONFIG_PACKAGE_hostapd=y
@@ -55,14 +52,14 @@ CONFIG_PACKAGE_sshfs=m
 # Web-Interface
 CONFIG_PACKAGE_luci-ssl=y
 CONFIG_PACKAGE_luci-app-commands=y
-CONFIG_PACKAGE_luci-app-ddns=y
 CONFIG_PACKAGE_luci-app-diag-core=y
 CONFIG_PACKAGE_luci-app-olsr=y
 CONFIG_PACKAGE_luci-app-olsr-services=m
 CONFIG_PACKAGE_luci-app-olsr-viz=m
 CONFIG_PACKAGE_luci-app-statistics=m
 CONFIG_PACKAGE_luci-app-upnp=m
-CONFIG_PACKAGE_luci-app-wol=m
+# Build-Problem mit wake-on-lan? (Juni 2015)
+#CONFIG_PACKAGE_luci-app-wol=m
 CONFIG_PACKAGE_luci-i18n-german=y
 # fuer die olsr-Status-Seite
 CONFIG_PACKAGE_luci-lib-json=y
@@ -128,16 +125,6 @@ CONFIG_PACKAGE_kmod-usb-core=m
 CONFIG_PACKAGE_kmod-usb-storage=m
 CONFIG_PACKAGE_kmod-usb2=m
 CONFIG_PACKAGE_kmod-usbip=m
-
-# PPP (DSL usw.)
-CONFIG_PACKAGE_ppp=y
-CONFIG_PACKAGE_ppp-mod-pptp=y
-CONFIG_PACKAGE_ppp-mod-pppoe=y
-CONFIG_PACKAGE_kmod-ppp=y
-CONFIG_PACKAGE_kmod-mppe=y
-CONFIG_PACKAGE_kmod-pppoe=y
-CONFIG_PACKAGE_kmod-pppox=y
-CONFIG_PACKAGE_kmod-pptp=y
 
 # Switch-Konfiguration
 CONFIG_PACKAGE_kmod-swconfig=y

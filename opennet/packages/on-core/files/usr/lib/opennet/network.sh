@@ -95,6 +95,7 @@ update_opennet_zone_masquerading() {
 	# aktuelle Netzwerke wieder hinzufuegen
 	for network in $(get_zone_interfaces "$ZONE_LOCAL"); do
 		network_with_prefix=$(get_current_addresses_of_network "$network")
+		[ -z "$network_with_prefix" ] && continue
 		uci_add_list "${uci_prefix}.masq_src" "$network_with_prefix"
 	done
 	# leider ist masq_src im Zweifelfall nicht "leer", sondern enthaelt ein Leerzeichen
@@ -105,6 +106,8 @@ update_opennet_zone_masquerading() {
 		# Es gibt keine lokalen Interfaces - also duerfen wir kein Masquerading aktivieren.
 		# Leider interpretiert openwrt ein leeres "masq_src" nicht als "masq fuer niemanden" :(
 		uci set "${uci_prefix}.masq=0"
+		# das firewall-Skript beschwert sich ueber einen leeren Eintrag
+		uci_delete "${uci_prefix}.masq_src"
 	fi
 	apply_changes firewall
 }

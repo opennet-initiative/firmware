@@ -18,7 +18,7 @@ persist-key
 mute-replay-warnings
 
 # mit der Variable "MESH_OPENVPN_DEVICE_PREFIX" synchron halten
-dev tap-mesh
+dev tap
 dev-type tap
 
 script-security 2 execve

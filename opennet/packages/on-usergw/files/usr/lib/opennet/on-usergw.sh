@@ -10,7 +10,7 @@ TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-service
 SPEEDTEST_UPLOAD_PORT=29418
 SPEEDTEST_SECONDS=20
 ## dieser Wert muss mit der VPN-Konfigurationsvorlage synchron gehalten werden
-MESH_OPENVPN_DEVICE_PREFIX=tap-mesh
+MESH_OPENVPN_DEVICE_PREFIX=tap
 
 
 # hole einen der default-Werte der aktuellen Firmware

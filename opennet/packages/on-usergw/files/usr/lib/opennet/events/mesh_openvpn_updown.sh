@@ -41,6 +41,8 @@ setup_mesh_interface() {
 	# die obige ubus-Aktion wird nebenlaeufig abgearbeitet - wir muessen das Ergebnis abwarten
 	ubus wait_for "$ubus_dev"
 	update_olsr_interfaces
+	# ohne dieses explizite reload reagiert die firewall seltsamerweise nicht auf die neuen Interfaces
+	/etc/init.d/firewall reload
 }
 
 

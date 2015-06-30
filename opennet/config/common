@@ -11,11 +11,6 @@ CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=64
 # blocksize=16 reduziert den RAM-Bedarf um ca. 2 MB - dagegen steigt der Flash-Bedarf um 800 kB.
 #CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=16
 
-# fuer die umgekehrte  Ausgabe des openvpn-Verbindungsprotokolls
-CONFIG_PACKAGE_coreutils-tac=y
-# fuer 'update_file_if_changed'
-CONFIG_PACKAGE_diffutils=y
-
 # unnoetiges optional machen
 CONFIG_PACKAGE_block-mount=m
 CONFIG_PACKAGE_libstdcpp=m
@@ -72,9 +67,13 @@ CONFIG_PACKAGE_luci-theme-openwrt=y
 CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_uhttpd=y
 CONFIG_PACKAGE_uhttpd-mod-lua=y
+# wir wollen explizit openssl waehlen, um polarssl einzusparen
 CONFIG_PACKAGE_uhttpd-mod-tls=y
 CONFIG_PACKAGE_uhttpd-mod-tls_openssl=y
 CONFIG_PACKAGE_uhttpd-mod-ubus=m
+
+# Platzbedarf minimieren (ohne das komplette polarssl)
+CONFIG_PACKAGE_px5g-standalone
 
 # System
 CONFIG_PACKAGE_bridge=y
@@ -90,7 +89,7 @@ CONFIG_PACKAGE_olsrd-mod-txtinfo=y
 
 # Opennet-Pakete
 CONFIG_PACKAGE_on-core=y
-CONFIG_PACKAGE_on-openvpn=m
+CONFIG_PACKAGE_on-openvpn=y
 CONFIG_PACKAGE_on-usergw=m
 CONFIG_PACKAGE_on-tinc=m
 CONFIG_PACKAGE_on-captive-portal=m
@@ -125,13 +124,6 @@ CONFIG_PACKAGE_kmod-usb-core=m
 CONFIG_PACKAGE_kmod-usb-storage=m
 CONFIG_PACKAGE_kmod-usb2=m
 CONFIG_PACKAGE_kmod-usbip=m
-
-# Switch-Konfiguration
-CONFIG_PACKAGE_kmod-swconfig=y
-CONFIG_PACKAGE_kmod-switch-ip17xx=y
-CONFIG_PACKAGE_kmod-switch-rtl8366-smi=y
-CONFIG_PACKAGE_kmod-switch-rtl8366rb=y
-CONFIG_PACKAGE_kmod-switch-rtl8366s=y
 
 # traceroute und mtr mit ONI Ortsinformationen
 CONFIG_PACKAGE_traceroute-oni-names=y

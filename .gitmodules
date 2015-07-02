@@ -10,3 +10,4 @@
 [submodule "packages"]
 	path = packages
 	url = https://github.com/openwrt/packages.git
+	branch = for-15.05

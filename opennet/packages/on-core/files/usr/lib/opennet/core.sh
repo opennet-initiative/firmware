@@ -250,6 +250,7 @@ _set_file_dict_value() {
 	local status_file="$1"
 	local field="$2"
 	local new_value="$3"
+	[ -z "$field" ] && msg_error "Ignoring empty key for _set_file_dict_value" && return
 	# Filtere bisherige Zeilen mit dem key heraus.
 	# Fuege anschliessend die Zeile mit dem neuen Wert an.
 	# Die Sortierung sorgt fuer gute Vergleichbarkeit, um die Anzahl der

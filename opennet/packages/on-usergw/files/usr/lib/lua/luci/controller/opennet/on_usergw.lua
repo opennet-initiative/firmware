@@ -83,7 +83,13 @@ function action_on_mesh_connections()
     if (service_result ~= true) and (service_result ~= false) then table.insert(on_errors, service_result) end
     -- Dienst verschieben
     service_result = process_service_action_form("mesh")
-    if (service_result ~= true) and (service_result ~= false) then table.insert(on_errors, service_result) end
+    if (service_result == true) then
+        -- enable or disable services
+        on_function("sync_mesh_openvpn_connection_processes")
+    elseif (service_result ~= false) then
+        -- ungleich true und ungleich false: es ist eine Fehlermeldung
+        table.insert(on_errors, service_result)
+    end
 
     luci.template.render("opennet/mesh_connections", { on_errors=on_errors })
 end
@@ -97,7 +103,13 @@ function action_on_service_relay()
     if (service_result ~= true) and (service_result ~= false) then table.insert(on_errors, service_result) end
     -- Dienst verschieben
     service_result = process_service_action_form(nil)
-    if (service_result ~= true) and (service_result ~= false) then table.insert(on_errors, service_result) end
+    if (service_result == true) then
+        -- enable or disable services
+        on_function("update_service_relay_status")
+    elseif (service_result ~= false) then
+        -- ungleich true und ungleich false: es ist eine Fehlermeldung
+        table.insert(on_errors, service_result)
+    end
 
     -- Dienst-Liste ermitteln
     local relay_services = line_split(luci.sys.exec("on-function get_services | on-function filter_relay_services"))

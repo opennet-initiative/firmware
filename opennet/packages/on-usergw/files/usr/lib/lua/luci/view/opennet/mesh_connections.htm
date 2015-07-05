@@ -124,21 +124,28 @@ You may obtain a copy of the License at
 		<td id="wan_ping_<%= service_name %>" class="cbi-value-field"><%= gateway.wan_ping %></td>
 		<!-- end of other status section -->
 		<td class="cbi-value-field">
-			<input class="cbi-button cbi-button-up cbi-button-small" type="submit"
-				value="<%= gateway.id %>" title="<%:move up%>" name="move_service_up" />
-			<input class="cbi-button cbi-button-down cbi-button-small" type="submit"
-				value="<%= gateway.id %>" title="<%:move down%>" name="move_service_down" />
-			<% if gateway.source ~= "manual" then %>
-				<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
-				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%= gateway.id %>"
-					title="<%:auto-discovered services cannot be deleted%>" name="delete_service" disabled="disabled" />
+			<% if gateway.disabled then %>
+				<input class="cbi-button cbi-button-enable cbi-button-small" type="submit"
+					value="<%= gateway.id %>" title="<%:disable%>" name="enable_service" />
 			<% else %>
-				<%# Loeschen ist moeglich %>
-				<input class="cbi-button cbi-button-del cbi-button-small" type="submit" value="<%= gateway.id %>"
-					title="<%:delete%>" name="delete_service" />
+				<input class="cbi-button cbi-button-up cbi-button-small" type="submit"
+					value="<%= gateway.id %>" title="<%:move up%>" name="move_service_up" />
+				<input class="cbi-button cbi-button-down cbi-button-small" type="submit"
+					value="<%= gateway.id %>" title="<%:move down%>" name="move_service_down" />
+				<% if gateway.source ~= "manual" then %>
+					<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
+					<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
+						value="<%= gateway.id %>"
+						title="<%:auto-discovered services cannot be deleted%>"
+						name="delete_service" disabled="disabled" />
+				<% else %>
+					<%# Loeschen ist moeglich %>
+					<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
+						value="<%= gateway.id %>" title="<%:delete%>" name="delete_service" />
+				<% end %>
+				<input class="cbi-button cbi-button-disable cbi-button-small" type="submit"
+					value="<%= gateway.id %>" title="<%:disable%>" name="disable_service" />
 			<% end %>
-			<input class="cbi-button cbi-button-disable cbi-button-small" type="submit"
-				value="<%= gateway.id %>" title="<%:disable%>" name="disable_service" />
 		</td>
 	</tr>
 	<% end %>

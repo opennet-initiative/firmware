@@ -201,13 +201,15 @@ deannounce_unused_olsr_service_relays() {
 }
 
 
+## @fn is_service_relay_possible()
+## @brief Pruefe ob ein Relay-Dienst aktiviert (nicht "disabled") ist und ob das WAN-Routing korrekt ist.
 is_service_relay_possible() {
 	trap "error_trap is_service_relay_possible '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local enabled
 	local wan_routing
-	enabled=$(get_service_value "$service_name" "true")
-	uci_is_false "$enabled" && trap "" $GUARD_TRAPS && return 1
+	disabled=$(get_service_value "$service_name" "disabled" "false")
+	uci_is_true "$disabled" && trap "" $GUARD_TRAPS && return 1
 	wan_routing=$(get_service_value "$service_name" "wan_status" "false")
 	uci_is_false "$wan_routing" && trap "" $GUARD_TRAPS && return 1
 	return 0

@@ -211,21 +211,24 @@ update_mesh_gateway_mtu_state() {
 
 
 ## @fn sync_mesh_gateway_connection_processes()
-## @brief Erzeuge openvpn-Konfigurationen für die als nutzbar markierten Dienste und entferne die Konfigurationen von unbrauchbaren Dienste. Dabei wird auch die maximale Anzahl von mesh-OpenVPN-Verbindungen beachtet.
+## @brief Erzeuge openvpn-Konfigurationen für die als nutzbar markierten Dienste und entferne
+##   die Konfigurationen von unbrauchbaren Dienste. Dabei wird auch die maximale Anzahl von
+##   mesh-OpenVPN-Verbindungen beachtet.
 sync_mesh_openvpn_connection_processes() {
 	local service_name
-	local max_connections=2
 	local conn_count=0
+	local max_connections
 	local service_state
 	# diese Festlegung ist recht willkürlich: auf Geräten mit nur 32 MB scheinen wir jedenfalls nahe der Speichergrenze zu arbeiten
-	[ "$(get_memory_size)" -gt 32 ] && max_connections=5
+	[ "$(get_memory_size)" -gt 32 ] && max_connections=5 || max_connections=2
 	get_services "mesh" \
 			| filter_services_by_value "scheme" "openvpn" \
-			| filter_enabled_services \
 			| sort_services_by_priority \
 			| while read service_name; do
 		service_state=$(get_openvpn_service_state "$service_name")
-		if [ "$conn_count" -lt "$max_connections" ] && uci_is_true "$(get_service_value "$service_name" "status" "false")"; then
+		if [ "$conn_count" -lt "$max_connections" ] \
+				&& uci_is_true "$(get_service_value "$service_name" "status" "false")" \
+				&& uci_is_false "$(get_service_value "$service_name" "disabled" "false")"; then
 			[ -z "$service_state" ] && enable_openvpn_service "$service_name"
 			: $((conn_count++))
 		else

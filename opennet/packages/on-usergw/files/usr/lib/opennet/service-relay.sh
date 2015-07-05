@@ -136,7 +136,7 @@ get_service_relay_olsr_announcement() {
 	local service_name="$1"
 	local announce_unique=$(_get_service_relay_olsr_announcement_prefix "$service_name")
 	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	uci_get_list "${uci_prefix}.service" | grep -F "^$announce_unique " || true
+	uci_get_list "${uci_prefix}.service" | awk '{ if ($1 == "'$announce_unique'") print $0; }'
 }
 
 

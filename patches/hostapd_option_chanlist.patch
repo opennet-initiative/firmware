@@ -10,9 +10,9 @@ Signed-off-by: Lars Kruse <devel@sumpfralle.de>
  	config_add_int beacon_int chanbw frag rts
 +	config_add_string chanlist
  	config_add_int rxantenna txantenna antenna_gain txpower distance
- 	config_add_boolean noscan
+ 	config_add_boolean noscan ht_coex
  	config_add_array ht_capab
-@@ -291,6 +292,10 @@ mac80211_hostapd_setup_base() {
+@@ -298,6 +299,10 @@ mac80211_hostapd_setup_base() {
  		[ -n "$vht_capab" ] && append base_cfg "vht_capab=$vht_capab" "$N"
  	fi
  

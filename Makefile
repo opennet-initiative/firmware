@@ -2,6 +2,7 @@ OPENWRT_DIR = openwrt
 LUCI_DIR = luci
 CUSTOM_PO_DIR = opennet/po
 CUSTOM_PACKAGES_DIR = opennet/packages
+CUSTOM_DOC_DIR = opennet/doc
 LANGUAGES = de
 COMMON_CONFIG = common
 CONFIG_DIR = opennet/config
@@ -64,7 +65,7 @@ diff-menuconfig: feeds
 	@quilt delete
 
 doc: patch
-	$(MAKE) -C opennet/doc
+	$(MAKE) -C $(CUSTOM_DOC_DIR)/doc
 
 translate:
 	@find "$(CUSTOM_PACKAGES_DIR)" -mindepth 1 -maxdepth 1 -type d | while read dname; do \
@@ -89,7 +90,7 @@ unpatch:
 	@test -n "$(shell quilt applied 2>/dev/null)" && quilt pop -a || true
 
 clean: unpatch
-	$(MAKE) -C opennet/doc clean
+	$(MAKE) -C $(CUSTOM_DOC_DIR)/doc clean
 
 # VORSICHT: alle lokalen Aenderungen gehen verloren - dies sollte nie von einem
 # Menschen ausgefuehrt werden - es ist lediglich fuer den trac-Autobuilder gedacht

@@ -71,7 +71,7 @@ function gateway_info(service_name)
 		luci.http.prepare_content("application/json")
 		luci.http.write_json(info)
 	else
-		luci.http.status(404, "No such device")
+		luci.http.status(404, "No such service")
 	end
 end
 

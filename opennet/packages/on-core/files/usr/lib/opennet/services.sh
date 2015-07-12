@@ -148,9 +148,9 @@ get_service_priority() {
 				msg_error "Unknown sorting method for services: $sorting"
 				echo 1
 			fi
-		fi | cut -f 1 -d .)
+		fi)
 	local service_bias=$(_get_local_bias_for_service "$service_name")
-	echo $(( ${base_priority:-$DEFAULT_SERVICE_RANK} * 1000 + service_bias))
+	echo "${base_priority:-$DEFAULT_SERVICE_RANK}" | awk '{ print $1 * 1000 + '$service_bias'; }'
 }
 
 

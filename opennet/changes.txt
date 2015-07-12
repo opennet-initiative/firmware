@@ -9,16 +9,17 @@ Anschließend kann diese Liste wieder geleert werden.
 * Nutzer-VPN-Tunnel wird innerhalb von ca. drei Minuten nach dem Booten aufgebaut (zuvor: ca. acht Minuten)
 * keine VPN-Verbindungstests ohne Zertifikat
 ** weniger Load für Infrastruktur-APs, leichte Verzögerung nach Zertifikatsupload
-* verschlüsselte Verbindung mit dem Web-Interface (z.B. https://172.16.0.1/) ist möglich
+* verschlüsselte Verbindung mit dem Web-Interface
 * Verfallsdatum des eigenen Zertifikats wird angezeigt
 * reduzierter RAM-Speicherbedarf
 ** auf Geräten mit 32 MB RAM gab es zuvor gelegentlich Neustarts durch Speichermangel
 * POE-Weiterleitung kann via Web-Interface kontrolliert werden
 * Korrekturen:
-** lokale IP wird nicht mehr auf 172.16.0.1 zurückgesetzt
+** lokale IP wird nicht mehr auf 172.16.0.1 zurückgesetzt (falls lokal modifiziert)
 ** Geschwindigkeitsanzeige in der Gatewayliste hinzugefügt
 ** korrekte Zeitstempel-Ermittlung für reboot-Logeintrag (/etc/banner)
-** gemischte Mesh/lokal-Alias-Interfaces funktionieren
+** gemischte Mesh/lokal-Alias-Interfaces sind nun möglich
+** fehlerhafte Sortierung der Gateways behoben
 
 = Interne Änderungen =
 * neue CA-Zertifikate sind nun in einem separaten Paket untergebracht

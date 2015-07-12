@@ -26,7 +26,7 @@ configure_free_network() {
 	# beenden, falls vorhanden
 	if [ -z "$uci_prefix" ]; then
 		# DHCP-Einstellungen fuer dieses Interface festlegen
-		uci_prefix=$(uci add "dhcp" "dhcp")
+		uci_prefix="dhcp.$(uci add "dhcp" "dhcp")"
 		uci set "${uci_prefix}.interface=$NETWORK_FREE"
 		uci set "${uci_prefix}.start=10"
 		uci set "${uci_prefix}.limit=240"

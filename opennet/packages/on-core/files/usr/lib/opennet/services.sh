@@ -386,6 +386,8 @@ get_service_value() {
 # die mit dem gegebenen Praefix uebereinstimmen.
 get_service_attributes() {
 	_get_file_dict_keys "$PERSISTENT_SERVICE_STATUS_DIR/$1" "$VOLATILE_SERVICE_STATUS_DIR/$1"
+	# wir liefern einfach alle Provider-spezifischen Attribute zurueck - viele duerften leer sein
+	ls "$PROVIDER_SPECIFIC_STATUS_DIR"
 }
 
 
@@ -402,6 +404,7 @@ print_services() {
 		echo "$service_name"
 		get_service_attributes "$service_name" | while read attribute; do
 			value=$(get_service_value "$service_name" "$attribute")
+			[ -z "$value" ] && continue
 			echo -e "\t$attribute=$value"
 		done
 	done

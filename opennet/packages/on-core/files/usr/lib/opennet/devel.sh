@@ -45,6 +45,13 @@ run_httpd_debug() {
 }
 
 
+## @fn get_function_names()
+## @brief Liefere die Namen aller Funktionen zurück.
+get_function_names() {
+	grep -h "^[^_][a-z0-9_]*(" "${IPKG_INSTROOT:-}"/usr/lib/opennet/*.sh | sed 's/(.*//' | sort
+}
+
+
 ## @fn enable_profiling()
 ## @brief Manipuliere die Funktionsheader in allen shell-Skripten der opennet-Pakete für das Sammeln von profiling-Informationen.
 ## @details Diese Operation ist irreversibel - eine erneute Installation der Pakete ist der einzige saubere Weg zurück.

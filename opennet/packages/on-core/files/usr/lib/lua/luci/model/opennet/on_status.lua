@@ -194,18 +194,26 @@ end
 
 function status_neighbors()
 	luci.http.prepare_content("text/plain")
-	-- TODO: Verschiebung der Ermittlung direkter Nachbarn in eine shell-Funktion
-	output = luci.sys.exec("on-function request_olsrd_txtinfo links | awk 'BEGIN {out=0} { if (out == 1 \&\& \$0 != \"\") printf \"<tr><td><a href=\\\"http://\"$2\"\\\">\"\$2\"</a></td><td>\"\$4\"</td><td>\"\$5\"</td><td>\"\$6\"</td></tr>\"; if (\$1 == \"Local\") out = 1;}'")
-	if output ~= "" then
-		luci.http.write('<table class="status_page_table"><tr><th>' ..
-			luci.i18n.translate("IP Address") .. "</th><th>" ..
-			'<abbr title="' .. luci.i18n.translate("Link-Quality: how many of your packets were received by your neighbor") .. '">LQ</abbr>' ..
-			'</th><th>' ..
-			'<abbr title="' .. luci.i18n.translate("Neighbor-Link-Quality: how many of your test-packets did reach your neighbor") .. '">NLQ</abbr>' ..
-			'</th><th>' ..
-			'<abbr title="' .. luci.i18n.translate("Expected Transmission Count: Quality of the Connection to the Gateway reagrding OLSR") .. '">ETX</abbr>' ..
-			"</th></tr></class>")
-		luci.http.write(output)
+	local neighbour_info = on_function("get_olsr_neighbours")
+	if neighbour_info ~= "" then
+		luci.http.write('<table class="status_page_table"><tr>' ..
+			'<th>' ..  luci.i18n.translate("IP Address") .. "</th>" ..
+			'<th><abbr title="' .. luci.i18n.translate("Link-Quality: how many of your packets were received by your neighbor") .. '">LQ</abbr></th>' ..
+			'<th><abbr title="' .. luci.i18n.translate("Neighbor-Link-Quality: how many of your test-packets did reach your neighbor") .. '">NLQ</abbr></th>' ..
+			'<th><abbr title="' .. luci.i18n.translate("Expected Transmission Count: Quality of the Connection to the Gateway reagrding OLSR") .. '">ETX</abbr></th>' ..
+			'<th><abbr title="' .. luci.i18n.translate("Number of routes via this neighbour") .. '">Routes</abbr></th>' ..
+			'</tr>')
+		for _, line in pairs(line_split(neighbour_info)) do
+			local info = space_split(line)
+			luci.http.write('<tr>')
+			luci.http.write('<td><a href="http://' .. info[1] .. '/">' .. info[1] .. '</a></td>')
+			luci.http.write('<td>' .. info[2] .. '</td>')
+			luci.http.write('<td>' .. info[3] .. '</td>')
+			luci.http.write('<td>' .. info[4] .. '</td>')
+			luci.http.write('<td style="text-align:right">' .. info[5] .. '</td>')
+			luci.http.write('</tr>')
+		end
+		luci.http.write("</table>")
 	end
 end
 

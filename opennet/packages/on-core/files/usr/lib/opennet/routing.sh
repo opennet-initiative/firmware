@@ -265,12 +265,37 @@ update_olsr_route_cache() {
 
 
 ## @fn get_olsr_route_count_by_device()
-## @brief Liefere die Anzahl von olsr-Routen, die durch auf ein bestimmtest Netzwerk-Interface verweist.
+## @brief Liefere die Anzahl von olsr-Routen, die auf ein bestimmtes Netzwerk-Interface verweisen
 get_olsr_route_count_by_device() {
 	local device_regex="$1"
 	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
-	[ ! -e "$OLSR_ROUTE_CACHE_FILE" ] && return 0
+	[ -e "$OLSR_ROUTE_CACHE_FILE" ] || return 0
 	awk '{ print $5 }' "$OLSR_ROUTE_CACHE_FILE" | grep "^$device_regex$" | wc -l
+}
+
+
+## @fn get_olsr_route_count_by_neighbour()
+## @brief Liefere die Anzahl von olsr-Routen, die auf einen bestimmten Routing-Nachbarn verweisen.
+get_olsr_route_count_by_neighbour() {
+	local neighbour_ip="$1"
+	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
+	[ -e "$OLSR_ROUTE_CACHE_FILE" ] || return 0
+	awk 'BEGIN { count=0; } { if ($2 == "'$neighbour_ip'") count++; } END { print count; }' "$OLSR_ROUTE_CACHE_FILE"
+}
+
+
+## @fn get_olsr_neighbours()
+## @brief Ermittle die direkten olsr-Nachbarn und liefere ihre IPs und interessante Kennzahlen zurück.
+## details Ergebnisformat: NEIGHBOUR_IP LINK_QUALITY NEIGHBOUR_LINK_QUALITY ETX ROUTE_COUNT
+get_olsr_neighbours() {
+	local ip
+	local lq
+	local nlq
+	local etx
+	local route_count
+	request_olsrd_txtinfo links | grep "^[0-9]" | awk '{ print $2,$4,$5,$6 }' | while read ip lq nlq etx; do
+		echo "$ip $lq $nlq $etx $(get_olsr_route_count_by_neighbour "$ip")"
+	done
 }
 
 # Ende der Doku-Gruppe

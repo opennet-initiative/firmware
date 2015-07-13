@@ -24,6 +24,9 @@ LOCAL_BIAS_MODULO=10
 SERVICES_LOG_BASE=/var/log/on-services
 
 
+## @fn get_service_name()
+## @brief Ermittle en Namen eines Diensts basierend auf den Dienst-Attributen.
+## @details Reihenfolge der Eingabeparameter: SERVICE_TYPE SCHEMA HOST PORT PROTOCOL PATH
 get_service_name() {
 	local service="$1"
 	local scheme="$2"

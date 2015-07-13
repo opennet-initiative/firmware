@@ -8,7 +8,6 @@ DEFAULT_MESH_OPENVPN_PORT=1602
 ## falls mehr als ein GW-Dienst weitergereicht wird, wird dieser Port und die folgenden verwendet
 SERVICE_RELAY_LOCAL_RELAY_PORT_START=5100
 # Markierung fuer firewall-Regeln, die zu Dienst-Weiterleitungen gehören
-SERVICE_RELAY_CREATOR=on_service_relay
 SERVICE_RELAY_FIREWALL_RULE_PREFIX=on_service_relay_
 
 
@@ -51,7 +50,7 @@ pick_local_service_relay_port() {
 
 ## @fn delete_unused_service_relay_forward_rules()
 ## @brief Lösche ungenutzte Firewall-Weiterleitungsregel für einen durchgereichten Dienst.
-## @attention Anschließend muss die firewall-uci-Sektion committed werden. 
+## @attention Anschließend muss die firewall-uci-Sektion committed werden.
 delete_unused_service_relay_forward_rules() {
 	trap "error_trap delete_unused_service_relay_forward_rules '$*'" $GUARD_TRAPS
 	local uci_prefix
@@ -74,7 +73,7 @@ delete_unused_service_relay_forward_rules() {
 ## @fn add_service_relay_forward_rule()
 ## @brief Erzeuge die Firewall-Weiterleitungsregel für einen durchgereichten Dienst.
 ## @param service_name der weiterzuleitende Dienst
-## @attention Anschließend muss die firewall-uci-Sektion committed werden. 
+## @attention Anschließend muss die firewall-uci-Sektion committed werden.
 add_service_relay_forward_rule() {
 	trap "error_trap add_service_relay_forward_rule '$*'" $GUARD_TRAPS
 	local service_name="$1"
@@ -155,7 +154,6 @@ announce_olsr_service_relay() {
 		upload $(get_service_value "$service_name" wan_speed_upload)
 		download $(get_service_value "$service_name" wan_speed_download)
 		ping $(get_service_value "$service_name" wan_ping)
-		creator $SERVICE_RELAY_CREATOR
 		service_name $service_name
 EOF
 )
@@ -183,17 +181,11 @@ EOF
 # olsr-Nameservice-Beschreibungen entfernen falls der dazugehoerige Dienst nicht mehr relay-tauglich ist
 deannounce_unused_olsr_service_relays() {
 	local service_description
-	local extra_info
-	local creator
 	local service_name
 	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	uci_get_list "${uci_prefix}.service" | while read service_description; do
-		extra_info=$(echo "$service_description" | parse_olsr_service_definitions | cut -f 7)
-		creator=$(echo "$extra_info" | get_from_key_value_list "creator" :)
-		# ausschließlich Eintrage mit unserem "creator"-Stempel beachten
-		[ "$creator" = "$SERVICE_RELAY_CREATOR" ] || continue
 		# unbenutzte Eintraege entfernen
-		service_name=$(echo "$extra_info" | get_from_key_value_list "service_name" :)
+		service_name=$(get_olsr_service_name_from_description "$service_description")
 		is_service_relay_possible "$service_name" && continue
 		uci_delete_list "${uci_prefix}.service" "$service_description"
 	done

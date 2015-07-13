@@ -130,8 +130,8 @@ EOF
 
 # Einlesen eines olsrd-Nameservice-Service.
 # Details zum Eingabe- und Ausgabeformat: siehe "get_olsr_services".
-parse_olsr_service_definitions() {
-	trap "error_trap parse_olsr_service_definitions '$*'" $GUARD_TRAPS
+parse_olsr_service_descriptions() {
+	trap "error_trap parse_olsr_service_descriptions '$*'" $GUARD_TRAPS
 	local url
 	local proto
 	local service
@@ -153,6 +153,22 @@ parse_olsr_service_definitions() {
 			[ "$service" = "gw" -o "$service" = "ugw" ] && scheme=openvpn && port=1600 && proto=udp && service=gw
 		echo -e "$scheme\t$host\t$port\t$path\t$proto\t$service\t$details"
 	done
+}
+
+
+## @fn get_olsr_service_name_from_description()
+## @brief Ermittle den Dienstnamen, der zu einer olsr-Service-Definition gehoert.
+get_olsr_service_name_from_description() {
+	trap "error_trap get_olsr_service_name_from_description '$*'" $GUARD_TRAPS
+	local service_description="$1"
+	local fields=$(echo "$service_description" | parse_olsr_service_descriptions)
+	local service_type=$(echo "$fields" | cut -f 6)
+	local scheme=$(echo "$fields" | cut -f 1)
+	local host=$(echo "$fields" | cut -f 2)
+	local port=$(echo "$fields" | cut -f 3)
+	local path=$(echo "$fields" | cut -f 4)
+	local protocol=$(echo "$fields" | cut -f 5)
+	get_service_name "$service_type" "$scheme" "$host" "$port" "$protocol" "$path"
 }
 
 
@@ -181,7 +197,7 @@ get_olsr_services() {
 	# remove trailing commentary (containing the service's source IP address)
 	grep "^[^#]" "$SERVICES_FILE" | \
 		sed 's/[\t ]\+#[^#]\+//' | \
-		parse_olsr_service_definitions | \
+		parse_olsr_service_descriptions | \
 		# filtere die Ergebnisse nach einem Service-Typ, falls selbiger als erster Parameter angegeben wurde
 		if [ "$#" -ge 1 ]; then awk "{ if (\$6 == \"$1\") print \$0; }"; else cat -; fi
 	return 0

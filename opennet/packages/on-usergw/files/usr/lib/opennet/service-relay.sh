@@ -154,7 +154,6 @@ announce_olsr_service_relay() {
 		upload $(get_service_value "$service_name" wan_speed_upload)
 		download $(get_service_value "$service_name" wan_speed_download)
 		ping $(get_service_value "$service_name" wan_ping)
-		service_name $service_name
 EOF
 )
 	# Zeilenumbrueche durch Leerzeichen ersetzen, abschliessendes Leerzeichen entfernen
@@ -219,8 +218,8 @@ update_service_relay_status() {
 		wan_status="true"
 		is_service_routed_via_wan "$service_name" || wan_status="false"
 		set_service_value "$service_name" "wan_status" "$wan_status"
-		is_service_relay_possible "$service_name" && enable_service_relay "$service_name"
-		true
+		is_service_relay_possible "$service_name" || continue
+		enable_service_relay "$service_name"
 	done
 	delete_unused_service_relay_forward_rules
 	deannounce_unused_olsr_service_relays

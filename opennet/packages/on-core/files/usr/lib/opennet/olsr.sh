@@ -162,13 +162,21 @@ get_olsr_service_name_from_description() {
 	trap "error_trap get_olsr_service_name_from_description '$*'" $GUARD_TRAPS
 	local service_description="$1"
 	local fields=$(echo "$service_description" | parse_olsr_service_descriptions)
-	local service_type=$(echo "$fields" | cut -f 6)
-	local scheme=$(echo "$fields" | cut -f 1)
-	local host=$(echo "$fields" | cut -f 2)
 	local port=$(echo "$fields" | cut -f 3)
-	local path=$(echo "$fields" | cut -f 4)
-	local protocol=$(echo "$fields" | cut -f 5)
-	get_service_name "$service_type" "$scheme" "$host" "$port" "$protocol" "$path"
+	local service_type=$(echo "$fields" | cut -f 6)
+	local details=$(echo "$fields" | cut -f 7)
+	local public_host=$(echo "$details" | get_from_key_value_list "public_host" ":")
+	if [ -n "$public_host" ]; then
+		# ein relay-Dienst
+		get_services "$service_type" | filter_services_by_value "local_relay_port" "$port" | head -1
+	else
+		# ein nicht-relay-Dienst
+		local scheme=$(echo "$fields" | cut -f 1)
+		local host=$(echo "$fields" | cut -f 2)
+		local path=$(echo "$fields" | cut -f 4)
+		local protocol=$(echo "$fields" | cut -f 5)
+		get_service_name "$service_type" "$scheme" "$host" "$port" "$protocol" "$path"
+	fi
 }
 
 

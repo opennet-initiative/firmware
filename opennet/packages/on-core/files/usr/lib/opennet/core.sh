@@ -909,36 +909,60 @@ run_curl() {
 }
 
 
-## @fn generate_flash_backup
-## @brief Erzeuge ein tar-gz-Archiv mit den herstellerspezifischen Informationen für diesen AP.
+## @fn get_flash_backup
+## @brief Erzeuge einen rohen Dump des Flash-Speichers. Dieser ermöglicht den Austausch des Flash-Speichers.
+## @param include_private Kopiere neben den nur-Lese-Bereichen auch die aktuelle Konfiguration inkl. eventueller privater Daten.
 ## @details Alle mtd-Partition bis auf den Kernel und die Firmware werden einzeln kopiert und dann komprimiert.
-generate_flash_backup() {
-	local temp_dir=$(mktemp -d)
+##   Beispiel-Layout einer Ubiquiti Nanostation:
+##     dev:    size   erasesize  name
+##     mtd0: 00040000 00010000 "u-boot"
+##     mtd1: 00010000 00010000 "u-boot-env"
+##     mtd2: 00760000 00010000 "firmware"
+##     mtd3: 00102625 00010000 "kernel"
+##     mtd4: 0065d9db 00010000 "rootfs"
+##     mtd5: 00230000 00010000 "rootfs_data"
+##     mtd6: 00040000 00010000 "cfg"
+##     mtd7: 00010000 00010000 "EEPROM"
+##   Dabei ignorieren wir bei Bedarf "rootfs_data" (beschreibbarer Bereich der Firmware). 
+get_flash_backup() {
+	trap "error_trap get_flash_backup '$*'" $GUARD_TRAPS
+	local include_private="${1:-}"
 	local name
 	local size
 	local blocksize
 	local label
-	local target_filename
-	local start_address=0
-	local target_dir="$temp_dir/flash-backup"
-	mkdir -p "$target_dir"
-	cat /proc/mtd >"$target_dir/mtd.list"
 	grep "^mtd[0-9]\+:" /proc/mtd | while read name size blocksize label; do
-		# Doppelpunkt entfernen
-		name=${name%:}
+		# abschliessenden Doppelpunkt entfernen
+		name="${name%:}"
 		# hexadezimal-Zahl umrechnen
 		size=$(echo | awk "{print 0x$size }")
 		# Anfuehrungszeichen entfernen
 		label=$(echo "$label" | cut -f 2 -d '"')
-		# Start-Adresse weiterzaehlen
-		start_address=$((start_address + size))
 		# Firmware-Partitionen ueberspringen
-		[ "$label" = "kernel" -o "$label" = "rootfs" -o "$label" = "rootfs_data" -o "$label" = "firmware" ] && continue
-		target_filename="$target_dir/${name}_${start_address}_${label}.img"
-		cat "/dev/$name" >"$target_filename"
+		if [ "$label" = "rootfs" ]; then
+			local rootfs_device="/dev/$name"
+			local rootfs_full_size="$size"
+		elif [ "$label" = "rootfs_data" ]; then
+			# schreibe das komplette rootfs _ohne_ das aktuelle rootfs_data
+			echo >&2 "root-RO: $((rootfs_full_size - size))"
+			dd "if=$rootfs_device" bs=1 "count=$((rootfs_full_size - size))"
+			if [ -z "$include_private" ]; then
+				echo >&2 "root-zero: $size"
+				# erzeuge 0xFF auf obskure Weise (fuer maximale Flash-Schreibgeschwindigkeit)
+				# siehe http://stackoverflow.com/a/10905109
+				yes $'\xFF' | tr -d '\n' | dd bs=1 "count=$size"
+			else
+				echo >&2 "root-RW: $size"
+				# auch das private rootfs-Dateisystem (inkl. Schluessel, Passworte, usw.) auslesen
+				dd "if=/dev/$name" bs=1 "count=$size"
+			fi
+		elif [ "$label" = "firmware" ]; then
+			# ignoriere die meta-Partition (kernel + rootfs)
+			true
+		else
+			cat "/dev/$name"
+		fi
 	done
-	tar czf - -C "$temp_dir" "flash-backup"
-	rm -rf "$temp_dir"
 }
 
 # Ende der Doku-Gruppe

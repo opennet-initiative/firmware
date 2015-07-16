@@ -142,10 +142,10 @@ get_openvpn_config() {
 verify_vpn_connection() {
 	trap "error_trap verify_vpn_connection '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local key_file=${2:-}
-	local cert_file=${3:-}
+	local key_file="${2:-}"
+	local cert_file="${3:-}"
 	local config_file=$(mktemp -t "VERIFY-${service_name}-XXXXXXX")
-	local log_file="$(get_service_log_filename "$service_name" "openvpn" "verify")"
+	local log_file=$(get_service_log_filename "$service_name" "openvpn" "verify")
 	local file_opts
 	local wan_dev
 	local hostname

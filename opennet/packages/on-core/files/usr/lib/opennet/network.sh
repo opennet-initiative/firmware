@@ -69,8 +69,8 @@ get_ping_time() {
 # Parameter: Quell-Zone und Ziel-Zone
 add_zone_forward() {
 	trap "error_trap add_zone_forward '$*'" $GUARD_TRAPS
-	local source=$1
-	local dest=$2
+	local source="$1"
+	local dest="$2"
 	local uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
 	# die Weiterleitungsregel existiert bereits -> Ende
 	[ -n "$uci_prefix" ] && return 0
@@ -318,8 +318,8 @@ add_raw_device_to_zone() {
 ## @brief Fuege ein logisches Netzwerk-Interface zu einer Firewall-Zone hinzu.
 ## @details Typischerweise ist diese Funktion nur fuer temporaere Netzwerkschnittstellen geeignet.
 add_interface_to_zone() {
-	local zone=$1
-	local interface=$2
+	local zone="$1"
+	local interface="$2"
 	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to add interface '$interface' to non-existing zone '$zone'" && return 0
 	uci_add_list "${uci_prefix}.network" "$interface"
@@ -383,7 +383,7 @@ get_zone_of_device() {
 ##   oder falls es das Interface nicht gibt.
 get_zone_of_interface() {
 	trap "error_trap get_zone_of_interface '$*'" $GUARD_TRAPS
-	local interface=$1
+	local interface="$1"
 	local uci_prefix
 	local interfaces
 	local zone

@@ -70,7 +70,7 @@ olsr_set_main_ip() {
 	# Auslesen der aktuellen, bzw. der Standard-IP
 	local main_ip
 	if [ $# -eq 1 ]; then
-		main_ip=$1
+		main_ip="$1"
 	else
 		main_ip=$(get_main_ip)
 	fi

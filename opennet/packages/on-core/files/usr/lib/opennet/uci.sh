@@ -11,7 +11,7 @@ uci_is_true() {
 
 
 uci_is_false() {
-	local token=$1
+	local token="$1"
 	[ "$token" = "0" -o "$token" = "no" -o "$token" = "n" -o "$token" = "off" -o "$token" = "false" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
@@ -26,8 +26,8 @@ uci_is_false() {
 #   uci_get firewall.zone_free.masq 1
 # Der abschließende Standardwert (zweiter Parameter) ist optional.
 uci_get() {
-	local key=$1
-	local default=${2:-}
+	local key="$1"
+	local default="${2:-}"
 	if uci -q get "$key"; then
 		return 0
 	else
@@ -141,9 +141,9 @@ filter_uci_show_value_quotes() {
 # Aus Performance-Gruenden brechen wir frueh ab, falls die gewuenschte Anzahl an Ergebnissen erreicht ist.
 # Die meisten Anfragen suchen nur einen Treffer ("find_first_uci_section") - daher koennen wir hier viel Zeit sparen.
 _find_uci_sections() {
-	local max_num=$1
-	local config=$2
-	local stype=$3
+	local max_num="$1"
+	local config="$2"
+	local stype="$3"
 	shift 3
 	local counter=0
 	local section

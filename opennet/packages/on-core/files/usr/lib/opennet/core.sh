@@ -136,7 +136,7 @@ update_dns_servers() {
 	local servers_file=$(uci_get "dhcp.@dnsmasq[0].serversfile")
 	# aktiviere die "dnsmasq-serversfile"-Direktive, falls noch nicht vorhanden
 	if [ -z "$servers_file" ]; then
-	       servers_file=$DNSMASQ_SERVERS_FILE_DEFAULT
+	       servers_file="$DNSMASQ_SERVERS_FILE_DEFAULT"
 	       uci set "dhcp.@dnsmasq[0].serversfile=$servers_file"
 	       uci commit "dhcp.@dnsmasq[0]"
 	       reload_config
@@ -193,7 +193,7 @@ update_ntp_servers() {
 ## @details Ein Zeitstempel, sowie hübsche Formatierung wird automatisch hinzugefügt.
 add_banner_event() {
 	trap "error_trap add_banner_event '$*'" $GUARD_TRAPS
-	local event=$1
+	local event="$1"
 	# verwende den optionalen zweiten Parameter oder den aktuellen Zeitstempel
 	local timestamp="${2:-$(date)}"
 	local line=" - $timestamp - $event -"
@@ -291,9 +291,9 @@ get_on_firmware_version() {
 ##   *on_id_2* nach dem Aufruf verfügbar sind (also _nicht_ als "local"
 ##   Variablen deklariert wurden).
 get_on_ip() {
-	local on_id=$1
-	local on_ipschema=$2
-	local no=$3
+	local on_id="$1"
+	local on_ipschema="$2"
+	local no="$3"
 	echo "$on_id" | grep -q "\." || on_id=1.$on_id
 	on_id_1=$(echo "$on_id" | cut -d . -f 1)
 	on_id_2=$(echo "$on_id" | cut -d . -f 2)
@@ -320,8 +320,8 @@ get_main_ip() {
 # A + C return success and create that file
 # B return failure and do not touch that file
 aquire_lock() {
-	local lock_file=$1
-	local max_age_minutes=$2
+	local lock_file="$1"
+	local max_age_minutes="$2"
 	[ ! -e "$lock_file" ] && touch "$lock_file" && return 0
 	local file_timestamp=$(get_file_modification_timestamp_minutes "$lock_file")
 	# too old? We claim it for ourself.
@@ -332,7 +332,7 @@ aquire_lock() {
 
 
 clean_stale_pid_file() {
-	local pid_file=$1
+	local pid_file="$1"
 	[ -e "$pid_file" ] || return 0
 	local pid=$(cat "$pid_file" | sed 's/[^0-9]//g')
 	[ -z "$pid" ] && msg_debug "removing broken PID file: $pid_file" && rm "$pid_file" && return 0
@@ -414,7 +414,7 @@ apply_changes() {
 # 4) IP des Interface "free" setzen
 set_opennet_id() {
 	trap "error_trap set_opennet_id '$*'" $GUARD_TRAPS
-	local new_id=$1
+	local new_id="$1"
 	local network
 	local uci_prefix
 	local ipaddr

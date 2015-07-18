@@ -95,6 +95,7 @@ clean: unpatch
 # VORSICHT: alle lokalen Aenderungen gehen verloren - dies sollte nie von einem
 # Menschen ausgefuehrt werden - es ist lediglich fuer den trac-Autobuilder gedacht
 autobuilder-clean:
+	id >&2
 	git fetch --all
 	git reset --hard origin/master
 	git submodule update

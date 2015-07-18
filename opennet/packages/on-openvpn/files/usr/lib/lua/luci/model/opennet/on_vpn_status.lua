@@ -26,7 +26,7 @@ end
 
 
 -- ein Tunnel-VPN-Prozess laeuft (eventuell steht die Verbindung noch nicht)
-function is_tunnel_active()
+function is_tunnel_starting()
 	return on_function("get_starting_mig_connections") ~= ""
 end
 

@@ -1,0 +1,9 @@
+add snapshot build key. RC releases of CC seem to be signed with this key.
+If there is stable CC then this patch should be obsolete.
+Index: on_firmware/openwrt/package/base-files/files/etc/opkg/keys/af22f7a88858c8e9
+===================================================================
+--- /dev/null
++++ on_firmware/openwrt/package/base-files/files/etc/opkg/keys/af22f7a88858c8e9
+@@ -0,0 +1,2 @@
++untrusted comment: openwrt.org snapshot build key
++RWSvIveoiFjI6WS/h3J8Us0wUEjA53cQLuHJEwOD/sT5JsGvguZjlKmU

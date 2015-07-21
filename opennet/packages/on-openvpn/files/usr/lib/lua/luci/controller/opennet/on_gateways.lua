@@ -52,8 +52,7 @@ function action_vpn_gateways()
 		on_function("reset_all_mig_connection_test_timestamps")
 	end
 
-	local show_more_info = luci.http.formvalue("show_more_info")
-	luci.template.render("opennet/on_gateways", { show_more_info=show_more_info, on_errors=on_errors })
+	luci.template.render("opennet/on_gateways", { on_errors=on_errors })
 end
 
 

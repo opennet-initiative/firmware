@@ -668,9 +668,9 @@ set_opkg_download_version() {
 		# bei "ar71xx/generic" ignorieren wir den Teil nach dem slash - unsere Repo-Struktur hat diese Ebene nicht
 		echo "http://downloads.on/openwrt/$version/${DISTRIB_TARGET%/generic}/packages"
 	)
-	# entferne Zeilen, die auf opennet-Domains verweisen
+	# entferne Zeilen, die auf opennet-Domains verweisen und den automatisch eingefuegtes packages/opennet
 	(
-		grep -vF "//downloads.on/" "$opkg_file" | grep -vF "//downloads.opennet-initiative.de/"
+		grep -vF "//downloads.on/" "$opkg_file" | grep -vF "//downloads.opennet-initiative.de/" | grep -vF "packages/opennet"
 		echo "src/gz opennet $base_url/opennet"
 	) | update_file_if_changed "$opkg_file" || true
 }

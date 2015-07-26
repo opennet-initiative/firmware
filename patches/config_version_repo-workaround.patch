@@ -1,0 +1,16 @@
+#Leider scheint die Variable CONFIG_VERSION_REPO *nicht* weitergereicht zu werden. Eigentlich sollte diese Variable hier in den Make Prozess gelangen.
+# In openwrt/includes/version.mk wird geprüft, ob diese Variable vorher gesetz wurde. Wenn ja, dann wird sie übernommen. Wenn nein, wird ein generiert.
+# Und an dieser Stelle wird immer eine generiert (mit string snapshot/trunk) darin, obwohl sie von uns vorher in opennet/config/common gesetzt wurde. 
+Index: on_firmware/openwrt/include/version.mk
+===================================================================
+--- on_firmware.orig/openwrt/include/version.mk
++++ on_firmware/openwrt/include/version.mk
+@@ -29,7 +29,7 @@ VERSION_CODE:=$(if $(VERSION_CODE),$(VER
+ VERSION_NICK:=$(call qstrip_escape,$(CONFIG_VERSION_NICK))
+ VERSION_NICK:=$(if $(VERSION_NICK),$(VERSION_NICK),$(RELEASE))
+ 
+-#workaround for opennet
++#workaround for opennet because of bug
+ CONFIG_VERSION_REPO="http://downloads.openwrt.org/%n/15.05-rc3/%S/packages"
+ 
+ VERSION_REPO:=$(call qstrip_escape,$(CONFIG_VERSION_REPO))

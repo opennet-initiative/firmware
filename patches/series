@@ -10,3 +10,4 @@ olsrd_add_ondataservice.patch
 px5g_create_csr.patch
 gpio_switch_control.patch
 openwrt_opkg_snapshot_build-key.patch
+config_version_repo-workaround.patch

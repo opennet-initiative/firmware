@@ -124,6 +124,8 @@ captive_portal_restart() {
 	local clients=$(ndsctl clients 2>/dev/null | grep "^ip=" | cut -f 2 -d =)
 	# Prozess neustarten (reload legt wohl keine iptables-Regeln an)
 	/etc/init.d/nodogsplash restart >/dev/null
+	# kurz warten, damit der Dienst startet
+	sleep 1
 	# kein laufender Prozess? Keine Wiederherstellung von Clients ...
 	[ -z "$(pidof nodogsplash)" ] && return 0
 	# Client-Liste wiederherstellen

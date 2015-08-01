@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Wir wollen regelmaessig sicherstellen, dass die captive-Portal-Funktion der VPN-Tunnel folgt.
+# Wir wollen regelmaessig sicherstellen, dass die captive-Portal-Funktion dem Zustand des VPN-Tunnels folgt.
 # Andernfalls verpassen wir eventuell einen Zustandswechsel (z.B. beim Booten).
 #
 

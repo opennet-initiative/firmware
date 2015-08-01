@@ -194,11 +194,13 @@ sync_captive_portal_state_with_mig_connections() {
 		done
 	fi
 	if [ -n "$device_active" -a -z "$mig_active" ]; then
+		# free-Interface ist aktive - es gibt jedoch keinen Tunnel
 		ifdown "$NETWORK_FREE"
 		# reload fuehrt zum sanften Stoppen
 		is_captive_portal_running && sleep 1 && captive_portal_reload
 		true
 	elif [ -z "$device_active" -a -n "$mig_active" ]; then
+		# kein aktives free-Interface, aber ein aktiver Tunnel
 		ifup "$NETWORK_FREE"
 	fi
 	# warte auf das Netzwerk-Interface

@@ -911,7 +911,7 @@ run_curl() {
 
 ## @fn is_on_module_installed_and_enabled()
 ## @brief Pruefe ob ein Modul sowohl installiert, als auch aktiv ist.
-## @param module Eins der Opennet-Pakete (on-openvpn, on-usergw, on-captiva-portal).
+## @param module Eins der Opennet-Pakete (on-openvpn, on-usergw, on-captive-portal).
 ## @details Die Aktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" geprueft.
 ##   Der Standardwert ist "false" (ausgeschaltet).
 is_on_module_installed_and_enabled() {
@@ -921,7 +921,29 @@ is_on_module_installed_and_enabled() {
 }
 
 
-## @fn get_flash_backup
+## @fn enable_on_module()
+## @brief Aktiviere ein Opennet-Modul
+## @param module Eins der Opennet-Pakete (on-openvpn, on-usergw, on-captive-portal).
+## @details Die Aktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" vorgenommen.
+enable_on_module() {
+	local module="$1"
+	uci set "${module}.settings=settings"
+	uci set "${module}.settings.enabled=1"
+}
+
+
+## @fn disable_on_module()
+## @brief Deaktiviere ein Opennet-Modul
+## @param module Eins der Opennet-Pakete (on-openvpn, on-usergw, on-captive-portal).
+## @details Die Deaktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" vorgenommen.
+disable_on_module() {
+	local module="$1"
+	uci set "${module}.settings=settings"
+	uci set "${module}.settings.enabled=0"
+}
+
+
+## @fn get_flash_backup()
 ## @brief Erzeuge einen rohen Dump des Flash-Speichers. Dieser ermöglicht den Austausch des Flash-Speichers.
 ## @param include_private Kopiere neben den nur-Lese-Bereichen auch die aktuelle Konfiguration inkl. eventueller privater Daten.
 ## @details Alle mtd-Partition bis auf den Kernel und die Firmware werden einzeln kopiert und dann komprimiert.

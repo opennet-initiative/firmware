@@ -705,7 +705,7 @@ line_in_file() {
 ## @param package Name des Pakets
 is_package_installed() {
 	local package="$1"
-	opkg list-installed | grep -q "^$package[\t ]" && return 0
+	opkg list-installed | grep -q -w "^$package" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 
@@ -906,6 +906,18 @@ schedule_parts() {
 run_curl() {
 	curl -q --silent --cacert /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem "$@" \
 		|| msg_error "Failed to retrieve data from URL '$@' via curl"
+}
+
+
+## @fn is_on_module_installed_and_enabled()
+## @brief Pruefe ob ein Modul sowohl installiert, als auch aktiv ist.
+## @param module Eins der Opennet-Pakete (on-openvpn, on-usergw, on-captiva-portal).
+## @details Die Aktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" geprueft.
+##   Der Standardwert ist "false" (ausgeschaltet).
+is_on_module_installed_and_enabled() {
+	local module="$1"
+	is_package_installed "$module" && uci_is_true "$(uci_get "${module}.settings.enabled" "false")" && return 0
+	trap "" $GUARD_TRAPS && return 1
 }
 
 

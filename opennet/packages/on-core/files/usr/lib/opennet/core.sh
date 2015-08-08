@@ -943,6 +943,24 @@ disable_on_module() {
 }
 
 
+## @fn read_data_bytes()
+## @brief Bytes von einem Blockdevice lesen
+## @param source das Quell-Blockdevice (oder die Datei)
+## @param size die Anzahl der zu uebertragenden Bytes
+## @param transfer_blocksize die Blockgroesse bei der Uebertragung (Standard: 65536)
+## @details Die verwendete Uebertragung in grossen Bloecken ist wesentlich schneller als das byteweise EinlesenaKopie.sh_backup
+##   Der abschliessende unvollstaendige Block wird byteweise eingelesen.
+read_data_bytes() {
+	local size="$1"
+	local transfer_blocksize="${2:-65536}"
+	# "conv=sync" ist fuer die "yes"-Quelle erforderlich - sonst fehlt gelegentlich der letzte Block.
+	# Es scheint sich dazu bei um eine race-condition zu handeln.
+	dd "bs=$transfer_blocksize" "count=$((size / transfer_blocksize))" conv=sync 2>/dev/null
+	[ "$((size % transfer_blocksize))" -ne 0 ] && dd bs=1 "count=$((size % transfer_blocksize))" 2>/dev/null
+	true
+}
+
+
 ## @fn get_flash_backup()
 ## @brief Erzeuge einen rohen Dump des Flash-Speichers. Dieser ermöglicht den Austausch des Flash-Speichers.
 ## @param include_private Kopiere neben den nur-Lese-Bereichen auch die aktuelle Konfiguration inkl. eventueller privater Daten.
@@ -978,22 +996,31 @@ get_flash_backup() {
 			local rootfs_full_size="$size"
 		elif [ "$label" = "rootfs_data" ]; then
 			# schreibe das komplette rootfs _ohne_ das aktuelle rootfs_data
-			echo >&2 "root-RO: $((rootfs_full_size - size))"
-			dd "if=$rootfs_device" bs=1 "count=$((rootfs_full_size - size))"
+			echo >&2 "Read: root-RO $((rootfs_full_size - size))"
+			# Transfer blockweise vornehmen - byteweise dauert es zu lang
+			read_data_bytes "($((rootfs_full_size - size)))" <"$rootfs_device"
 			if [ -z "$include_private" ]; then
-				echo >&2 "root-zero: $size"
+				echo >&2 "Read: root-zero ($size)"
 				# erzeuge 0xFF auf obskure Weise (fuer maximale Flash-Schreibgeschwindigkeit)
 				# siehe http://stackoverflow.com/a/10905109
-				yes $'\xFF' | tr -d '\n' | dd bs=1 "count=$size"
+				yes $'\xFF' | tr -d '\n' | read_data_bytes "$size"
+				#yes $'\xFF' | tr -d '\n' | dd bs=1 "count=$size"
+				#local count=0
+				#while [ "$count" -lt "$size" ]; do
+					#echo -n $'\xFF'
+					#: $((count++))
+				#done
 			else
-				echo >&2 "root-RW: $size"
+				echo >&2 "Read: root-RW ($size)"
 				# auch das private rootfs-Dateisystem (inkl. Schluessel, Passworte, usw.) auslesen
-				dd "if=/dev/$name" bs=1 "count=$size"
+				read_data_bytes "$size" <"/dev/$name"
 			fi
 		elif [ "$label" = "firmware" ]; then
+			echo >&2 "Skip: $label ($size)"
 			# ignoriere die meta-Partition (kernel + rootfs)
 			true
 		else
+			echo >&2 "Read: $label ($size)"
 			cat "/dev/$name"
 		fi
 	done

@@ -195,8 +195,8 @@ function fill_openssl(domain, openssl)
 	openssl.provinceName = get_default_value(domain, "certificate_provinceName")
 	openssl.localityName = get_default_value(domain, "certificate_localityName")
 	openssl.organizationalUnitName = get_default_value(domain, "certificate_organizationalUnitName")
-	openssl.organizationName = luci.http.formvalue("openssl.organizationName")
-	openssl.commonName = luci.http.formvalue("openssl.commonName")
+	openssl.organizationName = trim_string(luci.http.formvalue("openssl.organizationName"))
+	openssl.commonName = trim_string(luci.http.formvalue("openssl.commonName"))
 	if not openssl.commonName then
 		on_id = cursor:get("on-core", "settings", "on_id")
 		if not on_id then on_id = "X.XX" end
@@ -206,7 +206,7 @@ function fill_openssl(domain, openssl)
 			openssl.commonName = on_id..".ugw.on"
 		end
 	end
-	openssl.EmailAddress = luci.http.formvalue("openssl.EmailAddress")
+	openssl.EmailAddress = trim_string(luci.http.formvalue("openssl.EmailAddress"))
 	openssl.days = get_default_value(domain, "certificate_days")
 end
 

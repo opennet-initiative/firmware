@@ -6,7 +6,7 @@ rm -f "${IPKG_INSTROOT:-}/tmp/luci-indexcache"
 # Paket-Initialisierungen durchfuehren, falls wir in einem echten System sind
 # In der Paket-Bau-Phase funktioniert die untenstehende Aktion nicht, da eine
 # Datei fehlt, die in der /etc/init.d/boot geladen wird.
-if [ -z "$IPKG_INSTROOT" ]; then
+if [ -z "${IPKG_INSTROOT:-}" ]; then
 	# Die Angabe von IPKG_INSTROOT ist hier muessig - aber vielleicht
 	# koennen wir die obige Bedingung irgendwann entfernen.
 	. "${IPKG_INSTROOT:-}/etc/init.d/boot"

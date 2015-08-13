@@ -943,6 +943,27 @@ disable_on_module() {
 }
 
 
+## @fn on_opkg_postinst_default()
+## @brief Übliche Nachbereitung einer on-Paket-Installation.
+## @details luci-Cache löschen, uci-defaults anwenden, on-core-Bootskript ausführen
+on_opkg_postinst_default() {
+	# Reset des Luci-Cache - sonst sind neue Web-Interface-Elemente nicht sichtbar
+	rm -f "${IPKG_INSTROOT:-}/tmp/luci-indexcache"
+	# Paket-Initialisierungen durchfuehren, falls wir in einem echten System sind.
+	# In der Paket-Bau-Phase funktioniert die untenstehende Aktion nicht, da eine
+	# Datei fehlt, die in der /etc/init.d/boot geladen wird.
+	if [ -z "${IPKG_INSTROOT:-}" ]; then
+		# Die Angabe von IPKG_INSTROOT ist hier muessig - aber vielleicht
+		# koennen wir die obige Bedingung irgendwann entfernen.
+		. "${IPKG_INSTROOT:-}/etc/init.d/boot"
+		uci_apply_defaults
+		# Boot-Skript aktivieren und ausführen (falls noch nicht geschehen)
+		/etc/init.d/on-core enable 2>/dev/null || true
+		/etc/init.d/on-core start
+	fi
+}
+
+
 ## @fn read_data_bytes()
 ## @brief Bytes von einem Blockdevice lesen
 ## @param source das Quell-Blockdevice (oder die Datei)

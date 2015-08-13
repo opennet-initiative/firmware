@@ -1,1 +1,2 @@
-../../on-core/ipkg/postinst
+#!/bin/sh
+on-function on_opkg_postinst_default

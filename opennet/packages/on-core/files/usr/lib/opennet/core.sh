@@ -927,6 +927,7 @@ is_on_module_installed_and_enabled() {
 ## @details Die Aktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" vorgenommen.
 enable_on_module() {
 	local module="$1"
+	[ -e "/etc/config/$module" ] || touch "/etc/config/$module"
 	uci set "${module}.settings=settings"
 	uci set "${module}.settings.enabled=1"
 }
@@ -938,6 +939,7 @@ enable_on_module() {
 ## @details Die Deaktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" vorgenommen.
 disable_on_module() {
 	local module="$1"
+	[ -e "/etc/config/$module" ] || touch "/etc/config/$module"
 	uci set "${module}.settings=settings"
 	uci set "${module}.settings.enabled=0"
 }

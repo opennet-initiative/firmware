@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Ueberblick ueber Eigenschaften der Internetfreigabe
+#
+
+set -eu
+
+
+# uci-Konfiguration
+uci show -q "on-usergw" >uci_on-usergw || true

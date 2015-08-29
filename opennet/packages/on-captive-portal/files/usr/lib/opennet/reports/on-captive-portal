@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Ueberblick ueber Eigenschaften des Captive-Portal-Moduls
+#
+
+set -eu
+
+
+# uci-Konfiguration
+uci show -q "on-captive-portal" >uci_on-captive-portal || true

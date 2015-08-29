@@ -42,5 +42,8 @@ ping_neighbour() {
 	ping -W 2 -c 1 -s 1500 8.8.8.8
 ) >vpn_tunnel_ping.log &
 
-wait
 
+# uci-Konfiguration
+uci show -q "on-openvpn" >uci_on-openvpn || true
+
+wait

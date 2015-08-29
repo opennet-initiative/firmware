@@ -132,7 +132,7 @@ get_zone_interfaces() {
 	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
 	# keine Zone -> keine Interfaces
 	[ -z "$uci_prefix" ] && return 0
-	local interfaces=$(uci_get "${uci_prefix}.network")
+	local interfaces=$(uci_get_list "${uci_prefix}.network")
 	# falls 'network' und 'device' leer sind, dann enthaelt 'name' den Interface-Namen
 	# siehe http://wiki.openwrt.org/doc/uci/firewall#zones
 	[ -z "$interfaces" ] && [ -z "$(uci_get "${uci_prefix}.device")" ] && interfaces="$(uci_get "${uci_prefix}.name")"

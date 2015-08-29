@@ -59,6 +59,11 @@ ON_SHELL_MODULES_NEWEST=$( (ls -dtr "$ON_SHELL_MODULES_DIR" $ON_SHELL_MODULES "$
 . "$ON_SHELL_MINIMIZED"
 
 
+clear_caches() {
+	rm -f "$ON_SHELL_MINIMIZED"
+	clean_luci_restart
+}
+
+
 # erzeuge das Profiling-Verzeichnis (vorsorglich - es wird wohl unbenutzt bleiben)
 mkdir -p "$PROFILING_DIR"
-

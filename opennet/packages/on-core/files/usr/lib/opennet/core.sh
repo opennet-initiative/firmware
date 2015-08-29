@@ -962,8 +962,8 @@ disable_on_module() {
 ## @brief Übliche Nachbereitung einer on-Paket-Installation.
 ## @details luci-Cache löschen, uci-defaults anwenden, on-core-Bootskript ausführen
 on_opkg_postinst_default() {
-	# Reset des Luci-Cache - sonst sind neue Web-Interface-Elemente nicht sichtbar
-	rm -f "${IPKG_INSTROOT:-}/tmp/luci-indexcache"
+	# Reset des Luci-Cache und Shell-Cache
+	clear_caches
 	# Paket-Initialisierungen durchfuehren, falls wir in einem echten System sind.
 	# In der Paket-Bau-Phase funktioniert die untenstehende Aktion nicht, da eine
 	# Datei fehlt, die in der /etc/init.d/boot geladen wird.

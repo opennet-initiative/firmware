@@ -24,9 +24,11 @@ list_installed_packages_by_size() {
 ## @brief Starte den Webserver neu und lösche alle luci-Cache-Dateien und Kompilate.
 ## @details Diese Funktion sollte nach Änderungen von luci-Templates oder -Code ausgeführt werden.
 clean_luci_restart() {
-	/etc/init.d/uhttpd stop
+	local rc_path="/etc/init.d/uhttpd"
+	[ -e "$rc_path" ] || return 0
+	"$rc_path" stop
 	rm -rf /var/luci-*
-	/etc/init.d/uhttpd start
+	"$rc_path" start
 }
 
 

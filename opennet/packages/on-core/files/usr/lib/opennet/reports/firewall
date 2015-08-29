@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Ueberblick ueber Firewall-Einstellungen
+#
+
+set -eu
+
+
+# aktuell wirksame Firewall-Regeln
+for table in filter nat mangle; do
+	iptables -t "$table" -L -vn >"iptables_${table}.rules"
+done
+
+
+# uci-Konfiguration
+uci show -q "firewall" >uci_firewall || true

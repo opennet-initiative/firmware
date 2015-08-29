@@ -1,4 +1,5 @@
 #!/bin/sed -nf
+# Source: https://github.com/Anvil/bash-doxygen
 /^## \+@fn/{
     :step
     /@param [^ ]\+ .*$/{

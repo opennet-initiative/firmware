@@ -267,13 +267,24 @@ get_mig_port_forward_range() {
 
 
 ## @fn update_mig_connection_status()
-## @brief Prüfe die VPN-Verbindungen bis mindestens eine Verbindung aufgebaut wurde.
+## @brief Je nach Status des Moduls: prüfe die VPN-Verbindungen bis mindestens eine Verbindung
+##   aufgebaut wurde bzw. trenne alle Verbindungen.
 ## @details Diese Funktion sollte regelmäßig als cronjob ausgeführt werden.
 update_mig_connection_status() {
-	# die Gateway-Tests sind nur moeglich, falls ein Test-Schluessel vorhanden ist
-	if has_mig_openvpn_credentials; then
-		verify_mig_gateways
-		find_and_select_best_gateway
+	local service_name
+	if is_on_module_installed_and_enabled "on-openvpn"; then
+		# die Gateway-Tests sind nur moeglich, falls ein Test-Schluessel vorhanden ist
+		if has_mig_openvpn_credentials; then
+			verify_mig_gateways
+			find_and_select_best_gateway
+		fi
+	else
+		# möglicherweise vorhandene Verbindungen trennen und bei Bedarf openvpn neustarten
+		{ get_active_mig_connections; get_starting_mig_connections; } | while read service_name; do
+			disable_openvpn_service "$service_name" && echo "$service_name"
+			true
+		done | grep -q . && apply_changes openvpn
+		true
 	fi
 }
 

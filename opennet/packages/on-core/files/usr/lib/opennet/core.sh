@@ -400,6 +400,15 @@ apply_changes() {
 				update_ntp_servers
 				update_dns_servers
 				;;
+			on-openvpn)
+				update_mig_connection_status
+				;;
+			on-usergw)
+				# TODO
+				;;
+			on-captive-portal)
+				# TODO
+				;;
 			*)
 				msg_error "no handler defined for applying config changes for '$config'"
 				;;
@@ -932,7 +941,7 @@ enable_on_module() {
 	[ -e "/etc/config/$module" ] || touch "/etc/config/$module"
 	uci set "${module}.settings=settings"
 	uci set "${module}.settings.enabled=1"
-	uci commit on-openvpn
+	apply_changes "$module"
 }
 
 
@@ -945,7 +954,7 @@ disable_on_module() {
 	[ -e "/etc/config/$module" ] || touch "/etc/config/$module"
 	uci set "${module}.settings=settings"
 	uci set "${module}.settings.enabled=0"
-	uci commit on-openvpn
+	apply_changes "$module"
 }
 
 

@@ -52,18 +52,19 @@ captive_portal_get_or_create_config() {
 
 
 ## @fn get_on_captive_portal_default()
-## @brief Liefere einen der default-Werte der aktuellen Firmware zurück (Paket on-captive-portal).
 ## @param key Name des Schlüssels
+## @brief Liefere einen der default-Werte der aktuellen Firmware zurück (Paket on-captive-portal).
 ## @details Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
 ##   Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfügbar.
 get_on_captive_portal_default() {
-	_get_file_dict_value "$1" "$ON_CAPTIVE_PORTAL_DEFAULTS_FILE"
+	local key="$1"
+	_get_file_dict_value "$key" "$ON_CAPTIVE_PORTAL_DEFAULTS_FILE"
 }
 
 
-## @fn captive_portal_set_property
+## @fn captive_portal_set_property()
 ## @brief Setze ein Attribut der Captive-Portal-Funktion
-## @param attribute Eins der Captive-Portal-Attribute: name / url
+## @param key Eins der Captive-Portal-Attribute: name / url
 ## @param value Der gewünschte neue Inhalt des Attributs
 ## @attention Anschließend ist 'captive_portal_apply' aufzurufen, um die Änderungen wirksam werden zu lassen.
 captive_portal_set_property() {
@@ -77,9 +78,9 @@ captive_portal_set_property() {
 }
 
 
-## @fn captive_portal_get_property
+## @fn captive_portal_get_property()
 ## @brief Hole ein Attribut der Captive-Portal-Funktion
-## @param attribute Eins der Captive-Portal-Attribute: name / url
+## @param key Eins der Captive-Portal-Attribute: name / url
 captive_portal_get_property() {
 	local key="$1"
 	local uci_attribute=$(_captive_portal_get_mapped_attribute "$key")

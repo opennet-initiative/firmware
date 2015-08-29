@@ -6,7 +6,7 @@
 MIG_OPENVPN_DIR=/etc/openvpn/opennet_user
 MIG_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
 DEFAULT_MIG_PORT=1600
-## @var Quelldatei für Standardwerte des Nutzer-VPN-Pakets
+## Quelldatei für Standardwerte des Nutzer-VPN-Pakets
 ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
 ZONE_TUNNEL=on_vpn
 NETWORK_TUNNEL=on_vpn
@@ -17,7 +17,8 @@ NETWORK_TUNNEL=on_vpn
 ## @param key Name des Schlüssels
 ## @sa get_on_core_default
 get_on_openvpn_default() {
-	_get_file_dict_value "$1" "$ON_OPENVPN_DEFAULTS_FILE"
+	local key="$1"
+	_get_file_dict_value "$key" "$ON_OPENVPN_DEFAULTS_FILE"
 }
 
 
@@ -43,7 +44,7 @@ verify_mig_gateways() {
 
 ## @fn select_mig_connection()
 ## @brief Aktiviere den angegebenen VPN-Gateway
-## @param Name eines Diensts
+## @param wanted Name eines Diensts
 ## @attention Seiteneffekt: Beräumung aller herumliegenden Konfigurationen von alten Verbindungen.
 select_mig_connection() {
 	trap "error_trap select_mig_connection '$*'" $GUARD_TRAPS
@@ -61,9 +62,9 @@ select_mig_connection() {
 }
 
 
-## @fn find_and_select_best_gateway
+## @fn find_and_select_best_gateway()
 ## @brief Ermittle den besten Gateway und prüfe, ob ein Wechsel sinnvoll ist.
-## @param force [optional] erzwinge den Wechsel auf den besten Gateway unabhängig von Wartezeiten (true/false)
+## @param force_switch_now [optional] erzwinge den Wechsel auf den besten Gateway unabhängig von Wartezeiten (true/false)
 ## @ref mig-switch
 find_and_select_best_gateway() {
 	trap "error_trap find_and_select_best_gateway '$*'" $GUARD_TRAPS
@@ -177,7 +178,7 @@ get_starting_mig_connections() {
 
 ## @fn reset_mig_connection_test_timestamp()
 ## @brief Löse eine erneute Prüfung dieses Gateways beim nächsten Prüflauf aus.
-## @param Name eines Diensts
+## @param service_name Name eines Diensts
 ## @details Das Löschen des *status_timestamp* Werts führt zu einer
 ##   erneuten Prüfung zum nächstmöglichen Zeitpunkt.
 reset_mig_connection_test_timestamp() {
@@ -223,7 +224,7 @@ get_client_cn() {
 
 ## @fn get_mig_port_forward_range()
 ## @brief Liefere den ersten und letzten Port der Nutzertunnel-Portweiterleitung zurück.
-## @param [optional] common name des Nutzer-Zertifikats
+## @param client_cn [optional] common name des Nutzer-Zertifikats
 ## @returns zwei Zahlen durch Tabulatoren getrennt / keine Ausgabe, falls keine Main-ID gefunden wurde
 ## @details Jeder AP bekommt einen Bereich von zehn Ports fuer die Port-Weiterleitung zugeteilt.
 get_mig_port_forward_range() {
@@ -265,7 +266,7 @@ get_mig_port_forward_range() {
 }
 
 
-## @fn update_connection_status()
+## @fn update_mig_connection_status()
 ## @brief Prüfe die VPN-Verbindungen bis mindestens eine Verbindung aufgebaut wurde.
 ## @details Diese Funktion sollte regelmäßig als cronjob ausgeführt werden.
 update_mig_connection_status() {

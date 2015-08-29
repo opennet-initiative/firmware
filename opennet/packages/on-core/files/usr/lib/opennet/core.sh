@@ -66,10 +66,10 @@ msg_error() {
 
 
 ## @fn append_to_custom_log()
-## @brief Hänge eine neue Nachricht an ein spezfisches Protokoll an.
 ## @param log_name Name des Log-Ziels
 ## @param event die Kategorie der Meldung (up/down/???)
 ## @param msg die textuelle Beschreibung des Ereignis (z.B. "connection with ... closed")
+## @brief Hänge eine neue Nachricht an ein spezfisches Protokoll an.
 ## @details Die Meldungen werden beispielsweise von den konfigurierten openvpn-up/down-Skripten gesendet.
 append_to_custom_log() {
 	local log_name="$1"
@@ -85,8 +85,8 @@ append_to_custom_log() {
 
 
 ## @fn get_custom_log()
-## @brief Liefere den Inhalt eines spezifischen Logs (z.B. das OpenVPN-Verbindungsprotokoll) zurück.
 ## @param log_name Name des Log-Ziels
+## @brief Liefere den Inhalt eines spezifischen Logs (z.B. das OpenVPN-Verbindungsprotokoll) zurück.
 ## @returns Zeilenweise Ausgabe der Protokollereignisse (aufsteigend nach Zeitstempel sortiert).
 get_custom_log() {
 	local log_name="$1"
@@ -96,7 +96,7 @@ get_custom_log() {
 
 
 ## @fn update_file_if_changed()
-## @param filename Name der Zieldatei
+## @param target_filename Name der Zieldatei
 ## @brief Aktualisiere eine Datei, falls sich ihr Inhalt geändert haben sollte.
 ## @details Der neue Inhalt der Datei wird auf der Standardeingabe erwartet.
 ##   Im Falle der Gleichheit von aktuellem Inhalt und zukünftigem Inhalt wird
@@ -187,9 +187,9 @@ update_ntp_servers() {
 
 
 ## @fn add_banner_event()
-## @brief Füge ein Ereignis zum dauerhaften Ereignisprotokoll (/etc/banner) hinzu.
 ## @param event Ereignistext
 ## @param timestamp [optional] Der Zeitstempel-Text kann bei Bedarf vorgegeben werden.
+## @brief Füge ein Ereignis zum dauerhaften Ereignisprotokoll (/etc/banner) hinzu.
 ## @details Ein Zeitstempel, sowie hübsche Formatierung wird automatisch hinzugefügt.
 add_banner_event() {
 	trap "error_trap add_banner_event '$*'" $GUARD_TRAPS
@@ -212,6 +212,8 @@ add_banner_event() {
 }
 
 
+## @fn clean_restart_log()
+## @brief Alle Log-Einträge aus der banner-Datei entfernen.
 clean_restart_log() {
 	awk '{if ($1 != "-") print}' /etc/banner >/tmp/banner
 	mv /tmp/banner /etc/banner
@@ -220,12 +222,11 @@ clean_restart_log() {
 
 
 ## @fn _get_file_dict_value()
-## @brief Auslesen eines Werts aus einer Schlüssel/Wert-Datei
-## @param status_file der Name der Schlüssel/Wert-Datei
-## @param field das Schlüsselwort
-## @returns Den zum gegebenen Schlüssel gehörenden Wert aus der Schlüssel/Wert-Datei.
+## @param key das Schlüsselwort
+## @brief Auslesen eines Werts aus einem Schlüssel/Wert-Eingabestrom
+## @returns Den zum gegebenen Schlüssel gehörenden Wert aus dem Schlüssel/Wert-Eingabestrom
 ##   Falls kein passender Schlüssel gefunden wurde, dann ist die Ausgabe leer.
-## @details Jede Zeile dieser Datei enthält einen Feldnamen und einen Wert - beide sind durch
+## @details Jede Zeile der Standardeingabe enthält einen Feldnamen und einen Wert - beide sind durch
 ##   ein beliebiges whitespace-Zeichen getrennt.
 ##   Dieses Dateiformat wird beispielsweise für die Dienst-Zustandsdaten verwendet.
 ##   Zusätzlich ist diese Funktion auch zum Parsen von openvpn-Konfigurationsdateien geeignet.
@@ -233,18 +234,16 @@ _get_file_dict_value() { local key="$1"; shift; { grep -s -w "^$key" "$@" || tru
 
 
 ## @fn _get_file_dict_keys()
-## @brief Liefere alle Schlüssel aus einer Schlüssel/Wert-Datei.
-## @param status_files Namen der Schlüssel/Wert-Dateien
-## @returns Liste aller Schlüssel aus der Schlüssel/Wert-Datei.
+## @brief Liefere alle Schlüssel aus einem Schlüssel/Wert-Eingabestrom.
+## @returns Liste aller Schlüssel aus dem Schlüssel/Wert-Eingabestrom.
 ## @sa _get_file_dict_value
 _get_file_dict_keys() { sed 's/[ \t].*//' "$@" 2>/dev/null || true; }
 
 
 ## @fn _set_file_dict_value()
-## @brief Schreiben eines Werts in eine Schlüssel/Wert-Datei
-## @param status_file der Name der Schlüssel/Wert-Datei
 ## @param field das Schlüsselwort
 ## @param value der neue Wert
+## @brief Ersetzen oder Einfügen eines Werts in einen Schlüssel/Wert-Eingabestrom.
 ## @sa _get_file_dict_value
 _set_file_dict_value() {
 	local status_file="$1"
@@ -265,12 +264,13 @@ _set_file_dict_value() {
 
 
 ## @fn get_on_core_default()
-## @brief Liefere einen der default-Werte der aktuellen Firmware zurück (Paket on-core).
 ## @param key Name des Schlüssels
+## @brief Liefere einen der default-Werte der aktuellen Firmware zurück (Paket on-core).
 ## @details Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
 ##   Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfügbar.
 get_on_core_default() {
-	_get_file_dict_value "$1" "$ON_CORE_DEFAULTS_FILE"
+	local key="$1"
+	_get_file_dict_value "$key" "$ON_CORE_DEFAULTS_FILE"
 }
 
 
@@ -293,7 +293,9 @@ get_on_firmware_version() {
 get_on_ip() {
 	local on_id="$1"
 	local on_ipschema="$2"
-	local no="$3"
+	local interface_number="$3"
+	# das "on_ipschema" erwartet die Variable "no"
+	local no="$interface_number"
 	echo "$on_id" | grep -q "\." || on_id=1.$on_id
 	on_id_1=$(echo "$on_id" | cut -d . -f 1)
 	on_id_2=$(echo "$on_id" | cut -d . -f 2)
@@ -364,8 +366,8 @@ check_pid_file() {
 
 
 ## @fn apply_changes()
-## @brief Kombination von uci-commit und anschliessender Inkraftsetzung fuer verschiedene uci-Sektionen.
 ## @param configs Einer oder mehrere uci-Sektionsnamen.
+## @brief Kombination von uci-commit und anschliessender Inkraftsetzung fuer verschiedene uci-Sektionen.
 ## @details Dienst-, Netzwerk- und Firewall-Konfigurationen werden bei Bedarf angewandt.
 ##   Zuerst werden alle uci-Sektionen commited und anschliessend werden die Trigger ausgefuehrt.
 apply_changes() {
@@ -472,9 +474,9 @@ get_from_key_value_list() {
 
 
 ## @fn replace_in_key_value_list()
-## @brief Ermittle aus einer mit Tabulatoren oder Leerzeichen getrennten Liste von Schlüssel-Wert-Paaren den Inhalt des Werts zu einem Schlüssel.
 ## @param search_key der Name des Schlüsselworts
 ## @param separator der Name des Trennzeichens zwischen Wert und Schlüssel
+## @brief Ermittle aus einer mit Tabulatoren oder Leerzeichen getrennten Liste von Schlüssel-Wert-Paaren den Inhalt des Werts zu einem Schlüssel.
 ## @returns die korrigierte Schlüssel-Wert-Liste wird ausgegeben (eventuell mit veränderten Leerzeichen oder Tabulatoren)
 replace_in_key_value_list() {
 	local search_key="$1"
@@ -515,9 +517,9 @@ get_file_modification_timestamp_minutes() {
 
 
 ## @fn is_timestamp_older_minutes()
-## @brief Prüfe, ob ein gegebener Zeitstempel älter ist, als die vorgegebene Zeitdifferenz.
 ## @param timestamp_minute der zu prüfende Zeitstempel (in Minuten seit dem Systemstart)
 ## @param difference zulässige Zeitdifferenz zwischen jetzt und dem Zeitstempel
+## @brief Prüfe, ob ein gegebener Zeitstempel älter ist, als die vorgegebene Zeitdifferenz.
 ## @returns Exitcode Null (Erfolg), falls der gegebene Zeitstempel mindestens 'difference' Minuten zurückliegt.
 # Achtung: Zeitstempel aus der Zukunft gelten immer als veraltet.
 is_timestamp_older_minutes() {
@@ -542,9 +544,9 @@ get_uptime_seconds() {
 
 
 ## @fn run_delayed_in_background()
-## @brief Führe eine Aktion verzögert im Hintergrund aus.
 ## @param delay Verzögerung in Sekunden
 ## @param command alle weiteren Token werden als Kommando und Parameter interpretiert und mit Verzögerung ausgeführt.
+## @brief Führe eine Aktion verzögert im Hintergrund aus.
 run_delayed_in_background() {
 	local delay="$1"
 	shift

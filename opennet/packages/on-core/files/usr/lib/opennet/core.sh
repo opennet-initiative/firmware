@@ -930,6 +930,7 @@ enable_on_module() {
 	[ -e "/etc/config/$module" ] || touch "/etc/config/$module"
 	uci set "${module}.settings=settings"
 	uci set "${module}.settings.enabled=1"
+	uci commit on-openvpn
 }
 
 
@@ -942,6 +943,7 @@ disable_on_module() {
 	[ -e "/etc/config/$module" ] || touch "/etc/config/$module"
 	uci set "${module}.settings=settings"
 	uci set "${module}.settings.enabled=0"
+	uci commit on-openvpn
 }
 
 

@@ -22,6 +22,31 @@ require("luci.model.opennet.funcs")
 
 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 <div class="cbi-map"><fieldset class="cbi-section">
+	<legend><%:Status of Modules%></legend>
+		<div class="cbi-section-descr"><%:The Opennet Firmware consists of multiple modules providing distinct features within the network. Please pick which features should be enabled for this device.%></div>
+		<div class="cbi-section-node">
+			<% for _, item in ipairs({
+					{ key="on-openvpn", label=luci.i18n.translate("Access the Internet") },
+					{ key="on-usergw", label=luci.i18n.translate("Share your local internet connection with other members") },
+					{ key="on-captive-portal", label=luci.i18n.translate("Provide unrestricted internet access via Opennet to your vicinity") }}) do %>
+				<div class="cbi-value">
+					<label class="cbi-value-title" for="<%=item.key%>"><%=item.label%></label>
+					<div class="cbi-value-field">
+						<% if on_bool_function("is_package_installed", { item.key }) then %>
+							<% local is_enabled = on_bool_function("is_on_module_installed_and_enabled", { item.key }) %>
+							<input class="cbi-input-checkbox" value="1"
+								type="checkbox" id="<%=item.key%>" name="<%=item.key%>_enabled"
+								<%= is_enabled and 'checked="checked"' or '' %> />
+						<% else %>
+							<span><%:This module is not installed%></span>
+						<% end %>
+					</div>
+				</div>
+			<% end %>
+		</div>
+</fieldset></div>
+
+<div class="cbi-map"><fieldset class="cbi-section">
 	<legend><%:Service settings%></legend>
 		<div class="cbi-section-descr"><%:Nodes in the Opennet can announce various services. These services can be used by other nodes. The most important services are Internet access, DNS and NTP.%></div>
 		<div class="cbi-section-node">

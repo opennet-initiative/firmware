@@ -39,10 +39,10 @@ function index()
 	page.i18n = "on_network"
 	page.css = "opennet.css"
 
-	page = entry({"opennet", "opennet_1", "dienste"}, call("services"))
-	page.title = i18n("Services")
+	page = entry({"opennet", "opennet_1", "einstellungen"}, call("settings"))
+	page.title = i18n("Settings")
 	page.order = 40
-	page.i18n = "on_services"
+	page.i18n = "on_settings"
 	page.css = "opennet.css"
 
 	page = entry({"opennet", "opennet_1", "bericht"}, call("report"))
@@ -74,8 +74,20 @@ function report()
 end
 
 
-function services()
+function settings()
 	if luci.http.formvalue("save") then
+		-- Module
+		for _, module in ipairs({"on-openvpn", "on-usergw", "on-captive-portal"}) do
+			if on_bool_function("is_package_installed", {module}) then
+				local enabled = on_bool_function("is_on_module_installed_and_enabled", {module})
+				if luci.http.formvalue(module .. "_enabled") then
+					if not enabled then on_function("enable_on_module", {module}) end
+				else
+					if enabled then on_function("disable_on_module", {module}) end
+				end
+			end
+		end
+		-- Dienst-Sortierung
 		for _, key in ipairs({"use_olsrd_dns", "use_olsrd_ntp"}) do
 			if luci.http.formvalue(key) then
 				cursor:set("on-core", "settings", key, "1")
@@ -89,7 +101,7 @@ function services()
 		end
 		cursor:commit("on-core")
 	end
-	luci.template.render("opennet/on_services")
+	luci.template.render("opennet/on_settings")
 end
 
 

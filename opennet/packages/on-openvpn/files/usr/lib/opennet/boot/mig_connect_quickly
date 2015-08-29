@@ -3,7 +3,7 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
-# löse eine baldige Prüfung der Gateways aus (keine direkte Ausführung, um paralellel Prozesse zu vermeiden)
+# löse eine baldige Prüfung der Gateways aus (keine direkte Ausführung, um parallele Prozesse zu vermeiden)
 echo "on-function update_mig_connection_status" | schedule_task
 
 # Führe dieses Skript erneut aus, falls die uptime kleiner als zehn Minuten

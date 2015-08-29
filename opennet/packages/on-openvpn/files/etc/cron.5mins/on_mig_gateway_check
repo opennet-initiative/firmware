@@ -3,5 +3,8 @@
 # Durchlaufe alle Gateways bis mindestens ein Gateway-Test erfolgreich war (oder die Liste durchlaufen wurde).
 #
 
+is_on_module_installed_and_enabled "on-openvpn" || exit 0
+has_mig_openvpn_credentials || exit 0
+
 # wir verwenden die 'schedule_task'-Funktion um die parallele Ausführung mehrerer Instanzen zu verhindern (z.B. beim Booten)
 echo "on-function update_mig_connection_status" | on-function schedule_task

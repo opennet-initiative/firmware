@@ -2,14 +2,19 @@
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
+# alte OpenVPN-Verbindungen loeschen (Überbleibsel eines Reboot-Vorgangs)
+cleanup_stale_openvpn_services
+
+is_on_module_installed_and_enabled "on-openvpn" || exit 0
+has_mig_openvpn_credentials || exit 0
 
 # löse eine baldige Prüfung der Gateways aus (keine direkte Ausführung, um parallele Prozesse zu vermeiden)
 echo "on-function update_mig_connection_status" | schedule_task
 
-# Führe dieses Skript erneut aus, falls die uptime kleiner als zehn Minuten
-# ist, ein Zertifikat vorhanden ist und keine Verbindung aufgebaut wurde.
-[ "$(get_uptime_minutes)" -lt 10 ] \
-	&& has_mig_openvpn_credentials \
-	&& [ -z "$(get_active_mig_connections)" ] \
-	&& echo "$0" | schedule_task
+# Führe dieses Skript nach dem Booten kurz hintereinander aus, um einen schnellen Verbindungsaufbau zu ermöglichen
+local delay
+for delay in 100 200 300 400 500 600; do
+	run_delayed_in_background "$delay" 'echo "on-function update_mig_connection_status" | schedule_task'
+done
+
 exit 0

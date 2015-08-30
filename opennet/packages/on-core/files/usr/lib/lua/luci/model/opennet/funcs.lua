@@ -325,7 +325,10 @@ end
 --- @param text Fehlertext
 --- @returns ein html-String
 function html_error_box(text)
-	return '<div class="errorbox"><h4>' .. luci.i18n.translatef("Error: %s", luci.util.pcdata(text)) .. '</h4></div>'
+	local split_out
+	local _
+	split_out, _ = string.gsub(luci.util.pcdata(text), "\n", "<br/>")
+	return '<div class="errorbox"><h4>' .. luci.i18n.translatef("Error: %s", split_out) .. '</h4></div>'
 end
 
 

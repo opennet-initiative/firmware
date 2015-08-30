@@ -1,0 +1,2 @@
+#!/bin/sh
+disable_on_openvpn

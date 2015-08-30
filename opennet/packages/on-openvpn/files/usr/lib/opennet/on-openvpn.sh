@@ -271,7 +271,6 @@ get_mig_port_forward_range() {
 ##   aufgebaut wurde bzw. trenne alle Verbindungen.
 ## @details Diese Funktion sollte regelmäßig als cronjob ausgeführt werden.
 update_mig_connection_status() {
-	local service_name
 	if is_on_module_installed_and_enabled "on-openvpn"; then
 		# die Gateway-Tests sind nur moeglich, falls ein Test-Schluessel vorhanden ist
 		if has_mig_openvpn_credentials; then
@@ -279,13 +278,21 @@ update_mig_connection_status() {
 			find_and_select_best_gateway
 		fi
 	else
-		# möglicherweise vorhandene Verbindungen trennen und bei Bedarf openvpn neustarten
-		{ get_active_mig_connections; get_starting_mig_connections; } | while read service_name; do
-			disable_openvpn_service "$service_name" && echo "$service_name"
-			true
-		done | grep -q . && apply_changes openvpn
-		true
+		disable_on_openvpn
 	fi
+}
+
+
+## @fn disable_on_openvpn()
+## @brief Trenne alle laufenden oder im Aufbau befindlichen Verbindungen.
+disable_on_openvpn() {
+	local service_name
+	# möglicherweise vorhandene Verbindungen trennen und bei Bedarf openvpn neustarten
+	{ get_active_mig_connections; get_starting_mig_connections; } | while read service_name; do
+		disable_openvpn_service "$service_name" && echo "$service_name"
+		true
+	done | grep -q . && apply_changes openvpn
+	true
 }
 
 # Ende der Doku-Gruppe

@@ -7,16 +7,30 @@ ZONE_LOCAL=lan
 ZONE_WAN=wan
 ZONE_MESH=on_mesh
 NETWORK_LOCAL=lan
+# diese Domain wird testweise abgefragt, um die Verfügbarkeit des on-DNS zu prüfen
+DNS_SERVICE_REFERENCE="ca.on"
 
 
 # Liefere alle IPs fuer diesen Namen zurueck
 query_dns() {
-	nslookup "$1" | sed '1,/^Name:/d' | awk '{print $3}' | sort -n
+	nslookup "$1" 2>/dev/null | sed '1,/^Name:/d' | awk '{print $3}' | sort -n
 }
 
 
 query_dns_reverse() {
 	nslookup "$1" 2>/dev/null | tail -n 1 | awk '{ printf "%s", $4 }'
+}
+
+
+## @has_opennet_dns()
+## @brief Prüfe, ob *.on-Domains aufgelöst werden.
+## @returns Der Exitcode ist Null, falls on-DNS verfügbar ist.
+## @details Die maximale Laufzeit dieser Funktion ist auf eine Sekunde begrenzt.
+has_opennet_dns() {
+	trap "error_trap has_opennet_dns '$*'" $GUARD_TRAPS
+	# timeout ist kein shell-builtin - es benoetigt also ein global ausfuehrbares Kommando
+	timeout 1 on-function query_dns "$DNS_SERVICE_REFERENCE" | grep -q . && return 0
+	trap "" $GUARD_TRAPS && return 1
 }
 
 
@@ -26,6 +40,7 @@ query_dns_reverse() {
 ## @returns Zeilenweise Ausgabe von SRV Records: PRIORITY WEIGHT PORT HOSTNAME
 ## @details Siehe RFC 2782 für die SRV-Spezifikation. Die Abfrage erfordert dig drill oder unbound-host.
 query_srv_records() {
+	trap "error_trap query_srv_records '$*'" $GUARD_TRAPS
 	local domain="$1"
 	# verschiedene DNS-Werkzeuge sind nutzbar: dig, drill oder unbound-host
 	# "djbdns-tools" unterstützt leider nicht das Parsen von srv-Records (siehe "dnsq 33 DOMAIN localhost")
@@ -52,6 +67,7 @@ query_srv_records() {
 ## @param duration die Dauer der Ping-Kommunikation in Sekunden (falls ungesetzt: 5)
 ## @returns Ausgabe der mittleren Ping-Zeit in ganzen Sekunden; bei Nichterreichbarkit ist die Ausgabe leer
 get_ping_time() {
+	trap "error_trap get_ping_time '$*'" $GUARD_TRAPS
 	local target="$1"
 	local duration="${2:-5}"
 	local ip=$(query_dns "$target" | filter_routable_addresses | tail -1)

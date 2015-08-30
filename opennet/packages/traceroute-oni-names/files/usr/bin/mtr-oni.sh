@@ -1,11 +1,13 @@
 #!/bin/sh
 
-if [  -z $1 ]; then
+set -eu
+
+if [ "$#" -lt 2 ] || [ -z "$1" ]; then
    echo "Bad parameter! IP as parameter is needed."
    echo "e.g."
    echo "      mtr-oni.sh 192.168.0.33"
    echo
    exit
-fi
+fi >&2
 
-source oni_tracert_mtr_helper.sh $1 method-mtr
+oni_tracert_mtr_helper.sh "$1" method-mtr

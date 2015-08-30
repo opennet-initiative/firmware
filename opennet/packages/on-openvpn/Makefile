@@ -10,7 +10,7 @@ define Package/on-openvpn
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=VPN extensions
-  DEPENDS+=+on-core +openvpn-openssl +openssl-util
+  DEPENDS+=+on-core +on-certificates +openvpn-openssl +openssl-util
 endef
 
 define Package/on-openvpn/description

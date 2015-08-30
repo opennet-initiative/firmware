@@ -99,7 +99,7 @@ update_trusted_service_list() {
 	local details
 	local service_name
 	local is_proxy
-	local url_list=$(run_curl "$TRUSTED_SERVICES_URL")
+	local url_list=$(https_request_opennet "$TRUSTED_SERVICES_URL")
 	# leeres Ergebnis? Noch keine Internet-Verbindung? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$url_list" ] && return
 	echo "$url_list" | grep -v "^#" | sed 's/\t\+/\t/g' | while read line; do

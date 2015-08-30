@@ -1,6 +1,6 @@
 ## @defgroup openvpn OpenVPN (allgemein)
-## @brief Vorbereitung, Konfiguration und Prüfung von VPN-Verbindunge (z.B. für Nutzertunnel oder UGW). 
-# Beginn der opnvpn-Doku-Gruppe
+## @brief Vorbereitung, Konfiguration und Prüfung von VPN-Verbindungen (z.B. für Nutzertunnel oder UGW). 
+# Beginn der openvpn-Doku-Gruppe
 ## @{
 
 
@@ -250,31 +250,6 @@ openvpn_service_has_certificate_and_key() {
 	[ -z "$cert_file" -o -z "$key_file" ] && return 0
 	# existiert die Datei?
 	[ -e "$cert_file" -a -e "$key_file" ] && return 0
-	trap "" $GUARD_TRAPS && return 1
-}
-
-
-## @fn submit_csr_via_http()
-## @param upload_url URL des Upload-Formulars
-## @param csr_file Dateiname einer Zertifikatsanfrage
-## @brief Einreichung einer Zertifikatsanfrage via http (bei http://ca.on)
-## @details Eine Prüfung des Ergebniswerts ist aufgrund des auf menschliche Nutzer ausgerichteten Interface nicht so leicht moeglich.
-## @todo Umstellung vom Formular auf die zu entwickelnde API
-## @returns Das Ergebnis ist die html-Ausgabe des Upload-Formulars.
-submit_csr_via_http() {
-	trap "error_trap submit_csr_via_http '$*'" $GUARD_TRAPS
-	# upload_url: z.B. http://ca.on/csr/csr_upload.php
-	local upload_url="$1"
-	local csr_file="$2"
-	local helper="${3:-}"
-	local helper_email="${4:-}"
-	# wir verlassen uns nicht auf das gesamte Opennet-CA-Verzeichnis, sondern lediglich auf die CA fuer Server-Zertifikate
-	# (wir wollen keine Nutzer-AP-Zertifikate akzeptieren)
-	run_curl \
-		--form "file=@$csr_file" \
-		--form "opt_name=$helper" \
-		--form "opt_mail=$helper_email" "$upload_url" && return 0
-	# ein technischer Verbindungsfehler trat auf
 	trap "" $GUARD_TRAPS && return 1
 }
 

@@ -10,7 +10,7 @@ define Package/on-core
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=System and Webinterface
-  DEPENDS+=+on-certificates +olsrd +olsrd-mod-httpinfo +olsrd-mod-txtinfo +olsrd-mod-nameservice +olsrd-mod-jsoninfo +ip +ncat +coreutils +coreutils-timeout +curl
+  DEPENDS+=+olsrd +olsrd-mod-httpinfo +olsrd-mod-txtinfo +olsrd-mod-nameservice +olsrd-mod-jsoninfo +ip +ncat +coreutils +coreutils-timeout
 endef
 
 define Package/on-core/description

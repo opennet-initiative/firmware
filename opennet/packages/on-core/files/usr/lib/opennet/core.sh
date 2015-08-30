@@ -732,7 +732,7 @@ generate_opennet_opkg_config() {
 	echo "option overlay_root /overlay"
 	echo
 	local feed
-	for feed in base packages routing telephony opennet; do
+	for feed in base packages routing telephony luci opennet; do
 		echo "src/gz on_$feed $repository_url/$feed"
 	done
 }
@@ -957,17 +957,6 @@ schedule_parts() {
 		# ignoriere Fehler bei der Ausfuehrung
 		echo "$fname" | schedule_task
 	done
-}
-
-
-## @fn run_curl()
-## @brief Rufe den Inhalt ab, auf den eine URL verweist.
-## @param URL die Quell-Adresse
-## @details Eventuelle SSL-Zertifikate werden gegenueber der Opennet-CA-Liste abgeglichen.
-##     Zusätzlich zur URL können auch (davor) curl-spezifischen Optionen angebeben werden.
-run_curl() {
-	curl -q --silent --cacert /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem "$@" \
-		|| msg_error "Failed to retrieve data from URL '$@' via curl"
 }
 
 

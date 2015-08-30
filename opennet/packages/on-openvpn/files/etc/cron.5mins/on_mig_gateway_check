@@ -3,6 +3,10 @@
 # Durchlaufe alle Gateways bis mindestens ein Gateway-Test erfolgreich war (oder die Liste durchlaufen wurde).
 #
 
+set -eu
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
 is_on_module_installed_and_enabled "on-openvpn" || exit 0
 has_mig_openvpn_credentials || exit 0
 

@@ -2,6 +2,7 @@
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
+is_on_module_installed_and_enabled "on-usergw" || exit 0
 
 update_all_gateway_speeds() {
 	get_services "mesh" \

@@ -44,7 +44,7 @@ function action_on_captive_portal()
 		else
 			table.insert(on_errors, luci.i18n.translate("Ignoring the URL due to invalid characters."))
 		end
-		on_function("captive_portal_apply")
+		on_function("apply_changes", {"on-captive-portal"})
 	end
 	-- Warne den Nutzer, falls dem 'free'-Netzwerk-Interface kein physisches Gerät zugeordnet ist.
 	if not on_bool_function("captive_portal_has_devices") then

@@ -66,7 +66,7 @@ enable_captive_portal_munin_monitoring() {
 
 init_captive_portal() {
 	captive_portal_get_or_create_config >/dev/null
-	captive_portal_apply
+	apply_changes on-captive-portal
 }
 
 

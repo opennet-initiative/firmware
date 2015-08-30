@@ -66,7 +66,7 @@ get_on_captive_portal_default() {
 ## @brief Setze ein Attribut der Captive-Portal-Funktion
 ## @param key Eins der Captive-Portal-Attribute: name / url
 ## @param value Der gewünschte neue Inhalt des Attributs
-## @attention Anschließend ist 'captive_portal_apply' aufzurufen, um die Änderungen wirksam werden zu lassen.
+## @attention Anschließend ist 'apply_changes on-captive-portal' aufzurufen, um die Änderungen wirksam werden zu lassen.
 captive_portal_set_property() {
 	local key="$1"
 	local value="$2"
@@ -105,14 +105,6 @@ _captive_portal_get_mapped_attribute() {
 		msg_error "unknown captive portal attribute mapping requested: $attribute"
 		return 1
 	fi
-}
-
-
-## @fn captive_portal_apply()
-## @brief Wende alle zwischenzeitlichen Änderungen an Captive-Portal-Eigenschaften an.
-## @details Dies führt zu einem Neustart des zugrundeliegenden Diensts.
-captive_portal_apply() {
-	apply_changes nodogsplash
 }
 
 
@@ -175,6 +167,24 @@ configure_captive_portal_firewall_script() {
 }
 
 
+update_captive_portal_status() {
+	if is_on_module_installed_and_enabled "on-captive-portal"; then
+		sync_captive_portal_state_with_mig_connections
+	else
+		disable_captive_portal
+	fi
+}
+
+
+disable_captive_portal() {
+	# free-Interface ist aktive - es gibt jedoch keinen Tunnel
+	ifdown "$NETWORK_FREE"
+	# reload fuehrt zum sanften Stoppen
+	is_captive_portal_running && sleep 1 && captive_portal_reload
+	true
+}
+
+
 ## @fn sync_captive_portal_state_with_mig_connections()
 ## @brief Synchronisiere den Zustand (up/down) des free-Interface mit dem des VPN-Tunnel-Interface.
 ## @details Diese Funktion wird nach Statusänderungen des VPN-Interface, sowie innerhalb eines
@@ -195,11 +205,7 @@ sync_captive_portal_state_with_mig_connections() {
 		done
 	fi
 	if [ -n "$device_active" -a -z "$mig_active" ]; then
-		# free-Interface ist aktive - es gibt jedoch keinen Tunnel
-		ifdown "$NETWORK_FREE"
-		# reload fuehrt zum sanften Stoppen
-		is_captive_portal_running && sleep 1 && captive_portal_reload
-		true
+		disable_captive_portal
 	elif [ -z "$device_active" -a -n "$mig_active" ]; then
 		# kein aktives free-Interface, aber ein aktiver Tunnel
 		ifup "$NETWORK_FREE"

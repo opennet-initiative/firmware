@@ -4,4 +4,8 @@
 # Andernfalls verpassen wir eventuell einen Zustandswechsel (z.B. beim Booten).
 #
 
-on-function sync_captive_portal_state_with_mig_connections
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+is_on_module_installed_and_enabled "on-captive-portal" || exit 0
+
+echo "on-function update_captive_portal_status" | schedule_task

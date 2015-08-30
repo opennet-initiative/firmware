@@ -412,7 +412,8 @@ apply_changes() {
 				update_service_relay_status
 				;;
 			on-captive-portal)
-				# TODO
+				update_captive_portal_status
+				apply_changes nodogsplash
 				;;
 			*)
 				msg_error "no handler defined for applying config changes for '$config'"

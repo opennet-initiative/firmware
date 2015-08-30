@@ -317,6 +317,8 @@ disable_on_usergw() {
 ## @brief Baue Verbindungen auf oder trenne sie - je nach Modul-Status.
 update_on_usergw_status() {
 	if is_on_module_installed_and_enabled "on-usergw"; then
+		update_trusted_service_list
+		# ohne Zertifikat ist nicht mehr zu tun
 		if has_mesh_openvpn_credentials; then
 			verify_mesh_gateways
 			sync_mesh_openvpn_connection_processes

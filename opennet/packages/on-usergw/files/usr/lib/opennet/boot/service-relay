@@ -1,4 +1,9 @@
 #!/bin/sh
 
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+# keinerlei Tests, falls wir nicht aktiv sind
+is_on_module_installed_and_enabled "on-usergw" || exit 0
+
 # Portweiterleitungen abgleichen
-on-function update_service_relay_status
+echo "on-function update_service_relay_status" | schedule_task

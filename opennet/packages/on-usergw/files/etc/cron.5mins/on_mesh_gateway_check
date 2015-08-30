@@ -1,22 +1,9 @@
 #!/bin/sh
-#
-# Durchlaufe alle Gateways bis mindestens ein Gateway-Test erfolgreich war (oder die Liste durchlaufen wurde).
-#
 
-# include helper functions
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
-
-# alte Verbindungen loeschen
-# eventuell laeuft zeitgleich dieselbe Pruefung im Rahmen von on_mig_gateway_check ab - also warten wir vorher ein wenig
-sleep 15 && cleanup_stale_openvpn_services
+# keinerlei Tests, falls wir nicht aktiv sind
+is_on_module_installed_and_enabled "on-usergw" || exit 0
 
 # verfuegbare mesh-Gateways ermitteln
-update_trusted_service_list
-
-# die Gateway-Tests sind nur moeglich, falls ein Test-Schluessel vorhanden ist
-if has_mesh_openvpn_credentials; then
-	verify_mesh_gateways
-	sync_mesh_openvpn_connection_processes
-fi
-
+echo "on-function update_on_usergw_status" | schedule_task

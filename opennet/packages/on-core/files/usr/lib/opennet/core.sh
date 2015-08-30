@@ -1000,7 +1000,7 @@ disable_on_module() {
 
 ## @fn on_opkg_postinst_default()
 ## @brief Übliche Nachbereitung einer on-Paket-Installation.
-## @details luci-Cache löschen, uci-defaults anwenden, on-core-Bootskript ausführen
+## @details Caches löschen, uci-defaults anwenden, on-core-Bootskript ausführen
 on_opkg_postinst_default() {
 	# Reset des Luci-Cache und Shell-Cache
 	clear_caches
@@ -1016,6 +1016,14 @@ on_opkg_postinst_default() {
 		/etc/init.d/on-core enable 2>/dev/null || true
 		/etc/init.d/on-core start
 	fi
+}
+
+
+## @fn on_opkg_postrm_default()
+## @brief Übliche Nachbereitung einer on-Paket-Entfernung
+## @details Caches löschen
+on_opkg_postrm_default() {
+	clear_caches
 }
 
 

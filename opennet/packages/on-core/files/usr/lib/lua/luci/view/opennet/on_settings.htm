@@ -12,13 +12,18 @@ You may obtain a copy of the License at
 -%>
 <%+header%>
 
-<h2><a id="content" name="content"><%:Services in the Opennet%></a></h2>
-
 <%
 local uci = require "luci.model.uci"
 local cursor = uci.cursor()
 require("luci.model.opennet.funcs")
+
+if not on_bool_function("has_opennet_dns") then
+	table.insert(on_errors, luci.i18n.translate("Opennet-DNS service is not available, yet (or quite slow). Please verify that you are connected to the network. A few minutes later DNS should be available. DNS is required for many features."))
+end
 %>
+
+<h2><a id="content" name="content"><%:Services in the Opennet%></a></h2>
+<%= html_display_error_list(on_errors) %>
 
 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 <div class="cbi-map"><fieldset class="cbi-section">
@@ -32,13 +37,14 @@ require("luci.model.opennet.funcs")
 				<div class="cbi-value">
 					<label class="cbi-value-title" for="<%=item.key%>"><%=item.label%></label>
 					<div class="cbi-value-field">
-						<% if on_bool_function("is_package_installed", { item.key }) then %>
+					<% if on_bool_function("is_package_installed", { item.key }) then %>
 							<% local is_enabled = on_bool_function("is_on_module_installed_and_enabled", { item.key }) %>
-							<input class="cbi-input-checkbox" value="1"
-								type="checkbox" id="<%=item.key%>" name="<%=item.key%>_enabled"
+							<input class="cbi-input-checkbox" value="1" type="checkbox"
+								id="<%=item.key%>" name="<%=item.key%>_enabled"
 								<%= is_enabled and 'checked="checked"' or '' %> />
+							<span>(<a href="<%=REQUEST_URI%>?remove=<%=item.key%>">remove</a>)</span>
 						<% else %>
-							<span><%:This module is not installed%></span>
+							<span><a href="<%=REQUEST_URI%>?install=<%=item.key%>">install</a></span>
 						<% end %>
 					</div>
 				</div>

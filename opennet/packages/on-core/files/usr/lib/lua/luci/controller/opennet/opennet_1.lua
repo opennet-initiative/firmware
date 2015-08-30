@@ -15,6 +15,7 @@ module("luci.controller.opennet.opennet_1", package.seeall)
 
 local report_filename = "/tmp/on_report.tar.gz"
 require("luci.model.opennet.funcs")
+require("luci.sys")
 local uci = require "luci.model.uci"
 local cursor = uci.cursor()
 
@@ -75,6 +76,19 @@ end
 
 
 function settings()
+	on_errors = {}
+	local remove_package = parse_string_pattern(luci.http.formvalue("remove"), "a-z-")
+	if remove_package then
+		-- stderr sollte nach stdout gehen, damit wir es als Fehlertext einblenden koennen
+		error_message = luci.sys.exec("opkg --verbosity=0 --autoremove remove '" .. remove_package .. "' 2>&1")
+		table.insert(on_errors, error_message)
+	end
+	local install_package = parse_string_pattern(luci.http.formvalue("install"), "a-z-")
+	if install_package then
+		error_message = on_function("install_from_opennet_repository", {install_package})
+		table.insert(on_errors, error_message)
+	end
+	-- Module an- und abschalten oder umkonfigurieren
 	if luci.http.formvalue("save") then
 		-- Module
 		for _, module in ipairs({"on-openvpn", "on-usergw", "on-captive-portal"}) do
@@ -101,7 +115,7 @@ function settings()
 		end
 		cursor:commit("on-core")
 	end
-	luci.template.render("opennet/on_settings")
+	luci.template.render("opennet/on_settings", { on_errors=on_errors })
 end
 
 

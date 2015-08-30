@@ -9,7 +9,8 @@ Anschließend kann diese Liste wieder geleert werden.
 ** Internetspender (UGW)
 ** öffentliche Zugangspunkte (zuvor: "wifidog")
 * Nutzer-VPN-Tunnel wird innerhalb von ca. drei Minuten nach dem Booten aufgebaut
-** zuvor waren es ca. acht Minuten
+** zuvor (v0.5.1) waren es ca. acht Minuten
+* Module (Internetzugang, Freigabe, Captive Portal) sind im Web-Interface nachinstallierbar
 * keine VPN-Verbindungstests ohne Zertifikat
 ** weniger Load für Infrastruktur-APs
 ** kurze Wartezeit zwischen Zertifikatsupload und Verbindungsaufbau

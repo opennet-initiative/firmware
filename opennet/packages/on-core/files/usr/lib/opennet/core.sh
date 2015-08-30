@@ -408,7 +408,8 @@ apply_changes() {
 				update_mig_connection_status
 				;;
 			on-usergw)
-				# TODO
+				update_on_usergw_status
+				update_service_relay_status
 				;;
 			on-captive-portal)
 				# TODO

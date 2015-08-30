@@ -53,6 +53,8 @@ pick_local_service_relay_port() {
 ## @attention Anschließend muss die firewall-uci-Sektion committed werden.
 delete_unused_service_relay_forward_rules() {
 	trap "error_trap delete_unused_service_relay_forward_rules '$*'" $GUARD_TRAPS
+	# wir erwarten einen ausführbaren Testnamen
+	local test_for_activity="$1"
 	local uci_prefix
 	local fw_rule_name
 	local service_name
@@ -64,7 +66,7 @@ delete_unused_service_relay_forward_rules() {
 		[ "${fw_rule_name:0:$prefix_length}" != "$SERVICE_RELAY_FIREWALL_RULE_PREFIX" ] && continue
 		# schneide das Präfix ab, um den Dienstnamen zu ermitteln
 		service_name="${fw_rule_name:$prefix_length}"
-		is_service_relay_possible "$service_name" && continue
+		"$test_for_activity" "$service_name" && continue
 		uci_delete "${uci_prefix}"
 	done
 }
@@ -179,13 +181,15 @@ EOF
 
 # olsr-Nameservice-Beschreibungen entfernen falls der dazugehoerige Dienst nicht mehr relay-tauglich ist
 deannounce_unused_olsr_service_relays() {
+	# wir erwarten einen ausführbaren Testnamen
+	local test_for_activity="$1"
 	local service_description
 	local service_name
 	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	uci_get_list "${uci_prefix}.service" | while read service_description; do
 		# unbenutzte Eintraege entfernen
 		service_name=$(get_olsr_service_name_from_description "$service_description")
-		is_service_relay_possible "$service_name" && continue
+		"$test_for_activity" "$service_name" && continue
 		uci_delete_list "${uci_prefix}.service" "$service_description"
 	done
 	return 0
@@ -207,22 +211,39 @@ is_service_relay_possible() {
 }
 
 
-# Pruefe regelmaessig, ob Weiterleitungen für alle bekannten durchgereichten Diensten existieren.
-# Fehlende Weiterleitungen oder olsr-Announcements werden angelegt.
+## @fn update_service_relay_status()
+## @brief Pruefe regelmaessig, ob Weiterleitungen für alle bekannten durchgereichten Diensten existieren.
+## @details Fehlende Weiterleitungen oder olsr-Announcements werden angelegt.
 update_service_relay_status() {
 	trap "error_trap update_service_relay_status '$*'" $GUARD_TRAPS
 	local service_name
 	local wan_status
+	if is_on_module_installed_and_enabled "on-usergw"; then
+		get_services | filter_relay_services | while read service_name; do
+			# WAN-Routing pruefen und aktualisieren
+			is_service_routed_via_wan "$service_name" && wan_status="true" || wan_status="false"
+			set_service_value "$service_name" "wan_status" "$wan_status"
+			is_service_relay_possible "$service_name" || continue
+			enable_service_relay "$service_name"
+		done
+		delete_unused_service_relay_forward_rules is_service_relay_possible
+		deannounce_unused_olsr_service_relays is_service_relay_possible
+		apply_changes firewall olsrd
+	else
+		disable_service_relay
+	fi
+}
+
+
+## @fn disable_service_relay()
+## @brief Schalte alle Weiterleitungen und Dienst-Announcierungen ab.
+disable_service_relay() {
+	trap "error_trap disable_service_relay '$*'" $GUARD_TRAPS
+	local service_name
 	get_services | filter_relay_services | while read service_name; do
-		# WAN-Routing pruefen und aktualisieren
-		wan_status="true"
-		is_service_routed_via_wan "$service_name" || wan_status="false"
-		set_service_value "$service_name" "wan_status" "$wan_status"
-		is_service_relay_possible "$service_name" || continue
-		enable_service_relay "$service_name"
+		delete_unused_service_relay_forward_rules false
+		deannounce_unused_olsr_service_relays false
 	done
-	delete_unused_service_relay_forward_rules
-	deannounce_unused_olsr_service_relays
 	apply_changes firewall olsrd
 }
 

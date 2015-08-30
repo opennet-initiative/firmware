@@ -296,5 +296,35 @@ get_active_ugw_connections() {
 	done
 }
 
+
+## @fn disable_on_usergw()
+## @brief Alle mesh-Verbindungen trennen.
+disable_on_usergw() {
+	local service_name
+	local service_state
+	get_services "mesh" \
+			| filter_services_by_value "scheme" "openvpn" \
+			| while read service_name; do
+		service_state=$(get_openvpn_service_state "$service_name")
+		[ -n "$service_state" ] && disable_openvpn_service "$service_name" && echo "$service_name"
+		true
+	done | grep -q . && apply_changes openvpn
+	true
+}
+
+
+## @fn update_on_usergw_status()
+## @brief Baue Verbindungen auf oder trenne sie - je nach Modul-Status.
+update_on_usergw_status() {
+	if is_on_module_installed_and_enabled "on-usergw"; then
+		if has_mesh_openvpn_credentials; then
+			verify_mesh_gateways
+			sync_mesh_openvpn_connection_processes
+		fi
+	else
+		disable_on_usergw
+	fi
+}
+
 # Ende der Doku-Gruppe
 ## @}

@@ -1,0 +1,3 @@
+#!/bin/sh
+on-function disable_on_usergw
+on-function disable_service_relay

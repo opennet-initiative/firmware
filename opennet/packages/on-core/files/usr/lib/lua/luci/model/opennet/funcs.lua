@@ -337,7 +337,9 @@ end
 function html_display_error_list(errors)
 	local result = ""
 	for _, value in pairs(errors or {}) do
-		result = result .. html_error_box(value)
+		if value and value ~= "" then
+			result = result .. html_error_box(value)
+		end
 	end
 	return result
 end

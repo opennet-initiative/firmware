@@ -61,6 +61,7 @@ ON_SHELL_MODULES_NEWEST=$( (ls -dtr "$ON_SHELL_MODULES_DIR" $ON_SHELL_MODULES "$
 
 clear_caches() {
 	rm -f "$ON_SHELL_MINIMIZED"
+	clear_cache_opennet_opkg
 	clean_luci_restart
 }
 

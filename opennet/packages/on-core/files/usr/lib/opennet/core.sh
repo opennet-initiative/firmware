@@ -4,20 +4,24 @@
 ## @{
 
 
-## @var Quelldatei für Standardwerte des Kern-Pakets
-ON_CORE_DEFAULTS_FILE=/usr/share/opennet/core.defaults
-## @var Pfad zur dnsmasq-Server-Datei zur dynamischen Aktualisierung durch Dienste-Erkennung
-DNSMASQ_SERVERS_FILE_DEFAULT=/var/run/dnsmasq.servers
-## @var DNS-Suffix, das vorrangig von den via olsrd publizierten Nameservern ausgeliefert werden soll
+# Quelldatei für Standardwerte des Kern-Pakets
+ON_CORE_DEFAULTS_FILE="${IPKG_INSTROOT:-}/usr/share/opennet/core.defaults"
+# Pfad zur dnsmasq-Server-Datei zur dynamischen Aktualisierung durch Dienste-Erkennung
+DNSMASQ_SERVERS_FILE_DEFAULT="${IPKG_INSTROOT:-}/var/run/dnsmasq.servers"
+# DNS-Suffix, das vorrangig von den via olsrd publizierten Nameservern ausgeliefert werden soll
 INTERN_DNS_DOMAIN=on
-## @var Dateiname für erstellte Zusammenfassungen
-REPORTS_FILE=/tmp/on_report.tar.gz
-## @var Basis-Verzeichnis für Log-Dateien
-LOG_BASE_DIR=/var/log
-## @var maximum length of message lines (logger seems to resctrict lines incl. timestamp to 512 characters)
+# Dateiname für erstellte Zusammenfassungen
+REPORTS_FILE="${IPKG_INSTROOT:-}/tmp/on_report.tar.gz"
+# Basis-Verzeichnis für Log-Dateien
+LOG_BASE_DIR="${IPKG_INSTROOT:-}/var/log"
+# maximum length of message lines (logger seems to resctrict lines incl. timestamp to 512 characters)
 LOG_MESSAGE_LENGTH=420
-## @var Verzeichnis für auszuführende Aktionen
-SCHEDULING_DIR=/var/run/on-scheduling.d
+# Verzeichnis für auszuführende Aktionen
+SCHEDULING_DIR="${IPKG_INSTROOT:-}/var/run/on-scheduling.d"
+# Basis-URL für Opennet-Paketinstallationen
+ON_OPKG_REPOSITORY_URL_PREFIX="http://downloads.on/openwrt"
+# temporäre Datei für Installation von Opennet-Paketen
+ON_OPKG_CONF_PATH="${IPKG_INSTROOT:-}/tmp/opkg-opennet.conf"
 # beim ersten Pruefen wird der Debug-Modus ermittelt
 DEBUG_ENABLED=
 
@@ -667,23 +671,70 @@ get_potential_error_messages() {
 }
 
 
-# Im openwrt-Build-Prozess wird aus bisher ungeklaerter Ursache die falsche opkg-Repository-URL gesetzt.
-# Diese Funktion erlaubt die einfache Aenderung der opkg-URL.
-# Parameter: URL-Bestandteile (z.B. "stable/0.5.0")
-set_opkg_download_version() {
-	local version="$1"
-	local opkg_file="${IPKG_INSTROOT:-}/etc/opkg.conf"
-	local base_url=$(
-		# importiere das DISTRIB_TARGET
-		. /etc/openwrt_release
-		# bei "ar71xx/generic" ignorieren wir den Teil nach dem slash - unsere Repo-Struktur hat diese Ebene nicht
-		echo "http://downloads.on/openwrt/$version/${DISTRIB_TARGET%/generic}/packages"
-	)
-	# entferne Zeilen, die auf opennet-Domains verweisen und den automatisch eingefuegtes packages/opennet
-	(
-		grep -vF "//downloads.on/" "$opkg_file" | grep -vF "//downloads.opennet-initiative.de/" | grep -vF "packages/opennet"
-		echo "src/gz opennet $base_url/opennet"
-	) | update_file_if_changed "$opkg_file" || true
+## @fn install_from_opennet_repository()
+## @param package Name des zu installierenden Software-Pakets
+## @returns Eventuelle Fehlermeldungen werden auf die Standardausgabe geschrieben. Der Exitcode ist immer Null.
+## @brief Installiere ein Paket aus den Opennet-Repositories.
+## @details Für die Installation von Opennet-relevanten Paketen wird eine separate opkg.conf-Datei verwendet.
+##   Alle nicht-opennet-relevanten Pakete sollten - wie gewohnt - aus den openwrt-Repositories heraus installiert
+##   werden, da deren Paket-Liste umfassender ist.
+##   Die opkg.conf wird im tmpfs erzeugt, falls sie noch nicht vorhanden ist. Eventuelle manuelle Nachkorrekturen
+##   bleiben also bis zum nächsten Reboot erhalten.
+install_from_opennet_repository() {
+	trap "error_trap install_from_opennet_repository '$*'" $GUARD_TRAPS
+	local package="$1"
+	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
+	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
+	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$package" || true
+}
+
+
+# Ausführung eines opkg-Kommnados mit der opennet-Repository-Konfiguration und minimaler Ausgabe (nur Fehler) auf stdout.
+_run_opennet_opkg() {
+	opkg --verbosity=0 --conf "$ON_OPKG_CONF_PATH" "$@" 2>&1
+}
+
+
+## @fn clear_cache_opennet_opkg()
+## @brief Lösche die eventuell vorhandene opennet-opkg-Konfiguration (z.B. nach einem Update).
+clear_cache_opennet_opkg() {
+	rm -f "$ON_OPKG_CONF_PATH"
+}
+
+
+## @fn generate_opennet_opkg_config()
+## @brief Liefere den Inhalt einer opkg.conf für das Opennet-Paket-Repository zurück.
+## @details Die aktuelle Version wird aus dem openwrt-Versionsstring gelesen.
+generate_opennet_opkg_config() {
+	trap "error_trap create_opennet_opkg_config '$*'" $GUARD_TRAPS
+	# ermittle die Firmware-Repository-URL
+	local firmware_version=$(get_on_firmware_version)
+	# leere Versionsnummer? Damit können wir nichts anfangen.
+	[ -z "$firmware_version" ] && msg_error "Failed to retrieve opennet firmware version for opkg repository URL" && return 0
+	# snapshots erkennen wir aktuell daran, dass auch Buchstaben in der Versionsnummer vorkommen
+	local version_path
+	if echo "$firmware_version" | grep -q "[a-zA-Z]"; then
+		# ein Buchstabe wurde entdeckt: unstable
+		version_path="testing/$firmware_version"
+	else
+		# kein Buchstabe wurde entdeckt: stable
+		# wir schneiden alles ab dem ersten Bindestrich ab
+		version_path="stable/$(echo "$firmware_version" | cut -f 1 -d -)"
+	fi
+	# Hole "DISTRIB_TARGET" und entferne potentielle "/generic"-Suffixe (z.B. ar71xx und x86),
+	# da wir dies in unserem Repository nicht abbilden.
+	local arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
+	local repository_url="$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/$arch_path/packages"
+	# schreibe den Inahlt der neuen OPKG-Konfiguration
+	echo "dest root /"
+	echo "dest ram /tmp"
+	echo "lists_dir ext /var/opkg-lists-opennet"
+	echo "option overlay_root /overlay"
+	echo
+	local feed
+	for feed in base packages routing telephony opennet; do
+		echo "src/gz on_$feed $repository_url/$feed"
+	done
 }
 
 
@@ -693,7 +744,7 @@ set_opkg_download_version() {
 # Parameter pattern: Suchmuster der zu ersetzenden Zeile
 # Parameter new_line: neue Zeile
 line_in_file() {
-	trap "error_trap lineinfile '$*'" $GUARD_TRAPS
+	trap "error_trap line_in_file '$*'" $GUARD_TRAPS
 	local filename="$1"
 	local pattern="$2"
 	local new_line="$3"

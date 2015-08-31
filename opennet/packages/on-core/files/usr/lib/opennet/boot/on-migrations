@@ -3,8 +3,8 @@
 # Dieses Skript enthaelt Funktionen, die fuer Updates altes Firmware-Versionen notwendig sind.
 # Alle Funktionen muessen idempotent sein.
 #
-# Dieses Skript wird nur ein einziges Mal nach einem Upgrade oder der Erstinstallation ausgefuehrt:
-#   http://wiki.openwrt.org/doc/uci#defaults
+# Dieses Skript wird nach jedem Booten ausgeführt.
+# Damit ermöglichen wir das Laden eines alten Backups auf eine neue Firmware.
 #
 
 

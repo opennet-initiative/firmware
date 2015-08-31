@@ -416,7 +416,7 @@ apply_changes() {
 				apply_changes nodogsplash
 				;;
 			on-monitoring)
-				true
+				update_monitoring_state
 				;;
 			*)
 				msg_error "no handler defined for applying config changes for '$config'"

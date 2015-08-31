@@ -6,6 +6,5 @@ on-function on_opkg_postinst_default
 # nach der Cache-Loeschung ist die neue Funktion verfuegbar
 on-function enable_munin_plugins
 
-# munin aktivieren und starten (TODO: ab Chaos Calmer wohl nicht mehr separat erforderlich)
-/etc/init.d/xinetd enable || true
-/etc/init.d/xinetd start || true
+# munin starten oder stoppen (je nach Modul-Aktivierung)
+on-function update_monitoring_state

@@ -18,5 +18,25 @@ enable_munin_plugins() {
 	sed -i "/^PLUGINS=\".*\"$/s/^PLUGINS=\"/PLUGINS=\"plugindir_ /" "$target"
 }
 
+
+## @fn update_munin_service_state()
+## @brief Munin-Dienst an- oder abschalten - je nach Modul-Zustand.
+update_monitoring_state() {
+	if is_on_module_installed_and_enabled "on-monitoring"; then
+		/etc/init.d/xinetd enable || true
+		/etc/init.d/xinetd start || true
+	else
+		disable_monitoring
+	fi
+}
+
+
+## @fn disable_monitoring()
+## @brief Monitoring abschalten
+disable_monitoring() {
+	/etc/init.d/xinetd disable || true
+	/etc/init.d/xinetd stop || true
+}
+
 # Ende der Doku-Gruppe
 ## @}

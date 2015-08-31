@@ -115,18 +115,20 @@ fix_firewall_reload() {
 disable_unwanted_forward() {
 	local zone_name
 	local forward
-	find_all_uci_sections firewall zone | while read uci_prefix; do
+	find_all_uci_sections firewall zone "forward=ACCEPT" | while read uci_prefix; do
 		zone_name=$(uci_get "${uci_prefix}.name")
 		# eventuell ist ZONE_TUNNEL nicht definiert (falls on-openvpn nicht installiert ist)
 		if [ "$zone_name" = "$ZONE_MESH" -o "$zone_name" = "${ZONE_TUNNEL:-on_vpn}" ]; then
-			forward=$(uci_get "${uci_prefix}.forward")
-			[ "$forward" = "ACCEPT" ] && uci set "${uci_prefix}.forward=REJECT" || true
+			uci set "${uci_prefix}.forward=REJECT" && echo "$uci_prefix"
+			true
 		fi
-	done
-	# sicherstellen, dass die als Ersatz fuer "forward=ACCEPT" noetige Weiterleitung existiert
-	add_zone_forward "$ZONE_MESH" "$ZONE_MESH"
-	uci commit firewall
-	reload_config || true
+	done | grep -q . && {
+		# sicherstellen, dass die als Ersatz fuer "forward=ACCEPT" noetige Weiterleitung existiert
+		add_zone_forward "$ZONE_MESH" "$ZONE_MESH"
+		uci commit firewall
+		reload_config || true
+	}
+	true
 }
 
 

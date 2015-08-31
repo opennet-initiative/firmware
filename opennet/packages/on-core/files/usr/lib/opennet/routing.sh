@@ -183,11 +183,12 @@ initialize_olsrd_policy_routing() {
 
 
 # Stelle sicher, dass eine sinnvolle routing-Tabellen-Datei existiert.
-# Dies ist erforderlich, da kein echtes "ip"-Paket installiert ist (im busybox-Paket ist die Datei nicht enthalten).
+# Dies ist erforderlich, falls kein echtes "ip"-Paket installiert ist (im busybox-Paket ist die Datei nicht enthalten).
 _prepare_routing_table_file() {
 	[ -e "$RT_FILE" ] && return 0
-	mkdir "$(dirname "$RT_FILE")"
+	mkdir -p "$(dirname "$RT_FILE")"
 	cat >"$RT_FILE" << EOF
+# erzeugt von "on-core"
 #
 255	local
 254	main

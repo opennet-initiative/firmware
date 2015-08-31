@@ -56,14 +56,6 @@ configure_free_zone() {
 }
 
 
-enable_captive_portal_munin_monitoring() {
-	enable_munin_plugins
-	# munin aktivieren und starten (TODO: ab Chaos Calmer wohl nicht mehr separat erforderlich)
-	/etc/init.d/xinetd enable || true
-	/etc/init.d/xinetd start || true
-}
-
-
 init_captive_portal() {
 	captive_portal_get_or_create_config >/dev/null
 	apply_changes on-captive-portal
@@ -73,5 +65,4 @@ init_captive_portal() {
 configure_free_network
 configure_free_zone
 configure_captive_portal_firewall_script true
-enable_captive_portal_munin_monitoring
 init_captive_portal

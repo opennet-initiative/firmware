@@ -900,21 +900,6 @@ run_parts() {
 }
 
 
-## @fn enable_munin_plugins()
-## @brief Aktiviere die Plugin-Unterstützung von muninlite durch Patchen des muninlite-Skripts.
-## @details Die Plugin-Unterstützung von muninlite wird durch Hinzufügen des Token 'plugindir_' zu
-##   der Variable 'PLUGINS' umgesetzt. Dies ist ein kleines bisschen hässlich :(
-enable_munin_plugins() {
-	local target="${IPKG_INSTROOT:-}/usr/sbin/munin-node"
-	# nicht installiert?
-	[ -e "$target" ] || return 0
-	# bereits konfiguriert?
-	grep -q "^PLUGINS=.*plugindir_" "$target" && return 0
-	# "plugindir_" einfuegen
-	sed -i "/^PLUGINS=\".*\"$/s/^PLUGINS=\"/PLUGINS=\"plugindir_ /" "$target"
-}
-
-
 ## @fn run_scheduled_tasks()
 ## @brief Führe die zwischenzeitlich für die spätere Ausführung vorgemerkten Aufgaben aus.
 ## @details Unabhängig vom Ausführungsergebnis wird das Skript anschließend gelöscht.

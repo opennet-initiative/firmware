@@ -954,44 +954,6 @@ schedule_parts() {
 }
 
 
-## @fn is_on_module_installed_and_enabled()
-## @brief Pruefe ob ein Modul sowohl installiert, als auch aktiv ist.
-## @param module Eins der Opennet-Pakete (on-openvpn, on-usergw, on-captive-portal).
-## @details Die Aktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" geprueft.
-##   Der Standardwert ist "false" (ausgeschaltet).
-is_on_module_installed_and_enabled() {
-	local module="$1"
-	is_package_installed "$module" && uci_is_true "$(uci_get "${module}.settings.enabled" "false")" && return 0
-	trap "" $GUARD_TRAPS && return 1
-}
-
-
-## @fn enable_on_module()
-## @brief Aktiviere ein Opennet-Modul
-## @param module Eins der Opennet-Pakete (on-openvpn, on-usergw, on-captive-portal).
-## @details Die Aktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" vorgenommen.
-enable_on_module() {
-	local module="$1"
-	[ -e "/etc/config/$module" ] || touch "/etc/config/$module"
-	uci set "${module}.settings=settings"
-	uci set "${module}.settings.enabled=1"
-	apply_changes "$module"
-}
-
-
-## @fn disable_on_module()
-## @brief Deaktiviere ein Opennet-Modul
-## @param module Eins der Opennet-Pakete (on-openvpn, on-usergw, on-captive-portal).
-## @details Die Deaktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" vorgenommen.
-disable_on_module() {
-	local module="$1"
-	[ -e "/etc/config/$module" ] || touch "/etc/config/$module"
-	uci set "${module}.settings=settings"
-	uci set "${module}.settings.enabled=0"
-	apply_changes "$module"
-}
-
-
 ## @fn on_opkg_postinst_default()
 ## @brief Übliche Nachbereitung einer on-Paket-Installation.
 ## @details Caches löschen, uci-defaults anwenden, on-core-Bootskript ausführen

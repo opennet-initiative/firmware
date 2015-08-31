@@ -20,6 +20,14 @@ require("luci.model.opennet.funcs")
 if not on_bool_function("has_opennet_dns") then
 	table.insert(on_errors, luci.i18n.translate("Opennet-DNS service is not available, yet (or quite slow). Please verify that you are connected to the network. A few minutes later DNS should be available. DNS is required for many features."))
 end
+
+-- alle Module mit uebersetzbarer Beschreibung sollten hier aufgelistet werden
+-- Module, die hier fehlen, werden ohne Beschreibungstext angezeigt
+local on_module_descriptions = {}
+on_module_descriptions["on-openvpn"] = luci.i18n.translate("Access the Internet")
+on_module_descriptions["on-usergw"] = luci.i18n.translate("Share your local internet connection with other members")
+on_module_descriptions["on-captive-portal"] = luci.i18n.translate("Provide unrestricted internet access via Opennet to your vicinity")
+on_module_descriptions["on-monitoring"] = luci.i18n.translate("Publish statistical data of network usage")
 %>
 
 <h2><a id="content" name="content"><%:Services in the Opennet%></a></h2>
@@ -30,22 +38,19 @@ end
 	<legend><%:Status of Modules%></legend>
 		<div class="cbi-section-descr"><%:The Opennet Firmware consists of multiple modules providing distinct features within the network. Please pick which features should be enabled for this device.%></div>
 		<div class="cbi-section-node">
-			<% for _, item in ipairs({
-					{ key="on-openvpn", label=luci.i18n.translate("Access the Internet") },
-					{ key="on-usergw", label=luci.i18n.translate("Share your local internet connection with other members") },
-					{ key="on-captive-portal", label=luci.i18n.translate("Provide unrestricted internet access via Opennet to your vicinity") },
-					{ key="on-monitoring", label=luci.i18n.translate("Provide statistical data of network usage") }}) do %>
+			<% for _, mod_name in ipairs(line_split(on_function("get_on_modules"))) do %>
 				<div class="cbi-value">
-					<label class="cbi-value-title" for="<%=item.key%>"><%=item.label%></label>
+					<label class="cbi-value-title" for="<%= mod_name %>">
+						<%= on_module_descriptions[mod_name] or mod_name %></label>
 					<div class="cbi-value-field">
-					<% if on_bool_function("is_package_installed", { item.key }) then %>
-							<% local is_enabled = on_bool_function("is_on_module_installed_and_enabled", { item.key }) %>
+					<% if on_bool_function("is_package_installed", { mod_name }) then %>
+							<% local is_enabled = on_bool_function("is_on_module_installed_and_enabled", { mod_name }) %>
 							<input class="cbi-input-checkbox" value="1" type="checkbox"
-								id="<%=item.key%>" name="<%=item.key%>_enabled"
+								id="<%=mod_name%>" name="<%=mod_name%>_enabled"
 								<%= is_enabled and 'checked="checked"' or '' %> />
-							<span>(<a href="<%=REQUEST_URI%>?remove=<%=item.key%>">remove</a>)</span>
+							<span>(<a href="<%=REQUEST_URI%>?remove=<%=mod_name%>">remove</a>)</span>
 						<% else %>
-							<span><a href="<%=REQUEST_URI%>?install=<%=item.key%>">install</a></span>
+							<span><a href="<%=REQUEST_URI%>?install=<%=mod_name%>">install</a></span>
 						<% end %>
 					</div>
 				</div>

@@ -91,7 +91,7 @@ function settings()
 	-- Module an- und abschalten oder umkonfigurieren
 	if luci.http.formvalue("save") then
 		-- Module
-		for _, module in ipairs({"on-openvpn", "on-usergw", "on-captive-portal"}) do
+		for _, module in ipairs(line_split(on_function("get_on_modules"))) do
 			if on_bool_function("is_package_installed", {module}) then
 				local enabled = on_bool_function("is_on_module_installed_and_enabled", {module})
 				if luci.http.formvalue(module .. "_enabled") then

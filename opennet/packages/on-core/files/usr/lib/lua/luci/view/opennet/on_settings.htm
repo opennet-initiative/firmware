@@ -33,7 +33,8 @@ end
 			<% for _, item in ipairs({
 					{ key="on-openvpn", label=luci.i18n.translate("Access the Internet") },
 					{ key="on-usergw", label=luci.i18n.translate("Share your local internet connection with other members") },
-					{ key="on-captive-portal", label=luci.i18n.translate("Provide unrestricted internet access via Opennet to your vicinity") }}) do %>
+					{ key="on-captive-portal", label=luci.i18n.translate("Provide unrestricted internet access via Opennet to your vicinity") },
+					{ key="on-monitoring", label=luci.i18n.translate("Provide statistical data of network usage") }}) do %>
 				<div class="cbi-value">
 					<label class="cbi-value-title" for="<%=item.key%>"><%=item.label%></label>
 					<div class="cbi-value-field">

@@ -1,0 +1,293 @@
+#!/bin/sh
+
+set -eu
+
+SYSFS_BASE=/sys/kernel/debug/ieee80211
+
+
+STATION_EVENT_COUNTERS="tx_retry_count tx_retry_failed tx_filtered tx_fragments rx_dropped rx_fragments rx_duplicates beacon_loss_count"
+
+
+# IP/Name beautification
+# e.g. replace "192.168.12.213" with "AP2.213"
+# These patterns are configurable via "env" settings.
+IP_PREFIX_REGEX="${IP_PREFIX_REGEX:-192\.168\.[1-9]\?\([1-9]\)}"
+NAME_SUBSTITUTION_PREFIX="${NAME_SUBSTITUTION_PREFIX:-AP\1}"
+
+ACTION=${1:-}
+
+
+
+clean_fieldname() {
+	echo "$1" | sed 's/^\([^A-Za-z_]\)/_\1/; s/[^A-Za-z0-9_]/_/g'
+}
+
+
+install_munin_ath9k() {
+	# install muninlite and enable the service
+	if opkg list-installed | grep -q "^muninlite "; then
+		true
+	else
+		opkg update
+		opkg install muninlite
+		/etc/init.d/xinetd enable
+		/etc/init.d/xinetd start
+	fi
+	# copy this munin plugin
+	target_dir=/usr/sbin/munin-node-plugin.d
+	mkdir -p "$target_dir"
+	cp "$0" "$target_dir/" || true
+	chmod +x "$target_dir/$(basename "$0")"
+	# patch 'munin-node' in order to enable/configure plugins
+	munin_bin=$(which munin-node 2>/dev/null)
+	if grep -q '^PLUGINS=".*plugindir_' "$munin_bin"; then
+		# it is already enabled
+		true
+	else
+		# add 'plugindir_' to the plugins setting
+		sed -i '/^PLUGINS="/s/"$/ plugindir_"/' "$munin_bin"
+	fi
+	exit 0
+}
+
+
+# remove all non-digits and sort the remaining tokens numerically
+sort_by_number() {
+	local line
+	local key
+	while read line; do
+		key=$(echo "$line" | awk '{ print $1 }')
+		# prepend a zero in order to avoid empty results
+		echo -n "0$key" | sed 's/[^0-9]//g'
+		echo -e "\t$line"
+	done | sort -n | cut -f 2-
+}
+
+
+get_name_from_mac() {
+	local mac="$1"
+	# retrieve a suitrp | grep -i "$mac"able name for the neighbour
+	local name=$(grep -i "$mac" /proc/net/arp | awk '{ print $1 }' | sed "s/^$IP_PREFIX_REGEX/$NAME_SUBSTITUTION_PREFIX/" | head -1)
+	# output name or fall back to MAC
+	[ -n "$name" ] && echo "$name" && return 0
+	# No suitable label found? Return the mac without colons.
+	echo "$mac" | sed 's/://g'
+}
+
+
+get_stations() {
+	local station_dir
+	local station_info
+	local peer_mac
+	local label
+	find "$SYSFS_BASE" -type f -name rc_stats | while read station_dir; do
+		station_info=${station_dir#$SYSFS_BASE}
+		peer_mac=$(echo "$station_info" | cut -d / -f 5)
+		label=$(get_name_from_mac "$peer_mac")
+		echo "$label $(dirname "$station_dir")"
+	done
+}
+
+
+# The result is a list of unique items from the column "rate" of the "rc_stats" file.
+# Depending on the modes (11a or 11n) of the connected stations this will result in
+# numbers (6/9/12/18/24/36/48/54) or MCS rates (MCS0..15) or even both (with mixed clients).
+get_rc_stat_labels() {
+	local station_dir
+	local fieldname
+	get_stations | while read fieldname station_dir; do
+		parse_rc_stats <"$station_dir/rc_stats" | awk '{ print $1 }'
+	done | sort_by_number | uniq
+}
+
+
+# Return the rates and the corresponding successful and failed packet receive events.
+# The content of a 'rc_stats' file is expected at stdin.
+parse_rc_stats() {
+	local content="$(cat -)"
+	echo "$content" | sed 1d | grep "(" | grep "[0-9]$" \
+		| if echo "$content" | head -1 | grep -q "^rate"; then
+			# mode 11n, example:
+			# rate      throughput  ewma prob  this prob  this succ/attempt   success    attempts
+			#   C P 18        17.3       99.9      100.0             0(  0)       266         274
+			sed 's/^[^0-9]*//' | awk '{ print $1,$(NF-1),$NF-$(NF-1) }'
+		else
+			# mode 11a, example:
+			# type         rate     throughput  ewma prob   this prob  retry   this succ/attempt   success    attempts
+			# HT20/LGI     MCS0            5.6      100.0       100.0      1              0(  0)         1           1
+			sed 's/^.*MCS/MCS/' | awk '{ print $1,$(NF-1),$NF-$(NF-1) }'
+		fi
+}
+
+
+get_rc_stats_value() {
+	local station_dir="$1"
+	local value_name="$2"
+	local suffix
+	if [ "${value_name%_success}" != "$value_name" ]; then
+		suffix=success
+		column=2
+	else
+		suffix=failure
+		column=3
+	fi
+	rate="${value_name%_$suffix}"
+	parse_rc_stats <"$station_dir/rc_stats" | grep "^$rate[ \t]" | awk '{ print $'$column' }'
+}
+
+
+generate_up_down_pair() {
+	local label="$1"
+	local key_up="$2"
+	local key_down="$3"
+	local cdef="${4:-}"
+	echo "${key_down}.label $label"
+	echo "${key_down}.type COUNTER"
+	echo "${key_down}.graph no"
+	[ -n "$cdef" ] && echo "${key_down}.cdef ${key_down},${cdef}"
+	echo "${key_up}.label $label"
+	echo "${key_up}.type COUNTER"
+	echo "${key_up}.negative ${key_down}"
+	[ -n "$cdef" ] && echo "${key_up}.cdef ${key_up},${cdef}"
+	return 0
+}
+
+
+get_station_event_counter() {
+	local station_dir="$1"
+	local event="$2"
+	[ -e "$station_dir/$event" ] && cat "$station_dir/$event" || echo 0
+}
+
+
+sum_numbers() {
+	awk '{s+=$1} END {print s}'
+}
+
+
+generate_multigraphs() {
+	local graph_prefix="$1"
+	local config_generator="$2"
+	local get_value_func="$3"
+	shift 3
+	local station_name
+	local station_dir
+	local event
+	local value
+	local clean_station
+	local sum_file=$(mktemp)
+
+	get_stations | while read station_name station_dir; do
+		clean_station=$(clean_fieldname "$station_name")
+		echo "multigraph ${graph_prefix}.${clean_station}"
+
+		if [ "$ACTION" != "config" ]; then
+			# values of a station
+			for value_key in "$@"; do
+				value=$("$get_value_func" "$station_dir" "$value_key")
+				echo "${value_key}=${value}" >>"$sum_file"
+				echo "${value_key}.value $value"
+			done
+		else
+			"$config_generator" "$station_name" "$station_dir"
+		fi
+		echo
+	done
+
+	echo "multigraph $graph_prefix"
+	if [ "$ACTION" != "config" ]; then
+		for value_key in "$@"; do
+			value=$(grep "^${value_key}=" "$sum_file" | cut -f 2- -d = | sum_numbers)
+			echo "${value_key}.value $value"
+		done
+	else
+		"$config_generator" "" ""
+	fi
+	echo
+
+	# cleanup
+	rm -f "$sum_file"
+}
+
+
+# **************** graph definitions and calculations *******************
+
+generate_traffic_config() {
+	local station_name="$1"
+	local station_dir="$2"
+	local label_suffix=$([ -z "$station_name" ] && echo "" || echo " $station_name")
+	echo "graph_title ath9k Station Traffic$label_suffix"
+	echo "graph_args --base 1024"
+	echo "graph_scale no"
+	echo "graph_vlabel received (-) / transmitted (+)"
+	echo "graph_category wireless"
+
+	# convert bytes/s into kbit/s (x * 8 / 1000 = x / 125)
+	generate_up_down_pair "kBit/s" "tx_bytes" "rx_bytes" "125,/"
+	generate_up_down_pair "Packets/s" "tx_packets" "rx_packets"
+}
+
+
+generate_events_config() {
+	local station_name="$1"
+	local station_dir="$2"
+	local label_suffix=$([ -z "$station_name" ] && echo "" || echo " $station_name")
+	local event
+	local key
+	echo "graph_title ath9k Station Events$label_suffix"
+	echo "graph_vlabel events per \${graph_period}"
+	echo "graph_category wireless"
+
+	for event in $STATION_EVENT_COUNTERS; do
+		# some events are not handled with older versions (e.g. "beacon_loss_count")
+		# always show the configuration for the overview level (no 'station_dir' given)
+		if [ -z "$station_dir" -o -e "$station_dir/$event" ]; then
+			key=$(clean_fieldname "$event")
+			echo "${key}.label $event"
+			echo "${key}.type COUNTER"
+		fi
+	done
+}
+
+
+generate_rc_stats_config() {
+	local station_name="$1"
+	local station_dir="$2"
+	local label_suffix=$([ -z "$station_name" ] && echo "" || echo " $station_name")
+	local rate
+	local clean_rate
+	local rate_label
+	echo "graph_title ath9k Station Receive Rates$label_suffix"
+	echo "graph_vlabel receive: failures (-) / successes (+)"
+	echo "graph_category wireless"
+
+	get_rc_stat_labels | while read rate; do
+		clean_rate=$(clean_fieldname "$rate")
+		if echo "$rate" | grep -q "^[0-9]*$"; then
+			# only digits - add the bandwidth
+			rate_label="$rate MBit/s"
+		else
+			# "MSCxy" labels - these are fine without a change
+			rate_label="$rate"
+		fi
+		generate_up_down_pair "$rate_label" "${clean_rate}_success" "${clean_rate}_failure"
+	done
+}
+
+
+# ******************************** main ***********************************
+
+[ "$ACTION" = "setup-openwrt" ] && install_munin_ath9k
+
+
+generate_multigraphs "ath9k_station_traffic" "generate_traffic_config" "get_station_event_counter" \
+		rx_bytes tx_bytes rx_packets tx_packets
+
+generate_multigraphs "ath9k_station_events" "generate_events_config" "get_station_event_counter" \
+		$STATION_EVENT_COUNTERS
+
+generate_multigraphs "ath9k_station_rc_stats" "generate_rc_stats_config" "get_rc_stats_value" \
+		$(for stat in $(get_rc_stat_labels); do echo "${stat}_success" "${stat}_failure"; done)
+
+exit 0
+

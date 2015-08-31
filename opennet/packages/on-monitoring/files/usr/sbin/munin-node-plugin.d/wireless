@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -eu
+
+
+clean_fieldname() {
+	echo "$1" | sed 's/^\([^A-Za-z_]\)/_\1/; s/[^A-Za-z0-9_]/_/g'
+}
+
+
+get_wifi_devices() {
+	iw dev | grep Interface | awk '{print $2}'
+}
+
+
+if [ "${1:-}" = "config" ]; then
+	echo "graph_title Channel Occupation $device"
+	echo "graph_vlabel time"
+	echo "graph_category wireless"
+	get_wifi_devices | while read device; do
+		for key in busy receive transmit; do
+			echo "${device}_${key}.label $key"
+			echo "${device}_${key}.type COUNTER"
+		done
+	done
+	exit 0
+fi
+
+get_wifi_devices | while read device; do
+	iw dev "$device" survey dump \
+		| grep -F -A 5 "[in use]" \
+		| grep -E "channel (busy|receive|transmit) time:" \
+		| awk '{print "'${device}_'"$2"'.value'",$4}'
+done

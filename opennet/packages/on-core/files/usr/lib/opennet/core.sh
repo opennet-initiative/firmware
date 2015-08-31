@@ -415,6 +415,9 @@ apply_changes() {
 				update_captive_portal_status
 				apply_changes nodogsplash
 				;;
+			on-monitoring)
+				true
+				;;
 			*)
 				msg_error "no handler defined for applying config changes for '$config'"
 				;;

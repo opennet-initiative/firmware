@@ -28,7 +28,7 @@ configure_tunnel_firewall() {
 	# Zone fuer ausgehenden Verkehr definieren
 	uci_prefix=firewall.$(uci add firewall zone)
 	uci set "${uci_prefix}.name=$ZONE_TUNNEL"
-	uci set "${uci_prefix}.network=$NETWORK_TUNNEL"
+	uci add_list "${uci_prefix}.network=$NETWORK_TUNNEL"
 	uci set "${uci_prefix}.forward=REJECT"
 	uci set "${uci_prefix}.input=REJECT"
 	uci set "${uci_prefix}.output=ACCEPT"
@@ -45,4 +45,3 @@ configure_tunnel_firewall() {
 
 configure_tunnel_network
 configure_tunnel_firewall
-

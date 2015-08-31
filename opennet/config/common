@@ -132,4 +132,5 @@ CONFIG_PACKAGE_kmod-usb2=m
 CONFIG_PACKAGE_kmod-usbip=m
 
 # traceroute und mtr mit ONI Ortsinformationen
-CONFIG_PACKAGE_traceroute-oni-names=y
+# TODO: dies loest eine Abhaengigkeit auf mtr->libncurses aus - vielleicht mtr nur optional verwenden (ohne Abhaengigkeit)?
+CONFIG_PACKAGE_traceroute-oni-names=m

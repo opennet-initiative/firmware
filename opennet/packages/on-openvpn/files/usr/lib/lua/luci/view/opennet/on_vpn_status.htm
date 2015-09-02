@@ -11,7 +11,10 @@ You may obtain a copy of the License at
 
 -%>
 
-<% require("luci.model.opennet.funcs") %>
+<%
+require("luci.model.opennet.funcs")
+require("luci.model.opennet.urls")
+%>
 
 <script type="text/javascript">//<![CDATA[
 
@@ -19,7 +22,7 @@ function update_vpn_status_item(item) {
 	var element = document.getElementById(item);
 	if (element) {
 		var run_xhr = new XHR();
-		run_xhr.get('<%=luci.dispatcher.build_url("opennet", "opennet_1")%>/vpn_tunnel/on_' + item, null,
+		run_xhr.get('<%= on_url("mig_openvpn") %>/' + item, null,
 			function(x) { if (x.responseText) element.innerHTML = x.responseText; });
 	}
 }
@@ -45,11 +48,7 @@ function init() {
 		<fieldset class="cbi-section-node">
 			<table width="100%">
 				<tr>
-					<td><table class="usergw-status" id="vpn_status_label">
-						<tr><td>
-							<img class='loading_img_small' id="vpn_status_spinner" src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
-						</td></tr>
-					</table></td>
+					<td><%= get_html_loading_spinner("vpn_status_label") %></td>
 					<td>
 						<form method="post" action="<%=REQUEST_URI%>?restartvpn=true" id="vpn_status_form" />
 					</td>

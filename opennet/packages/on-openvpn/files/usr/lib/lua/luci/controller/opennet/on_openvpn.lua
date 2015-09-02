@@ -36,24 +36,3 @@ function index()
 	-- importiere den file-upload-Handler
 	require("luci.model.opennet.on_vpn_management")
 end
-
-
-function action_on_openvpn()
-	if luci.http.formvalue("restartvpn") then os.execute("vpn_status restart opennet_user") end
-	
-	local on_errors = {}
-
-	-- sofortiges Ende, falls der Upload erfolgreich verlief
-	if process_csr_submission("user", on_errors) then return end
-
-	-- Zertifikatverwaltung
-	local cert_result = process_openvpn_certificate_form("user")
-	
-	luci.template.render("opennet/on_openvpn", {
-		on_errors=on_errors,
-		certstatus=cert_result.certstatus,
-		openssl=cert_result.openssl,
-		force_show_uploadfields=cert_result.force_show_uploadfields,
-		force_show_generatefields=cert_result.force_show_generatefields
-	})
-end

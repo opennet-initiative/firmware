@@ -54,5 +54,5 @@ function index()
 	on_entry({"basis", "einstellungen"}, call("action_settings"), i18n("Settings"), 40).leaf = true
 	on_entry({"basis", "portweiterleitung"}, call("action_portmapping"), i18n("Port-Mapping"), 60).leaf = true
 	on_entry({"basis", "bericht"}, call("action_report"), i18n("Report"), 80)
-	on_entry({"basis", "bericht", "timestamp"}, call("get_report_timestamp")).leaf = true
+	on_entry({"basis", "bericht", "zeitstempel"}, call("get_report_timestamp")).leaf = true
 end

@@ -13,10 +13,12 @@ You may obtain a copy of the License at
 <%+header%>
 <%+cbi/apply_xhr%>
 
+<% require("luci.model.opennet.funcs") %>
+
 <%# erforderlich fuer "String.format" %>
 <script type="text/javascript" src="<%=resource%>/cbi.js"></script>
 <script type="text/javascript">//<![CDATA[
-	XHR.poll(10, '<%=luci.dispatcher.build_url("opennet", "opennet_1", "bericht", "timestamp")%>', null, update_report_status);
+	XHR.poll(10, '<%= on_url("basis", "bericht", "zeitstempel") %>', null, update_report_status);
 
 	function update_report_status(x, info) {
 		var status_field = document.getElementById('on-report-status');

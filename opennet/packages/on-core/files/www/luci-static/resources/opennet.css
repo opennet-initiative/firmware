@@ -169,7 +169,6 @@ input.cbi-input-del, input.cbi-button-del {
 	background:transparent url(../../luci-static/opennet/user-trash.png) no-repeat scroll 1px center;
 }
 
-
 #cbi-opennet-gateways-active[active="n"], #cbi-opennet-gateways-status[status="n"], .opennet-bool[status="n"], .ugw-wan-route, .ugw-wan-ping, .ugw-mtu, .ugw-centralip, .ugw-tunnel_active[status="inactive"], .cert_available {
 	background:transparent url(../../luci-static/opennet/error.png) no-repeat scroll center;
 	min-height: 24px;

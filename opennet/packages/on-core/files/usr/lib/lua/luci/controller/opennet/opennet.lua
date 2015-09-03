@@ -2,6 +2,7 @@
 Opennet Firmware
 
 Copyright 2010 Rene Ejury <opennet@absorb.it>
+Copyright 2015 Lars Kruse <devel@sumpfralle.de>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -9,40 +10,49 @@ You may obtain a copy of the License at
 
 	http://www.apache.org/licenses/LICENSE-2.0
 
-$Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 ]]--
 module("luci.controller.opennet.opennet", package.seeall)
 
+
 function index()
-	luci.i18n.loadc("on-core")
+	local page
 	local i18n = luci.i18n.translate
+	require("luci.model.opennet.urls")
+	luci.i18n.loadc("on-core")
 
+	-- Umleitung der top-level Node (die Startseite) zur Node "opennet"
 	local page = node()
-	page.target = alias("opennet")
+	page.target = on_alias()
+	page.sysauth = nil
+	page.sysauth_authenticator = nil
 	
-	page = node("opennet")
-	page.title = i18n("Opennet")
-	page.target = alias("opennet", "on_status")
-	page.order = 70
+	-- Definition der Opennet-Startseite
+	page = on_entry_no_auth({}, nil, i18n("Opennet"), 35)
+	page.target = on_alias("status")
 
-	-- die Status-Seite
-	page = entry({"opennet", "on_status"}, template("opennet/on_status"))
-	page.title = i18n("Status")
-	page.order = 0
-	page.css = "opennet.css"
-	page.i18n = "on_status"
+	-- die Status-Seite (/status)
+	page = on_entry_no_auth({"status"}, nil, i18n("Status"), 0)
+	page.target = on_alias("status", "allgemein")
+
+	-- Status-Unterseiten
+	on_entry_no_auth({"status", "allgemein"}, template("opennet/on_status"), i18n("Overview"), 10).leaf = true
+	on_entry_no_auth({"status", "olsr"}, template("opennet/on_olsr"), i18n("OLSR Routing"), 50).leaf = true
 
 	-- Quellen fuer die Inhalte der Status-Seite
 	require ("luci.model.opennet.on_status")
-	entry({"opennet", "on_status", "on_status_neighbors"}, call("status_neighbors")).leaf = true
-	entry({"opennet", "on_status", "on_status_network"}, call("status_network")).leaf = true
-	entry({"opennet", "on_status", "on_status_wireless"}, call("status_wireless")).leaf = true
-	entry({"opennet", "on_status", "on_status_issues"}, call("status_issues")).leaf = true
+	on_entry_no_auth({"status", "neighbors"}, call("status_neighbors")).leaf = true
+	on_entry_no_auth({"status", "network"}, call("status_network")).leaf = true
+	on_entry_no_auth({"status", "wireless"}, call("status_wireless")).leaf = true
+	on_entry_no_auth({"status", "issues"}, call("status_issues")).leaf = true
 
-	-- separate top-level Auswahl fuer das olsr-Web-Interface
-	page = node("olsr")
-	page.title = i18n("OLSR-Status")
-	page.target = template("opennet/on_olsr")
-	page.css = "opennet.css"
-	page.order = 50
+
+	-- Grundlegende Einstellungen (/basis)
+	require ("luci.model.opennet.base")
+	page = on_entry({"basis"}, nil, i18n("Base"), 20)
+	page.target = on_alias("basis", "funknetz")
+	on_entry({"basis", "funknetz"}, template("opennet/on_network"), i18n("Network"), 20).leaf = true
+	on_entry({"basis", "einstellungen"}, call("action_settings"), i18n("Settings"), 40).leaf = true
+	on_entry({"basis", "portweiterleitung"}, call("action_portmapping"), i18n("Port-Mapping"), 60).leaf = true
+	on_entry({"basis", "bericht"}, call("action_report"), i18n("Report"), 80)
+	on_entry({"basis", "bericht", "timestamp"}, call("get_report_timestamp")).leaf = true
 end

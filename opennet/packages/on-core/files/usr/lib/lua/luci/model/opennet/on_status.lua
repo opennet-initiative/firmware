@@ -10,7 +10,6 @@ You may obtain a copy of the License at
 
 	http://www.apache.org/licenses/LICENSE-2.0
 
-$Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 ]]--
 
 
@@ -226,10 +225,9 @@ function status_issues()
 		result = result .. '<a title="' .. luci.util.pcdata(warnings) .. '">'
 		    .. luci.i18n.translate("There are indications for possible technical issues.") .. "</a><br/>"
 		local support_contact = get_default_value("on-core", "support_contact")
-		result = result .. luci.i18n.translatef('You may want to send a <a href="%s">report</a> to the Opennet community (%s).', luci.dispatcher.build_url("opennet", "opennet_1", 'bericht'), '<a href="mailto:' .. support_contact ..'">' .. support_contact .. '</a>')
+		result = result .. luci.i18n.translatef('You may want to send a <a href="%s">report</a> to the Opennet community (%s).', on_url("basis", 'bericht'), '<a href="mailto:' .. support_contact ..'">' .. support_contact .. '</a>')
 	else
 		result = result .. luci.i18n.translate("There seem to be no issues.")
 	end
 	luci.http.write(result)
 end
-

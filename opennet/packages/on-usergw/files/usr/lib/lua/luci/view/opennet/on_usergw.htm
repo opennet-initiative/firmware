@@ -19,7 +19,7 @@ You may obtain a copy of the License at
 
 function check_ugw_status() {
 	var run_xhr = new XHR();
-	run_xhr.get('<%= luci.dispatcher.build_url("opennet", "on_status", "on_status_ugw_connection") %>', null,
+	run_xhr.get('<%= on_url("mesh_tunnel", "mesh_verbindungen") %>', null,
 		function(x) {
 			if (x.responseText) document.getElementById("ugw_status_content").innerHTML = x.responseText;
 		}

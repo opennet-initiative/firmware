@@ -14,6 +14,8 @@ You may obtain a copy of the License at
 
 <%
 	require("luci.model.opennet.funcs")
+	require("luci.model.opennet.urls")
+
 	local sorting = on_function("get_service_sorting")
 
 	local parallel_processes = 3
@@ -39,7 +41,7 @@ You may obtain a copy of the License at
 	var service_dict = {};
 
 	// loese die Anfrage nach allen Dienst-IDs aus - diese werden anschliessend einzeln nacheinander abgefragt
-	XHR.get('<%=luci.dispatcher.build_url("opennet", "opennet_2", "vpn_gateway_list")%>', null, build_table);
+	XHR.get('<%= on_url("mig_openvpn", "status", "vpn_gateway_list") %>', null, build_table);
 
 	function uci_to_yn(token) {
 		if (!token) {
@@ -86,7 +88,7 @@ You may obtain a copy of the License at
 
 	function schedule_next_service(remaining_services) {
 		if (remaining_services && (remaining_services.length > 0)) {
-			XHR.get('<%=luci.dispatcher.build_url("opennet", "opennet_2", "vpn_gateway_info")%>/' + remaining_services[0], null,
+			XHR.get('<%= on_url("mig_openvpn", "status", "vpn_gateway_info") %>/' + remaining_services[0], null,
 				function(x, info) { if (info) { insert_gateway(info, remaining_services.slice(1)); }});
 		}
 	}
@@ -240,7 +242,7 @@ e "offset/distance" column for this purpose.%></p>
 	<% if not on_bool_function("has_mig_openvpn_credentials") then %>
 		<fieldset class="cbi-section"><div class="cbi-section-comment"><div class="alert-message warning">
 			<p><%:The required certificate and key for your internet access via Opennet seems to be missing%>
-			(<%:see%> <a href="<%=luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel")%>"><%:Certificate management%></a>).</p>
+			(<%:see%> <a href="<%= on_url("mig_openvpn", "zertifikat") %>"><%:Certificate management%></a>).</p>
 		</div></div></fieldset>
 	<% end %>
 </div>
@@ -250,7 +252,7 @@ e "offset/distance" column for this purpose.%></p>
 <div class="cbi-map">
 	<fieldset class="cbi-section">
 		<legend><%:Gateway-List%></legend>
-		<div class="cbi-section-comment"><%=luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', luci.dispatcher.build_url("opennet", "opennet_1", "dienste"))%></div>
+		<div class="cbi-section-comment"><%=luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', on_url("basis", "settings"))%></div>
 		<fieldset class="cbi-section-node">
 			<form name="gateways" method="post" action="<%=REQUEST_URI%>">
 			<table class="cbi-section-table" id="on-gateway-list">

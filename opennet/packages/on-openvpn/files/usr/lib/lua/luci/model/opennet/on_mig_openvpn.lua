@@ -16,6 +16,7 @@ $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 local uci = require "luci.model.uci"
 local cursor = uci.cursor()
 require("luci.i18n")
+require("luci.model.opennet.urls")
 
 
 function action_on_openvpn()
@@ -157,7 +158,7 @@ function status_mig_openvpn()
 		else
 			-- das Zertifikat fehlt
 			result = luci.i18n.translatef('<a href="%s">A certificate is required</a>.',
-					luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel"))
+					on_url("mig_openvpn", "zertifikat"))
 		end
 		result = luci.i18n.translate('The VPN-Tunnel is not active,') .. " " .. result
 	end

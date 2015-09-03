@@ -24,7 +24,7 @@ You may obtain a copy of the License at
 <div class="cbi-map-descr">
 	<p><%:You may want to run a public hotspot in your area.%></p>
 	<p><%:This requires a working VPN connection:%>
-		<a href="<%=luci.dispatcher.build_url("opennet", "opennet_1", "vpn_tunnel")%>"><%:VPN Tunnel%></a></p>
+		<a href="<%= on_url("mig_openvpn") %>"><%:VPN Tunnel%></a></p>
 	<p><%:Disable the Hotspot feature by removing the physical device from the 'free' network interface.%></p>
 	<p><%:Users do not need to authenticate themselves. Basic information about using a public Opennet hotspot is presented during the first http connection attempt.%></p>
 </div>

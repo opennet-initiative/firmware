@@ -4,4 +4,5 @@
 # Damit diese bei einem firewall-Restart angewandt werden, muss dieses Skript
 # in der firewall-Konfiguration als include aktivert sein.
 
-on-function captive_portal_restart
+is_on_module_installed_and_enabled "on-captive-portal" && on-function captive_portal_restart
+true

@@ -26,6 +26,8 @@ process_captive_portal_triggers() {
 	fi
 }
 
-[ "$ACTION" = "ifup" -o "$ACTION" = "ifdown" ] && process_captive_portal_triggers
+is_on_module_installed_and_enabled "on-captive-portal" \
+	&& [ "$ACTION" = "ifup" -o "$ACTION" = "ifdown" ] \
+	&& process_captive_portal_triggers
 true
 

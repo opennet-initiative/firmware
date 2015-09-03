@@ -31,12 +31,7 @@ function index()
 	page.target = on_alias("status")
 
 	-- die Status-Seite (/status)
-	page = on_entry_no_auth({"status"}, nil, i18n("Status"), 0)
-	page.target = on_alias("status", "allgemein")
-
-	-- Status-Unterseiten
-	on_entry_no_auth({"status", "allgemein"}, template("opennet/on_status"), i18n("Overview"), 10).leaf = true
-	on_entry_no_auth({"status", "olsr"}, template("opennet/on_olsr"), i18n("OLSR Routing"), 50).leaf = true
+	on_entry_no_auth({"status"}, template("opennet/on_status"), i18n("Status"), 10)
 
 	-- Quellen fuer die Inhalte der Status-Seite
 	require ("luci.model.opennet.on_status")

@@ -287,30 +287,36 @@ e "offset/distance" column for this purpose.%></p>
 				<%:The first reachable Gateway is currently not in use. The Tunnel will be restarted and the Gateway will be changed in a few minutes. This change will be shown after a reload of this page.%>
 			</p>
 		</fieldset>
+	</fieldset>
 
 
-		<%# Manuelles Hinzufügen weiterer Gateways %>
-		<fieldset class="cbi-section-node">
-			<form name="gateways" method="post" action="<%=REQUEST_URI%>">
-			<div class="cbi-value">
-				<div class="cbi-value-field">
-					<input type="hidden" name="service_type" value="gw" />
-					<input type="hidden" name="service_path" value="/" />
-					<input type="hidden" name="service_scheme" value="openvpn" />
-					<input type="hidden" name="service_protocol" value="udp" />
-					<input type="hidden" name="service_details" value="" />
-					<label for="service_host"><%:Add Gateway manually%>:</label>
-					<input class="cbi-input-text" name="service_host" id="service_host" size="16" />
-					<label for="service_port"><%:Port%>:</label>
-					<input class="cbi-input-text" name="service_port"
-						id="service_port" size="5"
-						value="<%=on_function("get_variable", {"DEFAULT_MIG_PORT"})%>" />
-					<input class="cbi-button cbi-button-apply" type="submit"
-						id="add_service" name="add_service" value="<%:Add%>" />
-				</div>
+	<%# Manuelles Hinzufügen weiterer Gateways %>
+	<fieldset class="cbi-section">
+	<legend><%:Manually add a Gateway%></legend>
+		<div class="cbi-section-comment">
+			<p><%:Developers or experimenting users may want to add custom gateways here.%></p>
+		</div>
+		<form name="gateways" method="post" action="<%=REQUEST_URI%>">
+		<div class="cbi-value">
+			<input type="hidden" name="service_type" value="gw" />
+			<input type="hidden" name="service_path" value="/" />
+			<input type="hidden" name="service_scheme" value="openvpn" />
+			<input type="hidden" name="service_protocol" value="udp" />
+			<input type="hidden" name="service_details" value="" />
+			<label class="cbi-value-title" for="service_host"><%:Add Gateway manually%>:</label>
+			<div class="cbi-value-field">
+				<input class="cbi-input-text" name="service_host" id="service_host" size="16" />
 			</div>
-			</form>
-		</fieldset>
+			<label class="cbi-value-title" for="service_port"><%:Port%>:</label>
+			<div class="cbi-value-field">
+				<input class="cbi-input-text" name="service_port"
+					id="service_port" size="5"
+					value="<%=on_function("get_variable", {"DEFAULT_MIG_PORT"})%>" />
+				<input class="cbi-button cbi-button-apply" type="submit"
+					id="add_service" name="add_service" value="<%:Add%>" />
+			</div>
+		</div>
+		</form>
 	</fieldset>
 </div>
 

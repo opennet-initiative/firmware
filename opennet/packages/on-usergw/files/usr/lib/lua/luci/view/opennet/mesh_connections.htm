@@ -162,16 +162,18 @@ You may obtain a copy of the License at
 	<legend><%:Manually add a Mesh Gateway%></legend>
 	<form name="gateways" method="post" action="<%= REQUEST_URI %>">
 	<div class="cbi-value">
+		<input type="hidden" name="service_type" value="mesh" />
+		<input type="hidden" name="service_path" value="/" />
+		<input type="hidden" name="service_scheme" value="openvpn" />
+		<input type="hidden" name="service_protocol" value="udp" />
+		<input type="hidden" name="service_details" value="" />
+		<input type="hidden" name="service_priority" value="5" />
+		<label class="cbi-value-title" for="service_host"><%:Host%>:</label>
 		<div class="cbi-value-field">
-			<input type="hidden" name="service_type" value="mesh" />
-			<input type="hidden" name="service_path" value="/" />
-			<input type="hidden" name="service_scheme" value="openvpn" />
-			<input type="hidden" name="service_protocol" value="udp" />
-			<input type="hidden" name="service_details" value="" />
-			<input type="hidden" name="service_priority" value="5" />
-			<label for="service_host"><%:Manually add Mesh Gateway%>:</label>
 			<input class="cbi-input-text" name="service_host" id="service_host" size="16" />
-			<label for="service_port"><%:Port%>:</label>
+		</div>
+		<label class="cbi-value-title" for="service_port"><%:Port%>:</label>
+		<div class="cbi-value-field">
 			<input class="cbi-input-text" name="service_port"
 				id="service_port" size="5"
 				value="<%= on_function("get_variable", {"DEFAULT_MESH_OPENVPN_PORT"}) %>" />

@@ -114,16 +114,18 @@ You may obtain a copy of the License at
     <legend><%:Manually add a Service Relay%></legend>
     <form name="relay_services" method="post" action="<%= REQUEST_URI %>">
       <div class="cbi-value">
+        <input type="hidden" name="service_type" value="mesh" />
+        <input type="hidden" name="service_path" value="/" />
+        <input type="hidden" name="service_scheme" value="openvpn" />
+        <input type="hidden" name="service_protocol" value="udp" />
+        <input type="hidden" name="service_details" value="" />
+        <input type="hidden" name="service_priority" value="5" />
+        <label class="cbi-value-title" for="service_host"><%:Exit Gateway host%>:</label>
         <div class="cbi-value-field">
-          <input type="hidden" name="service_type" value="mesh" />
-          <input type="hidden" name="service_path" value="/" />
-          <input type="hidden" name="service_scheme" value="openvpn" />
-          <input type="hidden" name="service_protocol" value="udp" />
-          <input type="hidden" name="service_details" value="" />
-          <input type="hidden" name="service_priority" value="5" />
-          <label for="service_host"><%:Manually add Exit Gateway%>:</label>
           <input class="cbi-input-text" name="service_host" id="service_host" size="16" />
-          <label for="service_port"><%:Port%>:</label>
+        </div>
+        <label class="cbi-value-title" for="service_port"><%:Port%>:</label>
+        <div class="cbi-value-field">
           <input class="cbi-input-text" name="service_port" id="service_port" size="5" />
           <input class="cbi-button cbi-button-apply" type="submit"
               id="add_service" name="add_service" value="<%:Add%>" />

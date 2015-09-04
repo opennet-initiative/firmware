@@ -11,7 +11,7 @@ You may obtain a copy of the License at
 	http://www.apache.org/licenses/LICENSE-2.0
 
 ]]--
-module("luci.controller.opennet.opennet", package.seeall)
+module("luci.controller.opennet.on_core", package.seeall)
 
 
 function index()
@@ -23,15 +23,14 @@ function index()
 	-- Umleitung der top-level Node (die Startseite) zur Node "opennet"
 	local page = node()
 	page.target = on_alias()
-	page.sysauth = nil
-	page.sysauth_authenticator = nil
-	
+
 	-- Definition der Opennet-Startseite
 	page = on_entry_no_auth({}, nil, i18n("Opennet"), 35)
 	page.target = on_alias("status")
 
 	-- die Status-Seite (/status)
-	on_entry_no_auth({"status"}, template("opennet/on_status"), i18n("Status"), 10)
+	-- unsichtbar auf höchster Ebene (wird nur als Startseite angesteuert)
+	on_entry_no_auth({"status"}, template("opennet/on_status"), nil, 10)
 
 	-- Quellen fuer die Inhalte der Status-Seite
 	require ("luci.model.opennet.on_status")

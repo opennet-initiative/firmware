@@ -13,6 +13,12 @@
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
+
+# In diesem Skript ist ausnahmsweise die Konstruktionen "local foo=$(bar)" erlaubt.
+# Typischerweise maskiert diese Konstruktion den Exit-Code von "bar" und ist daher zu vermeiden.
+# Siehe http://mywiki.wooledge.org/BashPitfalls#local_varname.3D.24.28command.29
+# In diesem Skript tolerieren wir jedoch Fehler, da nicht klar geprueft wird, welche Module installiert wurden.
+
 print_status() {
 	local ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get "$gw" 2>/dev/null | awk '{if ($5 ~ "$MESH_OPENVPN_DEVICE_PREFIX") print $1}' ; done)
 	local ugw_status_centralips_no=$(echo "$ugw_status_centralips" | wc -w)
@@ -154,4 +160,3 @@ case "${1:-}" in
 		print_usage
 	;;
 esac
-

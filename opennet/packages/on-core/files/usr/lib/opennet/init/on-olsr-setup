@@ -27,7 +27,8 @@ configure_olsrd_httpinfo_port() {
 # das txtinfo-Modul ist notwendig fuer die Dienstverwaltung (Routen-Entfernung)
 olsrd_enable_txtinfo() {
 	trap "error_trap olsrd_enable_txtinfo '$*'" $GUARD_TRAPS
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "txtinfo")
+	local uci_prefix
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "txtinfo")
 	uci set "${uci_prefix}.ignore=0"
 }
 
@@ -36,7 +37,8 @@ olsrd_enable_txtinfo() {
 # (nett, aber unwichtig)
 olsrd_enable_jsoninfo() {
 	trap "error_trap olsrd_enable_jsoninfo '$*'" $GUARD_TRAPS
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "jsoninfo")
+	local uci_prefix
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "jsoninfo")
 	uci set "${uci_prefix}.ignore=0"
 }
 
@@ -66,7 +68,8 @@ olsrd_enable_nameservice() {
 	local uci_prefix
 
 	# fuer NTP, DNS und die Gateway-Auswahl benoetigen wir das nameservice-Plugin
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
+	local uci_prefix
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	if [ -z "$uci_prefix" ]; then
 	       msg_info "Failed to find olsrd_nameservice plugin"
 	else

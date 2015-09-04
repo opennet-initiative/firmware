@@ -70,7 +70,8 @@ get_ping_time() {
 	trap "error_trap get_ping_time '$*'" $GUARD_TRAPS
 	local target="$1"
 	local duration="${2:-5}"
-	local ip=$(query_dns "$target" | filter_routable_addresses | tail -1)
+	local ip
+	ip=$(query_dns "$target" | filter_routable_addresses | tail -1)
 	[ -z "$ip" ] && return 0
 	ping -w "$duration" -q "$ip" 2>/dev/null \
 		| grep "min/avg/max" \
@@ -87,7 +88,8 @@ add_zone_forward() {
 	trap "error_trap add_zone_forward '$*'" $GUARD_TRAPS
 	local source="$1"
 	local dest="$2"
-	local uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
 	# die Weiterleitungsregel existiert bereits -> Ende
 	[ -n "$uci_prefix" ] && return 0
 	# neue Regel erstellen
@@ -103,7 +105,8 @@ update_opennet_zone_masquerading() {
 	trap "error_trap update_opennet_zone_masquerading '$*'" $GUARD_TRAPS
 	local network
 	local network_with_prefix
-	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
 	# Abbruch, falls die Zone fehlt
 	[ -z "$uci_prefix" ] && msg_info "failed to find opennet mesh zone ($ZONE_MESH)" && return 0
 	# alle masquerade-Netzwerke entfernen
@@ -145,10 +148,12 @@ get_current_addresses_of_network() {
 get_zone_interfaces() {
 	trap "error_trap get_zone_interfaces '$*'" $GUARD_TRAPS
 	local zone="$1"
-	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
+	local uci_prefix
+	local interfaces
+	uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
 	# keine Zone -> keine Interfaces
 	[ -z "$uci_prefix" ] && return 0
-	local interfaces=$(uci_get_list "${uci_prefix}.network")
+	interfaces=$(uci_get_list "${uci_prefix}.network")
 	# falls 'network' und 'device' leer sind, dann enthaelt 'name' den Interface-Namen
 	# siehe http://wiki.openwrt.org/doc/uci/firewall#zones
 	[ -z "$interfaces" ] && [ -z "$(uci_get "${uci_prefix}.device")" ] && interfaces="$(uci_get "${uci_prefix}.name")"
@@ -163,7 +168,8 @@ get_zone_interfaces() {
 get_zone_raw_devices() {
 	trap "error_trap get_zone_raw_devices '$*'" $GUARD_TRAPS
 	local zone="$1"
-	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to retrieve raw devices of non-existing zone '$zone'" && return 0
 	uci_get_list "${uci_prefix}.device"
 }
@@ -244,7 +250,8 @@ get_subdevices_of_interface() {
 add_raw_device_to_zone() {
 	local zone="$1"
 	local device="$2"
-	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to add raw device '$device' to non-existing zone '$zone'" && return 0
 }
 
@@ -324,7 +331,8 @@ get_subdevices_of_interface() {
 add_raw_device_to_zone() {
 	local zone="$1"
 	local device="$2"
-	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to add raw device '$device' to non-existing zone '$zone'" && return 0
 	uci_add_list "${uci_prefix}.device" "$device"
 }
@@ -336,7 +344,8 @@ add_raw_device_to_zone() {
 add_interface_to_zone() {
 	local zone="$1"
 	local interface="$2"
-	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to add interface '$interface' to non-existing zone '$zone'" && return 0
 	uci_add_list "${uci_prefix}.network" "$interface"
 }
@@ -347,7 +356,8 @@ add_interface_to_zone() {
 del_raw_device_from_zone() {
 	local zone="$1"
 	local device="$2"
-	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to remove raw device '$device' from non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
 	uci del_list "${uci_prefix}.device=$device"
 }
@@ -358,7 +368,8 @@ del_raw_device_from_zone() {
 del_interface_from_zone() {
 	local zone="$1"
 	local interface="$2"
-	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to remove interface '$interface' from non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
 	uci del_list "${uci_prefix}.network=$interface"
 }
@@ -467,7 +478,8 @@ delete_firewall_zone() {
 	local zone="$1"
 	local section
 	local key
-	local uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section firewall zone "name=$zone")
 	uci_delete "$uci_prefix"
 	for section in "forwarding" "redirect" "rule"; do
 		for key in "src" "dest"; do
@@ -491,10 +503,12 @@ rename_firewall_zone() {
 	local setting
 	local uci_prefix
 	local key
-	local old_uci_prefix=$(find_first_uci_section firewall zone "name=$old_zone")
+	local old_uci_prefix
+	old_uci_prefix=$(find_first_uci_section firewall zone "name=$old_zone")
 	# die Zone existiert nicht (mehr)
 	[ -z "$old_uci_prefix" ] && return 0
-	local new_uci_prefix=$(find_first_uci_section firewall zone "name=$new_zone")
+	local new_uci_prefix
+	new_uci_prefix=$(find_first_uci_section firewall zone "name=$new_zone")
 	[ -z "$new_uci_prefix" ] && new_uci_prefix="firewall.$(uci add firewall zone)"
 	uci show "$old_uci_prefix" | cut -f 3- -d . | while read setting; do
 		# die erste Zeile (der Zonen-Typ) ueberspringen

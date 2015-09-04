@@ -37,7 +37,8 @@ configure_free_network() {
 
 
 configure_free_zone() {
-	local uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$ZONE_FREE")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$ZONE_FREE")
 	# Zone existiert? Keine Aenderungen ...
 	[ -n "$uci_prefix" ] && return 0
 	uci_prefix=firewall.$(uci add firewall zone)

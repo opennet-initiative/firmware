@@ -32,9 +32,8 @@ _get_or_set_gpio() {
 		# neuen Zustand setzen
 		echo "$value" >"$gpio_path/value"
 	else
-		local state=$(cat "$gpio_path/value")
 		# aktuellen Zustand zurueckliefern
-		[ "$state" = "1" ] && return 0 || return 1
+		[ "$(cat "$gpio_path/value")" = "1" ] && return 0 || return 1
 	fi
 }
 
@@ -42,7 +41,8 @@ _get_or_set_gpio() {
 ## @fn _get_poe_passthrough_function()
 ## @brief Ermittle die fuer die Hardware geeignete POE-Passthrough-Funktion (zum Lesen und Setzen des Zustands).
 _get_poe_passthrough_function() {
-	local machine_type=$(get_machine_type)
+	local machine_type
+	machine_type=$(get_machine_type)
 	if [ "$machine_type" = "TP-LINK CPE210/220/510/520" ]; then
 		echo "_get_or_set_gpio 20"
 	elif [ "$machine_type" = "Ubiquiti Nanostation M" ]; then
@@ -65,7 +65,8 @@ _get_poe_passthrough_function() {
 ##   HP-Variante unterschieden werden.
 has_poe_passthrough_support() {
 	trap "error_trap has_poe_passthrough_support '$*'" $GUARD_TRAPS
-	local funcname=$(_get_poe_passthrough_function)
+	local funcname
+	funcname=$(_get_poe_passthrough_function)
 	[ -z "$funcname" ] && trap "" $GUARD_TRAPS && return 1
 	return 0
 }
@@ -75,7 +76,8 @@ has_poe_passthrough_support() {
 ## @brief Ermittle den aktuellen Zustand (wahr=an, falsch=aus) der POE-Weiterleitung.
 get_poe_passthrough_state() {
 	trap "error_trap get_poe_passthrough_state '$*'" $GUARD_TRAPS
-	local funcname=$(_get_poe_passthrough_function)
+	local funcname
+	funcname=$(_get_poe_passthrough_function)
 	[ -z "$funcname" ] && msg_error "POE passthrough is not supported for this device." && return 0
 	$funcname
 }
@@ -85,7 +87,8 @@ get_poe_passthrough_state() {
 ## @brief Schalte die POE-Weiterleitung aus.
 disable_poe_passthrough() {
 	trap "error_trap disable_poe_passthrough '$*'" $GUARD_TRAPS
-	local funcname=$(_get_poe_passthrough_function)
+	local funcname
+	funcname=$(_get_poe_passthrough_function)
 	[ -z "$funcname" ] && msg_error "POE passthrough is not supported for this device." && return 0
 	$funcname 0
 }
@@ -95,7 +98,8 @@ disable_poe_passthrough() {
 ## @brief Schalte die POE-Weiterleitung an.
 enable_poe_passthrough() {
 	trap "error_trap enable_poe_passthrough '$*'" $GUARD_TRAPS
-	local funcname=$(_get_poe_passthrough_function)
+	local funcname
+	funcname=$(_get_poe_passthrough_function)
 	[ -z "$funcname" ] && msg_error "POE passthrough is not supported for this device." && return 0
 	$funcname 1
 }

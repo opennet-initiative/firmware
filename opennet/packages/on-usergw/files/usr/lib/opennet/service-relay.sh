@@ -14,7 +14,8 @@ SERVICE_RELAY_FIREWALL_RULE_PREFIX=on_service_relay_
 # Pruefung ob ein lokaler Port bereits fuer einen ugw-Dienst weitergeleitet wird
 _is_local_service_relay_port_unused() {
 	local port="$1"
-	local collisions=$(get_services | filter_services_by_value "local_relay_port" "$port")
+	local collisions
+	collisions=$(get_services | filter_services_by_value "local_relay_port" "$port")
 	[ -n "$collisions" ] && trap "" $GUARD_TRAPS && return 1
 	# keine Kollision entdeckt
 	return 0
@@ -27,7 +28,8 @@ _is_local_service_relay_port_unused() {
 pick_local_service_relay_port() {
 	trap "error_trap pick_local_service_relay_port '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local port=$(get_service_value "$service_name" "local_relay_port")
+	local port
+	port=$(get_service_value "$service_name" "local_relay_port")
 	# falls unbelegt: suche einen unbenutzten lokalen Port
 	if [ -z "$port" ]; then
 		# fuer IGW-Verbindungen: belege zuerst den alten Standard-Port (fuer alte Clients)
@@ -79,16 +81,20 @@ delete_unused_service_relay_forward_rules() {
 add_service_relay_forward_rule() {
 	trap "error_trap add_service_relay_forward_rule '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local uci_match=$(get_service_relay_port_forwarding "$service_name")
+	local host
+	local uci_match
+	local rule_name
+	local uci_prefix
+	uci_match=$(get_service_relay_port_forwarding "$service_name")
 	# perfekt passende Regel gefunden? Fertig ...
 	[ -n "$uci_match" ] && return 0
-	local host=$(get_service_value "$service_name" "host")
-	local rule_name="${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
-	local uci_match=$(find_first_uci_section firewall redirect "target=DNAT" "name=$rule_name")
+	host=$(get_service_value "$service_name" "host")
+	rule_name="${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
+	uci_match=$(find_first_uci_section firewall redirect "target=DNAT" "name=$rule_name")
 	# unvollstaendig passendes Ergebnis? Loesche es (der Ordnung halber) ...
 	[ -n "$uci_match" ] && uci_delete "$uci_match"
 	# neue Regel anlegen
-	local uci_prefix=firewall.$(uci add firewall redirect)
+	uci_prefix=firewall.$(uci add firewall redirect)
 	# der Name ist wichtig fuer spaetere Aufraeumaktionen
 	uci set "${uci_prefix}.name=${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
 	uci set "${uci_prefix}.target=DNAT"
@@ -119,12 +125,18 @@ enable_service_relay() {
 _get_service_relay_olsr_announcement_prefix() {
 	trap "error_trap _get_service_relay_olsr_announcement_prefix '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local main_ip=$(get_main_ip)
-	local service_type=$(get_service_value "$service_name" "service")
-	local scheme=$(get_service_value "$service_name" "scheme")
-	local host=$(get_service_value "$service_name" "host")
-	local port=$(pick_local_service_relay_port "$service_name")
-	local protocol=$(get_service_value "$service_name" "protocol")
+	local main_ip
+	local service_type
+	local scheme
+	local host
+	local port
+	local protocol
+	main_ip=$(get_main_ip)
+	service_type=$(get_service_value "$service_name" "service")
+	scheme=$(get_service_value "$service_name" "scheme")
+	host=$(get_service_value "$service_name" "host")
+	port=$(pick_local_service_relay_port "$service_name")
+	protocol=$(get_service_value "$service_name" "protocol")
 	# announce the service
 	echo "${scheme}://${main_ip}:${port}|${protocol}|${service_type}"
 }
@@ -135,8 +147,10 @@ _get_service_relay_olsr_announcement_prefix() {
 get_service_relay_olsr_announcement() {
 	trap "error_trap get_service_relay_olsr_announcement '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local announce_unique=$(_get_service_relay_olsr_announcement_prefix "$service_name")
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
+	local announce_unique
+	local uci_prefix
+	announce_unique=$(_get_service_relay_olsr_announcement_prefix "$service_name")
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	uci_get_list "${uci_prefix}.service" | awk '{ if ($1 == "'$announce_unique'") print $0; }'
 }
 
@@ -148,10 +162,12 @@ get_service_relay_olsr_announcement() {
 announce_olsr_service_relay() {
 	trap "error_trap announce_olsr_service_relay '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local service_unique=$(_get_service_relay_olsr_announcement_prefix "$service_name")
+	local service_unique
+	local service_details
+	service_unique=$(_get_service_relay_olsr_announcement_prefix "$service_name")
 	# das 'service_name'-Detail wird fuer die anschliessende Beraeumung (firewall-Regeln usw.) verwendet
 	# nur nicht-leere Attribute werden geschrieben
-	local service_details=$(while read key value; do [ -z "$value" ] && continue; echo "$key:$value"; done <<EOF
+	service_details=$(while read key value; do [ -z "$value" ] && continue; echo "$key:$value"; done <<EOF
 		public_host $(get_service_value "$service_name" "host")
 		upload $(get_service_value "$service_name" wan_speed_upload)
 		download $(get_service_value "$service_name" wan_speed_download)
@@ -163,7 +179,8 @@ EOF
 	# loesche alte Dienst-Announcements mit demselben Prefix
 	local this_unique
 	local this_details
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
+	local uci_prefix
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	get_service_relay_olsr_announcement "$service_name" | while read this_unique this_details; do
 		# der Wert ist bereits korrekt - wir koennen abbrechen
 		[ "$this_details" = "$service_details" ] && break
@@ -185,7 +202,8 @@ deannounce_unused_olsr_service_relays() {
 	local test_for_activity="$1"
 	local service_description
 	local service_name
-	local uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
+	local uci_prefix
+	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	uci_get_list "${uci_prefix}.service" | while read service_description; do
 		# unbenutzte Eintraege entfernen
 		service_name=$(get_olsr_service_name_from_description "$service_description")
@@ -269,11 +287,16 @@ get_service_relay_port_forwarding() {
 	trap "error_trap get_service_relay_port_forwarding '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local rule_name="${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
-	local port=$(get_service_value "$service_name" "port")
-	local host=$(get_service_value "$service_name" "host")
-	local protocol=$(get_service_value "$service_name" "protocol")
-	local main_ip=$(get_main_ip)
-	local target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
+	local port
+	local host
+	local protocol
+	local main_ip
+	local target_ip
+	port=$(get_service_value "$service_name" "port")
+	host=$(get_service_value "$service_name" "host")
+	protocol=$(get_service_value "$service_name" "protocol")
+	main_ip=$(get_main_ip)
+	target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
 	# wir verwenden nur die erste aufgeloeste IP, zu welcher wir eine Route haben.
 	# z.B. faellt IPv6 aus, falls wir kein derartiges Uplink-Interface sehen
 	find_first_uci_section firewall redirect \

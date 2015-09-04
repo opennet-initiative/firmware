@@ -53,7 +53,8 @@ notify_service() {
 	local path="$6"
 	local source="$7"
 	local details="$8"
-	local service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
+	local service_name
+	service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 	if ! is_existing_service "$service_name"; then
 		# diese Attribute sind Bestandteil des Namens und aendern sich eigentlich nicht
 		set_service_value "$service_name" "service" "$service"
@@ -107,11 +108,13 @@ is_existing_service() {
 _get_local_bias_for_service() {
 	local service_name="$1"
 	# lade den Wert aus dem Cache, falls moeglich
-	local bias_cache=$(get_service_value "$service_name" "local_bias")
+	local bias_cache
+	bias_cache=$(get_service_value "$service_name" "local_bias")
 	if [ -z "$bias_cache" ]; then
 		# Die resultierende host_number darf nicht zu gross sein (z.B. mit Exponentendarstellung),
 		# da andernfalls awk die Berechnung fehlerhaft durchführt.
-		local host_number=$(echo "$service_name$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g')
+		local host_number
+		host_number=$(echo "$service_name$(get_local_bias_number)" | md5sum | sed 's/[^0-9]//g')
 		# Laenge von 'host_number' reduzieren (die Berechnung schlaegt sonst fehl)
 		# Wir fuegen die 1 an den Beginn, um die Interpretation als octal-Zahl zu verhindern (fuehrende Null).
 		bias_cache=$(( 1${host_number:0:6} % LOCAL_BIAS_MODULO))
@@ -131,13 +134,16 @@ get_service_priority() {
 	trap "error_trap get_service_priority '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local sorting="${2:-}"
-	local priority=$(get_service_value "$service_name" "priority")
+	local priority
+	priority=$(get_service_value "$service_name" "priority")
 	local rank
 	# priority wird von nicht-olsr-Clients verwendet (z.B. mesh-Gateways mit oeffentlichen IPs)
-	local base_priority=$(
+	local base_priority
+	base_priority=$(
 		if [ -n "$priority" ]; then
 			# dieses Ziel traegt anscheinend keine Routing-Metrik
-			local offset=$(get_service_value "$service_name" "offset" "0")
+			local offset
+			offset=$(get_service_value "$service_name" "offset" "0")
 			echo "$((priority + offset))"
 		else
 			# wir benoetigen Informationen fuer Ziele mit Routing-Metriken
@@ -152,7 +158,8 @@ get_service_priority() {
 				echo 1
 			fi
 		fi)
-	local service_bias=$(_get_local_bias_for_service "$service_name")
+	local service_bias
+	service_bias=$(_get_local_bias_for_service "$service_name")
 	echo "${base_priority:-$DEFAULT_SERVICE_RANK}" | awk '{ print $1 * 1000 + '$service_bias'; }'
 }
 
@@ -161,12 +168,14 @@ get_distance_with_offset() {
 	trap "error_trap get_distance_with_offset '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local sorting="${2:-}"
+	local distance
+	local base_value=
+	local offset
 	# aus Performance-Gruenden wird manchmal das sorting von aussen vorgegeben
 	[ -z "$sorting" ] && sorting=$(get_service_sorting)
-	local distance=$(get_service_value "$service_name" "distance")
-	local base_value=
+	distance=$(get_service_value "$service_name" "distance")
 	[ -z "$distance" ] && return 0
-	local offset=$(get_service_value "$service_name" "offset")
+	offset=$(get_service_value "$service_name" "offset")
 	[ -z "$offset" ] && offset=0
 	if [ "$sorting" = "etx" ]; then
 		base_value="$distance"
@@ -183,7 +192,8 @@ get_distance_with_offset() {
 set_service_sorting() {
 	trap "error_trap set_service_sorting '$*'" $GUARD_TRAPS
 	local new_sorting="$1"
-	local old_sorting=$(get_service_sorting)
+	local old_sorting
+	old_sorting=$(get_service_sorting)
 	[ "$old_sorting" = "$new_sorting" ] && return 0
 	[ "$new_sorting" != "manual" -a "$new_sorting" != "hop" -a "$new_sorting" != "etx" ] && \
 		msg_error "Ignoring unknown sorting method: $new_sorting" && \
@@ -198,7 +208,8 @@ set_service_sorting() {
 # Die Ausgabe dieser Funktion ist also in jedem Fall eine gueltige Sortier-Methode.
 get_service_sorting() {
 	trap "error_trap get_service_sorting '$*'" $GUARD_TRAPS
-	local sorting=$(uci_get "on-core.settings.service_sorting")
+	local sorting
+	sorting=$(uci_get "on-core.settings.service_sorting")
 	if [ "$sorting" = "manual" -o "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		# zulaessige Sortierung
 		echo -n "$sorting"
@@ -217,7 +228,8 @@ sort_services_by_priority() {
 	trap "error_trap sort_services_by_priority '$*'" $GUARD_TRAPS
 	local service_name
 	local priority
-	local sorting=$(get_service_sorting)
+	local sorting
+	sorting=$(get_service_sorting)
 	while read service_name; do
 		priority=$(get_service_priority "$service_name" "$sorting")
 		# keine Entfernung (nicht erreichbar) -> ganz nach hinten sortieren (schmutzig, aber wohl ausreichend)
@@ -346,7 +358,8 @@ set_service_value() {
 		&& msg_error "No service given for attribute change ($attribute=$value)" \
 		&& trap "" $GUARD_TRAPS && return 1
 	if echo "$PROVIDER_SPECIFIC_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
-		local host=$(get_service_value "$service_name" "host")
+		local host
+		host=$(get_service_value "$service_name" "host")
 		_set_file_dict_value "$PROVIDER_SPECIFIC_STATUS_DIR/$attribute" "$host" "$value"
 	else
 		local dirname
@@ -375,7 +388,8 @@ get_service_value() {
 		&& trap "" $GUARD_TRAPS && return 1
 	local value
 	if echo "$PROVIDER_SPECIFIC_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
-		local host=$(get_service_value "$service_name" "host")
+		local host
+		host=$(get_service_value "$service_name" "host")
 		value=$(_get_file_dict_value "$host" "$PROVIDER_SPECIFIC_STATUS_DIR/$attribute")
 	else
 		value=$(_get_file_dict_value "$attribute" "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" "$VOLATILE_SERVICE_STATUS_DIR/$service_name")
@@ -439,8 +453,9 @@ _add_service_dependency() {
 	local dependency="$1"
 	local service_name="$2"
 	local token="$3"
-	local deps=$(get_service_value "$service_name" "$dependency")
+	local deps
 	local dep
+	deps=$(get_service_value "$service_name" "$dependency")
 	for dep in $deps; do
 		# schon vorhanden -> fertig
 		[ "$dep" = "$token" ] && return 0 || true
@@ -480,11 +495,16 @@ cleanup_service_dependencies() {
 get_service_description() {
 	trap "error_trap get_service_description '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local scheme=$(get_service_value "$service_name" "scheme")
-	local host=$(get_service_value "$service_name" "host")
-	local port=$(get_service_value "$service_name" "port")
-	local proto=$(get_service_value "$service_name" "proto")
-	local details=$(get_service_value "$service_name" "details")
+	local scheme
+	local host
+	local port
+	local proto
+	local details
+	scheme=$(get_service_value "$service_name" "scheme")
+	host=$(get_service_value "$service_name" "host")
+	port=$(get_service_value "$service_name" "port")
+	proto=$(get_service_value "$service_name" "proto")
+	details=$(get_service_value "$service_name" "details")
 	echo "$scheme://$host:$port ($proto) $details"
 }
 
@@ -526,10 +546,11 @@ move_service_up() {
 	trap "error_trap move_service_up '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	shift
-	local sorting=$(get_service_sorting)
+	local sorting
 	local prev_service=
 	local current_service
 	local temp
+	sorting=$(get_service_sorting)
 	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		# reduziere den Offset um eins
 		temp=$(get_service_value "$service_name" "offset" 0)
@@ -573,10 +594,11 @@ move_service_down() {
 	trap "error_trap move_service_down '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	shift
-	local sorting=$(get_service_sorting)
+	local sorting
 	local prev_service=
 	local current_service
 	local temp
+	sorting=$(get_service_sorting)
 	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 		# reduziere den Offset um eins
 		temp=$(get_service_value "$service_name" "offset" 0)
@@ -613,14 +635,16 @@ move_service_top() {
 	trap "error_trap move_service_top '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	shift
-	local top_service=$(get_services "$@" | sort_services_by_priority | head -1)
-	local sorting=$(get_service_sorting)
+	local top_service
+	local sorting
 	local top_rank
 	local new_rank
 	local top_distance
 	local our_distance
 	local current_offset
 	local new_offset
+	top_service=$(get_services "$@" | sort_services_by_priority | head -1)
+	sorting=$(get_service_sorting)
 	# kein top-Service oder wir sind bereits ganz oben -> Ende
 	[ -z "$top_service" -o "$top_service" = "$service_name" ] && return 0
 	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
@@ -654,7 +678,8 @@ get_service_detail() {
 	local service_name="$1"
 	local key="$2"
 	local default="${3:-}"
-	local value=$(get_service_value "$service_name" "details" | get_from_key_value_list "$key" ":")
+	local value
+	value=$(get_service_value "$service_name" "details" | get_from_key_value_list "$key" ":")
 	[ -n "$value" ] && echo -n "$value" || echo -n "$default"
 	return 0
 }
@@ -670,7 +695,8 @@ set_service_detail() {
 	local service_name="$1"
 	local key="$2"
 	local value="$3"
-	local new_details=$(get_service_value "$service_name" "details" | replace_in_key_value_list "$key" ":" "$value")
+	local new_details
+	new_details=$(get_service_value "$service_name" "details" | replace_in_key_value_list "$key" ":" "$value")
 	set_service_value "$service_name" "details" "$new_details"
 	return 0
 }
@@ -762,9 +788,11 @@ get_service_log_filename() {
 is_service_routed_via_wan() {
 	trap "error_trap is_service_routed_via_wan '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local host=$(get_service_value "$service_name" "host")
-	local outgoing_device=$(get_target_route_interface "$host")
+	local host
+	local outgoing_device
 	local outgoing_zone
+	host=$(get_service_value "$service_name" "host")
+	outgoing_device=$(get_target_route_interface "$host")
 	if is_device_in_zone "$outgoing_device" "$ZONE_WAN"; then
 		msg_debug "target '$host' routing through wan device: $outgoing_device"
 		return 0
@@ -788,7 +816,8 @@ _notify_service_failure() {
 	local service_name="$1"
 	local max_fail_attempts="$2"
 	# erhoehe den Fehlerzaehler
-	local fail_counter=$(( $(get_service_value "$service_name" "status_fail_counter" "0") + 1))
+	local fail_counter
+	fail_counter=$(( $(get_service_value "$service_name" "status_fail_counter" "0") + 1))
 	set_service_value "$service_name" "status_fail_counter" "$fail_counter"
 	# Pruefe, ob der Fehlerzaehler gross genug ist, um seinen Status auf "fail" zu setzen.
 	if [ "$fail_counter" -ge "$max_fail_attempts" ]; then

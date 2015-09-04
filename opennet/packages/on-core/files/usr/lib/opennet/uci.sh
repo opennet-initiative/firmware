@@ -46,8 +46,9 @@ uci_get() {
 uci_add_list() {
 	local uci_path="$1"
 	local new_item="$2"
+	local index
 	# ist der Eintrag bereits vorhanden?
-	local index=$(uci_get_list_index "$uci_path" "$new_item")
+	index=$(uci_get_list_index "$uci_path" "$new_item")
 	# schon vorhanden? Fertig ...
 	[ -n "$index" ] && return 0
 	uci add_list "$uci_path=$new_item"
@@ -94,7 +95,8 @@ uci_get_list_index() {
 uci_delete_list() {
 	local uci_path="$1"
 	local value="$2"
-	local index=$(uci_get_list_index "$uci_path" "$value")
+	local index
+	index=$(uci_get_list_index "$uci_path" "$value")
 	[ -n "$index" ] && uci_delete "${uci_path}=${index}"
 	return 0
 }

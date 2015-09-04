@@ -14,9 +14,11 @@ OLSR_HTTP_PORT=8080
 update_olsr_interfaces() {
 	trap "error_trap update_olsr_interfaces '$*'" $GUARD_TRAPS
 	local value=
-	local interfaces=$(get_zone_interfaces "$ZONE_MESH")
+	local interfaces
+	interfaces=$(get_zone_interfaces "$ZONE_MESH")
 	# physische Interfaces werden beispielsweise durch die mesh-Interfaces erzeugt
-	local devices=$(get_zone_raw_devices "$ZONE_MESH")
+	local devices
+	devices=$(get_zone_raw_devices "$ZONE_MESH")
 	# fuehrende Leerzeichen entfernen
 	value=$(echo "$interfaces $devices" | sed 's/^ *//; s/ *$//')
 	uci set -q "olsrd.@Interface[0].interface=$value"
@@ -30,8 +32,9 @@ get_and_enable_olsrd_library_uci_prefix() {
 	trap "error_trap get_and_enable_olsrd_library_uci_prefix '$*'" $GUARD_TRAPS
 	local lib_file
 	local uci_prefix=
-	local library=olsrd_$1
-	local current=$(find_all_uci_sections olsrd LoadPlugin | while read uci_prefix; do
+	local library="olsrd_$1"
+	local current
+	current=$(find_all_uci_sections olsrd LoadPlugin | while read uci_prefix; do
 			# die Bibliothek beginnt mit dem Namen - danach folgt die genaue Versionsnummer
 			uci_get "${uci_prefix}.library" | grep -q "^$library\.so" && echo "$uci_prefix"
 		done | tail -1)
@@ -157,20 +160,29 @@ parse_olsr_service_descriptions() {
 get_olsr_service_name_from_description() {
 	trap "error_trap get_olsr_service_name_from_description '$*'" $GUARD_TRAPS
 	local service_description="$1"
-	local fields=$(echo "$service_description" | parse_olsr_service_descriptions)
-	local port=$(echo "$fields" | cut -f 3)
-	local service_type=$(echo "$fields" | cut -f 6)
-	local details=$(echo "$fields" | cut -f 7)
-	local public_host=$(echo "$details" | get_from_key_value_list "public_host" ":")
+	local fields
+	local port
+	local service_type
+	local details
+	local public_host
+	fields=$(echo "$service_description" | parse_olsr_service_descriptions)
+	port=$(echo "$fields" | cut -f 3)
+	service_type=$(echo "$fields" | cut -f 6)
+	details=$(echo "$fields" | cut -f 7)
+	public_host=$(echo "$details" | get_from_key_value_list "public_host" ":")
 	if [ -n "$public_host" ]; then
 		# ein relay-Dienst
 		get_services "$service_type" | filter_services_by_value "local_relay_port" "$port" | head -1
 	else
 		# ein nicht-relay-Dienst
-		local scheme=$(echo "$fields" | cut -f 1)
-		local host=$(echo "$fields" | cut -f 2)
-		local path=$(echo "$fields" | cut -f 4)
-		local protocol=$(echo "$fields" | cut -f 5)
+		local scheme
+		local host
+		local path
+		local protocol
+		scheme=$(echo "$fields" | cut -f 1)
+		host=$(echo "$fields" | cut -f 2)
+		path=$(echo "$fields" | cut -f 4)
+		protocol=$(echo "$fields" | cut -f 5)
 		get_service_name "$service_type" "$scheme" "$host" "$port" "$protocol" "$path"
 	fi
 }
@@ -221,8 +233,9 @@ update_olsr_services() {
 	local proto
 	local service
 	local details
+	local olsr_services
 	# aktuell verbreitete Dienste benachrichtigen
-	local olsr_services=$(get_olsr_services)
+	olsr_services=$(get_olsr_services)
 	# leere Liste? Keine Verbindung mit der Wolke? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$olsr_services" ] && return
 	echo "$olsr_services" | while read scheme ip port path proto service details; do
@@ -230,7 +243,8 @@ update_olsr_services() {
 	done
 	local service_name
 	local timestamp
-	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "olsr_service_expire_minutes")))
+	local min_timestamp
+	min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "olsr_service_expire_minutes")))
 	# veraltete Dienste entfernen (nur falls die uptime groesser ist als die Verfallszeit)
 	if [ "$min_timestamp" -gt 0 ]; then
 		get_services | filter_services_by_value "source" "olsr" | while read service_name; do

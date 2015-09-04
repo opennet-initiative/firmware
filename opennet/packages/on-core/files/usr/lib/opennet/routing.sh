@@ -225,7 +225,8 @@ add_routing_table() {
 	trap "error_trap add_routing_table '$*'" $GUARD_TRAPS
 	local table_name="$1"
 	_prepare_routing_table_file
-	local table_id=$(get_routing_table_id "$table_name")
+	local table_id
+	table_id=$(get_routing_table_id "$table_name")
 	# schon vorhanden?
 	[ -n "$table_id" ] && echo "$table_id" && return 0
 	# wir muessen den Eintrag hinzufuegen

@@ -35,8 +35,10 @@ has_mesh_openvpn_credentials() {
 ## @brief Durchlaufe die Liste aller Mesh-Gateway-Dienste und aktualisiere deren Status.
 ## @see run_cyclic_service_tests
 verify_mesh_gateways() {
-	local max_fail_attempts=$(get_on_usergw_default "test_max_fail_attempts")
-	local test_period_minutes=$(get_on_usergw_default "test_period_minutes")
+	local max_fail_attempts
+	local test_period_minutes
+	max_fail_attempts=$(get_on_usergw_default "test_max_fail_attempts")
+	test_period_minutes=$(get_on_usergw_default "test_period_minutes")
 	get_services "mesh" | run_cyclic_service_tests "is_mesh_gateway_usable" "$test_period_minutes" "$max_fail_attempts"
 }
 
@@ -74,7 +76,8 @@ is_mesh_gateway_usable() {
 			set_service_value "$service_name" "$key" ""
 		done
 	else
-		local mtu_result=$(openvpn_get_mtu "$service_name")
+		local mtu_result
+		mtu_result=$(openvpn_get_mtu "$service_name")
 		msg_debug "MTU test result ($service_name): $mtu_result"
 		echo "$mtu_result" | update_mesh_gateway_mtu_state "$service_name"
 		uci_is_true "$(get_service_value "$service_name" "mtu_status")" || failed=1
@@ -99,7 +102,8 @@ update_trusted_service_list() {
 	local details
 	local service_name
 	local is_proxy
-	local url_list=$(https_request_opennet "$TRUSTED_SERVICES_URL")
+	local url_list
+	url_list=$(https_request_opennet "$TRUSTED_SERVICES_URL")
 	# leeres Ergebnis? Noch keine Internet-Verbindung? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$url_list" ] && return
 	echo "$url_list" | grep -v "^#" | sed 's/\t\+/\t/g' | while read line; do
@@ -126,7 +130,8 @@ update_trusted_service_list() {
 		true
 	done
 	# veraltete Dienste entfernen
-	local min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "trusted_service_expire_minutes")))
+	local min_timestamp
+	min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "trusted_service_expire_minutes")))
 	# falls die uptime kleiner ist als die Verfallszeit, dann ist ein Test sinnfrei
 	if [ "$min_timestamp" -gt 0 ]; then
 		get_services "mesh" \
@@ -150,15 +155,20 @@ update_trusted_service_list() {
 update_public_gateway_speed_estimation() {
 	trap "error_trap update_public_gateway_speed_estimation '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local host=$(get_service_value "$service_name" "host")
-	local download_speed=$(measure_download_speed "$host")
-	local upload_speed=$(measure_upload_speed "$host")
+	local host
+	local download_speed
+	local upload_speed
+	host=$(get_service_value "$service_name" "host")
+	download_speed=$(measure_download_speed "$host")
+	upload_speed=$(measure_upload_speed "$host")
 	# keine Zahlen? Keine Aktualisierung ...
 	[ -z "$download_speed" ] && [ -z "$upload_speed" ] && return
 	# gleitende Mittelwerte: vorherigen Wert einfliessen lassen
 	# Falls keine vorherigen Werte vorliegen, dann werden die aktuellen verwendet.
-	local prev_download=$(get_service_detail "$service_name" "wan_speed_download" "${download_speed:-0}")
-	local prev_upload=$(get_service_detail "$service_name" "wan_speed_upload" "${upload_speed:-0}")
+	local prev_download
+	local prev_upload
+	prev_download=$(get_service_detail "$service_name" "wan_speed_download" "${download_speed:-0}")
+	prev_upload=$(get_service_detail "$service_name" "wan_speed_upload" "${upload_speed:-0}")
 	set_service_detail "$service_name" "wan_speed_download" "$(((3 * download_speed + prev_download) / 4))"
 	set_service_detail "$service_name" "wan_speed_upload" "$(((3 * download_speed + prev_upload) / 4))"
 	set_service_value "$service_name" "wan_speed_timestamp" "$(get_uptime_minutes)"
@@ -173,18 +183,25 @@ update_public_gateway_speed_estimation() {
 update_mesh_gateway_mtu_state() {
 	trap "error_trap update_mesh_gateway_mtu_state '$*'" $GUARD_TRAPS
 	local service_name="$1"
-	local host=$(get_service_value "$service_name" "host")
+	local host
 	local state
+	local mtu_result
+	local out_wanted
+	local out_real
+	local in_wanted
+	local in_real
+	local status_output
 
 	msg_debug "starting update_mesh_gateway_mtu_state for '$host'"
 	msg_debug "update_mesh_gateway_mtu_state will take around 5 minutes per gateway"
 
-	local mtu_result=$(cat -)
-	local out_wanted=$(echo "$mtu_result" | cut -f 1)
-	local out_real=$(echo "$mtu_result" | cut -f 2)
-	local in_wanted=$(echo "$mtu_result" | cut -f 3)
-	local in_real=$(echo "$mtu_result" | cut -f 4)
-	local status_output=$(echo "$mtu_result" | cut -f 5)
+	host=$(get_service_value "$service_name" "host")
+	mtu_result=$(cat -)
+	out_wanted=$(echo "$mtu_result" | cut -f 1)
+	out_real=$(echo "$mtu_result" | cut -f 2)
+	in_wanted=$(echo "$mtu_result" | cut -f 3)
+	in_real=$(echo "$mtu_result" | cut -f 4)
+	status_output=$(echo "$mtu_result" | cut -f 5)
 
 	if [ -z "$mtu_result" ]; then
 		state=""
@@ -264,7 +281,8 @@ get_device_traffic() {
 # Pruefe Bandbreite durch kurzen Download-Datenverkehr
 measure_download_speed() {
 	local host="$1"
-	local target_dev=$(get_target_route_interface "$host")
+	local target_dev
+	target_dev=$(get_target_route_interface "$host")
 	wget -q -O /dev/null "http://$host/.big" &
 	local pid="$!"
 	sleep 3
@@ -277,7 +295,8 @@ measure_download_speed() {
 # Pruefe Bandbreite durch kurzen Upload-Datenverkehr
 measure_upload_speed() {
 	local host="$1"
-	local target_dev=$(get_target_route_interface "$host")
+	local target_dev
+	target_dev=$(get_target_route_interface "$host")
 	# UDP-Verkehr laesst sich auch ohne einen laufenden Dienst auf der Gegenseite erzeugen
 	"$NETCAT_BIN" -u "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
 	local pid="$!"

@@ -17,7 +17,8 @@ ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT=/usr/lib/opennet/events/on-captive-portal-fire
 ##   nicht existieren sollte, dann wird sie erzeugt und zurückgeliefert.
 captive_portal_get_or_create_config() {
 	trap "error_trap captive_portal_get_or_create_config '$*'" $GUARD_TRAPS
-	local uci_prefix=$(find_first_uci_section "nodogsplash" "instance" "network=$NETWORK_FREE")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section "nodogsplash" "instance" "network=$NETWORK_FREE")
 	# gefunden? Zurueckliefern ...
 	if [ -z "$uci_prefix" ]; then
 		# neu mit grundlegenden Einstellungen anlegen
@@ -70,10 +71,12 @@ get_on_captive_portal_default() {
 captive_portal_set_property() {
 	local key="$1"
 	local value="$2"
-	local uci_attribute=$(_captive_portal_get_mapped_attribute "$key")
+	local uci_attribute
+	uci_attribute=$(_captive_portal_get_mapped_attribute "$key")
 	# ein Fehler ist aufgetreten - die obige subshell verdeckt ihn jedoch
 	[ -z "$uci_attribute" ] && return 1
-	local uci_prefix=$(captive_portal_get_or_create_config)
+	local uci_prefix
+	uci_prefix=$(captive_portal_get_or_create_config)
 	uci set "${uci_prefix}.${uci_attribute}=$value"
 }
 
@@ -83,10 +86,12 @@ captive_portal_set_property() {
 ## @param key Eins der Captive-Portal-Attribute: name / url
 captive_portal_get_property() {
 	local key="$1"
-	local uci_attribute=$(_captive_portal_get_mapped_attribute "$key")
+	local uci_attribute
+	uci_attribute=$(_captive_portal_get_mapped_attribute "$key")
 	# ein Fehler ist aufgetreten - die obige subshell verdeckt ihn jedoch
 	[ -z "$uci_attribute" ] && return 1
-	local uci_prefix=$(captive_portal_get_or_create_config)
+	local uci_prefix
+	uci_prefix=$(captive_portal_get_or_create_config)
 	uci_get "${uci_prefix}.${uci_attribute}"
 }
 
@@ -114,7 +119,8 @@ _captive_portal_get_mapped_attribute() {
 captive_portal_restart() {
 	trap "error_trap captive_portal_restart '$*'" $GUARD_TRAPS
 	# alte Clients-Liste sichern; keine Fehlerausgabe bei gestopptem Prozess
-	local clients=$(ndsctl clients 2>/dev/null | grep "^ip=" | cut -f 2 -d =)
+	local clients
+	clients=$(ndsctl clients 2>/dev/null | grep "^ip=" | cut -f 2 -d =)
 	# Prozess neustarten (reload legt wohl keine iptables-Regeln an)
 	/etc/init.d/nodogsplash restart >/dev/null
 	# kurz warten, damit der Dienst startet
@@ -153,7 +159,8 @@ captive_portal_has_devices() {
 configure_captive_portal_firewall_script() {
 	trap "error_trap configure_captive_portal_firewall_script '$*'" $GUARD_TRAPS
 	local state="$1"
-	local uci_prefix=$(find_first_uci_section "firewall" "include" "path=$ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section "firewall" "include" "path=$ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT")
 	if uci_is_true "$state" && [ -z "$uci_prefix" ]; then
 		uci_prefix="firewall.$(uci add "firewall" "include")"
 		uci set "${uci_prefix}.path=$ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT"
@@ -193,9 +200,10 @@ sync_captive_portal_state_with_mig_connections() {
 	trap "error_trap sync_captive_portal_state_with_mig_connections '$*'" $GUARD_TRAPS
 	# Abbruch, falls keine Netzwerk-Interfaces zugeordnet wurden
 	captive_portal_has_devices || return 0
-	local mig_active=$(get_active_mig_connections)
+	local mig_active
 	local address
 	local device_active=
+	mig_active=$(get_active_mig_connections)
 	if is_interface_up "$NETWORK_FREE"; then
 		# Pruefe ob mindestens eine IPv4-Adresse konfiguriert ist.
 		# (aus unbekannten Gruenden kann es vorkommen, dass die IPv4-Adresse spontan wegfaellt)

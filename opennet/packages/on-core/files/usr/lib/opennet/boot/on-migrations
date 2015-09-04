@@ -137,9 +137,11 @@ disable_unwanted_forward() {
 # * on-openvpn.gateways.autosearch=on|off
 # Die darauffolgenden Firrmware-Versionen verwenden stattdessen die Einstellung 'on-core.settings.service_sorting'.
 transfer_vpn_sort_criteria_and_autosearch() {
-	local sort_criteria=$(uci_get on-openvpn.gateways.vpn_sort_criteria)
-	local autosearch=$(uci_get on-openvpn.gateways.autosearch)
+	local sort_criteria
+	local autosearch
 	local result
+	sort_criteria=$(uci_get on-openvpn.gateways.vpn_sort_criteria)
+	autosearch=$(uci_get on-openvpn.gateways.autosearch)
 	if [ -z "$autosearch" -a -z "$sort_criteria" ]; then
 		# die Einstellungen wurden bereits uebertragen
 		return 0
@@ -339,9 +341,10 @@ remove_opennet_ca_certificates_from_previous_location() {
 move_service_provider_specific_attributes() {
 	local service_name
 	local key
+	local value
 	get_services | while read service_name; do
 		for key in "offset"; do
-			local value=$(_get_file_dict_value "$key" "$PERSISTENT_SERVICE_STATUS_DIR/$service_name")
+			value=$(_get_file_dict_value "$key" "$PERSISTENT_SERVICE_STATUS_DIR/$service_name")
 			if [ -n "$value" ]; then
 				# Der Wert ist in der Service-Datei gesetzt.
 				# neu setzen (er wird in der provider-Datei landen)

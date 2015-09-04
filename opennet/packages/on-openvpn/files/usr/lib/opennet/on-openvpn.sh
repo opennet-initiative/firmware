@@ -36,8 +36,10 @@ has_mig_openvpn_credentials() {
 ## @brief Durchlaufe die Liste aller Internet-Gateway-Dienste und aktualisieren deren Status.
 ## @see run_cyclic_service_tests
 verify_mig_gateways() {
-	local max_fail_attempts=$(get_on_openvpn_default "test_max_fail_attempts")
-	local test_period_minutes=$(get_on_openvpn_default "test_period_minutes")
+	local max_fail_attempts
+	local test_period_minutes
+	max_fail_attempts=$(get_on_openvpn_default "test_max_fail_attempts")
+	test_period_minutes=$(get_on_openvpn_default "test_period_minutes")
 	get_services "gw" | run_cyclic_service_tests "verify_vpn_connection" "$test_period_minutes" "$max_fail_attempts"
 }
 
@@ -77,8 +79,10 @@ find_and_select_best_gateway() {
 	local current_priority
 	local best_priority
 	local switch_candidate_timestamp
-	local now=$(get_uptime_minutes)
-	local bettergateway_timeout=$(get_on_openvpn_default vpn_bettergateway_timeout)
+	local now
+	local bettergateway_timeout
+	now=$(get_uptime_minutes)
+	bettergateway_timeout=$(get_on_openvpn_default vpn_bettergateway_timeout)
 	msg_debug "Trying to find a better gateway"
 	# suche nach dem besten und dem bisher verwendeten Gateway
 	# Ignoriere dabei alle nicht-verwendbaren Gateways.
@@ -204,10 +208,12 @@ reset_all_mig_connection_test_timestamps() {
 ## @details Anhand des Test-Alters lässt sich der Zeitpunkt der nächsten Prüfung abschätzen.
 get_mig_connection_test_age() {
 	local service_name="$1"
-	local timestamp=$(get_service_value "$service_name" "status_timestamp")
+	local timestamp
+	timestamp=$(get_service_value "$service_name" "status_timestamp")
 	# noch keine Tests durchgefuehrt?
 	[ -z "$timestamp" ] && return 0
-	local now=$(get_uptime_minutes)
+	local now
+	now=$(get_uptime_minutes)
 	echo "$timestamp" "$now" | awk '{ print $2 - $1 }'
 }
 

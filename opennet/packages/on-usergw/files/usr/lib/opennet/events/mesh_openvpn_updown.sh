@@ -23,7 +23,8 @@ get_netname() {
 
 setup_mesh_interface() {
 	local ifname="$1"
-	local netname=$(get_netname "$ifname")
+	local netname
+	netname=$(get_netname "$ifname")
 	uci set "network.${netname}=interface"
 	uci set "network.${netname}.proto=none"
 	uci set "network.${netname}.auto=0"
@@ -48,7 +49,8 @@ setup_mesh_interface() {
 
 cleanup_mesh_interface() {
 	local ifname="$1"
-	local netname=$(get_netname "$ifname")
+	local netname
+	netname=$(get_netname "$ifname")
 	del_interface_from_zone "$ZONE_MESH" "$netname"
 	uci_delete "network.${netname}"
 	apply_changes network firewall

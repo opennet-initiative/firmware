@@ -23,7 +23,8 @@ configure_local_network() {
 
 
 configure_opennet_zone() {
-	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
 	# Zone existiert? Keine Aenderungen ...
 	[ -n "$uci_prefix" ] && return 0
 	uci_prefix=firewall.$(uci add firewall zone)
@@ -51,8 +52,10 @@ configure_olsr_radio() {
 
 	local uci_wifi=wireless.@wifi-iface[$iface_index]
 	local uci_radio=wireless.$(uci_get "${uci_wifi}.device")
-	local radio_hwmode=$(uci_get "${uci_radio}.hwmode")
-	local bssid=$(get_on_core_default wifi_bssid)
+	local radio_hwmode
+	local bssid
+	radio_hwmode=$(uci_get "${uci_radio}.hwmode")
+	bssid=$(get_on_core_default wifi_bssid)
 
 	uci set "${uci_wifi}.network=$iface_logical"
 	uci set "${uci_wifi}.ifname=$iface_phys"
@@ -108,9 +111,12 @@ configure_olsr_interfaces() {
 	# diese Aktion ist bereits abgeschlossen
 	uci show network | grep -q "^network\.on_eth_0\." && return 0
 
-	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
-	local on_ipschema=$(get_on_core_default on_ipschema)
-	local on_netmask=$(get_on_core_default on_netmask)
+	local on_id
+	local on_ipschema
+	local on_netmask
+	on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
+	on_ipschema=$(get_on_core_default on_ipschema)
+	on_netmask=$(get_on_core_default on_netmask)
 	local on_ipaddr
 	local iface_phys
 	local iface_logical

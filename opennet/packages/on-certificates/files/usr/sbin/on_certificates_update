@@ -19,7 +19,8 @@ CURL_OPTIONS="-q --silent --fail --cacert ${CA_DIR}/opennet-server_bundle.pem"
 
 verify_crl() {
 	local hash="$1"
-	local cert_file=$(ls "$CA_DIR" | grep "^$hash\.[0-9]$" | sort -n | tail -1)
+	local cert_file
+	cert_file=$(ls "$CA_DIR" | grep "^$hash\.[0-9]$" | sort -n | tail -1)
 	[ -z "$cert_file" ] && echo >&2 "Failed to find certificate belonging to CRL '$hash'" && return 1
 	# Ausgabe des CRL-Resultats ("verify OK" oder aehnliches) umlenken - bei Erfolg sofort beenden
 	openssl crl -CAfile "$CA_DIR/$cert_file" -noout 2>/dev/null && return 0
@@ -29,7 +30,8 @@ verify_crl() {
 
 safely_replace_file() {
 	local target_filename="$1"
-	local content=$(cat -)
+	local content
+	content=$(cat -)
 	# Datei mit identischem Inhalt existiert bereits - wir sind fertig
 	[ -e "$target_filename" ] && echo "$content" | cmp -s "$target_filename" - && return 0
 	# vorsichtiges Ersetzen: in dasselbe Verzeichnis schreiben und anschließend als atomare Operation umbenennen
@@ -50,7 +52,8 @@ update_crl() {
 		content=$(curl $CURL_OPTIONS "$base_url/$crl_name")
 	done
 	[ -z "$content" ] && echo >&2 "Failed to download CRL '$crl_name'" && return 1
-	local hash=$(echo "$content" | openssl crl -hash -noout)
+	local hash
+	hash=$(echo "$content" | openssl crl -hash -noout)
 	[ -z "$hash" ] && echo >&2 "Failed to parse hash of CRL '$crl_name'" && return 2
 	echo "$content" | verify_crl "$hash" || return 1
 	# die CRL-Daten sind korrekt - wir koennen sie schreiben
@@ -71,4 +74,3 @@ for crl_file in $CRL_LIST; do
 	# falls die Aktualisierung einer CRL fehlschlaegt, wollen wir trotzdem die anderen CRLs aktualisieren
 	update_crl "$crl_file" || true
 done
-

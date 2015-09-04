@@ -9,7 +9,8 @@ START_DELAY=8
 
 is_olsrd_running() {
 	trap "error_trap is_olsrd_running '$*'" $GUARD_TRAPS
-	local pid_file=$(grep "^PID=" /etc/init.d/olsrd | cut -f 2- -d =)
+	local pid_file
+	pid_file=$(grep "^PID=" /etc/init.d/olsrd | cut -f 2- -d =)
 	if [ -z "$pid_file" ]; then
 		# Falls wir keine gueltige PID-Datei finden, dann pruefen wir lediglich,
 		# ob irgendein olsrd laeuft - dies ist natuerlich nicht sehr zuverlässig.

@@ -67,7 +67,8 @@ sort_by_number() {
 get_name_from_mac() {
 	local mac="$1"
 	# retrieve a suitrp | grep -i "$mac"able name for the neighbour
-	local name=$(grep -i "$mac" /proc/net/arp | awk '{ print $1 }' | sed "s/^$IP_PREFIX_REGEX/$NAME_SUBSTITUTION_PREFIX/" | head -1)
+	local name
+	name=$(grep -i "$mac" /proc/net/arp | awk '{ print $1 }' | sed "s/^$IP_PREFIX_REGEX/$NAME_SUBSTITUTION_PREFIX/" | head -1)
 	# output name or fall back to MAC
 	[ -n "$name" ] && echo "$name" && return 0
 	# No suitable label found? Return the mac without colons.
@@ -175,7 +176,8 @@ generate_multigraphs() {
 	local event
 	local value
 	local clean_station
-	local sum_file=$(mktemp)
+	local sum_file
+	sum_file=$(mktemp)
 
 	get_stations | while read station_name station_dir; do
 		clean_station=$(clean_fieldname "$station_name")
@@ -215,7 +217,8 @@ generate_multigraphs() {
 generate_traffic_config() {
 	local station_name="$1"
 	local station_dir="$2"
-	local label_suffix=$([ -z "$station_name" ] && echo "" || echo " $station_name")
+	local label_suffix
+	label_suffix=$([ -z "$station_name" ] && echo "" || echo " $station_name")
 	echo "graph_title ath9k Station Traffic$label_suffix"
 	echo "graph_args --base 1024"
 	echo "graph_scale no"
@@ -231,9 +234,10 @@ generate_traffic_config() {
 generate_events_config() {
 	local station_name="$1"
 	local station_dir="$2"
-	local label_suffix=$([ -z "$station_name" ] && echo "" || echo " $station_name")
+	local label_suffix
 	local event
 	local key
+	label_suffix=$([ -z "$station_name" ] && echo "" || echo " $station_name")
 	echo "graph_title ath9k Station Events$label_suffix"
 	echo "graph_vlabel events per \${graph_period}"
 	echo "graph_category wireless"
@@ -253,10 +257,11 @@ generate_events_config() {
 generate_rc_stats_config() {
 	local station_name="$1"
 	local station_dir="$2"
-	local label_suffix=$([ -z "$station_name" ] && echo "" || echo " $station_name")
+	local label_suffix
 	local rate
 	local clean_rate
 	local rate_label
+	label_suffix=$([ -z "$station_name" ] && echo "" || echo " $station_name")
 	echo "graph_title ath9k Station Receive Rates$label_suffix"
 	echo "graph_vlabel receive: failures (-) / successes (+)"
 	echo "graph_category wireless"

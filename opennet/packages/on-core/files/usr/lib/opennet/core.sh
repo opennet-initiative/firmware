@@ -82,7 +82,8 @@ append_to_custom_log() {
 	local logfile="$LOG_BASE_DIR/${log_name}.log"
 	echo "$(date) openvpn [$event]: $msg" >>"$logfile"
 	# Datei kuerzen, falls sie zu gross sein sollte
-	local filesize=$(get_filesize "$logfile")
+	local filesize
+	filesize=$(get_filesize "$logfile")
 	[ "$filesize" -gt 10000 ] && sed -i "1,30d" "$logfile"
 	return 0
 }
@@ -116,7 +117,8 @@ update_file_if_changed() {
 		trap "" $GUARD_TRAPS && return 1
 	else
 		# updated content
-		local dirname=$(dirname "$target_filename")
+		local dirname
+		dirname=$(dirname "$target_filename")
 		[ -d "$dirname" ] || mkdir -p "$dirname"
 		echo "$content" > "$target_filename"
 		return 0
@@ -137,7 +139,8 @@ update_dns_servers() {
 	local use_dns="$(uci_get on-core.settings.use_olsrd_dns)"
 	# return if we should not use DNS servers provided via olsrd
 	uci_is_false "$use_dns" && return 0
-	local servers_file=$(uci_get "dhcp.@dnsmasq[0].serversfile")
+	local servers_file
+	servers_file=$(uci_get "dhcp.@dnsmasq[0].serversfile")
 	# aktiviere die "dnsmasq-serversfile"-Direktive, falls noch nicht vorhanden
 	if [ -z "$servers_file" ]; then
 	       servers_file="$DNSMASQ_SERVERS_FILE_DEFAULT"
@@ -313,8 +316,10 @@ get_on_ip() {
 ## @attention Seiteneffekt: die Variablen "on_id_1" und "on_id_2" sind anschließend verfügbar.
 ## @sa get_on_ip
 get_main_ip() {
-	local on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
-	local ipschema=$(get_on_core_default on_ipschema)
+	local on_id
+	local ipschema
+	on_id=$(uci_get on-core.settings.on_id "$(get_on_core_default on_id_preset)")
+	ipschema=$(get_on_core_default on_ipschema)
 	get_on_ip "$on_id" "$ipschema" 0
 }
 
@@ -328,8 +333,9 @@ get_main_ip() {
 aquire_lock() {
 	local lock_file="$1"
 	local max_age_minutes="$2"
+	local file_timestamp
 	[ ! -e "$lock_file" ] && touch "$lock_file" && return 0
-	local file_timestamp=$(get_file_modification_timestamp_minutes "$lock_file")
+	file_timestamp=$(get_file_modification_timestamp_minutes "$lock_file")
 	# too old? We claim it for ourself.
 	is_timestamp_older_minutes "$file_timestamp" "$max_age_minutes" && touch "$lock_file" && return 0
 	# lockfile is too young
@@ -339,8 +345,9 @@ aquire_lock() {
 
 clean_stale_pid_file() {
 	local pid_file="$1"
+	local pid
 	[ -e "$pid_file" ] || return 0
-	local pid=$(cat "$pid_file" | sed 's/[^0-9]//g')
+	pid=$(cat "$pid_file" | sed 's/[^0-9]//g')
 	[ -z "$pid" ] && msg_debug "removing broken PID file: $pid_file" && rm "$pid_file" && return 0
 	[ ! -e "/proc/$pid" ] && msg_debug "removing stale PID file: $pid_file" && rm "$pid_file" && return 0
 	return 0
@@ -587,9 +594,11 @@ generate_report() {
 	trap "error_trap generate_report '$*'" $GUARD_TRAPS
 	local fname
 	local pid
-	local temp_dir=$(mktemp -d)
 	local reports_dir="$temp_dir/report"
-	local tar_file=$(mktemp)
+	local temp_dir
+	local tar_file
+	temp_dir=$(mktemp -d)
+	tar_file=$(mktemp)
 	msg_debug "Creating a report"
 	# die Skripte duerfen davon ausgehen, dass wir uns im Zielverzeichnis befinden
 	mkdir -p "$reports_dir"
@@ -717,7 +726,8 @@ clear_cache_opennet_opkg() {
 generate_opennet_opkg_config() {
 	trap "error_trap create_opennet_opkg_config '$*'" $GUARD_TRAPS
 	# ermittle die Firmware-Repository-URL
-	local firmware_version=$(get_on_firmware_version)
+	local firmware_version
+	firmware_version=$(get_on_firmware_version)
 	# leere Versionsnummer? Damit können wir nichts anfangen.
 	[ -z "$firmware_version" ] && msg_error "Failed to retrieve opennet firmware version for opkg repository URL" && return 0
 	# snapshots erkennen wir aktuell daran, dass auch Buchstaben in der Versionsnummer vorkommen
@@ -732,7 +742,8 @@ generate_opennet_opkg_config() {
 	fi
 	# Hole "DISTRIB_TARGET" und entferne potentielle "/generic"-Suffixe (z.B. ar71xx und x86),
 	# da wir dies in unserem Repository nicht abbilden.
-	local arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
+	local arch_path
+	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
 	local repository_url="$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/$arch_path/packages"
 	# schreibe den Inahlt der neuen OPKG-Konfiguration
 	echo "dest root /"
@@ -832,7 +843,8 @@ get_random() {
 ##   Bevorzugungen zu vermeiden.
 get_local_bias_number() {
 	trap "error_trap get_local_bias_number '$*'" $GUARD_TRAPS
-	local bias=$(uci_get on-core.settings.local_bias_number)
+	local bias
+	bias=$(uci_get on-core.settings.local_bias_number)
 	# der Bias-Wert ist schon vorhanden - wir liefern ihn aus
 	if [ -z "$bias" ]; then
 		# wir müssen einen Bias-Wert erzeugen: beliebige gehashte Inhalte ergeben eine akzeptable Zufallszahl
@@ -864,7 +876,8 @@ system_service_check() {
 ## @brief Ermittle die Größe des Arbeitsspeichers in Megabyte.
 ## @returns Der Rückgabewert (in Megabyte) ist etwas kleiner als der physische Arbeitsspeicher (z.B. 126 statt 128 MB).
 get_memory_size() {
-	local memsize_kb=$(grep "^MemTotal:" /proc/meminfo | sed 's/[^0-9]//g')
+	local memsize_kb
+	memsize_kb=$(grep "^MemTotal:" /proc/meminfo | sed 's/[^0-9]//g')
 	echo $((memsize_kb / 1024))
 }
 
@@ -927,9 +940,11 @@ run_scheduled_tasks() {
 ##   werden müssen und im Zweifelsfall nicht parallel ablaufen sollen (ressourcenschonend).
 schedule_task() {
 	trap "error_trap schedule_task '$*'" $GUARD_TRAPS
+	local script_content
+	local unique_key
+	script_content=$(cat -)
 	# wir sorgen fuer die Wiederverwendung des Dateinamens, um doppelte Ausführungen zu verhindern
-	local script_content=$(cat -)
-	local unique_key=$(echo "$script_content" | md5sum | awk '{ print $1 }')
+	unique_key=$(echo "$script_content" | md5sum | awk '{ print $1 }')
 	mkdir -p "$SCHEDULING_DIR"
 	local target_file="$SCHEDULING_DIR/$unique_key"
 	# das Skript existiert? Nichts zu tun ...

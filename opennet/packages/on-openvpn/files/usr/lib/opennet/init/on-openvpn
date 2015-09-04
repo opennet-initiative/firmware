@@ -20,7 +20,8 @@ configure_tunnel_network() {
 
 
 configure_tunnel_firewall() {
-	local uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_TUNNEL")
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_TUNNEL")
 
 	# Abbruch falls die Zone bereits vorhanden ist
 	[ -n "$(uci_get "$uci_prefix")" ] && return

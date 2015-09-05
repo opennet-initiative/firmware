@@ -216,33 +216,27 @@ Die UGW-Server bieten üblicherweise zwei Dienste an:
 * Zugang zum Internet aus dem mesh-Netzwerk heraus
 
 Beide Dienste sind über ihre öffentlichen IPs erreichbar. Daher ist eine Announcierung via olsrd-nameservice nicht umsetzbar.
-Somit verwenden wir stattdessen die Veröffentlichung via DNS-SRV (RFC 2782).
+Somit verwenden wir stattdessen die in Form einer csv-Datei, die via HTTP von einem Opennet-Server bereitgestellt wird:
 
-Die DNS-Namen für die beiden Dienste sind folgende:
+[https://service-discovery.opennet-initiative.de/ugw-services.csv](Auflistung aller Gateway- und Mesh-Server)
 
-* ``_mesh-openvpn._udp.systemausfall.org``
-* ``_igw-openvpn._udp.systemausfall.org``
+Die Spalten werden durch Tabulatoren getrennt (keine Leerzeichen).
 
-Beispielhafte Einträge sind folgende:
+Die erste Spalte enthält den Dienst-Typ (z.B. "mesh" oder "dns"). Falls der Dienst-Type mit dem Präfix "proxy-" beginnt, gilt er als weiterleitungsfähig. Er soll also nicht direkt verwendet, sondern lediglich weitergeleitet werden.
 
-    root@foo:~# dig +short SRV _mesh-openvpn._udp.systemausfall.org
-    5 0 1602 erina.opennet-initiative.de.
-    5 0 1602 megumi.opennet-initiative.de.
-    5 0 1602 subaru.opennet-initiative.de.
+Die zweite Spalte enthält das Dienst-Protokoll / die Anwendung (z.B. "openvpn").
 
-    root@foo:~# dig +short SRV _igw-openvpn._udp.systemausfall.org
-    5 0 1600 megumi.opennet-initiative.de.
-    5 0 1600 subaru.opennet-initiative.de.
-    5 0 1600 erina.opennet-initiative.de.
+Die dritte Spalte enthält den öffentlich erreichbaren DNS-Namen oder die IP des Hosts.
+
+Die vierte Spalte enthält die Port-Nummer des Diensts.
+
+Die fünfte Spalte enthält das Übertragungsprotokoll (udp/tcp - je nach Dienst).
+
+Die sechste Spalte enthält die Priorität dieses Dienste-Anbieters (5 = üblich; kleinere Werte werden bevorzugt). Ungwöhnliche Dienste oder Dienste mit überraschenden Eigenschaften (z.B. Exit-Knoten im Ausland) sollten eine höhrere Zahl verwenden, damit sie nur durch bewusste Auswahl aktiviert werden können.
+
+Die siebente und die folgenden Spalten können zusätliche Dienst-Informationen enthalten (z.B. "location").
 
 Dabei wird die Priorität (1. Spalte des Ergebnis) für die Vorauswahl der automatisch zu nutzenden Anbietern beachtet.
-Diensteanbieter, die eventuell zu Überraschungen beim Nutzenden führen (z.B. ein Exit-Knoten im Ausland), sollten eine nachgelagerte Priorität (höherer Zahlenwert) tragen. Der Nutzer kann durch manuelle Interaktion auch Dienste nachgelagerter Priorität explizit zur Nutzung freigeben.
-
-Die Gewichtung (2. Spalte) wird aktuell nicht für Mesh- oder Internetgateways verwendet.
-
-Sowohl Port als auch Hostname werden für die Nutzung des Diensts verwendet.
-
-Eine Beschreibung des Dienstanbieters (beispielsweise der Hosting-Standort: "Hetzner, Düsseldorf (Deutschland)") wird durch den TXT-Eintrag des dazugehörigen Dienstanbieters (siehe ``dig TXT erina.opennet-initiative.de``) ausgeliefert.
 
 Die ermittelten Dienst-Anbieter werden durch die Dienste-Verwaltung gespeichert. Darin werden alle für den Verbindungsaufbau notwendigen Daten abgelegt.
 
@@ -252,12 +246,7 @@ Die ermittelten Dienst-Anbieter werden durch die Dienste-Verwaltung gespeichert.
 Jeder weiterzuleitende Dienst stellt eine Belastung für die Internet-Spender dar. Daher dürften diese Announcierungen nicht via olsrd erfolgen, um eine unerwünschte Nutzung der Internetfreigabe durch triviale olsr-Announcements zu verhindern.
 
 Stattdesen erfolgt die Announcierung mittels der unter administrativer Kontrolle stehenden Opennet-Domain in Form von DNS-SRV-Einträgen.
-
-Die DNS-Einträge werden regelmäßig abgefragt und in lokale Dienstbeschreibungen verwandelt. Anhand der Dienst-Einträge werden die Port-Weiterleitungen und die olsr-nameservice-Announcierungen erstellt.
-
-Folgende Dienste werden weitergereicht:
-
-* _igw-openvpn._udp.opennet-initiative.de -> "gw"-Dienst
+Somit verwenden wir stattdessen eine csv-Datei, die via HTTP von einem Opennet-Server bereitgestellt wird (@ref #ugw-server-list).
 
 Es werden nur diejenigen Dienste weitergereicht und announciert, die den folgenden Bedingungen genügen:
 

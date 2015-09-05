@@ -11,6 +11,6 @@ Index: on_firmware/openwrt/include/version.mk
  
 -#workaround for opennet
 +#workaround for opennet because of bug
- CONFIG_VERSION_REPO="http://downloads.openwrt.org/%n/15.05-rc3/%S/packages"
++CONFIG_VERSION_REPO="http://downloads.openwrt.org/%n/15.05-rc3/%S/packages"
  
  VERSION_REPO:=$(call qstrip_escape,$(CONFIG_VERSION_REPO))

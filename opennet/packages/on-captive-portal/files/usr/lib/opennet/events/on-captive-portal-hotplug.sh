@@ -4,11 +4,10 @@
 # Aktiviere/deaktiviere das hotspot-Netzwerk-Interface je nach Verfügbarkeit des Opennet-VPN-Tunnels.
 #
 
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 # wir verwenden explizit eine sub-Shell um Seiteneffekte für andere hotplug-Skripte zu vermeiden
 process_captive_portal_triggers() {
-	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-
 	# das Opennet-VPN-Interface triggert die Aktivierung/Deaktivierung des hotspot-Interface
 	if [ "$INTERFACE" = "$NETWORK_TUNNEL" ]; then
 		msg_info "Trigger activation of Captive Portal interface following the state of the VPN tunnel"

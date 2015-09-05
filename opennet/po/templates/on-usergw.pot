@@ -1,10 +1,9 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-msgid "(central Gateway-IPs (%s) connected trough tunnel)"
-msgstr ""
-
-msgid "(no central Gateway-IPs connected trough tunnel)"
+msgid ""
+"Access points that are configured to share a local internet connection relay "
+"these services into the Opennet Mesh by default."
 msgstr ""
 
 msgid "Actions"
@@ -19,10 +18,19 @@ msgid ""
 "which is used by all people accesing the Internet via Opennet."
 msgstr ""
 
+msgid "Announcement"
+msgstr ""
+
 msgid "Available Services to be relayed"
 msgstr ""
 
-msgid "Central Gateways connected locally"
+msgid "Certificate is missing"
+msgstr ""
+
+msgid "Certificate management"
+msgstr ""
+
+msgid "Connected Mesh Gateways:"
 msgstr ""
 
 msgid ""
@@ -33,53 +41,25 @@ msgstr ""
 msgid "Connection to an Mesh VPN service succeeded."
 msgstr ""
 
+msgid "Current Status"
+msgstr ""
+
 msgid "Estimated upload and download speed to this exit gateway."
+msgstr ""
+
+msgid "Exit Gateway host"
 msgstr ""
 
 msgid "Gateway"
 msgstr ""
 
-msgid "Gateway-Forward activated"
-msgstr ""
-
-msgid "Gateway-Forward for %s (to %s) activated"
-msgstr ""
-
-msgid "Gateway-Forward from %s to %s activated"
+msgid "Host"
 msgstr ""
 
 msgid "Internet Sharing"
 msgstr ""
 
-msgid "Internet not shared"
-msgstr ""
-
-msgid "Internet shared"
-msgstr ""
-
-msgid "Internet-Sharing disabled"
-msgstr ""
-
-msgid "Internet-Sharing enabled"
-msgstr ""
-
-msgid "Internet-Sharing impossible"
-msgstr ""
-
-msgid ""
-"Internet-Sharing is currently disabled for %s Minutes. It will be "
-"automatically reenabled, but you can enable it manually if you like."
-msgstr ""
-
-msgid "Internet-Sharing possible"
-msgstr ""
-
-msgid ""
-"Internet-Sharing will be automatically reenabled in between the next 5 "
-"Minutes. You can enable it manually if you like."
-msgstr ""
-
-msgid "Internet-Sharing:"
+msgid "Internet Sharing Status"
 msgstr ""
 
 msgid "Key Management"
@@ -88,19 +68,10 @@ msgstr ""
 msgid "Known Mesh Gateways"
 msgstr ""
 
-msgid "Loading"
+msgid "Local Port"
 msgstr ""
 
 msgid "MTU"
-msgstr ""
-
-msgid "Manage Internet-Sharing"
-msgstr ""
-
-msgid "Manually add Exit Gateway"
-msgstr ""
-
-msgid "Manually add Mesh Gateway"
 msgstr ""
 
 msgid "Manually add a Mesh Gateway"
@@ -115,6 +86,9 @@ msgstr ""
 msgid "Mesh Gateways"
 msgstr ""
 
+msgid "No Mesh Gateways connected"
+msgstr ""
+
 msgid ""
 "No Mesh Gateways were found. Probably there is no DNS service available. "
 "Maybe you want to verify your internet connection."
@@ -123,6 +97,9 @@ msgstr ""
 msgid ""
 "Openvpn does not support mtu-check, please compile openvpn without \"--"
 "enable-small\" option."
+msgstr ""
+
+msgid "Other routeable addresses"
 msgstr ""
 
 msgid "Ping"
@@ -136,13 +113,24 @@ msgstr ""
 msgid "Port"
 msgstr ""
 
+msgid "Port Forwarding"
+msgstr ""
+
 msgid "Priority"
 msgstr ""
 
 msgid "Relaying external Services for the Opennet Mesh"
 msgstr ""
 
+msgid "Routeable addresses via Mesh VPN"
+msgstr ""
+
 msgid "Service Relay"
+msgstr ""
+
+msgid ""
+"Service relays are just traffic redirection rules - they do not consume "
+"processing resources."
 msgstr ""
 
 msgid "Sharing your Internet connection"
@@ -156,21 +144,37 @@ msgstr ""
 msgid "Speed"
 msgstr ""
 
-msgid "Status Internet-Sharing"
-msgstr ""
-
 msgid ""
 "The configured Maximum Transmission Unit can cause subtle problems. Thus it "
 "needs to be tested carefully."
 msgstr ""
 
+msgid "The following services are announced by public Opennet Servers."
+msgstr ""
+
+msgid "The list below is maintained by the Opennet Administration crew."
+msgstr ""
+
+msgid ""
+"The most important relayed service is the Mesh Internet Gateway service."
+msgstr ""
+
+msgid ""
+"The port forwarding will be active automatically soon after a successful "
+"test."
+msgstr ""
+
+msgid ""
+"The required certificate and key for your mesh connection with Opennet seems "
+"to be missing"
+msgstr ""
+
 msgid "The route to the gateway should point at a WAN interface."
 msgstr ""
 
-msgid "Usergateway-Tunnel active"
-msgstr ""
-
-msgid "Usergateway-Tunnel not running"
+msgid ""
+"The service announcement (via olsr) will be active soon after a successful "
+"test."
 msgstr ""
 
 msgid "VPN"
@@ -182,9 +186,15 @@ msgstr ""
 msgid "WAN"
 msgstr ""
 
+msgid "WAN Test"
+msgstr ""
+
 msgid ""
 "You can change the sorting mechanism of gateways in the <a href=\"%s"
 "\">Service Settings section</a>."
+msgstr ""
+
+msgid "You may disable any service relay below if you prefer so."
 msgstr ""
 
 msgid ""
@@ -198,34 +208,10 @@ msgstr ""
 msgid "auto-discovered services cannot be deleted"
 msgstr ""
 
-msgid "central Gateway-IP %s connected trough tunnel"
-msgstr ""
-
-msgid "central Gateway-IPs %s connected trough tunnel"
-msgstr ""
-
-msgid "day"
-msgstr ""
-
 msgid "delete"
 msgstr ""
 
 msgid "disable"
-msgstr ""
-
-msgid "disable Sharing"
-msgstr ""
-
-msgid "enable Sharing"
-msgstr ""
-
-msgid "hour"
-msgstr ""
-
-msgid "hours"
-msgstr ""
-
-msgid "minutes"
 msgstr ""
 
 msgid "move down"
@@ -234,16 +220,10 @@ msgstr ""
 msgid "move up"
 msgstr ""
 
-msgid "no central Gateway-IPs connected trough tunnel"
-msgstr ""
-
 msgid "reset offset"
 msgstr ""
 
-msgid "suspend Internet-Sharing for"
-msgstr ""
-
-msgid "suspend now"
+msgid "see"
 msgstr ""
 
 msgid "upload to Internet %s kBit/s | download from Internet %s kBit/s"

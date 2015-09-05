@@ -19,6 +19,9 @@ msgstr ""
 msgid "AP %s"
 msgstr ""
 
+msgid "Access the Internet"
+msgstr ""
+
 msgid "AccessPoint (type users)"
 msgstr ""
 
@@ -28,18 +31,10 @@ msgstr ""
 msgid "Base"
 msgstr ""
 
-msgid "Base Configuration"
-msgstr ""
-
 msgid ""
 "Based on your Certificate (%s), the ports from %s to %s are forwarded "
 "through the VPN-Tunnel to your Access-Point - you should enter those as your "
 "source-ports."
-msgstr ""
-
-msgid ""
-"Basic Network Configuration - just enter your Opennet ID and everything will "
-"be adapted"
 msgstr ""
 
 msgid ""
@@ -90,18 +85,10 @@ msgstr ""
 msgid "Download"
 msgstr ""
 
-msgid ""
-"Download a detailed summary of your router if you want to report or discuss "
-"a technical issue. This summary does not contain any private information."
-msgstr ""
-
 msgid "Download the CSR file and upload it manually"
 msgstr ""
 
 msgid "ETX: Routing Distance (default)"
-msgstr ""
-
-msgid "Enable or disable services and change their sorting order."
 msgstr ""
 
 msgid "Error: %s"
@@ -112,10 +99,12 @@ msgid ""
 "reagrding OLSR"
 msgstr ""
 
-msgid "Extended Configuration"
+msgid "FREE"
 msgstr ""
 
-msgid "FREE"
+msgid ""
+"Failed to send Certificate Signing Request. You may want to use a manual "
+"approach instead. Sorry!"
 msgstr ""
 
 msgid "Forwarding from DHCP-wireless network"
@@ -161,16 +150,6 @@ msgid "IP Address(es):"
 msgstr ""
 
 msgid "IPv6"
-msgstr ""
-
-msgid ""
-"If you like to forward ports from the outside (for instance the Internet) to "
-"Computers in your local network, configure it here."
-msgstr ""
-
-msgid ""
-"If you like to use the Internet, you should create or upload your OpenVPN "
-"Certificates and Keys here"
 msgstr ""
 
 msgid "Interface"
@@ -258,10 +237,7 @@ msgid ""
 "and NTP."
 msgstr ""
 
-msgid "OLSR-Status"
-msgstr ""
-
-msgid "ON Extended"
+msgid "Number of routes via this neighbour"
 msgstr ""
 
 msgid "OPENNET"
@@ -282,6 +258,12 @@ msgstr ""
 msgid ""
 "Opennet-Addresses are usually given to the Access-Point based on your "
 "Opennet-ID. These are the interfaces on which OLSR is running."
+msgstr ""
+
+msgid ""
+"Opennet-DNS service is not available, yet (or quite slow). Please verify "
+"that you are connected to the network. A few minutes later DNS should be "
+"available. DNS is required for many features."
 msgstr ""
 
 msgid "Opennet-ID / Network ID"
@@ -315,15 +297,16 @@ msgstr ""
 msgid "Private Key and Certificate do not match. Please replace Certificate!"
 msgstr ""
 
-msgid ""
-"Provide Internet Access to your neighbourhood. Traffic flows through the "
-"Opennet-Internet-Gateway connection."
+msgid "Provide unrestricted internet access via Opennet to your vicinity"
 msgstr ""
 
 msgid "Province"
 msgstr ""
 
 msgid "Public Hotspot"
+msgstr ""
+
+msgid "Publish statistical data of network usage"
 msgstr ""
 
 msgid "Report"
@@ -341,14 +324,6 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-msgid ""
-"Send Certificate Request (.csr) <b>and only this file</b> to <a href='mailto:"
-"%s?subject=Certificate Request for %s %s&amp;body=[please attach the "
-"Certificate Request (.csr) - and only this file - to this mail and write "
-"some nice words to the administrator]'>%s</a> in order to get the required "
-"certificate."
-msgstr ""
-
 msgid "Send your request with one click"
 msgstr ""
 
@@ -361,10 +336,13 @@ msgstr ""
 msgid "Service settings"
 msgstr ""
 
-msgid "Services"
+msgid "Services in the Opennet"
 msgstr ""
 
-msgid "Services in the Opennet"
+msgid "Settings"
+msgstr ""
+
+msgid "Share your local internet connection with other members"
 msgstr ""
 
 msgid "Sort order"
@@ -373,10 +351,10 @@ msgstr ""
 msgid "Source-Port"
 msgstr ""
 
-msgid "Status"
+msgid "Status Information"
 msgstr ""
 
-msgid "Status Information"
+msgid "Status of Modules"
 msgstr ""
 
 msgid "Submit certificate request"
@@ -395,23 +373,15 @@ msgid "The FREE Interface will be used to publicly share Opennet with Wifidog."
 msgstr ""
 
 msgid ""
+"The Opennet Firmware consists of multiple modules providing distinct "
+"features within the network. Please pick which features should be enabled "
+"for this device."
+msgstr ""
+
+msgid ""
 "The WAN Interface is used for your local Internet-Connection (for instance "
 "DSL). It will be used for your local traffic and to map Usergateways into "
 "Opennet = Share your Internet Connection if you choose to."
-msgstr ""
-
-msgid ""
-"The following points are the ones required to configure any Opennet Access-"
-"Point. Please use them all if the mentioned order if you like to configure "
-"your Accesspoint the easiest way. Choose the items below or from the menu on "
-"the left."
-msgstr ""
-
-msgid ""
-"The following points are useful if you like to specifically change some "
-"Accesspoint behavior. They are not required for proper work of your "
-"Accesspoint, but can be really useful if you like to extend the "
-"functionality of your Accesspoint."
 msgstr ""
 
 msgid ""
@@ -460,11 +430,6 @@ msgid ""
 "the requirements of the Opennet Initiative e.V."
 msgstr ""
 
-msgid ""
-"This is the place where you can configure your Opennet-Internet-Gateways. "
-"Select, how they are ordered and add or blacklist specific Gateways"
-msgstr ""
-
 msgid "Unknown protocol"
 msgstr ""
 
@@ -474,29 +439,10 @@ msgstr ""
 msgid "UserGateway (type user gateway)"
 msgstr ""
 
-msgid "VPN Gateways"
-msgstr ""
-
-msgid "VPN Tunnel"
-msgstr ""
-
 msgid "WAN"
 msgstr ""
 
-msgid "Welcome to the Configuration Pages of your Access Point"
-msgstr ""
-
-msgid "Welcome to the Extended Configuration Pages of your Access Point"
-msgstr ""
-
 msgid "Wireless"
-msgstr ""
-
-msgid ""
-"You have some WAN-connection like DSL and like to share the Internet? Here "
-"you can create and manage the required VPN-Certificates to turn your "
-"Accesspoint into a User-Gateway. If you like to enable or disable the "
-"Internet-Sharing, this is the place to choose"
 msgstr ""
 
 msgid ""

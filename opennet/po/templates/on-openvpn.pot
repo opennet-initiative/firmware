@@ -1,9 +1,6 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-msgid "...more Information..."
-msgstr ""
-
 msgid "<a href=\"%s\">A certificate is required</a>."
 msgstr ""
 
@@ -29,6 +26,9 @@ msgstr ""
 msgid "Announced Upload / Download Speed."
 msgstr ""
 
+msgid "Certificate"
+msgstr ""
+
 msgid "Certificate management"
 msgstr ""
 
@@ -36,6 +36,9 @@ msgid "Check the <a href=\"%s\">System Log</a> for details."
 msgstr ""
 
 msgid "Connection log"
+msgstr ""
+
+msgid "Developers or experimenting users may want to add custom gateways here."
 msgstr ""
 
 msgid "Distance"
@@ -49,12 +52,10 @@ msgid ""
 "regarding OLSR"
 msgstr ""
 
-msgid ""
-"Failed to send Certificate Signing Request. You may want to use a manual "
-"approach instead. Sorry!"
+msgid "Gateway-List"
 msgstr ""
 
-msgid "Gateway-List"
+msgid "Gateways"
 msgstr ""
 
 msgid "Here you can configure the IP-Addresses of your choosen Gateways."
@@ -65,11 +66,11 @@ msgstr ""
 
 msgid ""
 "If you notice a severe slow-down of your connection, you should try to "
-"remove your manual priorities first. Use the small \"clear\" icon in the "
+"remove your manual priorities first. Use the small \"clear\" icon in th e "
 "\"offset/distance\" column for this purpose."
 msgstr ""
 
-msgid "Loading"
+msgid "Manually add a Gateway"
 msgstr ""
 
 msgid ""
@@ -94,7 +95,7 @@ msgstr ""
 
 msgid ""
 "Take a look at the Opennet wiki, if you would like to know more about the "
-"Gateway system. Usually the first found Gateway in your list is the one you "
+"Gateway system. Usually the first found Gateway in your list is th e one you "
 "are going to use. The Gateway will be changed automatically, if the current "
 "Gateway does not work for approximately 120 seconds."
 msgstr ""
@@ -131,9 +132,6 @@ msgid "Tunnel starting"
 msgstr ""
 
 msgid "VPN Certificate and Internet Access"
-msgstr ""
-
-msgid "VPN Gateways"
 msgstr ""
 
 msgid "VPN Tunnel"
@@ -183,9 +181,6 @@ msgid "move up"
 msgstr ""
 
 msgid "reset offset"
-msgstr ""
-
-msgid "reset test counter"
 msgstr ""
 
 msgid "restart VPN Tunnel"

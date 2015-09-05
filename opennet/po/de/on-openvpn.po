@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-03-12 00:08+0200\n"
+"PO-Revision-Date: 2015-09-05 03:06+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -11,9 +11,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
-
-msgid "...more Information..."
-msgstr "...mehr Informationen..."
 
 msgid "<a href=\"%s\">A certificate is required</a>."
 msgstr "<a href=\"%s\">Das Zertifikat fehlt</a>."
@@ -46,6 +43,9 @@ msgstr ""
 msgid "Announced Upload / Download Speed."
 msgstr "Vom Gateway ermittelte Upload/Download-Bandbreite"
 
+msgid "Certificate"
+msgstr "Zertifikat"
+
 msgid "Certificate management"
 msgstr "Zertifikatsverwaltung"
 
@@ -54,6 +54,11 @@ msgstr "Eventuell hilft Dir das im <a href=\"%s\">Systemprotokoll</a> weiter."
 
 msgid "Connection log"
 msgstr "Verbindungsprotokoll"
+
+msgid "Developers or experimenting users may want to add custom gateways here."
+msgstr ""
+"Entwickler oder experimentierfreudige Benutzer können hier "
+"benutzerdefinierte Internet-Gateway hinzufügen."
 
 msgid "Distance"
 msgstr "Entfernung"
@@ -68,15 +73,11 @@ msgstr ""
 "Erwartete Anzahl von Übertragungen - die Qualität der Verbindung zum Gateway "
 "aus der Sicht von OLSR"
 
-msgid ""
-"Failed to send Certificate Signing Request. You may want to use a manual "
-"approach instead. Sorry!"
-msgstr ""
-"Beim Senden der Zertifikatsanfrage trat leider ein Fehler auf. Du möchtest "
-"stattdessen vielleicht eine manuelle Methode verwenden."
-
 msgid "Gateway-List"
 msgstr "Gateway-Liste"
+
+msgid "Gateways"
+msgstr "Tunnel-Server"
 
 msgid "Here you can configure the IP-Addresses of your choosen Gateways."
 msgstr ""
@@ -88,7 +89,7 @@ msgstr "IP-Adresse"
 
 msgid ""
 "If you notice a severe slow-down of your connection, you should try to "
-"remove your manual priorities first. Use the small \"clear\" icon in the "
+"remove your manual priorities first. Use the small \"clear\" icon in th e "
 "\"offset/distance\" column for this purpose."
 msgstr ""
 "Falls Du eine deutliche Verschlechterung Deiner Tunnel-Verbindung "
@@ -96,8 +97,8 @@ msgstr ""
 "Änderungen der Gateway-Reihenfolge zurückzusetzen. Klicke dazu auf das "
 "kleine Pinsel-Symbol in der Spalte \"Offset/Entfernung\"."
 
-msgid "Loading"
-msgstr "Lade"
+msgid "Manually add a Gateway"
+msgstr "Internet-Gateway manuell hinzufügen"
 
 msgid ""
 "Members of the Opennet Initiative e.V. can access the Internet through the "
@@ -123,7 +124,7 @@ msgstr "Status"
 
 msgid ""
 "Take a look at the Opennet wiki, if you would like to know more about the "
-"Gateway system. Usually the first found Gateway in your list is the one you "
+"Gateway system. Usually the first found Gateway in your list is th e one you "
 "are going to use. The Gateway will be changed automatically, if the current "
 "Gateway does not work for approximately 120 seconds."
 msgstr ""
@@ -172,9 +173,6 @@ msgstr "Tunnel ist im Aufbau"
 
 msgid "VPN Certificate and Internet Access"
 msgstr "VPN-Zertifikate und Internetzugang"
-
-msgid "VPN Gateways"
-msgstr "VPN Gateways"
 
 msgid "VPN Tunnel"
 msgstr "VPN Tunnel"
@@ -232,9 +230,6 @@ msgstr "nach oben bewegen"
 msgid "reset offset"
 msgstr "Offset zurücksetzen"
 
-msgid "reset test counter"
-msgstr "zurücksetzen"
-
 msgid "restart VPN Tunnel"
 msgstr "Neustart des VPN-Tunnels"
 
@@ -252,6 +247,46 @@ msgstr "nicht erreichbar"
 
 msgid "upload to Internet %s kbit/s; download from Internet %s kbit/s"
 msgstr "Upload ins Internet %s kbit/s; Download aus dem Internet %s kbit/s"
+
+#~ msgid "...more Information..."
+#~ msgstr "...mehr Informationen..."
+
+#~ msgid ""
+#~ "Failed to send Certificate Signing Request. You may want to use a manual "
+#~ "approach instead. Sorry!"
+#~ msgstr ""
+#~ "Beim Senden der Zertifikatsanfrage trat leider ein Fehler auf. Du "
+#~ "möchtest stattdessen vielleicht eine manuelle Methode verwenden."
+
+#~ msgid ""
+#~ "If you notice a severe slow-down of your connection, you should try to "
+#~ "remove your manual priorities first. Use the small \"clear\" icon in the "
+#~ "\"offset/distance\" column for this purpose."
+#~ msgstr ""
+#~ "Falls Du eine deutliche Verschlechterung Deiner Tunnel-Verbindung "
+#~ "feststellen solltest, dann solltest Du zuerst versuchen, Deine manuellen "
+#~ "Änderungen der Gateway-Reihenfolge zurückzusetzen. Klicke dazu auf das "
+#~ "kleine Pinsel-Symbol in der Spalte \"Offset/Entfernung\"."
+
+#~ msgid "Loading"
+#~ msgstr "Lade"
+
+#~ msgid ""
+#~ "Take a look at the Opennet wiki, if you would like to know more about the "
+#~ "Gateway system. Usually the first found Gateway in your list is the one "
+#~ "you are going to use. The Gateway will be changed automatically, if the "
+#~ "current Gateway does not work for approximately 120 seconds."
+#~ msgstr ""
+#~ "Schau in das Opennet-Wiki, falls du mehr über das Gateway-System wissen "
+#~ "möchtest. Üblicherweise wird der erste Gateway in der Liste für die "
+#~ "Verbindung ausgewählt. Dieser Gateway wird automatisch gewechselt, wenn "
+#~ "die Verbindung ca. 120 Sekunden lang ausfällt."
+
+#~ msgid "VPN Gateways"
+#~ msgstr "VPN Gateways"
+
+#~ msgid "reset test counter"
+#~ msgstr "zurücksetzen"
 
 #~ msgid "Certificate contents"
 #~ msgstr "Zertifikatsdetails"

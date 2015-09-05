@@ -14,13 +14,13 @@ You may obtain a copy of the License at
 require("luci.dispatcher")
 
 
--- Die folgenden drei Funktionen definieren global, an welcher Stelle im Luci-Dispatcher-Baum der Opennet-Zweig hängt.
--- Änderungen müssen an den drei folgenden Funktionen synchron durchgeführt werden.
+-- Die folgenden beiden Funktionen definieren global, an welcher Stelle im Luci-Dispatcher-Baum der Opennet-Zweig hängt.
+-- Änderungen müssen an den beiden folgenden Funktionen synchron durchgeführt werden.
 
 -- Definition der Basis-URL
+-- synchron mit "_on_dispatcher_func_caller" halten
 local function on_path(tokens)
 	local path = {}
-	table.insert(path, "admin")
 	table.insert(path, "opennet")
 	for _, token in ipairs(tokens) do
 		table.insert(path, token)
@@ -29,21 +29,20 @@ local function on_path(tokens)
 end
 
 
--- synchron mit der Basis-URL aus "on_path" halten
-function on_alias(...)
-	return luci.dispatcher.alias("admin", "opennet", ...)
+-- synchron mit "on_path" halten
+local function _on_dispatcher_func_caller(dispatcher_func, ...)
+	return dispatcher_func("opennet", ...)
 end
 
 
--- synchron mit der Basis-URL aus "on_path" halten
-function on_url(...)
-	return luci.dispatcher.build_url("admin", "opennet", ...)
-end
+function on_alias(...) return _on_dispatcher_func_caller(luci.dispatcher.alias, ...) end
+function on_url(...) return _on_dispatcher_func_caller(luci.dispatcher.build_url, ...) end
 
 
 -- Erzeugung eines luci-Entry mit opennet-geeigneten Eigenschaften (Pfad, css, Sprache)
 function on_entry(path_tokens, action, title, order, lang_domain)
-	local page = luci.dispatcher.entry(on_path(path_tokens), action, title, order)
+	local path = on_path(path_tokens)
+	local page = luci.dispatcher.entry(path, action, title, order)
 	if lang_domain then
 		page.i18n = lang_domain
 	else

@@ -34,7 +34,7 @@ function index()
 			i18n("Service Relay"), 40, "on_usergw").leaf = true
 
 	-- Einbindung in die Status-Seite mit dortigem Link
-	on_entry({"status", "mesh_verbindungen"}, call("status_ugw_connection")).leaf = true
+	on_entry_no_auth({"status", "mesh_verbindungen"}, call("status_ugw_connection")).leaf = true
 
 	-- importiere den file-upload-Handler
 	require("luci.model.opennet.on_vpn_management")

@@ -41,7 +41,7 @@ on_module_descriptions["on-monitoring"] = luci.i18n.translate("Publish statistic
 			<% for _, mod_name in ipairs(line_split(on_function("get_on_modules"))) do %>
 				<div class="cbi-value">
 					<label class="cbi-value-title" for="<%= mod_name %>">
-						<%= on_module_descriptions[mod_name] or mod_name %></label>
+						<%= mod_name %>:&nbsp;<%= on_module_descriptions[mod_name] or mod_name %></label>
 					<div class="cbi-value-field">
 					<% if on_bool_function("is_package_installed", { mod_name }) then %>
 							<% local is_enabled = on_bool_function("is_on_module_installed_and_enabled", { mod_name }) %>

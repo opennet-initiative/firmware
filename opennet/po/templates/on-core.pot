@@ -351,6 +351,9 @@ msgstr ""
 msgid "Source-Port"
 msgstr ""
 
+msgid "Status"
+msgstr ""
+
 msgid "Status Information"
 msgstr ""
 
@@ -451,6 +454,9 @@ msgid ""
 msgstr ""
 
 msgid "device"
+msgstr ""
+
+msgid "disabled (see <a href=\"%s\">Modules</a>)"
 msgstr ""
 
 msgid "download"

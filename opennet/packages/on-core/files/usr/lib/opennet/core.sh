@@ -382,11 +382,17 @@ check_pid_file() {
 apply_changes() {
 	local config
 	for config in "$@"; do
-		# keine Aenderungen?
-		# "on-core" achtet auch auf nicht-uci-Aenderungen (siehe PERSISTENT_SERVICE_STATUS_DIR)
-		[ -z "$(uci changes "$config")" -a "$config" != "on-core" ] && continue
-		uci commit "$config"
-		echo "$config"
+		# Opennet-Module achten auch auf nicht-uci-Aenderungen
+		if echo "$config" | grep -q "^on-"; then
+			uci -q commit "$config" || true
+			echo "$config"
+		elif [ -z "$(uci changes "$config")" ]; then
+			# keine Aenderungen?
+			true
+		else
+			uci commit "$config"
+			echo "$config"
+		fi
 	done | sed 's/\(system\|network\|firewall\|dhcp\)/do_reload/' | sort | uniq | while read config; do
 		# wir wollen die Aktionen erst nach allen commits ausfuehren
 		# Dabei vermeiden wir Dopplungen (siehe "sort | uniq").

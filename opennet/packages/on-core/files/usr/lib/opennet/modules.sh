@@ -44,7 +44,7 @@ disable_on_module() {
 	trap "error_trap disable_on_module '$*'" $GUARD_TRAPS
 	local module="$1"
 	_is_on_module_enabled "$module" || return 0
-	uci_add_list "on-core.modules.enabled" "$module"
+	uci_delete_list "on-core.modules.enabled" "$module"
 	apply_changes "$module"
 }
 

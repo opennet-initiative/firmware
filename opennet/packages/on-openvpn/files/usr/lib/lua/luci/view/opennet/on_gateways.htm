@@ -110,7 +110,7 @@ You may obtain a copy of the License at
 		if (gateway.port != <%=on_function("get_variable", {"DEFAULT_MIG_PORT"})%>) {
 			remote += ":" + (gateway.port || "?");
 		}
-		if (gateway.distance) {
+		if (gateway.distance || (gateway.distance==0)) {
 		       unreachable = false;
 		} else {
 		       unreachable = true;

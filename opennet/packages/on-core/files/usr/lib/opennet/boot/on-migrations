@@ -333,30 +333,6 @@ remove_opennet_ca_certificates_from_previous_location() {
 }
 
 
-## @fn move_service_provider_specific_attributes()
-## @brief Verschiebe "service"-Attribute, die zukuenftig "service-provider"-Attribute sein sollen.
-## @details Mit Version v0.5.2 wurden service-provider-spezifische Attribute (z.B. "offset") eingefuehrt.
-##   Diese Offset-Werte muessen daher aus den service-Dictionaries in die provider-Dictionaries uebertragen
-##   werden.
-move_service_provider_specific_attributes() {
-	local service_name
-	local key
-	local value
-	get_services | while read service_name; do
-		for key in "offset"; do
-			value=$(_get_file_dict_value "$key" "$PERSISTENT_SERVICE_STATUS_DIR/$service_name")
-			if [ -n "$value" ]; then
-				# Der Wert ist in der Service-Datei gesetzt.
-				# neu setzen (er wird in der provider-Datei landen)
-				set_service_value "$service_name" "$key" "$value"
-				# alten Wert loeschen
-				_set_file_dict_value "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" "$key" ""
-			fi
-		done
-	done
-}
-
-
 ## @fn remove_wifidog_config()
 ## @brief Lösche die nicht mehr verwendete Konfiguration von "wifidog" und "on-wifidog".
 ## @details Die Konfiguration enthält keine relevanten Inhalte mehr, die zu übertragen wären.
@@ -399,6 +375,5 @@ rename_firewall_zone "local" "$ZONE_LOCAL"
 run_delayed_in_background 600 transfer_gateway_uci_settings
 
 remove_opennet_ca_certificates_from_previous_location
-move_service_provider_specific_attributes
 
 remove_wifidog_config

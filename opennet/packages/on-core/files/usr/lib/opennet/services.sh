@@ -3,9 +3,8 @@
 # Beginn der Doku-Gruppe
 ## @{
 
-VOLATILE_SERVICE_STATUS_DIR="${IPKG_INSTROOT:-}/tmp/on-services-volatile.d"
-PERSISTENT_SERVICE_STATUS_DIR="${IPKG_INSTROOT:-}/etc/on-services.d"
-PROVIDER_SPECIFIC_STATUS_DIR="$PERSISTENT_SERVICE_STATUS_DIR/provider-specific"
+VOLATILE_SERVICE_STATUS_DIR=/tmp/on-services-volatile.d
+PERSISTENT_SERVICE_STATUS_DIR=/etc/on-services.d
 # eine grosse Zahl sorgt dafuer, dass neu entdeckte Dienste hinten angehaengt werden
 DEFAULT_SERVICE_RANK=10000
 DEFAULT_SERVICE_SORTING=etx
@@ -18,8 +17,7 @@ DEFAULT_SERVICE_SORTING=etx
 #   disabled: der Dienst wurde vom Nutzenden an- oder abgewählt
 #   local_relay_port: der lokale Port, der für eine Dienst-Weiterleitung verwendet wird - er sollte über reboots hinweg stabil sein
 #   source: die Quelle des Diensts (olsrd/dns/manual) muss erhalten bleiben, um ihn später löschen zu können
-PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency priority rank disabled source local_relay_port"
-PROVIDER_SPECIFIC_SERVICE_ATTRIBUTES="offset"
+PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency priority rank offset disabled source local_relay_port"
 LOCAL_BIAS_MODULO=10
 SERVICES_LOG_BASE=/var/log/on-services
 
@@ -322,7 +320,7 @@ get_services() {
 	# alle Dienste ausgeben
 	# kein Dienste-Verzeichnis? Keine Ergebnisse ...
 	[ -e "$PERSISTENT_SERVICE_STATUS_DIR" ] || return 0
-	find "$PERSISTENT_SERVICE_STATUS_DIR" -type f -maxdepth 1 -size +1c -print0 \
+	find "$PERSISTENT_SERVICE_STATUS_DIR" -type f -size +1c -print0 \
 		| xargs -0 -r -n 1 basename \
 		| if [ $# -gt 0 ]; then
 			filter_services_by_value "service" "$1"
@@ -354,22 +352,18 @@ set_service_value() {
 	local service_name="$1"
 	local attribute="$2"
 	local value="$3"
+	# unverändert? Schnell beenden
+	[ -n "$service_name" -a "$value" = "$(get_service_value "$service_name" "$attribute")" ] && return 0
 	[ -z "$service_name" ] \
 		&& msg_error "No service given for attribute change ($attribute=$value)" \
 		&& trap "" $GUARD_TRAPS && return 1
-	if echo "$PROVIDER_SPECIFIC_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
-		local host
-		host=$(get_service_value "$service_name" "host")
-		_set_file_dict_value "$PROVIDER_SPECIFIC_STATUS_DIR/$attribute" "$host" "$value"
+	local dirname
+	if echo "$PERSISTENT_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
+		dirname="$PERSISTENT_SERVICE_STATUS_DIR"
 	else
-		local dirname
-		if echo "$PERSISTENT_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
-			dirname="$PERSISTENT_SERVICE_STATUS_DIR"
-		else
-			dirname="$VOLATILE_SERVICE_STATUS_DIR"
-		fi
-		_set_file_dict_value "$dirname/$service_name" "$attribute" "$value"
+		dirname="$VOLATILE_SERVICE_STATUS_DIR"
 	fi
+	_set_file_dict_value "$dirname/$service_name" "$attribute" "$value"
 }
 
 
@@ -383,17 +377,12 @@ get_service_value() {
 	local service_name="$1"
 	local attribute="$2"
 	local default="${3:-}"
+	local value
+	local dirname
 	[ -z "$service_name" ] \
 		&& msg_error "No service given for attribute request ('$attribute')" \
 		&& trap "" $GUARD_TRAPS && return 1
-	local value
-	if echo "$PROVIDER_SPECIFIC_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
-		local host
-		host=$(get_service_value "$service_name" "host")
-		value=$(_get_file_dict_value "$host" "$PROVIDER_SPECIFIC_STATUS_DIR/$attribute")
-	else
-		value=$(_get_file_dict_value "$attribute" "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" "$VOLATILE_SERVICE_STATUS_DIR/$service_name")
-	fi
+	value=$(_get_file_dict_value "$attribute" "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" "$VOLATILE_SERVICE_STATUS_DIR/$service_name")
 	[ -n "$value" ] && echo -n "$value" || echo -n "$default"
 	return 0
 }

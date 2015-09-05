@@ -3,7 +3,7 @@
 # Opennet Firmware
 #
 # Copyright 2010 Rene Ejury <opennet@absorb.it>
-# Copyright 2014 Lars Kruse <devel@sumpfralle.de>
+# Copyright 2015 Lars Kruse <devel@sumpfralle.de>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,11 @@ case "$script_type" in
 		"$IP_BIN" route add default via "$route_vpn_gateway" table "$uplink_table" || true
 		;;
 	down)
+		# löse einen baldigen Verbindungsaufbau aus
+		is_on_module_installed_and_enabled "on-openvpn" \
+			&& has_mig_openvpn_credentials \
+			&& { echo "on-function update_mig_connection_status" | schedule_task; }
+		true
 		;;
 esac 2>&1 | logger -t mig-updown
 

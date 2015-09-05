@@ -14,7 +14,7 @@ define Package/traceroute-oni-names
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Martin Garbe <monomartin@on-i.de>
   TITLE:=Traceroute with Opennet names
-  DEPENDS:=+mtr
+  DEPENDS:=+on-core
 endef
 
 define Package/traceroute-oni-names/description

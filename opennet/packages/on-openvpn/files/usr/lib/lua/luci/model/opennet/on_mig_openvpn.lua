@@ -69,7 +69,7 @@ function action_vpn_gateways()
 end
 
 
--- URL zum Testen: http://172.16.0.1/cgi-bin/luci/opennet/opennet_2/vpn_gateway_info/gw_openvpn_192_168_0_254_1600_udp
+-- URL zum Testen: http://172.16.0.1/cgi-bin/luci/opennet/mig_openvpn/status/vpn_gateway_info/gw_openvpn_192_168_0_254_1600_udp
 -- das Resultat ist ein json-formatierter Datensatz mit den Informationen eines Gateways
 function gateway_info(service_name)
 	-- wir lesen "status" als string ein, um die drei moeglichen Werte (y/n/leer) zu unterscheiden
@@ -88,7 +88,7 @@ function gateway_info(service_name)
 end
 
 
--- URL zum Testen: http://172.16.0.1/cgi-bin/luci/opennet/opennet_2/vpn_gateway_list
+-- URL zum Testen: http://172.16.0.1/cgi-bin/luci/opennet/mig_openvpn/status/vpn_gateway_list
 function gateway_list()
 	sys = require("luci.sys")
 	local services = sys.exec("on-function get_services gw | on-function sort_services_by_priority")

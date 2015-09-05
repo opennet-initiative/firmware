@@ -4,10 +4,9 @@ makefile_include_opennet_packages.patch
 dnsmasq_option_servers_file.patch
 luci_wireless_client_isolation.patch
 hostapd_option_chanlist.patch
-#curl_enable_https.patch
 luci_olsr_fix_empty_result.patch
 olsrd_add_ondataservice.patch
 px5g_create_csr.patch
 gpio_switch_control.patch
 openwrt_opkg_snapshot_build-key.patch
-config_version_repo-workaround.patch
+#config_version_repo-workaround.patch

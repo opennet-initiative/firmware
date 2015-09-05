@@ -19,7 +19,7 @@ LOG_MESSAGE_LENGTH=420
 # Verzeichnis für auszuführende Aktionen
 SCHEDULING_DIR="${IPKG_INSTROOT:-}/var/run/on-scheduling.d"
 # Basis-URL für Opennet-Paketinstallationen
-ON_OPKG_REPOSITORY_URL_PREFIX="http://downloads.on/openwrt"
+ON_OPKG_REPOSITORY_URL_PREFIX="http://downloads.opennet-initiative.de/openwrt"
 # temporäre Datei für Installation von Opennet-Paketen
 ON_OPKG_CONF_PATH="${IPKG_INSTROOT:-}/tmp/opkg-opennet.conf"
 # beim ersten Pruefen wird der Debug-Modus ermittelt

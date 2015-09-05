@@ -246,9 +246,14 @@ add_routing_table() {
 ## @details Die Quelle dieser Information ist olsrd. Routen außerhalb von olsrd werden nicht beachtet.
 get_hop_count_and_etx() {
 	local target="$1"
+	local result
 	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
 	[ ! -e "$OLSR_ROUTE_CACHE_FILE" ] && return 0
-	awk '{ if ($1 == "'$target'") { print $3, $4; exit; } }' <"$OLSR_ROUTE_CACHE_FILE"
+	result=$(awk '{ if ($1 == "'$target'") { print $3, $4; exit; } }' <"$OLSR_ROUTE_CACHE_FILE")
+	[ -n "$result" ] && echo "$result" && return 0
+	#ueberpruefe, ob ip des Zielhost die eigene ip ist. Dann sollte distance=0 gesetzt werden.
+	result=$(ip route get "$target" | grep -w "dev lo")
+	[ -n "$result" ] && echo "0 0" || true
 }
 
 

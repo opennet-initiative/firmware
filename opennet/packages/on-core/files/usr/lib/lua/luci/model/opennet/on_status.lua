@@ -219,7 +219,7 @@ end
 
 function status_issues()
 	luci.http.prepare_content("text/plain")
-	local warnings = on_function("get_potential_error_messages")
+	local warnings = on_function("get_potential_error_messages", {"30"})
 	local result = ""
 	if warnings and (warnings ~= "") then
 		result = result .. '<a title="' .. luci.util.pcdata(warnings) .. '">'

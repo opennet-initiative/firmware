@@ -618,10 +618,13 @@ generate_report() {
 }
 
 
-# Filtere aus den zugaenglichen Quellen moegliche Fehlermeldungen.
-# Falls diese Funktion ein nicht-leeres Ergebnis zurueckliefert, dann kann dies als Hinweis fuer den
-# Nutzer verwendet werden, auf dass er einen Fehlerbericht einreicht.
+## @fn get_potential_error_messages()
+## @param max_lines die Angabe einer maximalen Anzahl von Zeilen ist optional - andernfalls werden alle Meldungen ausgegeben
+## @brief Filtere aus allen zugänglichen Quellen mögliche Fehlermeldungen.
+## @details Falls diese Funktion ein nicht-leeres Ergebnis zurückliefert, kann dies als Hinweis für den
+##   Nutzer verwendet werden, auf dass er einen Fehlerbericht einreicht.
 get_potential_error_messages() {
+	local max_lines=${1:-}
 	local filters=
 	# 1) get_service_as_csv
 	#    Wir ignorieren "get_service_as_csv"-Meldungen - diese werden durch asynchrone Anfragen des
@@ -685,7 +688,13 @@ get_potential_error_messages() {
 	#    ddns meldet leidet beim Starten einen Fehler, solange es unkonfiguriert ist.
 	filters="${filters}|ddns-scripts.*myddns_ipv[46]"
 	# System-Fehlermeldungen (inkl. "trapped")
-	logread | grep -i error | grep -vE "(${filters#|})" || true
+	logread | grep -i error | grep -vE "(${filters#|})" | if [ -z "$max_lines" ]; then
+		# alle Einträge ausgeben
+		cat -
+	else
+		# nur die letzten Einträge ausliefern
+		tail -n "$max_lines"
+	fi
 }
 
 

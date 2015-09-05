@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# Dieses Skript wird nur ein einziges Mal nach einem Upgrade oder der Erstinstallation ausgefuehrt:
+#   http://wiki.openwrt.org/doc/uci#defaults
+#
+
+set -eu
+
+#By default OpenWRT adds a repo url to all installed feeds.
+#Opennet is installed as feed but the generated URL by OpenWRT is wrong.
+#Therefore delete this line.
+sed -i '/opennet/d'  /etc/opkg.conf
+
+#add a note where to find the opennet repo url
+echo "# Notice: Opennet repository url is added by install_from_opennet_repository() in usr/lib/opennet/core.sh" >> /etc/opkg.conf

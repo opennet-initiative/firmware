@@ -15,6 +15,7 @@ $Id: index.htm 5448 2009-10-31 15:54:11Z jow $
 <%
 require ("luci.model.opennet.on_status")
 require("luci.model.opennet.urls")
+local i18n = luci.i18n.translate
 %>
 
 <%+header%>
@@ -55,30 +56,35 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 		local hardware_info = luci.sys.exec("echo -e \"Model: \$(cat /proc/diag/model 2>/dev/null)\\n\$(cat /proc/cpuinfo)\" | awk 'BEGIN {FS=\":\"; no=0} /Processor|Hardware|system type|machine|Model|vendor_id/ {gsub(\"[\\t]\", \"\"); if (no > 0) printf \" | \"; if (\$2) { no=1; printf \$1\":\"\$2}} END {printf \"\\n\";}'")
 
 		for _, item in ipairs({
-				  {"networks_section", luci.i18n.translate("Networks"), url="network"},
-				  {"wireless_section", luci.i18n.translate("Wireless"), url="wireless"},
-				  {"neighbor_section", luci.i18n.translate("Neighbors"), url="neighbors"},
-				  {"mig_connection_section", luci.i18n.translate("OpenVPN"), url="mig_openvpn"},
-				  {"ugw_connection_section", luci.i18n.translate("Internet Sharing"), url="mesh_verbindungen"},
-				  {"captive_portal_section", luci.i18n.translate("Public Hotspot"), url="zugangspunkt"},
-				  {"issues_section", luci.i18n.translate("Issue Indicators"), url="issues"},
-				  {"hardware_section", luci.i18n.translate("Hardware Information"), content=hardware_info},
-				  {"uptime_section", luci.i18n.translate("Uptime"), content=luci.sys.exec("uptime")},
-				  {"system_section", luci.i18n.translate("System"), content=luci.sys.exec("uname -a")},
-			  }) do %>
-			<tr class="cbi-section-table-titles">
-				<td class="cbi-section-table-cell"><%=item[2]%>:</td>
-				<td class="cbi-section-table-cell" id="<%=item[1]%>">
-				<% if item.url then %>
-					<%= get_html_loading_spinner(item[1] .. "_spinnr", "vertical-align:middle;") %>
-					<script type="text/javascript">
-						fill_result_row("<%=item[1]%>", "<%=item.url%>")
-					</script>
-				<% else %>
-					<%=luci.util.pcdata(item.content)%>
-				<% end %>
-				</td>
-			</tr>
+				  {"networks_section", i18n("Networks"), url="network"},
+				  {"wireless_section", i18n("Wireless"), url="wireless"},
+				  {"neighbor_section", i18n("Neighbors"), url="neighbors"},
+				  {"mig_connection_section", i18n("OpenVPN"), url="mig_openvpn", mod_name="on-openvpn"},
+				  {"ugw_connection_section", i18n("Internet Sharing"), url="mesh_verbindungen", mod_name="on-usergw"},
+				  {"captive_portal_section", i18n("Public Hotspot"), url="zugangspunkt", mod_name="on-captive-portal"},
+				  {"issues_section", i18n("Issue Indicators"), url="issues"},
+				  {"hardware_section", i18n("Hardware Information"), content=hardware_info},
+				  {"uptime_section", i18n("Uptime"), content=luci.sys.exec("uptime")},
+				  {"system_section", i18n("System"), content=luci.sys.exec("uname -a")},
+			  }) do
+			-- skip missing modules (test only if they are installed - ignore "enabled")
+			if not item.mod_name or on_bool_function("is_package_installed", {item.mod_name}) then %>
+				<tr class="cbi-section-table-titles">
+					<td class="cbi-section-table-cell"><%=item[2]%>:</td>
+					<td class="cbi-section-table-cell" id="<%=item[1]%>">
+					<% if item.mod_name and not on_bool_function("is_on_module_installed_and_enabled", {item.mod_name}) then %>
+						<%= luci.i18n.translatef('disabled (see <a href="%s">Modules</a>)', on_url("basis", "einstellungen")) %>
+					<% elseif item.url then %>
+						<%= get_html_loading_spinner(item[1] .. "_spinnr", "vertical-align:middle;") %>
+						<script type="text/javascript">
+							fill_result_row("<%=item[1]%>", "<%=item.url%>")
+						</script>
+					<% else %>
+						<%=luci.util.pcdata(item.content)%>
+					<% end %>
+					</td>
+				</tr>
+			<% end %>
 		<% end %>
 	</table>
 </fieldset></div>

@@ -712,7 +712,10 @@ install_from_opennet_repository() {
 	local package="$1"
 	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
 	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
-	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$package" || true
+	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$package"
+	# Falls es ein opennet-Modul ist, dann aktiviere es automatisch nach der Installation.
+	# Dies dürfte für den Nutzer am wenigsten überraschend sein.
+	get_on_modules | grep -qwF "$package" && enable_on_module "$package" || true
 }
 
 

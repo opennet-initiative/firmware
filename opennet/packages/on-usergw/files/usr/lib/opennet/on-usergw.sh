@@ -90,7 +90,7 @@ is_mesh_gateway_usable() {
 ## @fn update_trusted_service_list()
 ## @brief Hole die vertrauenswürdigen Dienste von signierten Opennet-Quellen.
 ## @details Diese Dienste führen beispielsweise auf UGW-APs zur Konfiguration von Portweiterleitungen
-##   ins Internet. Daher sind sie nur aus vertrauenswürdiger Quelle zu aktzeptieren (oder manuell).
+##   ins Internet. Daher sind sie nur aus vertrauenswürdiger Quelle zu akzeptieren (oder manuell).
 update_trusted_service_list() {
 	local line
 	local service_type

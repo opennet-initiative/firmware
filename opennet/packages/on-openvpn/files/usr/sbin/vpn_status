@@ -37,10 +37,10 @@ print_status()
 		host=$(get_service_value "$service_name" "host")
 		if uci_is_true "$(get_service_value "$service_name" "disabled" "false")"; then
 			# der Dienst wird ignoriert
-			printf "$format_string" "" "($host)" "disabled" "" ""
+			printf "$format_string" "" "$host" "disabled" "" ""
 		elif [ -z "$(get_service_value "$service_name" "distance")" ]; then
 			# der Dienst ist nicht erreichbar
-			printf "$format_string" "" "[$host]" "unreachable" "" ""
+			printf "$format_string" "" "$host" "unreachable" "" ""
 		else
 			# der Dienst wurde nicht abgeschaltet
 			timestamp=$(get_service_value "$service_name" "status_timestamp")
@@ -59,6 +59,8 @@ print_status()
 			elif [ "$sorting" = "manual" ]; then
 				quality=$(get_service_value "$service_name" "rank")
 			fi
+			# Begrenzung auf eine Nachkommastalle
+			quality=$(printf "%.1f" "$quality")
 			connection_state=$(get_openvpn_service_state "$service_name")
 			if [ "$connection_state" = "active" ]; then
 				active="*"

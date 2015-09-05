@@ -22,7 +22,7 @@ query_dns_reverse() {
 }
 
 
-## @has_opennet_dns()
+## @fn has_opennet_dns()
 ## @brief Prüfe, ob *.on-Domains aufgelöst werden.
 ## @returns Der Exitcode ist Null, falls on-DNS verfügbar ist.
 ## @details Die maximale Laufzeit dieser Funktion ist auf eine Sekunde begrenzt.

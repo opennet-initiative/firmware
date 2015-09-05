@@ -29,8 +29,7 @@ function index()
 	page.target = on_alias("status")
 
 	-- die Status-Seite (/status)
-	-- unsichtbar auf höchster Ebene (wird nur als Startseite angesteuert)
-	on_entry_no_auth({"status"}, template("opennet/on_status"), nil, 10)
+	on_entry_no_auth({"status"}, template("opennet/on_status"), i18n("Status"), 10)
 
 	-- Quellen fuer die Inhalte der Status-Seite
 	require ("luci.model.opennet.on_status")

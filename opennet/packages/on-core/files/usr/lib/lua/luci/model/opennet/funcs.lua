@@ -63,6 +63,16 @@ function bool_to_yn(value)
 end
 
 
+--- @brief Ermittle ob eine table leer ist.
+--- @param table Die zu prüfende Tabelle.
+function table_is_empty(data)
+	for _, _ in ipairs(data) do
+		return false
+	end
+	return true
+end
+
+
 function get_html_loading_spinner(name, style)
 	return '<span id="' .. name .. '"><img class="loading_img_small"' ..
 			' src="' .. html_resource_base .. '/icons/loading.gif" alt="' ..

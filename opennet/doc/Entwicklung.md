@@ -468,7 +468,7 @@ Ein Skript mit detaillierter Ausführungsverfolgung starten:
 
 Fehlermeldungen des Web-Interface ausgeben:
 
-  killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-*; uhttpd -h /www -p 80 -f
+  killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-\*; uhttpd -h /www -p 80 -f
 
 
 Profiling {#profiling}
@@ -491,6 +491,19 @@ Die Auswertung des Profiling ist folgendermaßen möglich:
   on-function summary_profiling
 
 Mit fortlaufendem Profiling wird das tmp-Verzeichnis (bzw. der RAM) schrittweise gefüllt. Ein Host mit aktiviertem Profiling darf also nicht im produktiven Einsatz sein, da im Verlauf von Stunden eine Speichermangel-Situation droht.
+
+
+Pakete erstellen {#packages}
+================
+
+Die verschiedenen Opennet-Pakete helfen bei der Modularisierung. Einige Pakete ermöglichen eine gewisse Nutzer-Funktion (z.B. on-openvpn: der Tunnel für den Internetzugang). Andere Pakete stellen Infrastruktur bereit, die von anderen Pakete benötigt wird (z.B. *on-certificates*).
+
+Einige Pakete können über das Web-Interface installiert werden. Diese Pakete müssen an folgenden Orten aufgeführt werden:
+
+* *on-core/files/usr/share/opennet/core.defaults*: zum Eintrag *on_modules* hinzufügen
+* *on-core/files/usr/lib/lua/luci/view/opennet/on_settings.htm*: zum Dictionary *on_module_descriptions* hinzufügen
+
+Das minimalste Paket ist *on-goodies* - es besteht lediglich aus einer Liste von Abhängigkeiten und ist daher gut als Vorlage geeignet. Zusätzlich sollten die meisten Pakete Initialisierungs- und Aufräumaktionen in *postinst*- und*prerm*-Skripten unterbringen.
 
 
 Übersetzungen {#translations}

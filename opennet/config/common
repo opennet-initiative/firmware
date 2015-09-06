@@ -100,15 +100,6 @@ CONFIG_OPENVPN_openssl_ENABLE_SERVER=n
 # der mtu-Test beim uservpn-Aufbau ist bei "--enable-small" nicht enthalten
 CONFIG_OPENVPN_openssl_ENABLE_SMALL=n
 
-# Analyse & Werkzeuge
-#CONFIG_PACKAGE_bwm-ng=y
-#CONFIG_PACKAGE_iperf=y
-#CONFIG_PACKAGE_less=y
-#CONFIG_PACKAGE_mtr=y
-#CONFIG_PACKAGE_procps-watch=y
-#CONFIG_PACKAGE_screen=y
-#CONFIG_PACKAGE_tcpdump-mini=y
-
 # Kernel-Minimierung
 CONFIG_PACKAGE_kmod-ath5k=m
 CONFIG_PACKAGE_kmod-button-hotplug=m

@@ -47,6 +47,8 @@ captive_portal_get_or_create_config() {
 		uci add_list "${uci_prefix}.users_to_router=allow udp port 53"
 		# DHCP
 		uci add_list "${uci_prefix}.users_to_router=allow udp port 67"
+		# erstmal nur speichern - um die Anwendung kuemmert sich jemand anders
+		uci commit nodogsplash
 	fi
 	echo -n "$uci_prefix"
 }

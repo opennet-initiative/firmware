@@ -429,6 +429,9 @@ apply_changes() {
 			on-monitoring)
 				update_monitoring_state
 				;;
+			on-goodies)
+				# es gibt nichts zu tun
+				;;
 			*)
 				msg_error "no handler defined for applying config changes for '$config'"
 				;;

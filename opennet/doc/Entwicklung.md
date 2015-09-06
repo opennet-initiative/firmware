@@ -502,6 +502,7 @@ Einige Pakete können über das Web-Interface installiert werden. Diese Pakete m
 
 * *on-core/files/usr/share/opennet/core.defaults*: zum Eintrag *on_modules* hinzufügen
 * *on-core/files/usr/lib/lua/luci/view/opennet/on_settings.htm*: zum Dictionary *on_module_descriptions* hinzufügen
+* *on-core/files/usr/lib/opennet/core.sh*: zur *case*-Verzweigung in *apply_changes* hinzufügen
 
 Das minimalste Paket ist *on-goodies* - es besteht lediglich aus einer Liste von Abhängigkeiten und ist daher gut als Vorlage geeignet. Zusätzlich sollten die meisten Pakete Initialisierungs- und Aufräumaktionen in *postinst*- und*prerm*-Skripten unterbringen.
 

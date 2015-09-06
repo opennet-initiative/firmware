@@ -94,6 +94,7 @@ CONFIG_PACKAGE_on-usergw=m
 CONFIG_PACKAGE_on-tinc=m
 CONFIG_PACKAGE_on-captive-portal=m
 CONFIG_PACKAGE_on-monitoring=m
+CONFIG_PACKAGE_on-goodies=m
 
 # openvpn
 CONFIG_OPENVPN_openssl_ENABLE_SERVER=n

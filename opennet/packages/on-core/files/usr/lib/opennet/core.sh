@@ -716,9 +716,13 @@ install_from_opennet_repository() {
 	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
 	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
 	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$package"
-	# Falls es ein opennet-Modul ist, dann aktiviere es automatisch nach der Installation.
-	# Dies dürfte für den Nutzer am wenigsten überraschend sein.
-	get_on_modules | grep -qwF "$package" && enable_on_module "$package" || true
+	if get_on_modules | grep -qwF "$package"; then
+		# Falls es ein opennet-Modul ist, dann aktiviere es automatisch nach der Installation.
+		# Dies dürfte für den Nutzer am wenigsten überraschend sein.
+		enable_on_module "$package"
+		# Anschließend wollen wir den aktuellen Zustand speichern.
+		save_on_module_list
+	fi
 }
 
 
@@ -729,6 +733,20 @@ _run_opennet_opkg() {
 		| grep -vF "resolve_conffiles: Existing conffile /etc/config/openvpn is different from the conffile in the new package. The new conffile will be placed at /etc/config/openvpn-opkg." \
 		| grep -v "^Collected errors:$" \
 		|| true
+}
+
+
+## @fn save_on_module_list()
+## @brief Speichere die aktuelle Liste der installierten opennet-Module in der uci-Konfiguration.
+## @details Nach einer Aktualisierung ermöglicht diese Sicherung die Nachinstallation fehlender Pakete.
+save_on_module_list() {
+	local modname
+	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
+	get_on_modules | while read modname; do
+		is_package_installed "$modname" \
+			&& uci_add_list "on-core.modules.installed" "$modname" \
+			|| uci_delete_list "on-core.modules.installed" "$modname"
+	done
 }
 
 

@@ -58,6 +58,8 @@ function action_settings()
 		-- stderr sollte nach stdout gehen, damit wir es als Fehlertext einblenden koennen
 		error_message = luci.sys.exec("opkg --verbosity=0 --autoremove remove '" .. remove_package .. "' 2>&1")
 		table.insert(on_errors, error_message)
+		-- bei der Paket-Installation wird die Liste automatisch aktualisiert - bei der Entfernung müssen wir es per Hand tun
+		on_function("save_on_module_list")
 	end
 	local install_package = parse_string_pattern(luci.http.formvalue("install"), "a-z-")
 	if install_package then

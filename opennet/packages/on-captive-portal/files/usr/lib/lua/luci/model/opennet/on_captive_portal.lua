@@ -16,6 +16,7 @@ require("luci.model.opennet.funcs")
 
 function action_on_captive_portal()
 	local on_errors = {}
+	check_and_warn_module_state("on-captive-portal", on_errors)
 	if luci.http.formvalue("save") then
 		local captive_portal_node_name = parse_string_pattern(luci.http.formvalue("captive_portal_node_name"), "a-zA-Z0-9:./ %-_")
 		if captive_portal_node_name then

@@ -29,7 +29,9 @@ function action_on_openvpn()
 
 	-- Zertifikatverwaltung
 	local cert_result = process_openvpn_certificate_form("user")
-	
+
+	check_and_warn_module_state("on-openvpn", on_errors)
+
 	luci.template.render("opennet/on_openvpn", {
 		on_errors=on_errors,
 		certstatus=cert_result.certstatus,
@@ -44,6 +46,8 @@ function action_vpn_gateways()
 	local reset_connection_test_timestamps = luci.http.formvalue("reset_connection_test_timestamps")
 	local on_errors = {}
 	
+	check_and_warn_module_state("on-openvpn", on_errors)
+
 	-- Neuen Dienst hinzufügen
 	local service_result = process_add_service_form()
 	if (service_result ~= true) and (service_result ~= false) then table.insert(on_errors, service_result) end

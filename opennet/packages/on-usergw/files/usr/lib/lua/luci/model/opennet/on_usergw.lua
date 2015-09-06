@@ -36,6 +36,8 @@ end
 function action_on_mesh_connections()
     local on_errors = {}
 
+    check_and_warn_module_state("on-usergw", on_errors)
+
     -- Dienst hinzufügen
     local service_result = process_add_service_form()
     if (service_result ~= true) and (service_result ~= false) then table.insert(on_errors, service_result) end
@@ -55,6 +57,8 @@ end
 
 function action_on_service_relay()
     local on_errors = {}
+
+    check_and_warn_module_state("on-usergw", on_errors)
 
     -- Dienst hinzufügen
     local service_result = process_add_service_form()

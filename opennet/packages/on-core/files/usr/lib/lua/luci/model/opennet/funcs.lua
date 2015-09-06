@@ -5,6 +5,7 @@
 require "luci.config"
 require "luci.util"
 
+
 html_resource_base = luci.config.main.resourcebase
 SYSROOT = os.getenv("LUCI_SYSROOT") or ""
 
@@ -81,6 +82,19 @@ end
 
 function get_services_sorted_by_priority(service_type)
 	return luci.sys.exec("on-function get_services '" .. service_type .. "' | on-function sort_services_by_priority")
+end
+
+
+--- @brief Füge eine Warnung zur gegebenen "errors"-Tabelle hinzu, falls das angegebene Modul derzeit abgeschaltet ist.
+--- @param module_name Name eines Opennet-Moduls, dessen Aktivierungszustand geprüft werden soll
+--- @param errors Liste von Fehlern, die eventuell erweitert wird
+--- @details Jede Seite eines Opennet-Moduls sollte eine Fehlerausgabe vorsehen. In der dazugehörigen controller-Funktion
+---    sollte diese Funktion aufgerufen werden.
+function check_and_warn_module_state(module_name, errors)
+	if not on_bool_function("is_on_module_installed_and_enabled", {module_name}) then
+		table.insert(errors, luci.i18n.translatef(
+			[[The module '%s' is currently disabled (see 'Opennet -> Base -> Settings').]], module_name))
+	end
 end
 
 

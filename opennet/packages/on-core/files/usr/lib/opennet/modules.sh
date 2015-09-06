@@ -19,7 +19,7 @@ is_on_module_installed_and_enabled() {
 
 _is_on_module_enabled() {
 	local module="$1"
-	[ -n "$(uci_get_list_index "on-core.modules.enabled" "$module")" ] && return 0
+	uci_is_in_list "on-core.modules.enabled" "$module" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

@@ -8,13 +8,7 @@ CONFIG_VERSION_NUMBER="0.5.2"
 #setze OpenWRT Downloadpfad+Versionsnummer explizit weil wir die OpenWRT Versionsnummer mit unserer Versionsnummer ueberschreiben.
 #         Eine offizielle Versionsnummer von 15.05-rc2 konnte ich (martin) nicht im Quelltext finden. Aber die Download URL beinhaltet dies.
 #         Wahrscheinlich kann mit Erscheinen von 15.05 final die Versionsnummer von woanders extrahiert und nicht manuell hier eingefuegt werden.
-#Hinweis 2:
-#Leider scheint die Variable unten NICHT weitergereicht zu werden. Eigentlich sollte diese Variable hier in den Make Prozess gelangen.
-# In openwrt/includes/version.mk wird geprüft, ob diese Variable hier gesetz ist. Wenn ja, dann wird sie übernommen. Wenn nein, wird ein generiert.
-# Und an dieser Stelle wird immer eine generiert (mit string snapshot/trunk) darin.  
-# Als Workaround gibt es einen patch (siehe patches/) welcher die nächste Zeile in version.mk patcht. 
-#
-#CONFIG_VERSION_REPO="http://downloads.openwrt.org/%n/15.05-rc3/%S/packages"
+CONFIG_VERSION_REPO="http://downloads.openwrt.org/%n/15.05-rc3/%S/packages"
 
 
 # reduzierte Squashfs-Blockgroesse Standard: 256)

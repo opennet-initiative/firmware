@@ -38,25 +38,43 @@ on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for net
 <div class="cbi-map"><fieldset class="cbi-section">
 	<legend><%:Status of Modules%></legend>
 		<div class="cbi-section-descr"><%:The Opennet Firmware consists of multiple modules providing distinct features within the network. Please pick which features should be enabled for this device.%></div>
-		<div class="cbi-section-node">
-			<% for _, mod_name in ipairs(line_split(on_function("get_on_modules"))) do %>
-				<div class="cbi-value">
-					<label class="cbi-value-title" for="<%= mod_name %>">
-						<%= mod_name %>:&nbsp;<%= on_module_descriptions[mod_name] or mod_name %></label>
-					<div class="cbi-value-field">
-					<% if on_bool_function("is_package_installed", { mod_name }) then %>
-							<% local is_enabled = on_bool_function("is_on_module_installed_and_enabled", { mod_name }) %>
-							<input class="cbi-input-checkbox" value="1" type="checkbox"
-								id="<%=mod_name%>" name="<%=mod_name%>_enabled"
-								<%= is_enabled and 'checked="checked"' or '' %> />
-							<span>(<a href="<%=REQUEST_URI%>?remove=<%=mod_name%>">remove</a>)</span>
-						<% else %>
-							<span><a href="<%=REQUEST_URI%>?install=<%=mod_name%>">install</a></span>
-						<% end %>
-					</div>
-				</div>
-			<% end %>
-		</div>
+		<table class="cbi-section-table">
+		<tr class="cbi-section-table-titles">
+			<th class="cbi-section-table-cell"><%:Name%></th>
+			<th class="cbi-section-table-cell"><%:Installed%></th>
+			<th class="cbi-section-table-cell"><%:Enabled%></th>
+			<th class="cbi-section-table-cell"><%:Action%></th>
+			<th class="cbi-section-table-cell"><%:Description%></th>
+		</tr>
+		<% for _, mod_name in ipairs(line_split(on_function("get_on_modules"))) do
+			local is_installed = on_bool_function("is_package_installed", { mod_name })
+			local is_enabled = on_bool_function("is_on_module_installed_and_enabled", { mod_name })
+			local action_label
+			local action_url
+		%>
+			<tr class="cbi-section-table-row">
+				<td class="cbi-section-table-cell"><%= mod_name %></td>
+				<td class="cbi-section-table-cell opennet-bool" status="<%= is_installed and "y" or "" %>" />
+				<td class="cbi-section-table-cell">
+					<input class="cbi-input-checkbox" value="1" type="checkbox"
+						 id="<%= mod_name %>" name="<%= mod_name %>_enabled"
+						 <%= is_enabled and 'checked="checked"' or '' %>
+						 <%= is_installed and "" or 'disabled="disabled"' %> />
+				</td>
+				<td class="cbi-section-table-cell">
+					<% if is_installed then
+						action_label = "remove"
+						action_url = REQUEST_URI .. "?remove=" .. mod_name
+					else
+						action_label = "install"
+						action_url = REQUEST_URI .. "?install=" .. mod_name
+					end %>
+					<a href="<%= action_url %>"><%= action_label %></a>
+				</td>
+				<td class="cbi-section-table-cell"><%= on_module_descriptions[mod_name] or mod_name %></td>
+			</tr>
+		<% end %>
+		</table>
 </fieldset></div>
 
 <div class="cbi-map"><fieldset class="cbi-section">

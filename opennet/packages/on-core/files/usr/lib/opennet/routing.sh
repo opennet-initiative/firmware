@@ -251,9 +251,11 @@ get_hop_count_and_etx() {
 	[ ! -e "$OLSR_ROUTE_CACHE_FILE" ] && return 0
 	result=$(awk '{ if ($1 == "'$target'") { print $3, $4; exit; } }' <"$OLSR_ROUTE_CACHE_FILE")
 	[ -n "$result" ] && echo "$result" && return 0
-	#ueberpruefe, ob ip des Zielhost die eigene ip ist. Dann sollte distance=0 gesetzt werden.
-	result=$(ip route get "$target" | grep -w "dev lo")
-	[ -n "$result" ] && echo "0 0" || true
+	# Überprüfe, ob die IP des Zielhost die eigene IP ist. Dann sollte distance=0 gesetzt werden.
+	if is_ipv4 "$target" || is_ipv6 "$target"; then
+		result=$(ip route get "$target" | grep -w "dev lo")
+		[ -n "$result" ] && echo "0 0" || true
+	fi
 }
 
 

@@ -172,7 +172,7 @@ get_olsr_service_name_from_description() {
 	public_host=$(echo "$details" | get_from_key_value_list "public_host" ":")
 	if [ -n "$public_host" ]; then
 		# ein relay-Dienst
-		get_services "${RELAYABLE_SERVICE_PREFIX}${service_type}" | filter_services_by_value "local_relay_port" "$port" | head -1
+		get_services "$service_type" | filter_services_by_value "local_relay_port" "$port" | head -1
 	else
 		# ein nicht-relay-Dienst
 		local scheme

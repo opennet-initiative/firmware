@@ -108,18 +108,25 @@ function check_and_warn_module_state(module_name, errors)
 end
 
 
-function _generic_split(text, token_regex)
+--- @fn generic_split()
+--- @brief Teile eine Zeichenkette anhand eines gegebenen regulären Ausdrucks, der die
+---   Zusammensetzung eines Token (nicht des Trennzeichens) beschreibt.
+--- @param text Der zu teilende Text.
+--- @param token_regex Der reguläre Ausdruck, der ein Token beschreibt (z.B. '[^ ]+' für Leerzeichen-getrennte Token).
+function generic_split(text, token_regex)
 	local result = {}
 	local token
-	for token in text:gmatch(token_regex) do table.insert(result, token) end
+	if text then
+		for token in text:gmatch(token_regex) do table.insert(result, token) end
+	end
 	return result
 end
 
 
-function tab_split(text) return _generic_split(text, "[^\t]+") end
-function line_split(text) return _generic_split(text, "[^\n]+") end
-function space_split(text) return _generic_split(text, "%S+") end
-function dot_split(text) return _generic_split(text, "[^.]+") end
+function tab_split(text) return generic_split(text, "[^\t]+") end
+function line_split(text) return generic_split(text, "[^\n]+") end
+function space_split(text) return generic_split(text, "%S+") end
+function dot_split(text) return generic_split(text, "[^.]+") end
 
 
 function map_table(input_table, func)
@@ -137,9 +144,7 @@ end
 -- Eine leere Liste fuehrt zum Ergebnis 'nil'.
 function string_join(table, separator)
 	local result
-	local token
-	local dummy
-	for dummy, token in ipairs(table) do
+	for _, token in ipairs(table) do
 		if result then
 			result = result .. separator .. token
 		else

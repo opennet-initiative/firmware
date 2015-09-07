@@ -749,6 +749,7 @@ save_on_module_list() {
 			&& uci_add_list "on-core.modules.installed" "$modname" \
 			|| uci_delete_list "on-core.modules.installed" "$modname"
 	done
+	apply_changes on-core
 }
 
 

@@ -57,5 +57,15 @@ get_on_modules() {
 	get_on_core_default "on_modules" | sed 's/[^a-z-]/\n/g' | grep -v "^$"
 }
 
+
+## @fn was_on_module_installed_before()
+## @brief Prüfe ob ein Modul "früher" (vor der letzten manuellen Änderung durch den Benutzer) installiert war.
+## @details Diese Prüfung ist hilfreich für die Auswahl von nachträglich zu installierenden Paketen.
+was_on_module_installed_before() {
+	local module="$1"
+	uci_is_in_list "on-core.modules.installed" "$module" && return 0
+	trap "" $GUARD_TRAPS && return 1
+}
+
 # Ende der Doku-Gruppe
 ## @}

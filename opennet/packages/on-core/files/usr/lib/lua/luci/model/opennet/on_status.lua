@@ -231,3 +231,38 @@ function status_issues()
 	end
 	luci.http.write(result)
 end
+
+
+--- @fn get_module_info()
+--- @brief Liefere den aktuellen Zustand der installierten Module zurück
+function status_modules()
+	local enabled = {}
+	local disabled = {}
+	local missing = {}
+	for _, modname in ipairs(line_split(on_function("get_on_modules"))) do
+		if on_bool_function("is_on_module_installed_and_enabled", {modname}) then
+			table.insert(enabled, modname)
+		elseif on_bool_function("is_package_installed", {modname}) then
+			table.insert(disabled, modname)
+		elseif on_bool_function("was_on_module_installed_before", {modname}) then
+			table.insert(missing, modname)
+		end
+	end
+	luci.http.prepare_content("text/plain")
+	result = ""
+	if not table_is_empty(enabled) then
+		result = result .. luci.i18n.translatef("Active: %s", string_join(enabled, ", ")) .. "<br/>"
+	end
+	if not table_is_empty(disabled) then
+		result = result .. luci.i18n.translatef("Disabled: %s", string_join(disabled, ", ")) .. "<br/>"
+	end
+	if not table_is_empty(missing) then
+		result = result .. '<div class="errorbox">'
+			.. luci.i18n.translatef("Previously installed modules: %s", string_join(missing, ", ")) .. '<br/>'
+			.. luci.i18n.translate("Recommended action") .. ': '
+			.. '<a href="' .. on_url("basis", "einstellungen") .. '?install=' .. string_join(missing, ",") .. '">'
+			.. luci.i18n.translate("Install missing modules")
+			.. '</a></div>'
+	end
+	luci.http.write(result)
+end

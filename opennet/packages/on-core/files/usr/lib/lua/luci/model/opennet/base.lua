@@ -106,6 +106,15 @@ function action_settings()
 		end
 		cursor:commit("on-core")
 	end
+	-- POE passthrough
+	if luci.http.formvalue("has_poe_passthrough") then
+		if luci.http.formvalue("gpio_switch_poe_passthrough") then
+			cursor:set("system", "gpio_switch_poe_passthrough", "value", "1")
+		else
+			cursor:set("system", "gpio_switch_poe_passthrough", "value", "0")
+		end
+		cursor:commit("system")
+	end
 	luci.template.render("opennet/on_settings", { on_errors=on_errors })
 end
 

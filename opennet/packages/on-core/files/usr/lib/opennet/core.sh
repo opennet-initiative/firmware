@@ -702,7 +702,7 @@ get_potential_error_messages() {
 
 
 ## @fn install_from_opennet_repository()
-## @param package Name des zu installierenden Software-Pakets
+## @param packages Ein oder mehrere zu installierende Software-Paket
 ## @returns Eventuelle Fehlermeldungen werden auf die Standardausgabe geschrieben. Der Exitcode ist immer Null.
 ## @brief Installiere ein Paket aus den Opennet-Repositories.
 ## @details Für die Installation von Opennet-relevanten Paketen wird eine separate opkg.conf-Datei verwendet.
@@ -712,17 +712,19 @@ get_potential_error_messages() {
 ##   bleiben also bis zum nächsten Reboot erhalten.
 install_from_opennet_repository() {
 	trap "error_trap install_from_opennet_repository '$*'" $GUARD_TRAPS
-	local package="$1"
+	local package
 	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
 	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
-	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$package"
-	if get_on_modules | grep -qwF "$package"; then
-		# Falls es ein opennet-Modul ist, dann aktiviere es automatisch nach der Installation.
-		# Dies dürfte für den Nutzer am wenigsten überraschend sein.
-		enable_on_module "$package"
-		# Anschließend wollen wir den aktuellen Zustand speichern.
-		save_on_module_list
-	fi
+	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$@"
+	for package in "$@"; do
+		if get_on_modules | grep -qwF "$package"; then
+			# Falls es ein opennet-Modul ist, dann aktiviere es automatisch nach der Installation.
+			# Dies dürfte für den Nutzer am wenigsten überraschend sein.
+			enable_on_module "$package"
+		fi
+	done
+	# anschließend speichern wir den aktuellen Zustand
+	save_on_module_list
 }
 
 

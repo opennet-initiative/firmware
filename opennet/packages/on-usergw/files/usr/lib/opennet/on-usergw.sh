@@ -193,10 +193,11 @@ update_mesh_gateway_mtu_state() {
 	local in_real
 	local status_output
 
+	host=$(get_service_value "$service_name" "host")
+
 	msg_debug "starting update_mesh_gateway_mtu_state for '$host'"
 	msg_debug "update_mesh_gateway_mtu_state will take around 5 minutes per gateway"
 
-	host=$(get_service_value "$service_name" "host")
 	mtu_result=$(cat -)
 	out_wanted=$(echo "$mtu_result" | cut -f 1)
 	out_real=$(echo "$mtu_result" | cut -f 2)

@@ -93,7 +93,7 @@ function status_ugw_connection()
         ugw_status.mesh_servers_string = string_join(ugw_status.mesh_servers, ", ")
         ugw_status.mesh_servers_status = (ugw_status.mesh_servers_string ~= "")
 	if ugw_status.mesh_servers_string and ugw_status.mesh_servers_string ~= "" then
-            result = luci.i18n.translate("Connected Mesh Gateways: ") .. ugw_status.mesh_servers_string
+            result = luci.i18n.translatef("Connected Mesh Gateways: %s", ugw_status.mesh_servers_string)
         else
             result = luci.i18n.translate("No Mesh Gateways connected")
 	end

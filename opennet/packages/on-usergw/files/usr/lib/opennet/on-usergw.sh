@@ -11,6 +11,8 @@ SPEEDTEST_UPLOAD_PORT=29418
 SPEEDTEST_SECONDS=20
 ## dieser Wert muss mit der VPN-Konfigurationsvorlage synchron gehalten werden
 MESH_OPENVPN_DEVICE_PREFIX=tap
+# Namenspräfix für weiterzuleitende Dienste
+RELAYABLE_SERVICE_PREFIX="proxy-"
 
 
 # hole einen der default-Werte der aktuellen Firmware
@@ -109,14 +111,13 @@ update_trusted_service_list() {
 	echo "$url_list" | grep -v "^#" | sed 's/\t\+/\t/g' | while read line; do
 		service_type=$(echo "$line" | cut -f 1)
 		# falls der Dienst-Typ mit "proxy-" beginnt, soll er weitergeleitet werden
-		if [ "${service_type#proxy-}" = "$service_type" ]; then
+		if [ "${service_type#$RELAYABLE_SERVICE_PREFIX}" = "$service_type" ]; then
 			# kein Proxy-Dienst
 			is_proxy=
 		else
 			# ein Proxy-Dienst
 			is_proxy=1
 			# entferne das Praefix
-			service_type="${service_type#proxy-}"
 		fi
 		scheme=$(echo "$line" | cut -f 2)
 		host=$(echo "$line" | cut -f 3)

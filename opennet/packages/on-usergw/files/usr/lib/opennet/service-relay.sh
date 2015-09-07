@@ -133,6 +133,8 @@ _get_service_relay_olsr_announcement_prefix() {
 	local protocol
 	main_ip=$(get_main_ip)
 	service_type=$(get_service_value "$service_name" "service")
+	# remove prefix
+	service_type="${service_type%$RELAYABLE_SERVICE_PREFIX}"
 	scheme=$(get_service_value "$service_name" "scheme")
 	host=$(get_service_value "$service_name" "host")
 	port=$(pick_local_service_relay_port "$service_name")
@@ -169,9 +171,9 @@ announce_olsr_service_relay() {
 	# nur nicht-leere Attribute werden geschrieben
 	service_details=$(while read key value; do [ -z "$value" ] && continue; echo "$key:$value"; done <<EOF
 		public_host $(get_service_value "$service_name" "host")
-		upload $(get_service_value "$service_name" wan_speed_upload)
-		download $(get_service_value "$service_name" wan_speed_download)
-		ping $(get_service_value "$service_name" wan_ping)
+		upload $(get_service_value "$service_name" "wan_speed_upload")
+		download $(get_service_value "$service_name" "wan_speed_download")
+		ping $(get_service_value "$service_name" "wan_ping")
 EOF
 )
 	# Zeilenumbrueche durch Leerzeichen ersetzen, abschliessendes Leerzeichen entfernen

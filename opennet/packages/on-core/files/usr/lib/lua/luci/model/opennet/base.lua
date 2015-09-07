@@ -53,18 +53,31 @@ function action_settings()
 	local uci = require "luci.model.uci"
 	local cursor = uci.cursor()
 	local on_errors = {}
-	local remove_package = parse_string_pattern(luci.http.formvalue("remove"), "a-z-")
-	if remove_package then
+	-- teile den Query-String als komma-separierte Liste in Token
+	local function get_splitted_package_names(text)
+		local result = {}
+		-- nur gueltige Paketnamen (entsprechend der erlaubten Zeichen) verwenden
+		for _, token in ipairs(generic_split(text, "[^,]+")) do
+			if parse_string_pattern(token, "a-z-") then
+				table.insert(result, token)
+			end
+		end
+		return result
+	end
+	local remove_packages = get_splitted_package_names(luci.http.formvalue("remove"))
+	if not table_is_empty(remove_packages) then
 		-- stderr sollte nach stdout gehen, damit wir es als Fehlertext einblenden koennen
-		error_message = luci.sys.exec("opkg --verbosity=0 --autoremove remove '" .. remove_package .. "' 2>&1")
+		error_message = luci.sys.exec("opkg --verbosity=0 --autoremove remove '" .. string_join(remove_packages, " ") .. "' 2>&1")
 		table.insert(on_errors, error_message)
 		-- bei der Paket-Installation wird die Liste automatisch aktualisiert - bei der Entfernung müssen wir es per Hand tun
 		on_function("save_on_module_list")
 	end
-	local install_package = parse_string_pattern(luci.http.formvalue("install"), "a-z-")
-	if install_package then
-		error_message = on_function("install_from_opennet_repository", {install_package})
-		table.insert(on_errors, error_message)
+	local install_packages = get_splitted_package_names(luci.http.formvalue("install"))
+	if not table_is_empty(install_packages) then
+		if not table_is_empty(install_packages) then
+			error_message = on_function("install_from_opennet_repository", install_packages)
+			table.insert(on_errors, error_message)
+		end
 	end
 	-- Module an- und abschalten oder umkonfigurieren
 	if luci.http.formvalue("save") then

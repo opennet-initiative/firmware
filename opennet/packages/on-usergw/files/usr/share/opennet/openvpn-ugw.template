@@ -17,6 +17,9 @@ persist-key
 # man openvpn: Silence the output of replay warnings, which are a common false alarm on WiFi networks.
 mute-replay-warnings
 
+# warte mehr als 5 Minuten, um den MTU-Test zu ueberstehen
+ping-exit 400
+
 # mit der Variable "MESH_OPENVPN_DEVICE_PREFIX" synchron halten
 dev tap
 dev-type tap

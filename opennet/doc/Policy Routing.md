@@ -16,10 +16,10 @@ Nach dem Booten und bei jeder Änderung (up/down) von Netzwerk-Schnittstellen wi
 3. neue Regeln erstellen
 
 
-Policy-Routing im Opennet
+Policy Routing im Opennet
 -------------------------
 
-Die folgende Regenreihenfolge definiert den Paketfluss im Opennet. Die erste passende Regel wird verwendet.
+Die folgende Reihenfolge der Regeln definiert den Paketfluss im Opennet. Die erste passende Regel wird verwendet.
 
 Regel                                                | Erklärung
 ---------------------------------------------------- | ----------

@@ -14,149 +14,86 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
-# In diesem Skript ist ausnahmsweise die Konstruktionen "local foo=$(bar)" erlaubt.
-# Typischerweise maskiert diese Konstruktion den Exit-Code von "bar" und ist daher zu vermeiden.
-# Siehe http://mywiki.wooledge.org/BashPitfalls#local_varname.3D.24.28command.29
-# In diesem Skript tolerieren wir jedoch Fehler, da nicht klar geprueft wird, welche Module installiert wurden.
-
 print_status() {
-	local ugw_status_centralips=$(for gw in $(uci_get on-usergw.@usergw[0].centralIP); do ip route get "$gw" 2>/dev/null | awk '{if ($5 ~ "$MESH_OPENVPN_DEVICE_PREFIX") print $1}' ; done)
-	local ugw_status_centralips_no=$(echo "$ugw_status_centralips" | wc -w)
+	local service_name
+	local host
+	local wan_status
+	local vpn_status
+	local mtu_status
+	local priority
+	local offset
+	local active
+	local format_string
+	format_string="%-6s %-32s %11s %3s %3s %3s\n"
 
-	local ugw_status_tunnel_active=$(ls /tmp/opennet_ugw-*.txt 2>/dev/null || true)
-
-	local ugw_status_sharing_wan_ok=""
-	local ugw_status_sharing_possible=""
-	local count=1
-	while ( [ -n "$(uci_get openvpn.opennet_ugw$count)" ] ); do
-		onusergw_wan=$(uci_get on-usergw.opennet_ugw${count}.wan_status)
-		onusergw_mtu=$(uci_get on-usergw.opennet_ugw${count}.mtu_status)
-		uci_is_true "$onusergw_wan" && ugw_status_sharing_wan_ok="true"
-		uci_is_true "$onusergw_wan" && uci_is_true "$onusergw_mtu" && ugw_status_sharing_possible="true" && break
-		: $((count++))
-	done
-
-	local ugw_status_sharing_enabled=$(uci_get on-usergw.ugw_sharing.shareInternet)
-	local ugw_status_sharing_blocked=$(uci_get on-usergw.ugw_sharing.blockSharing)
-
-	local returnVal=$(ps | grep on_usergateway_check)
-	local ugw_status_checkWANMTUrunning=$(echo "$returnVal" | grep checkMtu)$(echo "$returnVal" | grep checkWan)
-
-
-	local output="\nStatus Internet-Sharing:\n\t"
-	if [ "$ugw_status_centralips_no" -ge "1" ]; then
-		output=$output"Internet shared (Usergateway-Tunnel active, Central Gateways connected locally)\n"
-	elif [ -n "$ugw_status_tunnel_active" ]; then
-		output=$output"Internet not shared (Internet-Sharing enabled, Usergateway-Tunnel active)\n"
-	elif uci_is_true "$ugw_status_sharing_enabled"; then
-		output=$output"Internet not shared (Internet-Sharing enabled, Usergateway-Tunnel not running)\n"
-	elif uci_is_true "$ugw_status_sharing_possible"; then
-		output=$output"Internet not shared (Internet-Sharing possible)\n"
-	else
-		output=$output"Internet-Sharing impossible\n"
-	fi
-	if [ "$ugw_status_centralips_no" = "0" ]; then
-		output=$output"\t(no central Gateway-IPs connected trough tunnel)\n"
-	elif [ "$ugw_status_centralips_no" = "1" ]; then
-		output=$output"\t(central Gateway-IP $ugw_status_centralips connected trough tunnel)\n"
-	else
-		output=$output"\t(central Gateway-IPs $ugw_status_centralips connected trough tunnel)\n"
-	fi
-
-	if uci_is_true "$ugw_status_sharing_enabled"; then
-		output=$output"\nInternet-Sharing enabled\n"
-	else
-		output=$output"\nInternet-Sharing disabled\n"
-	fi
-
-	if [ "$ugw_status_sharing_blocked" -gt "0" ]; then
-		output=$output"Internet-Sharing is currently disabled for $ugw_status_sharing_blocked Minutes. It will be automatically reenabled, but you can enable it manually if you like.\n"
-	fi
-	output=$output"\n\t\tWAN[1]\tPing[2]\tMTU to GW[3]\tMTU from GW[3]\tMTU[4]\tTunnel\n"
-	output=$output"\t\t      \t       \tconf \treal\tconf\treal\n"
-
-	count=1
-	while ( [ -n "$(uci_get openvpn.opennet_ugw$count)" ] ); do
-		onusergw_wan=$(uci_get "on-usergw.opennet_ugw${count}.wan")
-		onusergw_wan_ping=$(uci_get "on-usergw.opennet_ugw${count}.wan_ping")
-		onusergw_mtu_out_wanted=$(uci_get "on-usergw.opennet_ugw${count}.mtu_out_wanted")
-		onusergw_mtu_out_real=$(uci_get "on-usergw.opennet_ugw${count}.mtu_out_real")
-		onusergw_mtu_in_wanted=$(uci_get "on-usergw.opennet_ugw${count}.mtu_in_wanted")
-		onusergw_mtu_in_real=$(uci_get "on-usergw.opennet_ugw${count}.mtu_in_real")
-		onusergw_mtu_status=$(uci_get "on-usergw.opennet_ugw${count}.mtu_status")
-		openvpn_remote=$(uci_get "openvpn.opennet_ugw${count}.remote")
-
-		ugw_tunnel_active="------"
-		[ -e "/tmp/opennet_ugw-${openvpn_remote}.txt" ] && ugw_tunnel_active="active"
-	
-		output=$output"$openvpn_remote\t$onusergw_wan\t$onusergw_wan_ping\t$onusergw_mtu_out_wanted\t$onusergw_mtu_out_real\t$onusergw_mtu_in_wanted\t$onusergw_mtu_in_real"
-		output=$output"\t$onusergw_mtu_status\t$ugw_tunnel_active\n"
-		: $((count++))
-	done;		
-
-	output=$output"\n[1] Route to Gateway points trough WAN-device, this is required. If not check/reconfigure your WAN connection, maybe it is not working.\n"
-	output=$output"[2] If Gateway cannot be pinged, it is probably (temporarily) down. If Tunnel is already running it will be reused once Gateway becomes available again.\n"
-	output=$output"[3] If MTU (Maximum Transmission Unit) of packages send to the Gateway is not matching the configured value, the Gateway cannot be used. Check your WAN-Connection / your WAN-Router for MTU Problems.\n"
-	output=$output"[4] Maximum Transmission Unit - match of configured and measured values is required to share your Internet.\n"
-
-	[ -n "$ugw_status_checkWANMTUrunning" ] && output=$output"check running, please wait for the results...\n"
-	echo -e "$output"
-}
-
-print_usage()
-{
-	echo
-	echo "*** ugw_status supports the following options: ***"
-	echo -e "toggle_sharing \t- will toggle the internet sharing"
-	echo -e "suspend $minutes \t- will disable sharing for minutes"
-	echo -e "checkWAN       \t- will check status of WAN"
-	echo -e "checkMTU       \t- will check MTU through WAN"
-}
-
-ugw_suspend() {
-	local suspend_time=$1
-	if [ -n "$suspend_time" ]; then
-		uci -q set on-usergw.ugw_sharing.shareInternet="off"
-		uci -q set "on-usergw.ugw_sharing.blockSharing=$((suspend_time+5))"
-		/usr/sbin/on_usergateway_check shareInternet &
-	fi
-	uci commit on-usergw	# commit after every change to prevent uci memory problems
-}
-
-toggle_sharing() {
-	local sharing=$(uci_get on-usergw.ugw_sharing.shareInternet)
-	if uci_is_true "$sharing"; then
-		sharing="false"
-	else
-		sharing="true"
-		uci_delete on-usergw.ugw_sharing.blockSharing
-	fi
-	uci -q set "on-usergw.ugw_sharing.shareInternet=$sharing"
-	uci commit on-usergw	# commit after every change to prevent uci memory problems
-}
-
-case "${1:-}" in
-	"toggle_sharing")
-		toggle_sharing
-		print_status
-	;;
-	"suspend")
-		if [ $# -ge 2 -a -n "${2:-}" ]; then
-			ugw_suspend "$2"
-		else echo "ERROR: suspend requires second parameter (minutes)"
+	printf "$format_string" "active" "Hostname" "Priority" "WAN" "VPN" "MTU"
+	get_services "mesh" | sort_services_by_priority | while read service_name; do
+		host=$(get_service_value "$service_name" "host")
+		if uci_is_true "$(get_service_value "$service_name" "disabled" "false")"; then
+			# der Dienst wird ignoriert
+			printf "$format_string" "" "$host" "disabled" "" "" ""
+		else
+			priority=$(get_service_value "$service_name" "priority")
+			offset=$(get_service_value "$service_name" "offset" "0")
+			[ "$offset" -gt 0 ] && offset="+$offset"
+			[ "$offset" -ne 0 ] && priority="($offset) $priority"
+			connection_state=$(get_openvpn_service_state "$service_name")
+			if [ "$connection_state" = "active" ]; then
+				active="*"
+			elif [ "$connection_state" = "connecting" ]; then
+				active="?"
+			else
+				active=""
+			fi
+			wan_status=$(uci_is_true "$(get_service_value "$service_name" "wan_status" "false")" && echo " y " || true)
+			vpn_status=$(uci_is_true "$(get_service_value "$service_name" "vpn_status" "false")" && echo " y " || true)
+			mtu_status=$(uci_is_true "$(get_service_value "$service_name" "mtu_status" "false")" && echo " y " || true)
+			printf "$format_string" "   $active" "$host" "$priority" "$wan_status" "$vpn_status" "$mtu_status"
 		fi
+	done
+}
+
+
+print_usage() {
+	echo
+	echo "*** ugw_status supports the following actions: ***"
+	echo "check_gateway    - test the usability of a mesh gateway"
+	echo "status           - show all mesh gateways and their status"
+	echo "start            - start the mesh tunnel"
+	echo "stop             - stop the mesh tunnel"
+	echo "restart          - restart the mesh tunnel"
+}
+
+
+
+ACTION=help
+[ $# -ge 1 ] && ACTION=$1
+
+case "$ACTION" in
+	check_gateway)
+		[ $# -gt 2 ] && echo >&2 "ERROR: '$ACTION' requires one more parameter" && exit 1
+		get_services "mesh" | filter_services_by_value "host" "$2" | while read service_name; do
+			echo "$service_name" | run_cyclic_service_tests "is_mesh_gateway_usable" "0" "0"
+			for key in wan vpn mtu; do
+				printf "%s: %s" "$key" "$(get_service_value "$service_name" "${key}_status")"
+			done
+			printf "%s: %s" "result" "$(get_service_value "$service_name" "status")"
+		done
+	;;
+	status)
 		print_status
 	;;
-	"checkWAN")
-		/usr/sbin/on_usergateway_check checkWan &
-		print_status
+	start|stop|restart)
+		# leider ist diese Funktion etwas grob: eventuell koennen mehr Instanzen beeinflusst werden, als gewollt
+		/etc/init.d/openvpn "$ACTION"
 	;;
-	"checkMTU")
-		/usr/sbin/on_usergateway_check checkMtu &
-		print_status
-	;;
-	*)
-		print_status
+	help|--help)
 		print_usage
 	;;
+	*)
+		print_usage >&2
+		exit 1
+	;;
 esac
+
+exit 0

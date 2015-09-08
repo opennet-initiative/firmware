@@ -66,9 +66,12 @@ get_target_route_interface() {
 		# Die Ergebnis der Interface-Ermittlung für eine IPv6-Adresse bei fehlendem IPv6-Gateway sieht folgendermaßen aus:
 		#    root@AP-1-193:/tmp/log/on-services# ip route get 2a01:4f8:140:1222::1:7
 		#    12 2a01:4f8:140:1222::1:7 from :: dev lo  src fe80::26a4:3cff:fefd:7649  metric -1  error -1
-		# Wir ignorieren also Zeilen, die auf "error -1" enden.
+		# oder:
+		#    root@AP-2-156:~# ip route get 2001:67c:1400:2430::1
+		#    prohibit 2001:67c:1400:2430::1 from :: dev lo  table unspec  proto kernel  src fe80::216:3eff:fe34:2aa5  metric 4294967295  error -13
+		# Wir ignorieren also Zeilen, die auf "error -1" oder "error -13" enden.
 		# Fehlermeldungen (ip: RTNETLINK answers: Network is unreachable) werden ebenfalls ignoriert.
-		ip route get "$ipaddr" 2>/dev/null | grep -v ^failed_policy | grep -v "error -1$" | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
+		ip route get "$ipaddr" 2>/dev/null | grep -vE "^(failed_policy|prohibit)" | grep -vE "error -(1|13)$" | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
 	done | tail -1
 }
 

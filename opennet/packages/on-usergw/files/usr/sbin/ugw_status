@@ -75,9 +75,9 @@ case "$ACTION" in
 		get_services "mesh" | filter_services_by_value "host" "$2" | while read service_name; do
 			echo "$service_name" | run_cyclic_service_tests "is_mesh_gateway_usable" "0" "0"
 			for key in wan vpn mtu; do
-				printf "%s: %s" "$key" "$(get_service_value "$service_name" "${key}_status")"
+				printf "%s: %s\n" "$key" "$(get_service_value "$service_name" "${key}_status")"
 			done
-			printf "%s: %s" "result" "$(get_service_value "$service_name" "status")"
+			printf "%s: %s\n" "result" "$(get_service_value "$service_name" "status")"
 		done
 	;;
 	status)

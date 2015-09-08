@@ -11,12 +11,12 @@
 # 	http://www.apache.org/licenses/LICENSE-2.0
 #
 
+
 # include helper functions
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
-print_status()
-{
-	local current_gw
+
+print_status() {
 	local service_name
 	local host
 	local age
@@ -75,8 +75,7 @@ print_status()
 }
 
 
-print_usage()
-{
+print_usage() {
 	echo
 	echo "*** vpn_status supports the following actions: ***"
 	echo "add_gw IP [PORT] - manually add a gateway"
@@ -147,4 +146,3 @@ case "$ACTION" in
 esac
 
 exit 0
-

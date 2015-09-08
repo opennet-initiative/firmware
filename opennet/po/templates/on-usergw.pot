@@ -30,7 +30,7 @@ msgstr ""
 msgid "Certificate management"
 msgstr ""
 
-msgid "Connected Mesh Gateways:"
+msgid "Connected Mesh Gateways: %s"
 msgstr ""
 
 msgid ""

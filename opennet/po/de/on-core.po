@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-09-05 04:17+0200\n"
+"PO-Revision-Date: 2015-09-08 03:56+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -35,6 +35,12 @@ msgstr "Zugang zum Internet"
 
 msgid "AccessPoint (type users)"
 msgstr "Access-Point (Nutzer)"
+
+msgid "Action"
+msgstr "Aktion"
+
+msgid "Active: %s"
+msgstr "Aktiv: %s"
 
 msgid "Available Report"
 msgstr "Vorhandener Bericht"
@@ -93,6 +99,19 @@ msgstr "DNS (Namensauflösung)"
 msgid "Delete"
 msgstr "Löschen"
 
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid ""
+"Devices with multiple ethernet ports may be able to supply chained devices "
+"with power."
+msgstr ""
+"Manche Geräte mit mehreren Ethernet-Ports können verbundene Geräte mit Strom "
+"versorgen."
+
+msgid "Disabled: %s"
+msgstr "Abgeschaltet: %s"
+
 msgid ""
 "Do you want to discuss technical issues with other members of the Opennet "
 "community? You can download a detailed summary here. This will help others "
@@ -112,6 +131,9 @@ msgstr "Lade die Zertifikatsanfrage (CSR) herunter und lade sie manuell hoch"
 
 msgid "ETX: Routing Distance (default)"
 msgstr "ETX: Routing-Entfernung (Voreinstellung)"
+
+msgid "Enabled"
+msgstr ""
 
 msgid "Error: %s"
 msgstr "Fehler: %s"
@@ -181,6 +203,12 @@ msgstr "IP-Adresse(n):"
 msgid "IPv6"
 msgstr "IPv6"
 
+msgid "Install missing modules"
+msgstr ""
+
+msgid "Installed"
+msgstr ""
+
 msgid "Interface"
 msgstr "Schnittstelle"
 
@@ -245,6 +273,9 @@ msgstr "Dein Name"
 msgid "NTP (Time synchronization)"
 msgstr "NTP (Zeitsynchronisation)"
 
+msgid "Name"
+msgstr ""
+
 msgid ""
 "Neighbor-Link-Quality: how many of your test-packets did reach your neighbor"
 msgstr ""
@@ -289,6 +320,9 @@ msgstr "Opennet-Firmware Version %s"
 msgid "Opennet ID"
 msgstr "Opennet ID"
 
+msgid "Opennet Modules"
+msgstr ""
+
 msgid ""
 "Opennet-Addresses are usually given to the Access-Point based on your "
 "Opennet-ID. These are the interfaces on which OLSR is running."
@@ -312,6 +346,9 @@ msgstr "Opennet-ID / Netzwerk ID"
 msgid "Organizational Unit"
 msgstr "Organisations-Einheit"
 
+msgid "POE Passthrough"
+msgstr ""
+
 msgid ""
 "Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your "
 "first Opennet-Network-Interface, any change will reconfigure your network "
@@ -326,6 +363,9 @@ msgstr "Port-Mapping"
 
 msgid "Portmapping - Forwarding of Ports"
 msgstr "Portmapping - Weiterleitung von Ports"
+
+msgid "Previously installed modules: %s"
+msgstr ""
 
 msgid "Private Key (.key)"
 msgstr "Geheimer Schlüssel (.key)"
@@ -358,6 +398,9 @@ msgstr "Offener Zugangspunkt"
 
 msgid "Publish statistical data of network usage"
 msgstr "Veröffentlichung statistischer Daten zum Netzwerkverkehr"
+
+msgid "Recommended action"
+msgstr ""
 
 msgid "Report"
 msgstr "Zusammenfassung"
@@ -475,6 +518,10 @@ msgstr ""
 "Netzwerk weitergeleitet. Sie sind vom Internet aus direkt erreichbar."
 
 msgid ""
+"The module '%s' is currently disabled (see 'Opennet -> Base -> Settings')."
+msgstr ""
+
+msgid ""
 "The specified opennet ID is invalid. Please try again (input format: 'X."
 "YYY')."
 msgstr ""
@@ -515,6 +562,9 @@ msgstr "Unbekanntes Protokoll"
 
 msgid "Uptime"
 msgstr "Gerätelaufzeit"
+
+msgid "Useful tools for network and system analysis"
+msgstr ""
 
 msgid "UserGateway (type user gateway)"
 msgstr "Usergateway (Internet-Freigabe)"

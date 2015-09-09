@@ -104,6 +104,7 @@ You may obtain a copy of the License at
 		var speed;
 		var speed_abbr;
 		var unreachable;
+		var sorting = "<%= sorting %>";
 		var result = "";
 		// "remote" menschenfreundlich setzen
 		remote = gateway.host;
@@ -143,7 +144,7 @@ You may obtain a copy of the License at
 		if (unreachable) {
 			// unerreichbare Knoten werden als solche markiert
 			result += '<td class="cbi-value-field"><%:unreachable%></td>';
-		} else if ("<%=sorting%>" == "manual") {
+		} else if (sorting == "manual") {
 			// im manuellen Modus ist die Entfernung egal - also ignorieren wir den Offset
 			result += String.format('<td class="cbi-value-field">%.2f</td>', gateway.distance);
 		} else {
@@ -170,9 +171,12 @@ You may obtain a copy of the License at
 		if (gateway.disabled) {
 			result += String.format('<input class="cbi-button cbi-button-enable cbi-button-small" type="submit" value="%s" title="<%:enable%>" name="enable_service" />', gateway.id);
 		} else {
-			result += String.format('<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="%s" title="<%:move to top and connect immediately%>" name="move_service_top" />', gateway.id);
-			result += String.format('<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="%s" title="<%:move up%>" name="move_service_up" />', gateway.id);
-			result += String.format('<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="%s" title="<%:move down%>" name="move_service_down" />', gateway.id);
+			// die Verschiebe-Aktionen sind nur auf erreichbare Knoten oder im Fall manueller Sortierung anwendbar
+			if ((sorting == "manual") || !unreachable) {
+				result += String.format('<input class="cbi-button cbi-button-top cbi-button-small" type="submit" value="%s" title="<%:move to top and connect immediately%>" name="move_service_top" />', gateway.id);
+				result += String.format('<input class="cbi-button cbi-button-up cbi-button-small" type="submit" value="%s" title="<%:move up%>" name="move_service_up" />', gateway.id);
+				result += String.format('<input class="cbi-button cbi-button-down cbi-button-small" type="submit" value="%s" title="<%:move down%>" name="move_service_down" />', gateway.id);
+			}
 			// den Loeschen-Knopf deaktivieren wir visuell, falls die Quelle nicht "manuell" sein sollte
 			if (gateway.source != "manual") {
 				// Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten

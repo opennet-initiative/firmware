@@ -18,10 +18,6 @@ LOG_BASE_DIR="${IPKG_INSTROOT:-}/var/log"
 LOG_MESSAGE_LENGTH=420
 # Verzeichnis für auszuführende Aktionen
 SCHEDULING_DIR="${IPKG_INSTROOT:-}/var/run/on-scheduling.d"
-# Basis-URL für Opennet-Paketinstallationen
-ON_OPKG_REPOSITORY_URL_PREFIX="http://downloads.opennet-initiative.de/openwrt"
-# temporäre Datei für Installation von Opennet-Paketen
-ON_OPKG_CONF_PATH="${IPKG_INSTROOT:-}/tmp/opkg-opennet.conf"
 # beim ersten Pruefen wird der Debug-Modus ermittelt
 DEBUG_ENABLED=
 
@@ -701,103 +697,6 @@ get_potential_error_messages() {
 }
 
 
-## @fn install_from_opennet_repository()
-## @param packages Ein oder mehrere zu installierende Software-Paket
-## @returns Eventuelle Fehlermeldungen werden auf die Standardausgabe geschrieben. Der Exitcode ist immer Null.
-## @brief Installiere ein Paket aus den Opennet-Repositories.
-## @details Für die Installation von Opennet-relevanten Paketen wird eine separate opkg.conf-Datei verwendet.
-##   Alle nicht-opennet-relevanten Pakete sollten - wie gewohnt - aus den openwrt-Repositories heraus installiert
-##   werden, da deren Paket-Liste umfassender ist.
-##   Die opkg.conf wird im tmpfs erzeugt, falls sie noch nicht vorhanden ist. Eventuelle manuelle Nachkorrekturen
-##   bleiben also bis zum nächsten Reboot erhalten.
-install_from_opennet_repository() {
-	trap "error_trap install_from_opennet_repository '$*'" $GUARD_TRAPS
-	local package
-	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
-	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
-	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$@"
-	for package in "$@"; do
-		if get_on_modules | grep -qwF "$package"; then
-			# Falls es ein opennet-Modul ist, dann aktiviere es automatisch nach der Installation.
-			# Dies dürfte für den Nutzer am wenigsten überraschend sein.
-			enable_on_module "$package"
-		fi
-	done
-	# anschließend speichern wir den aktuellen Zustand
-	save_on_module_list
-}
-
-
-# Ausführung eines opkg-Kommnados mit der opennet-Repository-Konfiguration und minimaler Ausgabe (nur Fehler) auf stdout.
-_run_opennet_opkg() {
-	# opkg ausfuehren und dabei die angegebene Fehlermeldung ignorieren (typisch fuer Paket-Installation nach Upgrade)
-	opkg --verbosity=0 --conf "$ON_OPKG_CONF_PATH" "$@" 2>&1 \
-		| grep -vF "resolve_conffiles: Existing conffile /etc/config/openvpn is different from the conffile in the new package. The new conffile will be placed at /etc/config/openvpn-opkg." \
-		| grep -v "^Collected errors:$" \
-		|| true
-}
-
-
-## @fn save_on_module_list()
-## @brief Speichere die aktuelle Liste der installierten opennet-Module in der uci-Konfiguration.
-## @details Nach einer Aktualisierung ermöglicht diese Sicherung die Nachinstallation fehlender Pakete.
-save_on_module_list() {
-	local modname
-	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
-	get_on_modules | while read modname; do
-		is_package_installed "$modname" \
-			&& uci_add_list "on-core.modules.installed" "$modname" \
-			|| uci_delete_list "on-core.modules.installed" "$modname"
-	done
-	apply_changes on-core
-}
-
-
-## @fn clear_cache_opennet_opkg()
-## @brief Lösche die eventuell vorhandene opennet-opkg-Konfiguration (z.B. nach einem Update).
-clear_cache_opennet_opkg() {
-	rm -f "$ON_OPKG_CONF_PATH"
-}
-
-
-## @fn generate_opennet_opkg_config()
-## @brief Liefere den Inhalt einer opkg.conf für das Opennet-Paket-Repository zurück.
-## @details Die aktuelle Version wird aus dem openwrt-Versionsstring gelesen.
-generate_opennet_opkg_config() {
-	trap "error_trap create_opennet_opkg_config '$*'" $GUARD_TRAPS
-	# ermittle die Firmware-Repository-URL
-	local firmware_version
-	firmware_version=$(get_on_firmware_version)
-	# leere Versionsnummer? Damit können wir nichts anfangen.
-	[ -z "$firmware_version" ] && msg_error "Failed to retrieve opennet firmware version for opkg repository URL" && return 0
-	# snapshots erkennen wir aktuell daran, dass auch Buchstaben in der Versionsnummer vorkommen
-	local version_path
-	if echo "$firmware_version" | grep -q "[a-zA-Z]"; then
-		# ein Buchstabe wurde entdeckt: unstable
-		version_path="testing/$firmware_version"
-	else
-		# kein Buchstabe wurde entdeckt: stable
-		# wir schneiden alles ab dem ersten Bindestrich ab
-		version_path="stable/$(echo "$firmware_version" | cut -f 1 -d -)"
-	fi
-	# Hole "DISTRIB_TARGET" und entferne potentielle "/generic"-Suffixe (z.B. ar71xx und x86),
-	# da wir dies in unserem Repository nicht abbilden.
-	local arch_path
-	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
-	local repository_url="$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/$arch_path/packages"
-	# schreibe den Inahlt der neuen OPKG-Konfiguration
-	echo "dest root /"
-	echo "dest ram /tmp"
-	echo "lists_dir ext /var/opkg-lists-opennet"
-	echo "option overlay_root /overlay"
-	echo
-	local feed
-	for feed in base packages routing telephony luci opennet; do
-		echo "src/gz on_$feed $repository_url/$feed"
-	done
-}
-
-
 # Ersetze eine Zeile durch einen neuen Inhalt. Falls das Zeilenmuster nicht vorhanden ist, wird eine neue Zeile eingefuegt.
 # Dies entspricht der Funktionalitaet des "lineinfile"-Moduls von ansible.
 # Parameter filename: der Dateiname
@@ -819,16 +718,6 @@ line_in_file() {
 		# die neue Zeile hinzufuegen, falls das Muster in der alten Datei nicht vorhanden war
 		grep -q "$pattern" "$filename" || echo "$new_line"
 	) | update_file_if_changed "$filename" || true
-}
-
-
-## @fn is_package_installed()
-## @brief Prüfe, ob ein opkg-Paket installiert ist.
-## @param package Name des Pakets
-is_package_installed() {
-	local package="$1"
-	opkg list-installed | grep -q -w "^$package" && return 0
-	trap "" $GUARD_TRAPS && return 1
 }
 
 
@@ -874,6 +763,7 @@ get_random() {
 	local range="$1"
 	echo "$range" | awk '{srand(systime()); print int(rand() * $1); }'
 }
+
 
 ## @fn get_local_bias_numer()
 ## @brief Ermittle eine lokale einzigartige Zahl, die als dauerhaft unveränderlich angenommen werden kann.
@@ -1007,40 +897,6 @@ schedule_parts() {
 		# ignoriere Fehler bei der Ausfuehrung
 		echo "$fname" | schedule_task
 	done
-}
-
-
-## @fn on_opkg_postinst_default()
-## @brief Übliche Nachbereitung einer on-Paket-Installation.
-## @details Caches löschen, uci-defaults anwenden, on-core-Bootskript ausführen
-on_opkg_postinst_default() {
-	# Reset des Luci-Cache und Shell-Cache
-	clear_caches
-	# Paket-Initialisierungen durchfuehren, falls wir in einem echten System sind.
-	# In der Paket-Bau-Phase funktioniert die untenstehende Aktion nicht, da eine
-	# Datei fehlt, die in der /etc/init.d/boot geladen wird.
-	if [ -z "${IPKG_INSTROOT:-}" ]; then
-		msg_info "Applying uci-defaults after package installation"
-		# Die Angabe von IPKG_INSTROOT ist hier muessig - aber vielleicht
-		# koennen wir die obige Bedingung irgendwann entfernen.
-		(
-			# der Rest sollte ohne Vorsicht stattfinden
-			set +eu
-			. "${IPKG_INSTROOT:-}/etc/init.d/boot"
-			uci_apply_defaults
-			# Boot-Skript aktivieren und ausführen (falls noch nicht geschehen)
-			/etc/init.d/on-core enable 2>/dev/null || true
-			/etc/init.d/on-core start
-		)
-	fi
-}
-
-
-## @fn on_opkg_postrm_default()
-## @brief Übliche Nachbereitung einer on-Paket-Entfernung
-## @details Caches löschen
-on_opkg_postrm_default() {
-	clear_caches
 }
 
 

@@ -78,11 +78,20 @@ is_mesh_gateway_usable() {
 			set_service_value "$service_name" "$key" ""
 		done
 	else
-		local mtu_result
-		mtu_result=$(openvpn_get_mtu "$service_name")
-		msg_debug "MTU test result ($service_name): $mtu_result"
-		echo "$mtu_result" | update_mesh_gateway_mtu_state "$service_name"
-		uci_is_true "$(get_service_value "$service_name" "mtu_status")" || failed=1
+		if [ -z "$(get_openvpn_service_state "$service_name")" ]; then
+			# es läuft aktuell keine Verbindung - wir können testen
+			local mtu_result
+			mtu_result=$(openvpn_get_mtu "$service_name")
+			msg_debug "MTU test result ($service_name): $mtu_result"
+			echo "$mtu_result" | update_mesh_gateway_mtu_state "$service_name"
+			uci_is_true "$(get_service_value "$service_name" "mtu_status" "false")" || failed=1
+		else
+			# Aktuell läuft eine Verbindung: ein MTU-Test würde diese unterbrechen (was zu
+			# wechselseitiger Trennung führen würde). Wir behalten daher das alte mtu-Ergebnis bei.
+			# Ein Abbruch einer Verbindung erfolgt also lediglich, wenn die VPN-Verbindung komplett
+			# nicht mehr nutzbar ist.
+			true
+		fi
 	fi
 	[ -z "$failed" ] && return 0
 	trap "" $GUARD_TRAPS && return 1

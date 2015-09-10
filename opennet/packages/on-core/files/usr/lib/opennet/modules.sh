@@ -4,7 +4,8 @@
 ## @{
 
 # Basis-URL für Opennet-Paketinstallationen
-ON_OPKG_REPOSITORY_URL_PREFIX="http://downloads.opennet-initiative.de/openwrt"
+ON_OPKG_REPOSITORY_URL_PREFIX_OPENNET="http://downloads.on/openwrt"
+ON_OPKG_REPOSITORY_URL_PREFIX_INTERNET="http://downloads.opennet-initiative.de/openwrt"
 # temporäre Datei für Installation von Opennet-Paketen
 ON_OPKG_CONF_PATH="${IPKG_INSTROOT:-}/tmp/opkg-opennet.conf"
 
@@ -90,6 +91,8 @@ install_from_opennet_repository() {
 	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$@"
 	for package in "$@"; do
 		if get_on_modules | grep -qwF "$package"; then
+			# Eventuell schlug die Installation fehl?
+			is_package_installed "$package" || continue
 			# Falls es ein opennet-Modul ist, dann aktiviere es automatisch nach der Installation.
 			# Dies dürfte für den Nutzer am wenigsten überraschend sein.
 			enable_on_module "$package"
@@ -132,11 +135,23 @@ clear_cache_opennet_opkg() {
 }
 
 
-## @fn generate_opennet_opkg_config()
-## @brief Liefere den Inhalt einer opkg.conf für das Opennet-Paket-Repository zurück.
-## @details Die aktuelle Version wird aus dem openwrt-Versionsstring gelesen.
-generate_opennet_opkg_config() {
-	trap "error_trap create_opennet_opkg_config '$*'" $GUARD_TRAPS
+## @fn get_default_opennet_opkg_repository_url()
+## @param target_zone Entweder "internet" oder "opennet".
+## @brief Ermittle die automatisch ermittelte URL für die Nachinstallation von Paketen.
+## @returns Liefert die Basis-URL bis einschließlich "/packages". Lediglich der Feed-Name ist anzuhängen.
+get_default_opennet_opkg_repository_url() {
+	trap "error_trap get_default_opennet_opkg_repository_url '$*'" $GUARD_TRAPS
+	local target_zone="$1"
+	local prefix
+	if [ "$target_zone" = "opennet" ]; then
+		prefix="$ON_OPKG_REPOSITORY_URL_PREFIX_OPENNET"
+	elif [ "$target_zone" = "internet" ]; then
+		prefix="$ON_OPKG_REPOSITORY_URL_PREFIX_INTERNET"
+	else
+		msg_info "Invalid opkg repository target zone requested: $target_zone"
+		# sinnvolle Rueckfalloption verwenden
+		prefix="$ON_OPKG_REPOSITORY_URL_PREFIX_OPENNET"
+	fi
 	# ermittle die Firmware-Repository-URL
 	local firmware_version
 	firmware_version=$(get_on_firmware_version)
@@ -156,7 +171,41 @@ generate_opennet_opkg_config() {
 	# da wir dies in unserem Repository nicht abbilden.
 	local arch_path
 	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
-	local repository_url="$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/$arch_path/packages"
+	echo "$prefix/$version_path/$arch_path/packages"
+}
+
+
+## @fn get_configured_opennet_opkg_repository_url()
+## @brief Ermittle die aktuell konfigurierte Repository-URL.
+get_configured_opennet_opkg_repository_url() {
+	local prefix
+	prefix=$(uci_get "on-core.modules.repository_url")
+	[ -n "$prefix" ] && echo "$prefix" || get_default_opennet_opkg_repository_url "opennet"
+}
+
+
+## @fn set_configured_opennet_opkg_repository_url()
+## @param repo_url Die neue Repository-URL (bis einschliesslich "/packages").
+## @brief Ändere die aktuell konfigurierte Repository-URL.
+## @details Die URL wird via uci gespeichert. Falls sie identisch mit der Standard-URL ist, wird die Einstellung gelöscht.
+set_configured_opennet_opkg_repository_url() {
+	local repo_url="$1"
+	if [ -z "$repo_url" ] || [ "$repo_url" = "$(get_default_opennet_opkg_repository_url "opennet")" ]; then
+		# Standard-Wert: loeschen
+		uci_delete "on-core.modules.repository_url"
+	else
+		uci set "on-core.modules.repository_url=$repo_url"
+	fi
+	clear_cache_opennet_opkg
+}
+
+
+## @fn generate_opennet_opkg_config()
+## @brief Liefere den Inhalt einer opkg.conf für das Opennet-Paket-Repository zurück.
+## @details Die aktuelle Version wird aus dem openwrt-Versionsstring gelesen.
+generate_opennet_opkg_config() {
+	trap "error_trap generate_opennet_opkg_config '$*'" $GUARD_TRAPS
+	local repository_url="$(get_configured_opennet_opkg_repository_url)"
 	# schreibe den Inahlt der neuen OPKG-Konfiguration
 	echo "dest root /"
 	echo "dest ram /tmp"

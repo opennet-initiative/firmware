@@ -165,26 +165,19 @@ get_olsr_service_name_from_description() {
 	local service_type
 	local details
 	local public_host
+	local scheme
+	local host
+	local path
+	local protocol
 	fields=$(echo "$service_description" | parse_olsr_service_descriptions)
 	port=$(echo "$fields" | cut -f 3)
 	service_type=$(echo "$fields" | cut -f 6)
 	details=$(echo "$fields" | cut -f 7)
-	public_host=$(echo "$details" | get_from_key_value_list "public_host" ":")
-	if [ -n "$public_host" ]; then
-		# ein relay-Dienst
-		get_services "$service_type" | filter_services_by_value "local_relay_port" "$port" | head -1
-	else
-		# ein nicht-relay-Dienst
-		local scheme
-		local host
-		local path
-		local protocol
-		scheme=$(echo "$fields" | cut -f 1)
-		host=$(echo "$fields" | cut -f 2)
-		path=$(echo "$fields" | cut -f 4)
-		protocol=$(echo "$fields" | cut -f 5)
-		get_service_name "$service_type" "$scheme" "$host" "$port" "$protocol" "$path"
-	fi
+	scheme=$(echo "$fields" | cut -f 1)
+	host=$(echo "$fields" | cut -f 2)
+	path=$(echo "$fields" | cut -f 4)
+	protocol=$(echo "$fields" | cut -f 5)
+	get_service_name "$service_type" "$scheme" "$host" "$port" "$protocol" "$path"
 }
 
 

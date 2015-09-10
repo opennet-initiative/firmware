@@ -260,7 +260,7 @@ function status_modules()
 		result = result .. '<div class="errorbox">'
 			.. luci.i18n.translatef("Previously installed modules: %s", string_join(missing, ", ")) .. '<br/>'
 			.. luci.i18n.translate("Recommended action") .. ': '
-			.. '<a href="' .. on_url("basis", "einstellungen") .. '?install=' .. string_join(missing, ",") .. '">'
+			.. '<a href="' .. on_url("basis", "module") .. '?install=' .. string_join(missing, ",") .. '">'
 			.. luci.i18n.translate("Install missing modules")
 			.. '</a></div>'
 	end

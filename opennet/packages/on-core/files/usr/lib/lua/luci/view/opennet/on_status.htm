@@ -74,7 +74,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 					<td class="cbi-section-table-cell"><%=item[2]%>:</td>
 					<td class="cbi-section-table-cell" id="<%=item[1]%>">
 					<% if item.mod_name and not on_bool_function("is_on_module_installed_and_enabled", {item.mod_name}) then %>
-						<%= luci.i18n.translatef('disabled (see <a href="%s">Modules</a>)', on_url("basis", "einstellungen")) %>
+						<%= luci.i18n.translatef('disabled (see <a href="%s">Modules</a>)', on_url("basis", "module")) %>
 					<% elseif item.url then %>
 						<%= get_html_loading_spinner(item[1] .. "_spinnr", "vertical-align:middle;") %>
 						<script type="text/javascript">

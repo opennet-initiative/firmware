@@ -48,10 +48,8 @@ function get_report_timestamp()
 end
 
 
-function action_settings()
+function action_modules()
 	require("luci.sys")
-	local uci = require "luci.model.uci"
-	local cursor = uci.cursor()
 	local on_errors = {}
 	-- teile den Query-String als komma-separierte Liste in Token
 	local function get_splitted_package_names(text)
@@ -79,9 +77,9 @@ function action_settings()
 			table.insert(on_errors, error_message)
 		end
 	end
-	-- Module an- und abschalten oder umkonfigurieren
+	-- Repository-URL ändern oder Module an- und abschalten
 	if luci.http.formvalue("save") then
-		-- Module
+		-- Modulaktivierung
 		for _, module in ipairs(line_split(on_function("get_on_modules"))) do
 			if on_bool_function("is_package_installed", {module}) then
 				local enabled = on_bool_function("is_on_module_installed_and_enabled", {module})
@@ -92,6 +90,28 @@ function action_settings()
 				end
 			end
 		end
+		-- Repository-URL
+		local current_url = on_function("get_configured_opennet_opkg_repository_url")
+		local new_url
+		if luci.http.formvalue("repository_url") == "custom" then
+			new_url = luci.http.formvalue("repository_url_custom")
+		else
+			new_url = luci.http.formvalue("repository_url")
+		end
+		if new_url ~= current_url then
+			on_function("set_configured_opennet_opkg_repository_url", {new_url})
+		end
+	end
+	luci.template.render("opennet/on_modules", { on_errors=on_errors })
+end
+
+
+function action_settings()
+	require("luci.sys")
+	local uci = require "luci.model.uci"
+	local cursor = uci.cursor()
+	local on_errors = {}
+	if luci.http.formvalue("save") then
 		-- Dienst-Sortierung
 		for _, key in ipairs({"use_olsrd_dns", "use_olsrd_ntp"}) do
 			if luci.http.formvalue(key) then

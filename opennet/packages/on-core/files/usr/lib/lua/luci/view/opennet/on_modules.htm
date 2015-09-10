@@ -1,0 +1,121 @@
+<%#
+Opennet Firmware
+
+Copyright 2015 Lars Kruse <devel@sumpfralle.de>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+<%+header%>
+
+<%
+require("luci.model.opennet.funcs")
+
+if not on_bool_function("has_opennet_dns") then
+	table.insert(on_errors, luci.i18n.translate("Opennet-DNS service is not available, yet (or quite slow). Please verify that you are connected to the network. A few minutes later DNS should be available. DNS is required for many features."))
+end
+
+-- alle Module mit uebersetzbarer Beschreibung sollten hier aufgelistet werden
+-- Module, die hier fehlen, werden ohne Beschreibungstext angezeigt
+local on_module_descriptions = {}
+on_module_descriptions["on-openvpn"] = luci.i18n.translate("Access the Internet")
+on_module_descriptions["on-usergw"] = luci.i18n.translate("Share your local internet connection with other members")
+on_module_descriptions["on-captive-portal"] = luci.i18n.translate("Provide unrestricted internet access via Opennet to your vicinity")
+on_module_descriptions["on-monitoring"] = luci.i18n.translate("Publish statistical data of network usage")
+on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for network and system analysis")
+%>
+
+<h2><a id="content" name="content"><%:Modules and Features%></a></h2>
+<%= html_display_error_list(on_errors) %>
+
+<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
+<div class="cbi-map"><fieldset class="cbi-section">
+	<legend><%:Status of Modules%></legend>
+		<div class="cbi-section-descr"><%:The Opennet Firmware consists of multiple modules providing distinct features within the network. Please pick which features should be enabled for this device.%></div>
+		<table class="cbi-section-table">
+		<tr class="cbi-section-table-titles">
+			<th class="cbi-section-table-cell"><%:Name%></th>
+			<th class="cbi-section-table-cell"><%:Installed%></th>
+			<th class="cbi-section-table-cell"><%:Enabled%></th>
+			<th class="cbi-section-table-cell"><%:Action%></th>
+			<th class="cbi-section-table-cell"><%:Description%></th>
+		</tr>
+		<% for _, mod_name in ipairs(line_split(on_function("get_on_modules"))) do
+			local is_installed = on_bool_function("is_package_installed", { mod_name })
+			local is_enabled = on_bool_function("is_on_module_installed_and_enabled", { mod_name })
+			local action_label
+			local action_url
+		%>
+			<tr class="cbi-section-table-row">
+				<td class="cbi-section-table-cell"><%= mod_name %></td>
+				<td class="cbi-section-table-cell opennet-bool" status="<%= is_installed and "y" or "" %>" />
+				<td class="cbi-section-table-cell">
+					<input class="cbi-input-checkbox" value="1" type="checkbox"
+						 id="<%= mod_name %>" name="<%= mod_name %>_enabled"
+						 <%= is_enabled and 'checked="checked"' or '' %>
+						 <%= is_installed and "" or 'disabled="disabled"' %> />
+				</td>
+				<td class="cbi-section-table-cell">
+					<% if is_installed then
+						action_label = "remove"
+						action_url = REQUEST_URI .. "?remove=" .. mod_name
+					else
+						action_label = "install"
+						action_url = REQUEST_URI .. "?install=" .. mod_name
+					end %>
+					<a href="<%= action_url %>"><%= action_label %></a>
+				</td>
+				<td class="cbi-section-table-cell"><%= on_module_descriptions[mod_name] or mod_name %></td>
+			</tr>
+		<% end %>
+		</table>
+</fieldset></div>
+
+<div class="cbi-map"><fieldset class="cbi-section">
+<legend><%:Package Sources%></legend>
+	<div class="cbi-section-descr"><%:Choose your preferred source of packages depending on your network connection.%></div>
+	<%
+		local repo_url_opennet = on_function("get_default_opennet_opkg_repository_url", {"opennet"})
+		local repo_url_internet = on_function("get_default_opennet_opkg_repository_url", {"internet"})
+		local configured_repo_url = on_function("get_configured_opennet_opkg_repository_url")
+		function checked_if_true(value)
+			if value then
+				return 'checked="checked"'
+			else
+				return ""
+			end
+		end
+	%>
+	<div class="cbi-section-node">
+		<div class="cbi-value">
+			<label class="cbi-value-title" for="repository_url_opennet"
+				title="<%= repo_url_opennet %>"><%:Opennet%></label>
+			<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url_opennet"
+				value="<%= repo_url_opennet %>" <%= checked_if_true(repo_url_opennet == configured_repo_url) %> />
+		</div>
+		<div class="cbi-value">
+			<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url_internet"
+				value="<%= repo_url_internet %>" <%= checked_if_true(repo_url_internet == configured_repo_url) %> />
+			<label class="cbi-value-title" for="repository_url_internet"
+				title="<%= repo_url_internet %>"><%:Internet%></label>
+		</div>
+		<div class="cbi-value">
+			<label class="cbi-value-title" for="repository_url_custom"><%:Custom%></label>
+			<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url_custom"
+				value="custom"
+				<%= checked_if_true((repo_url_internet ~= configured_repo_url) and (repo_url_opennet ~= configured_repo_url)) %> />
+			<input type="text" name="repository_url_custom" value="<%= configured_repo_url %>" />
+		</div>
+	</div>
+</fieldset></div>
+
+<div class="cbi-page-actions">
+	<input class="cbi-button cbi-button-save" type="submit" name="save" value="<%:Save%>" />
+</div>
+</form>
+
+<%+footer%>

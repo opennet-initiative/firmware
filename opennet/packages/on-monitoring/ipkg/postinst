@@ -3,10 +3,14 @@
 [ "${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 
 # zuerst die Caches zuruecksetzen
+# erst nach der Cache-Loeschung sind die neuen Funktionen verfuegbar
 on-function on_opkg_postinst_default
 
-# nach der Cache-Loeschung ist die neue Funktion verfuegbar
-on-function enable_munin_plugins
+# Leider, leider ist muninlite noch nicht installiert, wenn diese Funktion aufgerufen wird.
+# Daher warten wir einfach ein wenig und hoffen, dass es zwischendurch keinen Neustart gibt.
+
+# Patch auf /usr/sbin/munin-node anwenden, um die Verwendung von Modulen zu ermöglichen
+on-function run_delayed_in_background 20 enable_munin_plugins
 
 # munin starten oder stoppen (je nach Modul-Aktivierung)
-on-function update_monitoring_state
+on-function run_delayed_in_background 30 update_monitoring_state

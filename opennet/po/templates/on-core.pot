@@ -72,7 +72,15 @@ msgid ""
 "request"
 msgstr ""
 
+msgid ""
+"Choose your preferred source of packages depending on your network "
+"connection."
+msgstr ""
+
 msgid "Country"
+msgstr ""
+
+msgid "Custom"
 msgstr ""
 
 msgid "DNS (Name resolution)"
@@ -181,6 +189,9 @@ msgstr ""
 msgid "Interface"
 msgstr ""
 
+msgid "Internet"
+msgstr ""
+
 msgid "Internet Sharing"
 msgstr ""
 
@@ -236,6 +247,12 @@ msgid "Member Email Address"
 msgstr ""
 
 msgid "Member Name"
+msgstr ""
+
+msgid "Modules"
+msgstr ""
+
+msgid "Modules and Features"
 msgstr ""
 
 msgid "NTP (Time synchronization)"
@@ -305,6 +322,9 @@ msgid "Organizational Unit"
 msgstr ""
 
 msgid "POE Passthrough"
+msgstr ""
+
+msgid "Package Sources"
 msgstr ""
 
 msgid ""

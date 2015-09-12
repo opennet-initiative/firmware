@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-09-08 03:56+0200\n"
+"PO-Revision-Date: 2015-09-12 17:31+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -90,8 +90,16 @@ msgid ""
 msgstr ""
 "Wähle einen der folgenden Wege für die Einreichung Deiner Zertifikat-Anfrage"
 
+msgid ""
+"Choose your preferred source of packages depending on your network "
+"connection."
+msgstr "Wähle deine Paketquelle in Abhängigkeit von deiner Netzwerkanbindung"
+
 msgid "Country"
 msgstr "Land"
+
+msgid "Custom"
+msgstr "Selbstgewählt"
 
 msgid "DNS (Name resolution)"
 msgstr "DNS (Namensauflösung)"
@@ -133,7 +141,7 @@ msgid "ETX: Routing Distance (default)"
 msgstr "ETX: Routing-Entfernung (Voreinstellung)"
 
 msgid "Enabled"
-msgstr ""
+msgstr "Aktiviert"
 
 msgid "Error: %s"
 msgstr "Fehler: %s"
@@ -204,13 +212,16 @@ msgid "IPv6"
 msgstr "IPv6"
 
 msgid "Install missing modules"
-msgstr ""
+msgstr "Fehlende Module installieren"
 
 msgid "Installed"
-msgstr ""
+msgstr "Installiert"
 
 msgid "Interface"
 msgstr "Schnittstelle"
+
+msgid "Internet"
+msgstr "Internet"
 
 msgid "Internet Sharing"
 msgstr "Internet Freigabe"
@@ -270,11 +281,17 @@ msgstr "Deine EMail Adresse"
 msgid "Member Name"
 msgstr "Dein Name"
 
+msgid "Modules"
+msgstr "Module"
+
+msgid "Modules and Features"
+msgstr "Module und Funktionen"
+
 msgid "NTP (Time synchronization)"
 msgstr "NTP (Zeitsynchronisation)"
 
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 msgid ""
 "Neighbor-Link-Quality: how many of your test-packets did reach your neighbor"
@@ -321,7 +338,7 @@ msgid "Opennet ID"
 msgstr "Opennet ID"
 
 msgid "Opennet Modules"
-msgstr ""
+msgstr "Opennet-Module"
 
 msgid ""
 "Opennet-Addresses are usually given to the Access-Point based on your "
@@ -347,7 +364,10 @@ msgid "Organizational Unit"
 msgstr "Organisations-Einheit"
 
 msgid "POE Passthrough"
-msgstr ""
+msgstr "POE-Durchleitung"
+
+msgid "Package Sources"
+msgstr "Paketquellen"
 
 msgid ""
 "Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your "
@@ -365,7 +385,7 @@ msgid "Portmapping - Forwarding of Ports"
 msgstr "Portmapping - Weiterleitung von Ports"
 
 msgid "Previously installed modules: %s"
-msgstr ""
+msgstr "Zuvor installierte Module: %s"
 
 msgid "Private Key (.key)"
 msgstr "Geheimer Schlüssel (.key)"
@@ -400,7 +420,7 @@ msgid "Publish statistical data of network usage"
 msgstr "Veröffentlichung statistischer Daten zum Netzwerkverkehr"
 
 msgid "Recommended action"
-msgstr ""
+msgstr "Handlungsempfehlung"
 
 msgid "Report"
 msgstr "Zusammenfassung"
@@ -520,6 +540,8 @@ msgstr ""
 msgid ""
 "The module '%s' is currently disabled (see 'Opennet -> Base -> Settings')."
 msgstr ""
+"Das Modul '%s' ist derzeit abgeschaltet (siehe 'Opennet-> Basis-> "
+"Einstellungen')."
 
 msgid ""
 "The specified opennet ID is invalid. Please try again (input format: 'X."
@@ -564,7 +586,7 @@ msgid "Uptime"
 msgstr "Gerätelaufzeit"
 
 msgid "Useful tools for network and system analysis"
-msgstr ""
+msgstr "Nützliche Werkzeuge für die Netzwerk- und System-Analyse"
 
 msgid "UserGateway (type user gateway)"
 msgstr "Usergateway (Internet-Freigabe)"

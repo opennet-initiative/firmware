@@ -372,7 +372,8 @@ apply_changes() {
 				/etc/init.d/olsrd reload || true
 				;;
 			openvpn)
-				/etc/init.d/openvpn reload || true
+				# eventuell ist das openvpn-Paket nicht installiert (siehe on-migrations)
+				[ -e /etc/init.d/openvpn ] && /etc/init.d/openvpn reload || true
 				;;
 			nodogsplash)
 				captive_portal_reload || true

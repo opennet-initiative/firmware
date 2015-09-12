@@ -15,9 +15,11 @@ MESH_OPENVPN_DEVICE_PREFIX=tap
 RELAYABLE_SERVICE_PREFIX="proxy-"
 
 
-# hole einen der default-Werte der aktuellen Firmware
-# Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
-# Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfuegbar.
+## @fn get_on_usergw_default()
+## @param key Schlüssel des gewünschten default-Werts.
+## @brief Hole default-Werte der UGW-Funktionalität der aktuellen Firmware.
+## @details Die default-Werte werden nicht von der Konfigurationsverwaltung uci verwaltet.
+##   Somit sind nach jedem Upgrade imer die neuesten Standard-Werte verfuegbar.
 get_on_usergw_default() {
 	_get_file_dict_value "$1" "$ON_USERGW_DEFAULTS_FILE"
 }
@@ -45,6 +47,10 @@ verify_mesh_gateways() {
 }
 
 
+## @fn is_mesh_gateway_usable()
+## @param service_name zu prüfender Dienst
+## @brief Prüfe ob der Dienst alle notwendigen Tests besteht.
+## @details Ein Test dauert bis zu 5 Minuten. Falls bereits eine VPN-Verbindung besteht, wird der MTU-Test übersprungen.
 is_mesh_gateway_usable() {
 	trap "error_trap is_mesh_gateway_usable '$*'" $GUARD_TRAPS
 	local service_name="$1"
@@ -238,7 +244,7 @@ update_mesh_gateway_mtu_state() {
 }
 
 
-## @fn sync_mesh_gateway_connection_processes()
+## @fn sync_mesh_openvpn_connection_processes()
 ## @brief Erzeuge openvpn-Konfigurationen für die als nutzbar markierten Dienste und entferne
 ##   die Konfigurationen von unbrauchbaren Dienste. Dabei wird auch die maximale Anzahl von
 ##   mesh-OpenVPN-Verbindungen beachtet.
@@ -274,11 +280,11 @@ sync_mesh_openvpn_connection_processes() {
 # Ergebnis (tab-separiert):
 #   RX TX
 # (empfangene|gesendete KBits/s)
-get_device_traffic() {
+_get_device_traffic() {
 	local device="$1"
 	local seconds="$2"
 	local sys_path="/sys/class/net/$device"
-	[ ! -d "$sys_path" ] && msg_error "Failed to find '$sys_path' for 'get_device_traffic'" && return 0
+	[ ! -d "$sys_path" ] && msg_error "Failed to find '$sys_path' for '_get_device_traffic'" && return 0
 	{
 		cat "$sys_path/statistics/rx_bytes"
 		cat "$sys_path/statistics/tx_bytes"
@@ -289,7 +295,9 @@ get_device_traffic() {
 }
 
 
-# Pruefe Bandbreite durch kurzen Download-Datenverkehr
+## @fn measure_download_speed()
+## @param host Gegenstelle für den Geschwindigkeitstest.
+## @brief Pruefe Bandbreite durch kurzen Download-Datenverkehr
 measure_download_speed() {
 	local host="$1"
 	local target_dev
@@ -298,12 +306,14 @@ measure_download_speed() {
 	local pid="$!"
 	sleep 3
 	[ ! -d "/proc/$pid" ] && return
-	get_device_traffic "$target_dev" "$SPEEDTEST_SECONDS" | cut -f 1
+	_get_device_traffic "$target_dev" "$SPEEDTEST_SECONDS" | cut -f 1
 	kill "$pid" 2>/dev/null || true
 }
 
 
-# Pruefe Bandbreite durch kurzen Upload-Datenverkehr
+## @fn measure_upload_speed()
+## @param host Gegenstelle für den Geschwindigkeitstest.
+## @brief Pruefe Bandbreite durch kurzen Upload-Datenverkehr
 measure_upload_speed() {
 	local host="$1"
 	local target_dev
@@ -313,7 +323,7 @@ measure_upload_speed() {
 	local pid="$!"
 	sleep 3
 	[ ! -d "/proc/$pid" ] && return
-	get_device_traffic "$target_dev" "$SPEEDTEST_SECONDS" | cut -f 2
+	_get_device_traffic "$target_dev" "$SPEEDTEST_SECONDS" | cut -f 2
 	kill "$pid" 2>/dev/null || true
 }
 

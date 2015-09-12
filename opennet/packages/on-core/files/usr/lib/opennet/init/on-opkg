@@ -22,8 +22,11 @@ replace_outdated_opkg_conf() {
 	# attitude_adjustment: Release v0.4-5
 	# barrier_breaker: Release v0.5.0/1
 	# chaos_calmer/15.05-rc: Entwicklungsversionen von v0.5.2
-	if grep -qE "(backfire|attitude_adjustment|barrier_breaker|chaos_calmer/15.05-rc)"; then
-		cmp -s /rom/etc/opkg.conf /etc/opkg.conf || cp /rom/etc/opkg.conf /etc/opkg.conf
+	if grep -qE "(backfire|attitude_adjustment|barrier_breaker|chaos_calmer/15.05-rc)" /etc/opkg.conf; then
+		# im Vorgriff auf die folgende Funktion "remove_opennet_feed_from_global_opkg_conf" filtern wir den opennet-Feed raus
+		local distribution_opkg=$(grep -v 'opennet$' /etc/opkg.conf)
+		echo "$distribution_opkg" | cmp -s /rom/etc/opkg.conf - \
+			|| echo "$distribution_opkg" >/etc/opkg.conf
 	fi
 }
 

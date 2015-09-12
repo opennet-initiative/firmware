@@ -84,6 +84,35 @@ EOF
 }
 
 
+
+# wandele Leerzeichen-getrennte "option"-Eintraege in "list"-Eintraege um
+_split_uci_option() {
+	local config="$1"
+	local optname="$2"
+	local filename="/etc/config/$config"
+	# Zeilen der Form "  option $optname 'foo bar'" werden in mehrere "  option $optname '$ITEM'"-Zeilen verwandelt
+	awk <"$filename" '{
+		if (($1 == "option") && ($2 == "'$optname'")) {
+			i = 3
+			while (i <= NF) {
+				gsub(/'\''/, "", $i)
+				printf "        list %s '\'%s\''\n", $2, $i
+				i++
+			}
+		} else {
+			print $0
+		}}' | update_file_if_changed "$filename" && uci commit "$config"
+	true
+}
+
+
+# Gelegentlich ändert openwrt die Definition einzelner Variablen. Dies müssen wir via Migration nachbereiten.
+migrate_uci_definition_changes() {
+	# vor Barrier Breaker war "firewall.ZONE.network" eine "option" - anschliessed wurde es zur "list"
+	_split_uci_option "firewall" "network"
+}
+
+
 # bis Version v0.4-5: "firewall reload" fuehrte auch die "include"-Dateien aus (z.B. /etc/firewall.opennet)
 # Ab Version v0.5 verwenden wir diese Datei nicht mehr.
 # Beispiel (v0.4-5):
@@ -369,6 +398,7 @@ guess_previously_used_modules() {
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
+migrate_uci_definition_changes
 fix_firewall_reload
 transfer_vpn_sort_criteria_and_autosearch
 remove_tunnel_openvpn_settings

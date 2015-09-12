@@ -6,10 +6,52 @@
 
 set -eu
 
-#By default OpenWRT adds a repo url to all installed feeds.
-#Opennet is installed as feed but the generated URL by OpenWRT is wrong.
-#Therefore delete this line.
-sed -i '/opennet/d'  /etc/opkg.conf
+# Alle openwrt-Releases bis einschliesslich Chaos Calmer 15.05-rc3 haben die opkg.conf als
+# erhaltenswerte Nutzer-Konfiguration behandelt und somit bei Updates unverändert gelassen.
+# Dies führt naturgemäß zu unbrauchbaren Paket-Feeds nach einer Firmware-Aktualisierung.
+# Das Problem ist hier beschrieben:
+#  * https://dev.openwrt.org/ticket/19882
+#  * https://dev.openwrt.org/ticket/20439
+# Und hier ist die Loeschung (ab Chaos Chalmer (final release)):
+#  * https://dev.openwrt.org/changeset/46491
+# Wir folgen daher der Chaos-Calmer-Release-Empfehlung und überschreiben die opkg.conf mit
+# der mitgelieferten Datei, falls wir alte Release-Namen in der opkg.conf finden.
+replace_outdated_opkg_conf() {
+	# die opkg.conf-Datei der folgenden Releases ist zu ersetzen:
+	# backfire: Release v0.4-1
+	# attitude_adjustment: Release v0.4-5
+	# barrier_breaker: Release v0.5.0/1
+	# chaos_calmer/15.05-rc: Entwicklungsversionen von v0.5.2
+	if grep -qE "(backfire|attitude_adjustment|barrier_breaker|chaos_calmer/15.05-rc)"; then
+		cmp -s /rom/etc/opkg.conf /etc/opkg.conf || cp /rom/etc/opkg.conf /etc/opkg.conf
+	fi
+}
 
-#add a note where to find the opennet repo url
-echo "# Notice: Opennet repository url is added by install_from_opennet_repository() in usr/lib/opennet/core.sh" >> /etc/opkg.conf
+
+# Der openwrt-Build-Prozess fügt den opennet-Feed zur opkg.conf hinzu.
+# Wir möchten dies jedoch nicht (siehe opennet-Doku zur Paketverwaltung).
+remove_opennet_feed_from_global_opkg_conf() {
+	grep -q "opennet$" /etc/opkg.conf || return 0
+	sed -i '/opennet$/d'  /etc/opkg.conf
+}
+
+
+# Fuege den Hinweis auf die separate opennet-opkg-Konfigurationsdatei in die opkg.conf ein.
+# Bis Version 0.5.1 war es üblich, alle Pakete einfach via "opkg install" zu installieren.
+# Ab Version 0.5.2 sind die Konfigurationsdateien für die opennet- und die openwrt-Feeds
+# getrennt zu verwenden.
+add_on_repository_hint() {
+	grep -q "Opennet" /etc/opkg.conf || return 0
+	cat >>/etc/opkg.conf <<EOF
+#########################################################################
+# Hinweis: verwende "on-function install_from_opennet_repository PAKET" #
+#          um Opennet-Pakete zu installieren.                           #
+#########################################################################
+EOF
+}
+
+
+replace_outdated_opkg_conf
+# der opennet-Feed muss nach der obigen eventuellen Ersetzung der Konfigurationsdatei entfernt werden
+remove_opennet_feed_from_global_opkg_conf
+add_on_repository_hint

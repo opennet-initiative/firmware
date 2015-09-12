@@ -11,12 +11,11 @@ Anschließend kann diese Liste wieder geleert werden.
 * Nutzer-VPN-Tunnel wird innerhalb von ca. drei Minuten nach dem Booten aufgebaut
 ** zuvor (v0.5.1) waren es ca. acht Minuten
 * Module (Internetzugang, Freigabe, Captive Portal) sind im Web-Interface nachinstallierbar
-* für die Basis-Funktion (Infrastruktur) genügt nun ein Router mit 4 MB Flash
+** für die Basis-Funktion (Infrastruktur) genügt nun ein Router mit 4 MB Flash
 * keine VPN-Verbindungstests ohne Zertifikat
 ** weniger Load für Infrastruktur-APs
 ** kurze Wartezeit zwischen Zertifikatsupload und Verbindungsaufbau
-* verschlüsselte Verbindung mit dem Web-Interface
-** automatische Umleitung http->https
+* verschlüsselte Verbindung mit dem Web-Interface des Routers (automatische Umleitung http->https)
 * Verfallsdatum des eigenen VPN-Zertifikats wird angezeigt
 * reduzierter RAM-Speicherbedarf
 ** auf Geräten mit 32 MB RAM gab es zuvor gelegentlich Neustarts durch Speichermangel
@@ -38,3 +37,9 @@ Anschließend kann diese Liste wieder geleert werden.
 * UGW-APs veröffentlichen keine zusätzliche HNA im 192.168.0.x-Netzwerk
 
 = Bemerkenswertes / Fehler / Mängel =
+
+= Aktualisierungshinweis =
+* besuche nach der Aktualisierung das Web-Interface des AP, um bei Bedarf Module nachzuinstallieren
+** fehlende Module werden durch eine rote Hinweis-Box hervorgehoben und können mit einem Klick nachinstalliert werden
+** für UGWs: nach der Aktualisierung muss das UGW-Modul nachinstalliert werden - die Aktualisierung kann also nicht aus der Ferne durchgeführt werden, falls keine alternative Route zu dem UGW vorhanden ist
+* POE-Durchleitung: entferne manuelle hinzugefügte Zeilen aus der /etc/rc.local (bzw.: 'Administration -> System -> Startprogramme') und konfiguriere die POE-Weiterleitung zukünftig via 'Opennet -> Basis -> Einstellungen'

@@ -318,36 +318,6 @@ get_main_ip() {
 }
 
 
-# check if a given lock file:
-# A) exists, but it is outdated (determined by the number of minutes given as second parameter)
-# B) exists, but is fresh
-# C) does not exist
-# A + C return success and create that file
-# B return failure and do not touch that file
-aquire_lock() {
-	local lock_file="$1"
-	local max_age_minutes="$2"
-	local file_timestamp
-	[ ! -e "$lock_file" ] && touch "$lock_file" && return 0
-	file_timestamp=$(get_file_modification_timestamp_minutes "$lock_file")
-	# too old? We claim it for ourself.
-	is_timestamp_older_minutes "$file_timestamp" "$max_age_minutes" && touch "$lock_file" && return 0
-	# lockfile is too young
-	trap "" $GUARD_TRAPS && return 1
-}
-
-
-clean_stale_pid_file() {
-	local pid_file="$1"
-	local pid
-	[ -e "$pid_file" ] || return 0
-	pid=$(cat "$pid_file" | sed 's/[^0-9]//g')
-	[ -z "$pid" ] && msg_debug "removing broken PID file: $pid_file" && rm "$pid_file" && return 0
-	[ ! -e "/proc/$pid" ] && msg_debug "removing stale PID file: $pid_file" && rm "$pid_file" && return 0
-	return 0
-}
-
-
 # Pruefe ob eine PID-Datei existiert und ob die enthaltene PID zu einem Prozess
 # mit dem angegebenen Namen (nur Dateiname - ohne Pfad) verweist.
 # Parameter PID-Datei: vollstaendiger Pfad

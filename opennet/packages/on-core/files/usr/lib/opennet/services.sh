@@ -222,6 +222,9 @@ get_service_sorting() {
 }
 
 
+## @fn sort_services_by_priority()
+## @brief Sortiere den eingegebenen Strom von Dienstnamen und gib eine nach der Priorität sortierte Liste.
+## @details Die Prioritätsinformation wird typischerweise für nicht-mesh-verteilte Dienste verwendet (z.B. den mesh-Tunnel).
 sort_services_by_priority() {
 	trap "error_trap sort_services_by_priority '$*'" $GUARD_TRAPS
 	local service_name
@@ -234,20 +237,6 @@ sort_services_by_priority() {
 		[ -z "$priority" ] && priority=999999999999999
 		echo "$priority" "$service_name"
 	done | sort -n | awk '{print $2}'
-}
-
-
-## @fn sort_services_by()
-## @brief Sortiere den eingegebenen Strom von Dienstnamen und gib eine sortierte Liste entsprechende des Arguments aus.
-## @param sort_key Der Dienst-Wert, anhand dessen  die Auswertung und Sortierung stattfinden soll.
-sort_services_by() {
-	trap "error_trap sort_services_by '$*'" $GUARD_TRAPS
-	local sort_key="$1"
-	local service_name
-	while read service_name; do
-		value=$(get_service_value "$service_name" "$sort_key" "_")
-		echo "$value" "$service_name"
-	done | sort -n | cut -f 2- -d " "
 }
 
 
@@ -475,23 +464,6 @@ cleanup_service_dependencies() {
 		apply_changes "$branch"
 	done
 	set_service_value "$service_name" "uci_dependency" ""
-}
-
-
-get_service_description() {
-	trap "error_trap get_service_description '$*'" $GUARD_TRAPS
-	local service_name="$1"
-	local scheme
-	local host
-	local port
-	local proto
-	local details
-	scheme=$(get_service_value "$service_name" "scheme")
-	host=$(get_service_value "$service_name" "host")
-	port=$(get_service_value "$service_name" "port")
-	proto=$(get_service_value "$service_name" "proto")
-	details=$(get_service_value "$service_name" "details")
-	echo "$scheme://$host:$port ($proto) $details"
 }
 
 

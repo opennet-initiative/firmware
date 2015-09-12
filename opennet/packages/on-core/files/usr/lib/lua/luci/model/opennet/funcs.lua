@@ -155,15 +155,6 @@ function string_join(table, separator)
 end
 
 
-function to_bool(value)
-	if value then
-		return true
-	else
-		return false
-	end
-end
-
-
 function get_service_value(service_name, key, default)
 	if not default then default = "" end
 	local result = on_function("get_service_value", {service_name, key, default})

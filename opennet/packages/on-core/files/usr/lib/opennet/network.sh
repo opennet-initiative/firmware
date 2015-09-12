@@ -217,18 +217,6 @@ get_subdevices_of_interface() {
 }
 
 
-## @fn add_raw_device_to_zone()
-## @brief Fuege ein physisches Netzwerk-Interface zu einer Firewall-Zone hinzu.
-## @details Typischerweise ist diese Funktion nur fuer temporaere Netzwerkschnittstellen geeignet.
-add_raw_device_to_zone() {
-	local zone="$1"
-	local device="$2"
-	local uci_prefix
-	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
-	[ -z "$uci_prefix" ] && msg_debug "Failed to add raw device '$device' to non-existing zone '$zone'" && return 0
-}
-
-
 # Ist das gegebene physische Netzwerk-Interface Teil einer Firewall-Zone?
 is_device_in_zone() {
 	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
@@ -298,19 +286,6 @@ get_subdevices_of_interface() {
 }
 
 
-## @fn add_raw_device_to_zone()
-## @brief Fuege ein physisches Netzwerk-Interface zu einer Firewall-Zone hinzu.
-## @details Typischerweise ist diese Funktion nur fuer temporaere Netzwerkschnittstellen geeignet.
-add_raw_device_to_zone() {
-	local zone="$1"
-	local device="$2"
-	local uci_prefix
-	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
-	[ -z "$uci_prefix" ] && msg_debug "Failed to add raw device '$device' to non-existing zone '$zone'" && return 0
-	uci_add_list "${uci_prefix}.device" "$device"
-}
-
-
 ## @fn add_interface_to_zone()
 ## @brief Fuege ein logisches Netzwerk-Interface zu einer Firewall-Zone hinzu.
 ## @details Typischerweise ist diese Funktion nur fuer temporaere Netzwerkschnittstellen geeignet.
@@ -321,18 +296,6 @@ add_interface_to_zone() {
 	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to add interface '$interface' to non-existing zone '$zone'" && return 0
 	uci_add_list "${uci_prefix}.network" "$interface"
-}
-
-
-## @fn del_raw_device_from_zone()
-## @brief Entferne ein physisches Netzwerk-Interface aus einer Firewall-Zone.
-del_raw_device_from_zone() {
-	local zone="$1"
-	local device="$2"
-	local uci_prefix
-	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
-	[ -z "$uci_prefix" ] && msg_debug "Failed to remove raw device '$device' from non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
-	uci del_list "${uci_prefix}.device=$device"
 }
 
 

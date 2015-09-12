@@ -84,6 +84,9 @@ feeds: patch
 patch:
 	@# apply all patches if there are unapplied ones
 	@test -n "$(shell quilt unapplied 2>/dev/null)" && quilt push -a || true
+	######### TODO: GPIO-SWITCH-HACK nach dem wechsel weg von Chaos Calmer entfernen ##########
+	@# quilt kann keine Dateirechte erhalten - daher muessen wir es manuell nachpflegen
+	chmod +x "$(OPENWRT_DIR)/package/base-files/files/etc/init.d/gpio_switch"
 
 unpatch:
 	@# revert all patches if there are applied ones

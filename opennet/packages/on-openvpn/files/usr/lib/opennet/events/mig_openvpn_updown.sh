@@ -13,20 +13,20 @@
 #
 
 
-set -eu
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
 
 # die PATH-Umgebungsvariable beim Ausfuehren des openvpn-Skripts beinhaltet leider nicht die sbin-Verzeichnisse
 IP_BIN=$(PATH=$PATH:/sbin:/usr/sbin which ip)
 
 
 # Allgemeine openvpn-Ereignisbehandlung
-on-function log_openvpn_events_and_disconnect_if_requested "mig-openvpn-connections"
+log_openvpn_events_and_disconnect_if_requested "mig-openvpn-connections"
 
 # Sonder-Aktionen für mig-Verbindungen
 case "$script_type" in
 	up)
-		uplink_table=$(on-function get_variable "ROUTING_TABLE_ON_UPLINK")
-		"$IP_BIN" route add default via "$route_vpn_gateway" table "$uplink_table" || true
+		"$IP_BIN" route add default via "$route_vpn_gateway" table "$ROUTING_TABLE_ON_UPLINK" || true
 		;;
 	down)
 		# löse einen baldigen Verbindungsaufbau aus

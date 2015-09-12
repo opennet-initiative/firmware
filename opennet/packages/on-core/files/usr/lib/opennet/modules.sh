@@ -39,7 +39,7 @@ enable_on_module() {
 	_is_on_module_enabled "$module" && return 0
 	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
 	uci_add_list "on-core.modules.enabled" "$module"
-	apply_changes "$module"
+	apply_changes "on-core" "$module"
 }
 
 
@@ -51,7 +51,7 @@ disable_on_module() {
 	local module="$1"
 	_is_on_module_enabled "$module" || return 0
 	uci_delete_list "on-core.modules.enabled" "$module"
-	apply_changes "$module"
+	apply_changes "on-core" "$module"
 }
 
 

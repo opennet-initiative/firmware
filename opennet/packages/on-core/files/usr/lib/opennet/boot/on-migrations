@@ -343,6 +343,29 @@ remove_wifidog_config() {
 }
 
 
+## @fn guess_previously_used_modules()
+## @brief Versuche nach der Aktualisierung von einer Version vor v0.5.2 die zuvor verwendeten Module zu erraten.
+## @details Die Firmware-Versionen vor v0.5.2 enthielten alle Module vorinstalliert. Ab v0.5.2 werden Module bei
+##   Bedarf nachinstalliert. Beim Übergang von Komplett- zu Bedarfsinstallation versuchen wir die vorherige
+##   Nutzungsform zu erraten und die dazu passende Modulliste zu speichern.
+guess_previously_used_modules() {
+	# falls bereits etwas in der uci-Sektion gespeichert wurde, ist keine Nachbereitung noetig
+	[ -n "$(uci show -q "on-core.modules")" ] && return 0
+	# Zweig anlegen
+	uci set "on-core.modules=modules"
+	# prüfe ob relevante Dateien vorhanden sind, die die jeweiligen Module benutzen würden
+	[ -e "/etc/openvpn/opennet_user/on_aps.crt" ] \
+		&& uci_add_list "on-core.modules.installed" "on-openvpn"
+	[ -e "/etc/openvpn/opennet_ugw/on_aps.crt" ] \
+		&& uci_add_list "on-core.modules.installed" "on-usergw"
+	[ -e "/etc/wifidog.conf" ] \
+		&& uci_add_list "on-core.modules.installed" "on-captive-portal"
+	[ -e "/etc/xinetd.d/munin" ] \
+		&& uci_add_list "on-core.modules.installed" "on-monitoring"
+	true
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -375,5 +398,6 @@ rename_firewall_zone "local" "$ZONE_LOCAL"
 run_delayed_in_background 600 transfer_gateway_uci_settings
 
 remove_opennet_ca_certificates_from_previous_location
-
+# die Pruefung muss vor der Loeschung der wifidog-Konfiguration stattfinden
+guess_previously_used_modules
 remove_wifidog_config

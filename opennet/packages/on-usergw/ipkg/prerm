@@ -1,3 +1,4 @@
 #!/bin/sh
+[ "${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 on-function disable_on_usergw
 on-function disable_service_relay

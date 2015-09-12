@@ -111,10 +111,10 @@ index 0000000..81d3982
 +
 +case "$board" in
 +nanostation-m)
-+	ucidef_set_gpio_switch "poe_passthrough" "PoE Passthrough" "2"
++	ucidef_set_gpio_switch "poe_passthrough" "PoE Passthrough" "8"
 +	;;
 +nanostation-m-xw)
-+	ucidef_set_gpio_switch "poe_passthrough" "PoE Passthrough" "8"
++	ucidef_set_gpio_switch "poe_passthrough" "PoE Passthrough" "2"
 +	;;
 +cpe510)
 +	ucidef_set_gpio_switch "poe_passthrough" "PoE Passthrough" "20"

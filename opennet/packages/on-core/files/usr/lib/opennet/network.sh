@@ -34,33 +34,6 @@ has_opennet_dns() {
 }
 
 
-## @fn query_srv_record()
-## @brief Liefere die SRV Records zu einer Domain zurück.
-## @param srv_domain Dienst-Domain (z.B. _mesh-openvpn._udp.opennet-initiative.de)
-## @returns Zeilenweise Ausgabe von SRV Records: PRIORITY WEIGHT PORT HOSTNAME
-## @details Siehe RFC 2782 für die SRV-Spezifikation. Die Abfrage erfordert dig drill oder unbound-host.
-query_srv_records() {
-	trap "error_trap query_srv_records '$*'" $GUARD_TRAPS
-	local domain="$1"
-	# verschiedene DNS-Werkzeuge sind nutzbar: dig, drill oder unbound-host
-	# "djbdns-tools" unterstützt leider nicht das Parsen von srv-Records (siehe "dnsq 33 DOMAIN localhost")
-	# "drill" ist das kleinste Werkzeug
-	if which dig >/dev/null; then
-		dig +short SRV "$domain"
-	elif which drill >/dev/null; then
-		drill "$domain" SRV | grep -v "^;" \
-			| grep "[[:space:]]IN[[:space:]]\+SRV[[:space:]]\+[[:digit:]]\+[[:space:]]\+[[:digit:]]" \
-			| awk '{print $5, $6, $7, $8}'
-	elif which unbound-host >/dev/null; then
-		unbound-host -t SRV "$domain" \
-			| awk '{print $5, $6, $7, $8}'
-	else
-		msg_error "Missing advanced DNS resolver for mesh gateway discovery"
-	fi | sed 's/\.$//'
-	# (siehe oben) entferne den abschliessenden Top-Level-Domain-Punkt ("on-i.de." statt "on-i.de")
-}
-
-
 ## @fn get_ping_time()
 ## @brief Ermittle die Latenz eines Ping-Pakets auf dem Weg zu einem Ziel.
 ## @param target IP oder DNS-Name des Zielhosts

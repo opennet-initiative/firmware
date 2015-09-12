@@ -50,7 +50,7 @@ error_trap() {
 # geschrieben. Die Zeitstempel der Shell-Module werden bei jedem Start mit dem der
 # Cache-Datei verglichen und letztere bei Bedarf erneuert.
 # Diese Minimierung reduziert die Laufzeit bei einfachen Funktionsaufrufen um ca. 10%. 
-ON_SHELL_MINIMIZED=/tmp/on_shell_modules.cache
+ON_SHELL_MINIMIZED="${IPKG_INSTROOT:-}/tmp/on_shell_modules.cache"
 ON_SHELL_MODULES_DIR="${IPKG_INSTROOT:-}/usr/lib/opennet"
 ON_SHELL_MODULES=$(find "$ON_SHELL_MODULES_DIR" -maxdepth 1 -type f -name "*.sh")
 ON_SHELL_MODULES_NEWEST=$( (ls -dtr "$ON_SHELL_MODULES_DIR" $ON_SHELL_MODULES "$ON_SHELL_MINIMIZED" 2>/dev/null || true) | tail -1)

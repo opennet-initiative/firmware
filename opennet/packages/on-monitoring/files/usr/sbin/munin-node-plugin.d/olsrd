@@ -1,0 +1,109 @@
+#!/usr/bin/micropython
+
+# Magic markers
+#%# capabilities=autoconf
+#%# family=auto
+
+
+plugin_version = "0.1"
+
+
+import os
+import socket
+import sys
+
+
+GRAPH_CONFIG = """
+graph_title     {title}
+graph_vlabel    Link Quality (-) / Neighbour Link Quality (+)
+graph_category  network
+graph_info      OLSR estimates the quality of a connection by the ratio of successfully received (link quality) and transmitted (neighbour link quality) hello packets.
+"""
+
+VALUES_CONFIG = """
+nlq{suffix}.label none
+nlq{suffix}.type GAUGE
+nlq{suffix}.graph no
+nlq{suffix}.draw AREA
+nlq{suffix}.min 0
+lq{suffix}.label {label}
+lq{suffix}.type GAUGE
+lq{suffix}.draw AREA
+lq{suffix}.negative nlq{suffix}
+lq{suffix}.min 0
+"""
+
+
+get_clean_fieldname = lambda name: "".join([(("a" <= char.lower() <= "z") or ((index == 0) or ("0" <= char <= "9"))) and char or "_" for index, char in enumerate(name)])
+
+
+def query_olsrd_nameservice(section=""):
+    host = os.getenv("olsrd_host", "localhost")
+    port = os.getenv("olsrd_port", "2006")
+    conn = socket.create_connection((host, port), 1.0)
+    conn.sendall("/%s" % section)
+    # 64k should be sufficient for a thousand neighbours
+    return conn.recv(65536).decode().split("\n")
+
+
+def get_olsr_links():
+    for line in query_olsrd_nameservice(section="links"):
+        tokens = line.split()
+        if len(tokens) == 6:
+            link = {}
+            link["local"] = tokens.pop(0)
+            link["remote"] = tokens.pop(0)
+            try:
+                for key in ("hysterese", "lq", "nlq", "cost"):
+                    link[key] = float(tokens.pop(0))
+            except ValueError:
+                # break on conversion error (probably some header line)
+                continue
+            yield link
+
+
+if __name__ == "__main__":
+    # parse arguments
+    if len(sys.argv) > 1:
+        if sys.argv[1]=="config":
+            links = list(get_olsr_links())
+            print("multigraph link_quality")
+            print(GRAPH_CONFIG.format(title="OLSR Link Quality"))
+            for link in links:
+                print(VALUES_CONFIG.format(label=link["remote"], suffix="_{host}".format(host=get_clean_fieldname(link["remote"]))))
+                print()
+            for link in links:
+                print("multigraph link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
+                print(GRAPH_CONFIG.format(title="Link Quality towards {host}".format(host=link["remote"])))
+                print(VALUES_CONFIG.format(label="Link Quality", suffix=""))
+                print()
+            sys.exit(0)
+        elif sys.argv[1] == "autoconf":
+            if os.path.exists(os.getenv('olsrd_path', '/usr/sbin/olsrd')):
+                print('yes')
+            else:
+                print('no')
+            sys.exit(0)
+        elif sys.argv[1] == "version":
+            print('olsrd Munin plugin, version %s' % plugin_version)
+            sys.exit(0)
+        elif sys.argv[1] == "":
+            # ignore
+            pass
+        else:
+            # unknown argument
+            print("Unknown argument", file=sys.stderr)
+            sys.exit(1)
+
+    # output values
+    links = list(get_olsr_links())
+    print("multigraph link_quality")
+    for link in links:
+        print("{remote}_lq.value {lq:f}".format(lq=link["lq"], remote=get_clean_fieldname(link["remote"])))
+        print("{remote}_nlq.value {nlq:f}".format(nlq=link["nlq"], remote=get_clean_fieldname(link["remote"])))
+        print()
+    for link in links:
+        print("multigraph link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
+        print("lq.value {lq:f}".format(lq=link["lq"]))
+        print("nlq.value {nlq:f}".format(nlq=link["nlq"]))
+        print()

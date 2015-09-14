@@ -4,12 +4,8 @@ CONFIG_VERSIONOPT=y
 CONFIG_VERSION_MANUFACTURER="Opennet Initiative e.V."
 CONFIG_VERSION_NUMBER="0.5.2"
 
-#Hinweis 1:
 #setze OpenWRT Downloadpfad+Versionsnummer explizit weil wir die OpenWRT Versionsnummer mit unserer Versionsnummer ueberschreiben.
-#         Eine offizielle Versionsnummer von 15.05-rc2 konnte ich (martin) nicht im Quelltext finden. Aber die Download URL beinhaltet dies.
-#         Wahrscheinlich kann mit Erscheinen von 15.05 final die Versionsnummer von woanders extrahiert und nicht manuell hier eingefuegt werden.
-CONFIG_VERSION_REPO="http://downloads.openwrt.org/%n/15.05-rc3/%S/packages"
-
+CONFIG_VERSION_REPO="http://downloads.openwrt.org/%n/15.05/%S/packages"
 
 # reduzierte Squashfs-Blockgroesse Standard: 256)
 #CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=256

@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# monitor the channel occupation (taken from "iw dev wlan0 survey dump")
+#
 
 set -eu
 
@@ -14,7 +17,7 @@ get_wifi_devices() {
 
 
 if [ "${1:-}" = "config" ]; then
-	echo "graph_title Channel Occupation $device"
+	echo "graph_title Channel Occupation"
 	echo "graph_vlabel time"
 	echo "graph_category wireless"
 	get_wifi_devices | while read device; do
@@ -25,6 +28,7 @@ if [ "${1:-}" = "config" ]; then
 	done
 	exit 0
 fi
+
 
 get_wifi_devices | while read device; do
 	iw dev "$device" survey dump \

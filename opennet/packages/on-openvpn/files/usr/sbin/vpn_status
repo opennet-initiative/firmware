@@ -18,7 +18,8 @@
 
 print_status() {
 	local service_name
-	local host
+	local host_description
+	local port
 	local age
 	local status
 	local timestamp
@@ -34,13 +35,16 @@ print_status() {
 
 	printf "$format_string" "active" "IP" "Quality" "VPN" "Age"
 	get_services "gw" | sort_services_by_priority | while read service_name; do
-		host=$(get_service_value "$service_name" "host")
+		host_description=$(get_service_value "$service_name" "host")
+		# haenge den Port an den Hostnamen, falls es nicht der Standard-Port ist
+		port=$(get_service_value "$service_name" "port")
+		[ "$port" != "$DEFAULT_MIG_PORT" ] && host_description="$host_description:$port"
 		if uci_is_true "$(get_service_value "$service_name" "disabled" "false")"; then
 			# der Dienst wird ignoriert
-			printf "$format_string" "" "$host" "disabled" "" ""
+			printf "$format_string" "" "$host_description" "disabled" "" ""
 		elif [ -z "$(get_service_value "$service_name" "distance")" ]; then
 			# der Dienst ist nicht erreichbar
-			printf "$format_string" "" "$host" "unreachable" "" ""
+			printf "$format_string" "" "$host_description" "unreachable" "" ""
 		else
 			# der Dienst wurde nicht abgeschaltet
 			timestamp=$(get_service_value "$service_name" "status_timestamp")
@@ -53,6 +57,7 @@ print_status() {
 			if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
 				offset=$(get_service_value "$service_name" "offset")
 				quality=$(get_distance_with_offset "$service_name")
+				quality=$(printf "%.1f" "$quality")
 				[ -z "$offset" ] && offset=0
 				[ "$offset" -gt 0 ] && offset="+$offset"
 				[ "$offset" -ne 0 ] && quality="($offset) $quality"
@@ -60,7 +65,6 @@ print_status() {
 				quality=$(get_service_value "$service_name" "rank")
 			fi
 			# Begrenzung auf eine Nachkommastalle
-			quality=$(printf "%.1f" "$quality")
 			connection_state=$(get_openvpn_service_state "$service_name")
 			if [ "$connection_state" = "active" ]; then
 				active="*"
@@ -69,7 +73,7 @@ print_status() {
 			else
 				active=""
 			fi
-			printf "$format_string" "$active" "$host" "$quality" "$status" "$age"
+			printf "$format_string" "$active" "$host_description" "$quality" "$status" "$age"
 		fi
 	done
 }

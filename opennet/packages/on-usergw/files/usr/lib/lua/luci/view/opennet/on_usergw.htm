@@ -34,10 +34,6 @@ function init() {
 }
 //]]></script>
 
-<% if luci.sys.exec("openvpn --help | grep mtu") == "" then
-	write(html_error_box(luci.i18n.translate('Openvpn does not support mtu-check, please compile openvpn without "--enable-small" option.')))
-end %>
-
 <div class="cbi-map">
   <h2><a id="content" name="content"><%:Sharing your Internet connection%></a></h2>
   <div class="cbi-map-descr"><%:Sharing your internet connection with the Opennet Community usually consists of two distinct parts:%>

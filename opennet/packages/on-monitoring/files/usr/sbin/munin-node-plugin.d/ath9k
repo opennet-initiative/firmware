@@ -59,6 +59,8 @@ class Station:
          HT20/LGI       MCS6     32.9  95.7 100.0   5    0(   0)     24295(    32592)
          HT20/LGI    DP MCS7     35.0  90.4  95.2   5    0(   0)     63356(    88600)
          HT20/LGI       MCS8     10.5 100.0 100.0   0    0(   0)         1(        1)
+
+        beware: sometimes the last two pairs of columns are joined without withespace: "90959383(100188029)"
         """
         stats = {}
         with open(os.path.join(self._path, "rc_stats"), "r") as statsfile:
@@ -81,10 +83,13 @@ class Station:
                 entry["ewma_probability"] = float(tokens.pop(0))
                 entry["this_probability"] = float(tokens.pop(0))
                 entry["retry"] = int(tokens.pop(0))
-                entry["this_success"] = int(tokens.pop(0).rstrip("("))
-                entry["this_attempts"] = int(tokens.pop(0).rstrip(")"))
-                entry["success"] = int(tokens.pop(0).rstrip("("))
-                entry["attempts"] = int(tokens.pop(0).rstrip(")"))
+                # the remaining four columns may be not whitespace-separated - thus we put them together and use the braces
+                success_line = "".join(tokens)
+                success_tokens = success_line.replace("(", " ").replace(")", " ").split()
+                entry["this_success"] = int(success_tokens.pop(0).rstrip("("))
+                entry["this_attempts"] = int(success_tokens.pop(0).rstrip(")"))
+                entry["success"] = int(success_tokens.pop(0).rstrip("("))
+                entry["attempts"] = int(success_tokens.pop(0).rstrip(")"))
                 # some "rate" values are given in MBit/s - some are MCS0..15
                 try:
                     entry["rate_label"] = "{rate:d} MBit/s".format(rate=int(entry["rate"]))

@@ -99,6 +99,9 @@ class Station:
                 stats[entry["rate"]] = entry
         return stats
 
+    def _get_rc_stats_success(self):
+        return {"rate_" + rate["rate"]: rate["success"] for rate in self._rc_stats.values()}
+
     def _parse_file_based_stats(self, counters):
         stats = {}
         for counter in counters:
@@ -110,26 +113,26 @@ class Station:
         return stats
 
     def get_values(self, graph_base):
-        for suffix, stats in {
-                    "events": self._events_stats,
-                    "traffic": self._traffic_stats,
-                    #"rc_stats": self._rc_stats,
+        for suffix, func in {
+                    "events": lambda: self._events_stats,
+                    "traffic": lambda: self._traffic_stats,
+                    "rc_stats_success": self._get_rc_stats_success,
                 }.items():
             yield "multigraph {base}_{suffix}.{station}".format(base=graph_base, suffix=suffix, station=self.key)
-            for key, value in stats.items():
+            for key, value in func().items():
                 yield "{key}.value {value}".format(key=key, value=value)
 
     @classmethod
     def get_summary_values(cls, siblings, graph_base):
-        for suffix, stats_name in {
-                    "events": "_events_stats",
-                    "traffic": "_traffic_stats",
-                    #"rc_stats": "_rc_stats",
+        for suffix, func in {
+                "events": lambda station: station._events_stats,
+                "traffic": lambda station: station._traffic_stats,
+                "rc_stats_success": lambda station: station._get_rc_stats_success(),
                 }.items():
             yield "multigraph {base}_{suffix}".format(base=graph_base, suffix=suffix)
             stats = {}
             for station in siblings:
-                for key, value in getattr(station, stats_name).items():
+                for key, value in func(station).items():
                     stats[key] = stats.get(key, 0) + value
             for key, value in stats.items():
                 yield "{key}.value {value}".format(key=key, value=value)
@@ -138,7 +141,7 @@ class Station:
         for suffix, func in {
                     "events": self._get_events_config,
                     "traffic": self._get_traffic_config,
-                    #"rc_stats": self._get_rc_stats_config,
+                    "rc_stats_success": self._get_rc_stats_config,
                 }.items():
             yield "multigraph {base}_{suffix}.{station}".format(base=graph_base, suffix=suffix, station=self.key)
             for item in func(label=self.label, siblings=[self]):
@@ -149,11 +152,11 @@ class Station:
         for suffix, func in {
                     "events": Station._get_events_config,
                     "traffic": Station._get_traffic_config,
-                    #"rc_stats": Station._get_rc_stats_config,
+                    "rc_stats_success": Station._get_rc_stats_config,
                 }.items():
             yield "multigraph {base}_{suffix}".format(base=graph_base, suffix=suffix)
             for station in siblings:
-                for item in func(label=station.label, siblings=[station]):
+                for item in func(siblings=[station]):
                     yield item
 
     @classmethod
@@ -193,10 +196,10 @@ class Station:
     @classmethod
     def _get_rc_stats_config(cls, label=None, siblings=None):
         if label:
-            yield "graph_title ath9k Station Receive Rates {label}".format(label=label)
+            yield "graph_title ath9k Station Receive Rates {label} Success".format(label=label)
         else:
-            yield "graph_title ath9k Station Receive Rates"
-        yield "graph_vlabel receive: failures (-) / successes (+)"
+            yield "graph_title ath9k Station Receive Rates Success"
+        yield "graph_vlabel receive rates distribution"
         yield "graph_category wireless"
         all_rates = {}
         # collect alle unique rates
@@ -204,9 +207,15 @@ class Station:
             for rate, details in station._rc_stats.items():
                 all_rates[rate] = details
         # return all rates
-        for rate, details in all_rates.items():
-            for item in _get_up_down_pair(details["rate_label"], "success_" + details["rate"], "failure_" + details["rate"]):
-                yield item
+        is_first = True
+        num_extract = lambda text: int("".join([char for char in text if "0" <= char <= "9"]))
+        for rate in sorted(all_rates, key=num_extract):
+            details = all_rates[rate]
+            yield "rate_{rate}.label {rate_label}".format(rate=details["rate"], rate_label=details["rate_label"])
+            yield "rate_{rate}.type COUNTER".format(rate=details["rate"])
+            yield "rate_{rate}.draw {draw_type}".format(rate=details["rate"],
+                                                        draw_type=("AREA" if is_first else "STACK"))
+            is_first = False
         yield ""
 
 

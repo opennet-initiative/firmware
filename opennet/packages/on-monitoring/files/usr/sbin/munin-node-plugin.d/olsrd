@@ -99,8 +99,8 @@ if __name__ == "__main__":
     links = list(get_olsr_links())
     print("multigraph link_quality")
     for link in links:
-        print("{remote}_lq.value {lq:f}".format(lq=link["lq"], remote=get_clean_fieldname(link["remote"])))
-        print("{remote}_nlq.value {nlq:f}".format(nlq=link["nlq"], remote=get_clean_fieldname(link["remote"])))
+        print("lq_{remote}.value {lq:f}".format(lq=link["lq"], remote=get_clean_fieldname(link["remote"])))
+        print("nlq_{remote}.value {nlq:f}".format(nlq=link["nlq"], remote=get_clean_fieldname(link["remote"])))
         print()
     for link in links:
         print("multigraph link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))

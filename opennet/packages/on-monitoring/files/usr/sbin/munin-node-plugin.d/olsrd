@@ -48,7 +48,7 @@ graph_info      Count the number of locally known routes passing through each di
 NEIGHBOUR_COUNT_VALUE = """
 neighbour_{host_fieldname}.label = {host}
 neighbour_{host_fieldname}.type = GAUGE
-neighbour_{host_fieldname}.draw = {draw_style}
+neighbour_{host_fieldname}.draw = {draw_type}
 neighbour_{host_fieldname}.min = 0
 """
 
@@ -61,9 +61,10 @@ def query_olsrd_txtservice(section=""):
     port = os.getenv("olsrd_port", "2006")
     conn = socket.create_connection((host, port), 1.0)
     conn.sendall("/%s" % section)
+    fconn = open(conn.fileno(), "r")
     # "enumerate" is not suitable since it reads all lines at once (not a generator in micropython)
     index = 0
-    for line in open(conn.fileno()).readlines():
+    for line in fconn.readlines():
         # skip the first five lines - they are headers
         if index < 5:
             index += 1
@@ -71,6 +72,7 @@ def query_olsrd_txtservice(section=""):
         line = line.strip()
         if line:
             yield line
+    fconn.close()
     conn.close()
 
 
@@ -145,10 +147,12 @@ if __name__ == "__main__":
 
             # link count ("number of nodes behind each neighbour")
             print("multigraph olsr_neighbour_link_count")
-            for index, neighbour in enumerate(links):
+            is_first = True
+            for link in links:
                 print(NEIGHBOUR_COUNT_VALUE.format(host=link["remote"],
                                                    host_fieldname=get_clean_fieldname(link["remote"]),
-                                                   draw_type=("AREA" if (index == 0) else "STACK")))
+                                                   draw_type=("AREA" if is_first else "STACK")))
+                is_first = False
 
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
@@ -170,13 +174,13 @@ if __name__ == "__main__":
 
     # output values
     links = list(get_olsr_links())
-    print("multigraph link_quality")
+    print("multigraph olsr_link_quality")
     for link in links:
         print("lq_{remote}.value {lq:f}".format(lq=link["lq"], remote=get_clean_fieldname(link["remote"])))
         print("nlq_{remote}.value {nlq:f}".format(nlq=link["nlq"], remote=get_clean_fieldname(link["remote"])))
         print()
     for link in links:
-        print("multigraph link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
+        print("multigraph olsr_link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
         print("lq.value {lq:f}".format(lq=link["lq"]))
         print("nlq.value {nlq:f}".format(nlq=link["nlq"]))
         print()

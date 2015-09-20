@@ -1,4 +1,5 @@
-#!/usr/bin/micropython
+#!/bin/sh
+# weird shebang? See below "BAD AND UGLY" ...
 #
 # Collect basic information about the neighbours of an OLSR node:
 #   * link quality
@@ -8,6 +9,21 @@
 # Magic markers
 #%# capabilities=autoconf
 #%# family=auto
+
+"""true"
+# ****************** BAD AND UGLY ***************
+# This unbelievable dirty hack allows us to run micropython with additional startup options.
+# This is necessary due to our demand for more than 128k heap (this default is sufficient for only 400 olsr nodes).
+# This "execution hack" works as follows:
+#   * the script is executed by busybox ash
+#   * the above line (three quotes before and one quote after 'true') evaluates differently for shell and python:
+#    * shell: run "true" (i.e. nothing happens)
+#    * python: ignore everything up to the next three consecutive quotes
+# This hack would not be necessary if busybox's ash would handle shebang arguments properly.
+
+/usr/bin/micropython -X heapsize=512k "$0" "$@"
+exit $?
+"""
 
 
 plugin_version = "0.2"

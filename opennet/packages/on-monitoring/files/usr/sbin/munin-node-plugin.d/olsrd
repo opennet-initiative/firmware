@@ -1,11 +1,16 @@
 #!/usr/bin/micropython
-
+#
+# Collect basic information about the neighbours of an OLSR node:
+#   * link quality
+#   * neighbour link quality
+#   * number of nodes reachable behind this neighbour
+#
 # Magic markers
 #%# capabilities=autoconf
 #%# family=auto
 
 
-plugin_version = "0.1"
+plugin_version = "0.2"
 
 
 import os
@@ -13,14 +18,14 @@ import socket
 import sys
 
 
-GRAPH_CONFIG = """
+LQ_GRAPH_CONFIG = """
 graph_title     {title}
 graph_vlabel    Link Quality (-) / Neighbour Link Quality (+)
 graph_category  network
 graph_info      OLSR estimates the quality of a connection by the ratio of successfully received (link quality) and transmitted (neighbour link quality) hello packets.
 """
 
-VALUES_CONFIG = """
+LQ_VALUES_CONFIG = """
 nlq{suffix}.label none
 nlq{suffix}.type GAUGE
 nlq{suffix}.graph no
@@ -33,33 +38,91 @@ lq{suffix}.negative nlq{suffix}
 lq{suffix}.min 0
 """
 
+NEIGHBOUR_COUNT_CONFIG = """
+graph_title     Reachable nodes via neighbours
+graph_vlabel    Number of Nodes
+graph_category  network
+graph_info      Count the number of locally known routes passing through each direct neighbour. This number is a good approximation of the number of mesh nodes reachable via this specific neighbour. MIDs (alternative addresses of an OLSR node) and HNAs (host network announcements) are ignored.
+"""
+
+NEIGHBOUR_COUNT_VALUE = """
+neighbour_{host_fieldname}.label = {host}
+neighbour_{host_fieldname}.type = GAUGE
+neighbour_{host_fieldname}.draw = {draw_style}
+neighbour_{host_fieldname}.min = 0
+"""
+
 
 get_clean_fieldname = lambda name: "".join([(("a" <= char.lower() <= "z") or ((index == 0) or ("0" <= char <= "9"))) and char or "_" for index, char in enumerate(name)])
 
 
-def query_olsrd_nameservice(section=""):
+def query_olsrd_txtservice(section=""):
     host = os.getenv("olsrd_host", "localhost")
     port = os.getenv("olsrd_port", "2006")
     conn = socket.create_connection((host, port), 1.0)
     conn.sendall("/%s" % section)
-    # 64k should be sufficient for a thousand neighbours
-    return conn.recv(65536).decode().split("\n")
+    # "enumerate" is not suitable since it reads all lines at once (not a generator in micropython)
+    index = 0
+    for line in open(conn.fileno()).readlines():
+        # skip the first five lines - they are headers
+        if index < 5:
+            index += 1
+            continue
+        line = line.strip()
+        if line:
+            yield line
+    conn.close()
+
+
+def get_address_device_mapping():
+    mapping = {}
+    for line in query_olsrd_txtservice("mid"):
+        # example line content:
+        #    192.168.2.171   192.168.22.171;192.168.12.171
+        device_id, mids = line.split()
+        for mid in mids.split(";"):
+            mapping[mid] = device_id
+    return mapping
+
+
+def count_routes_by_neighbour(address_mapping, ignore_list):
+    node_count = {}
+    for line in query_olsrd_txtservice("routes"):
+        # example line content:
+        #    192.168.1.79/32 192.168.12.38   4       4.008   wlan0
+        tokens = line.split()
+        target = tokens[0]
+        via = tokens[1]
+        # we care only about single-host routes
+        if target.endswith("/32"):
+            if target[:-3] in address_mapping:
+                # we ignore MIDs - we want only real nodes
+                continue
+            if target in ignore_list:
+                continue
+            # replace the neighbour's IP with its main IP (if it is an MID)
+            via = address_mapping.get(via, via)
+            # increase the counter
+            node_count[via] = node_count.get(via, 0) + 1
+    return node_count
 
 
 def get_olsr_links():
-    for line in query_olsrd_nameservice(section="links"):
+    mid_mapping = get_address_device_mapping()
+    hna_list = [line.split()[0] for line in query_olsrd_txtservice("hna")]
+    route_count = count_routes_by_neighbour(mid_mapping, hna_list)
+    for line in query_olsrd_txtservice("links"):
         tokens = line.split()
-        if len(tokens) == 6:
-            link = {}
-            link["local"] = tokens.pop(0)
-            link["remote"] = tokens.pop(0)
-            try:
-                for key in ("hysterese", "lq", "nlq", "cost"):
-                    link[key] = float(tokens.pop(0))
-            except ValueError:
-                # break on conversion error (probably some header line)
-                continue
-            yield link
+        link = {}
+        link["local"] = tokens.pop(0)
+        remote = tokens.pop(0)
+        # replace the neighbour's IP with its main IP (if it is an MID)
+        link["remote"] = mid_mapping.get(remote, remote)
+        for key in ("hysterese", "lq", "nlq", "cost"):
+            link[key] = float(tokens.pop(0))
+        # add the route count
+        link["route_count"] = route_count.get(link["remote"], 0)
+        yield link
 
 
 if __name__ == "__main__":
@@ -67,16 +130,26 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1]=="config":
             links = list(get_olsr_links())
-            print("multigraph link_quality")
-            print(GRAPH_CONFIG.format(title="OLSR Link Quality"))
+
+            # link quality with regard to neighbours
+            print("multigraph olsr_link_quality")
+            print(LQ_GRAPH_CONFIG.format(title="OLSR Link Quality"))
             for link in links:
-                print(VALUES_CONFIG.format(label=link["remote"], suffix="_{host}".format(host=get_clean_fieldname(link["remote"]))))
+                print(LQ_VALUES_CONFIG.format(label=link["remote"], suffix="_{host}".format(host=get_clean_fieldname(link["remote"]))))
                 print()
             for link in links:
-                print("multigraph link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
-                print(GRAPH_CONFIG.format(title="Link Quality towards {host}".format(host=link["remote"])))
-                print(VALUES_CONFIG.format(label="Link Quality", suffix=""))
+                print("multigraph olsr_link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
+                print(LQ_GRAPH_CONFIG.format(title="Link Quality towards {host}".format(host=link["remote"])))
+                print(LQ_VALUES_CONFIG.format(label="Link Quality", suffix=""))
                 print()
+
+            # link count ("number of nodes behind each neighbour")
+            print("multigraph olsr_neighbour_link_count")
+            for index, neighbour in enumerate(links):
+                print(NEIGHBOUR_COUNT_VALUE.format(host=link["remote"],
+                                                   host_fieldname=get_clean_fieldname(link["remote"]),
+                                                   draw_type=("AREA" if (index == 0) else "STACK")))
+
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
             if os.path.exists(os.getenv('olsrd_path', '/usr/sbin/olsrd')):
@@ -107,3 +180,8 @@ if __name__ == "__main__":
         print("lq.value {lq:f}".format(lq=link["lq"]))
         print("nlq.value {nlq:f}".format(nlq=link["nlq"]))
         print()
+
+    print("multigraph olsr_neighbour_link_count")
+    for index, link in enumerate(links):
+        print("neighbour_{host_fieldname}.value {value}".format(value=link["route_count"],
+                                                                host_fieldname=get_clean_fieldname(link["remote"])))

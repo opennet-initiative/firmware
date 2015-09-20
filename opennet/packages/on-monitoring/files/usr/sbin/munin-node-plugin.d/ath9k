@@ -167,9 +167,9 @@ class Station:
         yield "graph_vlabel received (-) / transmitted (+)"
         yield "graph_category wireless"
         # convert bytes/s into kbit/s (x * 8 / 1000 = x / 125)
-        for item in _get_up_down_pair("kBit/s", "tx_bytes", "rx_bytes", divider=125):
+        for item in _get_up_down_pair("kBit/s", "tx_bytes", "rx_bytes", divider=125, use_negative=False):
             yield item
-        for item in _get_up_down_pair("Packets/s", "tx_packets", "rx_packets"):
+        for item in _get_up_down_pair("Packets/s", "tx_packets", "rx_packets", use_negative=False):
             yield item
         yield ""
 
@@ -298,19 +298,23 @@ class Ath9kDriver:
 
 
 
-def _get_up_down_pair(unit, key_up, key_down, factor=None, divider=None):
+def _get_up_down_pair(unit, key_up, key_down, factor=None, divider=None, use_negative=True):
     """ return all required statements for a munin-specific up/down value pair
         "factor" or "divider" can be given for unit conversions
     """
     for key in (key_up, key_down):
-        yield "{key}.label {unit}".format(key=key, unit=unit)
+        if use_negative:
+            yield "{key}.label {unit}".format(key=key, unit=unit)
+        else:
+            yield "{key}.label {key} {unit}".format(key=key, unit=unit)
         yield "{key}.type COUNTER".format(key=key)
         if factor:
             yield "{key}.cdef {key},{factor},*".format(key=key, factor=factor)
         if divider:
             yield "{key}.cdef {key},{divider},/".format(key=key, divider=divider)
-    yield "{key_down}.graph no".format(key_down=key_down)
-    yield "{key_up}.negative {key_down}".format(key_up=key_up, key_down=key_down)
+    if use_negative:
+        yield "{key_down}.graph no".format(key_down=key_down)
+        yield "{key_up}.negative {key_down}".format(key_up=key_up, key_down=key_down)
 
 
 if __name__ == "__main__":

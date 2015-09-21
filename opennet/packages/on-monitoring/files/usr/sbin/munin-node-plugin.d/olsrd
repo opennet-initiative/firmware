@@ -156,7 +156,7 @@ if __name__ == "__main__":
             for link in links:
                 print(LQ_VALUES_CONFIG.format(label=link["remote"],
                                               suffix="_{host}".format(host=get_clean_fieldname(link["remote"])),
-                                              draw_type=("AREA" if is_first else "STACK"))
+                                              draw_type=("AREA" if is_first else "STACK")))
                 print()
                 is_first = False
             is_first = True

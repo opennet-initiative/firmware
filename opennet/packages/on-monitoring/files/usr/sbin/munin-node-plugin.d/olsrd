@@ -45,11 +45,11 @@ LQ_VALUES_CONFIG = """
 nlq{suffix}.label none
 nlq{suffix}.type GAUGE
 nlq{suffix}.graph no
-nlq{suffix}.draw AREA
+nlq{suffix}.draw {draw_type}
 nlq{suffix}.min 0
 lq{suffix}.label {label}
 lq{suffix}.type GAUGE
-lq{suffix}.draw AREA
+lq{suffix}.draw {draw_type}
 lq{suffix}.negative nlq{suffix}
 lq{suffix}.min 0
 """
@@ -152,14 +152,20 @@ if __name__ == "__main__":
             # link quality with regard to neighbours
             print("multigraph olsr_link_quality")
             print(LQ_GRAPH_CONFIG.format(title="OLSR Link Quality"))
+            is_first = True
             for link in links:
-                print(LQ_VALUES_CONFIG.format(label=link["remote"], suffix="_{host}".format(host=get_clean_fieldname(link["remote"]))))
+                print(LQ_VALUES_CONFIG.format(label=link["remote"],
+                                              suffix="_{host}".format(host=get_clean_fieldname(link["remote"])),
+                                              draw_type=("AREA" if is_first else "STACK"))
                 print()
+                is_first = False
+            is_first = True
             for link in links:
                 print("multigraph olsr_link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
                 print(LQ_GRAPH_CONFIG.format(title="Link Quality towards {host}".format(host=link["remote"])))
-                print(LQ_VALUES_CONFIG.format(label="Link Quality", suffix=""))
+                print(LQ_VALUES_CONFIG.format(label="Link Quality", suffix="", draw_type=("AREA" if is_first else "STACK")))
                 print()
+                is_first = False
 
             # link count ("number of nodes behind each neighbour")
             print("multigraph olsr_neighbour_link_count")

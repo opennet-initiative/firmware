@@ -144,8 +144,7 @@ class Station:
                     "rc_stats_success": self._get_rc_stats_config,
                 }.items():
             yield "multigraph {base}_{suffix}.{station}".format(base=graph_base, suffix=suffix, station=self.key)
-            for item in func(label=self.label, siblings=[self]):
-                yield item
+            yield from func(label=self.label, siblings=[self])
 
     @classmethod
     def get_summary_config(cls, siblings, graph_base):
@@ -156,8 +155,7 @@ class Station:
                 }.items():
             yield "multigraph {base}_{suffix}".format(base=graph_base, suffix=suffix)
             for station in siblings:
-                for item in func(siblings=[station]):
-                    yield item
+                yield from func(siblings=[station])
 
     @classmethod
     def _get_traffic_config(cls, label=None, siblings=None):
@@ -170,10 +168,8 @@ class Station:
         yield "graph_vlabel received (-) / transmitted (+)"
         yield "graph_category wireless"
         # convert bytes/s into kbit/s (x * 8 / 1000 = x / 125)
-        for item in _get_up_down_pair("kBit/s", "tx_bytes", "rx_bytes", divider=125, use_negative=False):
-            yield item
-        for item in _get_up_down_pair("Packets/s", "tx_packets", "rx_packets", use_negative=False):
-            yield item
+        yield from _get_up_down_pair("kBit/s", "tx_bytes", "rx_bytes", divider=125, use_negative=False)
+        yield from _get_up_down_pair("Packets/s", "tx_packets", "rx_packets", use_negative=False)
         yield ""
 
     @classmethod
@@ -261,19 +257,15 @@ class WifiInterface:
             yield Station(label, key, os.path.join(stations_base, item))
 
     def get_config(self):
-        for item in Station.get_summary_config(self.stations, self._graph_base):
-            yield item
+        yield from Station.get_summary_config(self.stations, self._graph_base)
         for station in self.stations:
-            for item in station.get_config(self._graph_base):
-                yield item
+            yield from station.get_config(self._graph_base)
         yield ""
 
     def get_values(self):
-        for item in Station.get_summary_values(self.stations, self._graph_base):
-            yield item
+        yield from Station.get_summary_values(self.stations, self._graph_base)
         for station in self.stations:
-            for item in station.get_values(self._graph_base):
-                yield item
+            yield from station.get_values(self._graph_base)
         yield ""
 
 
@@ -297,13 +289,11 @@ class Ath9kDriver:
 
     def get_config(self):
         for interface in self.interfaces:
-            for item in interface.get_config():
-                yield item
+            yield from interface.get_config()
 
     def get_values(self):
         for interface in self.interfaces:
-            for item in interface.get_values():
-                yield item
+            yield from interface.get_values()
 
 
 

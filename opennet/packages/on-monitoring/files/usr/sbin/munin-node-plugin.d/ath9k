@@ -164,7 +164,6 @@ class Station:
         else:
             yield "graph_title ath9k Station Traffic"
         yield "graph_args --base 1024"
-        yield "graph_scale no"
         yield "graph_vlabel received (-) / transmitted (+)"
         yield "graph_category wireless"
         # convert bytes/s into kbit/s (x * 8 / 1000 = x / 125)

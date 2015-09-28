@@ -7,40 +7,38 @@
 set -eu
 
 
-_reset_upstream_opkg_conf() {
-	grep -v 'opennet$' /rom/etc/opkg.conf | on-function update_file_if_changed /etc/opkg.conf || true
-}
-
-
 # Alle openwrt-Releases bis einschliesslich Chaos Calmer 15.05-rc3 haben die opkg.conf als
 # erhaltenswerte Nutzer-Konfiguration behandelt und somit bei Updates unverändert gelassen.
 # Dies führt naturgemäß zu unbrauchbaren Paket-Feeds nach einer Firmware-Aktualisierung.
 # Das Problem ist hier beschrieben:
 #  * https://dev.openwrt.org/ticket/19882
 #  * https://dev.openwrt.org/ticket/20439
-# Und hier ist die Loeschung (ab Chaos Chalmer (final release)):
+# Und hier ist die Loesung (ab Chaos Chalmer (final release)):
 #  * https://dev.openwrt.org/changeset/46491
-# Wir folgen daher der Chaos-Calmer-Release-Empfehlung und überschreiben die opkg.conf mit
-# der mitgelieferten Datei, falls wir alte Release-Namen in der opkg.conf finden.
-replace_outdated_opkg_conf() {
+# Bei dieser Problembehebung werden die alten Repositories (aus der /etc/opkg.conf) in die
+# /etc/opkg/customfeeds.conf verschoben. Die /etc/opkg.conf enthaelt daraufhin nur noch
+# grundlegende Einstellungen.
+# Die neue Datei /etc/opkg/customfeeds.conf enthaelt dagegen alle distributions-spezifischen
+# Repositories. Diese Datei gilt nicht als Konfigurationsdatei und wird somit bei einer
+# Aktualisierung ersetzt.
+# Somit muessen wir alte unbrauchbare Feeds aus der Datei "customfeeds" entfernen.
+remove_obsolete_repositories() {
 	# die opkg.conf-Datei der folgenden Releases ist zu ersetzen:
 	# backfire: Release v0.4-1
 	# attitude_adjustment: Release v0.4-5
 	# barrier_breaker: Release v0.5.0/1
 	# chaos_calmer/15.05-rc: Entwicklungsversionen von v0.5.2
-	if grep -qE "(backfire|attitude_adjustment|barrier_breaker|chaos_calmer/15.05-rc)" /etc/opkg.conf; then
-		# im Vorgriff auf die folgende Funktion "remove_opennet_feed_from_global_opkg_conf" filtern wir den opennet-Feed raus
-		_reset_upstream_opkg_conf
-	fi
+	local opkg_file="/etc/opkg/customfeeds.conf"
+	grep -v '\(backfire\|attitude_adjustment\|barrier_breaker\|chaos_calmer\/15\.05-rc\)' "$opkg_file" | \
+		on-function update_file_if_changed "$opkg_file" || true
 }
 
 
-# Der openwrt-Build-Prozess fügt den opennet-Feed zur opkg.conf hinzu.
+# Der openwrt-Build-Prozess fügt den opennet-Feed zur /etc/opkg/distfeeds.conf hinzu.
 # Wir möchten dies jedoch nicht (siehe opennet-Doku zur Paketverwaltung).
-remove_opennet_feed_from_global_opkg_conf() {
-	grep -q "opennet$" /etc/opkg.conf && sed -i '/opennet$/d' /etc/opkg.conf
-	# Reset der originalen opkg.conf, falls es keine aktiven Quellen mehr gibt
-	grep -q "^src/gz" /etc/opkg.conf || _reset_upstream_opkg_conf
+remove_opennet_feed_from_distfeeds_opkg_conf() {
+	local opkg_file="/etc/opkg/distfeeds.conf"
+	grep -v "opennet$" "$opkg_file" | on-function update_file_if_changed "$opkg_file" || true
 }
 
 
@@ -59,7 +57,6 @@ EOF
 }
 
 
-replace_outdated_opkg_conf
-# der opennet-Feed muss nach der obigen eventuellen Ersetzung der Konfigurationsdatei entfernt werden
-remove_opennet_feed_from_global_opkg_conf
+remove_obsolete_repositories
+remove_opennet_feed_from_distfeeds_opkg_conf
 add_on_repository_hint

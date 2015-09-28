@@ -105,11 +105,16 @@ install_from_opennet_repository() {
 
 # Ausführung eines opkg-Kommnados mit der opennet-Repository-Konfiguration und minimaler Ausgabe (nur Fehler) auf stdout.
 _run_opennet_opkg() {
+	# Vor der opkg-Ausführung müssen wir das Verzeichnis /etc/opkg verdecken, da opkg fehlerhafterweise
+	# auch bei Verwendung von "--conf" die üblichen Orte nach Konfigurationsdateien durchsucht.
+	# TODO: opkg-Bug upstream berichten
+	mount -t tmpfs -o size=32k tmpfs /etc/opkg
 	# opkg ausfuehren und dabei die angegebene Fehlermeldung ignorieren (typisch fuer Paket-Installation nach Upgrade)
 	opkg --verbosity=0 --conf "$ON_OPKG_CONF_PATH" "$@" 2>&1 \
 		| grep -vF "resolve_conffiles: Existing conffile /etc/config/openvpn is different from the conffile in the new package. The new conffile will be placed at /etc/config/openvpn-opkg." \
 		| grep -v "^Collected errors:$" \
 		|| true
+	umount /etc/opkg
 }
 
 

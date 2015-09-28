@@ -657,6 +657,13 @@ get_potential_error_messages() {
 	# 17) ddns-scripts[...]: myddns_ipv4: ...
 	#    ddns meldet leidet beim Starten einen Fehler, solange es unkonfiguriert ist.
 	filters="${filters}|ddns-scripts.*myddns_ipv[46]"
+	# 18) Collected errors:
+	#    opkg-Paketinstallationen via Web-Interface erzeugen gelegentlich Fehlermeldungen (z.B. Entfernung
+	#    abhängiger Pakete), die dem Nutzer im Web-Interface angezeigt werden. Diese Fehlermeldungen landen
+	#    zusätzlich auch im log-Buffer. Da der Nutzer sie bereits gesehen haben dürfte, können wir sie ignorieren
+	#    (zumal die konkreten Fehlermeldungen erst in den folgenden Zeilen zu finden und somit schlecht zu filtern
+	#    sind).
+	filters="${filters}|Collected errors:"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" | if [ -z "$max_lines" ]; then
 		# alle Einträge ausgeben

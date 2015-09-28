@@ -45,7 +45,7 @@ build_platform() {
 	local dest_platform_dir="$dest_dir/$platform"
 	mkdir -p "$dest_platform_dir"
 	# workaround for broken directory or file mode?
-	find "$dest_platform_dir" -perm 655 -print0 | xargs -0 chmod 755
+	find "$dest_platform_dir" -perm 655 -print0 | xargs -0 --no-run-if-empty chmod 755
 
 	# copy build to export directory
 	local src_dir="$HOME/$BIN_DIR/$platform"

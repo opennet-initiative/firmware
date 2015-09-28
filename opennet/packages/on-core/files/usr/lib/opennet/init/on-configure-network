@@ -24,10 +24,11 @@ configure_local_network() {
 
 configure_opennet_zone() {
 	local uci_prefix
-	uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_MESH")
-	# Zone existiert? Keine Aenderungen ...
-	[ -n "$uci_prefix" ] && return 0
-	uci_prefix=firewall.$(uci add firewall zone)
+	# Forwarding (die letzte Aktion dieses Ablaufs) existiert? Keine Aenderungen ...
+	[ -n "$(find_first_uci_section "firewall" "forwarding" "src=$ZONE_MESH" "dest=$ZONE_MESH")" ] && return 0
+	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$ZONE_MESH")
+	# Zone anlegen, falls leer
+	[ -z "$uci_prefix" ] && uci_prefix=firewall.$(uci add firewall zone)
 	uci set "$uci_prefix=zone"
 	uci set "$uci_prefix.name=$ZONE_MESH"
 	# Opennet-APs bieten ueblicherweise keine privaten Dienste an

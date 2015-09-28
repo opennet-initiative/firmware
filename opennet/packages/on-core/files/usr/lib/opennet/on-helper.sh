@@ -62,7 +62,8 @@ ON_SHELL_MODULES_NEWEST=$( (ls -dtr "$ON_SHELL_MODULES_DIR" $ON_SHELL_MODULES "$
 clear_caches() {
 	rm -f "$ON_SHELL_MINIMIZED"
 	clear_cache_opennet_opkg
-	clean_luci_restart
+	# den luci-Restart leicht verzoegern (sonst reisst die Verbindung bei Aktualisierungen im Web-Interface ab)
+	run_delayed_in_background 3 clean_luci_restart
 }
 
 

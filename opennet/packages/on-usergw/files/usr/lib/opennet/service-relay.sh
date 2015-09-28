@@ -134,7 +134,7 @@ _get_service_relay_olsr_announcement_prefix() {
 	main_ip=$(get_main_ip)
 	service_type=$(get_service_value "$service_name" "service")
 	# remove prefix
-	service_type="${service_type%$RELAYABLE_SERVICE_PREFIX}"
+	service_type="${service_type#$RELAYABLE_SERVICE_PREFIX}"
 	scheme=$(get_service_value "$service_name" "scheme")
 	host=$(get_service_value "$service_name" "host")
 	port=$(pick_local_service_relay_port "$service_name")
@@ -198,6 +198,21 @@ EOF
 }
 
 
+## @fn get_olsr_relay_service_name_from_description()
+## @brief Ermittle den Dienstnamen, der zu einer olsr-Relay-Service-Definition gehoert.
+get_olsr_relay_service_name_from_description() {
+	trap "error_trap get_olsr_relay_service_name_from_description '$*'" $GUARD_TRAPS
+	local service_description="$1"
+	local fields
+	local port
+	local service_type
+	fields=$(echo "$service_description" | parse_olsr_service_descriptions)
+	port=$(echo "$fields" | cut -f 3)
+	service_type=$(echo "$fields" | cut -f 6)
+	get_services "${RELAYABLE_SERVICE_PREFIX}$service_type" | filter_services_by_value "local_relay_port" "$port"
+}
+
+
 # olsr-Nameservice-Beschreibungen entfernen falls der dazugehoerige Dienst nicht mehr relay-tauglich ist
 deannounce_unused_olsr_service_relays() {
 	# wir erwarten einen ausführbaren Testnamen
@@ -208,7 +223,7 @@ deannounce_unused_olsr_service_relays() {
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
 	uci_get_list "${uci_prefix}.service" | while read service_description; do
 		# unbenutzte Eintraege entfernen
-		service_name=$(get_olsr_service_name_from_description "$service_description")
+		service_name=$(get_olsr_relay_service_name_from_description "$service_description")
 		[ -z "$service_name" ] && msg_info "Failed to parse olsr service description: $service_description" && continue
 		"$test_for_activity" "$service_name" && continue
 		uci_delete_list "${uci_prefix}.service" "$service_description"

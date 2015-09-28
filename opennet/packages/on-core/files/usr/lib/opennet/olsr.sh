@@ -155,32 +155,6 @@ parse_olsr_service_descriptions() {
 }
 
 
-## @fn get_olsr_service_name_from_description()
-## @brief Ermittle den Dienstnamen, der zu einer olsr-Service-Definition gehoert.
-get_olsr_service_name_from_description() {
-	trap "error_trap get_olsr_service_name_from_description '$*'" $GUARD_TRAPS
-	local service_description="$1"
-	local fields
-	local port
-	local service_type
-	local details
-	local public_host
-	local scheme
-	local host
-	local path
-	local protocol
-	fields=$(echo "$service_description" | parse_olsr_service_descriptions)
-	port=$(echo "$fields" | cut -f 3)
-	service_type=$(echo "$fields" | cut -f 6)
-	details=$(echo "$fields" | cut -f 7)
-	scheme=$(echo "$fields" | cut -f 1)
-	host=$(echo "$fields" | cut -f 2)
-	path=$(echo "$fields" | cut -f 4)
-	protocol=$(echo "$fields" | cut -f 5)
-	get_service_name "$service_type" "$scheme" "$host" "$port" "$protocol" "$path"
-}
-
-
 # Parse die olsr-Service-Datei
 # Die Service-Datei enthaelt Zeilen streng definierter Form (durchgesetzt vom nameservice-Plugin).
 # Beispielhafte Eintraege:

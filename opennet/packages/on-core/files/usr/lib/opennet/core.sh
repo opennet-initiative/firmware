@@ -568,10 +568,11 @@ generate_report() {
 	trap "error_trap generate_report '$*'" $GUARD_TRAPS
 	local fname
 	local pid
-	local reports_dir="$temp_dir/report"
+	local reports_dir
 	local temp_dir
 	local tar_file
 	temp_dir=$(mktemp -d)
+	reports_dir="$temp_dir/report"
 	tar_file=$(mktemp)
 	msg_debug "Creating a report"
 	# die Skripte duerfen davon ausgehen, dass wir uns im Zielverzeichnis befinden

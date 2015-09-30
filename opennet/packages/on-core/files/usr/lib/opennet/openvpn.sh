@@ -125,6 +125,20 @@ get_openvpn_config() {
 	local pid_file
 	remote=$(get_service_value "$service_name" "host")
 	port=$(get_service_value "$service_name" "port")
+	# Falls es sich um einen relay-Dienst handelt, koennen wir uns leider nicht mit uns selbst verbinden,
+	# da die firewall-redirect-Regeln keine "device"-Quelle kennen (anstelle des ueblichen "on_mesh").
+	# Also ermitteln wir den lokal bekannten proxy-Dienst und verwenden dessen Daten, sofern on-usergw installiert ist.
+	if [ "$remote" = "$(get_main_ip)" -a -n "${RELAYABLE_SERVICE_PREFIX:-}" ]; then
+		local proxy_service_type="$RELAYABLE_SERVICE_PREFIX$(get_service_value "$service_name" "service")"
+		local relayed_service=$(get_services "$proxy_service_type" | filter_services_by_value "local_relay_port" "$port")
+		if [ -n "$relayed_service" ]; then
+			# Hostname und Port ersetzen
+			remote=$(get_service_value "$relayed_service" "host")
+			port=$(get_service_value "$relayed_service" "port")
+		else
+			msg_info "Failed to use locally relayed service for openvpn - trying to continue, anyway."
+		fi
+	fi
 	protocol=$(get_service_value "$service_name" "protocol")
 	[ "$protocol" = "tcp" ] && protocol=tcp-client
 	template_file=$(get_service_value "$service_name" "template_file")

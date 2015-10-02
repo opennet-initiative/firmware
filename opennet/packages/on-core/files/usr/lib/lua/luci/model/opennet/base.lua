@@ -124,7 +124,7 @@ function action_settings()
 		if services_sorting then
 			on_function("set_service_sorting", {services_sorting})
 		end
-		cursor:commit("on-core")
+		on_function("apply_changes", {"on-core"})
 	end
 	-- POE passthrough
 	if luci.http.formvalue("has_poe_passthrough") then
@@ -133,7 +133,7 @@ function action_settings()
 		else
 			cursor:set("system", "gpio_switch_poe_passthrough", "value", "0")
 		end
-		cursor:commit("system")
+		on_function("apply_changes", {"on-core"})
 	end
 	luci.template.render("opennet/on_settings", { on_errors=on_errors })
 end
@@ -168,10 +168,8 @@ function action_portmapping()
 		cursor:section("firewall", "redirect", nil, { src = zone, proto = 'tcpudp', src_dport = new_src_dport, dest_ip = new_dest_ip, dest_port = new_dest_port, target = 'DNAT' })
 	end
 	if del_section or zone then
-		cursor:commit("firewall")
+		on_function("apply_changes", {"firewall"})
 		cursor:unload("firewall")
-		-- Neustart der firewall ausloesen
-		luci.sys.exec("reload_config")
 	end
 
 	luci.template.render("opennet/on_portmapping", { show_more_info = show_more_info })

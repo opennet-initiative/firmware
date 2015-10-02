@@ -6,11 +6,15 @@
 # erst nach der Cache-Loeschung sind die neuen Funktionen verfuegbar
 on-function on_opkg_postinst_default
 
-# Leider, leider ist muninlite noch nicht installiert, wenn diese Funktion aufgerufen wird.
-# Daher warten wir einfach ein wenig und hoffen, dass es zwischendurch keinen Neustart gibt.
 
-# Patch auf /usr/sbin/munin-node anwenden, um die Verwendung von Modulen zu ermöglichen
-on-function run_delayed_in_background 20 enable_munin_plugins
+on-function schedule_task <<-EOF
+	# Leider, leider ist muninlite noch nicht installiert, wenn diese Funktion aufgerufen wird.
+	# Daher warten wir einfach ein wenig und hoffen, dass es zwischendurch keinen Neustart gibt.
+	sleep 20
 
-# munin starten oder stoppen (je nach Modul-Aktivierung)
-on-function run_delayed_in_background 30 update_monitoring_state
+	# Patch auf /usr/sbin/munin-node anwenden, um die Verwendung von Modulen zu ermöglichen
+	on-function enable_munin_plugins
+
+	# munin starten oder stoppen (je nach Modul-Aktivierung)
+	on-function update_monitoring_state
+EOF

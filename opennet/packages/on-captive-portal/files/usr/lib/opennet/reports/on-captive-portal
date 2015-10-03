@@ -7,4 +7,4 @@ set -eu
 
 
 # uci-Konfiguration
-uci show -q "on-captive-portal" >uci_on-captive-portal || true
+uci -q show "on-captive-portal" >uci_on-captive-portal || true

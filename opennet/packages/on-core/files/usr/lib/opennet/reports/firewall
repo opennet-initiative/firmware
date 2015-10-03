@@ -13,4 +13,4 @@ done
 
 
 # uci-Konfiguration
-uci show -q "firewall" >uci_firewall || true
+uci -q show "firewall" >uci_firewall || true

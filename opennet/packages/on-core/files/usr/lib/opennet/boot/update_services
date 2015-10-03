@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Führe innerhalb der ersten sieben Minuten Gerätelaufzeit im Minutentakt eine Aktualisierung
-# der Dienstliste durch. Dies ermöglicht nach dem Booten den zeitnahen Aufbaue einer VPN-Verbindung.
+# der Dienstliste durch. Dies ermöglicht nach dem Booten den zeitnahen Aufbau einer VPN-Verbindung.
 #
 # Falls die uptime weniger als sieben Minuten beträgt, wird eine erneute
 # Ausführung via 'schedule_task' veranlasst.

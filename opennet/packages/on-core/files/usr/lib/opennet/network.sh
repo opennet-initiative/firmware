@@ -307,7 +307,7 @@ del_interface_from_zone() {
 	local uci_prefix
 	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to remove interface '$interface' from non-existing zone '$zone'" && trap "" $GUARD_TRAPS && return 1
-	uci del_list "${uci_prefix}.network=$interface"
+	uci -q del_list "${uci_prefix}.network=$interface"
 }
 
 
@@ -446,7 +446,7 @@ rename_firewall_zone() {
 	local new_uci_prefix
 	new_uci_prefix=$(find_first_uci_section firewall zone "name=$new_zone")
 	[ -z "$new_uci_prefix" ] && new_uci_prefix="firewall.$(uci add firewall zone)"
-	uci show "$old_uci_prefix" | cut -f 3- -d . | while read setting; do
+	uci -q show "$old_uci_prefix" | cut -f 3- -d . | while read setting; do
 		# die erste Zeile (der Zonen-Typ) ueberspringen
 		[ -z "$setting" ] && continue
 		uci set "${new_uci_prefix}.$setting"

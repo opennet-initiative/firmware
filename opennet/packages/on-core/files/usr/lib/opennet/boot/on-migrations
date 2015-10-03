@@ -379,7 +379,7 @@ remove_wifidog_config() {
 ##   Nutzungsform zu erraten und die dazu passende Modulliste zu speichern.
 guess_previously_used_modules() {
 	# falls bereits etwas in der uci-Sektion gespeichert wurde, ist keine Nachbereitung noetig
-	[ -n "$(uci show -q "on-core.modules")" ] && return 0
+	[ -n "$(uci -q show "on-core.modules")" ] && return 0
 	# Zweig anlegen
 	uci set "on-core.modules=modules"
 	# prüfe ob relevante Dateien vorhanden sind, die die jeweiligen Module benutzen würden

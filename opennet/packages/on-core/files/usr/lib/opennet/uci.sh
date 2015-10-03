@@ -65,7 +65,7 @@ uci_get_list() {
 	# falls es den Schlüssel nicht gibt, liefert "uci show" eine Fehlermeldung und Müll - das wollen wir abfangen
 	[ -z "$(uci_get "$uci_path")" ] && return 0
 	# ansonsten: via "uci show" mit speziellem Trenner abfragen und zeilenweise separieren
-	uci show -d "_=_=_=_=_" "$uci_path" | cut -f 2- -d = | sed 's/_=_=_=_=_/\n/g' | sed "s/^'\(.*\)'$/\1/"
+	uci -q -d "_=_=_=_=_" show "$uci_path" | cut -f 2- -d = | sed 's/_=_=_=_=_/\n/g' | sed "s/^'\(.*\)'$/\1/"
 }
 
 
@@ -168,7 +168,7 @@ _find_uci_sections() {
 	local section
 	local condition
 	# Der Cache beschleunigt den Vorgang wesentlich.
-	uci_cache=$(uci -X show "$config" | filter_uci_show_value_quotes)
+	uci_cache=$(uci -X -q show "$config" | filter_uci_show_value_quotes)
 	echo "$uci_cache" | grep "^$config\.[^.]\+=$stype$" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
 		for condition in "$@"; do
 			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt

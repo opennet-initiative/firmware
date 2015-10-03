@@ -110,7 +110,7 @@ configure_olsr_interfaces() {
 	trap "error_trap configure_olsr_interfaces '$*'" $GUARD_TRAPS
 
 	# diese Aktion ist bereits abgeschlossen
-	uci show network | grep -q "^network\.on_eth_0\." && return 0
+	uci -q show "network" | grep -q "^network\.on_eth_0\." && return 0
 
 	local on_id
 	local on_ipschema

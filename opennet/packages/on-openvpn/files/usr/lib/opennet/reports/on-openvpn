@@ -44,6 +44,6 @@ ping_neighbour() {
 
 
 # uci-Konfiguration
-uci show -q "on-openvpn" >uci_on-openvpn || true
+uci -q show "on-openvpn" >uci_on-openvpn || true
 
 wait

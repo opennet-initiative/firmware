@@ -26,5 +26,39 @@ define Package/on-monitoring/install
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 
+define Package/on-monitoring/postinst
+#!/bin/sh
+[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+
+# zuerst die Caches zuruecksetzen
+# erst nach der Cache-Loeschung sind die neuen Funktionen verfuegbar
+on-function on_opkg_postinst_default
+
+on-function schedule_task <<-EOF
+	# Leider, leider ist muninlite noch nicht installiert, wenn diese Funktion aufgerufen wird.
+	# Daher warten wir einfach ein wenig und hoffen, dass es zwischendurch keinen Neustart gibt.
+	sleep 20
+
+	# Patch auf /usr/sbin/munin-node anwenden, um die Verwendung von Modulen zu ermöglichen
+	on-function enable_munin_plugins
+
+	# munin starten oder stoppen (je nach Modul-Aktivierung)
+	on-function update_monitoring_state
+EOF
+endef
+
+define Package/on-monitoring/prerm
+#!/bin/sh
+[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+# wir nehmen an, dass munin abgeschaltet werden soll, wenn der Nutzer das "on-monitoring"-Paket entfernt
+on-function disable_monitoring
+endef
+
+define Package/on-monitoring/postrm
+#!/bin/sh
+[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+on-function on_opkg_postrm_default
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))
 

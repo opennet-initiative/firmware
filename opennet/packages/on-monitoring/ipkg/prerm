@@ -1,6 +1,0 @@
-#!/bin/sh
-
-[ "${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-
-# wir nehmen an, dass munin abgeschaltet werden soll, wenn der Nutzer das "on-monitoring"-Paket entfernt
-on-function disable_monitoring

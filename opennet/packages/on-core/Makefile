@@ -26,5 +26,11 @@ define Package/on-core/install
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 
+define Package/on-core/postinst
+#!/bin/sh
+[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+on-function on_opkg_postinst_default
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))
 

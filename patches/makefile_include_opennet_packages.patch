@@ -1,7 +1,7 @@
 die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 --- /dev/null
 +++ b/openwrt/include/opennet.mk
-@@ -0,0 +1,52 @@
+@@ -0,0 +1,54 @@
 +# wir lesen die Versionsnummer aus der config-Datei
 +VERSION_NUMBER = $(shell cat "$(TOPDIR)/.config" | grep "^CONFIG_VERSION_NUMBER=" | cut -f 2- -d =)
 +ifeq "$(VERSION_NUMBER)" ""
@@ -25,8 +25,10 @@ die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 +
 +
 +define Package/opennet/install/template
-+	$(CP) "$(PKG_BUILD_DIR)/files/." "$(1)/"
-+	@# Zertifikate hashen, falls noetig (nur fuer on-core relevant; notwendig fuer csr-Upload via https)
++	$(INSTALL_DIR) "$(1)/"
++	@# das on-goodies-Paket enthaelt keinerlei Dateien - also darf die Kopie fehlschlagen
++	$(CP) "$(PKG_BUILD_DIR)/files/." "$(1)/" || true
++	@# Zertifikate hashen, falls noetig (nur fuer on-certificates relevant; notwendig fuer csr-Upload via https)
 +	[ -d "$(1)/etc/ssl/certs/opennet-initiative.de" ] && c_rehash "$(1)/etc/ssl/certs/opennet-initiative.de" || true
 +	@# falls es keine ipkg-Dateien gibt, existiert das Quell-Verzeichnis in git nicht
 +	$(CP) -L "$(PKG_BUILD_DIR)/ipkg/." "$(1)/CONTROL" || true

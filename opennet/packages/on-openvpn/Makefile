@@ -28,5 +28,17 @@ define Package/on-openvpn/install
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 
+define Package/on-openvpn/postinst
+#!/bin/sh
+[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+on-function on_opkg_postinst_default
+endef
+
+define Package/on-openvpn/postrm
+#!/bin/sh
+[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+on-function on_opkg_postrm_default
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))
 

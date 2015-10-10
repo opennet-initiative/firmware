@@ -229,7 +229,11 @@ generate_opennet_opkg_config() {
 ## @param package Name des Pakets
 is_package_installed() {
 	local package="$1"
-	opkg list-installed | grep -q -w "^$package" && return 0
+	# Korrekte Prüfung: via "opkg list-installed" - leider erzeugt sie locking-Fehlermeldung
+	# bei parallelen Abläufen (z.B. Status-Seite).
+	#opkg list-installed | grep -q -w "^$package" && return 0
+	# schneller als via opkg
+	[ -e "${IPKG_INSTROOT:-}/usr/lib/opkg/info/${package}.control" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

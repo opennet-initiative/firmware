@@ -962,5 +962,16 @@ get_flash_backup() {
 	done
 }
 
+
+## @fn has_flash_or_filesystem_error_indicators()
+## @brief Prüfe ob typische Indikatoren (vor allem im Kernel-Log) vorliegen, die auf einen Flash-Defekt hinweisen.
+has_flash_or_filesystem_error_indicators() {
+	trap "error_trap get_flash_backup '$*'" $GUARD_TRAPS
+	dmesg | grep -q "jffs2.*CRC" && return 0
+	dmesg | grep -q "SQUASHFS error" && return 0
+	# keine Hinweise gefunden -> wir liefern "nein"
+	trap "" $GUARD_TRAPS && return 1
+}
+
 # Ende der Doku-Gruppe
 ## @}

@@ -19,8 +19,8 @@ update_olsr_interfaces() {
 	# physische Interfaces werden beispielsweise durch die mesh-Interfaces erzeugt
 	local devices
 	devices=$(get_zone_raw_devices "$ZONE_MESH")
-	# fuehrende Leerzeichen entfernen
-	value=$(echo "$interfaces $devices" | sed 's/^ *//; s/ *$//')
+	# fuehrende Leerzeichen entfernen; Zeilenumbrueche in Leerzeichen verwandeln
+	value=$(echo "$interfaces $devices" | sed 's/^ *//; s/ *$//' | tr '\n' ' ')
 	uci set -q "olsrd.@Interface[0].interface=$value"
 	apply_changes olsrd
 }

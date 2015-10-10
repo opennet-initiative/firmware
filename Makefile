@@ -101,4 +101,6 @@ autobuilder-clean:
 	git fetch --all
 	git reset --hard origin/master
 	git submodule update
-
+	@# eventuell Reste von (zwischenzeitlich geaenderten) Patches entfernen
+	git submodule foreach git reset --hard
+	git submodule foreach git clean -f

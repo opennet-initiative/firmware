@@ -22,6 +22,8 @@ define Package/on-goodies/compile
 endef
 
 define Package/on-goodies/install
+	# dieses Template wird via patches/makefile_include_opennet_packages.patch definiert
+	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

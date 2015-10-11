@@ -39,7 +39,7 @@ gen_ip_list() {
       # ignore first lines ("HOST:"; "Start:")
       mtr --no-dns --report --report-cycles=5 "$ip" | grep -v "^[A-Z]" | while read line; do
           # Ausgabe (Debugging)
-          echo "$line"
+          #echo "$line"
           echo "$line" | awk '{ print $2 }'
       done
   fi | grep -v "^$" | tr '\n' ','
@@ -55,7 +55,15 @@ echo "----------------------------"
 echo -n "Fetching Opennet Names. Please wait ..."
 
 ip_list=$(gen_ip_list $dst_ip)
+if [ -z $ip_list ]; then
+  #no route to host
+  echo
+  echo "No route to host"
+  echo
+  exit 3
+fi
 ip_list=$(echo $ip_list | sed "s/^to,//") #delete first line with "traceroute to ..."
+ip_list=$(echo $ip_list | sed "s/???,//g") #delete all "???," of mtr output
 ip_list=${ip_list%,} #delete last "," which is a result of loop
 
 #---TODO---URL von www.on-i.de holen oder von api.on-i.de ----

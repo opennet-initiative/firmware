@@ -45,10 +45,6 @@ gen_ip_list() {
   fi | grep -v "^$" | tr '\n' ','
 }
 
-echo "Please wait a second..."
-echo "---plain $progname output---"
-echo
-
 type "$progname" >/dev/null 2>&1 || {
     echo "No traceroute program ($progname) found."
     exit 2

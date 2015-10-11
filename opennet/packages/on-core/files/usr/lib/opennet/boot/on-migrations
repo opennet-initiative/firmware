@@ -96,7 +96,7 @@ _split_uci_option() {
 			i = 3
 			while (i <= NF) {
 				gsub(/'\''/, "", $i)
-				printf "        list %s '\'%s\''\n", $2, $i
+				printf "        list %s '"'%s'"'\n", $2, $i
 				i++
 			}
 		} else {

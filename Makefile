@@ -105,4 +105,4 @@ autobuilder-clean:
 	git submodule foreach git reset --hard
 	git submodule foreach git clean -f
 	@# eventuelle Patch-Reste entfernen (z.B. die feeds.conf)
-	quilt pop -a -f
+	quilt pop -a -f || true

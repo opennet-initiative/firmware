@@ -101,7 +101,7 @@ _split_uci_option() {
 			}
 		} else {
 			print $0
-		}}' | update_file_if_changed "$filename" && uci commit "$config"
+		}}' | update_file_if_changed "$filename" && apply_changes "$config"
 	true
 }
 
@@ -128,9 +128,8 @@ fix_firewall_reload() {
 		[ "$(uci_get "${uci_prefix}.path")" != "$filename" ] && continue
 		# gesamte "include"-Abzweigung loeschen
 		uci_delete "$uci_prefix"
-		uci commit "firewall"
+		apply_changes "firewall"
 		rm -f "$filename"
-		reload_config || true
 		break
 	done
 	return 0
@@ -154,8 +153,7 @@ disable_unwanted_forward() {
 	done | grep -q . && {
 		# sicherstellen, dass die als Ersatz fuer "forward=ACCEPT" noetige Weiterleitung existiert
 		add_zone_forward "$ZONE_MESH" "$ZONE_MESH"
-		uci commit firewall
-		reload_config || true
+		apply_changes "firewall"
 	}
 	true
 }

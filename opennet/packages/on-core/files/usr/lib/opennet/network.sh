@@ -85,7 +85,7 @@ update_opennet_zone_masquerading() {
 	# alle masquerade-Netzwerke entfernen
 	uci_delete "${uci_prefix}.masq_src"
 	# aktuelle Netzwerke wieder hinzufuegen
-	for network in $(get_zone_interfaces "$ZONE_LOCAL"); do
+	for network in $(get_zone_interfaces "$ZONE_LOCAL"; get_zone_interfaces "$ZONE_WAN"); do
 		network_with_prefix=$(get_current_addresses_of_network "$network")
 		[ -z "$network_with_prefix" ] && continue
 		uci_add_list "${uci_prefix}.masq_src" "$network_with_prefix"

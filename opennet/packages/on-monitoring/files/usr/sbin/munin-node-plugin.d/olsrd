@@ -62,10 +62,10 @@ graph_info      Count the number of locally known routes passing through each di
 """
 
 NEIGHBOUR_COUNT_VALUE = """
-neighbour_{host_fieldname}.label = {host}
-neighbour_{host_fieldname}.type = GAUGE
-neighbour_{host_fieldname}.draw = {draw_type}
-neighbour_{host_fieldname}.min = 0
+neighbour_{host_fieldname}.label {host}
+neighbour_{host_fieldname}.type GAUGE
+neighbour_{host_fieldname}.draw {draw_type}
+neighbour_{host_fieldname}.min 0
 """
 
 

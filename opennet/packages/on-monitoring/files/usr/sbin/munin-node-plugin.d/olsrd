@@ -129,6 +129,7 @@ def get_olsr_links():
     mid_mapping = get_address_device_mapping()
     hna_list = [line.split()[0] for line in query_olsrd_txtservice("hna")]
     route_count = count_routes_by_neighbour(mid_mapping, hna_list)
+    result = []
     for line in query_olsrd_txtservice("links"):
         tokens = line.split()
         link = {}
@@ -140,7 +141,9 @@ def get_olsr_links():
             link[key] = float(tokens.pop(0))
         # add the route count
         link["route_count"] = route_count.get(link["remote"], 0)
-        yield link
+        result.append(link)
+    result.sort(key=lambda link: link["remote"])
+    return result
 
 
 if __name__ == "__main__":
@@ -169,6 +172,7 @@ if __name__ == "__main__":
 
             # link count ("number of nodes behind each neighbour")
             print("multigraph olsr_neighbour_link_count")
+            print(NEIGHBOUR_COUNT_CONFIG)
             is_first = True
             for link in links:
                 print(NEIGHBOUR_COUNT_VALUE.format(host=link["remote"],

@@ -163,7 +163,7 @@ if __name__ == "__main__":
             for link in links:
                 print("multigraph olsr_link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
                 print(LQ_GRAPH_CONFIG.format(title="Link Quality towards {host}".format(host=link["remote"])))
-                print(LQ_VALUES_CONFIG.format(label="Link Quality", suffix="", draw_type=("AREA" if is_first else "STACK")))
+                print(LQ_VALUES_CONFIG.format(label="Link Quality", suffix="", draw_type="AREA"))
                 print()
                 is_first = False
 

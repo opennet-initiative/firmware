@@ -68,6 +68,17 @@ neighbour_{host_fieldname}.draw {draw_type}
 neighbour_{host_fieldname}.min 0
 """
 
+NEIGHBOUR_PING_CONFIG = """
+graph_title     Ping time of neighbours
+graph_vlabel    roundtrip time (ms)
+graph_category  network
+graph_info      This graph shows ping RTT statistics.
+graph_args      --base 1000 --lower-limit 0
+graph_scale     no
+"""
+
+NEIGHBOUR_PING_VALUE = """neighbour_{host_fieldname}.label {host}"""
+
 
 get_clean_fieldname = lambda name: "".join([(("a" <= char.lower() <= "z") or ((index == 0) or ("0" <= char <= "9"))) and char or "_" for index, char in enumerate(name)])
 
@@ -146,6 +157,34 @@ def get_olsr_links():
     return result
 
 
+def _read_file(filename):
+    try:
+        return open(filename, "r").read().split("\n")
+    except OSError:
+        return []
+
+
+def get_ping_times(hosts):
+    tempfile = "/tmp/munin-olsrd-{pid}.tmp".format(pid=os.getpid())
+    command = 'for host in {hosts}; do echo -n "$host "; ping -c 1 -w 1 "$host" | grep /avg/ || true; done >{tempfile}'\
+              .format(hosts=" ".join(hosts), tempfile=tempfile)
+    returncode = os.system(command)
+    if returncode != 0:
+        return {}
+    lines = _read_file(tempfile)
+    os.unlink(tempfile)
+    # example output for one host:
+    #   192.168.2.41 round-trip min/avg/max = 4.226/4.226/4.226 ms
+    result = {}
+    for line in lines:
+        tokens = line.split(None)
+        if len(tokens) > 1:
+            host = tokens[0]
+            avg_ping = tokens[-2].split("/")[1]
+            result[host] = float(avg_ping)
+    return result
+
+
 if __name__ == "__main__":
     # parse arguments
     if len(sys.argv) > 1:
@@ -175,10 +214,19 @@ if __name__ == "__main__":
             print(NEIGHBOUR_COUNT_CONFIG)
             is_first = True
             for link in links:
-                print(NEIGHBOUR_COUNT_VALUE.format(host=link["remote"],
-                                                   host_fieldname=get_clean_fieldname(link["remote"]),
-                                                   draw_type=("AREA" if is_first else "STACK")))
+                print(NEIGHBOUR_COUNT_VALUE
+                      .format(host=link["remote"],
+                              host_fieldname=get_clean_fieldname(link["remote"]),
+                              draw_type=("AREA" if is_first else "STACK")))
                 is_first = False
+
+            # neighbour ping
+            print("multigraph olsr_neighbour_ping")
+            print(NEIGHBOUR_PING_CONFIG)
+            for link in links:
+                print(NEIGHBOUR_PING_VALUE
+                      .format(host=link["remote"],
+                              host_fieldname=get_clean_fieldname(link["remote"])))
 
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
@@ -202,16 +250,29 @@ if __name__ == "__main__":
     links = list(get_olsr_links())
     print("multigraph olsr_link_quality")
     for link in links:
-        print("lq_{remote}.value {lq:f}".format(lq=link["lq"], remote=get_clean_fieldname(link["remote"])))
-        print("nlq_{remote}.value {nlq:f}".format(nlq=link["nlq"], remote=get_clean_fieldname(link["remote"])))
+        print("lq_{remote}.value {lq:f}".format(lq=link["lq"],
+                                                remote=get_clean_fieldname(link["remote"])))
+        print("nlq_{remote}.value {nlq:f}".format(nlq=link["nlq"],
+                                                  remote=get_clean_fieldname(link["remote"])))
         print()
     for link in links:
-        print("multigraph olsr_link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
+        print("multigraph olsr_link_quality.host_{remote}"
+              .format(remote=get_clean_fieldname(link["remote"])))
         print("lq.value {lq:f}".format(lq=link["lq"]))
         print("nlq.value {nlq:f}".format(nlq=link["nlq"]))
         print()
 
     print("multigraph olsr_neighbour_link_count")
-    for index, link in enumerate(links):
-        print("neighbour_{host_fieldname}.value {value}".format(value=link["route_count"],
-                                                                host_fieldname=get_clean_fieldname(link["remote"])))
+    for link in links:
+        print("neighbour_{host_fieldname}.value {value}"
+              .format(value=link["route_count"],
+                      host_fieldname=get_clean_fieldname(link["remote"])))
+
+    print("multigraph olsr_neighbour_ping")
+    ping_times = get_ping_times([link["remote"] for link in links])
+    for link in links:
+        ping_time = ping_times.get(link["remote"], None)
+        if ping_time is not None:
+            print("neighbour_{host_fieldname}.value {value:.4f}"
+                  .format(value=ping_time,
+                          host_fieldname=get_clean_fieldname(link["remote"])))

@@ -65,25 +65,38 @@ class Station:
         stats = {}
         with open(os.path.join(self._path, "rc_stats"), "r") as statsfile:
             rate_column = None
+            skip_retry_column = False
             for index, line in enumerate(statsfile.readlines()):
-                # remove linebreak, replace braces (annoyingly present in the lasf four columns)
-                line = line.strip().replace("(", " ").replace(")", " ")
+                # remove trailing linebreak, replace braces (annoyingly present in the lasf four columns)
+                line = line.rstrip().replace("(", " ").replace(")", " ")
                 # ignore the trailing summary lines
                 if not line:
                     break
                 if index == 0:
                     # we need to remember the start of the "rate" column (in order to skip the flags)
                     rate_column = line.index("rate")
+                    if rate_column == 0:
+                        # the following weird format was found on a Barrier Breaker host (2014, Linux 3.10.49):
+                        #   rate      throughput  ewma prob  this prob  this succ/attempt   success    attempts
+                        #   ABCDP  6         5.4       89.9      100.0             0(  0)       171         183
+                        # Thus we just assume that there are five flag letters and two blanks.
+                        # Let's hope for the best!
+                        rate_column = 6
+                        # this format does not contain the "retry" column
+                        skip_retry_column = True
                     # skip the header line
                     continue
                 cutoff_line = line[rate_column:]
-                tokens = line[rate_column:].split()
+                tokens = cutoff_line.split()
                 entry = {}
                 entry["rate"] = tokens.pop(0)
                 entry["throughput"] = float(tokens.pop(0))
                 entry["ewma_probability"] = float(tokens.pop(0))
                 entry["this_probability"] = float(tokens.pop(0))
-                entry["retry"] = int(tokens.pop(0))
+                if skip_retry_column:
+                    entry["retry"] = 0
+                else:
+                    entry["retry"] = int(tokens.pop(0))
                 entry["this_success"] = int(tokens.pop(0))
                 entry["this_attempts"] = int(tokens.pop(0))
                 entry["success"] = int(tokens.pop(0))

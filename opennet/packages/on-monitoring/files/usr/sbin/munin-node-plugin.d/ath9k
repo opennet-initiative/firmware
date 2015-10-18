@@ -98,7 +98,9 @@ class Station:
         return stats
 
     def _get_rc_stats_success(self):
-        return {"rate_" + rate["rate"]: rate["success"] for rate in self._rc_stats.values()}
+        rc_values = {"rate_" + rate["rate"].lower(): rate["success"] for rate in self._rc_stats.values()}
+        rc_values["sum"] = sum(rc_values.values())
+        return rc_values
 
     def _parse_file_based_stats(self, counters):
         stats = {}
@@ -119,6 +121,7 @@ class Station:
             yield "multigraph {base}_{suffix}.{station}".format(base=graph_base, suffix=suffix, station=self.key)
             for key, value in func().items():
                 yield "{key}.value {value}".format(key=key, value=value)
+            yield ""
 
     @classmethod
     def get_summary_values(cls, siblings, graph_base):
@@ -134,6 +137,7 @@ class Station:
                     stats[key] = stats.get(key, 0) + value
             for key, value in stats.items():
                 yield "{key}.value {value}".format(key=key, value=value)
+            yield ""
 
     def get_config(self, graph_base):
         for suffix, func in {
@@ -202,12 +206,26 @@ class Station:
         # return all rates
         is_first = True
         num_extract = lambda text: int("".join([char for char in text if "0" <= char <= "9"]))
+        get_key = lambda rate_name: "rate_{0}".format(all_rates[rate_name]["rate"].lower())
+        # add all rates for percent visualization ("MCS7,MCS6,MCS5,MCS4,MCS3,MCS2,MCS1,MCS0,+,+,+,+,+,+,+")
+        cdef = None
+        for sum_rate in all_rates:
+            if cdef is None:
+                cdef = get_key(sum_rate)
+            else:
+                cdef = "{key},{cdef},+".format(key=get_key(sum_rate), cdef=cdef)
+        yield "sum.label Sum of all counters"
+        yield "sum.type DERIVE"
+        yield "sum.graph no"
         for rate in sorted(all_rates, key=num_extract):
             details = all_rates[rate]
-            yield "rate_{rate}.label {rate_label}".format(rate=details["rate"], rate_label=details["rate_label"])
-            yield "rate_{rate}.type COUNTER".format(rate=details["rate"])
-            yield "rate_{rate}.draw {draw_type}".format(rate=details["rate"],
-                                                        draw_type=("AREA" if is_first else "STACK"))
+            key = get_key(rate)
+            yield "{key}.label {rate_label}".format(key=key, rate_label=details["rate_label"])
+            yield "{key}.type DERIVE".format(key=key)
+            yield "{key}.min 0".format(key=key)
+            yield "{key}.draw {draw_type}".format(key=key, draw_type=("AREA" if is_first else "STACK"))
+            # divide the current value by the above sum of all counters and calculate percent
+            yield "{key}.cdef 100,{key},sum,/,*".format(key=key, cdef=cdef)
             is_first = False
         yield ""
 

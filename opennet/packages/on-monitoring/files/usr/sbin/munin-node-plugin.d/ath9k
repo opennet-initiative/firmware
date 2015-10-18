@@ -27,8 +27,10 @@ STATION_EVENT_COUNTERS = ("tx_retry_count", "tx_retry_failed", "tx_filtered", "t
                           "rx_dropped", "rx_fragments", "rx_duplicates", "beacon_loss_count")
 # 16 colors (see http://munin-monitoring.org/wiki/fieldname.colour) for visualizing
 # rate control selection (see rc_stats)
-QUALITY_GRAPH_COLORS_16 = ("FF1F00", "FF4500", "FF7000", "FF9700", "9BBC00", "FAE600", "D1FF00", "7BFF00",
-                           "1CFF00", "06E41B", "00C43B", "009D60", "007986", "0058A8", "0033CC", "0018DE")
+QUALITY_GRAPH_COLORS_16 = ("FF1F00", "FF4500", "FF7000", "FF9700",
+                           "FFBC00", "FAE600", "D1FF00", "7BFF00",
+                           "1CFF00", "06E41B", "00C43B", "009D60",
+                           "007986", "0058A8", "0033CC", "0018DE")
 SYS_BASE_DIR = "/sys/kernel/debug/ieee80211"
 GRAPH_BASE_NAME = "ath9k_stats"
 

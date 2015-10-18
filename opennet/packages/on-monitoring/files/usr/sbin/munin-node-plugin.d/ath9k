@@ -98,7 +98,7 @@ class Station:
         return stats
 
     def _get_rc_stats_success(self):
-        rc_values = {"rate_" + rate["rate"].lower(): rate["success"] for rate in self._rc_stats.values()}
+        rc_values = {self._get_rate_fieldname(rate["rate"]): rate["success"] for rate in self._rc_stats.values()}
         rc_values["sum"] = sum(rc_values.values())
         return rc_values
 
@@ -191,6 +191,10 @@ class Station:
         yield ""
 
     @classmethod
+    def _get_rate_fieldname(cls, rate):
+        return "rate_{0}".format(rate.lower()).replace(".", "_")
+
+    @classmethod
     def _get_rc_stats_config(cls, label=None, siblings=None):
         if label:
             yield "graph_title ath9k Station Transmit Rates {label} Success".format(label=label)
@@ -207,7 +211,7 @@ class Station:
         # return all rates
         is_first = True
         num_extract = lambda text: int("".join([char for char in text if "0" <= char <= "9"]))
-        get_key = lambda rate_name: "rate_{0}".format(all_rates[rate_name]["rate"].lower())
+        get_key = lambda rate_name: cls._get_rate_fieldname(all_rates[rate_name]["rate"])
         # add all rates for percent visualization ("MCS7,MCS6,MCS5,MCS4,MCS3,MCS2,MCS1,MCS0,+,+,+,+,+,+,+")
         cdef = None
         for sum_rate in all_rates:

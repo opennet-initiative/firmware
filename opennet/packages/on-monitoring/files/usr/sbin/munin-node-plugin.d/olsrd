@@ -4,7 +4,36 @@
 # Collect basic information about the neighbours of an OLSR node:
 #   * link quality
 #   * neighbour link quality
-#   * number of nodes reachable behind this neighbour
+#   * number of nodes reachable behind each neighbour
+#   * ping times of direct neighbours
+#
+# This plugin works with all of the following python interpreters:
+#   * micropython
+#   * Python 2
+#   * Python 3
+#
+# Environment variables:
+#   * OLSRD_HOST: name or IP of the host running the txtinfo plugin (default: localhost)
+#   * OLSRD_TXTINFO_PORT: the port that the txtinfo plugin is listening to (default: 2006)
+#   * OLSRD_BIN_PATH: name of the olsrd binary (only used for 'autoconf', defaults to /usr/sbin/olsrd)
+#   * MICROPYTHON_HEAP: adjust this parameter for micropython if your olsr network contains
+#     more than a few thousand nodes (default: 512k)
+#
+#
+# Copyright (C) 2015 Lars Kruse <devel@sumpfralle.de>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Magic markers
 #%# capabilities=autoconf
@@ -15,18 +44,23 @@
 # This unbelievable dirty hack allows us to run micropython with additional startup options.
 # This is necessary due to our demand for more than 128k heap (this default is sufficient for only 400 olsr nodes).
 # This "execution hack" works as follows:
-#   * the script is executed by busybox ash
+#   * the script is executed by busybox ash or another shell
 #   * the above line (three quotes before and one quote after 'true') evaluates differently for shell and python:
 #    * shell: run "true" (i.e. nothing happens)
 #    * python: ignore everything up to the next three consecutive quotes
 # This hack would not be necessary if busybox's ash would handle shebang arguments properly.
 
-/usr/bin/micropython -X heapsize=512k "$0" "$@"
+# prefer micropython if it is available - otherwise fall back to any python (2 or 3)
+if which micropython >/dev/null; then
+	/usr/bin/micropython -X "heapsize=${MICROPYTHON_HEAP:-512k}" "$0" "$@"
+else
+	python "$0" "$@"
+fi
 exit $?
 """
 
 
-plugin_version = "0.2"
+plugin_version = "0.3"
 
 
 import os
@@ -69,7 +103,7 @@ neighbour_{host_fieldname}.min 0
 """
 
 NEIGHBOUR_PING_CONFIG = """
-graph_title     Ping time of neighbours
+graph_title     {title}
 graph_vlabel    roundtrip time (ms)
 graph_category  network
 graph_info      This graph shows ping RTT statistics.
@@ -79,13 +113,16 @@ graph_scale     no
 
 NEIGHBOUR_PING_VALUE = """neighbour_{host_fieldname}.label {host}"""
 
+# micropython (as of 2015) does not contain "os.linesep"
+LINESEP = getattr(os, "linesep", "\n")
+
 
 get_clean_fieldname = lambda name: "".join([(("a" <= char.lower() <= "z") or ((index == 0) or ("0" <= char <= "9"))) and char or "_" for index, char in enumerate(name)])
 
 
 def query_olsrd_txtservice(section=""):
-    host = os.getenv("olsrd_host", "localhost")
-    port = os.getenv("olsrd_port", "2006")
+    host = os.getenv("OLSRD_HOST", "localhost")
+    port = os.getenv("OLSRD_TXTINFO_PORT", "2006")
     conn = socket.create_connection((host, port), 1.0)
     conn.sendall("/%s" % section)
     fconn = open(conn.fileno(), "r")
@@ -159,7 +196,7 @@ def get_olsr_links():
 
 def _read_file(filename):
     try:
-        return open(filename, "r").read().split("\n")
+        return open(filename, "r").read().split(LINESEP)
     except OSError:
         return []
 
@@ -168,6 +205,7 @@ def get_ping_times(hosts):
     tempfile = "/tmp/munin-olsrd-{pid}.tmp".format(pid=os.getpid())
     command = 'for host in {hosts}; do echo -n "$host "; ping -c 1 -w 1 "$host" | grep /avg/ || true; done >{tempfile}'\
               .format(hosts=" ".join(hosts), tempfile=tempfile)
+    # micropython supports only "os.system" (as of 2015) - thus we need to stick with it for openwrt
     returncode = os.system(command)
     if returncode != 0:
         return {}
@@ -222,15 +260,21 @@ if __name__ == "__main__":
 
             # neighbour ping
             print("multigraph olsr_neighbour_ping")
-            print(NEIGHBOUR_PING_CONFIG)
+            print(NEIGHBOUR_PING_CONFIG.format(title="Ping time of neighbours"))
             for link in links:
                 print(NEIGHBOUR_PING_VALUE
                       .format(host=link["remote"],
                               host_fieldname=get_clean_fieldname(link["remote"])))
+            # neighbour pings - single subgraphs
+            for link in links:
+                remote = get_clean_fieldname(link["remote"])
+                print("multigraph olsr_neighbour_ping.host_{remote}".format(remote=remote))
+                print(NEIGHBOUR_PING_CONFIG.format(title="Ping time of {remote}".format(remote=remote)))
+                print(NEIGHBOUR_PING_VALUE.format(host=link["remote"], host_fieldname=remote))
 
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
-            if os.path.exists(os.getenv('olsrd_path', '/usr/sbin/olsrd')):
+            if os.path.exists(os.getenv('OLSRD_BIN_PATH', '/usr/sbin/olsrd')):
                 print('yes')
             else:
                 print('no')
@@ -243,11 +287,13 @@ if __name__ == "__main__":
             pass
         else:
             # unknown argument
-            print("Unknown argument", file=sys.stderr)
+	    sys.stderr.write("Unknown argument{eol}".format(eol=LINESEP))
             sys.exit(1)
 
     # output values
     links = list(get_olsr_links())
+
+    # overview graph for the link quality (ETX) of all neighbours
     print("multigraph olsr_link_quality")
     for link in links:
         print("lq_{remote}.value {lq:f}".format(lq=link["lq"],
@@ -255,6 +301,7 @@ if __name__ == "__main__":
         print("nlq_{remote}.value {nlq:f}".format(nlq=link["nlq"],
                                                   remote=get_clean_fieldname(link["remote"])))
         print()
+    # detailed ETX graph for each single neighbour link
     for link in links:
         print("multigraph olsr_link_quality.host_{remote}"
               .format(remote=get_clean_fieldname(link["remote"])))
@@ -262,17 +309,26 @@ if __name__ == "__main__":
         print("nlq.value {nlq:f}".format(nlq=link["nlq"]))
         print()
 
+    # count the links/nodes behind each neighbour node
     print("multigraph olsr_neighbour_link_count")
     for link in links:
         print("neighbour_{host_fieldname}.value {value}"
               .format(value=link["route_count"],
                       host_fieldname=get_clean_fieldname(link["remote"])))
 
+    # overview of ping roundtrip times
     print("multigraph olsr_neighbour_ping")
     ping_times = get_ping_times([link["remote"] for link in links])
     for link in links:
         ping_time = ping_times.get(link["remote"], None)
         if ping_time is not None:
-            print("neighbour_{host_fieldname}.value {value:.4f}"
+            print("neighbour_{remote}.value {value:.4f}"
                   .format(value=ping_time,
-                          host_fieldname=get_clean_fieldname(link["remote"])))
+                          remote=get_clean_fieldname(link["remote"])))
+    # single detailed graphs for the ping time of each link
+    for link in links:
+        ping_time = ping_times.get(link["remote"], None)
+        if ping_time is not None:
+            remote = get_clean_fieldname(link["remote"])
+            print("multigraph olsr_neighbour_ping.host_{remote}".format(remote=remote))
+            print("neighbour_{remote}.value {value:.4f}".format(remote=remote, value=ping_time))

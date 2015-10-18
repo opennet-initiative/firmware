@@ -25,7 +25,10 @@ plugin_version = "0.1"
 STATION_TRAFFIC_COUNTERS = ("rx_bytes", "tx_bytes", "rx_packets", "tx_packets")
 STATION_EVENT_COUNTERS = ("tx_retry_count", "tx_retry_failed", "tx_filtered", "tx_fragments",
                           "rx_dropped", "rx_fragments", "rx_duplicates", "beacon_loss_count")
-
+# 16 colors (see http://munin-monitoring.org/wiki/fieldname.colour) for visualizing
+# rate control selection (see rc_stats)
+QUALITY_GRAPH_COLORS_16 = ("FF1F00", "FF4500", "FF7000", "FF9700", "9BBC00", "FAE600", "D1FF00", "7BFF00",
+                           "1CFF00", "06E41B", "00C43B", "009D60", "007986", "0058A8", "0033CC", "0018DE")
 SYS_BASE_DIR = "/sys/kernel/debug/ieee80211"
 GRAPH_BASE_NAME = "ath9k_stats"
 
@@ -235,12 +238,14 @@ class Station:
         yield "sum.label Sum of all counters"
         yield "sum.type DERIVE"
         yield "sum.graph no"
-        for rate in sorted(all_rates, key=num_extract):
+        for index, rate in enumerate(sorted(all_rates, key=num_extract)):
             details = all_rates[rate]
             key = get_key(rate)
             yield "{key}.label {rate_label}".format(key=key, rate_label=details["rate_label"])
             yield "{key}.type DERIVE".format(key=key)
             yield "{key}.min 0".format(key=key)
+            if index < len(QUALITY_GRAPH_COLORS_16):
+                yield "{key}.colour {colour}".format(key=key, colour=QUALITY_GRAPH_COLORS_16[index])
             yield "{key}.draw {draw_type}".format(key=key, draw_type=("AREA" if is_first else "STACK"))
             # divide the current value by the above sum of all counters and calculate percent
             yield "{key}.cdef 100,{key},sum,/,*".format(key=key, cdef=cdef)

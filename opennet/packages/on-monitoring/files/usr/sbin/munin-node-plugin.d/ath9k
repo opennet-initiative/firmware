@@ -193,11 +193,12 @@ class Station:
     @classmethod
     def _get_rc_stats_config(cls, label=None, siblings=None):
         if label:
-            yield "graph_title ath9k Station Receive Rates {label} Success".format(label=label)
+            yield "graph_title ath9k Station Transmit Rates {label} Success".format(label=label)
         else:
-            yield "graph_title ath9k Station Receive Rates Success"
-        yield "graph_vlabel receive rates distribution"
+            yield "graph_title ath9k Station Transmit Rates Success"
+        yield "graph_vlabel transmit rates %"
         yield "graph_category wireless"
+        yield "graph_args --base 1000 -r --lower-limit 0 --upper-limit 100"
         all_rates = {}
         # collect alle unique rates
         for station in siblings:

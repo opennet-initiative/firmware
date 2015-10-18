@@ -66,12 +66,13 @@ class Station:
         with open(os.path.join(self._path, "rc_stats"), "r") as statsfile:
             rate_column = None
             for index, line in enumerate(statsfile.readlines()):
-                # remove linebreak
-                line = line.strip()
+                # remove linebreak, replace braces (annoyingly present in the lasf four columns)
+                line = line.strip().replace("(", " ").replace(")", " ")
                 # ignore the trailing summary lines
                 if not line:
                     break
                 if index == 0:
+                    # we need to remember the start of the "rate" column (in order to skip the flags)
                     rate_column = line.index("rate")
                     # skip the header line
                     continue
@@ -83,13 +84,10 @@ class Station:
                 entry["ewma_probability"] = float(tokens.pop(0))
                 entry["this_probability"] = float(tokens.pop(0))
                 entry["retry"] = int(tokens.pop(0))
-                # the remaining four columns may be not whitespace-separated - thus we put them together and use the braces
-                success_line = "".join(tokens)
-                success_tokens = success_line.replace("(", " ").replace(")", " ").split()
-                entry["this_success"] = int(success_tokens.pop(0).rstrip("("))
-                entry["this_attempts"] = int(success_tokens.pop(0).rstrip(")"))
-                entry["success"] = int(success_tokens.pop(0).rstrip("("))
-                entry["attempts"] = int(success_tokens.pop(0).rstrip(")"))
+                entry["this_success"] = int(tokens.pop(0))
+                entry["this_attempts"] = int(tokens.pop(0))
+                entry["success"] = int(tokens.pop(0))
+                entry["attempts"] = int(tokens.pop(0))
                 # some "rate" values are given in MBit/s - some are MCS0..15
                 try:
                     entry["rate_label"] = "{rate:d} MBit/s".format(rate=int(entry["rate"]))

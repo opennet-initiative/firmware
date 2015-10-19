@@ -665,6 +665,13 @@ get_potential_error_messages() {
 	#    (zumal die konkreten Fehlermeldungen erst in den folgenden Zeilen zu finden und somit schlecht zu filtern
 	#    sind).
 	filters="${filters}|Collected errors:"
+	# 19) uhttpd[...]: sh: write error: Broken pipe
+	#    http-Requests die von seiten des Browser abgebrochen wurden
+	filters="${filters}|uhttpd.*: sh: write error: Broken pipe"
+	# 20) __main__ get_variable ...
+	#    Der obige "Broken pipe"-Fehler unterbricht dabei auch die akuell laufende Funktion - dies ist
+	#    sehr häufig die Variablen-Auslesung (seltsamerweise).
+	filters="${filters}|__main__ get_variable "
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" | if [ -z "$max_lines" ]; then
 		# alle Einträge ausgeben

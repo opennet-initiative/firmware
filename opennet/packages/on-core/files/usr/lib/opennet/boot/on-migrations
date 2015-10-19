@@ -5,6 +5,9 @@
 #
 # Dieses Skript wird nach jedem Booten ausgeführt.
 # Damit ermöglichen wir das Laden eines alten Backups auf eine neue Firmware.
+# Ausserdem wird dieses Skript als Teil des uci-defaults-Konzepts beim ersten Booten nach einer
+# Aktualisierung ausgefuehrt. Dies ist erforderlich, um alle notwendigen Vorbereitungen fuer
+# die erste Ausfuehrung des "on-core"-Init-Skripts zu treffen (z.B. crontab-Einrichtung).
 #
 
 

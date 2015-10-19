@@ -99,7 +99,7 @@ _split_uci_option() {
 			i = 3
 			while (i <= NF) {
 				gsub(/'\''/, "", $i)
-				printf "        list %s '"'%s'"'\n", $2, $i
+				printf "	list %s '"'%s'"'\n", $2, $i
 				i++
 			}
 		} else {
@@ -338,6 +338,37 @@ remove_ntpclient_config() {
 	# ntpclient ist installiert? Konfiguration belassen ...
 	is_package_installed "ntpclient" && return 0
 	rm -f /etc/config/ntpclient
+}
+
+
+## @fn rename_firewall_zone()
+## @brief Ändere den Namen einer Firewall-Zone (definiert im alten Barrier-Breaker-Stil).
+## @param old_zone Bisheriger Name der Firewall-Zone
+## @param new_zone Zukünftiger Name der Firewall-Zone
+## @details Alle abhängigen Firewall-Regeln (offene Ports, Weiterleitungen, Umleitungen) werden auf die neue Zone umgelenkt.
+##    Die Umbenennung ist auf alte "benannte" Firewll-Zonen ausgelegt. Die Zone wird in eine neue "unbenannte" verwandelt.
+rename_firewall_zone() {
+	trap "error_trap rename_firewall_zone '$*'" $GUARD_TRAPS
+	local old_zone="$1"
+	local new_zone="$2"
+	local uci_prefix
+	local key
+	uci_prefix=$(find_first_uci_section firewall zone "name=$old_zone")
+	# die Zone existiert nicht (mehr)
+	[ -z "$uci_prefix" ] && return 0
+	# "name"-Attribut der alten Zone neu setzen
+	uci set "${uci_prefix}.name=$new_zone"
+	# benannte Zone in eine unbenannte umwandeln
+	sed -i "s/^config zone 'zone_$old_zone'$/config zone/g" /etc/config/firewall
+	# aktualisiere alle Forwardings, Redirects und Regeln
+	for section in "forwarding" "redirect" "rule"; do
+		for key in "src" "dest"; do
+			find_all_uci_sections firewall "$section" "${key}=$old_zone" | while read uci_prefix; do
+				uci set "${uci_prefix}.${key}=$new_zone"
+			done
+		done
+	done
+	apply_changes firewall
 }
 
 

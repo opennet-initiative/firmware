@@ -205,44 +205,44 @@ end
 
 
 --[[
-fuelle die extern definierte Variable "openssl" mit Werten aus den Konfigurationsdateien
-"domain" ist "on-openvpn" oder "on-usergw" (siehe auch "get_default_value")
+fuelle eine table mit Werten aus den Konfigurationsdateien
+"cert_type" ist "user" oder "mesh"
 ]]--
-function fill_openssl(domain, openssl)
-	local uci = require("luci.model.uci")
-	local cursor = uci.cursor()
-	openssl.countryName = get_default_value(domain, "certificate_countryName")
-	openssl.provinceName = get_default_value(domain, "certificate_provinceName")
-	openssl.localityName = get_default_value(domain, "certificate_localityName")
-	openssl.organizationalUnitName = get_default_value(domain, "certificate_organizationalUnitName")
-	openssl.organizationName = trim_string(luci.http.formvalue("openssl.organizationName"))
-	openssl.commonName = trim_string(luci.http.formvalue("openssl.commonName"))
-	if not openssl.commonName then
-		on_id = cursor:get("on-core", "settings", "on_id")
-		if not on_id then on_id = "X.XX" end
-		if (domain == "on-openvpn") then
-			openssl.commonName = on_id..".aps.on"
-		else
-			openssl.commonName = on_id..".ugw.on"
-		end
-	end
-	openssl.EmailAddress = trim_string(luci.http.formvalue("openssl.EmailAddress"))
-	openssl.days = get_default_value(domain, "certificate_days")
+function get_openssl_csr_presets(cert_type)
+	local cert_info = get_ssl_cert_info(cert_type)
+	local defaults_domain = cert_info.on_package
+	local result = {}
+	result.countryName = get_default_value(defaults_domain, "certificate_countryName")
+	result.provinceName = get_default_value(defaults_domain, "certificate_provinceName")
+	result.localityName = get_default_value(defaults_domain, "certificate_localityName")
+	result.organizationalUnitName = get_default_value(defaults_domain, "certificate_organizationalUnitName")
+	result.days = get_default_value(defaults_domain, "certificate_days")
+	result.commonName = on_function("uci_get", {"on-core.settings.on_id", "X.XX"}) .. cert_info.common_name_suffix
+	return result
 end
 
 
-function generate_csr(type, openssl)
-	local filename = "on_aps"
-	local cert_dir
-	if type == "mesh" then
-		cert_dir = SYSROOT .. "/etc/openvpn/opennet_ugw"
-		filename = cert_dir .. "/" .. "on_ugws"
-	elseif type == "user" then
-		cert_dir = SYSROOT .. "/etc/openvpn/opennet_user"
-		filename = cert_dir .. "/" .. "on_aps"
+function get_ssl_cert_info(cert_type)
+	local result = {}
+	if cert_type == "mesh" then
+		result.cert_dir = SYSROOT .. "/etc/openvpn/opennet_ugw"
+		result.filename_prefix = result.cert_dir .. "/" .. "on_ugws"
+		result.on_package = "on-usergw"
+		result.common_name_suffix = ".ugw.on"
+	elseif cert_type == "user" then
+		result.cert_dir = SYSROOT .. "/etc/openvpn/opennet_user"
+		result.filename_prefix = result.cert_dir .. "/" .. "on_aps"
+		result.on_package = "on-openvpn"
+		result.common_name_suffix = ".aps.on"
 	end
+	return result
+end
+
+
+function generate_csr(cert_type, openssl)
+	local cert_info = get_ssl_cert_info(cert_type)
 	if openssl.organizationName and openssl.commonName and openssl.EmailAddress then
-		nixio.fs.mkdirr(cert_dir)
+		nixio.fs.mkdirr(cert_info.cert_dir)
 		local command = "export openssl_countryName='"..openssl.countryName.."'; "..
 						"export openssl_provinceName='"..openssl.provinceName.."'; "..
 						"export openssl_localityName='"..openssl.localityName.."'; "..
@@ -251,11 +251,23 @@ function generate_csr(type, openssl)
 						"export openssl_commonName='"..openssl.commonName.."'; "..
 						"export openssl_EmailAddress='"..openssl.EmailAddress.."'; "..
 						"openssl req -config /etc/ssl/on_openssl.cnf -batch -nodes -new -days "..openssl.days..
-							" -keyout ".. filename .. ".key"..
-							" -out ".. filename .. ".csr >/tmp/ssl.out"
+							" -keyout ".. cert_info.filename_prefix .. ".key"..
+							" -out ".. cert_info.filename_prefix .. ".csr >/tmp/ssl.out"
 		os.execute(command)
-		nixio.fs.chmod(filename .. ".key", 600)
-		nixio.fs.chmod(filename .. ".csr", 600)
+		nixio.fs.chmod(cert_info.filename_prefix .. ".key", 600)
+		nixio.fs.chmod(cert_info.filename_prefix .. ".csr", 600)
+	end
+end
+
+
+function get_private_key_id(cert_type)
+	local cert_info = get_ssl_cert_info(cert_type)
+	local filename = cert_info.filename_prefix .. ".key"
+	if nixio.fs.stat(filename) then
+		local id_output = trim_string(luci.sys.exec("openssl rsa -modulus -noout <'" .. filename .. "'"))
+		return generic_split(id_output, "[^=]+")[2]
+	else
+		return nil
 	end
 end
 
@@ -492,7 +504,7 @@ end
 
 --[[
 @brief Verarbeite ein HTML-Formular und führe die angeforderten Aktionen für OpenVPN-Zertifikate aus.
-@param key_type Der Zertifikatstyp ("user" oder "mesh") ist für die Auswahl des Zielverzeichnis relevant.
+@param cert_type Der Zertifikatstyp ("user" oder "mesh") ist für die Auswahl des Zielverzeichnis relevant.
 @details Die folgenden HTML-Formularvariablen werden verarbeitet:
     force_show_uploadfields: Nutzereingabe erzwingt die Anzeige des Upload-Formulars
     force_show_generatefields: Nutzereingabe erzwingt die Anzeige des "Erzeuge CSR"-Formulars
@@ -505,12 +517,12 @@ end
     force_show_uploadfields: Soll die Anzeige des Datei-Upload-Formulars erzwungen werden?
     force_show_generatefields: Soll die Anzeige des CSR-Erzeugen-Formulars erzwungen werden?
 --]]
-function process_openvpn_certificate_form(key_type)
+function process_openvpn_certificate_form(cert_type)
     require("luci.model.opennet.on_vpn_management")
 
     local result = {}
 
-    if luci.http.formvalue("upload") then upload_file(key_type) end
+    if luci.http.formvalue("upload") then upload_file(cert_type) end
 
     local download = luci.http.formvalue("download")
     if download then download_file(key_type, download) end
@@ -543,15 +555,11 @@ end
 @details Im Erfolgsfall wurde bereits eine html-Ausgabe geschrieben - die aufrufende Funktion kann anschliessend ohne weitere
   Ausgabe beendet werden. Eventuelle Fehler werden in 'errors_table' eingefuegt.
 --]]
-function process_csr_submission(key_type, errors_table)
+function process_csr_submission(cert_type, errors_table)
     local submit_url = luci.http.formvalue("submit")
     if submit_url then
-        local csr_filename
-        if key_type == "user" then
-            csr_filename = SYSROOT .. "/etc/openvpn/opennet_user/on_aps.csr"
-        elseif key_type == "mesh" then
-            csr_filename = SYSROOT .. "/etc/openvpn/opennet_ugw/on_ugws.csr"
-        end
+        local cert_info = get_ssl_cert_info(cert_type)
+        local csr_filename = cert_info.filename_prefix .. ".csr"
         -- zeige lediglich die Ausgabe von curl an
         local result = on_function("submit_csr_via_http", {submit_url, csr_filename})
         if result and (result ~= "") then

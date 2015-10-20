@@ -23,10 +23,10 @@ You may obtain a copy of the License at
 	<table class="cert-status">
 	<tr>
 	<% 	if certstatus.on_crt_exists then %>
-		<td class="cert_infotable" rowspan="5"><% display_crt_infotable(certtype) %></td>
+		<td class="cert_infotable" rowspan="5"><% display_crt_infotable(cert_type) %></td>
 	<%	end %>
 	<% 	if certstatus.on_csr_exists and not certstatus.on_keycrt_ok then %>
-		<td class="cert_infotable" rowspan="5"><% display_csr_infotable(certtype) %></td>
+		<td class="cert_infotable" rowspan="5"><% display_csr_infotable(cert_type) %></td>
 		<td>
 			<label><%:Certificate Request (.csr)%></label><br />
 			<abbr title='<%:uploaded or generated on this date.%>'>
@@ -94,7 +94,7 @@ You may obtain a copy of the License at
 		<div class="cbi-value-description">
 			<div><%
 				local type
-				if (certtype == "mesh") then
+				if (cert_type == "mesh") then
 					type = luci.i18n.translate("UserGateway (type user gateway)")
 				else
 					type = luci.i18n.translate("AccessPoint (type users)")

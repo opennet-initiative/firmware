@@ -38,9 +38,9 @@ end
 function write_infotable(data)
 	luci.http.write("<table class='status_page_table' >")
 	local count = 1
-	while count < table.getn(on_crt_data) do
-		if on_crt_data[count] ~= "subject" then
-			luci.http.write("<tr><td>" .. on_crt_data[count] .. "</td><td>" .. on_crt_data[count+1] .. "</td></tr>")
+	while count < table.getn(data) do
+		if data[count] ~= "subject" then
+			luci.http.write("<tr><td>" .. data[count] .. "</td><td>" .. data[count+1] .. "</td></tr>")
 			count = count + 1
 		end
 		count = count + 1
@@ -48,18 +48,18 @@ function write_infotable(data)
 	luci.http.write("</table></div>")
 end
 
-function display_csr_infotable(type)
-	local crtname = "/etc/openvpn/opennet_user/on_aps.csr"
-	if type == "mesh" then crtname = "/etc/openvpn/opennet_ugw/on_ugws.csr" end
-	on_crt_data = split(luci.sys.exec("openssl req -in "..crtname.." -nameopt sep_comma_plus,lname -subject -noout"), '[,=\n]')
-	luci.http.write("<div><h4>" .. luci.i18n.translate("Certificate-Request contents") .. "</h4>")
-	write_infotable(on_crt_data)
+function display_csr_infotable(cert_type)
+	local cert_info = get_ssl_cert_info(cert_type)
+	local filename = cert_info.filename_prefix .. ".csr"
+	local on_csr_data = split(luci.sys.exec("openssl req -in " .. filename .. " -nameopt sep_comma_plus,lname -subject -noout"), '[,=\n]')
+	luci.http.write("<div><h4>" .. luci.i18n.translate("Certificate Request contents") .. "</h4>")
+	write_infotable(on_csr_data)
 end
 
-function display_crt_infotable(type)
-	local crtname = "/etc/openvpn/opennet_user/on_aps.crt"
-	if type == "mesh" then crtname = "/etc/openvpn/opennet_ugw/on_ugws.crt" end
-	on_crt_data = split(luci.sys.exec("openssl x509 -in "..crtname.." -nameopt sep_comma_plus,lname -subject -enddate -noout"), '[,=\n]')
+function display_crt_infotable(cert_type)
+	local cert_info = get_ssl_cert_info(cert_type)
+	local filename = cert_info.filename_prefix .. ".crt"
+	local on_crt_data = split(luci.sys.exec("openssl x509 -in " .. filename .. " -nameopt sep_comma_plus,lname -subject -enddate -noout"), '[,=\n]')
 	luci.http.write("<div><h4>" .. luci.i18n.translate("Certificate contents") .. "</h4>")
 	write_infotable(on_crt_data)
 end

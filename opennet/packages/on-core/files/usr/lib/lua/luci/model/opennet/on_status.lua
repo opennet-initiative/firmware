@@ -204,13 +204,17 @@ function status_neighbors()
 			'</tr>')
 		for _, line in pairs(line_split(neighbour_info)) do
 			local info = space_split(line)
-			luci.http.write('<tr>')
-			luci.http.write('<td><a href="http://' .. info[1] .. '/">' .. info[1] .. '</a></td>')
-			luci.http.write('<td>' .. info[2] .. '</td>')
-			luci.http.write('<td>' .. info[3] .. '</td>')
-			luci.http.write('<td>' .. info[4] .. '</td>')
-			luci.http.write('<td style="text-align:right">' .. info[5] .. '</td>')
-			luci.http.write('</tr>')
+			-- keine Ausgabe, falls nicht mindestens fuenf Felder geparst wurden
+			-- (die Ursache fuer weniger als fuenf Felder ist unklar - aber es kam schon vor)
+			if info[5] then
+				luci.http.write('<tr>')
+				luci.http.write('<td><a href="http://' .. info[1] .. '/">' .. info[1] .. '</a></td>')
+				luci.http.write('<td>' .. info[2] .. '</td>')
+				luci.http.write('<td>' .. info[3] .. '</td>')
+				luci.http.write('<td>' .. info[4] .. '</td>')
+				luci.http.write('<td style="text-align:right">' .. info[5] .. '</td>')
+				luci.http.write('</tr>')
+			end
 		end
 		luci.http.write("</table>")
 	end

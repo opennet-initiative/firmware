@@ -21,6 +21,8 @@ Anschließend kann diese Liste wieder geleert werden.
 ** auf Geräten mit 32 MB RAM gab es zuvor gelegentlich Neustarts durch Speichermangel
 * POE-Weiterleitung kann via Web-Interface kontrolliert werden
 * Status-Seite: Anzahl der Routen für jeden Nachbarn wird angezeigt
+* Monitoring-Quelle (munin) aus dem Web-Interface heraus installierbar
+* VPN-Verbindungsfehler (UGW) sind versehen mit Tooltip-Text der Log-Ausgabe des Verbindungsversuchs
 * Fehlerkorrekturen:
 ** lokale IP wird nicht mehr auf 172.16.0.1 zurückgesetzt (falls lokal modifiziert)
 ** Geschwindigkeitsanzeige in der Gatewayliste hinzugefügt

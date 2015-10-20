@@ -726,6 +726,7 @@ get_service_as_csv() {
 ## @param other Eine beliebige Anzahl weiterer Parameter ist erlaubt: diese erweitern den typischen Log-Dateinamen für diesen Dienst.
 ## @details Die Funktion stellt sicher, dass das Verzeichnis der ermittelten Log-Datei anschließend existiert.
 get_service_log_filename() {
+	trap "error_trap get_service_log_filename '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	shift
 	local filename="$service_name"
@@ -736,6 +737,29 @@ get_service_log_filename() {
 	local full_filename="$SERVICES_LOG_BASE/$(get_safe_filename "$filename").log"
 	mkdir -p "$(dirname "$full_filename")"
 	echo -n "$full_filename"
+}
+
+
+## @fn get_service_log_content()
+## @brief Lies den Inhalt einer Log-Datei für einen Dienst aus.
+## @param service Name eines Dienstes.
+## @param max_lines maximale Anzahl der auszuliefernden Zeilen (unbegrenzt: 0)
+## @param other Eine beliebige Anzahl weiterer Parameter ist erlaubt: diese erweitern den typischen Log-Dateinamen für diesen Dienst.
+## @see get_service_log_filename
+get_service_log_content() {
+	trap "error_trap get_service_log_content '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local max_lines="$2"
+	shift 2
+	local log_filename=$(get_service_log_filename "$service_name" "$@")
+	[ -e "$log_filename" ] || return 0
+	if [ "$max_lines" = "0" ]; then
+		# alle Einträge ausgeben
+		cat -
+	else
+		# nur die letzten Einträge ausliefern
+		tail -n "$max_lines"
+	fi <"$log_filename"
 }
 
 

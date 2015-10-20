@@ -21,10 +21,13 @@ get_installed_opennet_packages() {
 
 # Konstruiere die Parameterliste
 get_source_and_target_params_null_terminated() {
+	local path
 	# Quellpfade
 	get_installed_opennet_packages | while read pkg; do
 		# Verwende null-terminated strings fuer xargs
-		printf "%s\0" "$BASE_DIR/packages/$pkg/files/."
+		path="$BASE_DIR/packages/$pkg/files/."
+		[ -e "$path" ] && printf "$path\0"
+		true
 	done
 	# der Zielpfad
 	printf "%s\0" "${TARGET_HOST}:/"

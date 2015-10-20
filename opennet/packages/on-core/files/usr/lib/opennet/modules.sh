@@ -75,7 +75,7 @@ was_on_module_installed_before() {
 
 
 ## @fn install_from_opennet_repository()
-## @param packages Ein oder mehrere zu installierende Software-Paket
+## @param packages Ein oder mehrere zu installierende Software-Pakete
 ## @returns Eventuelle Fehlermeldungen werden auf die Standardausgabe geschrieben. Der Exitcode ist immer Null.
 ## @brief Installiere ein Paket aus den Opennet-Repositories.
 ## @details Für die Installation von Opennet-relevanten Paketen wird eine separate opkg.conf-Datei verwendet.
@@ -265,6 +265,8 @@ on_opkg_postinst_default() {
 			/etc/init.d/on-core start
 		)
 	fi
+	# den luci-Restart leicht verzoegern (sonst reisst die Verbindung bei Aktualisierungen im Web-Interface ab)
+	run_delayed_in_background 2 clean_luci_restart
 }
 
 
@@ -273,6 +275,8 @@ on_opkg_postinst_default() {
 ## @details Caches löschen
 on_opkg_postrm_default() {
 	clear_caches
+	# den luci-Restart leicht verzoegern (sonst reisst die Verbindung bei Aktualisierungen im Web-Interface ab)
+	run_delayed_in_background 2 clean_luci_restart
 }
 
 # Ende der Doku-Gruppe

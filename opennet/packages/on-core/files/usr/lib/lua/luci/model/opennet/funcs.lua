@@ -40,7 +40,12 @@ end
 --- @returns true oder false
 --- @details Leere oder nicht erkannte Eingaben werden als "false" gewertet.
 function uci_to_bool(text)
-	return on_bool_function("uci_is_true", {text or ""})
+	-- synchron halten mit Funktion "uci_is_false" (shell-Module)
+	if (text == "0") or (text == "no") or (text == "n") or (text == "off") or (text == "false") then
+		return false
+	else
+		return true
+	end
 end
 
 

@@ -12,6 +12,7 @@ uci_is_true() {
 
 uci_is_false() {
 	local token="$1"
+	# synchron halten mit "uci_to_bool" (lua-Module)
 	[ "$token" = "0" -o "$token" = "no" -o "$token" = "n" -o "$token" = "off" -o "$token" = "false" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }

@@ -185,8 +185,8 @@ update_public_gateway_speed_estimation() {
 	local prev_upload
 	prev_download=$(get_service_detail "$service_name" "wan_speed_download" "${download_speed:-0}")
 	prev_upload=$(get_service_detail "$service_name" "wan_speed_upload" "${upload_speed:-0}")
-	set_service_detail "$service_name" "wan_speed_download" "$(((3 * download_speed + prev_download) / 4))"
-	set_service_detail "$service_name" "wan_speed_upload" "$(((3 * download_speed + prev_upload) / 4))"
+	set_service_detail "$service_name" "wan_speed_download" "$(( (3 * download_speed + prev_download) / 4 ))"
+	set_service_detail "$service_name" "wan_speed_upload" "$(( (3 * download_speed + prev_upload) / 4 ))"
 	set_service_value "$service_name" "wan_speed_timestamp" "$(get_uptime_minutes)"
 }
 
@@ -319,7 +319,7 @@ measure_upload_speed() {
 	local target_dev
 	target_dev=$(get_target_route_interface "$host")
 	# UDP-Verkehr laesst sich auch ohne einen laufenden Dienst auf der Gegenseite erzeugen
-	"$NETCAT_BIN" -u "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
+	nc -u "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
 	local pid="$!"
 	sleep 3
 	[ ! -d "/proc/$pid" ] && return

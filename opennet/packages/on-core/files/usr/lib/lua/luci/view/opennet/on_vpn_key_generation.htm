@@ -65,6 +65,7 @@ You may obtain a copy of the License at
 			<input type="text" size="48" name="openssl.EmailAddress" value="<%=openssl.EmailAddress%>" />
 		</div>
 	</div>
+	<input type="hidden" name="confirm_overwrite_key_id" value="<%= certstatus.on_key_modulus %>" />
 	<div class="cbi-value">
 		<label class="cbi-value-title" />
 		<div class="cbi-value-field"><input type="submit" name="gen_csr" value="<%:generate%>" /></div>

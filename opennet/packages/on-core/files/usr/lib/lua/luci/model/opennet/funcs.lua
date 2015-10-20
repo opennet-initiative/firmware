@@ -525,21 +525,23 @@ function process_openvpn_certificate_form(cert_type)
     if luci.http.formvalue("upload") then upload_file(cert_type) end
 
     local download = luci.http.formvalue("download")
-    if download then download_file(key_type, download) end
+    if (download == "csr") or (download == "crt") or (download == "key") then download_file(cert_type, download) end
 
-    local openssl = {}
-    local openssl_domain
-    if key_type == "user" then
-        openssl_domain = "on-openvpn"
-    elseif key_type == "mesh" then
-        openssl_domain = "on-usergw"
+    local openssl = get_openssl_csr_presets(cert_type, openssl)
+    openssl.organizationName = trim_string(luci.http.formvalue("openssl.organizationName"))
+    openssl.EmailAddress = trim_string(luci.http.formvalue("openssl.EmailAddress"))
+    local form_cn = trim_string(luci.http.formvalue("openssl.commonName")) 
+    if form_cn and (form_cn ~= "") then openssl.commonName = form_cn end
+
+    local certstatus = check_cert_status(cert_type)
+
+    -- prüfe ob zwischenzeitlich ein (anderes) CSR erzeugt wurde (z.B. beim Verwenden der "zurück"-Funktion des Browsers)
+    if luci.http.formvalue("generate") then
+        if luci.http.formvalue("confirm_overwrite_key_id") == certstatus.on_key_modulus then
+            generate_csr(cert_type, openssl)
+        end
     end
-    fill_openssl(openssl_domain, openssl)
 
-    if luci.http.formvalue("generate") then generate_csr(key_type, openssl) end
-
-    local certstatus = {}
-    check_cert_status(key_type, certstatus)
 
     result.force_show_uploadfields = luci.http.formvalue("force_show_uploadfields") or not certstatus.on_keycrt_ok
     result.force_show_generatefields = luci.http.formvalue("force_show_generatefields") or (not certstatus.on_keycrt_ok and not certstatus.on_keycsr_ok)

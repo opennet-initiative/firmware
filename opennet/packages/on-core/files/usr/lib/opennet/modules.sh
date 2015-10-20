@@ -98,7 +98,11 @@ install_from_opennet_repository() {
 			enable_on_module "$package"
 		fi
 	done
-	# anschließend speichern wir den aktuellen Zustand
+	# anschließend speichern wir den aktuellen Zustand, falls _alle_ Pakete installiert wurden
+	for package in "$@"; do
+		# Paket fehlt? aktuelle Liste nicht speichern, sondern einfach abbrechen
+		is_package_installed "$package" || return 0
+	done
 	save_on_module_list
 }
 

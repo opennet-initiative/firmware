@@ -266,7 +266,7 @@ on_opkg_postinst_default() {
 		)
 	fi
 	# den luci-Restart leicht verzoegern (sonst reisst die Verbindung bei Aktualisierungen im Web-Interface ab)
-	run_delayed_in_background 2 clean_luci_restart
+	run_delayed_in_background 5 clean_luci_restart
 }
 
 
@@ -276,7 +276,7 @@ on_opkg_postinst_default() {
 on_opkg_postrm_default() {
 	clear_caches
 	# den luci-Restart leicht verzoegern (sonst reisst die Verbindung bei Aktualisierungen im Web-Interface ab)
-	run_delayed_in_background 2 clean_luci_restart
+	run_delayed_in_background 5 clean_luci_restart
 }
 
 # Ende der Doku-Gruppe

@@ -411,6 +411,19 @@ remove_wifidog_config() {
 }
 
 
+## @fn enable_uhttpd_redirect()
+## @brief Aktiviere die automatische https-Weiterleitung
+## @details Bei einer Aktualisierung von v0.5.1 auf v0.5.2 fehlt diese Einstellung andernfalls, da
+##   zuvor keine https-Unterstützung in der Firmware aktiviert war.
+enable_uhttpd_redirect() {
+	local uci_key="uhttpd.main.redirect_https"
+	[ -n "$(uci_get "$uci_key")" ] && return 0
+	uci set "$uci_key=1"
+	uci commit uhttpd
+	reload_config
+}
+
+
 ## @fn guess_previously_used_modules()
 ## @brief Versuche nach der Aktualisierung von einer Version vor v0.5.2 die zuvor verwendeten Module zu erraten.
 ## @details Die Firmware-Versionen vor v0.5.2 enthielten alle Module vorinstalliert. Ab v0.5.2 werden Module bei
@@ -471,3 +484,4 @@ remove_openvpn_vpntest_keydir
 # die Pruefung muss vor der Loeschung der wifidog-Konfiguration stattfinden
 guess_previously_used_modules
 remove_wifidog_config
+enable_uhttpd_redirect

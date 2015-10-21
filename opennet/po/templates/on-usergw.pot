@@ -129,6 +129,11 @@ msgid "Service Relay"
 msgstr ""
 
 msgid ""
+"Service relay announcements are slowly broadcast through the mesh. Their "
+"status is updated hourly."
+msgstr ""
+
+msgid ""
 "Service relays are just traffic redirection rules - they do not consume "
 "processing resources."
 msgstr ""
@@ -139,6 +144,13 @@ msgstr ""
 msgid ""
 "Sharing your internet connection with the Opennet Community usually consists "
 "of two distinct parts:"
+msgstr ""
+
+msgid ""
+"Some Opennet servers are exposed to the internet in order to connect "
+"detached local mesh networks into a unified routing space. Every participant "
+"who is sharing an internet uplink should maintain a VPN connection to at "
+"least one of these Mesh Gateways."
 msgstr ""
 
 msgid "Speed"
@@ -177,6 +189,11 @@ msgid ""
 "test."
 msgstr ""
 
+msgid ""
+"These relayed services do not depend on a working connection with the mesh "
+"network."
+msgstr ""
+
 msgid "VPN"
 msgstr ""
 
@@ -187,11 +204,6 @@ msgid "WAN"
 msgstr ""
 
 msgid "WAN Test"
-msgstr ""
-
-msgid ""
-"You can change the sorting mechanism of gateways in the <a href=\"%s"
-"\">Service Settings section</a>."
 msgstr ""
 
 msgid "You may disable any service relay below if you prefer so."

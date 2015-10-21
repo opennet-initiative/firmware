@@ -61,10 +61,10 @@ msgstr ""
 msgid "Certificate Request (.csr)"
 msgstr ""
 
-msgid "Certificate contents"
+msgid "Certificate Request contents"
 msgstr ""
 
-msgid "Certificate-Request contents"
+msgid "Certificate contents"
 msgstr ""
 
 msgid ""
@@ -479,6 +479,11 @@ msgstr ""
 msgid ""
 "The target should be an IP-Address in your local network. Additionally you "
 "can enter the target port in the related field."
+msgstr ""
+
+msgid ""
+"There are indications for a possibly broken flash memory chip or a damaged "
+"filesystem."
 msgstr ""
 
 msgid "There are indications for possible technical issues."

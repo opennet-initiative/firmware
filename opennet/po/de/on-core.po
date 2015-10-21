@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-09-12 17:31+0200\n"
+"PO-Revision-Date: 2015-10-21 03:32+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -78,11 +78,11 @@ msgstr "Zertifikat-Name"
 msgid "Certificate Request (.csr)"
 msgstr "Zertifikat-Anfrage (.csr)"
 
+msgid "Certificate Request contents"
+msgstr "Details der Zertifikatsanfrage"
+
 msgid "Certificate contents"
 msgstr "Zertifikatsdaten"
-
-msgid "Certificate-Request contents"
-msgstr "Details der Zertifikatsanfrage"
 
 msgid ""
 "Choose one of the following options for submitting your certificate signing "
@@ -557,6 +557,13 @@ msgstr ""
 "Als Ziel der Weiterleitungen muss eine IP-Adresse im lokalen Netzwerk "
 "angegeben werden. Zusätzlich kann ein Zielport angegeben werden."
 
+msgid ""
+"There are indications for a possibly broken flash memory chip or a damaged "
+"filesystem."
+msgstr ""
+"Es gibt Anzeichen für einen möglicherweise defekten Flash-Speicherchip oder "
+"ein beschädigtes Dateisystem."
+
 msgid "There are indications for possible technical issues."
 msgstr "Es gibt Anzeichen für mögliche technische Probleme."
 
@@ -643,6 +650,9 @@ msgstr "über das Internet"
 
 msgid "via Opennet"
 msgstr "im Opennet"
+
+#~ msgid "Certificate-Request contents"
+#~ msgstr "Details der Zertifikatsanfrage"
 
 #~ msgid "Base Configuration"
 #~ msgstr "Basis-Konfiguration"

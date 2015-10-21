@@ -18,7 +18,7 @@ Anschließend kann diese Liste wieder geleert werden.
 * verschlüsselte Verbindung mit dem Web-Interface des Routers (automatische Umleitung http->https)
 * Verfallsdatum des eigenen VPN-Zertifikats wird angezeigt
 * reduzierter RAM-Speicherbedarf
-** auf Geräten mit 32 MB RAM gab es zuvor gelegentlich Neustarts durch Speichermangel
+** auf Geräten mit 32 MB RAM gab es mit v0.5.1 gelegentlich Neustarts durch Speichermangel
 * POE-Weiterleitung kann via Web-Interface kontrolliert werden
 * Status-Seite: Anzahl der Routen für jeden Nachbarn wird angezeigt
 * Monitoring-Quelle (munin) aus dem Web-Interface heraus installierbar

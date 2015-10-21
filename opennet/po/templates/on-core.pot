@@ -43,12 +43,6 @@ msgid ""
 "source-ports."
 msgstr ""
 
-msgid ""
-"Be aware that the network will be restarted immediately,\\n and you might "
-"loose the contact to your router.\\n\\nAre you really wan\\'t to update the "
-"network-id?"
-msgstr ""
-
 msgid "CN %s"
 msgstr ""
 
@@ -181,6 +175,11 @@ msgid "IPv6"
 msgstr ""
 
 msgid "Install missing modules"
+msgstr ""
+
+msgid ""
+"Installation of modules may take quite a while (up to 30s) - please be "
+"patient."
 msgstr ""
 
 msgid "Installed"

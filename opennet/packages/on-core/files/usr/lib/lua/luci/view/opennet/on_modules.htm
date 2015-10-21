@@ -35,7 +35,11 @@ on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for net
 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 <div class="cbi-map"><fieldset class="cbi-section">
 	<legend><%:Status of Modules%></legend>
-		<div class="cbi-section-descr"><%:The Opennet Firmware consists of multiple modules providing distinct features within the network. Please pick which features should be enabled for this device.%></div>
+		<div class="cbi-section-descr">
+			<%:The Opennet Firmware consists of multiple modules providing distinct features within the network. Please pick which features should be enabled for this device.%>
+			<br/>
+			<%:Installation of modules may take quite a while (up to 30s) - please be patient.%>
+		</div>
 		<table class="cbi-section-table">
 		<tr class="cbi-section-table-titles">
 			<th class="cbi-section-table-cell"><%:Name%></th>

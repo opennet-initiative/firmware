@@ -5,43 +5,9 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
-* bisher fehlende Funktionalitäten (im Vergleich zu v0.4-5) integriert:
-** Internetspender (UGW)
-** öffentliche Zugangspunkte (zuvor: "wifidog")
-* Nutzer-VPN-Tunnel wird innerhalb von ca. drei Minuten nach dem Booten aufgebaut
-** zuvor (v0.5.1) waren es ca. acht Minuten
-* Module (Internetzugang, Freigabe, Captive Portal) sind im Web-Interface nachinstallierbar
-** für die Basis-Funktion (Infrastruktur) genügt nun ein Router mit 4 MB Flash
-* keine VPN-Verbindungstests ohne Zertifikat
-** weniger Load für Infrastruktur-APs
-** kurze Wartezeit zwischen Zertifikatsupload und Verbindungsaufbau
-* verschlüsselte Verbindung mit dem Web-Interface des Routers (automatische Umleitung http->https)
-* Verfallsdatum des eigenen VPN-Zertifikats wird angezeigt
-* reduzierter RAM-Speicherbedarf
-** auf Geräten mit 32 MB RAM gab es mit v0.5.1 gelegentlich Neustarts durch Speichermangel
-* POE-Weiterleitung kann via Web-Interface kontrolliert werden
-* Status-Seite: Anzahl der Routen für jeden Nachbarn wird angezeigt
-* Monitoring-Quelle (munin) aus dem Web-Interface heraus installierbar
-* VPN-Verbindungsfehler (UGW) sind versehen mit Tooltip-Text der Log-Ausgabe des Verbindungsversuchs
-* Fehlerkorrekturen:
-** lokale IP wird nicht mehr auf 172.16.0.1 zurückgesetzt (falls lokal modifiziert)
-** Geschwindigkeitsanzeige in der Gatewayliste hinzugefügt
-** korrekte Zeitstempel-Ermittlung für reboot-Logeintrag (/etc/banner)
-** gemischte Mesh/lokal-Alias-Interfaces sind nun möglich
-** fehlerhafte Sortierung der Gateways behoben
-** teilweises Vergessen von Gateway-Offsets nach Reboot behoben
-*** siehe http://dev.opennet-initiative.de/ticket/85
 
 = Interne Änderungen =
-* neue CA-Zertifikate sind nun in einem separaten Paket untergebracht
-** zuvor führte ein Upgrade nicht zu einer CA-Aktualisierung
-* Internetspender bieten nun mehr als nur einen externen Gateway im Mesh an (via Portweiterleitung)
-* UGW-APs veröffentlichen keine zusätzliche HNA im 192.168.0.x-Netzwerk
 
 = Bemerkenswertes / Fehler / Mängel =
 
 = Aktualisierungshinweis =
-* besuche nach der Aktualisierung das Web-Interface des AP, um bei Bedarf Module nachzuinstallieren
-** fehlende Module werden durch eine rote Hinweis-Box hervorgehoben und können mit einem Klick nachinstalliert werden
-** für UGWs: nach der Aktualisierung muss das UGW-Modul nachinstalliert werden - die Aktualisierung kann also nicht aus der Ferne durchgeführt werden, falls keine alternative Route zu dem UGW vorhanden ist
-* POE-Durchleitung: entferne manuelle hinzugefügte Zeilen aus der /etc/rc.local (bzw.: 'Administration -> System -> Startprogramme') und konfiguriere die POE-Weiterleitung zukünftig via 'Opennet -> Basis -> Einstellungen'

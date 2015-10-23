@@ -34,11 +34,11 @@ ping_neighbour() {
 # Pfade zu interessanten Hosts
 (
 	# subaru
-	mtr -c 3 --report 192.168.0.248
+	traceroute 192.168.0.248
 	# tamago/titan
-	mtr -c 3 --report 192.168.0.254
+	traceroute 192.168.0.254
 	# Schweriner Dom
-	mtr -c 3 --report 192.168.1.93
+	traceroute 192.168.1.93
 ) >traceroute.log &
 
 

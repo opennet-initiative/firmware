@@ -42,6 +42,10 @@ setup_mesh_interface() {
 	# die obige ubus-Aktion wird nebenlaeufig abgearbeitet - wir muessen das Ergebnis abwarten
 	ubus wait_for "$ubus_dev"
 	update_olsr_interfaces
+	# expliziter olsrd-Neustart: eventuell sind noch Fragmente alter tap-Devices in
+	# der olsrd-Konfiguration eingetragen. Diese verhindern einen olsrd-Neustart,
+	# da es scheinbar keine Änderung gab.
+	/etc/init.d/olsrd restart
 	# ohne dieses explizite reload reagiert die firewall seltsamerweise nicht auf die neuen Interfaces
 	/etc/init.d/firewall reload
 }

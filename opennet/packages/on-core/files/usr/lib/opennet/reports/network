@@ -16,3 +16,5 @@ iwinfo >iwinfo.log
 # auf nicht-wifi-Plattformen (z.B. x86) ist iwlist (wireless-tools) nicht installiert
 which iwlist >/dev/null && iwlist scan >iwlist_scan.log 2>&1 || true
 
+# uci-Konfiguration
+uci -q show "network" >uci_network || true

@@ -358,27 +358,39 @@ function parse_string_pattern(text, characters)
 end
 
 
---- @brief Liefere den HTML-Code für eine Fehlerausgabe zurück.
+--- @brief Liefere den HTML-Code für eine Fehlerausgabe oder Hinweise zurück.
 --- @param text Fehlertext
+--- @param class Nachrichten-Klasse (error / info)
 --- @returns ein html-String
-function html_error_box(text)
+function html_box(text, class)
 	local split_out
 	local _
 	split_out, _ = string.gsub(luci.util.pcdata(text), "\n", "<br/>")
-	return '<div class="errorbox"><h4>' .. luci.i18n.translatef("Error: %s", split_out) .. '</h4></div>'
+	local prefix
+	local css_class
+	if class == "error" then
+		prefix = luci.i18n.translate("Error: ")
+		css_class = "errorbox"
+	else
+		prefix = ""
+		-- "infobox" ist eine opennet-spezifische css-Klasse
+		css_class = "infobox"
+	end
+	return '<div class="' .. css_class .. '"><h4>' .. prefix .. split_out .. '</h4></div>'
 end
 
 
 --[[
-@brief Liefere den HTML-Code für eine potentielle Liste von Fehlern zurück.
-@param errors eine Table mit Fehlermeldungen
+@brief Liefere den HTML-Code für eine Liste von Meldungen zurück.
+@param messages eine Table mit Fehlermeldungen oder Hinweisen
+@param class Nachrichten-Klasse (error / info)
 @returns ein html-String
 --]]
-function html_display_error_list(errors)
+function html_display_message_list(messages, class)
 	local result = ""
-	for _, value in pairs(errors or {}) do
+	for _, value in pairs(messages or {}) do
 		if value and value ~= "" then
-			result = result .. html_error_box(value)
+			result = result .. html_box(value, class)
 		end
 	end
 	return result

@@ -30,7 +30,7 @@ on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for net
 %>
 
 <h2><a id="content" name="content"><%:Modules and Features%></a></h2>
-<%= html_display_error_list(on_errors) %>
+<%= html_display_message_list(on_errors, "error") %>
 
 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 <div class="cbi-map"><fieldset class="cbi-section">

@@ -17,7 +17,7 @@ You may obtain a copy of the License at
 <%+header%>
 
 <h2><a id="content" name="content"><%:Public Hotspot%></a></h2>
-<%= html_display_error_list(on_errors) %>
+<%= html_display_message_list(on_errors, "error") %>
 
 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 <div class="cbi-map">

@@ -19,7 +19,7 @@ You may obtain a copy of the License at
     <%:You need to request your own VPN certificate in order to use these Internet Gateways.%>
   </div>
 
-  <%= html_display_error_list(on_errors) %>
+  <%= html_display_message_list(on_errors, "error") %>
 
   <% cert_type = "user" %>
   <% include("opennet/on_vpn_status") %>

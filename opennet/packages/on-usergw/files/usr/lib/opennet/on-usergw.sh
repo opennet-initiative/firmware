@@ -254,7 +254,7 @@ sync_mesh_openvpn_connection_processes() {
 	local max_connections
 	local service_state
 	# diese Festlegung ist recht willkürlich: auf Geräten mit nur 32 MB scheinen wir jedenfalls nahe der Speichergrenze zu arbeiten
-	[ "$(get_memory_size)" -gt 32 ] && max_connections=5 || max_connections=2
+	[ "$(get_memory_size)" -gt 32 ] && max_connections=3 || max_connections=1
 	get_services "mesh" \
 			| filter_services_by_value "scheme" "openvpn" \
 			| sort_services_by_priority \

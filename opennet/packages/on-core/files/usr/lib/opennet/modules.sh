@@ -101,18 +101,31 @@ install_from_opennet_repository() {
 		# Paket fehlt? aktuelle Liste nicht speichern, sondern einfach abbrechen
 		is_package_installed "$package" || return 0
 	done
-	save_on_module_list
+	save_on_modules_list
+}
+
+
+## @fn remove_opennet_module()
+## @param module Name des oder der zu entfernenden Module
+remove_opennet_modules() {
+	local log_file=$(get_custom_log_filename "opkg_opennet")
+	_run_opennet_opkg --autoremove remove "$@"
+	save_on_modules_list
 }
 
 
 # Ausführung eines opkg-Kommnados mit der opennet-Repository-Konfiguration und minimaler Ausgabe (nur Fehler) auf stdout.
 _run_opennet_opkg() {
+	trap "error_trap _run_opennet_opkg '$*'" $GUARD_TRAPS
+	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
+	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
+	local log_file=$(get_custom_log_filename "opkg_opennet")
 	# Vor der opkg-Ausführung müssen wir das Verzeichnis /etc/opkg verdecken, da opkg fehlerhafterweise
 	# auch bei Verwendung von "--conf" die üblichen Orte nach Konfigurationsdateien durchsucht.
 	# TODO: opkg-Bug upstream berichten
 	mount -t tmpfs -o size=32k tmpfs /etc/opkg
 	# opkg ausfuehren und dabei die angegebene Fehlermeldung ignorieren (typisch fuer Paket-Installation nach Upgrade)
-	opkg --verbosity=0 --conf "$ON_OPKG_CONF_PATH" "$@" 2>&1 \
+	opkg --verbosity=1 --conf "$ON_OPKG_CONF_PATH" "$@" >>"$log_file" 2>&1 \
 		| grep -vF "resolve_conffiles: Existing conffile /etc/config/openvpn is different from the conffile in the new package. The new conffile will be placed at /etc/config/openvpn-opkg." \
 		| grep -v "^Collected errors:$" \
 		|| true
@@ -120,10 +133,10 @@ _run_opennet_opkg() {
 }
 
 
-## @fn save_on_module_list()
+## @fn save_on_modules_list()
 ## @brief Speichere die aktuelle Liste der installierten opennet-Module in der uci-Konfiguration.
 ## @details Nach einer Aktualisierung ermöglicht diese Sicherung die Nachinstallation fehlender Pakete.
-save_on_module_list() {
+save_on_modules_list() {
 	local modname
 	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
 	get_on_modules | while read modname; do
@@ -263,8 +276,7 @@ on_opkg_postinst_default() {
 			/etc/init.d/on-core start
 		)
 	fi
-	# den luci-Restart leicht verzoegern (sonst reisst die Verbindung bei Aktualisierungen im Web-Interface ab)
-	run_delayed_in_background 5 clean_luci_restart
+	clean_luci_restart
 }
 
 
@@ -273,8 +285,7 @@ on_opkg_postinst_default() {
 ## @details Caches löschen
 on_opkg_postrm_default() {
 	clear_caches
-	# den luci-Restart leicht verzoegern (sonst reisst die Verbindung bei Aktualisierungen im Web-Interface ab)
-	run_delayed_in_background 5 clean_luci_restart
+	clean_luci_restart
 }
 
 # Ende der Doku-Gruppe

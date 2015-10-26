@@ -31,6 +31,7 @@ on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for net
 
 <h2><a id="content" name="content"><%:Modules and Features%></a></h2>
 <%= html_display_message_list(on_errors, "error") %>
+<%= html_display_message_list(on_hints, "info") %>
 
 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 <div class="cbi-map"><fieldset class="cbi-section">
@@ -116,6 +117,17 @@ on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for net
 		</div>
 	</div>
 </fieldset></div>
+
+<% if modules_log and modules_log ~= "" then %>
+	<div class="cbi-map"><fieldset class="cbi-section">
+	<legend><%:Package Installation Protocol%></legend>
+		<div class="cbi-section-descr"><%:Review the details of installations and removals.%></div>
+		<div class="cbi-section-node">
+			<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly"
+				rows="10" cols="110" wrap="off"><%=modules_log%></textarea>
+		</div>
+	</fieldset></div>
+<% end %>
 
 <div class="cbi-page-actions">
 	<input class="cbi-button cbi-button-save" type="submit" name="save" value="<%:Save%>" />

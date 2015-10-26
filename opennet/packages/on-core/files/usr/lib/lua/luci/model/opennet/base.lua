@@ -50,7 +50,9 @@ end
 
 function action_modules()
 	require("luci.sys")
+	local delay_hint = luci.i18n.translate("Please wait a minute before reloading this page for an updated status.")
 	local on_errors = {}
+	local on_hints = {}
 	-- teile den Query-String als komma-separierte Liste in Token
 	local function get_splitted_package_names(text)
 		local result = {}
@@ -64,18 +66,19 @@ function action_modules()
 	end
 	local remove_packages = get_splitted_package_names(luci.http.formvalue("remove"))
 	if not table_is_empty(remove_packages) then
-		-- stderr sollte nach stdout gehen, damit wir es als Fehlertext einblenden koennen
-		error_message = luci.sys.exec("opkg --verbosity=0 --autoremove remove '" .. string_join(remove_packages, " ") .. "' 2>&1")
-		table.insert(on_errors, error_message)
-		-- bei der Paket-Installation wird die Liste automatisch aktualisiert - bei der Entfernung müssen wir es per Hand tun
-		on_function("save_on_module_list")
+		local args = {}
+		for index, value in ipairs(remove_packages) do table.insert(args, value) end
+		on_function_background("remove_opennet_modules", args)
+		table.insert(on_hints, luci.i18n.translate("Removing modules in background."))
+		table.insert(on_hints, delay_hint)
 	end
 	local install_packages = get_splitted_package_names(luci.http.formvalue("install"))
 	if not table_is_empty(install_packages) then
-		if not table_is_empty(install_packages) then
-			error_message = on_function("install_from_opennet_repository", install_packages)
-			table.insert(on_errors, error_message)
-		end
+		local args = {}
+		for index, value in ipairs(install_packages) do table.insert(args, value) end
+		on_function_background("install_from_opennet_repository", args)
+		table.insert(on_hints, luci.i18n.translate("Installing modules in background."))
+		table.insert(on_hints, delay_hint)
 	end
 	-- Repository-URL ändern oder Module an- und abschalten
 	if luci.http.formvalue("save") then
@@ -102,7 +105,9 @@ function action_modules()
 			on_function("set_configured_opennet_opkg_repository_url", {new_url})
 		end
 	end
-	luci.template.render("opennet/on_modules", { on_errors=on_errors })
+	-- das log auslesen
+	local modules_log = on_function("get_custom_log_content", {"opkg_opennet"})
+	luci.template.render("opennet/on_modules", { on_errors=on_errors, on_hints=on_hints, modules_log=modules_log })
 end
 
 

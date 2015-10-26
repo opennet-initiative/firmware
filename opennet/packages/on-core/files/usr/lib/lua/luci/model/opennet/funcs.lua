@@ -29,6 +29,13 @@ function on_function(func_name, parameters)
 end
 
 
+-- call a function in the background and return immediately
+function on_function_background(func_name, parameters)
+	local cmdline = "on-function '" .. func_name .. "' " .. _quote_parameters(parameters) .. ' </dev/null >/dev/null 2>&1 &'
+	return luci.sys.call(cmdline)
+end
+
+
 function on_bool_function(func_name, parameters)
 	local cmdline = "on-function '" .. func_name .. "' " .. _quote_parameters(parameters)
 	return luci.sys.call(cmdline) == 0

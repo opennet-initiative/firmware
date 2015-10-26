@@ -33,6 +33,14 @@ body {
     font-size: 0.8em;
 }
 
+/* "errorbox" kommt aus openwrt/luci - "infobox" ist neu */
+.infobox {
+	border: 1px solid #11AA00;
+	background-color: #CCFFCC;
+	padding: 5px;
+	margin-bottom: 5px;
+}
+
 table {
 	border-collapse: collapse;
 }

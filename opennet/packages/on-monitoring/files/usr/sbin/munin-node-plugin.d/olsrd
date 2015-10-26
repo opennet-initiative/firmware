@@ -52,9 +52,9 @@
 
 # prefer micropython if it is available - otherwise fall back to any python (2 or 3)
 if which micropython >/dev/null; then
-	/usr/bin/micropython -X "heapsize=${MICROPYTHON_HEAP:-512k}" "$0" "$@"
+    /usr/bin/micropython -X "heapsize=${MICROPYTHON_HEAP:-512k}" "$0" "$@"
 else
-	python "$0" "$@"
+    python "$0" "$@"
 fi
 exit $?
 """
@@ -124,8 +124,14 @@ def query_olsrd_txtservice(section=""):
     host = os.getenv("OLSRD_HOST", "localhost")
     port = os.getenv("OLSRD_TXTINFO_PORT", "2006")
     conn = socket.create_connection((host, port), 1.0)
-    conn.sendall("/%s" % section)
-    fconn = open(conn.fileno(), "r")
+    try:
+        # Python3
+        request = bytes("/%s" % section, "ascii")
+    except TypeError:
+        # Python2
+        request = bytes("/%s" % section)
+    conn.sendall(request)
+    fconn = conn.makefile()
     # "enumerate" is not suitable since it reads all lines at once (not a generator in micropython)
     index = 0
     for line in fconn.readlines():
@@ -237,14 +243,12 @@ if __name__ == "__main__":
                 print(LQ_VALUES_CONFIG.format(label=link["remote"],
                                               suffix="_{host}".format(host=get_clean_fieldname(link["remote"])),
                                               draw_type=("AREA" if is_first else "STACK")))
-                print()
                 is_first = False
             is_first = True
             for link in links:
                 print("multigraph olsr_link_quality.host_{remote}".format(remote=get_clean_fieldname(link["remote"])))
                 print(LQ_GRAPH_CONFIG.format(title="Link Quality towards {host}".format(host=link["remote"])))
                 print(LQ_VALUES_CONFIG.format(label="Link Quality", suffix="", draw_type="AREA"))
-                print()
                 is_first = False
 
             # link count ("number of nodes behind each neighbour")
@@ -287,7 +291,7 @@ if __name__ == "__main__":
             pass
         else:
             # unknown argument
-	    sys.stderr.write("Unknown argument{eol}".format(eol=LINESEP))
+            sys.stderr.write("Unknown argument{eol}".format(eol=LINESEP))
             sys.exit(1)
 
     # output values
@@ -300,14 +304,12 @@ if __name__ == "__main__":
                                                 remote=get_clean_fieldname(link["remote"])))
         print("nlq_{remote}.value {nlq:f}".format(nlq=link["nlq"],
                                                   remote=get_clean_fieldname(link["remote"])))
-        print()
     # detailed ETX graph for each single neighbour link
     for link in links:
         print("multigraph olsr_link_quality.host_{remote}"
               .format(remote=get_clean_fieldname(link["remote"])))
         print("lq.value {lq:f}".format(lq=link["lq"]))
         print("nlq.value {nlq:f}".format(nlq=link["nlq"]))
-        print()
 
     # count the links/nodes behind each neighbour node
     print("multigraph olsr_neighbour_link_count")

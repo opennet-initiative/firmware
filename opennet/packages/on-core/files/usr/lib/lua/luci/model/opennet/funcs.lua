@@ -91,7 +91,7 @@ end
 function get_custom_log_reversed(log_name, lines)
 	-- die "sed"-Komponente kehrt die Reihenfolge der Zeilen um (http://stackoverflow.com/a/744093)
 	-- Dies erspart uns die Abhaengigkeit gegen das passendere "tac".
-	return luci.sys.exec("on-function get_custom_log '" .. log_name .. "' | tail -n '" .. lines .. "' | sed -n '1!G;h;$p'")
+	return luci.sys.exec("on-function get_custom_log_content '" .. log_name .. "' | tail -n '" .. lines .. "' | sed -n '1!G;h;$p'")
 end
 
 

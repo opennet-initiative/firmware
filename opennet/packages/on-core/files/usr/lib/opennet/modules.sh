@@ -86,8 +86,6 @@ was_on_module_installed_before() {
 install_from_opennet_repository() {
 	trap "error_trap install_from_opennet_repository '$*'" $GUARD_TRAPS
 	local package
-	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
-	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
 	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$@"
 	for package in "$@"; do
 		if get_on_modules | grep -qwF "$package"; then

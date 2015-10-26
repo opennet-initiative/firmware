@@ -75,7 +75,7 @@ append_to_custom_log() {
 	local log_name="$1"
 	local event="$2"
 	local msg="$3"
-	local logfile="$LOG_BASE_DIR/${log_name}.log"
+	local logfile=$(get_custom_log_filename "$log_name")
 	echo "$(date) openvpn [$event]: $msg" >>"$logfile"
 	# Datei kuerzen, falls sie zu gross sein sollte
 	local filesize
@@ -85,13 +85,25 @@ append_to_custom_log() {
 }
 
 
-## @fn get_custom_log()
+## @fn get_custom_log_filename()
 ## @param log_name Name des Log-Ziels
 ## @brief Liefere den Inhalt eines spezifischen Logs (z.B. das OpenVPN-Verbindungsprotokoll) zurück.
 ## @returns Zeilenweise Ausgabe der Protokollereignisse (aufsteigend nach Zeitstempel sortiert).
-get_custom_log() {
+get_custom_log_filename() {
 	local log_name="$1"
-	local logfile="$LOG_BASE_DIR/${log_name}.log"
+	# der Aufrufer darf sich darauf verlassen, dass er in die Datei schreiben kann
+	mkdir -p "$LOG_BASE_DIR"
+	echo "$LOG_BASE_DIR/${log_name}.log"
+}
+
+
+## @fn get_custom_log_content()
+## @param log_name Name des Log-Ziels
+## @brief Liefere den Inhalt eines spezifischen Logs (z.B. das OpenVPN-Verbindungsprotokoll) zurück.
+## @returns Zeilenweise Ausgabe der Protokollereignisse (aufsteigend nach Zeitstempel sortiert).
+get_custom_log_content() {
+	local log_name="$1"
+	local logfile=$(get_custom_log_filename "$log_name")
 	[ -e "$logfile" ] && cat "$logfile" || true
 }
 

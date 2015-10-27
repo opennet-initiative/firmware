@@ -63,8 +63,21 @@ set_timezone_berlin() {
 }
 
 
+enable_firewall_reload_trigger() {
+	local uci_prefix
+	script_path="/usr/lib/opennet/events/on-firewall-reload"
+	uci_prefix=$(find_first_uci_section "firewall" "include" "path=$script_path")
+	[ -n "$uci_prefix" ] && return 0
+	uci_prefix="firewall.$(uci add "firewall" "script")"
+	uci set "${uci_prefix}.path=$script_path"
+	uci set "${uci_prefix}.reload=1"
+	apply_changes firewall
+}
+
+
 add_default_settings
 disable_cron_logging
 configure_dnsmasq
 add_crontab_entries
 set_timezone_berlin
+enable_firewall_reload_trigger

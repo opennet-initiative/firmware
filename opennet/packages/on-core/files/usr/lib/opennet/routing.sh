@@ -51,11 +51,15 @@ filter_routable_addresses() {
 ## @fn get_target_route_interface()
 ## @brief Ermittle das Netzwerkinterface, über den der Verkehr zu einem Ziel laufen würde.
 ## @param target Hostname oder IP des Ziel-Hosts
+## @tos_field tos Optionale type-of-service-Zahl
 ## @details Falls erforderlich, findet eine Namensauflösung statt.
 ## @return Name des physischen Netzwerk-Interface, über den der Verkehr zum Ziel-Host fließen würde
 get_target_route_interface() {
-	local target=$1
+	local target="$1"
+	local tos_field="${2:-}"
 	local ipaddr
+	local route_get_args=
+	[ -n "$tos_field" ] && route_get_args="tos $tos_field"
 	if is_ipv4 "$target" || is_ipv6 "$target"; then
 		echo "$target"
 	else
@@ -71,7 +75,11 @@ get_target_route_interface() {
 		#    prohibit 2001:67c:1400:2430::1 from :: dev lo  table unspec  proto kernel  src fe80::216:3eff:fe34:2aa5  metric 4294967295  error -13
 		# Wir ignorieren also Zeilen, die auf "error -1" oder "error -13" enden.
 		# Fehlermeldungen (ip: RTNETLINK answers: Network is unreachable) werden ebenfalls ignoriert.
-		ip route get "$ipaddr" 2>/dev/null | grep -vE "^(failed_policy|prohibit)" | grep -vE "error -(1|13)$" | grep " dev " | sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
+		ip route get "$ipaddr" $route_get_args 2>/dev/null \
+			| grep -vE "^(failed_policy|prohibit)" \
+			| grep -vE "error -(1|13)$" \
+			| grep " dev " \
+			| sed 's/^.* dev \+\([^ \t]\+\) \+.*$/\1/'
 	done | tail -1
 }
 

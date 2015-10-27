@@ -1,0 +1,3 @@
+#!/bin/sh
+
+on-function update_relay_firewall_rules

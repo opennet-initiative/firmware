@@ -8,7 +8,6 @@ ZONE_FREE=on_free
 NETWORK_FREE=on_free
 ## @var Quelldatei für Standardwerte des Hotspot-Pakets
 ON_CAPTIVE_PORTAL_DEFAULTS_FILE=/usr/share/opennet/captive-portal.defaults
-ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT=/usr/lib/opennet/events/on-captive-portal-firewall-reload.sh
 
 
 ## @fn captive_portal_get_or_create_config()
@@ -151,28 +150,6 @@ captive_portal_reload() {
 captive_portal_has_devices() {
 	[ -n "$(get_subdevices_of_interface "$NETWORK_FREE")" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
-}
-
-
-## @fn configure_captive_portal_firewall_script()
-## @brief Aktiviere oder deaktiviere das captive-portal-Firewall-Skript.
-## @param state Ein uci-Wahrheitswert bestimmt die Aktivierung oder Deaktivierung des firewall-Skripts.
-## @details Das Skript sorgt für die Integration von nodogsplash in das openwrt-Firewall-System.
-configure_captive_portal_firewall_script() {
-	trap "error_trap configure_captive_portal_firewall_script '$*'" $GUARD_TRAPS
-	local state="$1"
-	local uci_prefix
-	uci_prefix=$(find_first_uci_section "firewall" "include" "path=$ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT")
-	if uci_is_true "$state" && [ -z "$uci_prefix" ]; then
-		uci_prefix="firewall.$(uci add "firewall" "include")"
-		uci set "${uci_prefix}.path=$ON_CAPTIVE_PORTAL_FIREWALL_SCRIPT"
-	elif uci_is_false "$state" && [ -n "$uci_prefix" ]; then
-		uci_delete "$uci_prefix"
-	else
-		# nichts zu tun
-		return 0
-	fi
-	apply_changes firewall
 }
 
 

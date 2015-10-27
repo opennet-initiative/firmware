@@ -5,6 +5,7 @@
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 MESH_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-ugw.template
+TOS_MESH_VPN=8
 TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-services.csv
 ## eine beliebige Portnummer, auf der wir keinen udp-Dienst vermuten
 SPEEDTEST_UPLOAD_PORT=29418
@@ -56,7 +57,7 @@ is_mesh_gateway_usable() {
 	local service_name="$1"
 	local failed=
 	# WAN-Routing
-	if is_service_routed_via_wan "$service_name"; then
+	if is_service_routed_via_wan "$service_name" "$TOS_MESH_VPN"; then
 		set_service_value "$service_name" "wan_status" "true"
 	else
 		failed=1
@@ -337,6 +338,34 @@ get_active_ugw_connections() {
 }
 
 
+## update_mesh_gateway_firewall_rules()
+## @brief markiere alle lokal erzeugten Pakete, die an einen mesh-Gateway-Dienst adressiert sind
+## @details Diese Markierung ermöglicht die Filterung (throw) der Pakete für mesh-Gateways in der
+##   Nutzer-Tunnel-Routingtabelle.
+update_mesh_gateway_firewall_rules() {
+	local host
+	local port
+	local protocol
+	local target_ip
+	local chain="on_fwmark_mesh_vpn"
+	# Chain erzeugen oder leeren (falls sie bereits existiert)
+	iptables -t mangle --new-chain "$chain" 2>/dev/null || iptables -t mangle --flush "$chain"
+	# Regeln fuer jeden mesh-Gateway aufstellen
+	get_services "mesh" | while read service; do
+		host=$(get_service_value "$service" "host")
+		port=$(get_service_value "$service" "port")
+		protocol=$(get_service_value "$service" "protocol")
+		target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
+		# unaufloesbare Hostnamen ignorieren
+		[ -z "$target_ip" ] && continue
+		iptables -t mangle --insert "$chain" --destination "$host" --protocol "$protocol" --dport "$port" \
+			-j TOS --set-tos "$TOS_MESH_VPN"
+	done
+	# verhindere das Routing von mesh-VPN-Verbindung ueber den Nutzer-Tunnel (falls die Regel noch nicht existiert)
+	ip route add throw table "$ROUTING_TABLE_ON_UPLINK" tos "$TOS_MESH_VPN" 2>/dev/null || true
+}
+
+
 ## @fn disable_on_usergw()
 ## @brief Alle mesh-Verbindungen trennen.
 disable_on_usergw() {
@@ -358,6 +387,7 @@ disable_on_usergw() {
 update_on_usergw_status() {
 	if is_on_module_installed_and_enabled "on-usergw"; then
 		update_trusted_service_list
+		update_mesh_gateway_firewall_rules
 		# ohne Zertifikat ist nicht mehr zu tun
 		if has_mesh_openvpn_credentials; then
 			verify_mesh_gateways

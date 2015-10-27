@@ -50,75 +50,35 @@ pick_local_service_relay_port() {
 }
 
 
-## @fn delete_unused_service_relay_forward_rules()
-## @brief Lösche ungenutzte Firewall-Weiterleitungsregel für einen durchgereichten Dienst.
-## @attention Anschließend muss die firewall-uci-Sektion committed werden.
-delete_unused_service_relay_forward_rules() {
-	trap "error_trap delete_unused_service_relay_forward_rules '$*'" $GUARD_TRAPS
-	# wir erwarten einen ausführbaren Testnamen
-	local test_for_activity="$1"
-	local uci_prefix
-	local fw_rule_name
-	local service_name
-	local prefix_length="${#SERVICE_RELAY_FIREWALL_RULE_PREFIX}"
-	# es ist nicht leicht, herauszufinden, welche Regeln zu uns gehören - wir verwenden das Namenspräfix
-	find_all_uci_sections firewall redirect "target=DNAT" "src=$ZONE_MESH" "dest=$ZONE_WAN" | while read uci_prefix; do
-		fw_rule_name=$(uci_get "${uci_prefix}.name")
-		# passt das Namenspräfix?
-		[ "${fw_rule_name:0:$prefix_length}" != "$SERVICE_RELAY_FIREWALL_RULE_PREFIX" ] && continue
-		# schneide das Präfix ab, um den Dienstnamen zu ermitteln
-		service_name="${fw_rule_name:$prefix_length}"
-		"$test_for_activity" "$service_name" && continue
-		uci_delete "${uci_prefix}"
-	done
-}
-
-
-## @fn add_service_relay_forward_rule()
-## @brief Erzeuge die Firewall-Weiterleitungsregel für einen durchgereichten Dienst.
-## @param service_name der weiterzuleitende Dienst
-## @attention Anschließend muss die firewall-uci-Sektion committed werden.
-add_service_relay_forward_rule() {
-	trap "error_trap add_service_relay_forward_rule '$*'" $GUARD_TRAPS
-	local service_name="$1"
+## @fn update_relay_firewall_rules
+## @brief Erstelle die Liste aller Firewall-Regeln fuer Service-Relay-Weiterleitungen neu.
+## @details Diese Funktion wird als Teil des Firewall-Reload-Prozess und nach Service-Relay-Aenderungen
+##   aufgerufen.
+update_relay_firewall_rules() {
+	trap "error_trap update_relay_firewall_rules '$*'" $GUARD_TRAPS
 	local host
-	local uci_match
-	local rule_name
-	local uci_prefix
-	uci_match=$(get_service_relay_port_forwarding "$service_name")
-	# perfekt passende Regel gefunden? Fertig ...
-	[ -n "$uci_match" ] && return 0
-	host=$(get_service_value "$service_name" "host")
-	rule_name="${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
-	uci_match=$(find_first_uci_section firewall redirect "target=DNAT" "name=$rule_name")
-	# unvollstaendig passendes Ergebnis? Loesche es (der Ordnung halber) ...
-	[ -n "$uci_match" ] && uci_delete "$uci_match"
-	# neue Regel anlegen
-	uci_prefix=firewall.$(uci add firewall redirect)
-	# der Name ist wichtig fuer spaetere Aufraeumaktionen
-	uci set "${uci_prefix}.name=${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
-	uci set "${uci_prefix}.target=DNAT"
-	uci set "${uci_prefix}.proto=$(get_service_value "$service_name" "protocol")"
-	uci set "${uci_prefix}.src=$ZONE_MESH"
-	uci set "${uci_prefix}.src_dip=$(get_main_ip)"
-	uci set "${uci_prefix}.src_dport=$(get_service_value "$service_name" "local_relay_port")"
-	uci set "${uci_prefix}.dest=$ZONE_WAN"
-	uci set "${uci_prefix}.dest_port=$(get_service_value "$service_name" "port")"
-	uci set "${uci_prefix}.dest_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)"
-	# die Abhängigkeit speichern
-	service_add_uci_dependency "$service_name" "$uci_prefix"
-}
+	local port
+	local protocol
+	local target_ip
+	local chain="on_service_relay_dnat"
+	local parent_chain="prerouting_${ZONE_MESH}_rule"
+	local main_ip=$(get_main_ip)
+	# neue Chain erzeugen
+	iptables -t nat --new-chain "$chain" 2>/dev/null || iptables -t nat --flush "$chain"
+	# Verweis auf die neue Chain erzeugen
+	iptables -t nat --check "$parent_chain" -j "$chain" || iptables -t nat --insert "$parent_chain" -j "$chain"
+	# Chain fuellen
+	get_services | filter_relay_services | while read service_name; do
+		is_service_relay_possible "$service_name" || continue
+		host=$(get_service_value "$service" "host")
+		port=$(get_service_value "$service" "port")
+		protocol=$(get_service_value "$service" "protocol")
+		local_port=$(get_service_value "$service" "local_relay_port")
+		target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
+		iptables -A "$chain" --destination "$main_ip" --protocol "$protocol" --dport "$local_port" \
+			-j DNAT --to-destination "${target_ip}:${port}"
+	done
 
-
-## @fn enable_service_relay()
-## @brief Aktiviere die Weiterleitung eines öffentlichen Diensts.
-## @param service_name Name des durchzuleitenden Diensts
-## @attention Anschließend müssen die uci-Sektion 'olsrd' und 'firewall' committed werden.
-enable_service_relay() {
-	trap "error_trap enable_service_relay '$*'" $GUARD_TRAPS
-	local service_name="$1"
-	add_service_relay_forward_rule "$service_name"
-	announce_olsr_service_relay "$service_name"
 }
 
 
@@ -260,27 +220,14 @@ update_service_relay_status() {
 			is_service_routed_via_wan "$service_name" && wan_status="true" || wan_status="false"
 			set_service_value "$service_name" "wan_status" "$wan_status"
 			is_service_relay_possible "$service_name" || continue
-			enable_service_relay "$service_name"
+			announce_olsr_service_relay "$service_name"
 		done
-		delete_unused_service_relay_forward_rules is_service_relay_possible
+		update_mesh_gateway_firewall_rules
 		deannounce_unused_olsr_service_relays is_service_relay_possible
-		apply_changes firewall olsrd
 	else
-		disable_service_relay
-	fi
-}
-
-
-## @fn disable_service_relay()
-## @brief Schalte alle Weiterleitungen und Dienst-Announcierungen ab.
-disable_service_relay() {
-	trap "error_trap disable_service_relay '$*'" $GUARD_TRAPS
-	local service_name
-	get_services | filter_relay_services | while read service_name; do
-		delete_unused_service_relay_forward_rules false
 		deannounce_unused_olsr_service_relays false
-	done
-	apply_changes firewall olsrd
+	fi
+	apply_changes olsrd
 }
 
 

@@ -12,9 +12,6 @@ uci_delete "network.$NETWORK_FREE"
 # Zone vollstaendig loeschen
 delete_firewall_zone "$ZONE_FREE"
 
-# firewall-Trigger-Skript entfernen
-configure_captive_portal_firewall_script false
-
 # wir behalten die nodogsplash-Konfiguration - dort sind eventuell lokale Einstellungen zu finden
 
 apply_changes firewall

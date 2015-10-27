@@ -65,5 +65,4 @@ init_captive_portal() {
 
 configure_free_network
 configure_free_zone
-configure_captive_portal_firewall_script true
 init_captive_portal

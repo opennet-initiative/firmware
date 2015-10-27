@@ -362,7 +362,7 @@ update_mesh_gateway_firewall_rules() {
 			-j TOS --set-tos "$TOS_MESH_VPN"
 	done
 	# verhindere das Routing von mesh-VPN-Verbindung ueber den Nutzer-Tunnel (falls die Regel noch nicht existiert)
-	ip route add throw table "$ROUTING_TABLE_ON_UPLINK" tos "$TOS_MESH_VPN" 2>/dev/null || true
+	ip route add throw default table "$ROUTING_TABLE_ON_UPLINK" tos "$TOS_MESH_VPN" 2>/dev/null || true
 }
 
 

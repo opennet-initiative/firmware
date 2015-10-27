@@ -770,7 +770,11 @@ get_service_log_content() {
 is_service_routed_via_wan() {
 	trap "error_trap is_service_routed_via_wan '$*'" $GUARD_TRAPS
 	local service_name="$1"
+	# verwende die übergebene TypeOfService-Angabe oder (falls vorhanden/installiert) den
+	# TOS-Wert, der fuer nicht-Tunnel-Verkehr verwendet wird (typischerweise ist dies die
+	# die Intention des Anfragenden)
 	local tos_field="${2:-}"
+	[ -z "$tos_field" ] && tos_field="${TOS_NON_TUNNEL:-}"
 	local host
 	local outgoing_device
 	local outgoing_zone

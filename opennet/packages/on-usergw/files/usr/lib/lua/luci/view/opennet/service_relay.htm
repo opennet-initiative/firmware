@@ -39,13 +39,10 @@ You may obtain a copy of the License at
 	<form name="relay_services" method="post" action="<%= REQUEST_URI %>">
 	<table class="cbi-section-table" id="on-gateway-list">
 	<tr class="cbi-section-table-titles">
-		<th colspan = "1" />
 		<th class="cbi-section-table-cell"><%:Gateway%></th>
 		<th class="cbi-section-table-cell"><%:Local Port%></th>
 		<th class="cbi-section-table-cell">
 			<abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN Test%></abbr></th>
-		<th class="cbi-section-table-cell">
-			<abbr title="<%:The port forwarding will be active automatically soon after a successful test.%>"><%:Port Forwarding%></abbr></th>
 		<th class="cbi-section-table-cell">
 			<abbr title="<%:The service announcement (via olsr) will be active soon after a successful test.%>"><%:Announcement%></abbr></th>
 		<th class="cbi-section-table-cell"><%:Actions%></th>
@@ -55,7 +52,6 @@ You may obtain a copy of the License at
         for index, service_name in ipairs(relay_services) do
           local service = parse_csv_service(service_name, {
               disabled="string|value|disabled",
-              port_forwarding_uci_section="string|function|get_service_relay_port_forwarding",
               olsr_announcement="string|function|get_service_relay_olsr_announcement",
               host="string|value|host",
               port="number|value|port",
@@ -75,13 +71,10 @@ You may obtain a copy of the License at
             end
 	%>
 	<tr class="cbi-section-table-row cbi-opennet-services" disabled="<%= bool_to_yn(service.disabled) %>">
-		<td class="cbi-value-field" style="text-align:right;"><%= index %>.</td>
 		<td><div title="<%= service.host %>:<%= service.port %>"><%= label %></div></td>
 		<td><%= service.local_relay_port %></td>
 		<td class="cbi-value-field">
 			<div class="opennet-bool" status="<%= bool_to_yn(service.wan_status) %>" /></td>
-		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= bool_to_yn(service.port_forwarding_uci_section) %>" /></td>
 		<td class="cbi-value-field">
 			<div class="opennet-bool" status="<%= bool_to_yn(service.olsr_announcement) %>" />
 		</td>

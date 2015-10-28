@@ -7,8 +7,6 @@ UGW_LOCAL_SERVICE_PORT_LEGACY=1600
 DEFAULT_MESH_OPENVPN_PORT=1602
 ## falls mehr als ein GW-Dienst weitergereicht wird, wird dieser Port und die folgenden verwendet
 SERVICE_RELAY_LOCAL_RELAY_PORT_START=5100
-# Markierung fuer firewall-Regeln, die zu Dienst-Weiterleitungen gehören
-SERVICE_RELAY_FIREWALL_RULE_PREFIX=on_service_relay_
 
 
 # Pruefung ob ein lokaler Port bereits fuer einen ugw-Dienst weitergeleitet wird
@@ -247,33 +245,6 @@ filter_relay_services() {
 		[ -n "$(get_service_value "$service_name" "local_relay_port")" ] && echo "$service_name"
 		true
 	done
-}
-
-
-## @fn get_service_relay_port_forwarding()
-## @brief Liefere den Namen der uci-Sektion des Relay-Service-Portforwarding zurueck.
-## @param service_name Name des Relay-Service-Diensts.
-## @returns Den uci-Namen oder nichts, falls keine Portweiterleitung existiert.
-get_service_relay_port_forwarding() {
-	trap "error_trap get_service_relay_port_forwarding '$*'" $GUARD_TRAPS
-	local service_name="$1"
-	local rule_name="${SERVICE_RELAY_FIREWALL_RULE_PREFIX}${service_name}"
-	local port
-	local host
-	local protocol
-	local main_ip
-	local target_ip
-	port=$(get_service_value "$service_name" "port")
-	host=$(get_service_value "$service_name" "host")
-	protocol=$(get_service_value "$service_name" "protocol")
-	main_ip=$(get_main_ip)
-	target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
-	# wir verwenden nur die erste aufgeloeste IP, zu welcher wir eine Route haben.
-	# z.B. faellt IPv6 aus, falls wir kein derartiges Uplink-Interface sehen
-	find_first_uci_section firewall redirect \
-		"target=DNAT" "name=$rule_name" "proto=$protocol" \
-		"src=$ZONE_MESH" "src_dip=$main_ip" \
-		"dest=$ZONE_WAN" "dest_port=$port" "dest_ip=$target_ip"
 }
 
 # Ende der Doku-Gruppe

@@ -56,7 +56,7 @@ is_mesh_gateway_usable() {
 	local service_name="$1"
 	local failed=
 	# WAN-Routing
-	if is_service_routed_via_wan "$service_name" "$TOS_MESH_VPN"; then
+	if is_service_routed_via_wan "$service_name"; then
 		set_service_value "$service_name" "wan_status" "true"
 	else
 		failed=1
@@ -346,9 +346,11 @@ update_mesh_gateway_firewall_rules() {
 	local port
 	local protocol
 	local target_ip
-	local chain="on_fwmark_mesh_vpn"
+	local chain="on_tos_mesh_vpn"
 	# Chain erzeugen oder leeren (falls sie bereits existiert)
 	iptables -t mangle --new-chain "$chain" 2>/dev/null || iptables -t mangle --flush "$chain"
+	# falls es keinen Tunnel-Anbieter gibt, ist nichts zu tun
+	[ -z "${TOS_NON_TUNNEL:-}" ] && return 0
 	# Regeln fuer jeden mesh-Gateway aufstellen
 	get_services "mesh" | while read service; do
 		host=$(get_service_value "$service" "host")

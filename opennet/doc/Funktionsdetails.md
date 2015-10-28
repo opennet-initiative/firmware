@@ -200,8 +200,8 @@ Diese Prüfung wird im Tagestakt innerhalb der ugw-Funktion ``ugw_doExtraChecks`
 
 Konfiguration des UGW-Servers:
 
-* Bereitstellung einer beliebigen Datei (> 100 MByte), die unter der URL http://UGW_HOST/.big erreichbar ist
-* Betrieb eines netcat-Listeners:
+* Download: Bereitstellung einer beliebigen Datei (> 100 MByte), die unter der URL http://UGW_HOST/.big erreichbar ist
+* Upload: Betrieb eines netcat-Listeners:
 
     iptables -I INPUT -p tcp --dport 22222 -j ACCEPT
     
@@ -252,6 +252,22 @@ Es werden nur diejenigen Dienste weitergereicht und announciert, die den folgend
 
 * die Route zum Ziel-Host verläuft über das WAN-Interface
 * die Quelle (*source*) des Dienstes ist *manual* (selbstverwaltet) oder *dns-srv* (durch den Verein verwaltet)
+
+
+### Kombinierter Betrieb mit Nutzer-Tunnel {#ugw-nutzer-kombi}
+
+Internet-Spender möchten eventuell zeitgleich mit dem Einspeisen auch einen lokalen Nutzer-Tunnel aufbauen (Internetzugang über Opennet-Server). Dies ist insbesondere für folgende Anwendungsfälle sinnvoll:
+
+* Nutzung als offener Zugangspunkt (Captive Portal)
+* Verwendung des Nutzer-Tunnels als Ersatz-Internetzugang beim Ausfall des lokalen Zugangs
+
+#### Routing
+
+Beim gleichzeitigen Betrieb ist sicherzustellen, dass die Mesh-VPN-Tunnel (deren Gegenstellen öffentliche IPs haben) nie über den Nutzer-Tunnel hinweg aufgebaut werden. Außerdem dürfen Service-Relay-Portweiterleitungen nicht über den Nutzer-Tunnel verlaufen.
+
+Eine Zuordnung der Verkehrsarten für diese Routing-Ausnahmen ist komplex. Daher wird die Markierung via Firewall-Regeln in Form der Zuweisung von TOS-Markierungen (Type of Service) umgesetzt.
+
+Ein Skript (``on-usergw/files/etc/on-firewall.d/mesh-vpn``) sorgt für die Erstellung von Firewall-Regeln, die die TOS-Markierungen an allen lokal erzeugten oder via Service-Relay umgeleiteten Paketen anbringen, die die passende IP/Port-Kombination ansprechen wollen. Eine vom Paket *on-openvpn* erzeugte *throw*-Route in der Policy-Routing-Tabelle *on-tunnel* sorgt dafür, dass diese Tabelle für die obigen markierten Pakete nicht verwendbar ist. Das Skript wird auch im Rahmen jedes Firewall-Reloads ausgeführt (@see firewall).
 
 
 Offene Zugangspunkte / Captive Portal {#captive}
@@ -447,6 +463,21 @@ Die Aktualisierung wird über den opennet-internen Domainnamen (*downloads.on*),
 Bei der Installation neuer Versionen des Opennet-Zertifikat-Pakets werden von *opkg* leider keine Signaturen und auch keine https-Verbindungen unterstützt. Somit ist auf diesem Weg das Unterschieben eines manipulierten CA-Zertifikats durch einen Dritten möglich.
 
 
+Firewall-Regeln {#firewall}
+---------------
+
+Das *on-core*-Paket fügt bei der Erstinitialisierung einen Eintrag zur Firewall-Konfiguration hinzu, der dafür sorgt, dass bei jedem Reload der Firewall-Konfiguration alle Skripte im Verzeichnis ``/etc/on-firewall.d/`` ausgeführt werden.
+
+Skripte die sich in diesem Verzeichnis befinden, sollten auf eine idempotente Ausführung achten: sie dürfen also nicht die Löchung aller zuvor erzeugten Regeln voraussetzen, sondern müssen selbst dafür sorgen (falls erforderlich).
+
+Ein typisches Ablauf-Schema solcher Skripte ist:
+
+1. eine separate Chain anlegen (Fehler bei Vorhandensein ignorieren)
+2. in der zu beeinflussenden Chain eine neue Regel hinzufügen (``-I``) falls nicht vorhanden, die auf diese separate Chain verweist
+3. die separate Chain leeren (``-F``)
+4. die separate Chain mit Regeln füllen
+
+
 Debugging {#debug}
 ---------
 
@@ -485,7 +516,6 @@ Opennet-Erstkonfiguration:
     * ntpclient: siehe "Zeitsychronisation"
     * olsrd: Basiskonfiguration inkl. nameservice
     * on-core: IP- und Netzwerkkonfiguration entsprechend den Opennet-Konventionen, sowie csr-Mailadresse, debug und on_id
-
 
 
 Zeit synchroniseren {#firmware04-ntp}
@@ -601,4 +631,3 @@ Das allgemeine Wifidog-Konzept wird unter https://wiki.opennet-initiative.de/wik
 * Alle DHCP Anfragen werden an die 10.1.0.1 und somit inez.on-i.de weitergeleitet (dhcp-fwd.conf.opennet_template).
     * die 10.1.0.1 ist die gateway-IP - auf dem jeweiligen Gateway muss also eine DNAT-Umleitung zu inez vorhanden sein
 * Beim Start (init.d/on_wifidog_config) wird ein *free* Netzwerk erzeugt falls es nicht bereits vorhanden ist.
-

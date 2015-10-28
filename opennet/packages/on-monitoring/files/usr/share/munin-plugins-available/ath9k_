@@ -3,7 +3,7 @@
 # Collect information related to ath9k wireless events and states.
 #
 # Magic markers
-#%# capabilities=autoconf
+#%# capabilities=autoconf suggest
 #%# family=auto
 
 """
@@ -33,6 +33,7 @@ QUALITY_GRAPH_COLORS_16 = ("FF1F00", "FF4500", "FF7000", "FF9700",
                            "007986", "0058A8", "0033CC", "0018DE")
 SYS_BASE_DIR = "/sys/kernel/debug/ieee80211"
 GRAPH_BASE_NAME = "ath9k_stats"
+PLUGIN_SCOPES = ("traffic", "events", "rcstats")
 
 
 import os
@@ -42,6 +43,13 @@ import sys
 
 
 class Station:
+
+    config_map = {"events": lambda station, **kwargs: station._get_events_config(**kwargs),
+                  "traffic": lambda station, **kwargs: station._get_traffic_config(**kwargs),
+                  "rcstats": lambda station, **kwargs: station._get_rc_stats_config(**kwargs)}
+    values_map = {"events": lambda station: station._events_stats,
+                  "traffic": lambda station: station._traffic_stats,
+                  "rcstats": lambda station: station._get_rc_stats_success()}
 
     def __init__(self, label, key, path):
         self._path = path
@@ -130,52 +138,36 @@ class Station:
                 stats[counter] = int(content)
         return stats
 
-    def get_values(self, graph_base):
-        for suffix, func in {
-                    "events": lambda: self._events_stats,
-                    "traffic": lambda: self._traffic_stats,
-                    "rc_stats_success": self._get_rc_stats_success,
-                }.items():
-            yield "multigraph {base}_{suffix}.{station}".format(base=graph_base, suffix=suffix, station=self.key)
-            for key, value in func().items():
-                yield "{key}.value {value}".format(key=key, value=value)
-            yield ""
+    def get_values(self, scope, graph_base):
+        func = self.values_map[scope]
+        yield "multigraph {base}_{suffix}.{station}".format(base=graph_base, suffix=scope, station=self.key)
+        for key, value in func(self).items():
+            yield "{key}.value {value}".format(key=key, value=value)
+        yield ""
 
     @classmethod
-    def get_summary_values(cls, siblings, graph_base):
-        for suffix, func in {
-                "events": lambda station: station._events_stats,
-                "traffic": lambda station: station._traffic_stats,
-                "rc_stats_success": lambda station: station._get_rc_stats_success(),
-                }.items():
-            yield "multigraph {base}_{suffix}".format(base=graph_base, suffix=suffix)
-            stats = {}
-            for station in siblings:
-                for key, value in func(station).items():
-                    stats[key] = stats.get(key, 0) + value
-            for key, value in stats.items():
-                yield "{key}.value {value}".format(key=key, value=value)
-            yield ""
+    def get_summary_values(cls, scope, siblings, graph_base):
+        func = cls.values_map[scope]
+        yield "multigraph {base}_{suffix}".format(base=graph_base, suffix=scope)
+        stats = {}
+        for station in siblings:
+            for key, value in func(station).items():
+                stats[key] = stats.get(key, 0) + value
+        for key, value in stats.items():
+            yield "{key}.value {value}".format(key=key, value=value)
+        yield ""
 
-    def get_config(self, graph_base):
-        for suffix, func in {
-                    "events": self._get_events_config,
-                    "traffic": self._get_traffic_config,
-                    "rc_stats_success": self._get_rc_stats_config,
-                }.items():
-            yield "multigraph {base}_{suffix}.{station}".format(base=graph_base, suffix=suffix, station=self.key)
-            yield from func(label=self.label, siblings=[self])
+    def get_config(self, scope, graph_base):
+        func = self.config_map[scope]
+        yield "multigraph {base}_{suffix}.{station}".format(base=graph_base, suffix=scope, station=self.key)
+        yield from func(self, label=self.label, siblings=[self])
 
     @classmethod
-    def get_summary_config(cls, siblings, graph_base):
-        for suffix, func in {
-                    "events": Station._get_events_config,
-                    "traffic": Station._get_traffic_config,
-                    "rc_stats_success": Station._get_rc_stats_config,
-                }.items():
-            yield "multigraph {base}_{suffix}".format(base=graph_base, suffix=suffix)
-            for station in siblings:
-                yield from func(siblings=[station])
+    def get_summary_config(cls, scope, siblings, graph_base):
+        func = cls.config_map[scope]
+        yield "multigraph {base}_{suffix}".format(base=graph_base, suffix=scope)
+        for station in siblings:
+            yield from func(station, siblings=[station])
 
     @classmethod
     def _get_traffic_config(cls, label=None, siblings=None):
@@ -296,16 +288,16 @@ class WifiInterface:
                 key = "host_" + peer_mac.replace(":", "").replace(".", "")
             yield Station(label, key, os.path.join(stations_base, item))
 
-    def get_config(self):
-        yield from Station.get_summary_config(self.stations, self._graph_base)
+    def get_config(self, scope):
+        yield from Station.get_summary_config(scope, self.stations, self._graph_base)
         for station in self.stations:
-            yield from station.get_config(self._graph_base)
+            yield from station.get_config(scope, self._graph_base)
         yield ""
 
-    def get_values(self):
-        yield from Station.get_summary_values(self.stations, self._graph_base)
+    def get_values(self, scope):
+        yield from Station.get_summary_values(scope, self.stations, self._graph_base)
         for station in self.stations:
-            yield from station.get_values(self._graph_base)
+            yield from station.get_values(scope, self._graph_base)
         yield ""
 
 
@@ -327,13 +319,13 @@ class Ath9kDriver:
                     graph_base = "{base}_{phy}_{interface}".format(base=self._graph_base, phy=phy, interface=wifi)
                     yield WifiInterface(label, wifi_path, graph_base)
 
-    def get_config(self):
+    def get_config(self, scope):
         for interface in self.interfaces:
-            yield from interface.get_config()
+            yield from interface.get_config(scope)
 
-    def get_values(self):
+    def get_values(self, scope):
         for interface in self.interfaces:
-            yield from interface.get_values()
+            yield from interface.get_values(scope)
 
 
 
@@ -356,12 +348,26 @@ def _get_up_down_pair(unit, key_up, key_down, factor=None, divider=None, use_neg
         yield "{key_up}.negative {key_down}".format(key_up=key_up, key_down=key_down)
 
 
+def get_scope():
+    called_name = os.path.basename(sys.argv[0])
+    name_prefix = "ath9k_"
+    if called_name.startswith(name_prefix):
+        scope = called_name[len(name_prefix):]
+        if not scope in PLUGIN_SCOPES:
+            print("Invalid scope requested: {0} (expected: {1})".format(scope, PLUGIN_SCOPES), file=sys.stderr)
+            sys.exit(2)
+    else:
+        print("Invalid filename - failed to discover plugin scope", file=sys.stderr)
+        sys.exit(2)
+    return scope
+
+
 if __name__ == "__main__":
     ath9k = Ath9kDriver(SYS_BASE_DIR, GRAPH_BASE_NAME)
     # parse arguments
     if len(sys.argv) > 1:
         if sys.argv[1]=="config":
-            for item in ath9k.get_config():
+            for item in ath9k.get_config(get_scope()):
                 print(item)
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
@@ -369,6 +375,10 @@ if __name__ == "__main__":
                 print('yes')
             else:
                 print('no')
+            sys.exit(0)
+        elif sys.argv[1] == "suggest":
+            for scope in PLUGIN_SCOPES:
+                print(scope)
             sys.exit(0)
         elif sys.argv[1] == "version":
             print('olsrd Munin plugin, version %s' % plugin_version)
@@ -382,5 +392,5 @@ if __name__ == "__main__":
             sys.exit(1)
 
     # output values
-    for item in ath9k.get_values():
+    for item in ath9k.get_values(get_scope()):
         print(item)

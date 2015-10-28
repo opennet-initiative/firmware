@@ -7,6 +7,9 @@
 # Ablage fuer profiling-Ergebnisse
 PROFILING_DIR=/var/run/on-profiling
 
+# erzeuge das Profiling-Verzeichnis (vorsorglich - es wird wohl unbenutzt bleiben)
+mkdir -p "$PROFILING_DIR"
+
 
 ## @fn list_installed_packages_by_size()
 ## @brief Zeige alle installierten Pakete und ihren Größenbedarf an.

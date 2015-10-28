@@ -63,7 +63,3 @@ clear_caches() {
 	rm -f "$ON_SHELL_MINIMIZED"
 	clear_cache_opennet_opkg
 }
-
-
-# erzeuge das Profiling-Verzeichnis (vorsorglich - es wird wohl unbenutzt bleiben)
-mkdir -p "$PROFILING_DIR"

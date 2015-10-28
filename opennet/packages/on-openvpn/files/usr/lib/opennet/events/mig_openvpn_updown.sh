@@ -27,6 +27,8 @@ log_openvpn_events_and_disconnect_if_requested "mig-openvpn-connections"
 case "$script_type" in
 	up)
 		"$IP_BIN" route add default via "$route_vpn_gateway" table "$ROUTING_TABLE_ON_UPLINK" || true
+		# verhindere das Routing von explizit unerwuenschtem Verkehr ueber den Nutzer-Tunnel (falls die Regel noch nicht existiert)
+		"$IP_BIN" route add throw default table "$ROUTING_TABLE_ON_UPLINK" tos "$TOS_NON_TUNNEL" 2>/dev/null || true
 		;;
 	down)
 		# löse einen baldigen Verbindungsaufbau aus

@@ -6,6 +6,8 @@
 MIG_OPENVPN_DIR=/etc/openvpn/opennet_user
 MIG_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
 DEFAULT_MIG_PORT=1600
+# Pakete mit dieser TOS-Markierung duerfen nicht in den Tunnel
+TOS_NON_TUNNEL=8
 ## Quelldatei für Standardwerte des Nutzer-VPN-Pakets
 ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
 ZONE_TUNNEL=on_vpn

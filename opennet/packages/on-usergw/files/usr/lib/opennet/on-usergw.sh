@@ -5,7 +5,6 @@
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 MESH_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-ugw.template
-TOS_MESH_VPN=8
 TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-services.csv
 ## eine beliebige Portnummer, auf der wir keinen udp-Dienst vermuten
 SPEEDTEST_UPLOAD_PORT=29418
@@ -359,10 +358,8 @@ update_mesh_gateway_firewall_rules() {
 		# unaufloesbare Hostnamen ignorieren
 		[ -z "$target_ip" ] && continue
 		iptables -t mangle --insert "$chain" --destination "$host" --protocol "$protocol" --dport "$port" \
-			-j TOS --set-tos "$TOS_MESH_VPN"
+			-j TOS --set-tos "$TOS_NON_TUNNEL"
 	done
-	# verhindere das Routing von mesh-VPN-Verbindung ueber den Nutzer-Tunnel (falls die Regel noch nicht existiert)
-	ip route add throw default table "$ROUTING_TABLE_ON_UPLINK" tos "$TOS_MESH_VPN" 2>/dev/null || true
 }
 
 

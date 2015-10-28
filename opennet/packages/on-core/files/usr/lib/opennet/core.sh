@@ -476,7 +476,7 @@ get_from_key_value_list() {
 	local separator="$2"
 	local key_value
 	local key
-	sed 's/[ \t]\+/\n/g' | while read key_value; do
+	{ sed 's/[ \t]\+/\n/g'; echo; } | while read key_value; do
 		key=$(echo "$key_value" | cut -f 1 -d "$separator")
 		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break || true
 	done

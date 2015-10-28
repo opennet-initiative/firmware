@@ -141,6 +141,11 @@ You may obtain a copy of the License at
 		}
 		result += String.format('<td class="cbi-value-field"><div id="cbi-opennet-gateways-active" active="%s">&nbsp;</div>', active);
 		result += String.format('<td><strong>%s</strong></td>', remote);
+		if (gateway.public_ugw_server) {
+			result += String.format('<td>%s</td>', gateway.public_ugw_server.split(".")[0]);
+		} else {
+			result += "</td><td>"
+		}
 		if (unreachable) {
 			// unerreichbare Knoten werden als solche markiert
 			result += '<td class="cbi-value-field"><%:unreachable%></td>';
@@ -263,6 +268,9 @@ e "offset/distance" column for this purpose.%></p>
 					<th colspan = "1" />
 					<th class="cbi-section-table-cell"><%:active%></th>
 					<th class="cbi-section-table-cell"><%:IP-Address%></th>
+					<th class="cbi-section-table-cell">
+						<abbr title="<%:Short name of the public gateway server (if known)%>">
+							<%:Gateway Server%></abbr></th>
 					<th class="cbi-section-table-cell">
 						<% if sorting ~= "manual" then %>
 							<%# es gibt keinen Offset im manual Modus %>

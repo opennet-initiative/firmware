@@ -153,6 +153,27 @@ captive_portal_has_devices() {
 }
 
 
+## @fn captive_portail_repair_empty_network_bridge()
+## @brief Reduziere Konstruktionen wie beispielsweise "bridge(None, wlan0)" zu "wlan0".
+## @details Brücken mit "none"-Elementen verwirren das nodogsplash-Start-Skript.
+captive_portail_repair_empty_network_bridge() {
+	local uci_prefix="network.${NETWORK_FREE}"
+	local sub_devices=$(get_subdevices_of_interface "$NETWORK_FREE")
+	if [ "$(uci_get "${uci_prefix}.type")" = "bridge" -a "$(uci_get "${uci_prefix}.ifname")" = "none" ]; then
+		# verdaechtig: Bruecke mit "none"-Device
+		if [ -n "$sub_devices" ]; then
+			# wifi-Device is konfiguriert - Bruecke und "none" kann entfernt werden
+			uci_delete "${uci_prefix}.type"
+			uci_delete "${uci_prefix}.ifname"
+		else
+			# nichts ist konfiguriert - erstmal nur die Bruecke entfernen
+			uci_delete "${uci_prefix}.type"
+		fi
+		apply_changes network
+	fi
+}
+
+
 update_captive_portal_status() {
 	if is_on_module_installed_and_enabled "on-captive-portal"; then
 		sync_captive_portal_state_with_mig_connections
@@ -177,6 +198,8 @@ disable_captive_portal() {
 ##   regelmäßigen cronjobs ausgeführt.
 sync_captive_portal_state_with_mig_connections() {
 	trap "error_trap sync_captive_portal_state_with_mig_connections '$*'" $GUARD_TRAPS
+	# eventuelle defekte/verwirrende Netzwerk-Konfiguration korrigieren
+	captive_portail_repair_empty_network_bridge
 	# Abbruch, falls keine Netzwerk-Interfaces zugeordnet wurden
 	captive_portal_has_devices || return 0
 	local mig_active

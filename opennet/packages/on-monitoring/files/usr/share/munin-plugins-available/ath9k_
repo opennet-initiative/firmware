@@ -1,10 +1,61 @@
-#!/usr/bin/micropython
+#!/bin/sh
+# weird shebang? See below: "interpreter selection"
 #
 # Collect information related to ath9k wireless events and states.
+#   * rate control statistics ("rc_stats")
+#   * events (dropped, transmitted, beacon loss, ...)
+#   * traffic (packets, bytes)
+#
+# All data is collected for each separate station (in case of multiple
+# connected peers). Combined graphs are provided as a summary.
+#
+#
+# This plugin works with the following python interpreters:
+#   * Python 2
+#   * Python 3
+#   * micropython
+#
+#
+# Copyright (C) 2015 Lars Kruse <devel@sumpfralle.de>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Magic markers
 #%# capabilities=autoconf suggest
 #%# family=auto
+
+"""true"
+# ****************** Interpreter Selection ***************
+# This unbelievable dirty hack allows to find a suitable python interpreter.
+# This is specifically useful for OpenWRT where typically only micropython is available.
+#
+# This "execution hack" works as follows:
+#   * the script is executed by busybox ash or another shell
+#   * the above line (three quotes before and one quote after 'true') evaluates differently for shell and python:
+#    * shell: run "true" (i.e. nothing happens)
+#    * python: ignore everything up to the next three consecutive quotes
+# Thus we may place shell code here that will take care for selecting an interpreter.
+
+# prefer micropython if it is available - otherwise fall back to any python (2 or 3)
+if which micropython >/dev/null; then
+    /usr/bin/micropython "$0" "$@"
+else
+    python "$0" "$@"
+fi
+exit $?
+"""
+
 
 """
 The following graphs are generated for each physical ath9k interface:
@@ -20,7 +71,7 @@ The following graphs are generated for each physical ath9k interface:
 """
 
 
-plugin_version = "0.1"
+plugin_version = "0.2"
 
 STATION_TRAFFIC_COUNTERS = ("rx_bytes", "tx_bytes", "rx_packets", "tx_packets")
 STATION_EVENT_COUNTERS = ("tx_retry_count", "tx_retry_failed", "tx_filtered", "tx_fragments",
@@ -258,7 +309,7 @@ class WifiInterface:
     def _parse_arp_cache(self):
         """ read IPs and MACs from /proc/net/arp and return a dictionary for MAC -> IP """
         arp_cache = {}
-        # example content: 
+        # example content:
         #   IP address       HW type     Flags       HW address            Mask     Device
         #   192.168.2.70     0x1         0x0         00:00:00:00:00:00     *        eth0.10
         #   192.168.12.76    0x1         0x2         24:a4:3c:fd:76:98     *        eth1.10
@@ -354,12 +405,18 @@ def get_scope():
     if called_name.startswith(name_prefix):
         scope = called_name[len(name_prefix):]
         if not scope in PLUGIN_SCOPES:
-            print("Invalid scope requested: {0} (expected: {1})".format(scope, PLUGIN_SCOPES), file=sys.stderr)
+            print_error("Invalid scope requested: {0} (expected: {1})".format(scope, PLUGIN_SCOPES))
             sys.exit(2)
     else:
-        print("Invalid filename - failed to discover plugin scope", file=sys.stderr)
+        print_error("Invalid filename - failed to discover plugin scope")
         sys.exit(2)
     return scope
+
+
+def print_error(message):
+    # necessary fallback for micropython
+    linesep = getattr(os, "linesep", "\n")
+    sys.stderr.write(message + linesep)
 
 
 if __name__ == "__main__":
@@ -381,14 +438,14 @@ if __name__ == "__main__":
                 print(scope)
             sys.exit(0)
         elif sys.argv[1] == "version":
-            print('olsrd Munin plugin, version %s' % plugin_version)
+            print_error('olsrd Munin plugin, version %s' % plugin_version)
             sys.exit(0)
         elif sys.argv[1] == "":
             # ignore
             pass
         else:
             # unknown argument
-            print("Unknown argument", file=sys.stderr)
+            print_error("Unknown argument")
             sys.exit(1)
 
     # output values

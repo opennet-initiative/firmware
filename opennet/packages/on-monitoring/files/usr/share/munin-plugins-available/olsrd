@@ -1,5 +1,5 @@
 #!/bin/sh
-# weird shebang? See below "BAD AND UGLY" ...
+# weird shebang? See below: "interpreter selection"
 #
 # Collect basic information about the neighbours of an OLSR node:
 #   * link quality
@@ -7,10 +7,10 @@
 #   * number of nodes reachable behind each neighbour
 #   * ping times of direct neighbours
 #
-# This plugin works with all of the following python interpreters:
-#   * micropython
+# This plugin works with the following python interpreters:
 #   * Python 2
 #   * Python 3
+#   * micropython
 #
 # Environment variables:
 #   * OLSRD_HOST: name or IP of the host running the txtinfo plugin (default: localhost)
@@ -40,15 +40,19 @@
 #%# family=auto
 
 """true"
-# ****************** BAD AND UGLY ***************
-# This unbelievable dirty hack allows us to run micropython with additional startup options.
+# ****************** Interpreter Selection ***************
+# This unbelievable dirty hack allows to find a suitable python interpreter.
+# This is specifically useful for OpenWRT where typically only micropython is available.
+#
+# Additionally we need to run micropython with additional startup options.
 # This is necessary due to our demand for more than 128k heap (this default is sufficient for only 400 olsr nodes).
+#
 # This "execution hack" works as follows:
 #   * the script is executed by busybox ash or another shell
 #   * the above line (three quotes before and one quote after 'true') evaluates differently for shell and python:
 #    * shell: run "true" (i.e. nothing happens)
 #    * python: ignore everything up to the next three consecutive quotes
-# This hack would not be necessary if busybox's ash would handle shebang arguments properly.
+# Thus we may place shell code here that will take care for selecting an interpreter.
 
 # prefer micropython if it is available - otherwise fall back to any python (2 or 3)
 if which micropython >/dev/null; then

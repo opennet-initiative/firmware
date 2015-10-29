@@ -38,5 +38,32 @@ disable_monitoring() {
 	/etc/init.d/xinetd stop || true
 }
 
+
+## @fn enable_suggested_munin_plugin_names()
+## @brief Ermittle die von einem Plugin empfohlenen Ziele und aktiviere sie in Form von Symlinks.
+## @details Dies ist eine Umsetzung der munin-typischen Selbsterkennung von Plugin-Zielen.
+enable_suggested_munin_plugin_names() {
+	local base_plugin="$1"
+	local target_dir="${IPKG_INSTROOT:-}/usr/sbin/munin-node-plugin.d"
+	local source_dir="../../share/munin-plugins-available"
+	"${IPKG_INSTROOT:-}/usr/share/munin-plugins-available/$base_plugin" suggest | while read scope; do
+		ln -s "$source_dir/$base_plugin" "$target_dir/${base_plugin}${scope}"
+	done
+}
+
+
+## @fn remove_suggested_munin_plugin_names()
+## @brief Lösche alle spezifischen Symlink-Ziele eines gegebenen Plugins.
+remove_suggested_munin_plugin_names() {
+	local base_plugin="$1"
+	local target_dir="${IPKG_INSTROOT:-}/usr/sbin/munin-node-plugin.d"
+	local target
+	"${IPKG_INSTROOT:-}/usr/share/munin-plugins-available/$base_plugin" suggest | while read scope; do
+		target="$target_dir/${base_plugin}${scope}"
+		[ -h "$target" ] && rm "$target"
+		true
+	done
+}
+
 # Ende der Doku-Gruppe
 ## @}

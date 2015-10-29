@@ -34,6 +34,9 @@ define Package/on-monitoring/postinst
 # erst nach der Cache-Loeschung sind die neuen Funktionen verfuegbar
 on-function on_opkg_postinst_default
 
+# automatisch konfigurierte munin-Plugins verlinken
+on-function enable_suggested_munin_plugin_names "wireless_channel_occupation_"
+
 on-function schedule_task <<-EOF
 	# Leider, leider ist muninlite noch nicht installiert, wenn diese Funktion aufgerufen wird.
 	# Daher warten wir einfach ein wenig und hoffen, dass es zwischendurch keinen Neustart gibt.
@@ -52,6 +55,9 @@ define Package/on-monitoring/prerm
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 # wir nehmen an, dass munin abgeschaltet werden soll, wenn der Nutzer das "on-monitoring"-Paket entfernt
 on-function disable_monitoring
+
+# automatisch konfigurierte munin-Plugins entfernen
+on-function remove_suggested_munin_plugin_names "wireless_channel_occupation_"
 endef
 
 define Package/on-monitoring/postrm

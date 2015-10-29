@@ -10,7 +10,7 @@ define Package/on-captive-portal
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Philipp Markwardt <philipp.markwardt@on-i.de>
   TITLE:=Captive Portal Extension
-  DEPENDS+=+on-openvpn +on-monitoring +nodogsplash
+  DEPENDS+=+on-openvpn +nodogsplash
 endef
 
 define Package/on-captive-portal/description
@@ -30,12 +30,13 @@ define Package/on-captive-portal/postinst
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 on-function on_opkg_postinst_default
+on-function update_captive_portal_status
 endef
 
 define Package/on-captive-portal/prerm
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-on-function disable_on_openvpn
+on-function disable_captive_portal
 endef
 
 define Package/on-captive-portal/postrm

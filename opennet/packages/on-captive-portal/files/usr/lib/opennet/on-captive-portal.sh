@@ -131,6 +131,7 @@ captive_portal_restart() {
 	# Client-Liste wiederherstellen
 	local ip
 	echo "$clients" | while read ip; do
+		[ -z "$ip" ] && continue
 		ndsctl auth "$ip"
 	done
 }

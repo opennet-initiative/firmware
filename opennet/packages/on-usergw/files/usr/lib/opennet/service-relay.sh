@@ -80,7 +80,7 @@ update_relay_firewall_rules() {
 		iptables -t nat -A "$dnat_chain" --destination "$main_ip" --protocol "$protocol" --dport "$local_port" \
 			-j DNAT --to-destination "${target_ip}:${port}"
 		iptables -t mangle -A "$tos_chain" --destination "$main_ip" --protocol "$protocol" --dport "$local_port" \
-			-j TOS --set-tos "$TOS_MESH_VPN"
+			-j TOS --set-tos "$TOS_NON_TUNNEL"
 	done
 
 }

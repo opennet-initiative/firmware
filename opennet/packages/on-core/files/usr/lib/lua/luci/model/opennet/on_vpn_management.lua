@@ -32,13 +32,20 @@ function upload_file(cert_type)
 	local upload_value = luci.http.formvalue("opensslfile")
 	if not upload_exists then return end
 	if not nixio.fs.access(cert_info.cert_dir) then nixio.fs.mkdirr(cert_info.cert_dir) end
-	if (string.find(upload_value, ".key")) then
+	if string.find(upload_value, ".key") then
 		replace_file(upload_file_location, cert_info.filename_prefix .. ".key")
-	elseif (string.find(upload_value, ".crt")) then
+	elseif string.find(upload_value, ".crt") then
 		replace_file(upload_file_location, cert_info.filename_prefix .. ".crt")
 	else
 		-- unbekannter Datentyp? Wir muessen die Datei loeschen - sonst wird sie beim naechsten Upload wiederverwendet.
 		nixio.fs.remove(upload_file_location)
+		return
+	end
+	-- wollen wir vielleicht eine Aktion ausloesen, wenn Schluessel/Zertifikat nun vollstaendig sind
+	if (cert_type == "user") and on_bool_function("has_mig_openvpn_credentials") then
+		on_schedule_task("on-function update_mig_connection_status")
+	elseif (cert_type == "mesh") and on_bool_function("has_mesh_openvpn_credentials") then
+		on_schedule_task("on-function update_on_usergw_status")
 	end
 end
 

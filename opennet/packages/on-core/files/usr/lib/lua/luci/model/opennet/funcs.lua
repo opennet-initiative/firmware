@@ -42,6 +42,12 @@ function on_bool_function(func_name, parameters)
 end
 
 
+function on_schedule_task(action)
+	local cmdline = "echo '" .. action .. "' | on-function schedule_task"
+	return luci.sys.call(cmdline) == 0
+end
+
+
 --- @brief Interpretiere einen Text entsprechend der uci-Boolean-Definition (yes/y/true/1 = wahr).
 --- @param text textuelle Repräsentation eines Wahrheitswerts
 --- @returns true oder false

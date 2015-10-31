@@ -14,11 +14,19 @@ You may obtain a copy of the License at
 
 <%
 require("luci.model.opennet.funcs")
+require("luci.model.opennet.urls")
+%>
 
-if not on_bool_function("has_opennet_dns") then
-	table.insert(on_errors, luci.i18n.translate("Opennet-DNS service is not available, yet (or quite slow). Please verify that you are connected to the network. A few minutes later DNS should be available. DNS is required for many features."))
-end
+<% if not on_bool_function("has_opennet_dns") then %>
+	<div class="errorbox">
+		<p><%:Opennet-DNS service is not available, yet (or quite slow). It is required for many features.%></p>
+		<p><%:Please verify that you are connected to the network. Opennet-DNS should be available a few minutes after connecting to the Opennet mesh network.%></p>
+		<p><%= luci.i18n.translatef('Take a look at the <a href="%s">Status</a> page and verify that you are connected to at least one neighbour.', on_url("status")) %></p>
+		<p><%:For module installation you may also use your internet connection for the download. Just pick this source below. In this case you may safely ignore the above warning regarding the availability of Opennet-DNS.%></p>
+	</div>
+<% end %>
 
+<%
 -- alle Module mit uebersetzbarer Beschreibung sollten hier aufgelistet werden
 -- Module, die hier fehlen, werden ohne Beschreibungstext angezeigt
 local on_module_descriptions = {}
@@ -116,6 +124,11 @@ on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for net
 			<input type="text" name="repository_url_custom" value="<%= configured_repo_url %>" />
 		</div>
 	</div>
+	<div class="cbi-page-actions">
+		<div style="text-align:right">
+			<input class="cbi-button cbi-button-save" type="submit" name="save" value="<%:Save%>" />
+		</div>
+	</div>
 </fieldset></div>
 
 <% if modules_log and modules_log ~= "" then %>
@@ -128,10 +141,6 @@ on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for net
 		</div>
 	</fieldset></div>
 <% end %>
-
-<div class="cbi-page-actions">
-	<input class="cbi-button cbi-button-save" type="submit" name="save" value="<%:Save%>" />
-</div>
 </form>
 
 <%+footer%>

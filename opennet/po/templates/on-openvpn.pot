@@ -52,6 +52,9 @@ msgid ""
 "regarding OLSR"
 msgstr ""
 
+msgid "Gateway Server"
+msgstr ""
+
 msgid "Gateway-List"
 msgstr ""
 
@@ -85,6 +88,9 @@ msgid "Opennet OpenVPN Gateways"
 msgstr ""
 
 msgid "Port"
+msgstr ""
+
+msgid "Short name of the public gateway server (if known)"
 msgstr ""
 
 msgid "Speed"

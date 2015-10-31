@@ -113,9 +113,6 @@ msgstr ""
 msgid "Port"
 msgstr ""
 
-msgid "Port Forwarding"
-msgstr ""
-
 msgid "Priority"
 msgstr ""
 
@@ -169,11 +166,6 @@ msgstr ""
 
 msgid ""
 "The most important relayed service is the Mesh Internet Gateway service."
-msgstr ""
-
-msgid ""
-"The port forwarding will be active automatically soon after a successful "
-"test."
 msgstr ""
 
 msgid ""

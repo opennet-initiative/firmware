@@ -113,7 +113,7 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-msgid "Error: %s"
+msgid "Error:"
 msgstr ""
 
 msgid ""
@@ -127,6 +127,12 @@ msgstr ""
 msgid ""
 "Failed to send Certificate Signing Request. You may want to use a manual "
 "approach instead. Sorry!"
+msgstr ""
+
+msgid ""
+"For module installation you may also use your internet connection for the "
+"download. Just pick this source below. In this case you may safely ignore "
+"the above warning regarding the availability of Opennet-DNS."
 msgstr ""
 
 msgid "Forwarding from DHCP-wireless network"
@@ -183,6 +189,9 @@ msgid ""
 msgstr ""
 
 msgid "Installed"
+msgstr ""
+
+msgid "Installing modules in background."
 msgstr ""
 
 msgid "Interface"
@@ -309,9 +318,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Opennet-DNS service is not available, yet (or quite slow). Please verify "
-"that you are connected to the network. A few minutes later DNS should be "
-"available. DNS is required for many features."
+"Opennet-DNS service is not available, yet (or quite slow). It is required "
+"for many features."
 msgstr ""
 
 msgid "Opennet-ID / Network ID"
@@ -323,6 +331,9 @@ msgstr ""
 msgid "POE Passthrough"
 msgstr ""
 
+msgid "Package Installation Protocol"
+msgstr ""
+
 msgid "Package Sources"
 msgstr ""
 
@@ -330,6 +341,14 @@ msgid ""
 "Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your "
 "first Opennet-Network-Interface, any change will reconfigure your network "
 "settings immediately."
+msgstr ""
+
+msgid ""
+"Please verify that you are connected to the network. Opennet-DNS should be "
+"available a few minutes after connecting to the Opennet mesh network."
+msgstr ""
+
+msgid "Please wait a minute before reloading this page for an updated status."
 msgstr ""
 
 msgid "Port-Mapping"
@@ -369,10 +388,16 @@ msgstr ""
 msgid "Recommended action"
 msgstr ""
 
+msgid "Removing modules in background."
+msgstr ""
+
 msgid "Report"
 msgstr ""
 
 msgid "Report Generator"
+msgstr ""
+
+msgid "Review the details of installations and removals."
 msgstr ""
 
 msgid "Router summary"
@@ -424,6 +449,11 @@ msgid "Submit certificate request"
 msgstr ""
 
 msgid "System"
+msgstr ""
+
+msgid ""
+"Take a look at the <a href=\"%s\">Status</a> page and verify that you are "
+"connected to at least one neighbour."
 msgstr ""
 
 msgid "Target-Address"

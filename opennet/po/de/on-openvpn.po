@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-09-05 03:06+0200\n"
+"PO-Revision-Date: 2015-10-31 03:38+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -73,6 +73,9 @@ msgstr ""
 "Erwartete Anzahl von Übertragungen - die Qualität der Verbindung zum Gateway "
 "aus der Sicht von OLSR"
 
+msgid "Gateway Server"
+msgstr "Gateway-Server"
+
 msgid "Gateway-List"
 msgstr "Gateway-Liste"
 
@@ -115,6 +118,9 @@ msgstr "Opennet OpenVPN Gateways"
 
 msgid "Port"
 msgstr "Port"
+
+msgid "Short name of the public gateway server (if known)"
+msgstr "Kurzname des öffentlichen Gateway-Servers (falls bekannt)"
 
 msgid "Speed"
 msgstr "Geschwindigkeit"

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-10-21 05:46+0200\n"
+"PO-Revision-Date: 2015-10-31 03:37+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -134,8 +134,8 @@ msgstr "ETX: Routing-Entfernung (Voreinstellung)"
 msgid "Enabled"
 msgstr "Aktiviert"
 
-msgid "Error: %s"
-msgstr "Fehler: %s"
+msgid "Error:"
+msgstr "Fehler:"
 
 msgid ""
 "Expected Transmission Count: Quality of the Connection to the Gateway "
@@ -153,6 +153,15 @@ msgid ""
 msgstr ""
 "Beim Senden der Zertifikatsanfrage trat leider ein Fehler auf. Du möchtest "
 "stattdessen vielleicht eine manuelle Methode verwenden."
+
+msgid ""
+"For module installation you may also use your internet connection for the "
+"download. Just pick this source below. In this case you may safely ignore "
+"the above warning regarding the availability of Opennet-DNS."
+msgstr ""
+"Für die Modul-Installation ist alternativ auch eine Internetverbindung "
+"verwendbar. Diese ist unten auszuwählen. In diesem Fall ist die obige "
+"Warnung bezüglich der fehlenden Opennet-DNS-Auflösung nicht relevant."
 
 msgid "Forwarding from DHCP-wireless network"
 msgstr "Weiterleitung aus dem DHCP-Funknetz"
@@ -212,6 +221,9 @@ msgstr "Die Installation von Modulen kann eine Weile dauern (bis zu 30s)."
 
 msgid "Installed"
 msgstr "Installiert"
+
+msgid "Installing modules in background."
+msgstr "Installiere Module im Hintergrund."
 
 msgid "Interface"
 msgstr "Schnittstelle"
@@ -344,14 +356,11 @@ msgstr ""
 "AP vergeben. Diese Netzwerkschnittstellen werden von OLSR verwendet."
 
 msgid ""
-"Opennet-DNS service is not available, yet (or quite slow). Please verify "
-"that you are connected to the network. A few minutes later DNS should be "
-"available. DNS is required for many features."
+"Opennet-DNS service is not available, yet (or quite slow). It is required "
+"for many features."
 msgstr ""
-"Der DNS-Dienst via Opennet ist derzeit noch nicht verfügbar. Prüfe bitte, ob "
-"du mit der Wolke verbunden bist. Ein paar Minuten nach dem Verbindungsaufbau "
-"sollte DNS verfügbar sein. Ein funktionierender DNS-Dienst wird für viele "
-"Funktionen benötigt."
+"Der DNS-Dienst via Opennet ist derzeit noch nicht erreichbar. Er wird für "
+"viele Funktionen benötigt."
 
 msgid "Opennet-ID / Network ID"
 msgstr "Opennet-ID / Netzwerk ID"
@@ -361,6 +370,9 @@ msgstr "Organisations-Einheit"
 
 msgid "POE Passthrough"
 msgstr "POE-Durchleitung"
+
+msgid "Package Installation Protocol"
+msgstr "Modul-Installationsprotokoll"
 
 msgid "Package Sources"
 msgstr "Paketquellen"
@@ -373,6 +385,18 @@ msgstr ""
 "Bitte gib Deine Opennet-ID (1.X oder 2.X etc.) oder die IP-Adresse der "
 "ersten Opennet-Netzwerkschnittstelle ein. Jede Änderung wird sofort die "
 "betroffenen Netzwerkschnittstellen neu konfigurieren."
+
+msgid ""
+"Please verify that you are connected to the network. Opennet-DNS should be "
+"available a few minutes after connecting to the Opennet mesh network."
+msgstr ""
+"Prüfe bitte, ob du mit der Wolke verbunden bist. Opennet-DNS sollte paar "
+"Minuten nach dem Aufbau der Verbindung mit der Opennet-Wolke verfügbar sein."
+
+msgid "Please wait a minute before reloading this page for an updated status."
+msgstr ""
+"In Kürze findest Du beim erneuten Laden dieser Seite den aktualisierten "
+"Status, sowie weiter unten ein Ereignisprotokoll."
 
 msgid "Port-Mapping"
 msgstr "Port-Mapping"
@@ -418,11 +442,17 @@ msgstr "Veröffentlichung statistischer Daten zum Netzwerkverkehr"
 msgid "Recommended action"
 msgstr "Handlungsempfehlung"
 
+msgid "Removing modules in background."
+msgstr "Entferne Module im Hintergrund."
+
 msgid "Report"
 msgstr "Zusammenfassung"
 
 msgid "Report Generator"
 msgstr "Zusammenfassungsgenerator"
+
+msgid "Review the details of installations and removals."
+msgstr "Prüfe die Details von Installationsvorgängen."
 
 msgid "Router summary"
 msgstr "Router-Überblick"
@@ -474,6 +504,13 @@ msgstr "Sende deine Zertifikatsanfrage"
 
 msgid "System"
 msgstr "System"
+
+msgid ""
+"Take a look at the <a href=\"%s\">Status</a> page and verify that you are "
+"connected to at least one neighbour."
+msgstr ""
+"Prüfe auf der <a href=\"%s\">Status</a>-Seite, ob der AP mit mindestens "
+"einem Nachbarn verbunden ist."
 
 msgid "Target-Address"
 msgstr "Ziel-Adresse"
@@ -646,6 +683,9 @@ msgstr "über das Internet"
 
 msgid "via Opennet"
 msgstr "im Opennet"
+
+#~ msgid "Error: %s"
+#~ msgstr "Fehler: %s"
 
 #~ msgid ""
 #~ "Be aware that the network will be restarted immediately,\\n and you might "

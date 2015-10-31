@@ -139,9 +139,6 @@ msgstr ""
 msgid "Port"
 msgstr "Port"
 
-msgid "Port Forwarding"
-msgstr "Port-Weiterleitung"
-
 msgid "Priority"
 msgstr "Priorität"
 
@@ -212,12 +209,6 @@ msgid ""
 "The most important relayed service is the Mesh Internet Gateway service."
 msgstr ""
 "Der wichtigste weitergeleitete Dienst ist der Mesh-Internet-Gateway-Dienst."
-
-msgid ""
-"The port forwarding will be active automatically soon after a successful "
-"test."
-msgstr ""
-"Die Portweiterleitung wird kurz nach einem erfolgreichen Test aktiviert."
 
 msgid ""
 "The required certificate and key for your mesh connection with Opennet seems "
@@ -292,6 +283,15 @@ msgstr "siehe"
 msgid "upload to Internet %s kBit/s | download from Internet %s kBit/s"
 msgstr ""
 "Hochladen ins Internet %s kBit/s | Herunterladen aus dem Internet %s kBit/s"
+
+#~ msgid "Port Forwarding"
+#~ msgstr "Port-Weiterleitung"
+
+#~ msgid ""
+#~ "The port forwarding will be active automatically soon after a successful "
+#~ "test."
+#~ msgstr ""
+#~ "Die Portweiterleitung wird kurz nach einem erfolgreichen Test aktiviert."
 
 #~ msgid ""
 #~ "Some Opennet servers are exposed to the internet in order to connect "

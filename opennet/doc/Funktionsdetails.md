@@ -75,6 +75,18 @@ Folgende Voraussetzungen müssen gegeben sein:
 * das Plugin ``nameservice`` ist aktiviert
 
 
+### DNS für APs mit einem Nutzer-Tunnel
+
+Um die Privatsphäre der Nutzenden hinter einem VPN-Nutzertunnel zu schützen, werden DNS-Anfragen ausschließlich an die vom OpenVPN-Server announcierten DNS-Server gerichtet. Typischerweise sollte der OpenVPN-Server also nur seine eigene Tunnel-IP angeben, um sicherzustellen, dass DNS-Anfragen immer durch den Tunnel gesandt werden.
+
+Die Umsetzung dieser DNS-Ausnahmesituation (im Vergleich zur obigen Darstellung) ist folgende:
+
+* beim Aufbau eines Nutzertunnels werden im "up"-Hook-Skript die Umgebungsvariablen "foreign_option_XXX" geprüft
+* alle Vorkommen von "dhcp-option DNS ..." werden gelesen und die angegebenes IP zeilenweise getrennt in eine temporäre Datei geschrieben
+* anschließend wird von dem Hook-Skript die Neu-Erstellung der dnsmasq-Servers-Datei ausgelöst
+* bei dieser Neuerstellung wird geprüft, ob aktuell ein Tunnel aktiv ist - daraufhin werden die zwischengespeicherten IPs als Nameserver verwendet und alle anderweitig announcierten DNS-Server werden ignoriert
+* beim Abbau eines Nutzertunnels wird ebenfalls die Neuerstellung der DNS-Servers-Datei ausgelöst
+
 
 NTP - Zeitsynchronisation {#ntp}
 -------------------------

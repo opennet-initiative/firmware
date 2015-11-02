@@ -144,6 +144,8 @@ update_dns_servers() {
 	local host
 	local port
 	local service
+	# wenn wir eine VPN-Tunnel-Verbindung aufgebaut haben, sollten wir DNS-Anfragen über diese Crypto-Verbindung lenken
+	local preferred_servers=$(is_function_available "get_mig_tunnel_nameservers" && get_mig_tunnel_nameservers)
 	local use_dns="$(uci_get on-core.settings.use_olsrd_dns)"
 	# return if we should not use DNS servers provided via olsrd
 	uci_is_false "$use_dns" && return 0
@@ -157,16 +159,23 @@ update_dns_servers() {
 	       reload_config
 	fi
 	# wir sortieren alphabetisch - Naehe ist uns egal
-	get_services "dns" | filter_reachable_services | filter_enabled_services | sort | while read service; do
-		host=$(get_service_value "$service" "host")
-		port=$(get_service_value "$service" "port")
-		[ -n "$port" -a "$port" != "53" ] && host="$host#$port"
-		echo "server=$host"
-		# Die interne Domain soll vorranging von den via olsrd verbreiteten DNS-Servern bedient werden.
-		# Dies ist vor allem fuer UGW-Hosts wichtig, die über eine zweite DNS-Quelle (lokaler uplink)
-		# verfügen.
-		echo "server=/$INTERN_DNS_DOMAIN/$host"
-	done | update_file_if_changed "$servers_file" || return 0
+	(
+		get_services "dns" | filter_reachable_services | filter_enabled_services | sort | while read service; do
+			host=$(get_service_value "$service" "host")
+			port=$(get_service_value "$service" "port")
+			[ -n "$port" -a "$port" != "53" ] && host="$host#$port"
+			# Host nur schreiben, falls kein bevorzugter Host gefunden wurde
+			[ -z "$preferred_servers" ] && echo "server=$host"
+			# Die interne Domain soll vorranging von den via olsrd verbreiteten DNS-Servern bedient werden.
+			# Dies ist vor allem fuer UGW-Hosts wichtig, die über eine zweite DNS-Quelle (lokaler uplink)
+			# verfügen.
+			echo "server=/$INTERN_DNS_DOMAIN/$host"
+		done
+		# eventuell bevorzugte Hosts einfuegen
+		for host in $preferred_servers; do
+			echo "server=$host"
+		done
+	) | update_file_if_changed "$servers_file" || return 0
 	# es gab eine Aenderung
 	msg_info "updating DNS servers"
 	# Konfiguration neu einlesen

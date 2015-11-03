@@ -36,13 +36,15 @@ setup_mesh_interface() {
 	# Falls wir hier nicht warten, wird olsrd zu frueh neugestartet (bevor tapX aktiv ist).
 	# Oft reicht eine Sekunde - aber wir wollen lieber sichergehen und wissen nicht, worauf
 	# wir achten sollten.
-	sleep 5
+	sleep 2
 	# indirekte Interface/Network-Zuordnung (siehe obigen Mailinglisten-Beitrag)
 	# Auf diesem Weg bleibt die IP-Konfiguration des Device erhalten.
 	local ubus_dev="network.interface.${netname}"
 	ubus call "$ubus_dev" add_device '{ "name": "'$ifname'" }'
 	# die obige ubus-Aktion wird nebenlaeufig abgearbeitet - wir muessen das Ergebnis abwarten
 	ubus wait_for "$ubus_dev"
+	# Auch diese Pause ist nicht ganz klar - aber sie scheint dafuer zu sorgen, dass olsrd auf den Interfaces laeuft.
+	sleep 2
 	update_olsr_interfaces
 	# expliziter olsrd-Neustart: eventuell sind noch Fragmente alter tap-Devices in
 	# der olsrd-Konfiguration eingetragen. Diese verhindern einen olsrd-Neustart,

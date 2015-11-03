@@ -194,30 +194,38 @@ end
 function status_neighbors()
 	luci.http.prepare_content("text/plain")
 	local neighbour_info = on_function("get_olsr_neighbours")
+	local response = ""
 	if neighbour_info ~= "" then
-		luci.http.write('<table class="status_page_table"><tr>' ..
+		response = response .. '<table class="status_page_table"><tr>' ..
 			'<th>' ..  luci.i18n.translate("IP Address") .. "</th>" ..
 			'<th><abbr title="' .. luci.i18n.translate("Link-Quality: how many of your packets were received by your neighbor") .. '">LQ</abbr></th>' ..
 			'<th><abbr title="' .. luci.i18n.translate("Neighbor-Link-Quality: how many of your test-packets did reach your neighbor") .. '">NLQ</abbr></th>' ..
 			'<th><abbr title="' .. luci.i18n.translate("Expected Transmission Count: Quality of the Connection to the Gateway reagrding OLSR") .. '">ETX</abbr></th>' ..
 			'<th><abbr title="' .. luci.i18n.translate("Number of routes via this neighbour") .. '">Routes</abbr></th>' ..
-			'</tr>')
+			'</tr>'
 		for _, line in pairs(line_split(neighbour_info)) do
 			local info = space_split(line)
 			-- keine Ausgabe, falls nicht mindestens fuenf Felder geparst wurden
 			-- (die Ursache fuer weniger als fuenf Felder ist unklar - aber es kam schon vor)
 			if info[5] then
-				luci.http.write('<tr>')
-				luci.http.write('<td><a href="http://' .. info[1] .. '/">' .. info[1] .. '</a></td>')
-				luci.http.write('<td>' .. info[2] .. '</td>')
-				luci.http.write('<td>' .. info[3] .. '</td>')
-				luci.http.write('<td>' .. info[4] .. '</td>')
-				luci.http.write('<td style="text-align:right">' .. info[5] .. '</td>')
-				luci.http.write('</tr>')
+				response = response .. '<tr>' ..
+					'<td><a href="http://' .. info[1] .. '/">' .. info[1] .. '</a></td>' ..
+					'<td>' .. info[2] .. '</td>' ..
+					'<td>' .. info[3] .. '</td>' ..
+					'<td>' .. info[4] .. '</td>' ..
+					'<td style="text-align:right">' .. info[5] .. '</td>' ..
+					'</tr>'
 			end
 		end
-		luci.http.write("</table>")
+		response = response .. "</table>"
+	else
+		response = response .. '<div class="errorbox">' ..
+			luci.i18n.translate("Currently there are no known routing neighbours.") .. " " ..
+			luci.i18n.translatef('Maybe you want to connect to a local <a href="%s">wifi peer</a>.',
+				luci.dispatcher.build_url("admin", "network", "wireless")) ..
+			'</div>'
 	end
+	luci.http.write(response)
 end
 
 

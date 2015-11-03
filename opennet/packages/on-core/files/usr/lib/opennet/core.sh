@@ -145,7 +145,7 @@ update_dns_servers() {
 	local port
 	local service
 	# wenn wir eine VPN-Tunnel-Verbindung aufgebaut haben, sollten wir DNS-Anfragen über diese Crypto-Verbindung lenken
-	local preferred_servers=$(is_function_available "get_mig_tunnel_nameservers" && get_mig_tunnel_nameservers)
+	local preferred_servers
 	local use_dns="$(uci_get on-core.settings.use_olsrd_dns)"
 	# return if we should not use DNS servers provided via olsrd
 	uci_is_false "$use_dns" && return 0
@@ -158,6 +158,7 @@ update_dns_servers() {
 	       uci commit "dhcp.@dnsmasq[0]"
 	       reload_config
 	fi
+	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "DNS")
 	# wir sortieren alphabetisch - Naehe ist uns egal
 	(
 		get_services "dns" | filter_reachable_services | filter_enabled_services | sort | while read service; do
@@ -194,18 +195,26 @@ update_ntp_servers() {
 	local host
 	local port
 	local service
+	local preferred_servers
 	local use_ntp="$(uci_get on-core.settings.use_olsrd_ntp)"
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
+	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "NTP")
 	# schreibe die Liste der NTP-Server neu
 	uci_delete system.ntp.server
 	# wir sortieren alphabetisch - Naehe ist uns egal
-	get_services "ntp" | filter_reachable_services | filter_enabled_services | sort | while read service; do
-		host=$(get_service_value "$service" "host")
-		port=$(get_service_value "$service" "port")
-		[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
-		uci_add_list "system.ntp.server" "$host"
-	done
+	if [ -n "$preferred_servers" ]; then
+		for host in $preferred_servers; do
+			uci_add_list "system.ntp.server" "$host"
+		done
+	else
+		get_services "ntp" | filter_reachable_services | filter_enabled_services | sort | while read service; do
+			host=$(get_service_value "$service" "host")
+			port=$(get_service_value "$service" "port")
+			[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
+			uci_add_list "system.ntp.server" "$host"
+		done
+	fi
 	apply_changes system
 }
 

@@ -10,7 +10,7 @@ DEFAULT_MIG_PORT=1600
 TOS_NON_TUNNEL=8
 ## Quelldatei für Standardwerte des Nutzer-VPN-Pakets
 ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
-MIG_PREFERRED_NAMESERVERS_FILE=/var/run/mig-nameservers.list
+MIG_PREFERRED_SERVERS_FILE=/var/run/mig-tunnel-servers.list
 ZONE_TUNNEL=on_vpn
 NETWORK_TUNNEL=on_vpn
 
@@ -305,14 +305,16 @@ disable_on_openvpn() {
 }
 
 
-## @fn get_mig_tunnel_nameservers()
-## @brief Ermittle die DNS-Server, die via Tunnel erreichbar sind.
+## @fn get_mig_tunnel_servers()
+## @brief Ermittle die Server für den gewünschen Dienst, die via Tunnel erreichbar sind.
+## @params stype Dienst-Typ (z.B. "DNS" oder "NTP") - entspricht den DHCP-Options, die vom OpenVPN-Server gepusht werden.
 ## @details Die Ausgabe ist leer, falls kein Tunnel aufgebaut ist.
-get_mig_tunnel_nameservers() {
-	trap "error_trap get_mig_tunnel_nameserver '$*'" $GUARD_TRAPS
+get_mig_tunnel_servers() {
+	trap "error_trap get_mig_tunnel_server '$*'" $GUARD_TRAPS
+	local stype="$1"
 	[ -z "$(get_active_mig_connections)" ] && return 0
-	[ -f "$MIG_PREFERRED_NAMESERVERS_FILE" ] || return 0
-	cat "$MIG_PREFERRED_NAMESERVERS_FILE"
+	[ -f "$MIG_PREFERRED_SERVERS_FILE" ] || return 0
+	awk <"$MIG_PREFERRED_SERVERS_FILE" '{ if ($1 == "'"$stype"'") print $2 }'
 }
 
 # Ende der Doku-Gruppe

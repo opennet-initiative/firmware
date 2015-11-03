@@ -18,8 +18,11 @@
 
 # parse die foreign-Options, beispielsweise:
 #   foreign_option_4='dhcp-option DNS 10.1.0.1'
-# Ergebnis: die IPs der vom VPN-Server announcierten DNS-Server (zeilenweise getrennt)
-get_dns_from_dhcp_options() {
+# Ergebnis: zeilenweise Auflistung von DHCP-Options und zugehoerigem Wert
+# Beispielsweise:
+#   DNS 10.1.0.1
+#   NTP 10.1.0.1
+get_servers_from_dhcp_options() {
 	local index=1
 	local option
 	while true; do
@@ -28,7 +31,7 @@ get_dns_from_dhcp_options() {
 		[ -z "$option" ] && break
 		echo "$option"
 		: $((index++))
-	done | awk '{ if (($1 == "dhcp-option") && ($2 == "DNS")) print $3 }'
+	done | awk '{ if ($1 == "dhcp-option") print $2,$3 }'
 }
 
 
@@ -45,8 +48,9 @@ case "$script_type" in
 		"$IP_BIN" route add default via "$route_vpn_gateway" table "$ROUTING_TABLE_ON_UPLINK" || true
 		# verhindere das Routing von explizit unerwuenschtem Verkehr ueber den Nutzer-Tunnel (falls die Regel noch nicht existiert)
 		"$IP_BIN" route add throw default table "$ROUTING_TABLE_ON_UPLINK" tos "$TOS_NON_TUNNEL" 2>/dev/null || true
-		get_dns_from_dhcp_options >"$MIG_PREFERRED_NAMESERVERS_FILE"
+		get_servers_from_dhcp_options >"$MIG_PREFERRED_SERVERS_FILE"
 		update_dns_servers
+		update_ntp_servers
 		;;
 	down)
 		# löse einen baldigen Verbindungsaufbau aus
@@ -54,8 +58,9 @@ case "$script_type" in
 			&& has_mig_openvpn_credentials \
 			&& { echo "on-function update_mig_connection_status" | schedule_task; }
 		true
-		rm -f "$MIG_PREFERRED_NAMESERVERS_FILE"
+		rm -f "$MIG_PREFERRED_SERVERS_FILE"
 		update_dns_servers
+		update_ntp_servers
 		;;
 esac 2>&1 | logger -t mig-updown
 

@@ -33,8 +33,10 @@ setup_mesh_interface() {
 	#uci set "network.${netname}.ifname=$ifname"
 	add_interface_to_zone "$ZONE_MESH" "$netname"
 	apply_changes network firewall
-	# falls wir hier nicht warten, wird olsrd zu frueh neugestartet (bevor tapX aktiv ist)
-	sleep 1
+	# Falls wir hier nicht warten, wird olsrd zu frueh neugestartet (bevor tapX aktiv ist).
+	# Oft reicht eine Sekunde - aber wir wollen lieber sichergehen und wissen nicht, worauf
+	# wir achten sollten.
+	sleep 5
 	# indirekte Interface/Network-Zuordnung (siehe obigen Mailinglisten-Beitrag)
 	# Auf diesem Weg bleibt die IP-Konfiguration des Device erhalten.
 	local ubus_dev="network.interface.${netname}"
@@ -75,4 +77,3 @@ case "$script_type" in
 esac 2>&1 | logger -t mesh-updown
 
 exit 0
-

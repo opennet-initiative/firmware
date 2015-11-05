@@ -72,6 +72,7 @@ enable_profiling() {
 		cat /usr/lib/opkg/info/on-*.list | grep -E "(bin/|\.sh$|etc/cron\.|/etc/hotplug\.d/|lib/opennet)" \
 			| while read fname; do [ -e "$fname" ] && echo "$fname"; true; done \
 			| xargs -n 200 -r sed -i -f "${IPKG_INSTROOT:-}/usr/lib/opennet/profiling.sed"
+		clear_caches
 	else
 		logger -t "on-profile" "$message"
 		echo >&2 "$message"

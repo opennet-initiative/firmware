@@ -859,18 +859,22 @@ run_cyclic_service_tests() {
 				msg_debug "failed to verify $service_name"
 				_notify_service_failure "$service_name" "$max_fail_attempts"
 			fi
-			set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
 		elif uci_is_false "$status"; then
 			# Junge "kaputte" Dienste sind potentielle Kandidaten fuer einen vorzeitigen Test, falls
 			# ansonsten kein Dienst positiv getestet wurde.
 			echo "$timestamp $service_name"
 		else
 			# funktionsfaehige "alte" Dienste - es gibt nichts fuer sie zu tun
-			true
+			# Wir sortieren sie nach ganz oben, um bei Existenz eines lauffaehigen Diensts
+			# keine unnoetigen Tests von nicht-funktionierenden Hosts durchzufuehren.
+			echo "-1 $service_name"
 		fi
 	done | sort -n | while read timestamp service_name; do
+		# Mit dem Zeitstempel "-1" sind funktionierende Dienste markiert. Wir brauchen also keine
+		# weiteren Tests.
+		[ "$timestamp" = "-1" ] && return 0
 		# Hier landen wir nur, falls alle defekten Gateways zu jung fuer einen Test waren und
-		# gleichzeitig kein Gateway erfolgreich getestet wurde.
+		# gleichzeitig kein Dienst erfolgreich getestet wurde bzw. als erfolgreich gilt.
 		# Dies stellt sicher, dass nach einer kurzen Nicht-Erreichbarkeit aller Gateways (z.B. olsr-Ausfall)
 		# relativ schnell wieder ein funktionierender Gateway gefunden wird, obwohl alle Test-Zeitstempel noch recht
 		# frisch sind.

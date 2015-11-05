@@ -13,7 +13,7 @@ ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.
 ##     Zusätzlich zur URL können auch (davor) curl-spezifischen Optionen angebeben werden.
 https_request_opennet() {
 	# diese curl-Operation dauert aus irgendeinem Grund ca. 10s - wir muessen also den timeout hochsetzen
-	curl -q --silent --connect-timeout 20 --retry 0 --cacert "$ON_CERT_BUNDLE_PATH" "$@" \
+	curl -q --silent --connect-timeout 30 --retry 0 --cacert "$ON_CERT_BUNDLE_PATH" "$@" \
 		|| msg_error "Failed to retrieve data from URL '$@' via curl"
 }
 

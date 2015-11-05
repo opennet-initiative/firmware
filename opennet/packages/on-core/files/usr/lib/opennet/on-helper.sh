@@ -55,7 +55,11 @@ ON_SHELL_MODULES_DIR="${IPKG_INSTROOT:-}/usr/lib/opennet"
 ON_SHELL_MODULES=$(find "$ON_SHELL_MODULES_DIR" -maxdepth 1 -type f -name "*.sh")
 ON_SHELL_MODULES_NEWEST=$( (ls -dtr "$ON_SHELL_MODULES_DIR" $ON_SHELL_MODULES "$ON_SHELL_MINIMIZED" 2>/dev/null || true) | tail -1)
 [ "$ON_SHELL_MODULES_NEWEST" != "$ON_SHELL_MINIMIZED" ] && \
-	grep -vh "^[[:space:]]*#" $(echo "$ON_SHELL_MODULES" | grep -vF "on-helper.sh") | grep -v "^$" >"$ON_SHELL_MINIMIZED"
+	grep -vh "^[[:space:]]*#" $(echo "$ON_SHELL_MODULES" \
+		| grep -vF "on-helper.sh") \
+		| sed 's/^[[:space:]]\+//' \
+		| grep -v "^$" \
+		>"$ON_SHELL_MINIMIZED"
 . "$ON_SHELL_MINIMIZED"
 
 

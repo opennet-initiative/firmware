@@ -5,5 +5,9 @@
 # keinerlei Tests, falls wir nicht aktiv sind
 is_on_module_installed_and_enabled "on-usergw" || exit 0
 
+# Falls bereits mindestens eine Verbindung besteht, benoetigen wir keine weiteren Tests.
+# Stuendlich findet in jedem Fall ein Test statt.
+[ -n "$(get_active_ugw_connections)" ] && exit 0
+
 # verfuegbare mesh-Gateways ermitteln
 echo "on-function update_on_usergw_status" | schedule_task

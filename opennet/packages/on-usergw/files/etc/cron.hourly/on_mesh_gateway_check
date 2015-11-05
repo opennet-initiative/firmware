@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# stuendlich wird der UGW-Status aktualisiert
+#
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+# keinerlei Tests, falls wir nicht aktiv sind
+is_on_module_installed_and_enabled "on-usergw" || exit 0
+
+# verfuegbare mesh-Gateways ermitteln
+echo "on-function update_on_usergw_status" | schedule_task

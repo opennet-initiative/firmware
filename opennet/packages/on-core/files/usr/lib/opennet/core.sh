@@ -390,7 +390,9 @@ apply_changes() {
 			echo "$config"
 		fi
 	done | sed 's/\(system\|network\|firewall\|dhcp\)/do_reload/' \
-			| sort | uniq | grep -v "^$" | while read config; do
+			| sort | uniq | while read config; do
+		# Es ist unklar, wie hier leere Zeilen landen koennen.
+		[ -z "$config" ] && continue
 		# wir wollen die Aktionen erst nach allen commits ausfuehren
 		# Dabei vermeiden wir Dopplungen (siehe "sort | uniq").
 		# Die "reload_config"-Trigger haben wir zuvor zu "do_reload" zusammengefasst, um

@@ -167,6 +167,7 @@ parse_olsr_service_descriptions() {
 #   http   192.168.0.15   8080   tcp   ugw   upload:3 download:490 ping:108
 get_olsr_services() {
 	trap "error_trap get_olsr_services '$*'" $GUARD_TRAPS
+	local wanted_type="${1:-}"
 	local filter_service
 	local url
 	local proto
@@ -182,7 +183,7 @@ get_olsr_services() {
 		sed 's/[\t ]\+#[^#]\+//' | \
 		parse_olsr_service_descriptions | \
 		# filtere die Ergebnisse nach einem Service-Typ, falls selbiger als erster Parameter angegeben wurde
-		if [ "$#" -ge 1 ]; then awk '{ if ($6 == "'$1'") print $0; }'; else cat -; fi
+		awk '{ if (("'$wanted_type'" == "") || ("'$wanted_type'" == $6)) print $0; }'
 	return 0
 }
 

@@ -182,7 +182,7 @@ get_olsr_services() {
 		sed 's/[\t ]\+#[^#]\+//' | \
 		parse_olsr_service_descriptions | \
 		# filtere die Ergebnisse nach einem Service-Typ, falls selbiger als erster Parameter angegeben wurde
-		if [ "$#" -ge 1 ]; then awk "{ if (\$6 == \"$1\") print \$0; }"; else cat -; fi
+		if [ "$#" -ge 1 ]; then awk '{ if ($6 == "'$1'") print $0; }'; else cat -; fi
 	return 0
 }
 

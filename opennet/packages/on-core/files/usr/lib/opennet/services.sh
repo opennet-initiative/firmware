@@ -304,6 +304,7 @@ pipe_service_attribute() {
 ##    Falls kein Typ angegben wird, dann werden alle Dienste ungeachtet ihres Typs ausgegeben.
 get_services() {
 	trap "error_trap get_services '$*'" $GUARD_TRAPS
+	local service_type="${1:-}"
 	local services
 	local fname_persist
 	# alle Dienste ausgeben
@@ -311,8 +312,8 @@ get_services() {
 	[ -e "$PERSISTENT_SERVICE_STATUS_DIR" ] || return 0
 	find "$PERSISTENT_SERVICE_STATUS_DIR" -type f -size +1c -print0 \
 		| xargs -0 -r -n 1 basename \
-		| if [ $# -gt 0 ]; then
-			filter_services_by_value "service" "$1"
+		| if [ -n "$service_type" ]; then
+			filter_services_by_value "service" "$service_type"
 		else
 			cat -
 		fi
@@ -329,7 +330,7 @@ filter_services_by_value() {
 	local value="$2"
 	local service_name
 	while read service_name; do
-		[ "$value" = "$(get_service_value "$service_name" "$key")" ] && echo "$service_name" || true
+		[ "$value" != "$(get_service_value "$service_name" "$key")" ] || echo "$service_name"
 	done
 }
 

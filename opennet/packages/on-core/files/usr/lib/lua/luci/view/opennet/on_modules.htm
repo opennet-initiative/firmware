@@ -15,6 +15,17 @@ You may obtain a copy of the License at
 <%
 require("luci.model.opennet.funcs")
 require("luci.model.opennet.urls")
+
+repo_url_opennet = on_function("get_default_opennet_opkg_repository_url", {"opennet"})
+repo_url_internet = on_function("get_default_opennet_opkg_repository_url", {"internet"})
+configured_repo_url = on_function("get_configured_opennet_opkg_repository_url")
+function checked_if_true(value)
+	if value then
+		return 'checked="checked"'
+	else
+		return ""
+	end
+end
 %>
 
 <% if not on_bool_function("has_opennet_dns") then %>
@@ -91,18 +102,6 @@ on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for net
 <div class="cbi-map"><fieldset class="cbi-section">
 <legend><%:Package Sources%></legend>
 	<div class="cbi-section-descr"><%:Choose your preferred source of packages depending on your network connection.%></div>
-	<%
-		local repo_url_opennet = on_function("get_default_opennet_opkg_repository_url", {"opennet"})
-		local repo_url_internet = on_function("get_default_opennet_opkg_repository_url", {"internet"})
-		local configured_repo_url = on_function("get_configured_opennet_opkg_repository_url")
-		function checked_if_true(value)
-			if value then
-				return 'checked="checked"'
-			else
-				return ""
-			end
-		end
-	%>
 	<div class="cbi-section-node">
 		<div class="cbi-value">
 			<label class="cbi-value-title" for="repository_url_opennet"

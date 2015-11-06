@@ -158,7 +158,7 @@ update_dns_servers() {
 	       uci commit "dhcp.@dnsmasq[0]"
 	       reload_config
 	fi
-	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "DNS")
+	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "DNS" || true)
 	# wir sortieren alphabetisch - Naehe ist uns egal
 	(
 		get_services "dns" | filter_reachable_services | filter_enabled_services | sort | while read service; do
@@ -199,7 +199,7 @@ update_ntp_servers() {
 	local use_ntp="$(uci_get on-core.settings.use_olsrd_ntp)"
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
-	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "NTP")
+	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "NTP" || true)
 	# schreibe die Liste der NTP-Server neu
 	uci_delete system.ntp.server
 	# wir sortieren alphabetisch - Naehe ist uns egal

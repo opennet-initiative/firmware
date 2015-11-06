@@ -48,7 +48,7 @@ olsrd_enable_ondataservice() {
 	local uci_prefix
 
 	# schon vorhanden? Unberuehrt lassen ...
-	[ -n "$(uci -q show olsrd | grep ondataservice)" ] && return
+	uci -q show olsrd | grep -q ondataservice && return
 
 	# add and activate ondataservice plugin
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "ondataservice_light")

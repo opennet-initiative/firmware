@@ -438,7 +438,7 @@ is_interface_up() {
 	# falls es ein uebergeordnetes Bridge-Interface geben sollte, dann muss dies ebenfalls aktiv sein
 	if [ "$(uci_get "network.${interface}.type")" = "bridge" ]; then
 		# das Bridge-Interface existiert nicht (d.h. es ist down)
-		[ -z "$(ip link show dev "br-${interface}" 2>/dev/null)" ] && trap "" $GUARD_TRAPS && return 1
+		[ -z "$(ip link show dev "br-${interface}" 2>/dev/null || true)" ] && trap "" $GUARD_TRAPS && return 1
 		# Bridge ist aus? Damit ist das befragte Interface ebenfalls aus ...
 		ip link show dev "br-${interface}" | grep -q "[\t ]state DOWN[\ ]" && trap "" $GUARD_TRAPS && return 1
 	fi

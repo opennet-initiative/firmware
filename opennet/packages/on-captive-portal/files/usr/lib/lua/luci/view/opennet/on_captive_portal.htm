@@ -19,6 +19,18 @@ You may obtain a copy of the License at
 <h2><a id="content" name="content"><%:Public Hotspot%></a></h2>
 <%= html_display_message_list(on_errors, "error") %>
 
+<%
+-- Warne den Nutzer, falls dem 'free'-Netzwerk-Interface kein physisches Gerät zugeordnet ist.
+if not on_bool_function("captive_portal_has_devices") then
+	local netdev = on_function("get_variable", {"NETWORK_FREE"})
+%>
+	<div class="errorbox">
+	<%= luci.i18n.translatef('You need to <a href="%s">attach a physical network device</a> to the \'%s\' interface in order to enable the Hotspot feature.',
+		luci.dispatcher.build_url("admin", "network", "network", netdev) .. "?tab.network." .. netdev .. "=physical",
+		netdev) %>
+	</div>
+<% end %>
+
 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 <div class="cbi-map">
 <div class="cbi-map-descr">

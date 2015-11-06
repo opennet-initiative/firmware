@@ -32,10 +32,6 @@ function action_on_captive_portal()
 		end
 		on_function("apply_changes", {"on-captive-portal"})
 	end
-	-- Warne den Nutzer, falls dem 'free'-Netzwerk-Interface kein physisches Gerät zugeordnet ist.
-	if not on_bool_function("captive_portal_has_devices") then
-		table.insert(on_errors, luci.i18n.translate("You need to attach a physical network device to the 'free' interface in order to enable the Hotspot feature."))
-	end
 	luci.template.render("opennet/on_captive_portal", {
 		portal_name=on_function("captive_portal_get_property", {"name"}),
 		portal_url=on_function("captive_portal_get_property", {"url"}),

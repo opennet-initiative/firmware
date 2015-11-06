@@ -309,8 +309,13 @@ get_on_core_default() {
 ## @brief Liefere die aktuelle Firmware-Version zurück.
 ## @returns Die zurückgelieferte Zeichenkette beinhaltet den Versionsstring (z.B. "0.5.0").
 ## @details Per Konvention entspricht die Version jedes Firmware-Pakets der Firmware-Version.
+##   Um locking-Probleme zu vermeiden, lesen wir den Wert direkt aus der control-Datei des Pakets.
+##   Das ist nicht schoen - aber leider ist die lock-Datei nicht konfigurierbar.
 get_on_firmware_version() {
-	opkg status on-core | awk '{if (/Version/) print $2;}'
+	trap "error_trap get_on_firmware_version '$*'" $GUARD_TRAPS
+	local status_file="${IPKG_INSTROOT:-}/usr/lib/opkg/info/on-core.control"
+	[ -e "$status_file" ] || return 0
+	awk '{if (/^Version:/) print $2;}' <"$status_file"
 }
 
 

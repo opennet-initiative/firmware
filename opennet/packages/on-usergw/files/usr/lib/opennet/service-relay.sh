@@ -82,8 +82,9 @@ update_relay_firewall_rules() {
 		target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
 		iptables -t nat -A "$dnat_chain" --destination "$main_ip" --protocol "$protocol" --dport "$local_port" \
 			-j DNAT --to-destination "${target_ip}:${port}"
-		iptables -t mangle -A "$tos_chain" --destination "$main_ip" --protocol "$protocol" --dport "$local_port" \
-			-j TOS --set-tos "$TOS_NON_TUNNEL"
+		# falls on-openvpn vorhanden ist, wollen wir vermeiden, dass mesh-Tunnel ueber den Internet-Tunnel laufen
+		[ -z "${TOS_NON_TUNNEL:-}" ] || iptables -t mangle -A "$tos_chain" --destination "$main_ip" \
+			--protocol "$protocol" --dport "$local_port" -j TOS --set-tos "$TOS_NON_TUNNEL"
 	done
 
 }

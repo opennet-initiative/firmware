@@ -187,36 +187,6 @@ get_device_of_interface() {
 }
 
 
-## @fn get_subdevices_of_interface()
-## @brief Ermittle die physischen Netzwerk-Geräte, die zu einem logischen Netzwerk-Interface gehören.
-## @details Im Fall eines Bridge-Interface werden nur die beteiligten Komponenten zurückgeliefert.
-## @returns Der Name des physischen Netzwerk-Geräts oder nichts.
-get_subdevices_of_interface() {
-	local interface="$1"
-	local device
-	# kabelgebundene Geräte
-	for device in $(uci_get "network.${interface}.ifname"); do
-		# entferne Alias-Nummerierungen
-		device=$(echo "$device" | cut -f 1 -d :)
-		[ -z "$device" -o "$device" = "none" ] && continue
-		echo "$device"
-	done
-	# wlan-Geräte
-	# "uci show network" enthält aus irgendeinem Grund keine wlan-Geräte. Daher müssen
-	# wir dort separat nachschauen.
-	local uci_prefix
-	local current_interface
-	find_all_uci_sections "wireless" "wifi-iface" | while read uci_prefix; do
-		for current_interface in $(uci_get "${uci_prefix}.network"); do
-			[ "$current_interface" != "$interface" ] && continue
-			uci_get "${uci_prefix}.ifname"
-		done
-	done
-	# Der folgende Weg (via ubus) wirkt wohl nur bei aktiven Interfaces:
-	#(local ifname; . /lib/functions/network.sh; network_get_device ifname on_free; echo "$ifname")
-}
-
-
 # Ist das gegebene physische Netzwerk-Interface Teil einer Firewall-Zone?
 is_device_in_zone() {
 	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
@@ -230,29 +200,6 @@ is_device_in_zone() {
 		done
 	done
 	trap "" $GUARD_TRAPS && return 1
-}
-
-
-# Ist das gegebene logische Netzwerk-Interface Teil einer Firewall-Zone?
-is_interface_in_zone() {
-	local interface="$1"
-	local zone="$2"
-	local item
-	for item in $(get_zone_interfaces "$zone"); do
-		[ "$item" = "$interface" ] && return 0 || true
-	done
-	trap "" $GUARD_TRAPS && return 1
-}
-
-
-## @fn get_device_of_interface()
-## @brief Ermittle das physische Netzwerk-Gerät, das einem logischen Netzwerk entspricht.
-## @details Ein Bridge-Interface wird als Gerät betrachtet und zurückgeliefert (nicht seine Einzelteile).
-get_device_of_interface() {
-	local interface="$1"
-	[ "$(uci_get "network.${interface}.type")" = "bridge" ] \
-		&& echo "br-$interface" \
-		|| get_subdevices_of_interface "$interface"
 }
 
 

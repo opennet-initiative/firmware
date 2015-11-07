@@ -46,6 +46,8 @@ add_crontab_entries() {
 		"* * * * *		$cron_prefix /etc/cron.minutely $cron_suffix"
 	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.5mins" \
 		"*/5 * * * *		$cron_prefix /etc/cron.5mins $cron_suffix"
+	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.hourly" \
+		"18 * * * *		$cron_prefix /etc/cron.hourly $cron_suffix"
 	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.daily" \
 		"02 4 * * *		$cron_prefix /etc/cron.daily $cron_suffix"
 	# es ist schwer zu pruefen, ob die Datei sich geaendert hat - also einfach neustarten

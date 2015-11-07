@@ -818,10 +818,8 @@ get_local_bias_number() {
 system_service_check() {
 	local executable="$1"
 	local pid_file="$2"
-	. /lib/functions/service.sh
-	SERVICE_PID_FILE="$pid_file"
-	set +eu
-	service_check "$executable" && return 0
+	local result=$(set +eu; . /lib/functions/service.sh; SERVICE_PID_FILE="$pid_file"; service_check "$executable" && echo "ok"; set -eu)
+	[ -n "$result" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

@@ -274,6 +274,7 @@ on_opkg_postinst_default() {
 			# Boot-Skript aktivieren und ausführen (falls noch nicht geschehen)
 			/etc/init.d/on-core enable 2>/dev/null || true
 			/etc/init.d/on-core start
+			set -eu
 		)
 	fi
 	clean_luci_restart

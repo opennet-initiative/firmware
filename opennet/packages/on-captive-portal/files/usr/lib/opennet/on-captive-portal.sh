@@ -68,9 +68,9 @@ captive_portal_get_or_create_config() {
 		# Demgegenüber ist es für den "users-to-router"-Verkehr praktischer, die einfachen
 		# nodogsplash-Einstellungen zu verwenden. Dadurch vermeiden wir die Verwaltung
 		# separater firewall-Regeln.
-		# ssh/web (TODO: entfernen - nur fuer Debugging)
-		uci add_list "${uci_prefix}.users_to_router=allow tcp port 22"
-		uci add_list "${uci_prefix}.users_to_router=allow tcp port 80"
+		# ssh/web (nur fuer Debugging)
+		#uci add_list "${uci_prefix}.users_to_router=allow tcp port 22"
+		#uci add_list "${uci_prefix}.users_to_router=allow tcp port 80"
 		# DNS
 		uci add_list "${uci_prefix}.users_to_router=allow tcp port 53"
 		uci add_list "${uci_prefix}.users_to_router=allow udp port 53"

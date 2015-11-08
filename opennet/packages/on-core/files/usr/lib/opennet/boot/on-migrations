@@ -372,6 +372,33 @@ rename_firewall_zone() {
 }
 
 
+## @fn move_wifidog_networks_to_captive_portal()
+## @brief Änderung des Netzwerk-Namens für offene Zugangspunkte von "free" zu "on_free".
+## @details Bis v0.4-5 hieß das wifidog-Netzwerk "free". Ab v0.5.2 heißt es "on_free".
+move_wifidog_networks_to_captive_portal() {
+	local old_name="free"
+	local new_name="$NETWORK_FREE"
+	local old_interfaces
+	local uci_prefix
+	# das alte Interface existiert nicht? Weitermachen ...
+	[ -z "$(uci_get "network.$old_name")" ] && return 0
+	# neues Interface anlegen, falls es noch nicht existieren sollte
+	# (das migrations-Skript wird vor dem on-captive-portal-Skript via uci-defaults ausgefuehrt)
+	configure_free_network
+	# die nicht-wifi-Netzwerke übertragen
+	old_interfaces=$(uci_get "network.${old_name}.ifname")
+	# das Interface muss immer angegeben sein (oder "none")
+	uci set "network.${new_name}.ifname=${old_interfaces:-none}"
+	# alle wifi-Interfaces verschieben
+	find_all_uci_sections "wireless" "wifi-iface" "network=$old_name" | while read uci_prefix; do
+		uci set "${uci_prefix}.network=$new_name"
+	done
+	# fertig: wir ignorieren das Bridge-Attribute - es ist nicht mehr erforderlich (und selten noetig)
+	uci_delete "network.$old_name"
+	apply_changes network wireless
+}
+
+
 ## @fn remove_opennet_ca_certificates_from_previous_location()
 ## @brief Löschung alter CA-Dateien an nicht mehr verwendeten Orten.
 ## @details Bis Version v0.5.1 wurden die CA-Zertifikate für die OpenVPN-Verbindungen
@@ -464,6 +491,13 @@ remove_ntpclient_config
 # Bis Version 0.4-5 hiess die Opennet-Mesh-Firewall-Zone "opennet".
 # Mit Version 0.5 wurde die Zone in "on_mesh" umbenannt.
 rename_firewall_zone "opennet" "$ZONE_MESH"
+
+# mit Version 0.5.2 wird wifidog durch on-captive-portal ersetzt
+move_wifidog_networks_to_captive_portal
+# Bis Version 0.4-5 hiess die wifidog-Zone "free".
+# Mit Version 0.5.2 wurde die Zone in "on_free" umbenannt.
+# Da die alte Zone falsch konfiguriert war ("FORWARD=yes"), werfen wir sie lieber einfach weg.
+delete_firewall_zone "free"
 
 disable_unwanted_forward
 move_mtu_fix_to_target_zone

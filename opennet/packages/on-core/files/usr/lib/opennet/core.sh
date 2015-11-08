@@ -394,7 +394,7 @@ apply_changes() {
 			uci commit "$config"
 			echo "$config"
 		fi
-	done | sed 's/\(system\|network\|firewall\|dhcp\)/do_reload/' \
+	done | sed 's/\(system\|network\|wireless\|firewall\|dhcp\)/do_reload/' \
 			| sort | uniq | while read config; do
 		# Es ist unklar, wie hier leere Zeilen landen koennen.
 		[ -z "$config" ] && continue

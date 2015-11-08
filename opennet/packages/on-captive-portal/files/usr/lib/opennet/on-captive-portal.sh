@@ -10,6 +10,36 @@ NETWORK_FREE=on_free
 ON_CAPTIVE_PORTAL_DEFAULTS_FILE=/usr/share/opennet/captive-portal.defaults
 
 
+## @fn configure_free_network()
+## @brief Erzeuge das free-Netzwerk-Interface, falls es noch nicht existiert.
+configure_free_network() {
+	local uci_prefix="network.$NETWORK_FREE"
+	# es wurde bereits einmalig konfiguriert
+	if [ -z "$(uci_get "$uci_prefix")" ]; then
+		uci set "${uci_prefix}=interface"
+		uci set "${uci_prefix}.ifname=none"
+		uci set "${uci_prefix}.proto=static"
+		uci set "${uci_prefix}.ipaddr=$(get_on_captive_portal_default free_ipaddress)"
+		uci set "${uci_prefix}.netmask=$(get_on_captive_portal_default free_netmask)"
+		# wir aktivieren das Interface manuell via hotplug
+		uci set "${uci_prefix}.auto=0"
+		apply_changes network
+	fi
+	# konfiguriere DHCP
+	uci_prefix=$(find_first_uci_section "dhcp" "dhcp" "interface=$NETWORK_FREE")
+	# beenden, falls vorhanden
+	if [ -z "$uci_prefix" ]; then
+		# DHCP-Einstellungen fuer dieses Interface festlegen
+		uci_prefix="dhcp.$(uci add "dhcp" "dhcp")"
+		uci set "${uci_prefix}.interface=$NETWORK_FREE"
+		uci set "${uci_prefix}.start=10"
+		uci set "${uci_prefix}.limit=240"
+		uci set "${uci_prefix}.leasetime=30m"
+		apply_changes dhcp
+	fi
+}
+
+
 ## @fn captive_portal_get_or_create_config()
 ## @brief Liefere die uci-captive-Portal-Konfigurationssektion zurück.
 ## @details Typischerweise ist dies so etwas wie nodogsplash.cfgXXXX. Falls die uci-Sektion noch

@@ -204,32 +204,32 @@ is_device_in_zone() {
 
 
 ## @fn get_subdevices_of_interface()
-## @brief Ermittle die physischen Netzwerk-Geräte, die zu einem logischen Netzwerk-Interface gehören.
+## @brief Ermittle die physischen Netzwerk-Geräte (bis auf wifi), die zu einem logischen Netzwerk-Interface gehören.
 ## @details Im Fall eines Bridge-Interface werden nur die beteiligten Komponenten zurückgeliefert.
-## @returns Der Name des physischen Netzwerk-Geräts oder nichts.
+##   Wifi-Geräte werden nur dann zurückgeliefert, wenn sie Teil einer Bridge sind. Andernfalls sind ihre Namen nicht
+##   ermittelbar.
+## @returns Der oder die Namen der physischen Netzwerk-Geräte oder nichts.
 get_subdevices_of_interface() {
+	trap "error_trap get_subdevices_of_interface '$*'" $GUARD_TRAPS
 	local interface="$1"
 	local device
-	# kabelgebundene Geräte
-	for device in $(uci_get "network.${interface}.ifname"); do
-		# entferne Alias-Nummerierungen
-		device=$(echo "$device" | cut -f 1 -d :)
-		[ -z "$device" -o "$device" = "none" ] && continue
-		echo "$device"
-	done
-	# wlan-Geräte
-	# "uci show network" enthält aus irgendeinem Grund keine wlan-Geräte. Daher müssen
-	# wir dort separat nachschauen.
 	local uci_prefix
 	local current_interface
-	find_all_uci_sections "wireless" "wifi-iface" | while read uci_prefix; do
-		for current_interface in $(uci_get "${uci_prefix}.network"); do
-			[ "$current_interface" != "$interface" ] && continue
-			uci_get "${uci_prefix}.ifname"
+	{
+		# kabelgebundene Geräte
+		for device in $(uci_get "network.${interface}.ifname"); do
+			# entferne Alias-Nummerierungen
+			device=$(echo "$device" | cut -f 1 -d :)
+			[ -z "$device" -o "$device" = "none" ] && continue
+			echo "$device"
 		done
-	done
-	# Der folgende Weg (via ubus) wirkt wohl nur bei aktiven Interfaces:
-	#(local ifname; . /lib/functions/network.sh; network_get_device ifname on_free; echo "$ifname")
+		# wir fügen das Ergebnis der ubus-Abfrage hinzu (unten werden Duplikate entfernt)
+		(set +eu; local ifname; . /lib/functions/network.sh; network_get_physdev ifname "$interface"; echo "$ifname"; set -eu)
+	} | tr ' ' '\n' | sort | uniq | while read device; do
+		# Falls das Verzeichnis existiert, ist es wohl eine Bridge, deren Bestandteile wir ausgeben.
+		# Ansonsten wird das Device ausgegeben.
+		ls "/sys/devices/virtual/net/$device/brif/" 2>/dev/null || echo "$device"
+	done | sort | uniq | grep -v "^none$" | grep -v "^$" || true
 }
 
 

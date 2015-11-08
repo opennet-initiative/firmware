@@ -399,6 +399,19 @@ move_wifidog_networks_to_captive_portal() {
 }
 
 
+## @fn remove_wifidog_alias_interface()
+## @brief Entferne ein Alias-Interface, das für das wifidog-Setup verwendet wurde.
+## @details Bis Version 0.4-5 wurde wifidog mit einem lokalen Alias-Interface konfiguriert, um
+##   die Umlenkung von Paketen via REDIRECT zu ermöglichen.
+remove_wifidog_alias_interface() {
+	local uci_prefix
+	find_all_uci_sections "network" "alias" "interface=free" | while read uci_prefix; do
+		uci_delete "$uci_prefix"
+	done
+	apply_changes network
+}
+
+
 ## @fn remove_opennet_ca_certificates_from_previous_location()
 ## @brief Löschung alter CA-Dateien an nicht mehr verwendeten Orten.
 ## @details Bis Version v0.5.1 wurden die CA-Zertifikate für die OpenVPN-Verbindungen
@@ -494,7 +507,8 @@ rename_firewall_zone "opennet" "$ZONE_MESH"
 
 # mit Version 0.5.2 wird wifidog durch on-captive-portal ersetzt
 move_wifidog_networks_to_captive_portal
-# Bis Version 0.4-5 hiess die wifidog-Zone "free".
+remove_wifidog_alias_interface
+# Bis Version 0.4-5 hieß die wifidog-Zone "free".
 # Mit Version 0.5.2 wurde die Zone in "on_free" umbenannt.
 # Da die alte Zone falsch konfiguriert war ("FORWARD=yes"), werfen wir sie lieber einfach weg.
 delete_firewall_zone "free"

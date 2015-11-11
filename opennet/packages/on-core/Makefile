@@ -26,6 +26,16 @@ define Package/on-core/install
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 
+define Package/on-core/conffiles
+# Die openwrt-Basisversion fuer v0.5.0 sorgt leider nicht dafuer, dass die Datei /etc/shadow bei einem Upgrade erhalten bleibt.
+# Das Problem ist inzwischen in openwrt behoben.
+# Beim naechsten Release mit einer neuen openwrt-Basis koennen wir diesen Eintrag wieder entfernen.
+# siehe https://dev.openwrt.org/ticket/18206
+/etc/shadow
+# Die Service-Beschreibungen inkl. persoenlicher Praeferenzen (offset/disable).
+/etc/on-services.d/
+endef
+
 define Package/on-core/postinst
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0

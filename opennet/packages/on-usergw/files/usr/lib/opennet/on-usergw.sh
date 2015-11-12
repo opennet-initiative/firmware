@@ -13,6 +13,7 @@ SPEEDTEST_SECONDS=20
 MESH_OPENVPN_DEVICE_PREFIX=tap
 # Namenspräfix für weiterzuleitende Dienste
 RELAYABLE_SERVICE_PREFIX="proxy-"
+UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES=360
 
 
 ## @fn get_on_usergw_default()
@@ -381,11 +382,30 @@ disable_on_usergw() {
 }
 
 
+## @fn is_trusted_service_list_outdated()
+## @brief Ermittle ob mindestens ein Zeitstempel für einen "trusted" Dienst vorhanden ist, der nicht älter
+##   als die vorgegebene Aktualisierungsperiode ist.
+## @returns Wahr, falls kein Diest mit aktuellem Zeitstempel gefunden wurde.
+is_trusted_service_list_outdated() {
+	trap "error_trap is_trusted_service_list_outdated '$*'" $GUARD_TRAPS
+	local most_recent_timestamp
+	most_recent_timestamp=$(get_services \
+		| filter_services_by_value "source" "trusted" \
+		| pipe_service_attribute "timestamp" \
+		| sort -n | tail -1)
+	# kein Zeitstempel -> dies gilt als "veraltet"
+	[ -z "$most_recent_timestamp" ] && return 0
+	# der aktuellste Zeitstempel ist zu alt
+	is_timestamp_older_minutes "$most_recent_timestamp" "$UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES" && return 0
+	trap "" $GUARD_TRAPS && return 1
+}
+
+
 ## @fn update_on_usergw_status()
 ## @brief Baue Verbindungen auf oder trenne sie - je nach Modul-Status.
 update_on_usergw_status() {
 	if is_on_module_installed_and_enabled "on-usergw"; then
-		update_trusted_service_list
+		is_trusted_service_list_outdated && update_trusted_service_list
 		update_mesh_gateway_firewall_rules
 		# ohne Zertifikat ist nicht mehr zu tun
 		if has_mesh_openvpn_credentials; then

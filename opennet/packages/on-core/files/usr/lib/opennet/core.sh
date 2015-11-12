@@ -558,13 +558,15 @@ get_file_modification_timestamp_minutes() {
 ## @param difference zulässige Zeitdifferenz zwischen jetzt und dem Zeitstempel
 ## @brief Prüfe, ob ein gegebener Zeitstempel älter ist, als die vorgegebene Zeitdifferenz.
 ## @returns Exitcode Null (Erfolg), falls der gegebene Zeitstempel mindestens 'difference' Minuten zurückliegt.
-# Achtung: Zeitstempel aus der Zukunft gelten immer als veraltet.
+# Achtung: Zeitstempel aus der Zukunft oder leere Zeitstempel gelten immer als veraltet.
 is_timestamp_older_minutes() {
 	local timestamp_minute="$1"
 	local difference="$2"
-	local now="$(get_uptime_minutes)"
+	[ -z "$timestamp_minute" ] && return 0
+	local now
+	now="$(get_uptime_minutes)"
 	# it is older
-	[ "$now" -ge "$((timestamp_minute+difference))" ] && return 0
+	[ "$now" -ge "$((timestamp_minute + difference))" ] && return 0
 	# timestamp in future -> invalid -> let's claim it is too old
 	[ "$now" -lt "$timestamp_minute" ] && \
 		msg_info "WARNING: Timestamp from future found: $timestamp_minute (minutes since epoch)" && \

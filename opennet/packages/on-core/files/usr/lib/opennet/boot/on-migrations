@@ -377,7 +377,9 @@ rename_firewall_zone() {
 ## @details Bis v0.4-5 hieß das wifidog-Netzwerk "free". Ab v0.5.2 heißt es "on_free".
 move_wifidog_networks_to_captive_portal() {
 	local old_name="free"
-	local new_name="$NETWORK_FREE"
+	local new_name="${NETWORK_FREE:-}"
+	# das on-captive-portal-Paket ist nicht installiert - keine Aenderungen
+	[ -z "$new_name" ] && return 0
 	local old_interfaces
 	local uci_prefix
 	# das alte Interface existiert nicht? Weitermachen ...

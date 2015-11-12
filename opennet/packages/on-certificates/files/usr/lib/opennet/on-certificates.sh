@@ -12,9 +12,10 @@ ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.
 ## @details Eventuelle SSL-Zertifikate werden gegenueber der Opennet-CA-Liste abgeglichen.
 ##     Zusätzlich zur URL können auch (davor) curl-spezifischen Optionen angebeben werden.
 https_request_opennet() {
-	# diese curl-Operation dauert aus irgendeinem Grund ca. 10s - wir muessen also den timeout hochsetzen
-	curl -q --silent --connect-timeout 30 --retry 0 --cacert "$ON_CERT_BUNDLE_PATH" "$@" \
-		|| msg_error "Failed to retrieve data from URL '$@' via curl"
+	# Diese curl-Operation dauert aus irgendeinem Grund ca. 10s - wir muessen also den timeout hochsetzen.
+	# Auf dem Server sind haeufig 408 (timeout) Fehler sichtbar - also mindestens einmal wiederholen.
+	curl -q --max-time 30 --retry 2 --cacert "$ON_CERT_BUNDLE_PATH" "$@" \
+		|| msg_error "Failed to retrieve data from URL '$@' via curl ($?)"
 }
 
 

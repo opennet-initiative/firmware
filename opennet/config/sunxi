@@ -7,3 +7,19 @@ CONFIG_TARGET_ROOTFS_INCLUDE_FIT=y
 
 # TODO: swconfig fehlt in openwrt's default-Konfiguration fuer das Banana Pi R1
 CONFIG_PACKAGE_swconfig=y
+
+# Bootloader erzeugen
+CONFIG_PACKAGE_uboot-sunxi-A10-OLinuXino-Lime=m
+CONFIG_PACKAGE_uboot-sunxi-A13-OLinuXino=m
+CONFIG_PACKAGE_uboot-sunxi-A20-OLinuXino-Lime=m
+CONFIG_PACKAGE_uboot-sunxi-A20-OLinuXino_MICRO=m
+CONFIG_PACKAGE_uboot-sunxi-Bananapi=m
+CONFIG_PACKAGE_uboot-sunxi-Bananapro=m
+CONFIG_PACKAGE_uboot-sunxi-Cubieboard=m
+CONFIG_PACKAGE_uboot-sunxi-Cubieboard2=m
+CONFIG_PACKAGE_uboot-sunxi-Cubietruck=m
+CONFIG_PACKAGE_uboot-sunxi-Lamobo_R1=m
+CONFIG_PACKAGE_uboot-sunxi-Linksprite_pcDuino=m
+CONFIG_PACKAGE_uboot-sunxi-Linksprite_pcDuino3=m
+CONFIG_PACKAGE_uboot-sunxi-Mele_M9=m
+CONFIG_PACKAGE_uboot-sunxi-OLIMEX_A13_SOM=m

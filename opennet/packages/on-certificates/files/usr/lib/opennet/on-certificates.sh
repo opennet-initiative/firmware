@@ -14,7 +14,7 @@ ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.
 https_request_opennet() {
 	# Diese curl-Operation dauert aus irgendeinem Grund ca. 10s - wir muessen also den timeout hochsetzen.
 	# Auf dem Server sind haeufig 408 (timeout) Fehler sichtbar - also mindestens einmal wiederholen.
-	curl -q --max-time 30 --retry 2 --cacert "$ON_CERT_BUNDLE_PATH" "$@" \
+	curl -q --silent --max-time 30 --retry 2 --cacert "$ON_CERT_BUNDLE_PATH" "$@" \
 		|| msg_error "Failed to retrieve data from URL '$@' via curl ($?)"
 }
 

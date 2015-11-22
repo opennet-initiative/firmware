@@ -43,10 +43,17 @@ get_wifi_devices() {
 get_wifi_device_from_suffix() {
 	local suffix
 	local called
+	local real_dev
 	called=$(basename "$0")
 	suffix="${called#$SCRIPT_PREFIX}"
 	# empty result if the prefix did not match (and was not removed)
-	[ "$suffix" = "$0" ] && echo "" || echo "$suffix"
+	[ "$suffix" = "$0" ] && echo "" && return 0
+	# look for the matching real device (while using 'clean_fieldname')
+	for real_dev in $(get_wifi_devices); do
+		[ "$(clean_fieldname "$real_dev")" = "$suffix" ] && echo "$real_dev"
+		# let the loop finish successfully
+		true
+	done
 }
 
 
@@ -61,7 +68,9 @@ if [ "${1:-}" = "autoconf" ]; then
 		echo "no (missing 'iw' dependency)"
 	fi
 elif [ "${1:-}" = "suggest" ]; then
-	get_wifi_devices
+	for dev in $(get_wifi_devices); do
+		clean_fieldname "$dev"
+	done
 elif [ "${1:-}" = "config" ]; then
 	device=$(get_wifi_device_from_suffix)
 	[ -z "$device" ] && echo >&2 "Invalid wifi device name given" && exit 1

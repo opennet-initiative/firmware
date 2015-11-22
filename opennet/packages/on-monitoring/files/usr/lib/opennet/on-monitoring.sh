@@ -47,6 +47,7 @@ enable_suggested_munin_plugin_names() {
 	local target_dir="${IPKG_INSTROOT:-}/usr/sbin/munin-node-plugin.d"
 	local source_dir="../../share/munin-plugins-available"
 	"${IPKG_INSTROOT:-}/usr/share/munin-plugins-available/$base_plugin" suggest | while read scope; do
+		[ -e "$target_dir/${base_plugin}${scope}" ] && continue
 		ln -s "$source_dir/$base_plugin" "$target_dir/${base_plugin}${scope}"
 	done
 }

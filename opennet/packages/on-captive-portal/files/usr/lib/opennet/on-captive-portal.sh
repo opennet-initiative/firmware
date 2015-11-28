@@ -70,12 +70,15 @@ captive_portal_get_or_create_config() {
 		# separater firewall-Regeln.
 		# ssh/web (nur fuer Debugging)
 		#uci add_list "${uci_prefix}.users_to_router=allow tcp port 22"
-		#uci add_list "${uci_prefix}.users_to_router=allow tcp port 80"
+		#uci add_list "${uci_prefix}.users_to_router=allow tcp port 443"
 		# DNS
 		uci add_list "${uci_prefix}.users_to_router=allow tcp port 53"
 		uci add_list "${uci_prefix}.users_to_router=allow udp port 53"
 		# DHCP
 		uci add_list "${uci_prefix}.users_to_router=allow udp port 67"
+		# jeglichen Verkehr ohne Interaktion zulassen
+		# (lediglich der erste Zugriff auf Port 80 wird auf die Portalseite umgelenkt)
+		uci set "${uci_prefix}.policy_preauthenticated_users=passthrough"
 		# erstmal nur speichern - um die Anwendung kuemmert sich jemand anders
 		uci commit nodogsplash
 	fi

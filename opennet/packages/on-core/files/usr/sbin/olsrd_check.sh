@@ -7,6 +7,13 @@
 START_DELAY=8
 
 
+olsr_service_action() {
+	local action="$1"
+	update_olsr_interfaces
+	/etc/init.d/olsrd "$action" >/dev/null || true
+}
+
+
 is_olsrd_running() {
 	trap "error_trap is_olsrd_running '$*'" $GUARD_TRAPS
 	local pid_file
@@ -36,9 +43,9 @@ check_for_empty_routing_table() {
 		# Laueft txtinfo und ist die Topologie trotzdem leer? Dann ist es ok (wir haben kein Netz).
 		( [ -n "$(request_olsrd_txtinfo all)" ] && request_olsrd_txtinfo topology | grep -q "^[0-9]" ) || exit 0
 		# es gibt also Topologie-Informationen, jedoch keine Routen -> ein Bug
-		/etc/init.d/olsrd restart >/dev/null || true
+		olsr_service_action restart
 	else
-		/etc/init.d/olsrd start >/dev/null || true
+		olsr_service_action start
 	fi
 	# warte auf vollstaendigen Start (inkl. bind)
 	sleep "$START_DELAY"
@@ -54,10 +61,10 @@ check_for_stale_olsrd_process() {
 		# nicht zu einem anderen Netz gehörten.
 		killall olsrd || true
 		sleep 1
-		/etc/init.d/olsrd start >/dev/null || true
+		olsr_service_action start
 	else
 		# einfach nochmal versuchen
-		/etc/init.d/olsrd restart >/dev/null || true
+		olsr_service_action restart
 	fi
 	sleep "$START_DELAY"
 }
@@ -72,4 +79,3 @@ is_olsrd_running && add_banner_event "olsrd restart" && exit 0
 msg_info "olsrd restart failed (attempt #2)"
 
 exit 1
-

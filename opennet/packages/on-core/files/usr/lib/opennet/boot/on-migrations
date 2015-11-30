@@ -89,7 +89,7 @@ EOF
 
 
 # wandele Leerzeichen-getrennte "option"-Eintraege in "list"-Eintraege um
-_split_uci_option() {
+_convert_uci_option_to_list() {
 	local config="$1"
 	local optname="$2"
 	local filename="/etc/config/$config"
@@ -112,7 +112,7 @@ _split_uci_option() {
 # Gelegentlich ändert openwrt die Definition einzelner Variablen. Dies müssen wir via Migration nachbereiten.
 migrate_uci_definition_changes() {
 	# vor Barrier Breaker war "firewall.ZONE.network" eine "option" - anschliessed wurde es zur "list"
-	_split_uci_option "firewall" "network"
+	_convert_uci_option_to_list "firewall" "network"
 }
 
 
@@ -293,7 +293,7 @@ remove_crontab_entries() {
 
 # Bis Version 0.4-5 wurde der Port des httpinfo-Plugins mit der Variable "olsrd.@LoadPlugin[1].Port" festgelegt.
 # uci-typisch sind jedoch Attribute mit Kleinbuchstaben.
-rename_olsrd_Port_to_port() {
+rename_olsrd_port_to_port() {
 	local uci_prefix
 	local library
 	find_all_uci_sections olsrd LoadPlugin | while read uci_prefix; do
@@ -500,7 +500,7 @@ remove_obsolete_on_core_settings
 remove_obsolete_usergw_settings
 remove_usergw_openvpn_configs
 remove_crontab_entries
-rename_olsrd_Port_to_port
+rename_olsrd_port_to_port
 remove_ntpclient_config
 
 # Bis Version 0.4-5 hiess die Opennet-Mesh-Firewall-Zone "opennet".

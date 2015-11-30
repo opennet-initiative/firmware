@@ -371,6 +371,12 @@ rename_firewall_zone() {
 		done
 	done
 	apply_changes firewall
+	# im Fall der Mesh-Zone muss die olsr-Konfiguration neu erstellt werden
+	update_olsr_interfaces
+	# Nach der Namensaenderung der Zone aendern sich eventuell auch Policy-Routing-Regeln.
+	# Siehe "add_network_policy_rule_by_destination" - fuer alle Firewall-Zonen, die
+	# nicht "$ZONE_MESH" heissen (diese kann sich durch die Umbenennung aendern).
+	initialize_olsrd_policy_routing
 }
 
 

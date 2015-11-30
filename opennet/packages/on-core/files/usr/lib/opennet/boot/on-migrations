@@ -306,6 +306,7 @@ rename_olsrd_port_to_port() {
 			uci_delete "${uci_prefix}.Port"
 		fi
 	done
+	apply_changes olsrd
 }
 
 
@@ -327,6 +328,7 @@ move_mtu_fix_to_target_zone() {
 		# alten Wert loeschen
 		uci_delete "${uci_prefix}.mtu_fix"
 	done
+	apply_changes firewall
 }
 
 
@@ -514,6 +516,7 @@ remove_wifidog_alias_interface
 # Mit Version 0.5.2 wurde die Zone in "on_free" umbenannt.
 # Da die alte Zone falsch konfiguriert war ("FORWARD=yes"), werfen wir sie lieber einfach weg.
 delete_firewall_zone "free"
+apply_changes firewall
 
 disable_unwanted_forward
 move_mtu_fix_to_target_zone
@@ -521,6 +524,7 @@ move_mtu_fix_to_target_zone
 # Bis Version 0.4-5 wurden ins lokale Netz eingehende Pakete (z.B. Portweiterleitungen) via SNAT maskiert.
 # siehe https://dev.on-i.de/ticket/73
 uci_delete firewall.zone_local.masq
+apply_changes firewall
 
 # Bis Version 0.4-5 hiess die lokale Zone "local" - bei barrier breaker heisst sie nun "lan"
 rename_firewall_zone "local" "$ZONE_LOCAL"

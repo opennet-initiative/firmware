@@ -57,7 +57,6 @@ cleanup_mesh_interface() {
 	del_interface_from_zone "$ZONE_MESH" "$netname"
 	uci_delete "network.${netname}"
 	apply_changes network firewall
-	update_olsr_interfaces
 }
 
 

@@ -394,17 +394,18 @@ apply_changes() {
 			uci commit "$config"
 			echo "$config"
 		fi
-	done | sed 's/\(system\|network\|wireless\|firewall\|dhcp\)/do_reload/' \
-			| sort | uniq | while read config; do
-		# Es ist unklar, wie hier leere Zeilen landen koennen.
-		[ -z "$config" ] && continue
+	done | grep -v "^$" | sort | uniq | while read config; do
 		# wir wollen die Aktionen erst nach allen commits ausfuehren
-		# Dabei vermeiden wir Dopplungen (siehe "sort | uniq").
-		# Die "reload_config"-Trigger haben wir zuvor zu "do_reload" zusammengefasst, um
-		# auch hier Dopplungen zu vermeiden.
 		case "$config" in
-			do_reload)
+			system|dhcp)
 				reload_config || true
+				;;
+			network|wireless|firewall)
+				reload_config || true
+				# Zonen- und IP-Aenderungen koennen Policy-Routing-Aenderungen erfordern
+				initialize_olsrd_policy_routing
+				# eventuelle Zonen-Zuordnungen zu olsr uebertragen
+				update_olsr_interfaces
 				;;
 			olsrd)
 				/etc/init.d/olsrd reload || true

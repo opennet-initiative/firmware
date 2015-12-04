@@ -2,7 +2,7 @@
 CONFIG_IMAGEOPT=y
 CONFIG_VERSIONOPT=y
 CONFIG_VERSION_MANUFACTURER="Opennet Initiative e.V."
-CONFIG_VERSION_NUMBER="0.5.2"
+CONFIG_VERSION_NUMBER="0.5.3"
 
 #setze OpenWRT Downloadpfad+Versionsnummer explizit weil wir die OpenWRT Versionsnummer mit unserer Versionsnummer ueberschreiben.
 CONFIG_VERSION_REPO="http://downloads.openwrt.org/%n/15.05/%S/packages"

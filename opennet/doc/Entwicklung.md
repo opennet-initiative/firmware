@@ -574,11 +574,13 @@ Alterantiv koennen diese Dienste via ``Administration -> System -> Systemstart``
 Release {#release}
 =======
 
-Für ein Release sind lediglich folgende Schritte durchzuführen:
+Für ein Release sind folgende Schritte durchzuführen:
 
 * einen letzten commit (z.B. mit Doku) erstellen
 * den Commit taggen: ``git tag -a v0.5.1``
 * den Commit und das Tag zum Server pushen: ``git push --tags``
+* das erzeugte Build-Verzeichnis nach "stable" verschieben: ``cd /var/www/htdocs/downloads.opennet-initiative.de/openwrt && mv testing/VERSION stable/``
+* die "CONFIG_VERSION_NUMBER" in ``opennet/config/common`` erhöhen
 
 
 Externe Dokumentationen {#doc-external}

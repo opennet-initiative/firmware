@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-10-31 03:37+0200\n"
+"PO-Revision-Date: 2015-12-04 20:05+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -88,6 +88,9 @@ msgstr "Wähle deine Paketquelle in Abhängigkeit von deiner Netzwerkanbindung"
 
 msgid "Country"
 msgstr "Land"
+
+msgid "Currently there are no known routing neighbours."
+msgstr "Derzeit gibt es keine bekannten Routing-Nachbarn."
 
 msgid "Custom"
 msgstr "Selbstgewählt"
@@ -282,6 +285,11 @@ msgstr "MAC"
 
 msgid "Manual: choose your preferred order"
 msgstr "Manuell: wähle Deine bevorzugte Reihenfolge"
+
+msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
+msgstr ""
+"Vielleicht möchtest Du deinen AP mit einem benachbarten AP <a href=\"%s\">"
+"via WLAN verbinden</a>."
 
 msgid "Member Email Address"
 msgstr "Deine EMail Adresse"

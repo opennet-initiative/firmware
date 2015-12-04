@@ -74,6 +74,9 @@ msgstr ""
 msgid "Country"
 msgstr ""
 
+msgid "Currently there are no known routing neighbours."
+msgstr ""
+
 msgid "Custom"
 msgstr ""
 
@@ -249,6 +252,9 @@ msgid "MAC"
 msgstr ""
 
 msgid "Manual: choose your preferred order"
+msgstr ""
+
+msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
 msgstr ""
 
 msgid "Member Email Address"

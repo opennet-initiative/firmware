@@ -93,6 +93,6 @@ msgid "You may want to run a public hotspot in your area."
 msgstr ""
 
 msgid ""
-"You need to attach a physical network device to the 'free' interface in "
-"order to enable the Hotspot feature."
+"You need to <a href=\"%s\">attach a physical network device</a> to the '%s' "
+"interface in order to enable the Hotspot feature."
 msgstr ""

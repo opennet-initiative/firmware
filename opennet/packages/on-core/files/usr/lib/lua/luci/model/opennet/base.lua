@@ -113,33 +113,30 @@ end
 
 function action_settings()
 	require("luci.sys")
-	local uci = require "luci.model.uci"
-	local cursor = uci.cursor()
 	local on_errors = {}
 	if luci.http.formvalue("save") then
 		-- Dienst-Sortierung
 		for _, key in ipairs({"use_olsrd_dns", "use_olsrd_ntp"}) do
 			if luci.http.formvalue(key) then
-				cursor:set("on-core", "settings", key, "1")
+				luci.sys.exec("uci set on-core.settings." .. key .. "=1")
 			else
-				cursor:set("on-core", "settings", key, "0")
+				luci.sys.exec("uci set on-core.settings." .. key .. "=0")
 			end
 		end
 		local services_sorting = luci.http.formvalue("services_sorting")
 		if services_sorting then
 			on_function("set_service_sorting", {services_sorting})
 		end
-		on_function("apply_changes", {"on-core"})
 	end
 	-- POE passthrough
 	if luci.http.formvalue("has_poe_passthrough") then
 		if luci.http.formvalue("gpio_switch_poe_passthrough") then
-			cursor:set("system", "gpio_switch_poe_passthrough", "value", "1")
+			luci.sys.exec("uci set system.gpio_switch_poe_passthrough.value=1")
 		else
-			cursor:set("system", "gpio_switch_poe_passthrough", "value", "0")
+			luci.sys.exec("uci set system.gpio_switch_poe_passthrough.value=0")
 		end
-		on_function("apply_changes", {"on-core"})
 	end
+	on_function("apply_changes", {"on-core"})
 	luci.template.render("opennet/on_settings", { on_errors=on_errors })
 end
 

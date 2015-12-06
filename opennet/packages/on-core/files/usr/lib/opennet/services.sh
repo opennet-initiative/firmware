@@ -39,7 +39,7 @@ get_service_name() {
 
 
 ## @fn notify_service()
-## @brief Aktualisiere den Zeitstempel und die Entfernung (etx) eines Dienstes
+## @brief Aktualisiere den Zeitstempel, die Entfernung (etx) und den Traceroute eines Dienstes
 ## @returns Der Dienstname wird ausgegeben.
 notify_service() {
 	trap "error_trap notify_service '$*'" $GUARD_TRAPS
@@ -67,6 +67,7 @@ notify_service() {
 	set_service_value "$service_name" "timestamp" "$(get_uptime_minutes)"
 	set_service_value "$service_name" "source" "$source"
 	update_service_routing_distance "$service_name"
+	update_service_traceroute "$service_name"
 	echo "$service_name"
 }
 
@@ -85,6 +86,21 @@ update_service_routing_distance() {
 		set_service_value "$service_name" "distance" "$etx"
 		set_service_value "$service_name" "hop_count" "$hop"
 	done
+}
+
+
+## @fn update_service_traceroute()
+## @brief Aktualisiere den traceroute zu einem Ziel
+## @param service_name der zu aktualisierende Dienst
+## @details Diese Funktion sollte regelmäßig für alle Hosts ausgeführt werden.
+update_service_traceroute() {
+	trap "error_trap update_service_traceroute '$*'" $GUARD_TRAPS
+	local service_name="$1"
+	local ip_list
+	local target
+	target=$(get_service_value "$service_name" "host")
+	ip_list=$(get_traceroute "$target")
+	set_service_value "$service_name" "traceroute" "$ip_list"
 }
 
 

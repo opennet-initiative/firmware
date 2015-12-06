@@ -270,6 +270,33 @@ get_hop_count_and_etx() {
 }
 
 
+## @fn get_traceroute()
+## @brief Liefere einen traceroute zu einem Host zurueck.
+## @param host der Ziel-IP
+## @return Eine mit Komma getrennte Liste von IPs
+## @details Traceroute zur Ziel-IP wird mit mtr ermittelt, da das traceroute Programm bei Firewalls sehr lange bis zum Abbruch benötigt.
+get_traceroute() {
+        local target="$1"
+        local result
+	
+	# ignore first lines ("HOST:"; "Start:")
+	get_ip_list() {
+		local ip=$1
+		mtr --no-dns --report --report-cycles=5 "$ip" | grep -v "^[A-Z]" | while read line; do
+			# Ausgabe (Debugging)
+		#echo "$	line"
+			echo "$line" | awk '{ print $2 }'
+		done | grep -v "^$" | tr '\n' ','
+	}
+	local ip_list=$(get_ip_list $target)
+	ip_list=$(echo $ip_list | sed "s/^to,//") #delete first line with "traceroute to ..."
+	ip_list=$(echo $ip_list | sed "s/???,//g") #delete all "???," of mtr output
+	ip_list=${ip_list%,} #delete last "," which is a result of loop
+	#echo $ip_list #DEBUG
+	[ -n "$ip_list" ] && echo "$ip_list" && return 0
+}
+
+
 # Diese Funktion sollte oft (minuetlich?) aufgerufen werden, um die olsrd-Routing-Informationen abzufragen.
 # Dies ist noetig, um deadlocks bei parallelem Zugriff auf den single-thread olsrd zu verhindern.
 # Symptome eines deadlocks: olsrd ist beendet; viele parallele nc-Instanzen; eine davon ist an den txtinfo-Port gebunden.

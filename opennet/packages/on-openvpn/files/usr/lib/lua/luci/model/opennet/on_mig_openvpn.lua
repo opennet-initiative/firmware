@@ -83,7 +83,8 @@ function gateway_info(service_name)
 			hop_count="number|value|hop_count|0", offset="number|value|offset|0",
 			wan_speed_download="number|detail|download", wan_speed_upload="number|detail|upload",
 			public_ugw_server="string|detail|public_host",
-			age="number|function|get_mig_connection_test_age", source="string|value|source"})
+			age="number|function|get_mig_connection_test_age", source="string|value|source",
+			traceroute="string|value|traceroute"})
 	if info then
 		luci.http.prepare_content("application/json")
 		luci.http.write_json(info)

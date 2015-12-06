@@ -162,7 +162,9 @@ You may obtain a copy of the License at
 			<% elseif sorting == "hop" then %>
 				distance = gateway.hop_count;
 			<% end %>
-			result += String.format('%.2f</td>', distance + gateway.offset);
+			result += "<a href=\"http://map.on-i.de/?route=" + filter_traceroute_for_api( gateway.traceroute ) + "\" target=\"_blank\">";
+			result += String.format('%.2f', distance + gateway.offset);
+			result += "</a></td>";
 		}
 		result += '<td>';
 		if (gateway.wan_speed_upload || gateway.wan_speed_download) {
@@ -210,6 +212,48 @@ You may obtain a copy of the License at
 				change_label.style.display = 'none';
 			}
 		}
+	}
+
+	// konvertiere traceroute IP Liste fuer API Anfrage
+	function filter_traceroute_for_api(traceroute) {
+		var ret_traceroute="";
+		var ip_list = String(traceroute).split(",");
+		for (var i=0; i < ip_list.length; i++) { //durchlaufe alle IPs
+			var quadrupel = String(ip_list[i]).split(".");
+			var ip = "";
+			
+			//10.x.y.z -> ignorieren, weil physischer Ort unklar
+			if (quadrupel[1] == "10") {
+				continue;	    
+			}
+			//192.168.0.x -> ignorieren, weil physischer Ort unklar
+			if (quadrupel[0] == "192" && quadrupel[1] == "168" && quadrupel[2] == "0") {
+                                continue;           
+                        }
+			
+			//Konvertiere IPs zusätzlicher Interfaces auf primaere Node IP
+			//192.168.[$x].y -> wenn $x=>11, dann lösche Zehnerpotenz; Bsp: 192.168.21.3->192.168.1.3 
+			if (quadrupel[2] > 10) {
+				for (var j=0; j < quadrupel.length; j++) { //zerlegen
+					if (j == 2) {
+						ip += quadrupel[j] % 10; //Rest von modulo 10
+					} else {
+						ip += quadrupel[j]; 
+					}
+					if (j <= 2) {
+						ip += ".";
+					}
+				}
+			} else {
+				ip = ip_list[i];
+			}
+			ret_traceroute += ip + ",";
+		}
+		//wenn Komma am Ende, dann löschen
+		if (ret_traceroute[ret_traceroute.length-1] == ",") {
+			ret_traceroute = ret_traceroute.substr(0,ret_traceroute.length-1);
+		}
+		return ret_traceroute;
 	}
 
 //]]></script>

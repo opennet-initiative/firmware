@@ -6,6 +6,7 @@
 
 # Ablage fuer profiling-Ergebnisse
 PROFILING_DIR=/var/run/on-profiling
+GIT_REPOSITORY_COMMIT_URL_FMT="http://dev.on-i.de/changeset/%s/on_firmware?format=diff"
 
 # erzeuge das Profiling-Verzeichnis (vorsorglich - es wird wohl unbenutzt bleiben)
 mkdir -p "$PROFILING_DIR"
@@ -101,6 +102,25 @@ summary_profiling() {
 			{ summe+=($1/1000); counter+=1 }
 			END { printf "%16d %16d %16d %s\n", summe, counter, int(summe/counter), "'$(basename "$fname")'"}'
 	done | sort -n
+}
+
+
+## @fn apply_repository_patch()
+## @brief Wende einen commit aus dem Firmware-Repository als Patch an.
+## @param Eine oder mehrere Commit-IDs.
+## @details Dies kann die punktuelle Fehlerbehebung nach einem Release erleichtern.
+##    Die Umgebungsvariable "ON_PATCH_ARGS" wird als Parameter für "patch" verwendet (z.B. "--reverse").
+apply_repository_patch() {
+	# Patch-Argumente können beim Aufruf gesetzt werden - z.B. "--reverse"
+	local patch_args="${ON_PATCH_ARGS:-}"
+	# wir benötigen das Paket "patch"
+	is_package_installed "patch" || { opkg update && opkg install "patch"; }
+	local commit
+	for commit in "$@"; do
+		wget -q -O - "$(printf "$GIT_REPOSITORY_COMMIT_URL_FMT" "$commit")" | patch $patch_args -p4 --directory /
+	done
+	clear_caches
+	clean_luci_restart
 }
 
 # Ende der Doku-Gruppe

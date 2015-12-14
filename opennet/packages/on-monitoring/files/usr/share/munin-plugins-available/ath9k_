@@ -153,6 +153,14 @@ class Station:
                         skip_retry_column = True
                     # skip the header line
                     continue
+                elif (index == 1) and ("MCS0" in line) and (line.index("MCS0") != rate_column):
+                    # the following weird format was found on an Attitude Adjustment host (2012, Linux 3.3.8):
+                    #   type      rate     throughput  ewma prob   this prob  this succ/attempt   success    attempts
+		    #   HT20/LGI  t MCS0        4.9       79.0      100.0          0(  0)       1469        1664
+		    #   HT20/LGI T PMCS1       10.0       85.1      100.0          1(  1)      44661       62798
+		    #   HT20/LGI    MCS2        8.4       51.2       33.3          0(  0)      37495       64721
+                    rate_column = line.index("MCS0")
+                    skip_retry_column = True
                 cutoff_line = line[rate_column:]
                 tokens = cutoff_line.split()
                 entry = {}

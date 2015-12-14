@@ -24,8 +24,7 @@ Die folgende Reihenfolge der Regeln definiert den Paketfluss im Opennet. Die ers
 Für den historischen Vergleich dokumentieren wir hier alle im Zeitverlauf verwendeten Routing-Flüsse.
 
 
-Firmware v0.5 und später
-^^^^^^^^^^^^^^^^^^^^^^^^
+### Firmware v0.5 und später
 
 Regel                                                | Erklärung
 ---------------------------------------------------- | ----------
@@ -48,8 +47,7 @@ Kurz zusammengefasst sollen die obigen Regeln folgende Logik ausdrücken:
 6. alle: Tunnel-Tabelle
 
 
-Firmware vor v0.5
-^^^^^^^^^^^^^^^^^
+### Firmware vor v0.5
 
 Vorbemerkung: beim Booten werden in die main-Tabelle *throw*-Regeln eingefügt, die alle IP-Bereiche von lokal vorhandenen olsr-Netzwerkschnittstellen umfassen.
 

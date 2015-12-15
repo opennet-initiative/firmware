@@ -274,7 +274,6 @@ get_hop_count_and_etx() {
 ## @brief Liefere einen traceroute zu einem Host zurueck.
 ## @param host der Ziel-IP
 ## @return Eine mit Komma getrennte Liste von IPs
-## @details Traceroute zur Ziel-IP wird mit mtr ermittelt, da das traceroute Programm bei Firewalls sehr lange bis zum Abbruch benötigt.
 get_traceroute() {
         local target="$1"
         local result
@@ -282,10 +281,10 @@ get_traceroute() {
 	# ignore first lines ("HOST:"; "Start:")
 	get_ip_list() {
 		local ip=$1
-		mtr --no-dns --report --report-cycles=5 "$ip" | grep -v "^[A-Z]" | while read line; do
-			# Ausgabe (Debugging)
-		#echo "$	line"
-			echo "$line" | awk '{ print $2 }'
+		timeout 20 traceroute -n "$ip" | tr '*' ' ' | while read line; do
+	
+        	# print IP
+	        echo "$line" | awk '{ print $2 }'
 		done | grep -v "^$" | tr '\n' ','
 	}
 	local ip_list=$(get_ip_list $target)

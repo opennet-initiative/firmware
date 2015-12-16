@@ -520,17 +520,9 @@ replace_in_key_value_list() {
 	local search_key="$1"
 	local separator="$2"
 	local value="$3"
-	local key_value
-	sed 's/[ \t]\+/\n/g' | while read key_value; do
-		key=$(echo "$key_value" | cut -f 1 -d "$separator")
-		if [ "$key" = "$search_key" ]; then
-			# nicht ausgeben, falls der Wert leer ist
-			[ -n "$value" ] && echo -n " ${key_value}${separator}${value}" || true
-		else
-			echo -n " $key_value"
-		fi
-	done | sed 's/^ //'
-	return 0
+	awk 'BEGIN { found=0; FS="'$separator'"; OFS=":"; RS="[ \t]"; ORS=" "; }
+	     { if ($1 == "'$search_key'") { print "'$search_key'", '$value'; found=1; } else { print $0; } }
+             END { if (found == 0) print "'$search_key'", '$value' };'
 }
 
 

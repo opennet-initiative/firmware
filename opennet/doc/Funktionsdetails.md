@@ -204,20 +204,16 @@ Die Eigenschaften von Gateway-Diensten werden durch die Dienstverwaltung gespeic
 ### Geschwindigkeitstests {#ugw-speed}
 
 Zu allen UGWs wird in der UGW-Übersicht eine Abschätzung der Upload- und Download-Bandbreite angezeigt.
-Diese wird durch den Download von der URL http://UGW_HOSTNAME/.big und den Upload via netcat zu Port 2222 auf dem UGW-Host ermittelt.
+Diese wird durch den Download von der URL http://UGW_HOSTNAME/.big und den Upload via netcat zum Dienst "discard" (Port 9) auf dem UGW-Host ermittelt.
 
 Die Geschwindigkeiten werden nach jeder Messung mit den vorherigen Werten gemittelt gespeichert. Änderungen setzen sich also nur langsam durch.
 
-Diese Prüfung wird im Tagestakt innerhalb der ugw-Funktion ``ugw_doExtraChecks`` durchgeführt.
+Diese Prüfung wird im Tagestakt innerhalb der ugw-Funktion ``update_public_gateway_speed_estimation`` durchgeführt.
 
 Konfiguration des UGW-Servers:
 
 * Download: Bereitstellung einer beliebigen Datei (> 100 MByte), die unter der URL http://UGW_HOST/.big erreichbar ist
-* Upload: Betrieb eines netcat-Listeners:
-
-    iptables -I INPUT -p tcp --dport 22222 -j ACCEPT
-    
-    (while true; do nc -l -n -p 22222 -q 0 2>&1 >/dev/null; sleep 2; done) &
+* Upload: Aktivierung des ``discard``-Diensts via ``inetd``
 
 
 ### Liste der Gegenstellen {#ugw-server-list}

@@ -4,9 +4,8 @@
 
 is_on_module_installed_and_enabled "on-usergw" || exit 0
 
-update_all_gateway_speeds() {
-	get_services "mesh" \
-			| filter_services_by_value "scheme" "openvpn" \
+update_wan_gateway_speeds() {
+	get_services "${RELAYABLE_SERVICE_PREFIX}-gw" \
 			| filter_reachable_services \
 			| filter_enabled_services \
 			| while read service_name; do
@@ -15,4 +14,4 @@ update_all_gateway_speeds() {
 }
 
 # alle APs fuehren den daily-cronjob zeitgleich aus - wir moechten aber nicht gleichzeitig die UGW-Server belasten
-run_delayed_in_background "$(get_random 7200)" update_all_gateway_speeds
+run_delayed_in_background "$(get_random 7200)" update_wan_gateway_speeds

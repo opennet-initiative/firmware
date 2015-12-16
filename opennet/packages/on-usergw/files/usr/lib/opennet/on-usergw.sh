@@ -7,7 +7,7 @@ ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 MESH_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-ugw.template
 TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-services.csv
 ## eine beliebige Portnummer, auf der wir keinen udp-Dienst vermuten
-SPEEDTEST_UPLOAD_PORT=29418
+SPEEDTEST_UPLOAD_PORT=discard
 SPEEDTEST_SECONDS=20
 ## dieser Wert muss mit der VPN-Konfigurationsvorlage synchron gehalten werden
 MESH_OPENVPN_DEVICE_PREFIX=tap
@@ -184,10 +184,10 @@ update_public_gateway_speed_estimation() {
 	# Falls keine vorherigen Werte vorliegen, dann werden die aktuellen verwendet.
 	local prev_download
 	local prev_upload
-	prev_download=$(get_service_detail "$service_name" "wan_speed_download" "${download_speed:-0}")
-	prev_upload=$(get_service_detail "$service_name" "wan_speed_upload" "${upload_speed:-0}")
-	set_service_detail "$service_name" "wan_speed_download" "$(( (3 * download_speed + prev_download) / 4 ))"
-	set_service_detail "$service_name" "wan_speed_upload" "$(( (3 * download_speed + prev_upload) / 4 ))"
+	prev_download=$(get_service_value "$service_name" "wan_speed_download" "${download_speed:-0}")
+	prev_upload=$(get_service_value "$service_name" "wan_speed_upload" "${upload_speed:-0}")
+	set_service_value "$service_name" "wan_speed_download" "$(( (3 * download_speed + prev_download) / 4 ))"
+	set_service_value "$service_name" "wan_speed_upload" "$(( (3 * upload_speed + prev_upload) / 4 ))"
 	set_service_value "$service_name" "wan_speed_timestamp" "$(get_uptime_minutes)"
 }
 
@@ -319,8 +319,7 @@ measure_upload_speed() {
 	local host="$1"
 	local target_dev
 	target_dev=$(get_target_route_interface "$host")
-	# UDP-Verkehr laesst sich auch ohne einen laufenden Dienst auf der Gegenseite erzeugen
-	nc -u "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
+	nc "$host" "$SPEEDTEST_UPLOAD_PORT" </dev/zero >/dev/null 2>&1 &
 	local pid="$!"
 	sleep 3
 	[ ! -d "/proc/$pid" ] && return

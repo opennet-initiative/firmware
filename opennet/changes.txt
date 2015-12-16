@@ -5,6 +5,10 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
+* Gateway-Liste: jeder Gateway ist verlinkt mit einer Karte auf der die Route vom eigenen AP zum Gateway visualisiert ist
+* Fehlerkorrekturen:
+** POE-Passthrough-Umschalter funktioniert nun
+** UGW: Korrektur der Ermittlung und Announcierung der Uplink-Bandbreite
 
 = Interne Änderungen =
 

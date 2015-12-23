@@ -44,9 +44,15 @@ disable_monitoring() {
 ## @details Dies ist eine Umsetzung der munin-typischen Selbsterkennung von Plugin-Zielen.
 enable_suggested_munin_plugin_names() {
 	local base_plugin="$1"
+	local plugin_file="${IPKG_INSTROOT:-}/usr/share/munin-plugins-available/$base_plugin"
 	local target_dir="${IPKG_INSTROOT:-}/usr/sbin/munin-node-plugin.d"
 	local source_dir="../../share/munin-plugins-available"
-	"${IPKG_INSTROOT:-}/usr/share/munin-plugins-available/$base_plugin" suggest | while read scope; do
+	# wird der "suggest"-Mechanismus unterstuetzt?
+	local capabilities
+	capabilities=$(grep "#%#[[:space:]]\+capabilities[[:space:]]*=" "$plugin_file" | cut -f 2 -d "=")
+	# keine Ausfuehrung ohne "suggest"-Faehigkeit
+	echo "$capabilities" | grep -qw "suggest" || return 0
+	"$plugin_file" suggest | while read scope; do
 		[ -e "$target_dir/${base_plugin}${scope}" ] && continue
 		ln -s "$source_dir/$base_plugin" "$target_dir/${base_plugin}${scope}"
 	done

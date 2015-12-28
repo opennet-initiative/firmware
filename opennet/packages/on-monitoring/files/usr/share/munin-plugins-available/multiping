@@ -4,12 +4,16 @@
 # multiping plugin for munin and openwart based on Jimmy Olsen's original script
 #
 # The list of target hosts (IPs or hostnames) are taken from the uci variable
-# "on-monitoring.plugin_multiping.hosts".
+# "on-monitoring.plugin_multiping.hosts". This uci variable is a list of host
+# specifications. Each host specification consist at least of a host (IP or hostname).
+# Optionally it may also contain a label separated by an equal sign ("=").
+# No spaces are allowed.
 #
 # Specify additional hosts:
 #  uci set on-monitoring.plugin_multiping=plugin
 #  uci add_list on-monitoring.plugin_multiping.hosts="8.8.8.8"
 #  uci add_list on-monitoring.plugin_multiping.hosts="192.168.0.254"
+#  uci add_list on-monitoring.plugin_multiping.hosts="10.1.0.1=gateway"
 #
 #
 # Copyright (C) 2004 Jimmy Olsen
@@ -33,34 +37,60 @@
 #%# family=manual
 
 
+set -eu
+
+
+clean_fieldname() {
+	echo "$1" | sed 's/[^A-Za-z0-9_]/_/g'
+}
+
+
+get_label_from_host_spec() {
+	# Remove the first token up to the first "=" character.
+	# Return the host_spec itself if there is no "=" character.
+	echo "$1" | sed 's/^[^=]*=//'
+}
+
+
+get_host_from_host_spec() {
+	# Remove everything starting with the first "=" character.
+	# Return the host_spec itself if there is no "=" character.
+	echo "$1" | sed 's/=.*//'
+}
+
+
 hosts=$(uci -q get on-monitoring.plugin_multiping.hosts)
 [ -z "$hosts" ] && hosts="downloads.openwrt.org"
 
-if [ "$1" = "config" ]; then
-    echo graph_title Ping times
-    echo 'graph_args --base 1000 -l 0'
-    echo 'graph_vlabel seconds'
-    echo 'graph_category network'
-    echo 'graph_info This graph shows ping RTT statistics.'
-    site=0
-    for host in $hosts; do
-	echo "site${site}_rtt.label $host"
-	echo "site${site}_rtt.info Ping RTT statistics for $host."
-	echo "site${site}_rtt.draw LINE2"
-	echo "site${site}_packetloss.label $host packet loss"
-	echo "site${site}_packetloss.graph no"
-        : $((site++))
-    done
-    exit 0
+if [ "${1:-}" = "config" ]; then
+	echo graph_title Ping times
+	echo 'graph_args --base 1000 -l 0'
+	echo 'graph_vlabel seconds'
+	echo 'graph_category network'
+	echo 'graph_info This graph shows ping RTT statistics.'
+	for host_spec in $hosts; do
+		label=$(get_label_from_host_spec "$host_spec")
+		field=$(clean_fieldname "$label")
+		host=$(get_host_from_host_spec "$host_spec")
+		echo "host_${field}_rtt.label $label"
+		echo "host_${field}_rtt.info Ping RTT statistics for $label."
+		echo "host_${field}_rtt.draw LINE2"
+		echo "host_${field}_packetloss.label $label packet loss"
+		echo "host_${field}_packetloss.graph no"
+	done
+	exit 0
 fi
 
-site=0
-for host in $hosts; do
-    ping -c 2 ${host} 2>/dev/null | awk '
-        BEGIN { packetloss_regex="([0-9]+)% packet loss"; }
-	{
-	    if ($0 ~ packetloss_regex) { print("'site${site}_packetloss.value'", gensub("^.*"packetloss_regex".*$", "\\1", "g")); };
-            if (/min\/avg\/max/) { split($4, tokens, "/"); print "'site${site}_rtt.value'", tokens[1]/1000; };
-        }'
-    : $((site++))
+for host_spec in $hosts; do
+	label=$(get_label_from_host_spec "$host_spec")
+	field=$(clean_fieldname "$label")
+	host=$(get_host_from_host_spec "$host_spec")
+	ping -c 2 ${host} 2>/dev/null | awk '
+		BEGIN { packetloss_regex="([0-9]+)% packet loss"; }
+		{
+			if ($0 ~ packetloss_regex)
+				{ print("'host_${field}_packetloss.value'", gensub("^.*"packetloss_regex".*$", "\\1", "g")); };
+			if (/min\/avg\/max/)
+				{ split($4, tokens, "/"); print "'host_${field}_rtt.value'", tokens[1]/1000; };
+		}'
 done

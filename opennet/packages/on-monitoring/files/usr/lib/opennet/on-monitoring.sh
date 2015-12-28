@@ -90,7 +90,7 @@ add_monitoring_multiping_host() {
 	local new_spec
 	[ -n "$label" ] && new_spec="$host=$label" || new_spec="$host"
 	local old_spec
-	_prepare_on_monitoring_plugin_settings "plugin_multiping"
+	_prepare_on_monitoring_plugin_settings "multiping"
 	for old_spec in $(uci -q get "on-monitoring.plugin_multiping.hosts"); do
 		# alter Eintrag ist vorhanden und korrekt - es ist nichts zu tun
 		[ "$old_spec" = "$new_spec" ] && return 0

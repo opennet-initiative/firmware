@@ -51,6 +51,11 @@ case "$script_type" in
 		get_servers_from_dhcp_options >"$MIG_PREFERRED_SERVERS_FILE"
 		update_dns_servers
 		update_ntp_servers
+		is_on_module_installed_and_enabled "on-monitoring" && {
+			# "route_vpn_gateway" ist eigentlich sinnvoller - aber er liefert keine Ping-Antwort
+			add_monitoring_multiping_host "$route_network_1" "gateway"
+			add_monitoring_multiping_host "$trusted_ip" "ugw"
+		}
 		;;
 	down)
 		# löse einen baldigen Verbindungsaufbau aus
@@ -61,6 +66,7 @@ case "$script_type" in
 		rm -f "$MIG_PREFERRED_SERVERS_FILE"
 		update_dns_servers
 		update_ntp_servers
+		# die monitoring-Host-Eintraege (siehe oben) muessen nicht entfernt werden - dies geschieht bei der Paket-Deinstallation
 		;;
 esac 2>&1 | logger -t mig-updown
 

@@ -38,6 +38,11 @@ endef
 define Package/on-openvpn/postrm
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+# multiping-Hosts aus Monitoring entfernen (siehe updown-Ereignis-Skript)
+on-function is_package_installed "on-monitoring" && {
+	on-function del_monitoring_multiping_host_by_label "gateway"
+	on-function del_monitoring_multiping_host_by_label "ugw"
+}
 on-function on_opkg_postrm_default
 endef
 

@@ -72,5 +72,52 @@ remove_suggested_munin_plugin_names() {
 	done
 }
 
+
+_prepare_on_monitoring_plugin_settings() {
+	local plugin="$1"
+	[ -e "/etc/config/on-monitoring" ] || touch "/etc/config/on-monitoring"
+	[ -n "$(uci_get "on-monitoring.plugin_$plugin")" ] || uci set "on-monitoring.plugin_${plugin}=plugin"
+}
+
+
+## @fn add_monitoring_multiping_host()
+## @param host Ziel-Host (IP oder Hostname)
+## @param label Dauerhaftes Label des Ping-Ziels (dies ermoeglicht die Ersetzung oder Loeschung)
+## @brief Füge einen via multiping zu überwachenden Host hinzu. Duplikate werden entfernt.
+add_monitoring_multiping_host() {
+	local host="$1"
+	local label="${2:-}"
+	local new_spec
+	[ -n "$label" ] && new_spec="$host=$label" || new_spec="$host"
+	local old_spec
+	_prepare_on_monitoring_plugin_settings "plugin_multiping"
+	for old_spec in $(uci -q get "on-monitoring.plugin_multiping.hosts"); do
+		# alter Eintrag ist vorhanden und korrekt - es ist nichts zu tun
+		[ "$old_spec" = "$new_spec" ] && return 0
+		# Eintrag mit identischem Label ist vorhanden - Eintrag ersetzen
+		if [ -n "$label" -a "$label" = "$(echo "$old_spec" | cut -f 2- -d "=")" ]; then
+			uci -q del_list "on-monitoring.plugin_multiping.hosts=$old_spec"
+			break
+		fi
+	done
+	uci add_list "on-monitoring.plugin_multiping.hosts=$new_spec"
+	uci commit "on-monitoring"
+}
+
+
+## @fn del_monitoring_multiping_host_by_label()
+## @param label Dauerhaftes Label des Ping-Ziels
+## @brief Lösche den multiping-Eintrag mit diesem Namen.
+## @returns Keine Rückgabe. Die Funktion verläuft immer erfolgreich, auch wenn der Host nicht gefunden wurde.
+del_monitoring_multiping_host_by_label() {
+	local label="$1"
+	local host_spec
+	for host_spec in $(uci -q get "on-monitoring.plugin_multiping.hosts"); do
+		[ "$label" = "$(echo "$host_spec" | cut -f 2- -d "=")" ] || continue
+		uci -q del_list "on-monitoring.plugin_multiping.hosts=$host_spec"
+	done
+	uci commit "on-monitoring"
+}
+
 # Ende der Doku-Gruppe
 ## @}

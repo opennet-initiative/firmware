@@ -346,7 +346,7 @@ update_traceroute_gw_cache() {
         local service
         local traceroute
         (
-                get_services "gw" | while read service; do
+                get_services "gw" | pipe_service_attribute "host" | sort | uniq | while read service; do
                         host=$(get_service_value "$service" "host")
                         #do traceroute and get result as csv back
                         traceroute=$(get_traceroute "$host")

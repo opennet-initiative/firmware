@@ -278,6 +278,9 @@ get_traceroute() {
         local target="$1"
         local result
 	
+	# wenn kein Parameter uebergeben, dann breche ab
+	[ -z "$target" ] && return 0
+	
 	# ignore first lines ("HOST:"; "Start:")
 	get_ip_list() {
 		local ip=$1

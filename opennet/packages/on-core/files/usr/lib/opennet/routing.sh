@@ -287,9 +287,10 @@ get_traceroute() {
 	        echo "$line" | awk '{ print $2 }'
 		done | grep -v "^$" | tr '\n' ','
 	}
-	local ip_list=$(get_ip_list $target)
-	ip_list=$(echo $ip_list | sed "s/^to,//") #delete first line with "traceroute to ..."
-	ip_list=$(echo $ip_list | sed "s/???,//g") #delete all "???," of mtr output
+	local ip_list 
+	ip_list=$(get_ip_list "$target")
+	ip_list=$(echo "$ip_list" | sed "s/^to,//") #delete first line with "traceroute to ..."
+	ip_list=$(echo "$ip_list" | sed "s/???,//g") #delete all "???," of mtr output
 	ip_list=${ip_list%,} #delete last "," which is a result of loop
 	#echo $ip_list #DEBUG
 	[ -n "$ip_list" ] && echo "$ip_list" && return 0

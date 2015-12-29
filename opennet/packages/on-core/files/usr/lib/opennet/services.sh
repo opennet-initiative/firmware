@@ -53,15 +53,14 @@ notify_service() {
 	local details="$8"
 	local service_name
 	service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
-	if ! is_existing_service "$service_name"; then
-		# diese Attribute sind Bestandteil des Namens und aendern sich eigentlich nicht
-		set_service_value "$service_name" "service" "$service"
-		set_service_value "$service_name" "scheme" "$scheme"
-		set_service_value "$service_name" "host" "$host"
-		set_service_value "$service_name" "port" "$port"
-		set_service_value "$service_name" "protocol" "$protocol"
-		set_service_value "$service_name" "path" "$path"
-	fi
+	# Diese Attribute duerften sich nicht aendern, aber wir wollen sicherheitshalber lieber kaputten
+	# Werten vorbeugen.
+	set_service_value "$service_name" "service" "$service"
+	set_service_value "$service_name" "scheme" "$scheme"
+	set_service_value "$service_name" "host" "$host"
+	set_service_value "$service_name" "port" "$port"
+	set_service_value "$service_name" "protocol" "$protocol"
+	set_service_value "$service_name" "path" "$path"
 	# dies sind die flexiblen Attribute
 	set_service_value "$service_name" "details" "$details"
 	set_service_value "$service_name" "timestamp" "$(get_uptime_minutes)"

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "on-function update_traceroute_gw_cache" | schedule_task

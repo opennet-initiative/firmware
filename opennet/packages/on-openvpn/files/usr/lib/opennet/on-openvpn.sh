@@ -13,6 +13,7 @@ ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
 MIG_PREFERRED_SERVERS_FILE=/var/run/mig-tunnel-servers.list
 ZONE_TUNNEL=on_vpn
 NETWORK_TUNNEL=on_vpn
+TRACEROUTE_FILENAME="traceroute_gw_cache"
 
 
 ## @fn get_on_openvpn_default()
@@ -316,6 +317,47 @@ get_mig_tunnel_servers() {
 	[ -f "$MIG_PREFERRED_SERVERS_FILE" ] || return 0
 	awk <"$MIG_PREFERRED_SERVERS_FILE" '{ if ($1 == "'"$stype"'") print $2 }'
 }
+
+
+## @fn get_traceroute()
+## @brief Liefere den gecachten Traceroute zum Service zurück
+## @param Service Name
+## @returns CSV Liste von Hops
+get_traceroute_csv() {
+        local service_name="$1"
+        local traceroute
+	local host
+
+	host=$(get_service_value "$service_name" "$host")
+	traceroute=$(get_service_value "$TRACEROUTE_FILENAME" "$host")
+
+        # noch keine Tests durchgefuehrt?
+        [ -z "$traceroute" ] && return 0
+        echo "$traceroute"
+}
+
+
+## @fn update_traceroute_gw_cache()
+## @brief Aktualisiere den traceroute zu allen Gateway Servern.
+## @details Fuer jedes Gateway wird der traceroute ermittlelt. Ist der letzte traceroute zu lange her, wird er neuer traceroute gemacht.
+update_traceroute_gw_cache() {
+        trap "error_trap update_traceroute_gw_cache '$*'" $GUARD_TRAPS
+        local host
+        local service
+        local traceroute
+        (
+                get_services "gw" | while read service; do
+                        host=$(get_service_value "$service" "host")
+                        #do traceroute and get result as csv back
+                        traceroute=$(get_traceroute "$host")
+                        #update cache file
+                        $(set_service_value "$TRACEROUTE_FILENAME" "$host" "$traceroute")
+                done
+        ) | update_file_if_changed "$TRACEROUTE_FILENAME" || return 0
+        # es gab eine Aenderung
+        msg_info "updating traceroute to gateway servers"
+}
+
 
 # Ende der Doku-Gruppe
 ## @}

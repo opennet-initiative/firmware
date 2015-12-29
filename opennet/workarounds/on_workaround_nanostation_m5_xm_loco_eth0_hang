@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+# Aufgrund eines Hardware-Fehlers bleibt die eth0-Verbindung der Nanostation M5 loco XW gelegentlich haengen.
+# Siehe: https://dev.openwrt.org/ticket/19085
+# Anwendung: scp on_workaround_nanostation_m5_xm_loco_eth0_hang root@192.168.X.Y:/etc/cron.5mins/
+#
+# Dieses Skript sollte im Fuenf-Minuten-Takt ausgefuehrt werden.
+
+set -eu
+
+PORT=eth0
+PHY_ID_SOURCE=/sys/devices/platform/ag71xx-mdio.0/ag71xx-mdio.0\:01/phy_id
+
+
+is_no_carrier_state() {
+	ip link show dev "$PORT" | grep -q "NO-CARRIER"
+}
+
+error_message=""
+
+# unter gewissen Umstaenden faehrt das eth0-Interface nach dem Booten nicht hoch
+if ip link show dev "$PORT" >/dev/null 2>&1; then
+	# Fehler sind nur dann moeglich, wenn "NO-CARRIER" gesetzt ist (zweimal mit kurzer Pause pruefen)
+	if is_no_carrier_state && sleep 10 && is_no_carrier_state; then
+		last_port_message=$(dmesg | grep "$PORT" | tail -1)
+		echo "$last_port_message" | grep -q "entered disabled state" && error_message="eth0-disabled-Bug: rebooting"
+		echo "$last_port_message" | grep -q "link down" && error_message="eth0-down-Bug: rebooting"
+		true
+	fi
+else
+	error_message="lost $PORT interface"
+fi
+
+# Mindest-Uptime von 10 Minuten einhalten
+uptime=$(cut -f 1 -d . /proc/uptime)
+[ -n "$error_message" -a "$uptime" -lt 600 ] && logger -t "ETH0_WATCHDOG" "Not rebooting that early for: $error_message" && exit 0
+
+# kein Fehler? Kein reboot ...
+[ -z "$error_message" ] && exit 0
+
+# reboot
+on-function add_banner_event "$error_message $(cat "$PHY_ID_SOURCE")"
+sync
+sleep 5
+reboot

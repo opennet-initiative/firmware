@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# In der ath9k-Version der Firmware v0.5.1 bleibt der Master einer Verbindung manchmal haengen.
+# Symptome: alle Clients trennen sich nach einer Weile. Zuvor bleibt der TX-Zaehler auf der Master-Seite stehen.
+# Loesung: "wifi" fuer neue Initialisierung des Masters
+# Anwendung: scp on_workaround_wifi_master_hangs root@192.168.X.Y:/etc/cron.minutely/
+#
+# VORSICHT: das WLAN-Interface _muss_ OLSR-Verkehr fuehren - ansonsten wird das Interface im Minutentakt neugestartet
+#
+# Dieses Skript sollte im Minuten-Takt ausgefuehrt werden.
+
+set -eu
+
+WIFI_IF="wlan0"
+LAST_RX_COUNTER_FILE="/tmp/$(basename "$0")-${WIFI_IF}.cache"
+
+# der workaround ist nur fuer Master anwendbar
+iwinfo "$WIFI_IF" info | grep -q "Mode: Master" || exit 0
+
+get_rx_counters() {
+	iwinfo "$WIFI_IF" assoclist | grep -w "RX:"
+}
+
+if [ -e "$LAST_RX_COUNTER_FILE" ] && get_rx_counters | cmp -s "$LAST_RX_COUNTER_FILE"; then
+	# die Zaehler sind stehengeblieben
+	on-function add_banner_event "wifi master hangs"
+	wifi
+else
+	# neue Zaehler speichern
+	get_rx_counters >"$LAST_RX_COUNTER_FILE"
+fi

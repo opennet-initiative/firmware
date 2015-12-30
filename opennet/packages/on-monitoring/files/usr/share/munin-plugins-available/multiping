@@ -1,7 +1,7 @@
 #!/bin/sh
 # -*- sh -*-
 #
-# multiping plugin for munin and openwart based on Jimmy Olsen's original script
+# multiping plugin for munin and openwrt based on Jimmy Olsen's original script
 #
 # The list of target hosts (IPs or hostnames) are taken from the uci variable
 # "on-monitoring.plugin_multiping.hosts". This uci variable is a list of host

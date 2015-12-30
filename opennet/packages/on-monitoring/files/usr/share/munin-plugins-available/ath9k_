@@ -46,7 +46,7 @@
 #    * python: ignore everything up to the next three consecutive quotes
 # Thus we may place shell code here that will take care for selecting an interpreter.
 
-# prefer micropython if it is available - otherwise fall back to any python (2 or 3)
+# prefer micropython if it is available - otherwise fall back to python 3
 if which micropython >/dev/null; then
     /usr/bin/micropython "$0" "$@"
 else
@@ -74,7 +74,7 @@ The following graphs are generated for each physical ath9k interface:
 """
 
 
-plugin_version = "0.2"
+plugin_version = "0.3"
 
 STATION_TRAFFIC_COUNTERS = ("rx_bytes", "tx_bytes", "rx_packets", "tx_packets")
 STATION_EVENT_COUNTERS = ("tx_retry_count", "tx_retry_failed", "tx_filtered", "tx_fragments",
@@ -371,6 +371,8 @@ class Ath9kDriver:
         self.interfaces = tuple(self._parse_interfaces())
 
     def _parse_interfaces(self):
+        if not os.path.exists(self._path):
+            return
         for phy in os.listdir(self._path):
             phy_path = os.path.join(self._path, phy)
             for item in os.listdir(phy_path):

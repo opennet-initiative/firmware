@@ -34,6 +34,8 @@ configure_dnsmasq() {
 	uci set "dhcp.@dnsmasq[0].rebind_protection=0"
 	# keine Speicherung von DHCP leases
 	uci set "dhcp.@dnsmasq[0].quietdhcp=1"
+	# erlaube reverse lookup von 192er und 10er privaten IP Adressen
+	uci set "dhcp.@dnsmasq[0].boguspriv=0"
 	apply_changes dhcp
 }
 

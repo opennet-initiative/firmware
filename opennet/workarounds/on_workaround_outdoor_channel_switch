@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# Pruefe in regelmaessigen Abstaenden, ob der AP aufgrund von DFS auf einen indoor-Kanal gewechselt ist.
+# Falls ja, dann wird ein Wechsel auf den konfigurierten Outdoor-Kanal versucht.
+#
+# Bedingungen fuer Einsatz dieses Workarounds:
+#  * das WLAN-Interface ist auf einen outdoor-Kanal eingestellt
+#  * das WLAN-Interface ist ein 5-GHz-Interface (sonst schlaegt die Kanelerkennung fehl)
+#  * der AP ist aufgrund seiner Lage keiner exzessiven radar-aehnlichen Impulsflut ausgesetzt
+#    (ansonsten wird die Verbindung stoerend oft neu aufgebaut)
+# Zwischen zwei Reset-Vorgaengen wird eine minimale definierte Wartzeit eingehalten.
+#
+# Dieser Workaround sollte im Minutentakt angewandt werden.
+#
+# Anwendung:
+#   scp on_workaround_outdoor_channel_switch root@192.168.x.y:/etc/cron.minutely/
+
+set -eu
+
+WIFI_DEVICE="wlan0"
+RESET_TIMESTAMP_FILE="/tmp/$(basename "$0").timestamp"
+MINIMUM_RESET_PERIOD_SECONDS=900
+
+
+is_outdoor_channel() {
+	local channel
+	channel=$(iwinfo "$WIFI_DEVICE" info | grep -w Channel: | awk '{ print $4 }')
+	# dreistellige Zahl beginnend mit 1?
+	echo "$channel" | grep -q "^1[0-9][0-9]$" && return 0
+	return 1
+}
+
+
+is_reset_period_elapsed() {
+	# keine Datei? Reset ist erlaubt ...
+	[ -e "$RESET_TIMESTAMP_FILE" ] || return 0
+	local timestamp
+	local now
+	timestamp=$(cat "$RESET_TIMESTAMP_FILE")
+	now=$(date +%s)
+	# schon abgelaufen?
+	[ "$((timestamp + MINIMUM_RESET_PERIOD_SECONDS))" -lt "$now" ] && return 0
+	return 1
+}
+
+
+# Abbruchbedingungen?
+is_outdoor_channel && exit 0
+is_reset_period_elapsed || exit 0
+
+# indoor-Kanal und Periode ist abgelaufen - also reset des wifi-Interface
+in-function add_banner_event "triggered wifi outdoor channel workaround"
+wifi

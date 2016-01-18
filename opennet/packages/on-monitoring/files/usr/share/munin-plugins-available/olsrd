@@ -194,6 +194,10 @@ def get_olsr_links():
     result = []
     for line in query_olsrd_txtservice("links"):
         tokens = line.split()
+        # the "cost" may be infinite
+        if tokens[-1] == "INFINITE":
+            # "inf" is the python keyword for "maximum float number"
+            tokens[-1] = "inf"
         link = {}
         link["local"] = tokens.pop(0)
         remote = tokens.pop(0)

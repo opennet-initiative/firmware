@@ -49,5 +49,6 @@ is_outdoor_channel && exit 0
 is_reset_period_elapsed || exit 0
 
 # indoor-Kanal und Periode ist abgelaufen - also reset des wifi-Interface
-in-function add_banner_event "triggered wifi outdoor channel workaround"
+on-function add_banner_event "wifi outdoor channel workaround"
+date +%s >"$RESET_TIMESTAMP_FILE"
 wifi

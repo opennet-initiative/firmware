@@ -22,6 +22,11 @@ RESET_TIMESTAMP_FILE="/tmp/$(basename "$0").timestamp"
 MINIMUM_RESET_PERIOD_SECONDS=900
 
 
+is_wifi_master() {
+	iwinfo "$WIFI_DEVICE" info | grep -qw "Mode: Master"
+}
+
+
 is_outdoor_channel() {
 	local channel
 	channel=$(iwinfo "$WIFI_DEVICE" info | grep -w Channel: | awk '{ print $4 }')
@@ -45,6 +50,7 @@ is_reset_period_elapsed() {
 
 
 # Abbruchbedingungen?
+is_wifi_master || exit 0
 is_outdoor_channel && exit 0
 is_reset_period_elapsed || exit 0
 

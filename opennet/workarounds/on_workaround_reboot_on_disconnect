@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Fuehre naechtlich einen Reboot aus, falls die Anzahl der Routen einen
+# Minimalwert unterschreitet. Dies ist eine (schlechte) Abhilfe, falls ein
+# Host gelegentlich aus unklaren Gruenden unerreichbar wird.
+#
+# Dieser Workaround sollte nicht haeufiger als taeglich ausgefuehrt werden, um
+# reboot-Schleifen unter unguenstigen Bedingungen zu vermeiden.
+#
+# Anwendung:
+#   scp on_workaround_reboot_on_disconnect root@192.168.x.y:/etc/cron.daily/
+#
+
+set -eu
+
+MIN_ROUTE_COUNT=5
+
+route_count=$(ip route show table olsrd | wc -l)
+
+[ "$route_count" -ge "$MIN_ROUTE_COUNT" ] && exit 0
+
+on-function add_banner_event "reboot on disconnect workaround"
+reboot

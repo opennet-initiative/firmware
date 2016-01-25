@@ -400,7 +400,8 @@ class WifiPhy:
         if scope == "dfs_events":
             yield "multigraph {graph_base}_dfs_events".format(graph_base=self._graph_base)
             yield "graph_title DFS Events"
-            yield "graph_args --base 1000"
+            yield "graph_vlabel events per second"
+            yield "graph_args --base 1000 --logarithmic"
             yield "graph_category wireless"
 	    for label, fieldname in DFS_EVENT_COUNTERS.items():
                 yield "{fieldname}.label {label}".format(fieldname=fieldname, label=label)

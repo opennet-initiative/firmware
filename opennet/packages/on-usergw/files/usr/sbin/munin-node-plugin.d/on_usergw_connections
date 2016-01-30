@@ -25,13 +25,13 @@ def get_fieldname(text):
 
 
 def get_connections_by_target():
-    def parse_assignments(tokens):
+    def parse_assignments(tokens, numeric_keys):
         try:
             result = {key: value for key, value in [token.split("=", 1) for token in tokens]}
         except ValueError:
             # fehlende Zuordnung ("=")
             return None
-        for key in ("sport", "dport", "packets", "bytes"):
+        for key in numeric_keys:
             try:
                 result[key] = int(result[key])
             except KeyError:
@@ -40,28 +40,51 @@ def get_connections_by_target():
     target_connections = {}
     with open("/proc/net/nf_conntrack", "r") as conntrack_file:
         for line in conntrack_file.readlines():
-            """ example line (splitted):
+            """ example lines (splitted):
+                Linux 3.18:
                     ipv4     2 udp      17 176
                     src=192.168.2.155 dst=192.168.2.254 sport=53231 dport=5100 packets=16613 bytes=1876140
                     src=62.141.37.125 dst=172.16.241.254 sport=1600 dport=53231 packets=26214 bytes=3956803
                     [ASSURED] use=2
+                Linux 3.2:
+                    ipv4     2 udp      17 179
+                    src=192.168.2.218 dst=192.168.0.254 sport=55955 dport=1600
+                    src=62.141.37.125 dst=139.30.241.200 sport=1600 dport=55955
+                    [ASSURED] mark=0 zone=0 use=2
             """
             tokens = line.split()
             protocol = tokens[2]
+            expire_timer = int(tokens[4])
             if protocol != UGW_SERVER_PROTOCOL:
                 continue
-            forward_tokens = tokens[5:][:6]
-            backward_tokens = tokens[11:][:6]
-            forward = parse_assignments(forward_tokens)
-            backward = parse_assignments(backward_tokens)
+            if "packets=" in line:
+                # Linux 3.18 or newer
+                numeric_keys = ("sport", "dport", "packets", "bytes")
+                forward_tokens = tokens[5:][:6]
+                backward_tokens = tokens[11:][:6]
+            else:
+                # probably Linux 3.2
+                numeric_keys = ("sport", "dport")
+                forward_tokens = tokens[5:][:4]
+                backward_tokens = tokens[9:][:4]
+            forward = parse_assignments(forward_tokens, numeric_keys)
+            backward = parse_assignments(backward_tokens, numeric_keys)
             if not forward or not backward:
                 # fehlende forward/backwards-Informationen
                 continue
             if backward["sport"] != UGW_SERVER_PORT:
                 continue
             # Test-Verbindungen ignorieren
-            if forward["packets"] < UGW_CONNECTION_MIN_PACKETS:
+            if "packets" in forward and (forward["packets"] < UGW_CONNECTION_MIN_PACKETS):
                 continue
+            else:
+                # Ohne den Paketzaehler koennen wir nicht pruefen, ob die Verbindung genutzt wird.
+                # Der expire-Timer ist die einzige halbwegs brauchbare Alternative, um zumindest
+                # nur die frischen Tests fehlzuerkennen.
+                # Der Schwellwert ergibt sich aus dem nf-conntrack-Standard-Verfall (180) und
+                # dem konfigurierten keepalive (10) von openvpn.
+                if expire_timer < (180 - 10):
+                    continue
             # es ist eine echte Nutzertunnel-Verbindung
             if not backward["src"] in target_connections:
                 target_connections[backward["src"]] = {"count": 1}

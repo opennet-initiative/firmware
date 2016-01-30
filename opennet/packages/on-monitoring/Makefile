@@ -36,6 +36,7 @@ on-function on_opkg_postinst_default
 
 # automatisch konfigurierte munin-Plugins verlinken
 on-function enable_suggested_munin_plugin_names "wireless_channel_occupation_"
+on-function enable_suggested_munin_plugin_names "wireless_channel_active_"
 
 on-function schedule_task <<-EOF
 	# Leider, leider ist muninlite noch nicht installiert, wenn diese Funktion aufgerufen wird.

@@ -5,6 +5,7 @@
 #   * rate control statistics ("rc_stats")
 #   * events (dropped, transmitted, beacon loss, ...)
 #   * traffic (packets, bytes)
+#   * DFS events (processed patterns, approved signals)
 #
 # All data is collected for each separate station (in case of multiple
 # connected peers). Combined graphs are provided as a summary.
@@ -490,7 +491,7 @@ if __name__ == "__main__":
     ath9k = Ath9kDriver(SYS_BASE_DIR, GRAPH_BASE_NAME)
     # parse arguments
     if len(sys.argv) > 1:
-        if sys.argv[1]=="config":
+        if sys.argv[1] == "config":
             for item in ath9k.get_config(get_scope()):
                 print(item)
             sys.exit(0)

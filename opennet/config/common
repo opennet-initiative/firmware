@@ -111,7 +111,3 @@ CONFIG_PACKAGE_kmod-usbip=m
 
 # Paket-Minimierung
 CONFIG_PACKAGE_ppp=m
-
-# traceroute und mtr mit ONI Ortsinformationen
-# TODO: dies loest eine Abhaengigkeit auf mtr->libncurses aus - vielleicht mtr nur optional verwenden (ohne Abhaengigkeit)?
-CONFIG_PACKAGE_traceroute-oni-names=m

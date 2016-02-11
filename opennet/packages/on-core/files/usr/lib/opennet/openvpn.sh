@@ -312,6 +312,10 @@ log_openvpn_events_and_disconnect_if_requested() {
 	local service_name
 	local pid_file
 	local established_indicator_file
+	local service_type
+	local service_host
+	local now
+	local same_host_service
 	service_name=$(basename "${config%.conf}")
 	pid_file=$(get_service_value "$service_name" "pid_file")
 	established_indicator_file=$(get_service_value "$service_name" "openvpn_established_indicator_file")
@@ -330,11 +334,18 @@ log_openvpn_events_and_disconnect_if_requested() {
 			[ -z "${time_duration:-}" ] && time_duration=$(($(date +%s) - $daemon_start_time))
 			# Verbindungsverlust durch fehlende openvpn-Pings?
 			if [ "${signal:-}" = "ping-restart" ]; then
+				service_type=$(get_service_value "$service_name" "service")
+				service_host=$(get_service_value "$service_name" "host")
+				now=$(get_uptime_minutes)
 				append_to_custom_log "$log_target" "down" \
 					"Lost connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
-				# Verbindung als unklar definieren
-				set_service_value "$service_name" "status" ""
-				set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
+				# alle Verbindungen derselben Art zu diesem Host als unklar definieren
+				get_services "$service_type" \
+						| filter_services_by_value "host" "$service_host" \
+						| while read same_host_service; do
+					set_service_value "$same_host_service" "status" ""
+					set_service_value "$same_host_service" "status_timestamp" "$now"
+				done
 				disable_openvpn_service "$service_name"
 				[ -n "$pid_file" ] && rm -f "$pid_file"
 				[ -n "$established_indicator_file" ] && rm -f "$established_indicator_file"

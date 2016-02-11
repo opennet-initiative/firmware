@@ -101,7 +101,7 @@ if __name__ == "__main__":
         if sys.argv[1] == "config":
             connections = get_connections_by_target()
             print("graph_title Verbindungen ueber freigegebenen Anschluss")
-            print("graph_args --base 1000")
+            print("graph_args --base 1000 -l 0")
             print("graph_vlabel Number of connections")
             print("graph_category opennet")
             is_first = True

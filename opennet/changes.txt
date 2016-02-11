@@ -16,6 +16,7 @@ Anschließend kann diese Liste wieder geleert werden.
 ** POE-Passthrough-Umschalter funktioniert nun
 ** UGW: Korrektur der Ermittlung und Announcierung der Uplink-Bandbreite
 ** zeitnahe Erkennung einer ungeklärten Race-Condition bei parallelem OpenVPN-Start
+** verzögerte UGW-Portweiterleitung korrigiert
 
 = Interne Änderungen =
 

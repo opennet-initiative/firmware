@@ -230,7 +230,7 @@ update_service_relay_status() {
 			is_service_relay_possible "$service_name" || continue
 			announce_olsr_service_relay "$service_name"
 		done
-		update_mesh_gateway_firewall_rules
+		update_relay_firewall_rules
 		deannounce_unused_olsr_service_relays is_service_relay_possible
 	else
 		deannounce_unused_olsr_service_relays false

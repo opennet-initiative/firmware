@@ -118,6 +118,26 @@ find_and_select_best_gateway() {
 		if [ -z "$current_gateway" ]; then
 			msg_debug "There is still no usable gateway around"
 		else
+			# gibt es eine gueltige default-Route?
+			# Auf einem AP mit der v0.5.2 trat einmal eine Situation auf, in der zwei
+			# OpenVPN-Prozesse gleichzeitig gestartet wurden und somit um den
+			# Device-Namensraum (tun0/tun1) konkurrierten.
+			# Am Ende ueberlebte der Prozess mit tun0 - allerdings hatte der tun1-Prozess
+			# zuvor die default-Route ueberschrieben. Dieser Zustand ohne Internetzugang
+			# war als Fehlerzustand nicht zu erkennen.
+			if [ -z "$(get_target_route_interface 1.1.1.1)" ]; then
+				# Durch aussergewoehnliche Umstaende (siehe oben) gibt es keine
+				# default-Route. Um sicherzugehen, dass wir uns nicht gerade im
+				# Verbindungsaufbau befinden, warten wir noch ein paar Sekunden und
+				# starten anschliessend openvpn neu.
+				sleep 20
+				[ -n "$(get_target_route_interface 1.1.1.1)" ] || {
+					# immer noch keine default-Route
+					msg_info "Missing default route detected - restarting openvpn"
+					/etc/init.d/openvpn restart || true
+					return
+				}
+			fi
 			msg_debug "Current gateway ($current_gateway) is still the best choice"
 			# Wechselzaehler zuruecksetzen (falls er hochgezaehlt wurde)
 			set_service_value "$current_gateway" "switch_candidate_timestamp" ""

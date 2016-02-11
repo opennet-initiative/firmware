@@ -3,7 +3,6 @@
 ## @{
 
 ## für die Kompatibilität mit Firmware vor v0.5
-UGW_LOCAL_SERVICE_PORT_LEGACY=1600
 ## falls mehr als ein GW-Dienst weitergereicht wird, wird dieser Port und die folgenden verwendet
 SERVICE_RELAY_LOCAL_RELAY_PORT_START=5100
 
@@ -28,14 +27,6 @@ pick_local_service_relay_port() {
 	local port
 	port=$(get_service_value "$service_name" "local_relay_port")
 	# falls unbelegt: suche einen unbenutzten lokalen Port
-	if [ -z "$port" ]; then
-		# fuer IGW-Verbindungen: belege zuerst den alten Standard-Port (fuer alte Clients)
-		if [ "$(get_service_value "$service_name" "service")" = "gw" ]; then
-			_is_local_service_relay_port_unused "$UGW_LOCAL_SERVICE_PORT_LEGACY" \
-				&& port="$UGW_LOCAL_SERVICE_PORT_LEGACY"
-			true
-		fi
-	fi
 	if [ -z "$port" ]; then
 		port="$SERVICE_RELAY_LOCAL_RELAY_PORT_START"
 		until _is_local_service_relay_port_unused "$port"; do

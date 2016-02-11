@@ -79,9 +79,9 @@ You may obtain a copy of the License at
             local label = gateway.host
 	    -- falls das Ziel nicht wie eine IP (v4/v6) aussehen sollte, dann nimm den Text-Bestandteil vor dem ersten Punkt
             if not string.match(label or "", "^[0-9a-fA-F:.]+$") then label = dot_split(label)[1] end
-            -- Port immer hinzufügen (bis v0.4-5 war 1602 der Standard-Wert für das Mesh)
-	    if label and (gateway.port ~= tonumber(on_function("get_variable", {"DEFAULT_MESH_OPENVPN_PORT"}))) then
-              label = label .. ":" .. gateway.port
+            -- Port an die IP haengen
+	    if label and gateway.port then
+	      label = label .. "<small>:" .. gateway.port .. "</small>"
             end
             if not label then label = service_name end
 	%>
@@ -180,9 +180,7 @@ You may obtain a copy of the License at
 		</div>
 		<label class="cbi-value-title" for="service_port"><%:Port%>:</label>
 		<div class="cbi-value-field">
-			<input class="cbi-input-text" name="service_port"
-				id="service_port" size="5"
-				value="<%= on_function("get_variable", {"DEFAULT_MESH_OPENVPN_PORT"}) %>" />
+			<input class="cbi-input-text" name="service_port" id="service_port" size="5" />
 			<input class="cbi-button cbi-button-apply" type="submit"
 				id="add_service" name="add_service" value="<%:Add%>" />
 		</div>

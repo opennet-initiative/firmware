@@ -4,7 +4,6 @@
 
 ## für die Kompatibilität mit Firmware vor v0.5
 UGW_LOCAL_SERVICE_PORT_LEGACY=1600
-DEFAULT_MESH_OPENVPN_PORT=1602
 ## falls mehr als ein GW-Dienst weitergereicht wird, wird dieser Port und die folgenden verwendet
 SERVICE_RELAY_LOCAL_RELAY_PORT_START=5100
 

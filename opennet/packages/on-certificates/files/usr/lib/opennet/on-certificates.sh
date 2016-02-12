@@ -9,13 +9,14 @@ ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.
 ## @fn https_request_opennet()
 ## @brief Rufe den Inhalt ab, auf den eine URL verweist.
 ## @param URL die Quell-Adresse
+## @returns Exitcode=0 falls kein Fehler auftrat. Andernfalls: curl-Exitcodes
 ## @details Eventuelle SSL-Zertifikate werden gegenueber der Opennet-CA-Liste abgeglichen.
 ##     Zusätzlich zur URL können auch (davor) curl-spezifischen Optionen angebeben werden.
 https_request_opennet() {
+	trap "" $GUARD_TRAPS
 	# Diese curl-Operation dauert aus irgendeinem Grund ca. 10s - wir muessen also den timeout hochsetzen.
 	# Auf dem Server sind haeufig 408 (timeout) Fehler sichtbar - also mindestens einmal wiederholen.
-	curl -q --silent --max-time 30 --retry 2 --cacert "$ON_CERT_BUNDLE_PATH" "$@" \
-		|| msg_error "Failed to retrieve data from URL '$@' via curl ($?)"
+	curl -q --silent --max-time 30 --retry 2 --cacert "$ON_CERT_BUNDLE_PATH" "$@"
 }
 
 
@@ -39,6 +40,7 @@ submit_csr_via_http() {
 		--form "file=@$csr_file" \
 		--form "opt_name=$helper" \
 		--form "opt_mail=$helper_email" "$upload_url" && return 0
+	msg_error "Failed to submit CSR to '$upload_url' via curl ($?)"
 	# ein technischer Verbindungsfehler trat auf
 	trap "" $GUARD_TRAPS && return 1
 }

@@ -121,7 +121,7 @@ update_trusted_service_list() {
 	local service_name
 	local is_proxy
 	local url_list
-	url_list=$(https_request_opennet "$TRUSTED_SERVICES_URL")
+	url_list=$(https_request_opennet "$TRUSTED_SERVICES_URL" || msg_info "Failed to retrieve list of trusted services from $TRUSTED_SERVICES_URL")
 	# leeres Ergebnis? Noch keine Internet-Verbindung? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$url_list" ] && return
 	echo "$url_list" | grep -v "^#" | sed 's/\t\+/\t/g' | while read line; do

@@ -491,6 +491,17 @@ guess_previously_used_modules() {
 }
 
 
+## @fn remove_pre05_usergateway_olsr_announcement()
+## @brief Entferne das veraltete UGW-Announcierungsformat von Firmware v0.4-x.
+##   Beispiel:
+##      olsrd.cfg0c4e54.service=http://192.168.0.42:8080|tcp|ugw upload:50 download:350 ping:27
+remove_pre05_usergateway_olsr_announcement() {
+	uci show -X olsrd | grep -q "^olsrd.cfg[^.]\+.service=http://.*:8080|tcp|ugw" || return
+	sed -i "/option service 'http:\/\/.*|tcp|ugw/d" /etc/config/olsrd
+	/etc/init.d/olsrd restart
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -540,3 +551,4 @@ remove_openvpn_vpntest_keydir
 guess_previously_used_modules
 remove_wifidog_config
 enable_uhttpd_redirect
+remove_pre05_usergateway_olsr_announcement

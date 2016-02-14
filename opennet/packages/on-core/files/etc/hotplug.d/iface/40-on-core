@@ -2,9 +2,8 @@
 
 case "$ACTION" in
         ifup)
-		on-function update_olsr_interfaces
-		on-function update_opennet_zone_masquerading
-		on-function initialize_olsrd_policy_routing
+		# alle Aktionen leicht verzoegert durchfuehren, um Hotplug-Schleifen zu vermeiden
+		echo ". ${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh; update_olsr_interfaces; update_opennet_zone_masquerading; initialize_olsrd_policy_routing" | on-function schedule_task
 		;;
 esac
 

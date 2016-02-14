@@ -129,68 +129,6 @@ function printNetworkInterfaceValues(network_interface)
 end
 
 
-function status_wireless()
-	luci.http.prepare_content("text/plain")
-
-	local header = 0;
-	local wireless = cursor:get_all("wireless")
-	if wireless then
-		for k, v in pairs(wireless) do
-			if v[".type"] == "wifi-iface" then
-				if header == 0 then
-					luci.http.write([[<table id='wireless_table' class='status_page_table'><tr><th>]]..
-						luci.i18n.translate("Interface") .. "</th><th>" ..
-						luci.i18n.translate("SSID") .. "</th><th></th></tr>")
-					header = 1
-				end
-				ifname = v.ifname or "-"
-				essid = luci.util.pcdata(v.ssid) or "-"
-				if not ifname or ifname == "-" then
-					ifname = luci.sys.exec([[
-						find /var/run/ -name "hostapd*conf" -exec \
-						awk 'BEGIN{FS="=";iface="";found=0}
-						{if ($1 == "ssid" && $2 == "]]..essid..[[") found=1; if ($1 == "interface") iface=$2;}
-						END{if (found) printf iface}' {} \;
-					]])
-				end
-				ifname = ifname.gsub(ifname, "%c+", "")
-				iwinfo = luci.sys.wifi.getiwinfo(ifname)
-				device = v.device or "-";
-				if (not iwinfo.mode) then
-					iwinfo = luci.sys.wifi.getiwinfo(device)
-				end
-				mode802 = wireless[v.device].hwmode
-				mode802 = mode802 and "802."..mode802 or "-"
-				--                  channel = wireless[v.device].channel or "-"
-
-				local signal = iwinfo and iwinfo.signal or "-"
-				local noise = iwinfo and iwinfo.noise or "-"
-				--                  local q = iwinfo and iwinfo.quality or "0"
-				local ssid = iwinfo and iwinfo.ssid or "N/A"
-				local bssid = iwinfo and iwinfo.bssid or "N/A"
-				local chan = iwinfo and iwinfo.channel or "N/A"
-				local mode = iwinfo and iwinfo.mode or "N/A"
-				local txpwr = iwinfo and iwinfo.txpower or "N/A"
-				--                  local bitrate = iwinfo and iwinfo.bitrate or "N/A"
-
-				luci.http.write(  "<tr><td>"..ifname.."/"..device.."</td>"..
-					"<td>"..ssid.."</td>"..
-					"<td>"..mode..
-					" / Mode: "..mode802..
-					" / Channel: "..chan..
-					" / Cell: "..bssid..
-					" / S/N: "..signal.."/"..noise..
-					--                          " / Bitrate: "..bitrate..
-					" / Power: "..txpwr.."</td></tr>")
-			end
-		end
-		if header == 1 then
-			luci.http.write([[</table>]])
-		end
-	end
-end
-
-
 function status_neighbors()
 	luci.http.prepare_content("text/plain")
 	local neighbour_info = on_function("get_olsr_neighbours")

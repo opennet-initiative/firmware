@@ -20,6 +20,126 @@ local i18n = luci.i18n.translate
 
 <%+header%>
 
+
+<%
+---------------- START_OF_LUCI_WIRELESS --------------
+-- der folgende Block ist eine Kopie aus: luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
+
+local stat = require "luci.tools.status"
+local wifinets = stat.wifi_networks()
+%>
+<script type="text/javascript" src="<%=resource%>/cbi.js"></script>
+<script type="text/javascript">//<![CDATA[
+	XHR.poll(5, '<%= luci.dispatcher.build_url("admin") %>', { status: 1 },
+		function(x, info)
+		{
+			var ws = document.getElementById('wifi_status_table');
+			if (ws)
+			{
+				var wsbody = ws.rows[0].parentNode;
+				while (ws.rows.length > 0)
+					wsbody.deleteRow(0);
+
+				for (var didx = 0; didx < info.wifinets.length; didx++)
+				{
+					var dev = info.wifinets[didx];
+
+					var tr = wsbody.insertRow(-1);
+					var td;
+
+					td = tr.insertCell(-1);
+					td.width     = "33%";
+					td.innerHTML = dev.name;
+					td.style.verticalAlign = "top";
+
+					td = tr.insertCell(-1);
+
+					var s = '';
+
+					for (var nidx = 0; nidx < dev.networks.length; nidx++)
+					{
+						var net = dev.networks[nidx];
+						var is_assoc = (net.bssid != '00:00:00:00:00:00' && net.channel && !net.disabled);
+
+						var icon;
+						if (!is_assoc)
+							icon = "<%=resource%>/icons/signal-none.png";
+						else if (net.quality == 0)
+							icon = "<%=resource%>/icons/signal-0.png";
+						else if (net.quality < 25)
+							icon = "<%=resource%>/icons/signal-0-25.png";
+						else if (net.quality < 50)
+							icon = "<%=resource%>/icons/signal-25-50.png";
+						else if (net.quality < 75)
+							icon = "<%=resource%>/icons/signal-50-75.png";
+						else
+							icon = "<%=resource%>/icons/signal-75-100.png";
+
+						s += String.format(
+							'<table><tr><td style="text-align:center; width:32px; padding:3px">' +
+								'<img src="%s" title="<%:Signal%>: %d dBm / <%:Noise%>: %d dBm" />' +
+								'<br /><small>%d%%</small>' +
+							'</td><td style="text-align:left; padding:3px"><small>' +
+								'<strong><%:SSID%>:</strong> <a href="%s">%h</a><br />' +
+								'<strong><%:Mode%>:</strong> %s<br />' +
+								'<strong><%:Channel%>:</strong> %d (%.3f <%:GHz%>)<br />' +
+								'<strong><%:Bitrate%>:</strong> %s <%:Mbit/s%><br />',
+								icon, net.signal, net.noise,
+								net.quality,
+								net.link, net.ssid,
+								net.mode,
+								net.channel, net.frequency,
+								net.bitrate || '?'
+						);
+
+						if (is_assoc)
+						{
+							s += String.format(
+								'<strong><%:BSSID%>:</strong> %s<br />' +
+								'<strong><%:Encryption%>:</strong> %s',
+									net.bssid,
+									net.encryption
+							);
+						}
+						else
+						{
+							s += '<em><%:Wireless is disabled or not associated%></em>';
+						}
+
+						s += '</small></td></tr></table>';
+
+						for (var bssid in net.assoclist)
+						{
+							assoclist.push({
+								bssid:    bssid,
+								signal:   net.assoclist[bssid].signal,
+								noise:    net.assoclist[bssid].noise,
+								rx_rate:  net.assoclist[bssid].rx_rate,
+								rx_mcs:   net.assoclist[bssid].rx_mcs,
+								rx_40mhz: net.assoclist[bssid].rx_40mhz,
+								tx_rate:  net.assoclist[bssid].tx_rate,
+								tx_mcs:   net.assoclist[bssid].tx_mcs,
+								tx_40mhz: net.assoclist[bssid].tx_40mhz,
+								link:     net.link,
+								name:     net.name
+							});
+						}
+					}
+
+					if (!s)
+						s = '<em><%:No information available%></em>';
+
+					td.innerHTML = s;
+				}
+			}
+		}
+	);
+//]]></script>
+<%
+----------------- END_OF_LUCI_WIRELESS ---------------
+%>
+
+
 <script type="text/javascript">//<![CDATA[
 
 function fill_result_row(table_cell_name, request_url_suffix) {
@@ -57,7 +177,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 
 		for _, item in ipairs({
 				  {"networks_section", i18n("Networks"), url="network"},
-				  {"wireless_section", i18n("Wireless"), url="wireless"},
+				  {"wireless_section", i18n("Wireless"), rawcontent=[[<table id="wifi_status_table"><tr/></table>]]},
 				  {"neighbor_section", i18n("Neighbors"), url="neighbors"},
 				  {"mig_connection_section", i18n("OpenVPN"), url="mig_openvpn", mod_name="on-openvpn"},
 				  {"ugw_connection_section", i18n("Internet Sharing"), url="mesh_verbindungen", mod_name="on-usergw"},
@@ -80,6 +200,8 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 						<script type="text/javascript">
 							fill_result_row("<%=item[1]%>", "<%=item.url%>")
 						</script>
+					<% elseif item.rawcontent then %>
+						<%=item.rawcontent%>
 					<% else %>
 						<%=luci.util.pcdata(item.content)%>
 					<% end %>

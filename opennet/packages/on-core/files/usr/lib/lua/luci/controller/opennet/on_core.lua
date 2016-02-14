@@ -35,7 +35,6 @@ function index()
 	require ("luci.model.opennet.on_status")
 	on_entry_no_auth({"status", "neighbors"}, call("status_neighbors")).leaf = true
 	on_entry_no_auth({"status", "network"}, call("status_network")).leaf = true
-	on_entry_no_auth({"status", "wireless"}, call("status_wireless")).leaf = true
 	on_entry_no_auth({"status", "modules"}, call("status_modules")).leaf = true
 	on_entry_no_auth({"status", "issues"}, call("status_issues")).leaf = true
 

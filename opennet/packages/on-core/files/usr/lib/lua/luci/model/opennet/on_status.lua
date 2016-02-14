@@ -55,8 +55,8 @@ end
 
 function printZoneLine(zone_variable_name)
 	local zone_name = on_function("get_variable", {zone_variable_name})
-	local network_interface = on_function("get_zone_interfaces", {zone_name})
-	if network_interface and on_bool_function("is_interface_up", {network_interface}) then
+	local network_interfaces = on_function("get_zone_interfaces", {zone_name})
+	if network_interfaces then
 		local title
 		local interface_name
 		if zone_variable_name == "ZONE_LOCAL" then
@@ -74,7 +74,7 @@ function printZoneLine(zone_variable_name)
 		end
 		luci.http.write('<h3><abbr title="' .. title .. '">' .. interface_name .. '</abbr>&nbsp;'
 				.. luci.i18n.translate('IP Address(es):') .. '</h3>')
-		printInterfaces(network_interface, zone_name)
+		printInterfaces(network_interfaces, zone_name)
 	end
 end
 

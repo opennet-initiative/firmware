@@ -189,6 +189,7 @@ update_relayed_server_speed_estimation() {
 	set_service_value "$service_name" "wan_speed_download" "$(( (3 * download_speed + prev_download) / 4 ))"
 	set_service_value "$service_name" "wan_speed_upload" "$(( (3 * upload_speed + prev_upload) / 4 ))"
 	set_service_value "$service_name" "wan_speed_timestamp" "$(get_uptime_minutes)"
+	announce_olsr_service_relay "$service_name"
 }
 
 

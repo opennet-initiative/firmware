@@ -5,12 +5,13 @@
 is_on_module_installed_and_enabled "on-usergw" || exit 0
 
 update_relayed_services_speed() {
-	get_services "${RELAYABLE_SERVICE_PREFIX}-gw" \
+	get_services "${RELAYABLE_SERVICE_PREFIX}gw" \
 			| filter_reachable_services \
 			| filter_enabled_services \
 			| while read service_name; do
 		update_relayed_server_speed_estimation "$service_name"
 	done
+	apply_changes "olsrd"
 }
 
 # alle APs fuehren den daily-cronjob zeitgleich aus - wir moechten aber nicht gleichzeitig die UGW-Server belasten

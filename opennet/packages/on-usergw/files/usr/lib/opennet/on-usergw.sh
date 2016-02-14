@@ -165,12 +165,12 @@ update_trusted_service_list() {
 }
 
 
-## @fn update_public_gateway_speed_estimation()
+## @fn update_relayed_server_speed_estimation()
 ## @brief Schätze die Upload- und Download-Geschwindigkeit zu dem Dienstanbieter ab. Aktualisiere anschließend die Attribute des Diensts.
 ## @param service_name der Name des Diensts
-## @details Auf der Gegenseite wird die Datei '.10megabyte' fuer den Download via http erwartet.
-update_public_gateway_speed_estimation() {
-	trap "error_trap update_public_gateway_speed_estimation '$*'" $GUARD_TRAPS
+## @details Auf der Gegenseite wird die Datei '.big' fuer den Download via http erwartet.
+update_relayed_server_speed_estimation() {
+	trap "error_trap update_relayed_server_speed_estimation '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	local host
 	local download_speed

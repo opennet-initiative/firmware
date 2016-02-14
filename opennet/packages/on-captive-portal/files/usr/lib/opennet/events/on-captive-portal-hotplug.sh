@@ -19,9 +19,8 @@ process_captive_portal_triggers() {
 	if [ "$INTERFACE" = "$NETWORK_FREE" ]; then
 		msg_info "Trigger reload of Captive Portal service due to interface status change ($INTERFACE -> $ACTION)"
 		# eventuell läuft er schon für andere Zwecke - "reload" sollte immer funktionieren
-		echo "on-function captive_portal_reload" | schedule_task
 		# aus unklarem Grund reagiert dnsmasq nicht selbstaendig auf das neue dhcp-Interface -> sanfter reload
-		echo "/etc/init.d/dnsmasq reload" | schedule_task
+		echo "on-function captive_portal_reload; /etc/init.d/dnsmasq reload" | schedule_task
 	fi
 }
 

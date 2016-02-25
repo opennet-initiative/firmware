@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# count the DHCP leases of dnsmasq
+
+set -eu
+
+LEASE_FILE=/tmp/dhcp.leases
+
+
+case "${1:-}" in
+	config)
+		echo "graph_title DHCP lease count"
+		echo "graph_args -l 0"
+		echo "graph_vlabel number of leases"
+		echo "graph_category network"
+		echo "leases.label Number of leases"
+		;;
+	"")
+		echo "leases.value $(wc -l < "$LEASE_FILE")"
+		;;
+	*)
+		echo >&2 "Invalid action"
+		exit 1
+		;;
+esac

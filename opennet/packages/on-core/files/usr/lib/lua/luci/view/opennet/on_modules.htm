@@ -16,8 +16,7 @@ You may obtain a copy of the License at
 require("luci.model.opennet.funcs")
 require("luci.model.opennet.urls")
 
-repo_url_opennet = on_function("get_default_opennet_opkg_repository_url", {"opennet"})
-repo_url_internet = on_function("get_default_opennet_opkg_repository_url", {"internet"})
+repo_url = on_function("get_default_opennet_opkg_repository_url")
 configured_repo_url = on_function("get_configured_opennet_opkg_repository_url")
 function checked_if_true(value)
 	if value then
@@ -104,22 +103,16 @@ on_module_descriptions["on-goodies"] = luci.i18n.translate("Useful tools for net
 	<div class="cbi-section-descr"><%:Choose your preferred source of packages depending on your network connection.%></div>
 	<div class="cbi-section-node">
 		<div class="cbi-value">
-			<label class="cbi-value-title" for="repository_url_opennet"
-				title="<%= repo_url_opennet %>"><%:Opennet%></label>
-			<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url_opennet"
-				value="<%= repo_url_opennet %>" <%= checked_if_true(repo_url_opennet == configured_repo_url) %> />
-		</div>
-		<div class="cbi-value">
-			<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url_internet"
-				value="<%= repo_url_internet %>" <%= checked_if_true(repo_url_internet == configured_repo_url) %> />
-			<label class="cbi-value-title" for="repository_url_internet"
-				title="<%= repo_url_internet %>"><%:Internet%></label>
+			<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url"
+				value="<%= repo_url %>" <%= checked_if_true(repo_url == configured_repo_url) %> />
+			<label class="cbi-value-title" for="repository_url"
+				title="<%= repo_url %>"><%:Default%></label>
 		</div>
 		<div class="cbi-value">
 			<label class="cbi-value-title" for="repository_url_custom"><%:Custom%></label>
 			<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url_custom"
 				value="custom"
-				<%= checked_if_true((repo_url_internet ~= configured_repo_url) and (repo_url_opennet ~= configured_repo_url)) %> />
+				<%= checked_if_true((repo_url ~= configured_repo_url) %> />
 			<input type="text" name="repository_url_custom" value="<%= configured_repo_url %>" />
 		</div>
 	</div>

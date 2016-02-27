@@ -8,7 +8,7 @@ ZONE_WAN=wan
 ZONE_MESH=on_mesh
 NETWORK_LOCAL=lan
 # diese Domain wird testweise abgefragt, um die Verfügbarkeit des on-DNS zu prüfen
-DNS_SERVICE_REFERENCE="ca.on"
+DNS_SERVICE_REFERENCE="opennet-initiative.de"
 
 
 # Liefere alle IPs fuer diesen Namen zurueck

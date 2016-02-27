@@ -4,8 +4,7 @@
 ## @{
 
 # Basis-URL für Opennet-Paketinstallationen
-ON_OPKG_REPOSITORY_URL_PREFIX_OPENNET="http://downloads.on/openwrt"
-ON_OPKG_REPOSITORY_URL_PREFIX_INTERNET="http://downloads.opennet-initiative.de/openwrt"
+ON_OPKG_REPOSITORY_URL_PREFIX="http://downloads.opennet-initiative.de/openwrt"
 # temporäre Datei für Installation von Opennet-Paketen
 ON_OPKG_CONF_PATH="${IPKG_INSTROOT:-}/tmp/opkg-opennet.conf"
 
@@ -156,22 +155,10 @@ clear_cache_opennet_opkg() {
 
 
 ## @fn get_default_opennet_opkg_repository_url()
-## @param target_zone Entweder "internet" oder "opennet".
 ## @brief Ermittle die automatisch ermittelte URL für die Nachinstallation von Paketen.
 ## @returns Liefert die Basis-URL bis einschließlich "/packages". Lediglich der Feed-Name ist anzuhängen.
 get_default_opennet_opkg_repository_url() {
 	trap "error_trap get_default_opennet_opkg_repository_url '$*'" $GUARD_TRAPS
-	local target_zone="$1"
-	local prefix
-	if [ "$target_zone" = "opennet" ]; then
-		prefix="$ON_OPKG_REPOSITORY_URL_PREFIX_OPENNET"
-	elif [ "$target_zone" = "internet" ]; then
-		prefix="$ON_OPKG_REPOSITORY_URL_PREFIX_INTERNET"
-	else
-		msg_info "Invalid opkg repository target zone requested: $target_zone"
-		# sinnvolle Rueckfalloption verwenden
-		prefix="$ON_OPKG_REPOSITORY_URL_PREFIX_OPENNET"
-	fi
 	# ermittle die Firmware-Repository-URL
 	local firmware_version
 	firmware_version=$(get_on_firmware_version)
@@ -191,16 +178,16 @@ get_default_opennet_opkg_repository_url() {
 	# da wir dies in unserem Repository nicht abbilden.
 	local arch_path
 	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
-	echo "$prefix/$version_path/$arch_path/packages"
+	echo "$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/$arch_path/packages"
 }
 
 
 ## @fn get_configured_opennet_opkg_repository_url()
 ## @brief Ermittle die aktuell konfigurierte Repository-URL.
 get_configured_opennet_opkg_repository_url() {
-	local prefix
-	prefix=$(uci_get "on-core.modules.repository_url")
-	[ -n "$prefix" ] && echo "$prefix" || get_default_opennet_opkg_repository_url "opennet"
+	local url
+	url=$(uci_get "on-core.modules.repository_url")
+	[ -n "$url" ] && echo "$url" || get_default_opennet_opkg_repository_url
 }
 
 

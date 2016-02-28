@@ -94,8 +94,12 @@ _convert_uci_option_to_list() {
 	local optname="$2"
 	local filename="/etc/config/$config"
 	# Zeilen der Form "  option $optname 'foo bar'" werden in mehrere "  option $optname '$ITEM'"-Zeilen verwandelt
+	# Wir korrigieren dabei sowohl "option"- als auch "list"-Elemente sofern ihr Inhalt Leerzeichen enthält.
+	# Dies ist notwendig, da schon vor dem Ausführen dieses Migrationsskripts beim Booten "uci add_list" angewandt
+	# wird - dies verwandelt die Leerzeichen-separierte alte "option" in eine unveränderte "list". Also müssen wir
+	# leider blind nachkorrigieren :(
 	awk <"$filename" '{
-		if (($1 == "option") && ($2 == "'$optname'")) {
+		if ((($1 == "option") || ($1 == "list")) && ($2 == "'$optname'")) {
 			i = 3
 			while (i <= NF) {
 				gsub(/'\''/, "", $i)

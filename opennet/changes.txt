@@ -10,7 +10,9 @@ Anschließend kann diese Liste wieder geleert werden.
 ** zuvor wurde "admin" vorgegeben, da openwrt bis einschließlich Barrier Breaker den ssh-Dienst nur startete wenn ein Passwort gesetzt ist
 * bei Verlust einer Gateway-Verbindung werden alle Gateway-Dienste dieses Hosts als unklar definiert
 ** bisher dauerte die Verbindungsunterbrechung durch die Wartezeit auf die anderen Dienste desselben Hosts bis zu zehn Minuten
-* Paket-Installation: keine Unterscheidung von opennet- und Internet-URL mehr nötig
+* Unterscheidung von opennet- und Internet-URL ist nicht mehr nötig:
+** Modulinstallation
+** Zertifikatseinreichung
 * Monitoring:
 ** die Ping-Latenz zum UGW und zum VPN-Tunnel-Gateway ist via munin auswertbar
 * Fehlerkorrekturen:

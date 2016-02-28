@@ -506,6 +506,17 @@ remove_pre05_usergateway_olsr_announcement() {
 }
 
 
+## @fn remove_pre05_usergateway_tap_interfaces()
+## @brief Entferne alte "on_tapX"-Interfaces, die in dem UGW-Modul bis Firmware v0.4-5 verwendet wurden.
+remove_pre05_usergateway_tap_interfaces() {
+	local netnum
+	for netnum in 0 1 2 3 4; do
+		uci_delete "network.on_tap${netnum}"
+	done
+	apply_changes network
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -556,3 +567,4 @@ guess_previously_used_modules
 remove_wifidog_config
 enable_uhttpd_redirect
 remove_pre05_usergateway_olsr_announcement
+remove_pre05_usergateway_tap_interfaces

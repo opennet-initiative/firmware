@@ -67,7 +67,7 @@ update_olsr2_interfaces() {
 		uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
 		uci set "${uci_prefix}.ifname=$ifname"
 	done
-	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes on-olsr2" ersetzen
+	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
 	[ -n "$(uci changes olsrd2)" ] && uci commit olsrd2 && /etc/init.d/olsrd2 reload >/dev/null
 	true
 }

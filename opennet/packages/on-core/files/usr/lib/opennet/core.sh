@@ -410,6 +410,9 @@ apply_changes() {
 			olsrd)
 				/etc/init.d/olsrd reload || true
 				;;
+			olsrd2)
+				/etc/init.d/olsrd2 reload >/dev/null || true
+				;;
 			openvpn)
 				# eventuell ist das openvpn-Paket nicht installiert (siehe on-migrations)
 				[ -e /etc/init.d/openvpn ] && /etc/init.d/openvpn reload || true

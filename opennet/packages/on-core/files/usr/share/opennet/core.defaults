@@ -32,4 +32,4 @@ wifi_ssid_5ghz	test.opennet-initiative.de
 wifi_mode_5ghz	ap
 wifi_channel_5ghz	auto
 
-on_modules	on-openvpn on-usergw on-captive-portal on-monitoring on-goodies
+on_modules	on-openvpn on-usergw on-captive-portal on-monitoring on-goodies on-olsr2

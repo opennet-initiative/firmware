@@ -113,7 +113,7 @@ on_module_descriptions["on-olsr2"] = luci.i18n.translate("Experimental support f
 			<label class="cbi-value-title" for="repository_url_custom"><%:Custom%></label>
 			<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url_custom"
 				value="custom"
-				<%= checked_if_true((repo_url ~= configured_repo_url) %> />
+				<%= checked_if_true(repo_url ~= configured_repo_url) %> />
 			<input type="text" name="repository_url_custom" value="<%= configured_repo_url %>" />
 		</div>
 	</div>

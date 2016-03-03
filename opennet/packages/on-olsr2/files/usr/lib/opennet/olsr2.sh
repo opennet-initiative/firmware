@@ -105,5 +105,8 @@ olsr2_sync_routing_tables() {
 apply_changes_olsrd2() {
 	[ -n "$(uci changes olsrd2)" ] || return
 	uci commit olsrd2
-	/etc/init.d/olsrd2 reload >/dev/null || true
+	# das init-Skript funktioniert nicht im strikten Modus
+	set +eu
+	/etc/init.d/olsrd2 reload >/dev/null
+	true
 }

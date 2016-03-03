@@ -71,8 +71,7 @@ update_olsr2_interfaces() {
 		uci set "${uci_prefix}.ifname=$ifname"
 	done
 	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
-	[ -n "$(uci changes olsrd2)" ] && uci commit olsrd2 && /etc/init.d/olsrd2 reload >/dev/null
-	true
+	apply_changes_olsrd2
 }
 
 
@@ -98,6 +97,13 @@ olsr2_sync_routing_tables() {
 	# olsr passt sich im Zweifel der iproute-Nummer an
 	[ "$olsr2_id" != "$iproute_id" ] && uci set "${uci_prefix}.table=$iproute_id" || true
 	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
-	[ -n "$(uci changes olsrd2)" ] && uci commit olsrd2 && /etc/init.d/olsrd2 reload >/dev/null
-	true
+	apply_changes_olsrd2
+}
+
+
+# TODO: diese Funktion vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
+apply_changes_olsrd2() {
+	[ -n "$(uci changes olsrd2)" ] || return
+	uci commit olsrd2
+	/etc/init.d/olsrd2 reload >/dev/null || true
 }

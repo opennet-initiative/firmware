@@ -1,6 +1,9 @@
 IP6_PREFIX=2001:67c:1400:2432
 IP6_PREFIX_LENGTH=64
 NETWORK_LOOPBACK=on_loopback
+ROUTING_TABLE_MESH_OLSR2=olsrd2
+# interne Zahl fuer die "Domain" in olsr2
+OLSR2_DOMAIN=0
 
 
 ## @fn get_mac_address()
@@ -67,6 +70,33 @@ update_olsr2_interfaces() {
 		uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
 		uci set "${uci_prefix}.ifname=$ifname"
 	done
+	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
+	[ -n "$(uci changes olsrd2)" ] && uci commit olsrd2 && /etc/init.d/olsrd2 reload >/dev/null
+	true
+}
+
+
+## @fn olsr2_sync_routing_tables()
+## @brief Synchronisiere die olsrd-Routingtabellen-Konfiguration mit den iproute-Routingtabellennummern.
+## @details Im Konfliktfall wird die olsrd-Konfiguration an die iproute-Konfiguration angepasst.
+olsr2_sync_routing_tables() {
+	trap "error_trap olsr2_sync_routing_tables '$*'" $GUARD_TRAPS
+	local olsr2_id
+	local iproute_id
+	local uci_prefix
+	uci_prefix=$(find_first_uci_section olsrd2 domain name="$OLSR2_DOMAIN")
+	[ -z "$uci_prefix" ] && {
+		uci_prefix="olsrd2.$(uci add "olsrd2" "domain")"
+		uci set "${uci_prefix}.name=$OLSR2_DOMAIN"
+	}
+	olsr2_id=$(uci_get "${uci_prefix}.table")
+	iproute_id=$(get_routing_table_id "$ROUTING_TABLE_MESH_OLSR2")
+	# beide sind gesetzt und identisch? Alles ok ...
+	[ -n "$olsr2_id" -a "$olsr2_id" = "$iproute_id" ] && continue
+	# eventuell Tabelle erzeugen, falls sie noch nicht existiert
+	[ -z "$iproute_id" ] && iproute_id=$(add_routing_table "$ROUTING_TABLE_MESH_OLSR2")
+	# olsr passt sich im Zweifel der iproute-Nummer an
+	[ "$olsr2_id" != "$iproute_id" ] && uci set "${uci_prefix}.table=$iproute_id" || true
 	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
 	[ -n "$(uci changes olsrd2)" ] && uci commit olsrd2 && /etc/init.d/olsrd2 reload >/dev/null
 	true

@@ -9,4 +9,5 @@
 
 
 configure_ipv6_address
+olsr2_sync_routing_tables
 update_olsr2_interfaces

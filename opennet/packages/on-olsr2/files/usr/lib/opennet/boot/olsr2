@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# Führe alle notwendigen Initialisierungsaktionen für OLSRv2 aus.
+#
+
+on-function init_policy_routing_ipv6

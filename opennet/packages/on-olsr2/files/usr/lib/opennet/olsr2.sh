@@ -110,3 +110,10 @@ apply_changes_olsrd2() {
 	/etc/init.d/olsrd2 reload >/dev/null
 	true
 }
+
+
+init_policy_routing_ipv6() {
+	# alte Regel loeschen, falls vorhanden
+	ip -6 rule del lookup "$ROUTING_TABLE_MESH_OLSR2" 2>/dev/null || true
+	ip -6 rule add lookup "$ROUTING_TABLE_MESH_OLSR2"
+}

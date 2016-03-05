@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo /netjsoninfo graph | nc localhost 2009 >/tmp/olsr2.json

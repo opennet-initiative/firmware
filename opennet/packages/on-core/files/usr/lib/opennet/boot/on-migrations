@@ -517,6 +517,13 @@ remove_pre05_usergateway_tap_interfaces() {
 }
 
 
+## @fn remove_pre05_on_usergw_settings()
+## @brief Seit v0.5.2 verwendet das on-usergw-Modul keine uci-Einstellungen mehr.
+remove_pre05_on_usergw_settings() {
+	rm -f /etc/config/on-usergw
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -568,3 +575,4 @@ remove_wifidog_config
 enable_uhttpd_redirect
 remove_pre05_usergateway_olsr_announcement
 remove_pre05_usergateway_tap_interfaces
+remove_pre05_on_usergw_settings

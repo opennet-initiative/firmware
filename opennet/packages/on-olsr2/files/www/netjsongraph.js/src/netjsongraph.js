@@ -194,16 +194,17 @@
                     nodes[i].linkCount = 0;
                     nodesMap[nodes[i].id] = i;
                 }
+                /* workaround for empty "nodes" list of OLSRDv2: "/netjsoninfo graph" */
                 for(var i = 0; i < links_length; i++) {
                     var new_length;
                     var name;
                     name = links[i].source;
-                    if (!nodesMap[name]) {
+                    if (!nodesMap.hasOwnProperty(name)) {
                         new_length = nodes.push({"id": name});
                         nodesMap[name] = new_length - 1;
                     }
                     name = links[i].target;
-                    if (!nodesMap[name]) {
+                    if (!nodesMap.hasOwnProperty(name)) {
                         new_length = nodes.push({"id": name});
                         nodesMap[name] = new_length - 1;
                     }

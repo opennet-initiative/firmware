@@ -58,8 +58,8 @@ disable_on_module() {
 ## @brief Liefere die Namen aller bekannten Opennet-Module zeilenweise getrennt zurück.
 ## @details Die Liste kann in der Datei ON_CORE_DEFAULTS_FILE angepasst werden.
 get_on_modules() {
-	# zeilenweise splitten (wir erwarten nur kleine Buchstaben im Namen)
-	get_on_core_default "on_modules" | sed 's/[^a-z-]/\n/g' | grep -v "^$"
+	# zeilenweise splitten (wir erwarten nur kleine Buchstaben und Zahlen im Namen)
+	get_on_core_default "on_modules" | sed 's/[^a-z0-9-]/\n/g' | grep -v "^$"
 }
 
 

@@ -107,23 +107,6 @@ local wifinets = stat.wifi_networks()
 						}
 
 						s += '</small></td></tr></table>';
-
-						for (var bssid in net.assoclist)
-						{
-							assoclist.push({
-								bssid:    bssid,
-								signal:   net.assoclist[bssid].signal,
-								noise:    net.assoclist[bssid].noise,
-								rx_rate:  net.assoclist[bssid].rx_rate,
-								rx_mcs:   net.assoclist[bssid].rx_mcs,
-								rx_40mhz: net.assoclist[bssid].rx_40mhz,
-								tx_rate:  net.assoclist[bssid].tx_rate,
-								tx_mcs:   net.assoclist[bssid].tx_mcs,
-								tx_40mhz: net.assoclist[bssid].tx_40mhz,
-								link:     net.link,
-								name:     net.name
-							});
-						}
 					}
 
 					if (!s)

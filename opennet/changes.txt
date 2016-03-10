@@ -20,6 +20,7 @@ Anschließend kann diese Liste wieder geleert werden.
 ** UGW: Korrektur der Ermittlung und Announcierung der Uplink-Bandbreite
 ** zeitnahe Erkennung einer ungeklärten Race-Condition bei parallelem OpenVPN-Start
 ** verzögerte UGW-Portweiterleitung korrigiert
+** veraltete olsr-Announcierungen nicht mehr existenter Dienste werden nun entfernt
 ** Status: Darstellung von multi-VAP-Konfigurationen ([[https://dev.opennet-initiative.de/ticket/134 Bug #134]])
 ** Status: Darstellung von Zonen mit mehreren Interfaces
 

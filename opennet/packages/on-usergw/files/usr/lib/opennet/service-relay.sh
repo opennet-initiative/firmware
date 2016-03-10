@@ -182,8 +182,8 @@ deannounce_unused_olsr_service_relays() {
 	uci_get_list "${uci_prefix}.service" | while read service_description; do
 		# unbenutzte Eintraege entfernen
 		service_name=$(get_olsr_relay_service_name_from_description "$service_description")
-		[ -z "$service_name" ] && msg_info "Failed to parse olsr service description: $service_description" && continue
-		"$test_for_activity" "$service_name" && continue
+		# falls es den Dienst noch gibt: ist er immer noch aktiv?
+		[ -n "$service_name" ] && "$test_for_activity" "$service_name" && continue
 		uci_delete_list "${uci_prefix}.service" "$service_description"
 	done
 	return 0

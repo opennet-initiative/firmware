@@ -94,7 +94,11 @@ function status_ugw_connection()
         ugw_status.mesh_servers_string = string_join(ugw_status.mesh_servers, ", ")
         ugw_status.mesh_servers_status = (ugw_status.mesh_servers_string ~= "")
 	if ugw_status.mesh_servers_string and ugw_status.mesh_servers_string ~= "" then
-            result = luci.i18n.translatef("Connected Mesh Gateways: %s", ugw_status.mesh_servers_string)
+            result = luci.i18n.translatef("Connected Mesh Gateways: %s", ugw_status.mesh_servers_string) .. [[<br/>]]
+	    -- wir missbrauchen das munin-Plugin fuer die Ermittlung der Verbindungsanzahl
+	    ugw_users_connection_count = luci.sys.exec(
+                "/usr/sbin/munin-node-plugin.d/on_usergw_connections | awk 'BEGIN {sum = 0} {sum += $2} END {print sum}'")
+	    result = result .. luci.i18n.translatef("Relayed user tunnel connection: %s", ugw_users_connection_count)
         else
             result = luci.i18n.translate("No Mesh Gateways connected")
 	end

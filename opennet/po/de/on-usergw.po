@@ -1,8 +1,8 @@
-# Lars Kruse <devel@sumpfralle.de>, 2014, 2015.
+# Lars Kruse <devel@sumpfralle.de>, 2014, 2015, 2016.
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-10-21 03:39+0200\n"
+"PO-Revision-Date: 2016-03-12 17:44+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -141,6 +141,9 @@ msgstr "Port"
 
 msgid "Priority"
 msgstr "Priorität"
+
+msgid "Relayed user tunnel connection: %s"
+msgstr "Weitergeleitete Nutzer-Tunnel: %s"
 
 msgid "Relaying external Services for the Opennet Mesh"
 msgstr "Weiterleitung externer Dienste für das Opennet-Mesh-Netzwerk"

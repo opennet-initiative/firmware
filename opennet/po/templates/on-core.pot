@@ -34,6 +34,9 @@ msgstr ""
 msgid "Available Report"
 msgstr ""
 
+msgid "BSSID"
+msgstr ""
+
 msgid "Base"
 msgstr ""
 
@@ -41,6 +44,9 @@ msgid ""
 "Based on your Certificate (%s), the ports from %s to %s are forwarded "
 "through the VPN-Tunnel to your Access-Point - you should enter those as your "
 "source-ports."
+msgstr ""
+
+msgid "Bitrate"
 msgstr ""
 
 msgid "CN %s"
@@ -59,6 +65,9 @@ msgid "Certificate Request contents"
 msgstr ""
 
 msgid "Certificate contents"
+msgstr ""
+
+msgid "Channel"
 msgstr ""
 
 msgid ""
@@ -81,6 +90,9 @@ msgid "Custom"
 msgstr ""
 
 msgid "DNS (Name resolution)"
+msgstr ""
+
+msgid "Default"
 msgstr ""
 
 msgid "Delete"
@@ -107,7 +119,7 @@ msgstr ""
 msgid "Download"
 msgstr ""
 
-msgid "Download the CSR file and upload it manually"
+msgid "Download the CSR file"
 msgstr ""
 
 msgid "ETX: Routing Distance (default)"
@@ -116,12 +128,18 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
+msgid "Encryption"
+msgstr ""
+
 msgid "Error:"
 msgstr ""
 
 msgid ""
 "Expected Transmission Count: Quality of the Connection to the Gateway "
 "reagrding OLSR"
+msgstr ""
+
+msgid "Experimental support for OLSRv2 and IPv6"
 msgstr ""
 
 msgid "FREE"
@@ -148,6 +166,9 @@ msgid "Forwarding from Opennet"
 msgstr ""
 
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
+msgstr ""
+
+msgid "GHz"
 msgstr ""
 
 msgid "Generate"
@@ -198,9 +219,6 @@ msgid "Installing modules in background."
 msgstr ""
 
 msgid "Interface"
-msgstr ""
-
-msgid "Internet"
 msgstr ""
 
 msgid "Internet Sharing"
@@ -257,10 +275,16 @@ msgstr ""
 msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
 msgstr ""
 
+msgid "Mbit/s"
+msgstr ""
+
 msgid "Member Email Address"
 msgstr ""
 
 msgid "Member Name"
+msgstr ""
+
+msgid "Mode"
 msgstr ""
 
 msgid "Modules"
@@ -288,6 +312,9 @@ msgstr ""
 msgid "Networks"
 msgstr ""
 
+msgid "No information available"
+msgstr ""
+
 msgid "No report available"
 msgstr ""
 
@@ -295,6 +322,9 @@ msgid ""
 "Nodes in the Opennet can announce various services. These services can be "
 "used by other nodes. The most important services are Internet access, DNS "
 "and NTP."
+msgstr ""
+
+msgid "Noise"
 msgstr ""
 
 msgid "Number of routes via this neighbour"
@@ -415,9 +445,6 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-msgid "Send your request with one click"
-msgstr ""
-
 msgid "Service Action: Invalid service name"
 msgstr ""
 
@@ -434,6 +461,9 @@ msgid "Settings"
 msgstr ""
 
 msgid "Share your local internet connection with other members"
+msgstr ""
+
+msgid "Signal"
 msgstr ""
 
 msgid "Sort order"
@@ -541,6 +571,9 @@ msgstr ""
 msgid "Unknown protocol"
 msgstr ""
 
+msgid "Upload your request with one click"
+msgstr ""
+
 msgid "Uptime"
 msgstr ""
 
@@ -556,9 +589,15 @@ msgstr ""
 msgid "Wireless"
 msgstr ""
 
+msgid "Wireless is disabled or not associated"
+msgstr ""
+
 msgid ""
 "You may want to send a <a href=\"%s\">report</a> to the Opennet community "
 "(%s)."
+msgstr ""
+
+msgid "and"
 msgstr ""
 
 msgid "device"
@@ -588,14 +627,11 @@ msgstr ""
 msgid "upload Certificate (.crt) or Private Key (.key)"
 msgstr ""
 
+msgid "upload it manually"
+msgstr ""
+
 msgid "uploaded or generated on this date."
 msgstr ""
 
 msgid "use"
-msgstr ""
-
-msgid "via Internet"
-msgstr ""
-
-msgid "via Opennet"
 msgstr ""

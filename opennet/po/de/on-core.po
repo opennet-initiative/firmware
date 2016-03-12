@@ -1,8 +1,8 @@
-# Lars Kruse <devel@sumpfralle.de>, 2014, 2015.
+# Lars Kruse <devel@sumpfralle.de>, 2014, 2015, 2016.
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2015-12-04 20:05+0200\n"
+"PO-Revision-Date: 2016-03-12 17:49+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -45,6 +45,9 @@ msgstr "Aktiv: %s"
 msgid "Available Report"
 msgstr "Vorhandener Bericht"
 
+msgid "BSSID"
+msgstr "BSSID"
+
 msgid "Base"
 msgstr "Basis"
 
@@ -56,6 +59,9 @@ msgstr ""
 "Basierend auf Ihrem Zertifikat (%s) werden die Ports %s bis %s vom VPN-"
 "Gateway an Deinen Access-Point weitergeleitet. Nur diese Ports sind als "
 "eingehende Ports für Dich verwendbar."
+
+msgid "Bitrate"
+msgstr "Bitrate"
 
 msgid "CN %s"
 msgstr "CN %s"
@@ -74,6 +80,9 @@ msgstr "Details der Zertifikatsanfrage"
 
 msgid "Certificate contents"
 msgstr "Zertifikatsdaten"
+
+msgid "Channel"
+msgstr "Kanal"
 
 msgid ""
 "Choose one of the following options for submitting your certificate signing "
@@ -97,6 +106,9 @@ msgstr "Selbstgewählt"
 
 msgid "DNS (Name resolution)"
 msgstr "DNS (Namensauflösung)"
+
+msgid "Default"
+msgstr "Standard"
 
 msgid "Delete"
 msgstr "Löschen"
@@ -128,14 +140,17 @@ msgstr ""
 msgid "Download"
 msgstr "Herunterladen"
 
-msgid "Download the CSR file and upload it manually"
-msgstr "Lade die Zertifikatsanfrage (CSR) herunter und lade sie manuell hoch"
+msgid "Download the CSR file"
+msgstr "Herunterladen der CSR-Datei"
 
 msgid "ETX: Routing Distance (default)"
 msgstr "ETX: Routing-Entfernung (Voreinstellung)"
 
 msgid "Enabled"
 msgstr "Aktiviert"
+
+msgid "Encryption"
+msgstr "Verschlüsselung"
 
 msgid "Error:"
 msgstr "Fehler:"
@@ -146,6 +161,9 @@ msgid ""
 msgstr ""
 "Erwartete Anzahl von Übertragungen: die Qualität der Verbindung zum Gateway "
 "aus der Sicht von OLSR"
+
+msgid "Experimental support for OLSRv2 and IPv6"
+msgstr "Experimentelle Unterstützung für OLSRv2 und IPv6"
 
 msgid "FREE"
 msgstr "FREE"
@@ -177,6 +195,9 @@ msgstr "Weiterleitung aus dem Opennet"
 
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
+
+msgid "GHz"
+msgstr "GHz"
 
 msgid "Generate"
 msgstr "Erzeugen"
@@ -230,9 +251,6 @@ msgstr "Installiere Module im Hintergrund."
 
 msgid "Interface"
 msgstr "Schnittstelle"
-
-msgid "Internet"
-msgstr "Internet"
 
 msgid "Internet Sharing"
 msgstr "Internet Freigabe"
@@ -288,14 +306,20 @@ msgstr "Manuell: wähle Deine bevorzugte Reihenfolge"
 
 msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
 msgstr ""
-"Vielleicht möchtest Du deinen AP mit einem benachbarten AP <a href=\"%s\">"
-"via WLAN verbinden</a>."
+"Vielleicht möchtest Du deinen AP mit einem benachbarten AP <a href=\"%s"
+"\">via WLAN verbinden</a>."
+
+msgid "Mbit/s"
+msgstr "MBit/s"
 
 msgid "Member Email Address"
 msgstr "Deine EMail Adresse"
 
 msgid "Member Name"
 msgstr "Dein Name"
+
+msgid "Mode"
+msgstr "Modus"
 
 msgid "Modules"
 msgstr "Module"
@@ -323,6 +347,9 @@ msgstr "Netzwerk"
 msgid "Networks"
 msgstr "Netzwerke"
 
+msgid "No information available"
+msgstr "Keine Informationen verfügbar"
+
 msgid "No report available"
 msgstr "Keine Zusammenfassung verfügbar"
 
@@ -334,6 +361,9 @@ msgstr ""
 "Knoten in der Opennet können verschiedene Dienste anbieten. Diese Dienste "
 "können von anderen Knoten verwendet werden. Die wichtigsten Dienste sind "
 "Internet-Zugang, Namensauflösung und Zeitsynchronisation."
+
+msgid "Noise"
+msgstr "Lärm"
 
 msgid "Number of routes via this neighbour"
 msgstr "Anzahl der Routen über diesen Nachbarn"
@@ -471,9 +501,6 @@ msgstr "SSID"
 msgid "Save"
 msgstr "Speichern"
 
-msgid "Send your request with one click"
-msgstr "Sende Deine Anfrage mit einem Klick"
-
 msgid "Service Action: Invalid service name"
 msgstr "Dienstaktions: ungültiger Dienstname"
 
@@ -491,6 +518,9 @@ msgstr "Einstellungen"
 
 msgid "Share your local internet connection with other members"
 msgstr "Teile Deinen lokalen Internetanschluss mit anderen Mitgliedern"
+
+msgid "Signal"
+msgstr "Signal"
 
 msgid "Sort order"
 msgstr "Sortierreihenfolge"
@@ -630,6 +660,9 @@ msgstr ""
 msgid "Unknown protocol"
 msgstr "Unbekanntes Protokoll"
 
+msgid "Upload your request with one click"
+msgstr "Sende Deine Anfrage mit einem Klick"
+
 msgid "Uptime"
 msgstr "Gerätelaufzeit"
 
@@ -645,6 +678,9 @@ msgstr "WAN"
 msgid "Wireless"
 msgstr "Funknetz"
 
+msgid "Wireless is disabled or not associated"
+msgstr "Das Funknetz ist deaktiviert oder nicht assoziiert"
+
 msgid ""
 "You may want to send a <a href=\"%s\">report</a> to the Opennet community "
 "(%s)."
@@ -652,6 +688,9 @@ msgstr ""
 "Vielleicht möchtest Du eine kurze Nachricht mit einer <a href=\"%s"
 "\">Zusammenfassung</a> Deiner Router-Konfiguration an die Opennet-Aktiven "
 "(%s) senden."
+
+msgid "and"
+msgstr "und"
 
 msgid "device"
 msgstr "Schnittstelle"
@@ -680,17 +719,30 @@ msgstr "hochladen"
 msgid "upload Certificate (.crt) or Private Key (.key)"
 msgstr "Hochladen von Zertifikat (.crt) oder geheimem Schlüssel (.key)"
 
+msgid "upload it manually"
+msgstr "lade es manuell hoch"
+
 msgid "uploaded or generated on this date."
 msgstr "hochgeladen oder erzeugt an diesem Tag"
 
 msgid "use"
 msgstr "übernehmen"
 
-msgid "via Internet"
-msgstr "über das Internet"
+#~ msgid "Download the CSR file and upload it manually"
+#~ msgstr ""
+#~ "Lade die Zertifikatsanfrage (CSR) herunter und lade sie manuell hoch"
 
-msgid "via Opennet"
-msgstr "im Opennet"
+#~ msgid "Internet"
+#~ msgstr "Internet"
+
+#~ msgid "Send your request with one click"
+#~ msgstr "Sende Deine Anfrage mit einem Klick"
+
+#~ msgid "via Internet"
+#~ msgstr "über das Internet"
+
+#~ msgid "via Opennet"
+#~ msgstr "im Opennet"
 
 #~ msgid "Error: %s"
 #~ msgstr "Fehler: %s"

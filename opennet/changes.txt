@@ -16,6 +16,7 @@ Anschließend kann diese Liste wieder geleert werden.
 * Monitoring:
 ** die Ping-Latenz zum UGW und zum VPN-Tunnel-Gateway ist via munin auswertbar
 * Status-Anzeige:
+** Nutzer-Tunnel: UGW-Server (erina/megumi/subaru) wird angezeigt
 ** UGW/Spender: Anzahl der weitergeleiteten Nutzerverbindungen wird angezeigt
 * Fehlerkorrekturen:
 ** POE-Passthrough-Umschalter funktioniert nun

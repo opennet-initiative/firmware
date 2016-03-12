@@ -150,10 +150,16 @@ function status_mig_openvpn()
 	luci.http.prepare_content("text/plain")
 	local services = line_split(on_function("get_active_mig_connections"))
 	local result
-	function get_service_host(service_name)
-		return get_service_value(service_name, "host")
+	function get_service_description(service_name)
+		local ugw_ap = get_service_value(service_name, "host")
+		local ugw_server = on_function("get_service_detail", {service_name, "public_host"})
+		if ugw_server and (ugw_server ~= "") then
+			return ugw_ap .. " (via " .. ugw_server .. ")"
+		else
+			return ugw_ap
+		end
 	end
-	local remotes = string_join(map_table(services, get_service_host), ", ")
+	local remotes = string_join(map_table(services, get_service_description), ", ")
 	if remotes then
 		result = luci.i18n.translatef('Active VPN-Tunnel: %s', remotes)
 	else

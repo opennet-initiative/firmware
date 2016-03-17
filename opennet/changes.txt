@@ -21,6 +21,7 @@ Anschließend kann diese Liste wieder geleert werden.
 * Fehlerkorrekturen:
 ** POE-Passthrough-Umschalter funktioniert nun
 ** UGW: Korrektur der Ermittlung und Announcierung der Uplink-Bandbreite
+** CSR-Daten direkt nach Erzeugung anzeigen (zuvor war ein Neuladen nötig)
 ** zeitnahe Erkennung einer ungeklärten Race-Condition bei parallelem OpenVPN-Start
 ** verzögerte UGW-Portweiterleitung korrigiert
 ** veraltete olsr-Announcierungen nicht mehr existenter Dienste werden nun entfernt

@@ -569,6 +569,8 @@ function process_openvpn_certificate_form(cert_type)
     if luci.http.formvalue("generate") then
         if luci.http.formvalue("confirm_overwrite_key_id") == certstatus.on_key_modulus then
             generate_csr(cert_type, openssl)
+	    -- Zertifikatstatus nach der CSR-Erzeugung aktualisieren
+            certstatus = check_cert_status(cert_type)
         end
     end
 

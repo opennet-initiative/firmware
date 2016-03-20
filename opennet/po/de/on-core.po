@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2016-03-12 17:49+0200\n"
+"PO-Revision-Date: 2016-03-20 15:56+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -141,7 +141,7 @@ msgid "Download"
 msgstr "Herunterladen"
 
 msgid "Download the CSR file"
-msgstr "Herunterladen der CSR-Datei"
+msgstr "CSR-Datei herunterladen"
 
 msgid "ETX: Routing Distance (default)"
 msgstr "ETX: Routing-Entfernung (Voreinstellung)"
@@ -216,6 +216,9 @@ msgstr ""
 "Schön, dass Du Dich entschieden hast, am Opennet teilzunehmen. Wähle Dir "
 "eine IP für Deinen Access-Point im %sOpennet-Wiki%s aus und trage diese hier "
 "ein. Bitte schau Dir vorher auch die %sMitmachen-Seite im Wiki%s an."
+
+msgid "Guided"
+msgstr "Geführt"
 
 msgid "Hardware Information"
 msgstr "Hardware-Informationen"
@@ -300,6 +303,9 @@ msgstr "Ort"
 
 msgid "MAC"
 msgstr "MAC"
+
+msgid "Manual"
+msgstr "Manuell"
 
 msgid "Manual: choose your preferred order"
 msgstr "Manuell: wähle Deine bevorzugte Reihenfolge"
@@ -720,7 +726,7 @@ msgid "upload Certificate (.crt) or Private Key (.key)"
 msgstr "Hochladen von Zertifikat (.crt) oder geheimem Schlüssel (.key)"
 
 msgid "upload it manually"
-msgstr "lade es manuell hoch"
+msgstr "manuell hochladen"
 
 msgid "uploaded or generated on this date."
 msgstr "hochgeladen oder erzeugt an diesem Tag"

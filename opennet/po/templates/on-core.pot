@@ -186,6 +186,9 @@ msgid ""
 "read the information %sin the wiki%s for further details."
 msgstr ""
 
+msgid "Guided"
+msgstr ""
+
 msgid "Hardware Information"
 msgstr ""
 
@@ -267,6 +270,9 @@ msgid "Locality"
 msgstr ""
 
 msgid "MAC"
+msgstr ""
+
+msgid "Manual"
 msgstr ""
 
 msgid "Manual: choose your preferred order"

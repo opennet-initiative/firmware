@@ -92,7 +92,8 @@ You may obtain a copy of the License at
 		local on_id = on_function("uci_get", {"on-core.settings.on_id"})
 		%>
 		<div class="cbi-value-description">
-			<div><%
+			<div>
+				<%
 				local type
 				if (cert_type == "mesh") then
 					type = luci.i18n.translate("UserGateway (type user gateway)")
@@ -102,11 +103,11 @@ You may obtain a copy of the License at
 				<h4><%:Submit certificate request%></h4>
 				<p><%:Choose one of the following options for submitting your certificate signing request%>:</p>
 				<ul>
-					<li><a href="<%=REQUEST_URI%>?submit=<%=get_default_value('on-core', 'csr_api')%>"
+					<li><%:Guided%>: <a href="<%=REQUEST_URI%>?submit=<%=get_default_value('on-core', 'csr_api')%>"
 						target="_blank"><%:Upload your request with one click%></a></li>
-					<li><a href="<%=REQUEST_URI%>?download=csr"><%:Download the CSR file%></a>
+					<li><%:Manual%>: <a href="<%=REQUEST_URI%>?download=csr"><%:Download the CSR file%></a>
 						<%:and%> <a href="<%=get_default_value('on-core', 'csr_form')%>"
-							target="_blank"><%:upload it manually%></li>
+						target="_blank"><%:upload it manually%></a></li>
 				</ul>
 			</div>
 		</div>

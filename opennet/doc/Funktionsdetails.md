@@ -64,7 +64,9 @@ Der entsprechende ``nameservice``-Block in der ``olsrd.conf`` des DNS-Servers ka
 
 ### Integration auf den APs {#dns-ap}
 
-Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank. Im Anschluss wird ``apply_changes on-core`` aufgerufen. Dies löst die Aktualisierung der ``dnsmasq``-Nameserver-Datei (``/var/run/dnsmasq.servers``) basierend auf der Dienstliste aus.
+Bei jeder Änderung von empfangenen olsrd-Nameservice-Announcements wird das Skript ``/etc/olsrd/nameservice.d/on_update_services`` ausgeführt, welches die Ausführung der Funktion ``update_olsr_services`` für die nächste Minute vormerkt (``schedule_task``). Dies verhindert die mehrfach parallel Ausführung der olsr-Auswertung.
+
+Die Funktion ``update_olsr_services`` überträgt alle Dienst-Informationen in die lokale Datenbank. Im Anschluss wird ``apply_changes on-core`` aufgerufen. Dies löst die eventuelle Aktualisierung der ``dnsmasq``-Nameserver-Datei (``/var/run/dnsmasq.servers``) basierend auf der Dienstliste aus. Im Fall von Änderungen wird ein Prozess-Signal an dnsmasq geschickt, um das erneute Lesen der DNS-Server-Liste auszulösen.
 
 In diesem Verlauf wird auch sichergestellt, dass die uci-Variable ``dhcp.@dnsmasq[0].serversfile`` gesetzt ist. Falls dies nicht der Fall ist, wird die Datei ``/var/run/dnsmasq.servers`` eingetragen.
 Abschließend wird dem ``dnsmasq``-Prozess ein HUP-Signal gesendet, um ein erneutes Einlesen der Konfigurationsdateien auszulösen.
@@ -114,11 +116,13 @@ Gateway-Auswahl {#mig}
 ### Gateway-Liste {#mig-list}
 
 Das Skript ``/etc/olsrd/nameservice.d/on_update_services`` wird bei jeder Änderung der olsrd-Nameservice-Announcements aufgerufen und überträgt alle Dienst-Informationen in die lokale Datenbank.
-Minütlich wird via cronjob die Datei ``/usr/sbin/mig_gateway_check`` ausgeführt. Dieser führt folgende Aktionen aus:
+Im Fünf-Minuten-Takt (kurz nach dem Booten: sogar minütlich) wird via cronjob die Funktion ``update_mig_connection_status`` ausgeführt. Diese löst folgende Aktionen aus:
 
 * Durchlaufen aller Gateways bis ein Test erfolgreich abgeschlossen wurde ("frische" Tests werden nicht wiederholt)
 * Falls kein Test erfolgreich durchgeführt wurde (z.B. weil alle Zeitstempel recht frisch sind), dann wird der älteste als defekt markierte Gateway getestet. Dies minimiert die Ausfallzeit nach einer globalen Nicht-Erreichbarkeit aller Gateways.
 * Ermittlung des aktuell besten Gateways und seine Aktivierung, falls er seit mehreren Minuten besser ist oder falls aktuell kein Gateway konfiguriert ist
+
+Diese Funktion (``update_mig_connection_status``) kann außerdem durch das *down*-Ereignis des VPN-Nutzertunnels ausgelöst. Sollte also der 60-Sekunden-Pingtest von OpenVPN scheitern (und somit die Verbindung trennen), dann wird innerhalb der nächsten 60 Sekunden der nächste passende Gateway ausgewählt.
 
 
 ### Gateway-Auswahl {#mig-selection}
@@ -128,7 +132,7 @@ Minütlich wird via cronjob die Datei ``/usr/sbin/mig_gateway_check`` ausgeführ
 
 ### Gateway-Wechsel {#mig-switch}
 
-Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann schreibt er das Attribute ``switch_candidate_timestamp`` in diesen neuen Dienst. Sobald dieser Zeitstempel im Verlaufe nachfolgender cronjob-Läufe älter als fünf Minuten ist, wird der neue Gateway via ``select_mig_connection`` aktiviert und eine Verbindung aufgebaut.
+Falls der cronjob feststellt, dass ein besserer Gateway als der aktuell verwendete vorhanden ist, dann schreibt er das Attribute ``switch_candidate_timestamp`` in diesen neuen Dienst. Sobald dieser Zeitstempel im Verlaufe nachfolgender cronjob-Läufe älter als 15 Minuten ist, wird der neue Gateway via ``select_mig_connection`` aktiviert und eine Verbindung aufgebaut.
 
 
 ### Gateway-Verbindungsabbruch {#mig-disconnect}
@@ -136,7 +140,7 @@ Falls der minütliche cronjob feststellt, dass ein besserer Gateway als der aktu
 Sollte die Verbindung zum aktuellen Gateway abreissen, muss der Gateway als unbrauchbar markiert werden und ein Wechsel zu einem anderen Gateway ist sinnvoll. Dies wird folgendermaßen erreicht:
 
 * Jeder Client erhält vom Server via ``keepalive`` die Regeln ``ping 10`` und ``pin-restart 120``. Somit wird nach ca. zwei Minuten Ausfall ein Neustart der Verbindung von Client-Seite ausgeführt.
-* Der Verbindungsneustart führt aufgrund der fehlenden ``persist-tun``-Option zur Ausführung des ``down``-Skripts, In diesem Skript wird der Status der aktuellen OpenVPN-Verbindung als 'n' gesetzt. Somit wird bei der nächsten Prüfung eines Gateway-Wechsels ohne Verzögerung ein alternativer Gateway gewählt.
+* Der Verbindungsneustart führt aufgrund der fehlenden ``persist-tun``-Option zur Ausführung des ``down``-Skripts, In diesem Skript wird der Status der aktuellen OpenVPN-Verbindung als 'n' gesetzt. Somit wird bei der nächsten Prüfung eines Gateway-Wechsels ohne Verzögerung ein alternativer Gateway gewählt. Zusätzlich wird für den Beginn der nächsten Minuten die Ausführung der Funktion ``update_mig_connection_status`` (siehe oben) vorgemerkt. Innerhalb von einer Minute wird also ein alternative Gateway ausgewählt.
 * Die Einstellung ``explicit-exit-notify`` muss abgeschaltet sein, da andernfalls der Grund des Endes der Verbindung im ``down``-Skript nicht erkennbar ist (die Status-Variable ``signal`` wird von ``explicit-exit-notify`` überschrieben).
 
 

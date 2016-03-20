@@ -896,10 +896,10 @@ schedule_task() {
 	script_content=$(cat -)
 	# wir sorgen fuer die Wiederverwendung des Dateinamens, um doppelte Ausführungen zu verhindern
 	unique_key=$(echo "$script_content" | md5sum | awk '{ print $1 }')
-	mkdir -p "$SCHEDULING_DIR"
 	local target_file="$SCHEDULING_DIR/$unique_key"
 	# das Skript existiert? Nichts zu tun ...
 	[ -e "$target_file" ] && return 0
+	mkdir -p "$SCHEDULING_DIR"
 	echo "$script_content" >"$target_file"
 }
 

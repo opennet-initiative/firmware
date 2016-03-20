@@ -893,6 +893,15 @@ run_scheduled_tasks() {
 	local fname
 	local temp_fname
 	[ -d "$SCHEDULING_DIR" ] || return 0
+	# keine Ausführung, falls noch mindestens ein alter Task aktiv ist
+	find "$SCHEDULING_DIR" -type f -name "*.running" | while read fname; do
+		# veraltete Dateien werden geloescht und ignoriert
+		is_file_timestamp_older_minutes "$fname" 5 && rm -f "$fname" && continue
+		# nicht-veraltete Dateien fuehren zum Abbruch der Funktion
+		msg_info "Skipping 'run_scheduled_task' due to an ongoing operation: $(tail -1 "$fname")"
+		echo "$fname"
+		# der Abbruch findet erst ausserhalb der while-Schleife statt, da das return nicht den loop verlaesst
+	done | grep -q . && return 0
 	find "$SCHEDULING_DIR" -type f | grep -v "\.running$" | while read fname; do
 		temp_fname="${fname}.running"
 		# zuerst schnell wegbewegen, damit wir keine Ereignisse verpassen

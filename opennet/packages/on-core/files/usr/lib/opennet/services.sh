@@ -854,7 +854,11 @@ run_cyclic_service_tests() {
 				msg_debug "service $service_name successfully tested"
 				_notify_service_success "$service_name"
 				# wir sind fertig - keine weiteren Tests
-				return
+				# Da "return" aufgrund der Pipe nicht die gesamte Funktion beenden
+				# würde, senden wir stattdessen die Markierung fuer "keine Tests
+				# noetig" und beenden die Schleife.
+				echo "-1 $service_name"
+				break
 			else
 				msg_debug "failed to verify $service_name"
 				_notify_service_failure "$service_name" "$max_fail_attempts"

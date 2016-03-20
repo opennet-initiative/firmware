@@ -9,6 +9,8 @@ ZONE_MESH=on_mesh
 NETWORK_LOCAL=lan
 # diese Domain wird testweise abgefragt, um die Verfügbarkeit des on-DNS zu prüfen
 DNS_SERVICE_REFERENCE="opennet-initiative.de"
+# ein Timeout von einer Sekunde scheint zu kurz zu sein (langsame Geräte brauchen mindestens 0,5s - abhängig vom Load)
+DNS_TIMEOUT=3
 
 
 # Liefere alle IPs fuer diesen Namen zurueck
@@ -29,7 +31,7 @@ query_dns_reverse() {
 has_opennet_dns() {
 	trap "error_trap has_opennet_dns '$*'" $GUARD_TRAPS
 	# timeout ist kein shell-builtin - es benoetigt also ein global ausfuehrbares Kommando
-	timeout 1 on-function query_dns "$DNS_SERVICE_REFERENCE" | grep -q . && return 0
+	timeout "$DNS_TIMEOUT" on-function query_dns "$DNS_SERVICE_REFERENCE" | grep -q . && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

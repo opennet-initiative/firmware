@@ -543,9 +543,28 @@ get_uptime_minutes() {
 }
 
 
-get_file_modification_timestamp_minutes() {
+## @fn is_file_timestamp_older_minutes()
+## @brief Prüfe ob die Datei älter ist als die angegebene Zahl von Minuten.
+## @details Alle Fehlerfälle (Datei existiert nicht, Zeitstempel liegt in der Zukunft, ...) werden
+##   als "veraltet" gewertet.
+## @returns True, falls die Datei zu ist oder falls ein Fehler auftrat.
+is_file_timestamp_older_minutes() {
+	trap "error_trap is_file_timestamp_older_minutes '$*'" $GUARD_TRAPS
 	local filename="$1"
-	date --reference "$filename" +%s | awk '{ print int($1/60) }'
+	local limit_minutes="$2"
+	[ -e "$filename" ] || return 0
+	local file_timestamp
+	local timestamp_now
+	file_timestamp=$(date --reference "$filename" +%s | awk '{ print int($1/60) }')
+	timestamp_now=$(date +%s | awk '{ print int($1/60) }')
+	# veraltet, falls:
+	#   * kein Zeitstempel
+	#   * Zeitstempel in der Zukunft
+	#   * Zeitstempel älter als erlaubt
+	[ -z "$file_timestamp" -o \
+		"$file_timestamp" -gt "$timestamp_now" -o \
+		"$((file_timestamp + limit_minutes))" -lt "$timestamp_now" ] && return 0
+	trap "" $GUARD_TRAPS && return 1
 }
 
 

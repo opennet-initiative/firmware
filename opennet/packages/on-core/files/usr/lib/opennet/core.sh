@@ -727,6 +727,10 @@ get_potential_error_messages() {
 	#    Der obige "Broken pipe"-Fehler unterbricht dabei auch die akuell laufende Funktion - dies ist
 	#    sehr häufig die Variablen-Auslesung (seltsamerweise).
 	filters="${filters}|__main__ get_variable "
+	# 21) ERROR: Linux route add command failed
+	#    Beim Aufbau er OpenVPN-Verbindung scheint gelegentlich noch eine alte Route verblieben zu sein.
+	#    Diese Meldung ist wohl irrelevant.
+	filters="${filters}|ERROR: Linux route add command failed"
 	# System-Fehlermeldungen (inkl. "trapped")
 	logread | grep -i error | grep -vE "(${filters#|})" | if [ -z "$max_lines" ]; then
 		# alle Einträge ausgeben

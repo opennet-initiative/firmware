@@ -221,7 +221,7 @@ def _read_file(filename):
 
 def get_ping_times(hosts):
     tempfile = "/tmp/munin-olsrd-{pid}.tmp".format(pid=os.getpid())
-    command = 'for host in {hosts}; do echo -n "$host "; ping -c 1 -w 1 "$host" | grep /avg/ || true; done >{tempfile}'\
+    command = 'for host in {hosts}; do echo -n "$host "; ping -c 1 -w 1 "$host" | grep /avg/ || echo; done >{tempfile}'\
               .format(hosts=" ".join(hosts), tempfile=tempfile)
     # micropython supports only "os.system" (as of 2015) - thus we need to stick with it for openwrt
     returncode = os.system(command)

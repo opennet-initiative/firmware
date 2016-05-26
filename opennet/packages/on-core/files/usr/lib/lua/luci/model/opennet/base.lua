@@ -145,7 +145,7 @@ function action_portmapping()
 	local uci = require "luci.model.uci"
 	local cursor = uci.cursor()
 	
-	zones = {}
+	local zones = {}
 	if on_bool_function("is_function_available", {"get_active_mig_connections"}) then
 		table.insert(zones, on_function("get_variable", {"ZONE_TUNNEL"}))
 	end

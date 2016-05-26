@@ -319,7 +319,7 @@ log_openvpn_events_and_disconnect_if_requested() {
 	service_name=$(basename "${config%.conf}")
 	pid_file=$(get_service_value "$service_name" "pid_file")
 	established_indicator_file=$(get_service_value "$service_name" "openvpn_established_indicator_file")
-	if [ -z "$established_indicator_file" ]; then
+	if [ -z "$established_indicator_file" -a -n "$pid_file" ]; then
 		established_indicator_file="${pid_file}.established"
 		set_service_value "$service_name" "openvpn_established_indicator_file" "$established_indicator_file"
 	fi

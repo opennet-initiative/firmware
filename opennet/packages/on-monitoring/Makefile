@@ -34,14 +34,14 @@ define Package/on-monitoring/postinst
 # erst nach der Cache-Loeschung sind die neuen Funktionen verfuegbar
 on-function on_opkg_postinst_default
 
-# automatisch konfigurierte munin-Plugins verlinken
-on-function enable_suggested_munin_plugin_names "wireless_channel_occupation_"
-on-function enable_suggested_munin_plugin_names "wireless_channel_active_"
-
 on-function schedule_task <<-EOF
 	# Leider, leider ist muninlite noch nicht installiert, wenn diese Funktion aufgerufen wird.
 	# Daher warten wir einfach ein wenig und hoffen, dass es zwischendurch keinen Neustart gibt.
 	sleep 20
+
+	# automatisch konfigurierte munin-Plugins verlinken
+	on-function enable_suggested_munin_plugin_names "wireless_channel_occupation_"
+	on-function enable_suggested_munin_plugin_names "wireless_channel_active_"
 
 	# Patch auf /usr/sbin/munin-node anwenden, um die Verwendung von Modulen zu ermöglichen
 	on-function enable_munin_plugins

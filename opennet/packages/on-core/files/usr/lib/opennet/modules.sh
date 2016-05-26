@@ -92,7 +92,10 @@ install_from_opennet_repository() {
 			is_package_installed "$package" || continue
 			# Falls es ein opennet-Modul ist, dann aktiviere es automatisch nach der Installation.
 			# Dies dürfte für den Nutzer am wenigsten überraschend sein.
-			enable_on_module "$package"
+			# Wichtig: "enable" in einem neuen Skript-Kontext ausführen, damit sichergestellt ist,
+			#          dass die "apply_changes"-Aktion mit den eventuell neuen Funktionen
+			#          ausgeführt werden kann.
+			on-function enable_on_module "$package"
 		fi
 	done
 	# anschließend speichern wir den aktuellen Zustand, falls _alle_ Pakete installiert wurden

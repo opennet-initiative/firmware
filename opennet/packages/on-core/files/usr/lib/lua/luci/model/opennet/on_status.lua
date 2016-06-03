@@ -134,6 +134,8 @@ function status_neighbors()
 	local neighbour_info = on_function("get_olsr_neighbours")
 	local response = ""
 	if neighbour_info ~= "" then
+		-- Tabelle in Tabelle (aussen: Details + Karte, innen: Details)
+		response = response .. '<table border="0"><tr><td>'
 		response = response .. '<table class="status_page_table"><tr>' ..
 			'<th>' ..  luci.i18n.translate("IP Address") .. "</th>" ..
 			'<th><abbr title="' .. luci.i18n.translate("Link-Quality: how many of your packets were received by your neighbor") .. '">LQ</abbr></th>' ..
@@ -155,7 +157,11 @@ function status_neighbors()
 					'</tr>'
 			end
 		end
-		response = response .. "</table>"
+		response = response .. '</table>'
+		-- Karte einblenden
+		response = response .. '</td><td>' ..
+		                '<iframe scrolling="no" width="400px" height="250px" src="https://map.opennet-initiative.de/?ip=' ..
+				on_function("get_main_ip") .. '"></iframe></td></tr></table>'
 	else
 		response = response .. '<div class="errorbox">' ..
 			luci.i18n.translate("Currently there are no known routing neighbours.") .. " " ..

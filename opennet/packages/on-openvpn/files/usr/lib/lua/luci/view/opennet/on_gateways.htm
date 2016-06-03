@@ -382,7 +382,7 @@ e "offset/distance" column for this purpose.%></p>
 	<!-- Verbindungslog -->
 	<div class="cbi-map"><fieldset class="cbi-section">
 		<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly"
-			rows="10" cols="110" wrap="off"><%=gateway_log%></textarea>
+			rows="10" cols="110" wrap="off"><%=luci.util.pcdata(gateway_log)%></textarea>
 	</fieldset></div>
 <% end %>
 <%+footer%>

@@ -130,7 +130,7 @@ on_module_descriptions["on-olsr2"] = luci.i18n.translate("Experimental support f
 		<div class="cbi-section-descr"><%:Review the details of installations and removals.%></div>
 		<div class="cbi-section-node">
 			<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly"
-				rows="10" cols="110" wrap="off"><%=modules_log%></textarea>
+				rows="10" cols="110" wrap="off"><%=luci.util.pcdata(modules_log)%></textarea>
 		</div>
 	</fieldset></div>
 <% end %>

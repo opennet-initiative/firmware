@@ -58,7 +58,7 @@ function action_modules()
 		local result = {}
 		-- nur gueltige Paketnamen (entsprechend der erlaubten Zeichen) verwenden
 		for _, token in ipairs(generic_split(text, "[^,]+")) do
-			if parse_string_pattern(token, "a-z-") then
+			if parse_string_pattern(token, "a-z0-9-") then
 				table.insert(result, token)
 			end
 		end

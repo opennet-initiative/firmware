@@ -28,6 +28,7 @@ function index()
 	require("luci.model.opennet.on_mig_openvpn")
 	on_entry({"mig_openvpn", "zertifikat"}, call("action_on_openvpn"), i18n("Certificate"), 20, "on-openvpn").leaf = true
 	on_entry({"mig_openvpn", "gateways"}, call("action_vpn_gateways"), i18n("Gateways"), 40, "on-openvpn").leaf = true
+	on_entry({"mig_openvpn", "log"}, call("action_vpn_connection_log"), i18n("Connection Log"), 60, "on-openvpn").leaf = true
 
 	on_entry({"mig_openvpn", "vpn_status_label"}, call("on_vpn_status_label"), nil, nil, "on-openvpn").leaf = true
 	on_entry({"mig_openvpn", "vpn_status_form"}, call("on_vpn_status_form"), nil, nil, "on-openvpn").leaf = true

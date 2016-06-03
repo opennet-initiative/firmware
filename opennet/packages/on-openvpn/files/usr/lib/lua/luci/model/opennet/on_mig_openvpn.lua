@@ -73,6 +73,12 @@ function action_vpn_gateways()
 end
 
 
+function action_vpn_connection_log()
+	local gateway_log = get_custom_log_reversed("mig-openvpn-connections", 30)
+	luci.template.render("opennet/on_gateway_connection_log", { gateway_log=gateway_log })
+end
+
+
 -- URL zum Testen: http://172.16.0.1/cgi-bin/luci/opennet/mig_openvpn/status/vpn_gateway_info/gw_openvpn_192_168_0_254_1600_udp
 -- das Resultat ist ein json-formatierter Datensatz mit den Informationen eines Gateways
 function gateway_info(service_name)

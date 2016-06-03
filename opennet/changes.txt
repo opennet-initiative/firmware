@@ -5,7 +5,9 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
-* Gateway-Liste: jeder Gateway ist verlinkt mit einer Karte auf der die Route vom eigenen AP zum Gateway visualisiert ist
+* Gateway-Liste:
+** jeder Gateway ist verlinkt mit einer Karte auf der die Route vom eigenen AP zum Gateway visualisiert ist
+** das Verbindungs-Protokoll ist nun separat erreichbar
 * Einblendung der Karte auf der Startseite
 * Unterscheidung von opennet- und Internet-URL ist nicht mehr nötig:
 ** Modulinstallation

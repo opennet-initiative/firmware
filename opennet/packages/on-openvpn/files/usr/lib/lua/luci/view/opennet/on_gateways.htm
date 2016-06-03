@@ -23,8 +23,6 @@ You may obtain a copy of the License at
 	if tonumber(on_function("get_memory_size")) <= 32 then
 		parallel_processes = 1
 	end
-
-	local gateway_log = get_custom_log_reversed("mig-openvpn-connections", 30)
 %>
 
 <%+header%>
@@ -374,15 +372,4 @@ e "offset/distance" column for this purpose.%></p>
 		</form>
 	</fieldset>
 </div>
-
-
-<%# Protokoll von Gateway-Wechseln %>
-<% if gateway_log ~= "" then %>
-	<h3><%:Connection log%></h3>
-	<!-- Verbindungslog -->
-	<div class="cbi-map"><fieldset class="cbi-section">
-		<textarea xmlns="http://www.w3.org/1999/xhtml" readonly="readonly"
-			rows="10" cols="110" wrap="off"><%=luci.util.pcdata(gateway_log)%></textarea>
-	</fieldset></div>
-<% end %>
 <%+footer%>

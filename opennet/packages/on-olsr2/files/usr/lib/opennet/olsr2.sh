@@ -47,11 +47,10 @@ configure_ipv6_address() {
 ## @brief Mesh-Interfaces ermitteln und für olsrd2 konfigurieren
 update_olsr2_interfaces() {
 	local interfaces
-	local finished_interfaces
+	local existing_interfaces
 	local ifname
 	local uci_prefix
-	interfaces=$(get_zone_interfaces "$ZONE_MESH")
-	interfaces="loopback $interfaces"
+	interfaces="loopback $(get_zone_interfaces "$ZONE_MESH")"
 	# alle konfigurierten Interfaces durchgehen und überflüssige löschen
 	find_all_uci_sections "olsrd2" "interface" | while read uci_prefix; do
 		ifname=$(uci_get "${uci_prefix}.ifname")
@@ -64,12 +63,27 @@ update_olsr2_interfaces() {
 		fi
 	done
 	# alle fehlenden Interfaces hinzufügen
-	finished_interfaces=$(find_all_uci_sections "olsrd2" "interface" | while read uci_prefix; do uci_get "${uci_prefix}.ifname"; done)
+	existing_interfaces=$(find_all_uci_sections "olsrd2" "interface" | while read uci_prefix; do uci_get "${uci_prefix}.ifname"; done)
 	echo "$interfaces" | sed 's/[^a-zA-Z�0-9_]/\n/g' | while read ifname; do
-		echo "$finished_interfaces" | grep -wq "$ifname" && continue
-		uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
-		uci set "${uci_prefix}.ifname=$ifname"
+		echo "$existing_interfaces" | grep -wq "$ifname" || {
+			uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
+			uci set "${uci_prefix}.ifname=$ifname"
+		}
+		# Interface auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
+		[ -n "$(uci_get "${uci_prefix}.bindto")" ] || {
+			uci_add_list "${uci_prefix}.bindto" "-0.0.0.0/0"
+			uci_add_list "${uci_prefix}.bindto" "-::1/128"
+			uci_add_list "${uci_prefix}.bindto" "default_accept"
+		}
 	done
+	# Informationsversand auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
+	uci_prefix=$(find_first_uci_section "olsrd2" "olsrv2")
+	[ -z "$uci_prefix" ] && uci_prefix="olsrd2.$(uci add "olsrd2" "olsrv2")"
+	[ -n "$(uci_get "${uci_prefix}.originator")" ] || {
+		uci_add_list "${uci_prefix}.originator" "-0.0.0.0/0"
+		uci_add_list "${uci_prefix}.originator" "-::1/128"
+		uci_add_list "${uci_prefix}.originator" "default_accept"
+	}
 	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
 	apply_changes_olsrd2
 }

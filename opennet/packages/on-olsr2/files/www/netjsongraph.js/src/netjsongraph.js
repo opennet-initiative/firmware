@@ -565,9 +565,9 @@
                           })
                           .html("Choose the network to display");
                     graph.collection.forEach(function(structure) {
-                        select.append("option").attr("value", structure.type).html(structure.type);
+                        select.append("option").attr("value", structure.topology_id).html(structure.topology_id);
                         // Collect each network json structure
-                        selected[structure.type] = structure;
+                        selected[structure.topology_id] = structure;
                     });
                     select.on("change", function() {
                         selectGroup.attr("class", "njg-hidden");

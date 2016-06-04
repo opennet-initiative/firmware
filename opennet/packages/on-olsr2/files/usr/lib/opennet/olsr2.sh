@@ -45,6 +45,7 @@ configure_ipv6_address() {
 
 ## @fn update_olsr2_interfaces()
 ## @brief Mesh-Interfaces ermitteln und für olsrd2 konfigurieren
+# TODO: olsrd2 ab Version 0.12 vereinfacht die uci-Konfiguration deutlich: http://www.olsr.org/mediawiki/index.php/UCI_Configuration_Plugin
 update_olsr2_interfaces() {
 	local interfaces
 	local existing_interfaces
@@ -57,13 +58,14 @@ update_olsr2_interfaces() {
 	# alle konfigurierten Interfaces durchgehen und überflüssige löschen
 	find_all_uci_sections "olsrd2" "interface" | while read uci_prefix; do
 		ifname=$(uci_get "${uci_prefix}.ifname")
-		# lasse die default-Interface-Sektion unverändert
 		[ -z "$ifname" ] && continue
 		if echo "$interfaces" | grep -q "^${ifname}$"; then
 			# das Interface ist bereits eingetragen
 			uci_delete "${uci_prefix}.ignore"
-			# TODO: vor dem Release entfernen - nur zur Bereinigung der Test-Hosts
-			uci_delete "${uci_prefix}.bindto"
+			# Interface auf IPv6 begrenzen
+			[ -n "$(uci_get "${uci_prefix}.bindto")" ] || {
+				for token in $ipv6_limit; do uci_add_list "${uci_prefix}.bindto" "$token"; done
+			}
 		else
 			# fuer diesen Eintrag gibt es kein Interface
 			uci_delete "${uci_prefix}"
@@ -76,6 +78,7 @@ update_olsr2_interfaces() {
 		echo "$existing_interfaces" | grep -wq "$ifname" || {
 			uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
 			uci set "${uci_prefix}.ifname=$ifname"
+			for token in $ipv6_limit; do uci_add_list "${uci_prefix}.bindto" "$token"; done
 		}
 	done
 	# Informationsversand auf IPv6 begrenzen
@@ -84,16 +87,6 @@ update_olsr2_interfaces() {
 	[ -n "$(uci_get "${uci_prefix}.originator")" ] || {
 		for token in $ipv6_limit; do
 			uci_add_list "${uci_prefix}.originator" "$token"
-		done
-	}
-	# alle Interfaces auf IPv6 begrenzen
-	# ermittle die default-Interface-Sektion (ohne "ifname")
-	uci_prefix=$(find_all_uci_sections "olsrd2" "interface" \
-		| while read uci_prefix; do [ -n "$(uci_get "${uci_prefix}.ifname")" ] || echo "$uci_prefix"; done)
-	[ -z "$uci_prefix" ] && uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
-	[ -n "$(uci_get "${uci_prefix}.bindto")" ] || {
-		for token in $ipv6_limit; do
-			uci_add_list "${uci_prefix}.bindto" "$token"
 		done
 	}
 	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen

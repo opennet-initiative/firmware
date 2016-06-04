@@ -53,6 +53,7 @@ enable_suggested_munin_plugin_names() {
 	# keine Ausfuehrung ohne "suggest"-Faehigkeit
 	echo "$capabilities" | grep -qw "suggest" || return 0
 	"$plugin_file" suggest | while read scope; do
+		[ -z "$scope" ] && continue
 		[ -e "$target_dir/${base_plugin}${scope}" ] && continue
 		ln -s "$source_dir/$base_plugin" "$target_dir/${base_plugin}${scope}"
 	done

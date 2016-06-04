@@ -50,39 +50,51 @@ update_olsr2_interfaces() {
 	local existing_interfaces
 	local ifname
 	local uci_prefix
+	local token
+	# auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
+	local ipv6_limit="-0.0.0.0/0 -::1/128 default_accept"
 	interfaces="loopback $(get_zone_interfaces "$ZONE_MESH")"
 	# alle konfigurierten Interfaces durchgehen und überflüssige löschen
 	find_all_uci_sections "olsrd2" "interface" | while read uci_prefix; do
 		ifname=$(uci_get "${uci_prefix}.ifname")
+		# lasse die default-Interface-Sektion unverändert
+		[ -z "$ifname" ] && continue
 		if echo "$interfaces" | grep -q "^${ifname}$"; then
 			# das Interface ist bereits eingetragen
 			uci_delete "${uci_prefix}.ignore"
+			# TODO: vor dem Release entfernen - nur zur Bereinigung der Test-Hosts
+			uci_delete "${uci_prefix}.bindto"
 		else
 			# fuer diesen Eintrag gibt es kein Interface
 			uci_delete "${uci_prefix}"
 		fi
 	done
 	# alle fehlenden Interfaces hinzufügen
-	existing_interfaces=$(find_all_uci_sections "olsrd2" "interface" | while read uci_prefix; do uci_get "${uci_prefix}.ifname"; done)
+	existing_interfaces=$(find_all_uci_sections "olsrd2" "interface" \
+		| while read uci_prefix; do uci_get "${uci_prefix}.ifname"; done)
 	echo "$interfaces" | sed 's/[^a-zA-Z�0-9_]/\n/g' | while read ifname; do
 		echo "$existing_interfaces" | grep -wq "$ifname" || {
 			uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
 			uci set "${uci_prefix}.ifname=$ifname"
 		}
-		# Interface auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
-		[ -n "$(uci_get "${uci_prefix}.bindto")" ] || {
-			uci_add_list "${uci_prefix}.bindto" "-0.0.0.0/0"
-			uci_add_list "${uci_prefix}.bindto" "-::1/128"
-			uci_add_list "${uci_prefix}.bindto" "default_accept"
-		}
 	done
-	# Informationsversand auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
+	# Informationsversand auf IPv6 begrenzen
 	uci_prefix=$(find_first_uci_section "olsrd2" "olsrv2")
 	[ -z "$uci_prefix" ] && uci_prefix="olsrd2.$(uci add "olsrd2" "olsrv2")"
 	[ -n "$(uci_get "${uci_prefix}.originator")" ] || {
-		uci_add_list "${uci_prefix}.originator" "-0.0.0.0/0"
-		uci_add_list "${uci_prefix}.originator" "-::1/128"
-		uci_add_list "${uci_prefix}.originator" "default_accept"
+		for token in $ipv6_limit; do
+			uci_add_list "${uci_prefix}.originator" "$token"
+		done
+	}
+	# alle Interfaces auf IPv6 begrenzen
+	# ermittle die default-Interface-Sektion (ohne "ifname")
+	uci_prefix=$(find_all_uci_sections "olsrd2" "interface" \
+		| while read uci_prefix; do [ -n "$(uci_get "${uci_prefix}.ifname")" ] || echo "$uci_prefix"; done)
+	[ -z "$uci_prefix" ] && uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
+	[ -n "$(uci_get "${uci_prefix}.bindto")" ] || {
+		for token in $ipv6_limit; do
+			uci_add_list "${uci_prefix}.bindto" "$token"
+		done
 	}
 	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
 	apply_changes_olsrd2
@@ -97,7 +109,7 @@ olsr2_sync_routing_tables() {
 	local olsr2_id
 	local iproute_id
 	local uci_prefix
-	uci_prefix=$(find_first_uci_section olsrd2 domain name="$OLSR2_DOMAIN")
+	uci_prefix=$(find_first_uci_section "olsrd2" "domain" "name=$OLSR2_DOMAIN")
 	[ -z "$uci_prefix" ] && {
 		uci_prefix="olsrd2.$(uci add "olsrd2" "domain")"
 		uci set "${uci_prefix}.name=$OLSR2_DOMAIN"

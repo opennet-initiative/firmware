@@ -548,36 +548,8 @@
             */
             d3.json(url, function(error, graph) {
                 if(error) { throw error; }
-                /**
-                * Check if the json contains a NetworkCollection
-                */
-                if(graph.type === "NetworkCollection") {
-                    var selectGroup = body.append("div").attr("id", "njg-select-group"),
-                        select = selectGroup.append("select")
-                                            .attr("id", "select");
-                        str = graph;
-                    select.append("option")
-                          .attr({
-                              "value": "",
-                              "selected": "selected",
-                              "name": "default",
-                              "disabled": "disabled"
-                          })
-                          .html("Choose the network to display");
-                    graph.collection.forEach(function(structure) {
-                        select.append("option").attr("value", structure.topology_id).html(structure.topology_id);
-                        // Collect each network json structure
-                        selected[structure.topology_id] = structure;
-                    });
-                    select.on("change", function() {
-                        selectGroup.attr("class", "njg-hidden");
-                        // Call selected json structure
-                        processJson(selected[this.options[this.selectedIndex].value]);
-                    });
-                }
-                else {
-                    processJson(graph);
-                }
+		// OPENNET: disable selection interface - just pick the first graph
+		processJson(graph.collection[0]);
             });
         }
      };

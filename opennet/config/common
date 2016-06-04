@@ -86,6 +86,7 @@ CONFIG_PACKAGE_on-captive-portal=m
 CONFIG_PACKAGE_on-monitoring=m
 CONFIG_PACKAGE_on-goodies=m
 CONFIG_PACKAGE_on-olsr2=m
+CONFIG_PACKAGE_on-olsr2-netjsongraph=m
 
 # openvpn
 CONFIG_OPENVPN_openssl_ENABLE_SERVER=n

@@ -1,5 +1,5 @@
 ca /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem
-ns-cert-type server
+remote-cert-tls server
 
 cd /etc/openvpn/opennet_ugw
 cert on_ugws.crt
@@ -22,6 +22,6 @@ dev tap
 dev-type tap
 
 script-security 2 execve
+
 up /usr/lib/opennet/events/mesh_openvpn_updown.sh
 down /usr/lib/opennet/events/mesh_openvpn_updown.sh
-

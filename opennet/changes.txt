@@ -32,6 +32,7 @@ Anschließend kann diese Liste wieder geleert werden.
 ** bisher dauerte die Verbindungsunterbrechung durch die Wartezeit auf die anderen Dienste desselben Hosts bis zu zehn Minuten
 * Monitoring:
 ** die Ping-Latenz zum UGW und zum VPN-Tunnel-Gateway ist via munin auswertbar
+* OpenVPN-Client: Umstellung von "ns-cert-type" auf "remote-cert-tls"
 
 = Bemerkenswertes / Fehler / Mängel =
 

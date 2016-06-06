@@ -38,14 +38,6 @@ get_ip_for_mac() {
 	echo "$1"
 }
 
-get_min_signal() {
-	get_wifi_peers "$1" | awk '{print $2}' | sort -n | head -1
-}
-
-get_max_noise() {
-	get_wifi_peers "$1" | awk '{print $3}' | sort -n | tail -1
-}
-
 get_selected_interface() {
 	# filename ends with "_"? Exit script with error immediately.
 	[ "$0" != "${0%_}" ] && echo >&2 "Failed to parse wifi interface from filename" && exit 1
@@ -59,58 +51,43 @@ ACTION="${1:-}"
 case "$ACTION" in
 	config)
 		wifi=$(get_selected_interface)
-		echo "multigraph signal_quality"
 		echo "graph_title Wireless signal quality - $wifi"
 		echo "graph_args --upper-limit 0"
 		echo "graph_vlabel Signal and noise [dBm]"
 		echo "graph_category network"
-		echo "graph_info This graph shows the worst signal and noise of all wifi peers"
-		echo "noise.label Worst noise"
-		echo "noise.draw AREA"
-		echo "signal.label Worst signal"
-		echo "signal.draw AREA"
-		echo
+		echo "graph_info This graph shows the signal and noise for all wifi peers"
+		echo "noise.label Noise floor"
+		echo "noise.draw LINE"
 		# sub graphs for all peers
-		get_wifi_peers "$wifi" | while read mac details; do
+		get_wifi_peers "$wifi" | while read mac signal noise; do
 			fieldname=$(clean_fieldname "peer_${mac}")
 			peer=$(get_ip_for_mac "$mac")
-			echo "multigraph signal_quality.$fieldname"
-			echo "graph_title Peer $peer"
-			echo "graph_args --upper-limit 0"
-			echo "graph_vlabel Signal and noise [dBm]"
-			echo "graph_category network"
-			echo "noise.label Noise"
-			echo "noise.draw AREA"
-			echo "signal.label Signal"
-			echo "signal.draw AREA"
-			echo
+			echo "signal_${fieldname}.label $peer"
+			echo "signal_${fieldname}.draw LINE"
 		done
 		;;
 	autoconf)
 		[ -z "$(get_wifi_interfaces)" ] && echo "no (no wifi interfaces found)" && exit 1
 		echo "yes"
-		exit 0
 		;;
 	suggest)
 		get_wifi_interfaces
 		;;
 	"")
 		wifi=$(get_selected_interface)
-		echo "multigraph signal_quality"
-		max_noise=$(get_max_noise "$wifi")
-		[ -n "$max_noise" ] && echo "noise.value $max_noise"
-		min_signal=$(get_min_signal "$wifi")
-		[ -n "$min_signal" ] && echo "signal.value $min_signal"
-		echo
-		get_wifi_peers "$wifi" | while read mac signal noise; do
+		peer_data=$(get_wifi_peers "$wifi")
+		echo "$peer_data" | while read mac signal noise; do
 			# ignore empty datasets
 			[ -z "$signal$noise" ] && continue
 			fieldname=$(clean_fieldname "peer_${mac}")
-			peer=$(get_ip_for_mac "$mac")
-			echo "multigraph signal_quality.$fieldname"
+			echo "signal_${fieldname}.value $signal"
+		done
+		# output the first valid noise value (it should be the same for all peers)
+		echo "$peer_data" | while read mac signal noise; do
+			[ -z "$noise" ] && continue
 			echo "noise.value $noise"
-			echo "signal.value $signal"
-			echo
+			# output only one value
+			break
 		done
 		;;
 	*)

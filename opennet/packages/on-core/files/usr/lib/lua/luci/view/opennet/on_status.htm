@@ -134,12 +134,15 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 				// die Zeile wurde nicht gefunden?
 				return;
 			// leider liefert luci in jedem Fall einen Text aus - notfalls "No page is registered at ..." :(
-			} else if ((x.responseText) && (x.responseText.indexOf('No page is registered at') != 0)) {
+			} else if ((x.responseText) && (x.responseText.indexOf('No page is registered at') == 0)) {
+				// die Quelle (anderes Modul?) ist nicht verfuegbar - verstecke die Zeile
+				cell.parentNode.style.display = "none";
+			} else if (x.responseText) {
 				// die Zelle mit neuem Inhalt fuellen (und das "loading"-Icon ueberschreiben
 				cell.innerHTML = x.responseText;
 			} else {
-				// keine Antwort - die ganze Zeile verstecken
-				cell.parentNode.style.display = "none";
+				// leere/keine Antwort (Fehler?)
+				cell.innerHTML = '<%:No response%>';
 			}
 	});
 }

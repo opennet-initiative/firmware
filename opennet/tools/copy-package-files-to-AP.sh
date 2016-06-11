@@ -11,19 +11,17 @@ BASE_DIR=$(cd "$(dirname "$0")/.."; pwd)
 
 RSYNC_OPTS="-ax --exclude=.*.swp --usermap=:root,*:root --groupmap=:root,*:root"
 SCP_OPTS="-rp"
+PACKAGES=${2:-}
 
-
-# wir wollen nur Dateien fuer diejenigen Pakete übertragen, die tatsächlich installiert sind
-get_installed_opennet_packages() {
-	ssh "$TARGET_HOST" "opkg list-installed" | grep ^on- | awk '{ print $1 }'
-}
+# falls nichts explizit gewünscht wurde, wollen wi nur Dateien fuer diejenigen Pakete übertragen, die tatsächlich installiert sind
+[ -z "$PACKAGES" ] && PACKAGES=$(ssh "$TARGET_HOST" "opkg list-installed" | grep ^on- | awk '{ print $1 }')
 
 
 # Konstruiere die Parameterliste
 get_source_and_target_params_null_terminated() {
 	local path
 	# Quellpfade
-	get_installed_opennet_packages | while read pkg; do
+	for pkg in $PACKAGES; do
 		# Verwende null-terminated strings fuer xargs
 		path="$BASE_DIR/packages/$pkg/files/."
 		[ -e "$path" ] && printf "$path\0"

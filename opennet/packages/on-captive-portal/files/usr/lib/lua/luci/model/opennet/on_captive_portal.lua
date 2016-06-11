@@ -45,24 +45,24 @@ function action_captive_portal()
 	local status
 	local free_device = on_function("get_variable", {"NETWORK_FREE"})
 	if on_bool_function("is_captive_portal_running") then
+		-- die Funktion ist aktiv - melde Zustand
 		status = luci.i18n.translatef("Connected clients: %d | Hotspot name: %s",
 				on_function("get_captive_portal_client_count"),
 				on_function("captive_portal_get_property", {"name"}))
-	else
-		-- die Funktion ist nicht aktiv - Ursachenforschung ...
-		if on_bool_function("captive_portal_has_devices") then
-			if on_function("get_active_mig_connections") ~= "" then
-				if on_bool_function("is_interface_up", {free_device}) then
-					status = luci.i18n.translate("Disabled: failed to start the 'nodogsplash' service.")
-				else
-					status = luci.i18n.translatef("Disabled: failed to enable the '%s' network interface.", free_device)
-				end
+	elseif on_bool_function("captive_portal_uses_wifi_only_bridge") then
+		status = luci.i18n.translatef("Warning: the Captive Portal interface (%s) seems to be a bridge containing only wifi devices. This setup is known to cause problems: you should add a non-wifi device or disable bridging.", free_device)
+	elseif on_bool_function("captive_portal_has_devices") then
+		if on_function("get_active_mig_connections") ~= "" then
+			if on_bool_function("is_interface_up", {free_device}) then
+				status = luci.i18n.translate("Disabled: failed to start the 'nodogsplash' service.")
 			else
-				status = luci.i18n.translate("Disabled: the VPN tunnel is not running.")
+				status = luci.i18n.translatef("Disabled: failed to enable the '%s' network interface.", free_device)
 			end
 		else
-			status = luci.i18n.translatef("Disabled: no network device is assigned to the '%s' zone.", free_device)
+			status = luci.i18n.translate("Disabled: the VPN tunnel is not running.")
 		end
+	else
+		status = luci.i18n.translatef("Disabled: no network device is assigned to the '%s' zone.", free_device)
 	end
 	luci.http.write(status)
 end

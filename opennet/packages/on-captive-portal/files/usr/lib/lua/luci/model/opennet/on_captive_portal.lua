@@ -32,6 +32,17 @@ function action_on_captive_portal()
 		end
 		on_function("apply_changes", {"on-captive-portal"})
 	end
+	-- Umgebungsprüfungen
+	if not on_bool_function("captive_portal_has_devices") then
+		-- Warne den Nutzer, falls dem 'free'-Netzwerk-Interface kein physisches Gerät zugeordnet ist.
+		local netdev = on_function("get_variable", {"NETWORK_FREE"})
+		table.insert(on_errors, luci.i18n.translatef('You need to <a href="%s">attach a physical network device</a> to the \'%s\' interface in order to enable the Hotspot feature.', luci.dispatcher.build_url("admin", "network", "network", netdev) .. "?tab.network." .. netdev .. "=physical", netdev))
+	end
+	if on_bool_function("captive_portal_uses_wifi_only_bridge") then
+		-- Warne den Nutzer, falls das 'free'-Netzwerk-Interface als Bridge ausschließlich aus Wifi-Interfaces besteht
+		local netdev = on_function("get_variable", {"NETWORK_FREE"})
+		table.insert(on_errors, luci.i18n.translatef('You may want to <a href="%s">reconfigure</a> the \'%s\' interface. Currently a bridge consisting of multiple wifi interfaces (and nothing else) is configured. This setup is known to cause problems with openwrt. Please add a non-wifi interface or disable bridging.', luci.dispatcher.build_url("admin", "network", "network", netdev) .. "?tab.network." .. netdev .. "=physical", netdev))
+	end
 	luci.template.render("opennet/on_captive_portal", {
 		portal_name=on_function("captive_portal_get_property", {"name"}),
 		portal_url=on_function("captive_portal_get_property", {"url"}),

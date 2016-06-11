@@ -378,7 +378,7 @@ end
 function html_box(text, class)
 	local split_out
 	local _
-	split_out, _ = string.gsub(luci.util.pcdata(text), "\n", "<br/>")
+	split_out, _ = string.gsub(text, "\n", "<br/>")
 	local prefix
 	local css_class
 	if class == "error" then

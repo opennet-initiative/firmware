@@ -41,7 +41,7 @@ clean_fieldname() {
 
 get_ip_for_mac() {
 	local ip
-	ip=$(grep -iw "$1" /proc/net/arp | awk '{print $1}' | sort | head -1)
+	ip=$(arp -n | grep -iw "$1$" | awk '{print $1}' | sort | head -1)
 	[ -n "$ip" ] && echo "$ip" && return 0
 	# no IP found - return MAC instead
 	echo "$1"

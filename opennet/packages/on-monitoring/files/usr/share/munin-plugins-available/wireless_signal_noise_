@@ -5,7 +5,7 @@
 # License: GPL v3 or later
 #
 # Requirements:
-#  * "iwinfo" tool
+#  * "iwinfo" tool (alternatively: fall back to "iw" - with incomplete data)
 #  * root privileges (for "iw" and "iwinfo")
 #
 # Magic markers
@@ -16,21 +16,22 @@
 set -eu
 
 
-get_wifi_interfaces() {
-	iwinfo | grep "^[a-zA-Z]" | awk '{print $1}'
-}
-
-
-get_wifi_peers() {
+# prefer "iwinfo" for information retrieval, if it is available
+if which iwinfo >/dev/null; then
+	# "iwinfo" has a stable output format but is only available on openwrt
+	get_wifi_interfaces() { iwinfo | grep "^[a-zA-Z]" | awk '{print $1}'; }
 	# return MAC of peer and the signal strength
-	iwinfo "$1" assoclist | grep "^[0-9a-fA-F]" | awk '{print $1,$2}'
-}
-
-
-get_wifi_noise() {
+	get_wifi_peers() { iwinfo "$1" assoclist | grep "^[0-9a-fA-F]" | awk '{print $1,$2}'; }
 	# the noise should be the same for all peers
-	iwinfo "$1" assoclist | grep "^[0-9a-fA-F]" | awk '{print $5}' | tail -1
-}
+	get_wifi_noise() { iwinfo "$1" assoclist | grep "^[0-9a-fA-F]" | awk '{print $5}' | tail -1; }
+else
+	# "iw" is available everywhere - but its output format is not recommended for non-humans
+	get_wifi_interfaces() { iw dev | awk '{ if ($1 == "Interface") print $2; }'; }
+	get_wifi_peers() { iw dev wlan0 station dump \
+		| awk '{ if ($1 == "Station") mac=$2; if (($1 == "signal") && ($2 == "avg:")) print mac,$3}'; }
+	# TODO: there seems to be no way to retrieve the noise level via "iw"
+	get_wifi_noise() { echo; }
+fi
 
 
 clean_fieldname() {

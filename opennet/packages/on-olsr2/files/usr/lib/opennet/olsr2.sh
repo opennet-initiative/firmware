@@ -136,3 +136,10 @@ init_policy_routing_ipv6() {
 	ip -6 rule del lookup "$ROUTING_TABLE_MESH_OLSR2" 2>/dev/null || true
 	ip -6 rule add lookup "$ROUTING_TABLE_MESH_OLSR2"
 }
+
+
+debug_ping_all_olsr2_hosts() {
+	ip -6 route show table olsrd2 | awk '{print $1}' | while read a; do
+		ping -w 1 -c 1 "$a" >/dev/null 2>&1 && printf "OK\t$a\n" || printf "OK\t$a\n"
+	done
+}

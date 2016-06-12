@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Show currently used channel of wifi enabled devices.
+# Show current signal strength and noise for all connected peers of wifi devices.
 # Author: Lars Kruse, devel@sumpfralle.de
 # License: GPL v3 or later
 #

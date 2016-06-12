@@ -54,11 +54,7 @@ update_olsr2_interfaces() {
 	local token
 	# auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
 	local ipv6_limit="-0.0.0.0/0 -::1/128 default_accept"
-	interfaces="loopback"
-	# up to v0.12 we need to use physical devices instead of logical ones
-	for token in $(get_zone_interfaces "$ZONE_MESH"); do
-		interfaces="$interfaces $(get_device_of_interface "$token")"
-	done
+	interfaces="loopback $(get_zone_interfaces "$ZONE_MESH")"
 	# alle konfigurierten Interfaces durchgehen und überflüssige löschen
 	find_all_uci_sections "olsrd2" "interface" | while read uci_prefix; do
 		ifname=$(uci_get "${uci_prefix}.ifname")

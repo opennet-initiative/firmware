@@ -94,6 +94,11 @@ print_interfaces_2_6() {
         wlan_mode="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Mode:") print $2;}')"
         wlan_channel="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($3 == "Channel:") print $4;}')"
         wlan_freq="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($3 == "Channel:") {gsub("(",""); print $5;}}')"
+	# ein Client, der gerade nicht mit dem Master verbunden ist, liefert hier "unknown" statt einer Kanal-Zahl
+	echo "$wlan_channel" | grep -q '^[0-9]\+$' || {
+		wlan_channel=0
+		wlan_freq=0
+	}
         wlan_txpower="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Tx-Power:") print $2;}')"
         wlan_signal="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($1 == "Signal:") print $2;}')"
         wlan_noise="$(echo "$iwinfo" | awk 'BEGIN{RS="\\\{newline\\\}"} {if ($4 == "Noise:") print $5;}')"

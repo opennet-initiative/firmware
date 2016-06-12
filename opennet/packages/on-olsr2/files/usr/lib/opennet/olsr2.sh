@@ -78,7 +78,7 @@ update_olsr2_interfaces() {
 	# alle fehlenden Interfaces hinzufügen
 	existing_interfaces=$(find_all_uci_sections "olsrd2" "interface" \
 		| while read uci_prefix; do uci_get "${uci_prefix}.ifname"; done)
-	echo "$interfaces" | sed 's/[^a-zA-Z�0-9_]/\n/g' | while read ifname; do
+	echo "$interfaces" | sed 's/[^a-zA-Z0-9\._]/\n/g' | while read ifname; do
 		echo "$existing_interfaces" | grep -wq "$ifname" || {
 			uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
 			uci set "${uci_prefix}.ifname=$ifname"

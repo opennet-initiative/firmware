@@ -11,19 +11,44 @@
 
 set -eu
 
-WIFI_IF="wlan0"
-LAST_RX_COUNTER_FILE="/tmp/$(basename "$0")-${WIFI_IF}.cache"
+WIFI_DEVICE="wlan0"
+LAST_RX_COUNTER_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.cache"
+RESET_TIMESTAMP_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.timestamp"
+MINIMUM_RESET_PERIOD_SECONDS=900
 
-# der workaround ist nur fuer Master anwendbar
-iwinfo "$WIFI_IF" info | grep -q "Mode: Master" || exit 0
+
+is_wifi_master() {
+	iwinfo "$WIFI_DEVICE" info | grep -qw "Mode: Master"
+}
+
+
+is_reset_period_elapsed() {
+	# keine Datei? Reset ist erlaubt ...
+	[ -e "$RESET_TIMESTAMP_FILE" ] || return 0
+	local timestamp
+	local now
+	timestamp=$(cat "$RESET_TIMESTAMP_FILE")
+	now=$(date +%s)
+	# schon abgelaufen?
+	[ "$((timestamp + MINIMUM_RESET_PERIOD_SECONDS))" -lt "$now" ] && return 0
+	return 1
+}
+
 
 get_rx_counters() {
-	iwinfo "$WIFI_IF" assoclist | grep -w "RX:"
+	iwinfo "$WIFI_DEVICE" assoclist | grep -w "RX:"
 }
+
+
+# Abbruchbedingungen?
+is_wifi_master || exit 0
+is_reset_period_elapsed || exit 0
+
 
 if [ -e "$LAST_RX_COUNTER_FILE" ] && get_rx_counters | cmp -s "$LAST_RX_COUNTER_FILE"; then
 	# die Zaehler sind stehengeblieben
 	on-function add_banner_event "wifi master hangs"
+	date +%s >"$RESET_TIMESTAMP_FILE"
 	wifi
 else
 	# neue Zaehler speichern

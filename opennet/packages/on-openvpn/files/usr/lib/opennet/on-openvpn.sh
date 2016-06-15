@@ -348,7 +348,7 @@ get_traceroute_csv() {
         local traceroute
 	local host
 
-	host=$(get_service_value "$service_name" "$host")
+	host=$(get_service_value "$service_name" "host")
 	traceroute=$(get_service_value "$TRACEROUTE_FILENAME" "$host")
 
         # noch keine Tests durchgefuehrt?
@@ -365,15 +365,13 @@ update_traceroute_gw_cache() {
         local host
         local service
         local traceroute
-        (
-                get_services "gw" | pipe_service_attribute "host" | sort | uniq | while read service; do
-                        host=$(get_service_value "$service" "host")
-                        #do traceroute and get result as csv back
-                        traceroute=$(get_traceroute "$host")
-                        #update cache file
-                        $(set_service_value "$TRACEROUTE_FILENAME" "$host" "$traceroute")
-                done
-        ) | update_file_if_changed "$TRACEROUTE_FILENAME" || return 0
+                
+	get_services "gw" | pipe_service_attribute "host" | sort | uniq | while read host; do
+                #do traceroute and get result as csv back
+                traceroute=$(get_traceroute "$host")
+                #update cache file
+                $(set_service_value "$TRACEROUTE_FILENAME" "$host" "$traceroute")
+        done
         # es gab eine Aenderung
         msg_info "updating traceroute to gateway servers"
 }

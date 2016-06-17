@@ -140,7 +140,7 @@ init_policy_routing_ipv6() {
 
 debug_ping_all_olsr2_hosts() {
 	ip -6 route show table olsrd2 | awk '{print $1}' | while read a; do
-		ping -w 1 -c 1 "$a" >/dev/null 2>&1 && printf "OK\t$a\n" || printf "OK\t$a\n"
+		ping6 -w 1 -c 1 "$a" >/dev/null 2>&1 && printf "OK\t$a\n" || printf "FAIL\t$a\n"
 	done
 }
 
@@ -154,10 +154,11 @@ debug_translate_macs() {
 		s/2001:67c:1400:2432:27:22ff:fe44:c32f/AP1-101/;
 		s/2001:67c:1400:2432:27:22ff:fe44:c1aa/AP1-110/;
 		s/2001:67c:1400:2432:15:6dff:fec5:c2b2/AP1-120/;
+		s/2001:67c:1400:2432:27:22ff:fe1a:7865/AP1-187/;
 		s/2001:67c:1400:2432:dc9f:dbff:fef4:36d6/AP1-196/;
 		s/2001:67c:1400:2432:c6e9:84ff:fe7d:e448/AP2-1/;
 		s/2001:67c:1400:2432:c04a:ff:fe40:adc2/AP2-30/;
 		s/2001:67c:1400:2432:24a4:3cff:fefc:7698/AP2-76/;
-		s/2001:67c:1400:2432:27:22ff:fe1a:7865/AP2-166/;
+		s/2001:67c:1400:2432:14cc:20ff:fea8:efc6/AP2-166/;
 		'
 }

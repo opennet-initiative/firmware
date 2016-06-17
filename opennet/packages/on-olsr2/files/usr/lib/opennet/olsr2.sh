@@ -5,6 +5,20 @@ ROUTING_TABLE_MESH_OLSR2=olsrd2
 # interne Zahl fuer die "Domain" in olsr2
 OLSR2_DOMAIN=0
 
+MAC_HOSTNAME_MAP="	50:54:00:a0:31:00 HOST-GAI
+			dc:9f:db:f4:34:a9 AP1-96
+			00:27:22:44:c3:2f AP1-101
+			00:27:22:44:c1:aa AP1-110
+			00:15:6d:c5:c2:b2 AP1-120
+			00:27:22:1a:78:65 AP1-187
+			dc:9f:db:f4:36:d6 AP1-196
+			c4:e9:84:7d:e4:48 AP2-1
+			c6:e9:84:7d:e4:48 AP2-1
+			c0:4a:00:40:ad:c2 AP2-30
+			24:a4:3c:fc:76:98 AP2-76
+			14:cc:20:a8:ef:c6 AP2-166"
+IPV6_HOSTNAME_MAP="fd00::245 HOST-GAI"
+
 
 ## @fn get_mac_address()
 ## @brief Ermittle die erste nicht-Null MAC-Adresse eines echten Interfaces.
@@ -14,13 +28,30 @@ get_mac_address() {
 }
 
 
-## @fn get_ipv6_address()
-## @brief Ermittle die IPv6-Adresse des APs anhand des EUI64-Verfahrens.
-get_ipv6_address() {
+## @fn shorten_ipv6_address()
+## @brief Verkuerze eine IPv6-Adress-Repräsentation anhand der üblichen Regeln.
+## Die Funktion ist kaum getestet - sie erzeugt sicherlich falsche Adressen (mehr als ein
+## Doppel-Doppelpunkt, usw.).
+shorten_ipv6_address() {
+	sed 's/:0\+/:/g; s/::\+/::/g'
+}
+
+
+## @fn convert_mac_to_eui64_address()
+## @brief Wandle eine MAC-Adresse in ein IPv6-Suffix (64 bit) um.
+convert_mac_to_eui64_address() {
+	local prefix="$1"
+	local mac="$2"
 	local combined_mac
-	local ipv6_address
-	combined_mac=$(get_mac_address | cut -c 1-2,4-8,10-14,16-17)
-	echo "$(echo "$combined_mac" | cut -c 1-7)ff:fe$(echo "$combined_mac" | cut -c 8-14)"
+	combined_mac=$(echo "$mac" | cut -c 1-2,4-8,10-14,16-17)
+	echo "$prefix:$(echo "$combined_mac" | cut -c 1-7)ff:fe$(echo "$combined_mac" | cut -c 8-14)" | shorten_ipv6_address
+}
+
+
+## @fn get_main_ipv6_address()
+## @brief Ermittle die IPv6-Adresse des APs anhand des EUI64-Verfahrens.
+get_main_ipv6_address() {
+	printf "%s/%s" "$(convert_mac_to_eui64_address "$IP6_PREFIX" "$(get_mac_address)")" "$IP6_PREFIX_LENGTH"
 }
 
 
@@ -38,7 +69,7 @@ configure_ipv6_address() {
 	# Also wollen wir es erstmal nur manuell ermitteln.
 	#uci set "${uci_prefix}.ip6ifaceid=eui64"
 	#uci set "${uci_prefix}.ip6prefix=${IP6_PREFIX}::/$IP6_PREFIX_LENGTH"
-	uci_add_list "${uci_prefix}.ip6addr" "${IP6_PREFIX}:$(get_ipv6_address)/$IP6_PREFIX_LENGTH"
+	uci_add_list "${uci_prefix}.ip6addr" "$(get_main_ipv6_address)"
 	apply_changes network
 }
 
@@ -147,18 +178,18 @@ debug_ping_all_olsr2_hosts() {
 
 # manuelle Host-Liste (bis wir richtiges Reverse-DNS haben)
 debug_translate_macs() {
-	sed '
-		s/2001:67c:1400:2432:5054:ff:fea0:3100/HOST-GAI/;
-		s/fd00::245/HOST-GAI/;
-		s/2001:67c:1400:2432:dc9f:dbff:fef4:34a9/AP1-96/;
-		s/2001:67c:1400:2432:27:22ff:fe44:c32f/AP1-101/;
-		s/2001:67c:1400:2432:27:22ff:fe44:c1aa/AP1-110/;
-		s/2001:67c:1400:2432:15:6dff:fec5:c2b2/AP1-120/;
-		s/2001:67c:1400:2432:27:22ff:fe1a:7865/AP1-187/;
-		s/2001:67c:1400:2432:dc9f:dbff:fef4:36d6/AP1-196/;
-		s/2001:67c:1400:2432:c4e9:84ff:fe7d:e448/AP2-1/;
-		s/2001:67c:1400:2432:c04a:ff:fe40:adc2/AP2-30/;
-		s/2001:67c:1400:2432:24a4:3cff:fefc:7698/AP2-76/;
-		s/2001:67c:1400:2432:14cc:20ff:fea8:efc6/AP2-166/;
-		'
+	local token
+	local mac
+	local ip
+	local name
+	local sed_script_mac
+	local sed_script_ip
+	sed_script_mac=$(echo "$MAC_HOSTNAME_MAP" | while read mac name; do
+			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "$IP6_PREFIX" "$mac")" "$name"
+			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "fe80::" "$mac")" "$name"
+		done)
+	sed_script_ip=$(echo "$IPV6_HOSTNAME_MAP" | while read ip name; do
+			printf "s/%s/%s/g;\n" "$ip" "$name"
+		done)
+	sed -e "$sed_script_mac" -e "$sed_script_ip"
 }

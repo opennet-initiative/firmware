@@ -27,10 +27,6 @@ CONFIG_PACKAGE_iwinfo=y
 CONFIG_PACKAGE_wireless-tools=y
 CONFIG_PACKAGE_wpa-cli=m
 
-# IPv6
-CONFIG_PACKAGE_odhcp6c=m
-CONFIG_PACKAGE_odhcpd=m
-
 # sshfs
 CONFIG_PACKAGE_kmod-fuse=m
 CONFIG_PACKAGE_sshfs=m

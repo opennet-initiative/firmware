@@ -47,9 +47,13 @@ shorten_ipv6_address() {
 convert_mac_to_eui64_address() {
 	local prefix="$1"
 	local mac="$2"
+	local mac_offset="${3:-0}"
 	local combined_mac
-	combined_mac=$(echo "$mac" | cut -c 1-2,4-8,10-14,16-17)
-	echo "$prefix:$(echo "$combined_mac" | cut -c 1-7)ff:fe$(echo "$combined_mac" | cut -c 8-14)" | shorten_ipv6_address
+	combined_mac=$(echo "$mac" | cut -c 1-2,4-5,7-8,10-11,13-14,16-17)
+	# MAC-Offset hinzuaddieren
+	combined_mac=$(printf "%012x" "$(( 0x$combined_mac + mac_offset ))")
+	printf "%s:%s:%sff:fe%s:%s" "$prefix" "${combined_mac:0:4}" "${combined_mac:4:2}" \
+		"${combined_mac:6:2}" "${combined_mac:8:4}" | shorten_ipv6_address
 }
 
 

@@ -5,18 +5,23 @@ ROUTING_TABLE_MESH_OLSR2=olsrd2
 # interne Zahl fuer die "Domain" in olsr2
 OLSR2_DOMAIN=0
 
-MAC_HOSTNAME_MAP="	50:54:00:a0:31:00 HOST-GAI
+MAC_HOSTNAME_MAP="	50:54:00:a0:31:00 H-GAI
 			dc:9f:db:f4:34:a9 AP1-96
 			00:27:22:44:c3:2f AP1-101
 			00:27:22:44:c1:aa AP1-110
+			68:72:51:0a:45:0c AP1-117
 			00:15:6d:c5:c2:b2 AP1-120
 			00:27:22:1a:78:65 AP1-187
 			dc:9f:db:f4:36:d6 AP1-196
 			c4:e9:84:7d:e4:48 AP2-1
-			c6:e9:84:7d:e4:48 AP2-1
+			00:15:6d:80:08:f3 AP2-4
+			24:a4:3c:86:3a:59 AP2-5
+			00:15:6d:80:09:7b AP2-6
+			00:15:6d:80:09:31 AP2-8
 			c0:4a:00:40:ad:c2 AP2-30
 			24:a4:3c:fc:76:98 AP2-76
-			14:cc:20:a8:ef:c6 AP2-166"
+			14:cc:20:a8:ef:c6 AP2-166
+			00:1e:62:1e:fa:37 AP2-189"
 IPV6_HOSTNAME_MAP="fd00::245 HOST-GAI"
 
 

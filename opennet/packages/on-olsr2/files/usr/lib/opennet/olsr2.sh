@@ -194,8 +194,12 @@ debug_translate_macs() {
 	local sed_script_mac
 	local sed_script_ip
 	sed_script_mac=$(echo "$MAC_HOSTNAME_MAP" | while read mac name; do
+			# Main-IP (loopback-Interface)
 			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "$IP6_PREFIX" "$mac")" "$name"
-			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "fe80::" "$mac")" "$name"
+			# link-local-Adressen: das "local"-Bit setzen
+			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "fe80::" "$mac" "0x020000000000")" "$name"
+			# für Nanostations: das 16. Bit hochzählen für die zweite MAC des Geräts
+			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "fe80::" "$mac" "0x020000010000")" "$name"
 		done)
 	sed_script_ip=$(echo "$IPV6_HOSTNAME_MAP" | while read ip name; do
 			printf "s/%s/%s/g;\n" "$ip" "$name"

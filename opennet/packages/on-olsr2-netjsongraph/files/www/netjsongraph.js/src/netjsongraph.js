@@ -113,7 +113,7 @@
             friction: 0.9,  // d3 default
             chargeDistance: Infinity,  // d3 default
             theta: 0.8,  // d3 default
-            gravity: 0.1,
+            gravity: 0.02,
             circleRadius: 8,
             labelDx: "0",
             labelDy: "-1.3em",

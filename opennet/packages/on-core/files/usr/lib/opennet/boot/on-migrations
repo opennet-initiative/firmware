@@ -500,7 +500,7 @@ guess_previously_used_modules() {
 ##   Beispiel:
 ##      olsrd.cfg0c4e54.service=http://192.168.0.42:8080|tcp|ugw upload:50 download:350 ping:27
 remove_pre05_usergateway_olsr_announcement() {
-	uci show -X olsrd | grep -q "^olsrd.cfg[^.]\+.service=http://.*:8080|tcp|ugw" || return
+	uci show -X olsrd | grep -q "^olsrd.cfg[^.]\+.service=http://.*:8080|tcp|ugw" || return 0
 	sed -i "/option service 'http:\/\/.*|tcp|ugw/d" /etc/config/olsrd
 	/etc/init.d/olsrd restart
 }

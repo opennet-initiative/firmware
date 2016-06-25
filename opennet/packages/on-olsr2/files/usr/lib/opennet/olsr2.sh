@@ -163,7 +163,7 @@ olsr2_sync_routing_tables() {
 
 # TODO: diese Funktion vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
 apply_changes_olsrd2() {
-	[ -n "$(uci changes olsrd2)" ] || return
+	[ -n "$(uci changes olsrd2)" ] || return 0
 	uci commit olsrd2
 	# das init-Skript funktioniert nicht im strikten Modus
 	set +eu

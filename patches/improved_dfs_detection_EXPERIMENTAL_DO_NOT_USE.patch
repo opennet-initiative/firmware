@@ -1,0 +1,14 @@
+--- /dev/null 2016-04-02 11:02:48.019584299 +0200
++++ b/openwrt/package/kernel/mac80211/patches/497_ath_PRI_TOLERANCE.patch 2016-04-02 20:59:00.271498735 +0200
+@@ -0,0 +1,11 @@
++--- a/drivers/net/wireless/ath/dfs_pattern_detector.h.orig 2016-04-02 20:53:19.001867244 +0200
+++++ b/drivers/net/wireless/ath/dfs_pattern_detector.h 2016-04-02 20:53:36.254148861 +0200
++@@ -24,7 +24,7 @@
++ /* tolerated deviation of radar time stamp in usecs on both sides
++  * TODO: this might need to be HW-dependent
++  */
++-#define PRI_TOLERANCE	16
+++#define PRI_TOLERANCE	2
++ 
++ /**
++  * struct ath_dfs_pool_stats - DFS Statistics for global pools

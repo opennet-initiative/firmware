@@ -729,12 +729,13 @@ get_service_log_filename() {
 	trap "error_trap get_service_log_filename '$*'" $GUARD_TRAPS
 	local service_name="$1"
 	shift
+	local full_filename
 	local filename="$service_name"
 	while [ $# -gt 0 ]; do
 		filename="${filename}.$1"
 		shift
 	done
-	local full_filename="$SERVICES_LOG_BASE/$(get_safe_filename "$filename").log"
+	full_filename="$SERVICES_LOG_BASE/$(get_safe_filename "$filename").log"
 	mkdir -p "$(dirname "$full_filename")"
 	echo -n "$full_filename"
 }
@@ -751,7 +752,8 @@ get_service_log_content() {
 	local service_name="$1"
 	local max_lines="$2"
 	shift 2
-	local log_filename=$(get_service_log_filename "$service_name" "$@")
+	local log_filename
+	log_filename=$(get_service_log_filename "$service_name" "$@")
 	[ -e "$log_filename" ] || return 0
 	if [ "$max_lines" = "0" ]; then
 		# alle Einträge ausgeben

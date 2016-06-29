@@ -110,7 +110,8 @@ install_from_opennet_repository() {
 ## @fn remove_opennet_module()
 ## @param module Name des oder der zu entfernenden Module
 remove_opennet_modules() {
-	local log_file=$(get_custom_log_filename "opkg_opennet")
+	local log_file
+	log_file=$(get_custom_log_filename "opkg_opennet")
 	_run_opennet_opkg --autoremove remove "$@"
 	save_on_modules_list
 }
@@ -121,7 +122,8 @@ _run_opennet_opkg() {
 	trap "error_trap _run_opennet_opkg '$*'" $GUARD_TRAPS
 	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
 	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
-	local log_file=$(get_custom_log_filename "opkg_opennet")
+	local log_file
+	log_file=$(get_custom_log_filename "opkg_opennet")
 	# Vor der opkg-Ausführung müssen wir das Verzeichnis /etc/opkg verdecken, da opkg fehlerhafterweise
 	# auch bei Verwendung von "--conf" die üblichen Orte nach Konfigurationsdateien durchsucht.
 	# TODO: opkg-Bug upstream berichten
@@ -215,7 +217,8 @@ set_configured_opennet_opkg_repository_url() {
 ## @details Die aktuelle Version wird aus dem openwrt-Versionsstring gelesen.
 generate_opennet_opkg_config() {
 	trap "error_trap generate_opennet_opkg_config '$*'" $GUARD_TRAPS
-	local repository_url="$(get_configured_opennet_opkg_repository_url)"
+	local repository_url
+	repository_url=$(get_configured_opennet_opkg_repository_url)
 	# schreibe den Inahlt der neuen OPKG-Konfiguration
 	echo "dest root /"
 	echo "dest ram /tmp"

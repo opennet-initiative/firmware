@@ -75,7 +75,8 @@ append_to_custom_log() {
 	local log_name="$1"
 	local event="$2"
 	local msg="$3"
-	local logfile=$(get_custom_log_filename "$log_name")
+	local logfile
+	logfile=$(get_custom_log_filename "$log_name")
 	echo "$(date) openvpn [$event]: $msg" >>"$logfile"
 	# Datei kuerzen, falls sie zu gross sein sollte
 	local filesize
@@ -103,7 +104,8 @@ get_custom_log_filename() {
 ## @returns Zeilenweise Ausgabe der Protokollereignisse (aufsteigend nach Zeitstempel sortiert).
 get_custom_log_content() {
 	local log_name="$1"
-	local logfile=$(get_custom_log_filename "$log_name")
+	local logfile
+	logfile=$(get_custom_log_filename "$log_name")
 	[ -e "$logfile" ] && cat "$logfile" || true
 }
 
@@ -119,7 +121,8 @@ get_custom_log_content() {
 ## @return exitcode=1 (Fehler) falls es keine Änderung gab
 update_file_if_changed() {
 	local target_filename="$1"
-	local content="$(cat -)"
+	local content
+	content="$(cat -)"
 	if [ -e "$target_filename" ] && echo "$content" | cmp -s - "$target_filename"; then
 		# the content did not change
 		trap "" $GUARD_TRAPS && return 1
@@ -146,7 +149,8 @@ update_dns_servers() {
 	local service
 	# wenn wir eine VPN-Tunnel-Verbindung aufgebaut haben, sollten wir DNS-Anfragen über diese Crypto-Verbindung lenken
 	local preferred_servers
-	local use_dns="$(uci_get on-core.settings.use_olsrd_dns)"
+	local use_dns
+	use_dns=$(uci_get on-core.settings.use_olsrd_dns)
 	# return if we should not use DNS servers provided via olsrd
 	uci_is_false "$use_dns" && return 0
 	local servers_file
@@ -235,7 +239,8 @@ add_banner_event() {
 	trap "error_trap add_banner_event '$*'" $GUARD_TRAPS
 	local event="$1"
 	# verwende den optionalen zweiten Parameter oder den aktuellen Zeitstempel
-	local timestamp="${2:-$(date)}"
+	local timestamp="${2:-}"
+	[ -z "$timestamp" ] && timestamp=$(date)
 	local line=" - $timestamp - $event -"
 	(
 		# Steht unser Text schon im Banner? Ansonsten hinzufuegen ...
@@ -846,7 +851,8 @@ get_local_bias_number() {
 system_service_check() {
 	local executable="$1"
 	local pid_file="$2"
-	local result=$(set +eu; . /lib/functions/service.sh; SERVICE_PID_FILE="$pid_file"; service_check "$executable" && echo "ok"; set -eu)
+	local result
+	result=$(set +eu; . /lib/functions/service.sh; SERVICE_PID_FILE="$pid_file"; service_check "$executable" && echo "ok"; set -eu)
 	[ -n "$result" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }

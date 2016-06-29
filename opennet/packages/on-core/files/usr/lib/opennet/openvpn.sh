@@ -123,14 +123,16 @@ get_openvpn_config() {
 	local protocol
 	local template_file
 	local pid_file
+	local proxy_service_type
+	local relayed_service
 	remote=$(get_service_value "$service_name" "host")
 	port=$(get_service_value "$service_name" "port")
 	# Falls es sich um einen relay-Dienst handelt, koennen wir uns leider nicht mit uns selbst verbinden,
 	# da die firewall-redirect-Regeln keine "device"-Quelle kennen (anstelle des ueblichen "on_mesh").
 	# Also ermitteln wir den lokal bekannten proxy-Dienst und verwenden dessen Daten, sofern on-usergw installiert ist.
 	if [ "$remote" = "$(get_main_ip)" -a -n "${RELAYABLE_SERVICE_PREFIX:-}" ]; then
-		local proxy_service_type="$RELAYABLE_SERVICE_PREFIX$(get_service_value "$service_name" "service")"
-		local relayed_service=$(get_services "$proxy_service_type" | filter_services_by_value "local_relay_port" "$port")
+		proxy_service_type="$RELAYABLE_SERVICE_PREFIX$(get_service_value "$service_name" "service")"
+		relayed_service=$(get_services "$proxy_service_type" | filter_services_by_value "local_relay_port" "$port")
 		if [ -n "$relayed_service" ]; then
 			# Hostname und Port ersetzen
 			remote=$(get_service_value "$relayed_service" "host")
@@ -430,8 +432,9 @@ openvpn_get_mtu() {
 	openvpn --mtu-test --config "$config_file" 2>&1 &
 	# warte auf den Startvorgang
 	sleep 3
-	local pid="$(cat "$pid_file")"
 	local wait_loops=40
+	local pid
+	pid=$(cat "$pid_file" 2>/dev/null || true)
 	local mtu_out
 	local mtu_out_filtered
 	while [ "$wait_loops" -gt 0 ]; do

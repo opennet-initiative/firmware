@@ -196,7 +196,10 @@ update_ntp_servers() {
 	local port
 	local service
 	local preferred_servers
-	local use_ntp="$(uci_get on-core.settings.use_olsrd_ntp)"
+	local previous_entries
+	local use_ntp
+	previous_entries=$(uci_get "system.ntp.server")
+	use_ntp=$(uci_get "on-core.settings.use_olsrd_ntp")
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
 	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "NTP" || true)
@@ -215,6 +218,10 @@ update_ntp_servers() {
 			uci_add_list "system.ntp.server" "$host"
 		done
 	fi
+	# Wir wollen keine leere Liste zurücklassen (z.B. bei einem UGW ohne Mesh-Anbindung).
+	# Also alte Werte wiederherstellen.
+	[ -z "$(uci_get "system.ntp.server")" ] && \
+		for host in $previous_entries; do uci_add_list "system.ntp.server" "$host"; done
 	apply_changes system
 }
 

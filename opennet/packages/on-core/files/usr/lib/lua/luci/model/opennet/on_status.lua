@@ -31,7 +31,7 @@ function get_firmware_title()
 	if on_id then
 		suffix = luci.i18n.translatef("AP %s", on_id)
 	end
-	if client_cn and client_cn ~= "" then
+	if not is_string_empty(client_cn) then
 		suffix = luci.i18n.translatef("CN %s", client_cn)
 	end
 	if suffix then
@@ -100,7 +100,7 @@ function printNetworkInterfaceValues(network_interface)
 	if not on_bool_function("is_interface_up", {network_interface}) then return end
 	local ifname = on_function("get_device_of_interface", {network_interface})
 	local output = luci.sys.exec([[ip address show label ]]..ifname..[[ | awk 'BEGIN{ mac="---";ip="---";ip6="---"; }  { if ($1 ~ /link/) mac=$2; if ($1 ~ /inet$/) ip=$2; if ($1 ~ /inet6/) ip6=$2; } END{ printf "<td>]]..ifname..[[</td><td>"ip"</td><td>"ip6"</td><td>"mac"</td>"}']])
-	if output and output ~= "" then
+	if not is_string_empty(output) then
 		luci.http.write([[<tr>]]..output..[[<td>]])
 		-- add DHCP information
 		local dhcp = cursor:get_all("dhcp", network_interface)
@@ -110,17 +110,17 @@ function printNetworkInterfaceValues(network_interface)
 		else
 			-- dnsmasq does not DHCP for this network _OR_ the network is used for opennet wifidog (FREE)
 			local dhcpfwd
-			if (luci.sys.exec("pidof dhcp-fwd") ~= "") then
+			if not is_string_empty(luci.sys.exec("pidof dhcp-fwd")) then
 				-- check for dhcp-fwd
 				dhcpfwd = luci.sys.exec([[
 					awk 'BEGIN{out=0} {if ($1 == "if" && $2 == "]]..ifname..[[" && $3 == "true") out=1;
 					if (out == 1 && $1 == "server" && $2 == "ip") printf $3}' /etc/dhcp-fwd.conf
 				]])
-				if dhcpfwd and dhcpfwd ~= "" then
+				if not is_string_empty(dhcpfwd) then
 					luci.http.write("active, forwarded to "..dhcpfwd)
 				end
 			end
-			if not dhcpfwd or dhcpfwd == "" then
+			if is_string_empty(dhcpfwd) then
 				luci.http.write("---")
 			end
 		end
@@ -133,7 +133,7 @@ function status_neighbors()
 	luci.http.prepare_content("text/plain")
 	local neighbour_info = on_function("get_olsr_neighbours")
 	local response = ""
-	if neighbour_info ~= "" then
+	if not is_string_empty(neighbour_info) then
 		-- Tabelle in Tabelle (aussen: Details + Karte, innen: Details)
 		response = response .. '<table border="0"><tr><td>'
 		response = response .. '<table class="status_page_table"><tr>' ..
@@ -177,7 +177,7 @@ function status_issues()
 	luci.http.prepare_content("text/plain")
 	local result = ""
 	local warnings = on_function("get_potential_error_messages", {"30"})
-	if warnings and (warnings ~= "") then
+	if not is_string_empty(warnings) then
 		result = result .. '<a title="' .. luci.util.pcdata(warnings) .. '">'
 		    .. luci.i18n.translate("There are indications for possible technical issues.") .. "</a><br/>"
 		local support_contact = get_default_value("on-core", "support_contact")

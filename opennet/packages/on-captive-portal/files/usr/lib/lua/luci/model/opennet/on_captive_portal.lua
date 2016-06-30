@@ -63,14 +63,14 @@ function action_captive_portal()
 	elseif on_bool_function("captive_portal_uses_wifi_only_bridge") then
 		status = luci.i18n.translatef("Warning: the Captive Portal interface (%s) seems to be a bridge containing only wifi devices. This setup is known to cause problems: you should add a non-wifi device or disable bridging.", free_device)
 	elseif on_bool_function("captive_portal_has_devices") then
-		if on_function("get_active_mig_connections") ~= "" then
+		if is_string_empty(on_function("get_active_mig_connections")) then
+			status = luci.i18n.translate("Disabled: the VPN tunnel is not running.")
+		else
 			if on_bool_function("is_interface_up", {free_device}) then
 				status = luci.i18n.translate("Disabled: failed to start the 'nodogsplash' service.")
 			else
 				status = luci.i18n.translatef("Disabled: failed to enable the '%s' network interface.", free_device)
 			end
-		else
-			status = luci.i18n.translate("Disabled: the VPN tunnel is not running.")
 		end
 	else
 		status = luci.i18n.translatef("Disabled: no network device is assigned to the '%s' zone.", free_device)

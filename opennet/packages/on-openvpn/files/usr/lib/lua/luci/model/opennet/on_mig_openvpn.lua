@@ -112,13 +112,13 @@ end
 
 -- eine Tunnel-VPN-Verbindung scheint aufgebaut zu sein
 function is_tunnel_active()
-	return on_function("get_active_mig_connections") ~= ""
+	return not is_string_empty(on_function("get_active_mig_connections"))
 end
 
 
 -- ein Tunnel-VPN-Prozess laeuft (eventuell steht die Verbindung noch nicht)
 function is_tunnel_starting()
-	return on_function("get_starting_mig_connections") ~= ""
+	return not is_string_empty(on_function("get_starting_mig_connections"))
 end
 
 
@@ -159,10 +159,10 @@ function status_mig_openvpn()
 	function get_service_description(service_name)
 		local ugw_ap = get_service_value(service_name, "host")
 		local ugw_server = on_function("get_service_detail", {service_name, "public_host"})
-		if ugw_server and (ugw_server ~= "") then
-			return ugw_ap .. " (via " .. ugw_server .. ")"
-		else
+		if is_string_empty(ugw_server) then
 			return ugw_ap
+		else
+			return ugw_ap .. " (via " .. ugw_server .. ")"
 		end
 	end
 	local remotes = string_join(map_table(services, get_service_description), ", ")

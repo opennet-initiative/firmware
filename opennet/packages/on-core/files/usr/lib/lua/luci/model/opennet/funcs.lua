@@ -224,6 +224,14 @@ end
 
 
 --[[
+pruefe ob ein String leer ist bzw. nur aus Whitespace besteht
+]]--
+function is_string_empty(s)
+	if s and (trim_string(s) ~= "") then return true else return false end
+end
+
+
+--[[
 fuelle eine table mit Werten aus den Konfigurationsdateien
 "cert_type" ist "user" oder "mesh"
 ]]--
@@ -403,7 +411,7 @@ end
 function html_display_message_list(messages, class)
 	local result = ""
 	for _, value in pairs(messages or {}) do
-		if value and value ~= "" then
+		if not is_string_empty(value) then
 			result = result .. html_box(value, class)
 		end
 	end
@@ -454,7 +462,7 @@ function process_add_service_form()
 	if not details then return luci.i18n.translate("Invalid service details") end
         local service_name = on_function("notify_service", {stype, scheme, host, port, protocol, path, "manual", details})
 	-- die Prioritaet wird nur gesetzt, falls sie uebergeben wurde (z.B. fuer Mesh-Gateways)
-	if priority and (priority ~= "") then
+	if not is_string_empty(priority) then
 		priority = parse_number_string(priority)
 		if priority then set_service_value(service_name, "priority", priority) end
 	end
@@ -562,7 +570,7 @@ function process_openvpn_certificate_form(cert_type)
     openssl.organizationName = trim_string(luci.http.formvalue("openssl.organizationName"))
     openssl.EmailAddress = trim_string(luci.http.formvalue("openssl.EmailAddress"))
     local form_cn = trim_string(luci.http.formvalue("openssl.commonName")) 
-    if form_cn and (form_cn ~= "") then openssl.commonName = form_cn end
+    if not is_string_empty(form_cn) then openssl.commonName = form_cn end
 
     local certstatus = check_cert_status(cert_type)
 
@@ -597,7 +605,7 @@ function process_csr_submission(cert_type, errors_table)
         local csr_filename = cert_info.filename_prefix .. ".csr"
         -- zeige lediglich die Ausgabe von curl an
         local result = on_function("submit_csr_via_http", {submit_url, csr_filename})
-        if result and (result ~= "") then
+        if not is_string_empty(result) then
             -- das Upload-Resultat sollte ausgegeben werden
             luci.http.write(result)
 	    -- die wahr-Rueckgabe sollte in der aufrufenden Funktion zum unmittelbaren (fehlerfreien) Ende fuehren

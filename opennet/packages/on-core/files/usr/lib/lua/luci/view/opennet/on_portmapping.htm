@@ -67,7 +67,7 @@ require("luci.model.opennet.funcs")
 			<%
 			local portrange = tab_split(on_function("get_mig_port_forward_range"))
 			local client_cn = on_function("get_client_cn")
-			if client_cn and client_cn ~= "" then %>
+			if not is_string_empty(client_cn) then %>
 				<%=luci.i18n.translatef('Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.', client_cn, portrange[1], portrange[2])%>
 			<% end %>
 			<%:The target should be an IP-Address in your local network. Additionally you can enter the target port in the related field.%></div>

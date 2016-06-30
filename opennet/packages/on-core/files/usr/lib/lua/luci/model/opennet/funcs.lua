@@ -4,6 +4,7 @@
 
 require "luci.config"
 require "luci.util"
+require "luci.sys"
 
 
 html_resource_base = luci.config.main.resourcebase

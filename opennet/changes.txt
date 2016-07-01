@@ -15,6 +15,8 @@ Anschließend kann diese Liste wieder geleert werden.
 * Status-Anzeige:
 ** Nutzer-Tunnel: UGW-Server (erina/megumi/subaru) wird angezeigt
 ** UGW/Spender: Anzahl der weitergeleiteten Nutzerverbindungen wird angezeigt
+* UGW-APs ohne lokale Mesh-Interfaces (nur via OpenVPN) sind nun auch über ihre Main-IP ansprechbar
+** zuvor: nur 10.2.x.y (statt 192.168.x.y)
 * Fehlerkorrekturen:
 ** POE-Passthrough-Umschalter funktioniert nun
 ** UGW: Korrektur der Ermittlung und Announcierung der Uplink-Bandbreite

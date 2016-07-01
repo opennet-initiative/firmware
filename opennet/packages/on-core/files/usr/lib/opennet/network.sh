@@ -24,6 +24,16 @@ query_dns_reverse() {
 }
 
 
+## @fn has_active_address()
+## @brief Liefere wahr, falls die angegebene IP aktuell auf einem Interface aktiv ist.
+has_active_address() {
+	trap "error_trap has_active_address '$*'" $GUARD_TRAPS
+	local ip="$1"
+	ip addr show | grep -qwF "$ip" && return 0
+	trap "" $GUARD_TRAPS && return 1
+}
+
+
 ## @fn has_opennet_dns()
 ## @brief Prüfe, ob *.on-Domains aufgelöst werden.
 ## @returns Der Exitcode ist Null, falls on-DNS verfügbar ist.

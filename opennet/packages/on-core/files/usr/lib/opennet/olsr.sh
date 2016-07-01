@@ -22,6 +22,61 @@ update_olsr_interfaces() {
 	# fuehrende Leerzeichen entfernen; Zeilenumbrueche in Leerzeichen verwandeln
 	value=$(echo "$interfaces $devices" | sed 's/^ *//; s/ *$//' | tr '\n' ' ' | sed 's/^ *//; s/ *$//')
 	uci set -q "olsrd.@Interface[0].interface=$value"
+	announce_main_ip_via_hna_if_necessary
+	apply_changes olsrd
+}
+
+
+## @fn announce_main_ip_via_hna_if_necessary()
+## @brief Prüfe ob einem der konfigurierten Interfaces die Main-IP zugeordnet wurde. Falls nicht,
+##        dann erstelle einen HNA-Eintrag.
+announce_main_ip_via_hna_if_necessary() {
+	trap "error_trap announce_main_ip_via_hna_if_necessary '$*'" $GUARD_TRAPS
+	local main_ip
+	local uci_prefix
+	local mesh_ips
+	local active_mesh_ip
+	local iface
+	local some_ip
+	main_ip=$(get_main_ip)
+	[ -z "$main_ip" ] && return 0
+	uci_prefix=$(find_first_uci_section "olsrd" "Hna4" "netaddr=$main_ip" "netmask=255.255.255.255")
+	mesh_ips=$(for iface in $(get_zone_interfaces "$ZONE_MESH"); do \
+		get_current_addresses_of_network "$iface"; \
+		done | sed 's#/[0-9]\+##g')
+	if has_active_address "$main_ip"; then
+		# die Main-IP ist vergeben - entferne ein eventuell vorhandenes HNA
+		[ -n "$uci_prefix" ] && uci_delete "$uci_prefix"
+		# lösche auch alle Redirects
+		for some_ip in $mesh_ips; do
+			uci_prefix=$(find_first_uci_section "firewall" "redirect" "src_dip=$main_ip" \
+				"proto=all" "target=DNAT" "src=$ZONE_MESH" "dest_ip=$some_ip")
+			[ -n "$uci_prefix" ] && uci_delete "$uci_prefix"
+			true
+		done
+		true
+	else
+		# die IP ist keinem Interface zugeordnet - announciere ein HNA
+		[ -z "$uci_prefix" ] && {
+			uci_prefix="olsrd.$(uci add "olsrd" "Hna4")"
+			uci set "${uci_prefix}.netaddr=$main_ip"
+			uci set "${uci_prefix}.netmask=255.255.255.255"
+		}
+		# erzeuge einen firewall-Redirect der Main-IP auf eine aktive IP (falls vorhanden)
+		active_mesh_ip=$(for some_ip in $mesh_ips; do has_active_address "$some_ip" || continue; echo "$some_ip"; break; done)
+		uci_prefix=$(find_first_uci_section "firewall" "redirect" "src_dip=$main_ip" \
+				"proto=all" "target=DNAT" "src=$ZONE_MESH")
+		[ -n "$active_mesh_ip" -a -z "$uci_prefix" ] && {
+			uci_prefix="firewall.$(uci add "firewall" "redirect")"
+			uci set "${uci_prefix}.src=$ZONE_MESH"
+			uci set "${uci_prefix}.src_dip=$main_ip"
+			uci set "${uci_prefix}.dest_ip=$active_mesh_ip"
+			uci set "${uci_prefix}.proto=all"
+			uci set "${uci_prefix}.target=DNAT"
+		}
+		true
+	fi
+	apply_changes firewall
 	apply_changes olsrd
 }
 

@@ -119,6 +119,41 @@ class Station:
         self._rc_stats = self._parse_rc_stats()
 
     def _parse_rc_stats(self):
+        csv_filename = os.path.join(self._path, "rc_stats_csv")
+        legacy_filename = os.path.join(self._path, "rc_stats")
+        if os.path.exists(csv_filename):
+            return self._parse_rc_stats_csv(csv_filename)
+        else:
+            return self._parse_rc_stats_legacy(legacy_filename)
+
+    def _parse_rc_stats_csv(self, filename):
+        """ example content (there is no header)
+        HT20,LGI,1,ABCDP,MCS0 ,0,1477,5.6,4.5,73.6,1.4,100.0,3,1,1,89,194,82,8,1.0
+        HT20,LGI,1,,MCS1 ,1,739,10.5,0.0,0.0,0.0,0.0,0,0,0,0,1,82,8,1.0
+        HT20,LGI,1,,MCS2 ,2,493,14.9,0.0,0.0,0.0,0.0,0,0,0,0,0,82,8,1.0
+        HT20,LGI,1,,MCS3 ,3,369,18.7,0.0,0.0,0.0,0.0,0,0,0,0,1,82,8,1.0
+        HT20,LGI,1,,MCS4 ,4,246,25.3,0.0,0.0,0.0,0.0,0,0,0,0,1,82,8,1.0
+        HT20,LGI,1,,MCS5 ,5,185,30.6,0.0,0.0,0.0,0.0,0,0,0,0,0,82,8,1.0
+        HT20,LGI,1,,MCS6 ,6,164,32.9,0.0,0.0,0.0,0.0,0,0,0,0,0,82,8,1.0
+        """
+	strip_string = lambda text: text.strip()
+        column_map = {"rate": (4, strip_string), "success": (15, int)}
+        stats = {}
+        with open(filename, "r") as statsfile:
+            for index, line in enumerate(statsfile.readlines()):
+                tokens = line.split(",")
+                entry = {key: convert(tokens[column])
+                         for key, (column, convert) in column_map.items()}
+                # some "rate" values are given in MBit/s - some are MCS0..15
+                try:
+                    entry["rate_label"] = "{rate:d} MBit/s".format(rate=int(entry["rate"]))
+                except ValueError:
+                    # keep the MCS string
+                    entry["rate_label"] = entry["rate"]
+                stats[entry["rate"]] = entry
+        return stats
+
+    def _parse_rc_stats_legacy(self, filename):
         """ example content
 
          type           rate      tpt eprob *prob ret  *ok(*cum)        ok(      cum)
@@ -133,9 +168,11 @@ class Station:
          HT20/LGI       MCS8     10.5 100.0 100.0   0    0(   0)         1(        1)
 
         beware: sometimes the last two pairs of columns are joined without withespace: "90959383(100188029)"
+        The format changed over different versions of the ath9k driver. Thus the CSV format
+        above is preferable (available since 2016).
         """
         stats = {}
-        with open(os.path.join(self._path, "rc_stats"), "r") as statsfile:
+        with open(filename, "r") as statsfile:
             rate_column = None
             skip_retry_column = False
             for index, line in enumerate(statsfile.readlines()):
@@ -170,17 +207,23 @@ class Station:
                 tokens = cutoff_line.split()
                 entry = {}
                 entry["rate"] = tokens.pop(0)
-                entry["throughput"] = float(tokens.pop(0))
-                entry["ewma_probability"] = float(tokens.pop(0))
-                entry["this_probability"] = float(tokens.pop(0))
-                if skip_retry_column:
-                    entry["retry"] = 0
-                else:
-                    entry["retry"] = int(tokens.pop(0))
-                entry["this_success"] = int(tokens.pop(0))
-                entry["this_attempts"] = int(tokens.pop(0))
+                # throughput (float)
+                tokens.pop()
+                # ewma_probability (float)
+                tokens.pop(0)
+                # this_probability (float)
+                tokens.pop(0)
+                # retry (int)
+                if not skip_retry_column:
+                    tokens.pop(0)
+                # this_success (int)
+                tokens.pop(0)
+                # this_attempts (int)
+                tokens.pop(0)
+                # success (int)
                 entry["success"] = int(tokens.pop(0))
-                entry["attempts"] = int(tokens.pop(0))
+                # attempts (int)
+                tokens.pop(0)
                 # some "rate" values are given in MBit/s - some are MCS0..15
                 try:
                     entry["rate_label"] = "{rate:d} MBit/s".format(rate=int(entry["rate"]))
@@ -379,7 +422,7 @@ class WifiPhy:
 
     def _parse_dfs_events(self):
         result = {}
-	for line in open(os.path.join(self._path, "ath9k", "dfs_stats"), "r").read().split("\n"):
+        for line in open(os.path.join(self._path, "ath9k", "dfs_stats"), "r").read().split("\n"):
             tokens = line.split(":")
             if len(tokens) != 2: continue
             label, value = tokens[0].strip(), tokens[1].strip()
@@ -404,7 +447,7 @@ class WifiPhy:
             yield "graph_vlabel events per second"
             yield "graph_args --base 1000 --logarithmic"
             yield "graph_category wireless"
-	    for label, fieldname in DFS_EVENT_COUNTERS.items():
+            for label, fieldname in DFS_EVENT_COUNTERS.items():
                 yield "{fieldname}.label {label}".format(fieldname=fieldname, label=label)
                 yield "{fieldname}.type COUNTER".format(fieldname=fieldname)
             yield ""

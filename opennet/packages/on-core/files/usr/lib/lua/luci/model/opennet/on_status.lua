@@ -102,19 +102,25 @@ function get_interfaces_info_table(networks, zoneName)
 end
 
 
+-- address_type: inet, inet6, link/ether (siehe "ip address")
+function get_interface_addresses(network_interface, address_type)
+	local output = luci.sys.exec([[ip address show label ']] .. network_interface .. [[']]
+		.. [[ | awk '{ if ($1 == "]] .. address_type .. [[") print $2; }']])
+	return line_split(trim_string(output))
+end
+
+
 function get_network_interface_table_row(network_interface)
 	-- ignoriere abgeschaltete Interfaces
 	if not on_bool_function("is_interface_up", {network_interface}) then return nil end
 	local ifname = on_function("get_device_of_interface", {network_interface})
-	local result = luci.sys.exec([[ip address show label ']] .. ifname .. [[' | awk ']]
-		.. [[ BEGIN { mac="---"; ip="---"; ip6="---"; } ]]
-		.. [[ { if ($1 ~ /link/) mac=$2; if ($1 ~ /inet$/) ip=$2; if ($1 ~ /inet6/) ip6=$2; } ]]
-		.. [[ END { printf "<td>]] .. ifname .. [[</td><td>"ip"</td><td>"ip6"</td><td>"mac"</td>" } ']])
-	if is_string_empty(result) then
-		return nil
-	else
-		return [[<tr>]] .. result .. [[</tr>]]
-	end
+	local ip4_address = string_join(get_interface_addresses(ifname, "inet"), [[<br/>]])
+	local ip6_address = string_join(get_interface_addresses(ifname, "inet6"), [[<br/>]])
+	local mac_address = string_join(get_interface_addresses(ifname, "link/ether"), [[<br/>]])
+	return [[<tr><td>]] .. ifname .. [[</td>]]
+		.. [[<td>]] .. ip4_address .. [[</td>]]
+		.. [[<td>]] .. ip6_address .. [[</td>]]
+		.. [[<td>]] .. mac_address .. [[</td></tr>]]
 end
 
 

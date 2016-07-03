@@ -88,7 +88,6 @@ function get_interfaces_info_table(networks, zoneName)
 		.. [[<th>]] .. luci.i18n.translate("IP") .. [[</th>]]
 		.. [[<th>]] .. luci.i18n.translate("IPv6") .. [[</th>]]
 		.. [[<th>]] .. luci.i18n.translate("MAC") ..  [[</th>]]
-		.. [[<th><abbr title="]] .. luci.i18n.translate("start / limit / leasetime") .. [[">DHCP</abbr></th>]]
 	        .. [[</tr>]]
 	local content = ""
 	for network in networks:gmatch("%S+") do
@@ -114,31 +113,7 @@ function get_network_interface_table_row(network_interface)
 	if is_string_empty(result) then
 		return nil
 	else
-		result = [[<tr>]] .. result .. [[<td>]]
-		-- add DHCP information
-		local dhcp = cursor:get_all("dhcp", network_interface)
-		if dhcp and dhcp.ignore ~= "1" then
-			-- we provide DHCP for this network
-			result = result .. dhcp.start .. " / " .. dhcp.limit .. " / " .. dhcp.leasetime
-		else
-			-- dnsmasq does not DHCP for this network _OR_ the network is used for opennet wifidog (FREE)
-			local dhcpfwd
-			if not is_string_empty(luci.sys.exec("pidof dhcp-fwd")) then
-				-- check for dhcp-fwd
-				dhcpfwd = luci.sys.exec([[
-					awk 'BEGIN{out=0} {if ($1 == "if" && $2 == "]]..ifname..[[" && $3 == "true") out=1;
-					if (out == 1 && $1 == "server" && $2 == "ip") printf $3}' /etc/dhcp-fwd.conf
-				]])
-				if not is_string_empty(dhcpfwd) then
-					result = result .. "active, forwarded to " .. dhcpfwd
-				end
-			end
-			if is_string_empty(dhcpfwd) then
-				result = result .. "---"
-			end
-		end
-		result = result .. [[</td></tr>]]
-		return result
+		return [[<tr>]] .. result .. [[</tr>]]
 	end
 end
 

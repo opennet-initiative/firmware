@@ -227,7 +227,7 @@ end
 pruefe ob ein String leer ist bzw. nur aus Whitespace besteht
 ]]--
 function is_string_empty(s)
-	if s and (trim_string(s) ~= "") then return true else return false end
+	if s and (trim_string(s) ~= "") then return false else return true end
 end
 
 

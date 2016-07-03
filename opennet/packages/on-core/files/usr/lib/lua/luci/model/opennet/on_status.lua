@@ -44,16 +44,16 @@ end
 
 function status_network()
 	luci.http.prepare_content("text/plain")
-	printZoneLine("ZONE_LOCAL")
-	printZoneLine("ZONE_MESH")
-	printZoneLine("ZONE_WAN")
+	print_zone_info("ZONE_LOCAL")
+	print_zone_info("ZONE_MESH")
+	print_zone_info("ZONE_WAN")
 	if on_bool_function("is_function_available", {"captive_portal_get_or_create_config"}) then
-		printZoneLine("ZONE_FREE")
+		print_zone_info("ZONE_FREE")
 	end
 end
 
 
-function printZoneLine(zone_variable_name)
+function print_zone_info(zone_variable_name)
 	local zone_name = on_function("get_variable", {zone_variable_name})
 	local network_interfaces = on_function("get_zone_interfaces", {zone_name})
 	if not is_string_empty(network_interfaces) then
@@ -72,41 +72,54 @@ function printZoneLine(zone_variable_name)
 			title = luci.i18n.translate("The FREE Interface will be used to publicly share Opennet with Wifidog.")
 			interface_name = luci.i18n.translate("FREE")
 		end
-		luci.http.write('<h3><abbr title="' .. title .. '">' .. interface_name .. '</abbr>&nbsp;'
+		local zone_info = get_interfaces_info_table(network_interfaces, zone_name)
+		if not is_string_empty(zone_info) then
+			luci.http.write('<h3><abbr title="' .. title .. '">' .. interface_name .. '</abbr>&nbsp;'
 				.. luci.i18n.translate('IP Address(es):') .. '</h3>')
-		printInterfaces(network_interfaces, zone_name)
+			luci.http.write(zone_info)
+		end
 	end
 end
 
 
-function printInterfaces(networks, zoneName)
-	luci.http.write([[<table id='network_table_]]..zoneName..[[' class='status_page_table'><tr><th>]]..
-		luci.i18n.translate("Interface") ..
-		"</th><th>" .. luci.i18n.translate("IP") ..
-		"</th><th>" .. luci.i18n.translate("IPv6") ..
-		"</th><th>" .. luci.i18n.translate("MAC") ..
-		"</th><th>")
-	luci.http.write('<abbr title="' .. luci.i18n.translate("start / limit / leasetime") .. '">DHCP</abbr>')
-	luci.http.write([[</th></tr>]])
+function get_interfaces_info_table(networks, zoneName)
+	local header = [[<table id="network_table_]] .. zoneName.. [[" class="status_page_table"><tr>]]
+	        .. [[<th>]] ..  luci.i18n.translate("Interface") .. [[</th>]]
+		.. [[<th>]] .. luci.i18n.translate("IP") .. [[</th>]]
+		.. [[<th>]] .. luci.i18n.translate("IPv6") .. [[</th>]]
+		.. [[<th>]] .. luci.i18n.translate("MAC") ..  [[</th>]]
+		.. [[<th><abbr title="]] .. luci.i18n.translate("start / limit / leasetime") .. [[">DHCP</abbr></th>]]
+	        .. [[</tr>]]
+	local content = ""
 	for network in networks:gmatch("%S+") do
-		printNetworkInterfaceValues(network)
+		content = content .. (get_network_interface_table_row(network) or "")
 	end
-	luci.http.write([[</table>]])
+	if is_string_empty(content) then
+		-- keine Tabelle im Fall von fehlenden Interfaces
+		return ""
+	else
+		return header .. content .. [[</table>]]
+	end
 end
 
 
-function printNetworkInterfaceValues(network_interface)
+function get_network_interface_table_row(network_interface)
 	-- ignoriere abgeschaltete Interfaces
-	if not on_bool_function("is_interface_up", {network_interface}) then return end
+	if not on_bool_function("is_interface_up", {network_interface}) then return nil end
 	local ifname = on_function("get_device_of_interface", {network_interface})
-	local output = luci.sys.exec([[ip address show label ]]..ifname..[[ | awk 'BEGIN{ mac="---";ip="---";ip6="---"; }  { if ($1 ~ /link/) mac=$2; if ($1 ~ /inet$/) ip=$2; if ($1 ~ /inet6/) ip6=$2; } END{ printf "<td>]]..ifname..[[</td><td>"ip"</td><td>"ip6"</td><td>"mac"</td>"}']])
-	if not is_string_empty(output) then
-		luci.http.write([[<tr>]]..output..[[<td>]])
+	local result = luci.sys.exec([[ip address show label ']] .. ifname .. [[' | awk ']]
+		.. [[ BEGIN { mac="---"; ip="---"; ip6="---"; } ]]
+		.. [[ { if ($1 ~ /link/) mac=$2; if ($1 ~ /inet$/) ip=$2; if ($1 ~ /inet6/) ip6=$2; } ]]
+		.. [[ END { printf "<td>]] .. ifname .. [[</td><td>"ip"</td><td>"ip6"</td><td>"mac"</td>" } ']])
+	if is_string_empty(result) then
+		return nil
+	else
+		result = [[<tr>]] .. result .. [[<td>]]
 		-- add DHCP information
 		local dhcp = cursor:get_all("dhcp", network_interface)
 		if dhcp and dhcp.ignore ~= "1" then
 			-- we provide DHCP for this network
-			luci.http.write(dhcp.start.." / "..dhcp.limit.." / "..dhcp.leasetime)
+			result = result .. dhcp.start .. " / " .. dhcp.limit .. " / " .. dhcp.leasetime
 		else
 			-- dnsmasq does not DHCP for this network _OR_ the network is used for opennet wifidog (FREE)
 			local dhcpfwd
@@ -117,14 +130,15 @@ function printNetworkInterfaceValues(network_interface)
 					if (out == 1 && $1 == "server" && $2 == "ip") printf $3}' /etc/dhcp-fwd.conf
 				]])
 				if not is_string_empty(dhcpfwd) then
-					luci.http.write("active, forwarded to "..dhcpfwd)
+					result = result .. "active, forwarded to " .. dhcpfwd
 				end
 			end
 			if is_string_empty(dhcpfwd) then
-				luci.http.write("---")
+				result = result .. "---"
 			end
 		end
-		luci.http.write([[</td></tr>]])
+		result = result .. [[</td></tr>]]
+		return result
 	end
 end
 

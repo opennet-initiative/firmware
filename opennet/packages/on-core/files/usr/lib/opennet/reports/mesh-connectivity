@@ -12,6 +12,11 @@ ping_neighbour() {
 }
 
 
+traceroute_target() {
+	traceroute -n -w 1 -m 16 "$1"
+}
+
+
 # verschiedene Ping-Versuche - dies sollte ein gutes Abbild der Situation ergeben
 (
 	# megumi
@@ -33,12 +38,12 @@ ping_neighbour() {
 
 # Pfade zu interessanten Hosts
 (
-	# subaru
-	traceroute 192.168.0.248
+	# subaru (nur seine tap-mesh-IP ist erreichbar)
+	traceroute_target 10.2.0.248
 	# tamago/titan
-	traceroute 192.168.0.254
+	traceroute_target 192.168.0.254
 	# Schweriner Dom
-	traceroute 192.168.1.93
+	traceroute_target 192.168.1.93
 ) >traceroute.log &
 
 
@@ -50,4 +55,3 @@ ip route show table olsrd >ip_route_table_olsrd.txt
 [ -e /etc/iproute2/rt_tables ] && cat /etc/iproute2/rt_tables >rt_tables
 
 wait
-

@@ -26,6 +26,8 @@ Anschließend kann diese Liste wieder geleert werden.
 ** veraltete olsr-Announcierungen nicht mehr existenter Dienste werden nun entfernt
 ** Status: Darstellung von multi-VAP-Konfigurationen ([[https://dev.opennet-initiative.de/ticket/134 Bug #134]])
 ** Status: Darstellung von Zonen mit mehreren Interfaces
+* Captive-Portal:
+** unklarer IP-Verlust auf den join-Interface wird erkannt und behoben
 
 = Interne Änderungen =
 * root-Passwort ist bei einer Erstinstallation leer

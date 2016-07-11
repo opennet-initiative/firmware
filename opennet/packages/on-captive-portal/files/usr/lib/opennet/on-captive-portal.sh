@@ -238,7 +238,9 @@ update_captive_portal_status() {
 
 
 disable_captive_portal() {
-	# free-Interface ist aktive - es gibt jedoch keinen Tunnel
+	trap "error_trap disable_captive_portal '$*'" $GUARD_TRAPS
+	msg_info "on-captive-portal: Interface abschalten"
+	# free-Interface ist aktiv - es gibt jedoch keinen Tunnel
 	ifdown "$NETWORK_FREE"
 	# reload fuehrt zum sanften Stoppen
 	is_captive_portal_running && sleep 1 && captive_portal_reload

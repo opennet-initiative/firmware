@@ -152,24 +152,35 @@ function action_portmapping()
 	table.insert(zones, on_function("get_variable", {"ZONE_MESH"}))
 	table.insert(zones, on_function("get_variable", {"ZONE_LOCAL"}))
 	table.insert(zones, on_function("get_variable", {"ZONE_WAN"}))
-	
-	local zone
-	for index = 1, #zones do if luci.http.formvalue(zones[index]) then zone = zones[index] end end
+
+	local src_zone
+	for index = 1, #zones do
+		if not is_string_empty(luci.http.formvalue(zones[index])) then
+			src_zone = zones[index]
+		end
+	end
 
 	local del_section
-	for index = 1, #zones do del_section = luci.http.formvalue(zones[index].."_del_section") if del_section then break end end
-	
-	local new_src_dport = luci.http.formvalue("src_dport")
-	local new_dest_ip = luci.http.formvalue("dest_ip")
-	local new_dest_port = luci.http.formvalue("dest_port")
-	
-	
+	for index = 1, #zones do
+		if not is_string_empty(luci.http.formvalue(zones[index] .. "_del_section")) then
+			del_section = luci.http.formvalue(zones[index] .. "_del_section")
+		end
+	end
+
 	if del_section then
 		cursor:delete("firewall", del_section)
-	elseif zone then
-		cursor:section("firewall", "redirect", nil, { src = zone, proto = 'tcpudp', src_dport = new_src_dport, dest_ip = new_dest_ip, dest_port = new_dest_port, target = 'DNAT' })
+	elseif src_zone then
+		local src_dport = luci.http.formvalue("src_dport")
+		local dest_ip = luci.http.formvalue("dest_ip")
+		local dest_port = luci.http.formvalue("dest_port")
+		cursor:section("firewall", "redirect", nil,
+			{ src = src_zone, dest = on_function("get_variable", {"ZONE_LOCAL"}),
+				proto = 'tcp udp', src_dport = src_dport, dest_ip = dest_ip,
+				dest_port = dest_port, target = 'DNAT',
+				name = (src_zone .. "-" .. src_dport)})
 	end
-	if del_section or zone then
+	if del_section or src_zone then
+		cursor:save("firewall")
 		on_function("apply_changes", {"firewall"})
 		cursor:unload("firewall")
 	end

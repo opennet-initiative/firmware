@@ -19,12 +19,10 @@ require("luci.model.opennet.funcs")
 
 <%+header%>
 
-<% function show_portmap(src_zone) %>
+<% function show_portmap(src_zone, min_port, max_port) %>
 	<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 	<table class="cbi-section-table">
 	<tr class="cbi-section-table-titles">
-<!--		<th class="cbi-section-table-cell">Name</th>
-		<th class="cbi-section-table-cell">Protokolle</th>-->
 		<th class="cbi-section-table-cell"><%:Source-Port%></th>
 		<th class="cbi-section-table-cell"><%:Target-Address%></th>
 		<th class="cbi-section-table-cell"><%:Target-Port%></th>
@@ -34,24 +32,27 @@ require("luci.model.opennet.funcs")
 	for index = 1, #t do
 		local s = t[index]	%>
 		<tr id="cbi-network-lan" class="cbi-section-table-row">
-<!--		<td class="cbi-value-field"><div id="cbi-network-lan-name"><%=s[".name"]%></div></td>
-		<td class="cbi-value-field"><div id="cbi-network-lan-proto"><%=s.proto%></div></td>-->
 		<td class="cbi-value-field"><div id="cbi-network-lan-src_dport"><%=s.src_dport%></div></td>
 		<td class="cbi-value-field"><div id="cbi-network-lan-dest_ip"><%=s.dest_ip%></div></td>
 		<td class="cbi-value-field"><div id="cbi-network-lan-dest_port"><%=s.dest_port%></div></td>
 		<td class="cbi-section-table-cell">
-			<input class="cbi-button cbi-button-del" type="submit" value="<%=s[".name"]%>" title="Del" name="<%=src_zone%>_del_section" />
+			<input class="cbi-button cbi-button-del" type="submit" value="<%=s[".name"]%>"
+				title="Del" name="<%=src_zone%>_del_section" />
 		</td>
 		</tr>
 		<tr />				
 <%	end	%>
 		<tr id="cbi-network-lan" class="cbi-section-table-row">
-<!--			<td class="cbi-value-field"><div id="cbi-network-lan-name"><input type="value" name="name" /></div></td>
-			<td class="cbi-value-field"><div id="cbi-network-lan-proto"><input type="value" name="proto" /></div></td>-->
-			<td class="cbi-value-field"><div id="cbi-network-lan-src_dport"><input type="value" name="src_dport" /></div></td>
-			<td class="cbi-value-field"><div id="cbi-network-lan-dest_ip"><input type="value" name="dest_ip" /></div></td>
-			<td class="cbi-value-field"><div id="cbi-network-lan-dest_port"><input type="value" name="dest_port" /></div></td>
-			<td class="cbi-value-field cbi-value-field-add"><input class="cbi-button cbi-button-add" type="submit" value="Add" name="<%=src_zone%>" title="Add"/></td>
+			<td class="cbi-value-field"><div id="cbi-network-lan-src_dport">
+				<input type="number" name="src_dport"
+					<% if min_port then %>value="<%=min_port%>"<% end %>
+					<% if min_port then %>min="<%=min_port%>"<% end %>
+					<% if max_port then %>max="<%=max_port%>"<% end %>
+					/></div></td>
+			<td class="cbi-value-field"><div id="cbi-network-lan-dest_ip"><input type="text" name="dest_ip" /></div></td>
+			<td class="cbi-value-field"><div id="cbi-network-lan-dest_port"><input type="number" name="dest_port" /></div></td>
+			<td class="cbi-value-field cbi-value-field-add">
+				<input class="cbi-button cbi-button-add" type="submit" value="Add" name="<%=src_zone%>" title="Add"/></td>
 		</tr>
 	</table>
 	</form>
@@ -71,7 +72,7 @@ require("luci.model.opennet.funcs")
 				<%=luci.i18n.translatef('Based on your Certificate (%s), the ports from %s to %s are forwarded through the VPN-Tunnel to your Access-Point - you should enter those as your source-ports.', client_cn, portrange[1], portrange[2])%>
 			<% end %>
 			<%:The target should be an IP-Address in your local network. Additionally you can enter the target port in the related field.%></div>
-			<% show_portmap(on_function("get_variable", {"ZONE_TUNNEL"})) %>
+			<% show_portmap(on_function("get_variable", {"ZONE_TUNNEL"}), portrange[1], portrange[2]) %>
 		</fieldset>
 	</div>
 <% end %>

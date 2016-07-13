@@ -422,11 +422,11 @@ msgid "Package Sources"
 msgstr "Paketquellen"
 
 msgid ""
-"Please enter your Opennet-ID (1.X or 2.X etc.) or the IP-Address of your "
+"Please enter your Opennet-ID (1.X, 2.X or 3.X etc.) or the IP-Address of your "
 "first Opennet-Network-Interface, any change will reconfigure your network "
 "settings immediately."
 msgstr ""
-"Bitte gib Deine Opennet-ID (1.X oder 2.X etc.) oder die IP-Adresse der "
+"Bitte gib Deine Opennet-ID (1.X, 2.X oder 3.X etc.) oder die IP-Adresse der "
 "ersten Opennet-Netzwerkschnittstelle ein. Jede Änderung wird sofort die "
 "betroffenen Netzwerkschnittstellen neu konfigurieren."
 

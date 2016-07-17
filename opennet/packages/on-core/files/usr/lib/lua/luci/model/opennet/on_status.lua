@@ -118,8 +118,8 @@ function get_network_interface_table_row(network_interface)
 	local ip6_address = string_join(get_interface_addresses(ifname, "inet6"), [[<br/>]])
 	local mac_address = string_join(get_interface_addresses(ifname, "link/ether"), [[<br/>]])
 	return [[<tr><td>]] .. ifname .. [[</td>]]
-		.. [[<td>]] .. ip4_address .. [[</td>]]
-		.. [[<td>]] .. ip6_address .. [[</td>]]
+		.. [[<td>]] .. (ip4_address or "") .. [[</td>]]
+		.. [[<td>]] .. (ip6_address or "") .. [[</td>]]
 		.. [[<td>]] .. mac_address .. [[</td></tr>]]
 end
 

@@ -17,6 +17,8 @@ Anschließend kann diese Liste wieder geleert werden.
 ** UGW/Spender: Anzahl der weitergeleiteten Nutzerverbindungen wird angezeigt
 * UGW-APs ohne lokale Mesh-Interfaces (nur via OpenVPN) sind nun auch über ihre Main-IP ansprechbar
 ** zuvor: nur 10.2.x.y (statt 192.168.x.y)
+* Captive-Portal:
+** Zustand von wifi-Interfaces folgt nun dem Nutzer-Tunnel
 * Fehlerkorrekturen:
 ** POE-Passthrough-Umschalter funktioniert nun
 ** UGW: Korrektur der Ermittlung und Announcierung der Uplink-Bandbreite
@@ -26,8 +28,6 @@ Anschließend kann diese Liste wieder geleert werden.
 ** veraltete olsr-Announcierungen nicht mehr existenter Dienste werden nun entfernt
 ** Status: Darstellung von multi-VAP-Konfigurationen ([[https://dev.opennet-initiative.de/ticket/134 Bug #134]])
 ** Status: Darstellung von Zonen mit mehreren Interfaces
-* Captive-Portal:
-** unklarer IP-Verlust auf den join-Interface wird erkannt und behoben
 
 = Interne Änderungen =
 * root-Passwort ist bei einer Erstinstallation leer

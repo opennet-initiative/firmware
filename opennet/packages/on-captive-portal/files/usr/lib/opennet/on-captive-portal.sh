@@ -237,11 +237,22 @@ update_captive_portal_status() {
 }
 
 
+change_captive_portal_wireless_disabled_state() {
+	local state="$1"
+	local uci_prefix
+	find_all_uci_sections wireless wifi-iface "network=$NETWORK_FREE" | while read uci_prefix; do
+		uci set "${uci_prefix}.disabled=$state"
+	done
+	apply_changes wireless
+}
+
+
 disable_captive_portal() {
 	trap "error_trap disable_captive_portal '$*'" $GUARD_TRAPS
 	msg_info "on-captive-portal: Interface abschalten"
 	# free-Interface ist aktiv - es gibt jedoch keinen Tunnel
 	ifdown "$NETWORK_FREE"
+	change_captive_portal_wireless_disabled_state "1"
 	# reload fuehrt zum sanften Stoppen
 	is_captive_portal_running && sleep 1 && captive_portal_reload
 	true
@@ -275,6 +286,7 @@ sync_captive_portal_state_with_mig_connections() {
 	elif [ -z "$device_active" -a -n "$mig_active" ]; then
 		# kein aktives free-Interface, aber ein aktiver Tunnel
 		ifup "$NETWORK_FREE"
+		change_captive_portal_wireless_disabled_state "0"
 	fi
 	# warte auf das Netzwerk-Interface
 	sleep 3

@@ -19,6 +19,7 @@ Anschließend kann diese Liste wieder geleert werden.
 ** zuvor: nur 10.2.x.y (statt 192.168.x.y)
 * Captive-Portal:
 ** Zustand von wifi-Interfaces folgt nun dem Nutzer-Tunnel
+** Firewall-Konfiguration für manuell erzeugte nicht-nodogsplash-Interfaces ist vorkonfiguriert
 * Fehlerkorrekturen:
 ** POE-Passthrough-Umschalter funktioniert nun
 ** UGW: Korrektur der Ermittlung und Announcierung der Uplink-Bandbreite

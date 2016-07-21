@@ -12,19 +12,30 @@ configure_free_zone() {
 	local uci_prefix
 	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$ZONE_FREE")
 	# Zone existiert? Keine Aenderungen ...
-	[ -n "$uci_prefix" ] && return 0
-	uci_prefix=firewall.$(uci add firewall zone)
-	uci set "$uci_prefix=zone"
-	uci set "$uci_prefix.name=$ZONE_FREE"
-	add_interface_to_zone "$ZONE_FREE" "$NETWORK_FREE"
-	# wir lassen ein paar wenige Ports via nodogsplash zu
-	uci set "$uci_prefix.input=REJECT"
-	# ausgehende Pakete sind OK
-	uci set "$uci_prefix.output=ACCEPT"
-	# Verkehr aus dem opennet-Netz darf nicht in lokale oder tunnel-Netze
-	uci set "$uci_prefix.forward=REJECT"
-	# die Nutzer duerfen nie in lokale WANs, sondern lediglich in VPN-Tunnel hinein kommunizieren
-	add_zone_forward "$ZONE_FREE" "$ZONE_TUNNEL"
+	[ -z "$uci_prefix" ] && {
+		uci_prefix=firewall.$(uci add firewall zone)
+		uci set "$uci_prefix=zone"
+		uci set "$uci_prefix.name=$ZONE_FREE"
+		add_interface_to_zone "$ZONE_FREE" "$NETWORK_FREE"
+		# wir lassen ein paar wenige Ports via nodogsplash zu
+		uci set "$uci_prefix.input=REJECT"
+		# ausgehende Pakete sind OK
+		uci set "$uci_prefix.output=ACCEPT"
+		# Verkehr aus dem opennet-Netz darf nicht in lokale oder tunnel-Netze
+		uci set "$uci_prefix.forward=REJECT"
+		# die Nutzer duerfen nie in lokale WANs, sondern lediglich in VPN-Tunnel hinein kommunizieren
+		add_zone_forward "$ZONE_FREE" "$ZONE_TUNNEL"
+	}
+	uci_prefix=$(find_first_uci_section "firewall" "rule" "proto=udp" "dest_port=67" "src=$ZONE_FREE" "target=ACCEPT")
+	[ -z "$uci_prefix" ] && {
+		uci_prefix="firewall.$(uci add "firewall" "rule")"
+		uci set "${uci_prefix}.proto=udp"
+		uci set "${uci_prefix}.dest_port=67"
+		uci set "${uci_prefix}.src=$ZONE_FREE"
+		uci set "${uci_prefix}.target=ACCEPT"
+		uci set "${uci_prefix}.name=on-free-dhcp"
+		uci set "${uci_prefix}.enabled=1"
+	}
 	apply_changes firewall
 }
 

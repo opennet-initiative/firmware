@@ -3,6 +3,6 @@
 case "$ACTION" in
         ifup)
 		# leicht verzoegert durchfuehren, um Hotplug-Schleifen zu vermeiden
-		echo "on-function update_olsr2_interfaces" | on-function schedule_task
+		echo "on-function update_olsr2_interfaces; on-function init_policy_routing_ipv6" | on-function schedule_task
 		;;
 esac

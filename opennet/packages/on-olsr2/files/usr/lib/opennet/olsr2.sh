@@ -173,9 +173,37 @@ apply_changes_olsrd2() {
 
 
 init_policy_routing_ipv6() {
+	olsr2_sync_routing_tables
+	# die Uplink-Tabelle ist unabhaengig von olsr
+	add_routing_table "$ROUTING_TABLE_ON_UPLINK" >/dev/null
+
 	# alte Regel loeschen, falls vorhanden
-	ip -6 rule del lookup "$ROUTING_TABLE_MESH_OLSR2" 2>/dev/null || true
-	ip -6 rule add lookup "$ROUTING_TABLE_MESH_OLSR2"
+	delete_policy_rule inet6 table "$ROUTING_TABLE_MESH_OLSR2"
+	delete_policy_rule inet6 table main
+
+	# free-Verkehr geht immer in den Tunnel (falls das Paket installiert ist)
+	[ -n "${ZONE_FREE:-}" ] \
+		&& add_zone_policy_rules_by_iif inet6 "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK"
+
+	# sehr wichtig - also zuerst: keine vorbeifliegenden Mesh-Pakete umlenken
+	add_zone_policy_rules_by_iif inet6 "$ZONE_MESH" table "$ROUTING_TABLE_MESH_OLSR2"
+
+	# Pakete mit passendem Ziel orientieren sich an der main-Tabelle
+	# Alle Ziele ausserhalb der mesh-Zone sind geeignet (z.B. local, free, ...).
+	# Wir wollen dadurch explizit keine potentielle default-Route verwenden.
+	get_all_network_interfaces | while read iface; do
+		is_interface_in_zone "$iface" "$ZONE_MESH" && continue
+		add_network_policy_rule_by_destination inet6 "$iface" table main
+	done
+
+	# alle nicht-mesh-Quellen routen auch ins olsr-Netz
+	ip -family inet6 rule add table "$ROUTING_TABLE_MESH_OLSR2"
+	# Routen, die nicht den lokalen Netz-Interfaces entsprechen (z.B. default-Routen)
+	ip -family inet6 rule add table main
+
+
+	# die VPN-Tunnel fungieren fuer alle anderen Pakete als default-GW
+	ip -family inet6 rule add table "$ROUTING_TABLE_ON_UPLINK"
 }
 
 

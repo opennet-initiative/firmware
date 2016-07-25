@@ -87,7 +87,9 @@ get_target_route_interface() {
 # Entferne alle Policy-Routing-Regeln die dem gegebenen Ausdruck entsprechen.
 # Es erfolgt keine Fehlerausgabe und keine Fehlermeldungen.
 delete_policy_rule() {
-	while ip rule del "$@"; do true; done 2>/dev/null
+	local family="$1"
+	shift
+	while ip -family "$family" rule del "$@"; do true; done 2>/dev/null
 }
 
 
@@ -97,14 +99,15 @@ delete_policy_rule() {
 ## @param more weitere Parameter: Policy-Rule-Spezifikation
 add_network_policy_rule_by_destination() {
 	trap "error_trap add_network_policy_rule_by_destination '$*'" $GUARD_TRAPS
-	local network="$1"
-	shift
+	local family="$1"
+	local network="$2"
+	shift 2
 	local network_with_prefix
-	local ip_version
 	for network_with_prefix in $(get_current_addresses_of_network "$network"); do
 		[ -z "$network_with_prefix" ] && continue
-		is_ipv4 "$network_with_prefix" && ip_version="-4" || ip_version="-6"
-		ip "$ip_version" rule add to "$network_with_prefix" "$@" || true
+		is_ipv4 "$network_with_prefix" && [ "$family" != "inet" ] && continue
+		is_ipv6 "$network_with_prefix" && [ "$family" != "inet6" ] && continue
+		ip -family "$family" rule add to "$network_with_prefix" "$@" || true
 	done
 	return 0
 }
@@ -112,12 +115,14 @@ add_network_policy_rule_by_destination() {
 
 ## @fn add_zone_policy_rules_by_iif()
 ## @brief Erzeuge Policy-Rules fuer Quell-Interfaces
+## @param family "inet" oder "inet6"
 ## @param zone Pakete aus allen Interfaces dieser Zone kommend sollen betroffen sein
 ## @param route Spezifikation einer Route (siehe 'ip route add ...')
 add_zone_policy_rules_by_iif() {
 	trap "error_trap add_zone_policy_rules '$*'" $GUARD_TRAPS
-	local zone="$1"
-	shift
+	local family="$1"
+	local zone="$2"
+	shift 2
 	local interface
 	local device
 	# ermittle alle physischen Geräte inklusive Bridge-Interfaces, die zu dieser Zone gehören
@@ -127,7 +132,7 @@ add_zone_policy_rules_by_iif() {
 			echo "$device"
 		done
 	done | sort | uniq | while read device; do
-		[ -n "$device" -a "$device" != "none" ] && ip rule add iif "$device" "$@"
+		[ -n "$device" -a "$device" != "none" ] && ip -family "$family" rule add iif "$device" "$@"
 		true
 	done
 	return 0
@@ -150,22 +155,22 @@ initialize_olsrd_policy_routing() {
 	# Sicherstellen, dass die Tabellen existieren und zur olsrd-Konfiguration passen
 	olsr_sync_routing_tables
 	# die Uplink-Tabelle ist unabhaengig von olsr
-	[ -z "$(get_routing_table_id "$ROUTING_TABLE_ON_UPLINK")" ] && add_routing_table "$ROUTING_TABLE_ON_UPLINK" >/dev/null
+	add_routing_table "$ROUTING_TABLE_ON_UPLINK" >/dev/null
 
 	# alle Eintraege loeschen
-	delete_policy_rule table "$ROUTING_TABLE_MESH"
-	delete_policy_rule table "$ROUTING_TABLE_MESH_DEFAULT"
-	delete_policy_rule table "$ROUTING_TABLE_ON_UPLINK"
-	delete_policy_rule table main
-	delete_policy_rule table default
+	delete_policy_rule inet table "$ROUTING_TABLE_MESH"
+	delete_policy_rule inet table "$ROUTING_TABLE_MESH_DEFAULT"
+	delete_policy_rule inet table "$ROUTING_TABLE_ON_UPLINK"
+	delete_policy_rule inet table main
+	delete_policy_rule inet table default
 
 	# free-Verkehr geht immer in den Tunnel (falls das Paket installiert ist)
 	[ -n "${ZONE_FREE:-}" ] \
-		&& add_zone_policy_rules_by_iif "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK" prio "$((priority++))"
+		&& add_zone_policy_rules_by_iif inet "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK" prio "$((priority++))"
 
 	# sehr wichtig - also zuerst: keine vorbeifliegenden Mesh-Pakete umlenken
-	add_zone_policy_rules_by_iif "$ZONE_MESH" table "$ROUTING_TABLE_MESH" prio "$((priority++))"
-	add_zone_policy_rules_by_iif "$ZONE_MESH" table "$ROUTING_TABLE_MESH_DEFAULT" prio "$((priority++))"
+	add_zone_policy_rules_by_iif inet "$ZONE_MESH" table "$ROUTING_TABLE_MESH" prio "$((priority++))"
+	add_zone_policy_rules_by_iif inet "$ZONE_MESH" table "$ROUTING_TABLE_MESH_DEFAULT" prio "$((priority++))"
 
 	# Pakete mit passendem Ziel orientieren sich an der main-Tabelle
 	# Alle Ziele ausserhalb der mesh-Zone sind geeignet (z.B. local, free, ...).
@@ -174,7 +179,7 @@ initialize_olsrd_policy_routing() {
 	# einfach bei gleicher Prioritaet und erhoehen diese erst anschliessend.
 	get_all_network_interfaces | while read iface; do
 		is_interface_in_zone "$iface" "$ZONE_MESH" && continue
-		add_network_policy_rule_by_destination "$iface" table main prio "$priority"
+		add_network_policy_rule_by_destination inet "$iface" table main prio "$priority"
 	done
 	: $((priority++))
 

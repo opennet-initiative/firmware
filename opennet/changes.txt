@@ -38,6 +38,7 @@ Anschließend kann diese Liste wieder geleert werden.
 * Monitoring:
 ** die Ping-Latenz zum UGW und zum VPN-Tunnel-Gateway ist via munin auswertbar
 * OpenVPN-Client: Umstellung von "ns-cert-type" auf "remote-cert-tls"
+* experimentelle Integration von OLSRv2
 
 = Bemerkenswertes / Fehler / Mängel =
 

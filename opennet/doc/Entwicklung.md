@@ -505,6 +505,7 @@ Einige Pakete können über das Web-Interface installiert werden. Diese Pakete m
 * *on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm*: zum Dictionary *on_module_descriptions* hinzufügen
 * *on-core/files/usr/lib/opennet/core.sh*: zur *case*-Verzweigung in *apply_changes* hinzufügen
 * *config/common*: das Paket als Modul aktivieren (*CONFIG_PACKAGE_on-foobar=m*) und somit in den Build-Prozess aufnehmen
+* falls das Paket übersetzungsfähige Texte enthalten kann: *touch opennet/po/de/on-foobar.po* (die Datei wird später durch "make translate" mit Inhalten gefüllt)
 
 Das minimalste Paket ist *on-goodies* - es besteht lediglich aus einer Liste von Abhängigkeiten und ist daher gut als Vorlage geeignet. Zusätzlich sollten die meisten Pakete Initialisierungs- und Aufräumaktionen in *postinst*- und*prerm*-Skripten unterbringen.
 

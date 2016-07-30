@@ -86,42 +86,36 @@ configure_ipv6_address() {
 
 ## @fn update_olsr2_interfaces()
 ## @brief Mesh-Interfaces ermitteln und für olsrd2 konfigurieren
-# TODO: olsrd2 ab Version 0.12 vereinfacht die uci-Konfiguration deutlich: http://www.olsr.org/mediawiki/index.php/UCI_Configuration_Plugin
 update_olsr2_interfaces() {
 	local interfaces
 	local existing_interfaces
-	local ifname
+	local ifnames
 	local uci_prefix
 	local token
+	local is_configured=0
 	# auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
 	local ipv6_limit="-0.0.0.0/0 -::1/128 default_accept"
 	interfaces="loopback $(get_zone_interfaces "$ZONE_MESH")"
 	# alle konfigurierten Interfaces durchgehen und überflüssige löschen
-	find_all_uci_sections "olsrd2" "interface" | while read uci_prefix; do
-		ifname=$(uci_get "${uci_prefix}.ifname")
-		[ -z "$ifname" ] && continue
-		if echo "$interfaces" | grep -q "^${ifname}$"; then
-			# das Interface ist bereits eingetragen
-			uci_delete "${uci_prefix}.ignore"
-			# Interface auf IPv6 begrenzen
-			[ -n "$(uci_get "${uci_prefix}.bindto")" ] || {
-				for token in $ipv6_limit; do uci_add_list "${uci_prefix}.bindto" "$token"; done
-			}
-		else
-			# fuer diesen Eintrag gibt es kein Interface
-			uci_delete "${uci_prefix}"
-		fi
-	done
-	# alle fehlenden Interfaces hinzufügen
-	existing_interfaces=$(find_all_uci_sections "olsrd2" "interface" \
-		| while read uci_prefix; do uci_get "${uci_prefix}.ifname"; done)
-	echo "$interfaces" | sed 's/[^a-zA-Z0-9\._]/\n/g' | while read ifname; do
-		echo "$existing_interfaces" | grep -wq "$ifname" || {
-			uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
-			uci set "${uci_prefix}.ifname=$ifname"
+	for uci_prefix in $(find_all_uci_sections "olsrd2" "interface"); do
+		# seit olsrd2 v0.12 benötigen wir "ifname" nicht mehr
+		uci_delete "${uci_prefix}.ifname"
+		# alle weiteren Interface-Sektionen loeschen, falls wir bereits fertig sind
+		[ "$is_configured" = "1" ] && uci_delete "${uci_prefix}" && continue
+		uci_delete "${uci_prefix}.ignore"
+		# Interface auf IPv6 begrenzen
+		[ -n "$(uci_get "${uci_prefix}.bindto")" ] || {
 			for token in $ipv6_limit; do uci_add_list "${uci_prefix}.bindto" "$token"; done
 		}
+		# alle Netzwerkschnittstellen eintragen
+		for token in $interfaces; do uci_add_list "${uci_prefix}.name" "$token"; done
+		is_configured=1
 	done
+	if [ "$is_configured" = "0" ]; then
+		uci_prefix="olsrd2.$(uci add "olsrd2" "interface")"
+		for token in $ipv6_limit; do uci_add_list "${uci_prefix}.bindto" "$token"; done
+		for token in $interfaces; do uci_add_list "${uci_prefix}.name" "$token"; done
+	fi
 	# Informationsversand auf IPv6 begrenzen
 	uci_prefix=$(find_first_uci_section "olsrd2" "olsrv2")
 	[ -z "$uci_prefix" ] && uci_prefix="olsrd2.$(uci add "olsrd2" "olsrv2")"

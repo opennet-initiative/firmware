@@ -198,6 +198,41 @@ init_policy_routing_ipv6() {
 }
 
 
+request_olsrd2_txtinfo() {
+	echo /$@ | timeout 2 nc localhost 2009 2>/dev/null
+}
+
+
+## @fn get_olsr2_route_count_by_neighbour()
+## @brief Liefere die Anzahl von olsr-Routen, die auf einen bestimmten Routing-Nachbarn verweisen.
+get_olsr2_route_count_by_neighbour() {
+	local neighbour_link_ipv6="$1"
+	request_olsrd2_txtinfo "olsrv2info" "route" | awk '{ if ($2 == "'$neighbour_link_ipv6'") print $1; }' | wc -l
+}
+
+
+## @fn get_olsr2_neighbours()
+## @brief Ermittle die direkten olsr2-Nachbarn und liefere ihre IPs und interessante Kennzahlen zurück.
+## details Ergebnisformat: Neighbour_IPv4 Neighbour_IPv6 Interface IncomingRate OutgoingRate RouteCount
+get_olsr2_neighbours() {
+	local ipv6
+	local ipv4
+	local link_ipv6
+	local mac
+	local interface
+	local incoming_rate
+	local outgoing_rate
+	local route_count
+	request_olsrd2_txtinfo "nhdpinfo" "link" | awk '{ print $1,$2,$10,$11,$15,$17 }' \
+			| while read interface link_ipv6 mac ipv6 incoming_rate outgoing_rate; do
+		ipv4=$(get_ipv4_of_mac "$mac")
+		[ -z "$ipv4" ] && ipv4="?"
+		route_count=$(get_olsr2_route_count_by_neighbour "$link_ipv6")
+		echo "$ipv4 $ipv6 $interface $incoming_rate $outgoing_rate $route_count"
+	done
+}
+
+
 debug_ping_all_olsr2_hosts() {
 	ip -6 route show table olsrd2 | awk '{print $1}' | while read a; do
 		ping6 -w 1 -c 1 "$a" >/dev/null 2>&1 && printf "OK\t$a\n" || printf "FAIL\t$a\n"

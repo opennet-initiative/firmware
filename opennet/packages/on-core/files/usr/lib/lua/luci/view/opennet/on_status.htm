@@ -164,7 +164,8 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 		for _, item in ipairs({
 				  {"networks_section", i18n("Networks"), url="network"},
 				  {"wireless_section", i18n("Wireless"), rawcontent=[[<table id="wifi_status_table"><tr/></table>]]},
-				  {"neighbor_section", i18n("Neighbors"), url="neighbors"},
+				  {"neighbor_section", i18n("Neighbors (OLSRv1)"), url="neighbors"},
+				  {"neighbor_olsr2_section", i18n("Neighbors (OLSRv2)"), url="neighbors_olsr2", mod_name="on-olsr2"},
 				  {"mig_connection_section", i18n("OpenVPN"), url="mig_openvpn", mod_name="on-openvpn"},
 				  {"ugw_connection_section", i18n("Internet Sharing"), url="mesh_verbindungen", mod_name="on-usergw"},
 				  {"captive_portal_section", i18n("Public Hotspot"), url="zugangspunkt", mod_name="on-captive-portal"},

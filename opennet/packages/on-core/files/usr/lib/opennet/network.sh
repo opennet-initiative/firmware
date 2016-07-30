@@ -409,5 +409,14 @@ is_interface_up() {
 	trap "" $GUARD_TRAPS && return 1
 }
 
+
+## @fn get_ipv4_of_mac()
+## @brief Ermittle die IPv4-Adresse zu einer MAC-Adresse
+## @param mac MAC-Adresse eines Nachbarn
+get_ipv4_of_mac() {
+	local ip="$1"
+	cat /proc/net/arp | awk '{ if ($4 == "'$ip'") print $1; }' | sort | head -1
+}
+
 # Ende der Doku-Gruppe
 ## @}

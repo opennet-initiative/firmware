@@ -27,4 +27,3 @@ define Package/on-goodies/install
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
-

@@ -68,4 +68,3 @@ on-function on_opkg_postrm_default
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
-

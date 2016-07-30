@@ -27,4 +27,3 @@ define Package/on-certificates/install
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
-

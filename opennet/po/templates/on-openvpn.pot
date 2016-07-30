@@ -35,6 +35,9 @@ msgstr ""
 msgid "Check the <a href=\"%s\">System Log</a> for details."
 msgstr ""
 
+msgid "Connection Log"
+msgstr ""
+
 msgid "Connection log"
 msgstr ""
 

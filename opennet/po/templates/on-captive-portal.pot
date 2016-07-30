@@ -89,6 +89,19 @@ msgstr ""
 msgid "VPN Tunnel"
 msgstr ""
 
+msgid ""
+"Warning: the Captive Portal interface (%s) seems to be a bridge containing "
+"only wifi devices. This setup is known to cause problems: you should add a "
+"non-wifi device or disable bridging."
+msgstr ""
+
+msgid ""
+"You may want to <a href=\"%s\">reconfigure</a> the '%s' interface. Currently "
+"a bridge consisting of multiple wifi interfaces (and nothing else) is "
+"configured. This setup is known to cause problems with openwrt. Please add a "
+"non-wifi interface or disable bridging."
+msgstr ""
+
 msgid "You may want to run a public hotspot in your area."
 msgstr ""
 

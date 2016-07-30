@@ -139,6 +139,9 @@ msgid ""
 "reagrding OLSR"
 msgstr ""
 
+msgid "Experimental Visualization for OLSRv2"
+msgstr ""
+
 msgid "Experimental support for OLSRv2 and IPv6"
 msgstr ""
 
@@ -309,7 +312,10 @@ msgid ""
 "Neighbor-Link-Quality: how many of your test-packets did reach your neighbor"
 msgstr ""
 
-msgid "Neighbors"
+msgid "Neighbors (OLSRv1)"
+msgstr ""
+
+msgid "Neighbors (OLSRv2)"
 msgstr ""
 
 msgid "Network"
@@ -322,6 +328,9 @@ msgid "No information available"
 msgstr ""
 
 msgid "No report available"
+msgstr ""
+
+msgid "No response"
 msgstr ""
 
 msgid ""
@@ -380,9 +389,9 @@ msgid "Package Sources"
 msgstr ""
 
 msgid ""
-"Please enter your Opennet-ID (1.X, 2.X or 3.X etc.) or the IP-Address of your "
-"first Opennet-Network-Interface, any change will reconfigure your network "
-"settings immediately."
+"Please enter your Opennet-ID (1.X, 2.X or 3.X etc.) or the IP-Address of "
+"your first Opennet-Network-Interface, any change will reconfigure your "
+"network settings immediately."
 msgstr ""
 
 msgid ""
@@ -622,9 +631,6 @@ msgid "related network addresses"
 msgstr ""
 
 msgid "search file"
-msgstr ""
-
-msgid "start / limit / leasetime"
 msgstr ""
 
 msgid "upload"

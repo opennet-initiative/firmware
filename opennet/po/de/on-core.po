@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2016-03-20 15:56+0200\n"
+"PO-Revision-Date: 2016-07-31 01:49+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -162,6 +162,9 @@ msgstr ""
 "Erwartete Anzahl von Übertragungen: die Qualität der Verbindung zum Gateway "
 "aus der Sicht von OLSR"
 
+msgid "Experimental Visualization for OLSRv2"
+msgstr "Experimentelle Visualisierung für OLSRv2"
+
 msgid "Experimental support for OLSRv2 and IPv6"
 msgstr "Experimentelle Unterstützung für OLSRv2 und IPv6"
 
@@ -312,7 +315,7 @@ msgstr "Manuell: wähle Deine bevorzugte Reihenfolge"
 
 msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
 msgstr ""
-"Vielleicht möchtest Du deinen AP mit einem benachbarten AP <a href=\"%s"
+"Vielleicht möchtest Du Deinen AP mit einem benachbarten AP <a href=\"%s"
 "\">via WLAN verbinden</a>."
 
 msgid "Mbit/s"
@@ -344,8 +347,11 @@ msgid ""
 msgstr ""
 "Nachbar-Link-Qualität: wie viele der Pakete des Nachbarn wurden empfangen"
 
-msgid "Neighbors"
-msgstr "Nachbarn"
+msgid "Neighbors (OLSRv1)"
+msgstr "Nachbarn (OLSRv1)"
+
+msgid "Neighbors (OLSRv2)"
+msgstr "Nachbarn (OLSRv2)"
 
 msgid "Network"
 msgstr "Netzwerk"
@@ -358,6 +364,9 @@ msgstr "Keine Informationen verfügbar"
 
 msgid "No report available"
 msgstr "Keine Zusammenfassung verfügbar"
+
+msgid "No response"
+msgstr "Keine Antwort"
 
 msgid ""
 "Nodes in the Opennet can announce various services. These services can be "
@@ -422,9 +431,9 @@ msgid "Package Sources"
 msgstr "Paketquellen"
 
 msgid ""
-"Please enter your Opennet-ID (1.X, 2.X or 3.X etc.) or the IP-Address of your "
-"first Opennet-Network-Interface, any change will reconfigure your network "
-"settings immediately."
+"Please enter your Opennet-ID (1.X, 2.X or 3.X etc.) or the IP-Address of "
+"your first Opennet-Network-Interface, any change will reconfigure your "
+"network settings immediately."
 msgstr ""
 "Bitte gib Deine Opennet-ID (1.X, 2.X oder 3.X etc.) oder die IP-Adresse der "
 "ersten Opennet-Netzwerkschnittstelle ein. Jede Änderung wird sofort die "
@@ -716,9 +725,6 @@ msgstr "zugehörige Netzwerkadressen"
 msgid "search file"
 msgstr "suche Datei"
 
-msgid "start / limit / leasetime"
-msgstr "Beginn / Anzahl / Lease-Laufzeit"
-
 msgid "upload"
 msgstr "hochladen"
 
@@ -733,6 +739,12 @@ msgstr "hochgeladen oder erzeugt an diesem Tag"
 
 msgid "use"
 msgstr "übernehmen"
+
+#~ msgid "Neighbors"
+#~ msgstr "Nachbarn"
+
+#~ msgid "start / limit / leasetime"
+#~ msgstr "Beginn / Anzahl / Lease-Laufzeit"
 
 #~ msgid "Download the CSR file and upload it manually"
 #~ msgstr ""

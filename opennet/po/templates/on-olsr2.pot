@@ -1,0 +1,26 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid "Currently there are no known routing neighbours."
+msgstr ""
+
+msgid "IP-Address"
+msgstr ""
+
+msgid "Incoming Rate: bandwidth of this link - announced by the neighbour"
+msgstr ""
+
+msgid "Interface"
+msgstr ""
+
+msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Number of routes via this neighbour"
+msgstr ""
+
+msgid "Outgoing Rate: bandwidth of this link - our estimation"
+msgstr ""

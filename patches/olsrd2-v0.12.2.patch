@@ -1,0 +1,40 @@
+Aktualisierung von OLSRv2 auf v0.12.2
+--- a/routing/oonf-dlep-proxy/Makefile
++++ b/routing/oonf-dlep-proxy/Makefile
+@@ -1,8 +1,8 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=oonf-dlep-proxy
+-PKG_VERSION:=0.12.1
+-PKG_REV:=e4cb9a3ab52352ecee0da09ab4ccae32461f5f44
++PKG_VERSION:=0.12.2
++PKG_REV:=c2caa5e1ee4a2e3b46007355f28805db18e46da9
+ PKG_RELEASE:=$(PKG_REV)
+ 
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+--- a/routing/oonf-dlep-radio/Makefile
++++ b/routing/oonf-dlep-radio/Makefile
+@@ -1,8 +1,8 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=oonf-dlep-radio
+-PKG_VERSION:=0.12.1
+-PKG_REV:=e4cb9a3ab52352ecee0da09ab4ccae32461f5f44
++PKG_VERSION:=0.12.2
++PKG_REV:=c2caa5e1ee4a2e3b46007355f28805db18e46da9
+ PKG_RELEASE:=$(PKG_REV)
+ 
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+--- a/routing/oonf-olsrd2/Makefile
++++ b/routing/oonf-olsrd2/Makefile
+@@ -1,8 +1,8 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=oonf-olsrd2
+-PKG_VERSION:=0.12.1
+-PKG_REV:=e4cb9a3ab52352ecee0da09ab4ccae32461f5f44
++PKG_VERSION:=0.12.2
++PKG_REV:=c2caa5e1ee4a2e3b46007355f28805db18e46da9
+ PKG_RELEASE:=$(PKG_REV)
+ 
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2

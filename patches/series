@@ -9,3 +9,4 @@ px5g_create_csr.patch
 gpio_switch_control.patch
 packages_sshfs_source.patch
 cpe-rx.patch
+olsrd2-v0.12.2.patch

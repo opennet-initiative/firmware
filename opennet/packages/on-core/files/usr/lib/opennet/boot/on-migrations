@@ -24,6 +24,7 @@
 #   openvpn.opennet_ugw_erina_on_i_de.comp_lzo=1
 #   openvpn.opennet_ugw_subaru_on_i_de.comp_lzo=1
 coerce_openvpn_comp_lzo() {
+	trap "error_trap coerce_openvpn_comp_lzo '$*'" $GUARD_TRAPS
 	local new_value
 	local key
 	# wir wissen nicht genau, ob on-usergw und openvpn existiert - also lieber vorsichtig fragen
@@ -45,6 +46,7 @@ coerce_openvpn_comp_lzo() {
 # Bei einem Update wird das symlink-Ziel ersetzt und somit gibt es keine Nutzerdatenbank mehr.
 # Dies verhindert jeden telnet/ssh-Login-Versuch. Lediglich das Web-Interface ist nutzbar.
 fix_passwd_broken_symlink() {
+	trap "error_trap fix_passwd_broken_symlink '$*'" $GUARD_TRAPS
 	local target=/etc/passwd
 	if [ -h "$target" -a ! -e "$target" ]; then
 		msg_info "MIGRATION: fix_passwd_broken_symlink"
@@ -69,6 +71,7 @@ EOF
 # In den folgenden Versionen gibt es kein /etc/etc_presets/ mehr.
 # Der Symlink kann dann durch den ueblichen Kommentar-Text ersetzt werden.
 fix_rclocal_broken_symlink() {
+	trap "error_trap fix_rclocal_broken_symlink '$*'" $GUARD_TRAPS
 	local target=/etc/rc.local
 	# die Datei existiert, bzw. der Symlink zeigt nicht ins Leere
 	[ -e "$target" ] && return 0
@@ -90,6 +93,7 @@ EOF
 
 # wandele Leerzeichen-getrennte "option"-Eintraege in "list"-Eintraege um
 _convert_uci_option_to_list() {
+	trap "error_trap _convert_uci_option_to_list '$*'" $GUARD_TRAPS
 	local config="$1"
 	local optname="$2"
 	local filename="/etc/config/$config"
@@ -115,6 +119,7 @@ _convert_uci_option_to_list() {
 
 # Gelegentlich ändert openwrt die Definition einzelner Variablen. Dies müssen wir via Migration nachbereiten.
 migrate_uci_definition_changes() {
+	trap "error_trap migrate_uci_definition_changes '$*'" $GUARD_TRAPS
 	# vor Barrier Breaker war "firewall.ZONE.network" eine "option" - anschliessed wurde es zur "list"
 	_convert_uci_option_to_list "firewall" "network"
 }
@@ -129,6 +134,7 @@ migrate_uci_definition_changes() {
 #  firewall.@include[1]=include
 #  firewall.@include[1].path=/etc/firewall.user
 fix_firewall_reload() {
+	trap "error_trap fix_firewall_reload '$*'" $GUARD_TRAPS
 	local filename=/etc/firewall.opennet
 	local uci_prefix
 	find_all_uci_sections "firewall" "include" | while read uci_prefix; do
@@ -148,6 +154,7 @@ fix_firewall_reload() {
 #   firewall.zone_on_mesh.forward=ACCEPT
 # Diese erlauben die Paketweiterleitung aus unerwuenschten Netzen heraus.
 disable_unwanted_forward() {
+	trap "error_trap disable_unwanted_forward '$*'" $GUARD_TRAPS
 	local zone_name
 	local forward
 	find_all_uci_sections firewall zone "forward=ACCEPT" | while read uci_prefix; do
@@ -171,6 +178,7 @@ disable_unwanted_forward() {
 # * on-openvpn.gateways.autosearch=on|off
 # Die darauffolgenden Firrmware-Versionen verwenden stattdessen die Einstellung 'on-core.settings.service_sorting'.
 transfer_vpn_sort_criteria_and_autosearch() {
+	trap "error_trap transfer_vpn_sort_criteria_and_autosearch '$*'" $GUARD_TRAPS
 	local sort_criteria
 	local autosearch
 	local result
@@ -193,8 +201,8 @@ transfer_vpn_sort_criteria_and_autosearch() {
 # bis Version 0.4-5 verwendeten wir vollstaendige uci-Sektionen fuer die VPN-Server
 # z.B. openvpn.opennet_user
 remove_tunnel_openvpn_settings() {
+	trap "error_trap remove_tunnel_openvpn_settings '$*'" $GUARD_TRAPS
 	local uci_prefix=openvpn.opennet_user
-
 	# Abbruch falls die Einstellungen bereits entfernt wurden
 	[ -z "$(uci_get "$uci_prefix")" ] && return
 	uci delete "$uci_prefix"
@@ -207,6 +215,7 @@ remove_tunnel_openvpn_settings() {
 # Dadurch wurden openvpn-uci-Konfigurationen (z.B. openvpn.opennet_ugw_erina_on_i_de) nach on-usergw.opennet_ugw* übertragen.
 # Da die openvpn-Konfigurationen nun ein anderes Namensformat haben, loeschen wir sie.
 remove_usergw_openvpn_configs() {
+	trap "error_trap remove_usergw_openvpn_configs '$*'" $GUARD_TRAPS
 	local uci_prefix
 	find_all_uci_sections "openvpn" "openvpn" | grep "^openvpn\.opennet_ugw_" | while read uci_prefix; do
 		uci delete "$uci_prefix"
@@ -228,6 +237,7 @@ remove_usergw_openvpn_configs() {
 #   on-openvpn.gateways.vpn_sort_criteria
 #   on-openvpn.gateways.vpn_recheck_age
 remove_obsolete_on_core_settings() {
+	trap "error_trap remove_obsolete_on_core_settings '$*'" $GUARD_TRAPS
 	local key
 	for key in \
 			on-core.defaults \
@@ -249,6 +259,7 @@ remove_obsolete_on_core_settings() {
 
 # bis Version 0.4-5 wurde die Variable "on-usergw.ugwng_hna_mask" verwendet.
 remove_obsolete_usergw_settings() {
+	trap "error_trap remove_obsolete_usergw_settings '$*'" $GUARD_TRAPS
 	[ -n "$(uci_get "on-usergw.ugwng_hna_mask")" ] && uci delete "on-usergw.ugwng_hna_mask"
 	return 0
 }
@@ -259,6 +270,7 @@ remove_obsolete_usergw_settings() {
 # Im Zweifelsfall (z.B. falls gerade keine Verbindung zum mesh existiert), werden die
 # zu uebertragenden Informationen (die Offsets der Gateways oder ihre manuelle Reihenfolge) verworfen.
 transfer_gateway_uci_settings() {
+	trap "error_trap transfer_gateway_uci_settings '$*'" $GUARD_TRAPS
 	local uci_prefix
 	local host
 	local offset
@@ -286,6 +298,7 @@ transfer_gateway_uci_settings() {
 # Paketierung wollen wir dies nicht mehr verwenden.
 # Fortan werden die Eintraege manuell hinzugefuegt (siehe /etc/uci-defaults/on-core-init).
 remove_crontab_entries() {
+	trap "error_trap remove_crontab_entries '$*'" $GUARD_TRAPS
 	local crontab_file=/etc/crontabs/root
 	[ -e "$crontab_file" ] || return 0
 	# Verwendung des alten shell-Skripts
@@ -298,6 +311,7 @@ remove_crontab_entries() {
 # Bis Version 0.4-5 wurde der Port des httpinfo-Plugins mit der Variable "olsrd.@LoadPlugin[1].Port" festgelegt.
 # uci-typisch sind jedoch Attribute mit Kleinbuchstaben.
 rename_olsrd_port_to_port() {
+	trap "error_trap rename_olsrd_port_to_port '$*'" $GUARD_TRAPS
 	local uci_prefix
 	local library
 	find_all_uci_sections olsrd LoadPlugin | while read uci_prefix; do
@@ -317,6 +331,7 @@ rename_olsrd_port_to_port() {
 # Bis Version 0.4-5 gab es anscheinend die veraltete "mtu_fix"-Option in firewall-Weiterleitungen.
 # Seit OpenWRT 8.09.2 befindet sich diese Option jedoch nicht mehr in den Weiterleitungen, sondern in der Zielzone.
 move_mtu_fix_to_target_zone() {
+	trap "error_trap move_mtu_fix_to_target_zone '$*'" $GUARD_TRAPS
 	local uci_prefix
 	local mtu_value
 	local target_zone
@@ -339,6 +354,7 @@ move_mtu_fix_to_target_zone() {
 # Bis Version 0.4-5 verwendeten wir ntpclient anstelle des integrierten ntpd
 # Die alten Einstellungen koennen also entfernt werden, da die Hosts automatisch gewaehlt werden.
 remove_ntpclient_config() {
+	trap "error_trap remove_ntpclient_config '$*'" $GUARD_TRAPS
 	# keine config-Datei? Fertig ...
 	[ -e /etc/config/ntpclient ] || return 0
 	# ntpclient ist installiert? Konfiguration belassen ...
@@ -382,6 +398,7 @@ rename_firewall_zone() {
 ## @brief Änderung des Netzwerk-Namens für offene Zugangspunkte von "free" zu "on_free".
 ## @details Bis v0.4-5 hieß das wifidog-Netzwerk "free". Ab v0.5.2 heißt es "on_free".
 move_wifidog_networks_to_captive_portal() {
+	trap "error_trap move_wifidog_networks_to_captive_portal '$*'" $GUARD_TRAPS
 	local old_name="free"
 	local new_name="${NETWORK_FREE:-}"
 	# das on-captive-portal-Paket ist nicht installiert - keine Aenderungen
@@ -412,6 +429,7 @@ move_wifidog_networks_to_captive_portal() {
 ## @details Bis Version 0.4-5 wurde wifidog mit einem lokalen Alias-Interface konfiguriert, um
 ##   die Umlenkung von Paketen via REDIRECT zu ermöglichen.
 remove_wifidog_alias_interface() {
+	trap "error_trap remove_wifidog_alias_interface '$*'" $GUARD_TRAPS
 	local uci_prefix
 	find_all_uci_sections "network" "alias" "interface=free" | while read uci_prefix; do
 		uci_delete "$uci_prefix"
@@ -436,6 +454,7 @@ remove_wifidog_alias_interface() {
 ##     /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
 ##     /etc/openvpn/opennet_vpntest/opennet-ca.crt
 remove_opennet_ca_certificates_from_previous_location() {
+	trap "error_trap remove_opennet_ca_certificates_from_previous_location '$*'" $GUARD_TRAPS
 	rm -f /etc/openvpn/opennet_user/opennet-ca.crt
 	rm -f /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
 	rm -f /etc/openvpn/opennet_vpntest/opennet-ca.crt
@@ -445,6 +464,7 @@ remove_opennet_ca_certificates_from_previous_location() {
 ## @fn remove_openvpn_vpntest_keydir()
 ## @brief Dieses Verzeichnis ist mindestens seit v0.5.2 nicht mehr in Nutzung.
 remove_openvpn_vpntest_keydir() {
+	trap "error_trap remove_openvpn_vpntest_keydir '$*'" $GUARD_TRAPS
 	rm -rf /etc/openvpn/vpntest/
 }
 
@@ -453,6 +473,7 @@ remove_openvpn_vpntest_keydir() {
 ## @brief Lösche die nicht mehr verwendete Konfiguration von "wifidog" und "on-wifidog".
 ## @details Die Konfiguration enthält keine relevanten Inhalte mehr, die zu übertragen wären.
 remove_wifidog_config() {
+	trap "error_trap remove_wifidog_config '$*'" $GUARD_TRAPS
 	rm -f /etc/config/on-wifidog
 	uci_delete luci.flash_keep.wifidog
 	rm -f /etc/wifidog.conf
@@ -464,6 +485,7 @@ remove_wifidog_config() {
 ## @details Bei einer Aktualisierung von v0.5.1 auf v0.5.2 fehlt diese Einstellung andernfalls, da
 ##   zuvor keine https-Unterstützung in der Firmware aktiviert war.
 enable_uhttpd_redirect() {
+	trap "error_trap enable_uhttpd_redirect '$*'" $GUARD_TRAPS
 	local uci_key="uhttpd.main.redirect_https"
 	[ -n "$(uci_get "$uci_key")" ] && return 0
 	uci set "$uci_key=1"
@@ -478,6 +500,7 @@ enable_uhttpd_redirect() {
 ##   Bedarf nachinstalliert. Beim Übergang von Komplett- zu Bedarfsinstallation versuchen wir die vorherige
 ##   Nutzungsform zu erraten und die dazu passende Modulliste zu speichern.
 guess_previously_used_modules() {
+	trap "error_trap guess_previously_used_modules '$*'" $GUARD_TRAPS
 	# falls bereits etwas in der uci-Sektion gespeichert wurde, ist keine Nachbereitung noetig
 	[ -n "$(uci -q show "on-core.modules")" ] && return 0
 	# Zweig anlegen
@@ -500,6 +523,7 @@ guess_previously_used_modules() {
 ##   Beispiel:
 ##      olsrd.cfg0c4e54.service=http://192.168.0.42:8080|tcp|ugw upload:50 download:350 ping:27
 remove_pre05_usergateway_olsr_announcement() {
+	trap "error_trap remove_pre05_usergateway_olsr_announcement '$*'" $GUARD_TRAPS
 	uci show -X olsrd | grep -q "^olsrd.cfg[^.]\+.service=http://.*:8080|tcp|ugw" || return 0
 	sed -i "/option service 'http:\/\/.*|tcp|ugw/d" /etc/config/olsrd
 	/etc/init.d/olsrd restart
@@ -509,6 +533,7 @@ remove_pre05_usergateway_olsr_announcement() {
 ## @fn remove_pre05_usergateway_tap_interfaces()
 ## @brief Entferne alte "on_tapX"-Interfaces, die in dem UGW-Modul bis Firmware v0.4-5 verwendet wurden.
 remove_pre05_usergateway_tap_interfaces() {
+	trap "error_trap remove_pre05_usergateway_tap_interfaces '$*'" $GUARD_TRAPS
 	local netnum
 	for netnum in 0 1 2 3 4; do
 		uci_delete "network.on_tap${netnum}"
@@ -520,6 +545,7 @@ remove_pre05_usergateway_tap_interfaces() {
 ## @fn remove_pre05_on_usergw_settings()
 ## @brief Seit v0.5.2 verwendet das on-usergw-Modul keine uci-Einstellungen mehr.
 remove_pre05_on_usergw_settings() {
+	trap "error_trap remove_pre05_on_usergw_settings '$*'" $GUARD_TRAPS
 	rm -f /etc/config/on-usergw
 }
 

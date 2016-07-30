@@ -11,7 +11,8 @@ BASE_DIR=$(cd "$(dirname "$0")/.."; pwd)
 
 RSYNC_OPTS="-ax --exclude=.*.swp --usermap=:root,*:root --groupmap=:root,*:root"
 SCP_OPTS="-rp"
-PACKAGES=${2:-}
+shift
+PACKAGES="$@"
 
 # falls nichts explizit gewünscht wurde, wollen wi nur Dateien fuer diejenigen Pakete übertragen, die tatsächlich installiert sind
 [ -z "$PACKAGES" ] && PACKAGES=$(ssh "$TARGET_HOST" "opkg list-installed" | grep ^on- | awk '{ print $1 }')

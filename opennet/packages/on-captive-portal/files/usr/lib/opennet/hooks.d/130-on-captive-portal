@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eu
+
+case "$1" in
+	nodogsplash)
+		/etc/init.d/nodogsplash reload >/dev/null || true
+		;;
+	on-captive-portal)
+		on-function update_captive_portal_status
+		;;
+esac

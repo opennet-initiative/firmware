@@ -174,7 +174,7 @@ captive_portal_restart() {
 ## @brief Neukonfiguration der Captive-Portal-Software, falls Änderungen aufgetreten sind.
 ## @details Bestehende Verbindungen bleiben erhalten.
 captive_portal_reload() {
-	/etc/init.d/nodogsplash reload >/dev/null
+	/etc/init.d/nodogsplash reload >/dev/null || true
 }
 
 

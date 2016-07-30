@@ -394,6 +394,8 @@ check_pid_file() {
 ##   Zuerst werden alle uci-Sektionen commited und anschliessend werden die Trigger ausgefuehrt.
 apply_changes() {
 	local config
+	# Zuerst werden alle Änderungen committed und anschließend die (veränderten) Konfiguration
+	# für den Aufruf der hook-Skript verwandt.
 	for config in "$@"; do
 		# Opennet-Module achten auch auf nicht-uci-Aenderungen
 		if echo "$config" | grep -q "^on-"; then
@@ -407,56 +409,7 @@ apply_changes() {
 			echo "$config"
 		fi
 	done | grep -v "^$" | sort | uniq | while read config; do
-		# wir wollen die Aktionen erst nach allen commits ausfuehren
-		case "$config" in
-			system|dhcp)
-				reload_config || true
-				;;
-			network|wireless|firewall)
-				reload_config || true
-				# Zonen- und IP-Aenderungen koennen Policy-Routing-Aenderungen erfordern
-				initialize_olsrd_policy_routing
-				# eventuelle Zonen-Zuordnungen zu olsr uebertragen
-				update_olsr_interfaces
-				;;
-			olsrd)
-				/etc/init.d/olsrd reload || true
-				;;
-			olsrd2)
-				/etc/init.d/olsrd2 reload >/dev/null || true
-				;;
-			openvpn)
-				# eventuell ist das openvpn-Paket nicht installiert (siehe on-migrations)
-				[ -e /etc/init.d/openvpn ] && /etc/init.d/openvpn reload || true
-				;;
-			nodogsplash)
-				captive_portal_reload || true
-				;;
-			on-core)
-				update_ntp_servers
-				update_dns_servers
-				;;
-			on-openvpn)
-				update_mig_connection_status
-				;;
-			on-usergw)
-				update_on_usergw_status
-				update_service_relay_status
-				;;
-			on-captive-portal)
-				update_captive_portal_status
-				apply_changes nodogsplash
-				;;
-			on-monitoring)
-				update_monitoring_state
-				;;
-			on-goodies)
-				# es gibt nichts zu tun
-				;;
-			*)
-				msg_error "no handler defined for applying config changes for '$config'"
-				;;
-		esac
+		run_parts "${IPKG_INSTROOT:-}/usr/lib/opennet/hooks.d" "$config"
 	done
 	return 0
 }
@@ -888,16 +841,19 @@ _get_parts_dir_files() {
 
 ## @fn run_parts()
 ## @brief Führe alle Skripte aus, die in einem bestimmten Verzeichnis liegen und gewissen Konventionen genügen.
+## @param rundir Verzeichnis, das die auszuführenden Skripte enthält
+## @param weitere Paramter (falls erforderlich)
 ## @details Die Namenskonventionen und das Verhalten entspricht dem verbreiteten 'run-parts'-Werkzeug.
 ##     Die Dateien müssen ausführbar sein.
 run_parts() {
 	trap "error_trap run_parts '$*'" $GUARD_TRAPS
 	local rundir="$1"
+	shift
 	local fname
 	_get_parts_dir_files "$rundir" | while read fname; do
 		msg_debug "on-run-parts: executing $fname"
 		# ignoriere Fehler bei der Ausfuehrung
-		"$fname" || true
+		"$fname" "$@" || true
 	done
 }
 

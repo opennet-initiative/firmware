@@ -30,7 +30,7 @@ define Package/on-captive-portal/postinst
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 on-function on_opkg_postinst_default
-on-function update_captive_portal_status
+on-function apply_changes "$(PKG_NAME)"
 endef
 
 define Package/on-captive-portal/prerm

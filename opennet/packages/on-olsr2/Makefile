@@ -30,6 +30,7 @@ define Package/on-olsr2/postinst
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 on-function on_opkg_postinst_default
+on-function apply_changes "$(PKG_NAME)"
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

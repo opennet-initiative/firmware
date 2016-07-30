@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -eu
+
+case "$1" in
+	system|dhcp|network|wireless|firewall)
+		reload_config || true
+		;;
+	openvpn)
+		on-function cleanup_stale_openvpn_services
+		/etc/init.d/openvpn reload || true
+		;;
+	on-core)
+		on-function update_ntp_servers
+		on-function update_dns_servers
+		;;
+esac

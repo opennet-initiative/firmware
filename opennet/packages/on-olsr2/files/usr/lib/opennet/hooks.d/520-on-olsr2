@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+case "$1" in
+	network|wireless|firewall)
+		# Zonen- und IP-Aenderungen koennen Policy-Routing-Aenderungen erfordern
+		on-function init_policy_routing_ipv6
+		# eventuelle Zonen-Zuordnungen zu olsrd2 uebertragen
+		on-function update_olsr2_interfaces
+		;;
+	olsrd2)
+		/etc/init.d/olsrd2 reload >/dev/null || true
+		;;
+esac

@@ -31,6 +31,7 @@ define Package/on-usergw/postinst
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 on-function on_opkg_postinst_default
+on-function apply_changes "$(PKG_NAME)"
 endef
 
 define Package/on-usergw/prerm

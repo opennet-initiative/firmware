@@ -46,10 +46,9 @@ on-function schedule_task <<-EOF
 
 	# Patch auf /usr/sbin/munin-node anwenden, um die Verwendung von Modulen zu ermöglichen
 	on-function enable_munin_plugins
-
-	# munin starten oder stoppen (je nach Modul-Aktivierung)
-	on-function update_monitoring_state
 EOF
+
+on-function apply_changes "$(PKG_NAME)"
 endef
 
 define Package/on-monitoring/prerm

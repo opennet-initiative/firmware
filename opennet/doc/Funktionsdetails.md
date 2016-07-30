@@ -409,10 +409,18 @@ Im Zuge der uci-defaults-Initialisierung (nach der Erst-Installation oder nach e
 Siehe dazu die Datei */etc/uci-defaults/10-on-core-init* und die Funktion *set_opkg_download_version*.
 
 
-Bootvorgang
+Bootvorgang {#booting}
 -----------
 
 Am Ende des Boot-Vorgangs werden alle Skripte, die sich im Verzeichnis */usr/lib/opennet/boot/* befinden, für die Ausführung beim nächsten minütlichen cron-Job angemeldet (siehe *schedule_task*). Einige dieser Skripte sollen nicht direkt nach dem Booten, sondern etwas verzögert gestartet werden. Diese Skripte sorgen ebenfalls durch *schedule_task* dafür, dass sie erneut ausgeführt werden, solange ihre Zeit noch nicht gekommen ist.
+
+
+Hook-Skripte für Konfigurationsänderungen {#hooks}
+-----------------------------------------
+
+Die verschiedenen on-Pakete legen ausführbare Skripte im Verzeichnis */usr/lib/opennet/hooks.d/* ab. Diese Skripte werden ausgeführt, wenn Opennet-Skripte Änderungen an der Konfiguration vornehmen. Diese Änderungen werden via *apply_changes FOO* signalisiert. Der *apply_changes*-Funktion wird ein Paramter übergeben. Dieser ist entweder der Name einer uci-Sektion (z.B. *network*, *dhcp*, ...) oder eines Opennet-Pakets (*on-core*, *on-openvpn*, *on-usergw*, *on-monitoring*, *on-captive-portal*). Dieser Paramter wird als einziger Parameter beim Aufruf jedes einzelnen Hook-Skripts übergeben.
+
+Die Hook-Skripte bestehen typischerweise aus einer einfachen case-Struktur.
 
 
 Dauerhaftes Ereignisprotokoll {#bootlog}

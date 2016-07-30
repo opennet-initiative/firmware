@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -eu
+
+case "$1" in
+	on-monitoring)
+		on-function update_monitoring_state
+		;;
+esac

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eu
+
+case "$1" in
+	on-openvpn)
+		on-function cleanup_stale_openvpn_services
+		on-function update_mig_connection_status
+		;;
+esac

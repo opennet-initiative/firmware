@@ -32,7 +32,7 @@ define Package/on-openvpn/postinst
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 on-function on_opkg_postinst_default
-on-function cleanup_stale_openvpn_services
+on-function apply_changes "$(PKG_NAME)"
 endef
 
 define Package/on-openvpn/postrm

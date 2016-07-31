@@ -5,44 +5,11 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
-* Gateway-Liste:
-** jeder Gateway ist verlinkt mit einer Karte auf der die Route vom eigenen AP zum Gateway visualisiert ist
-** das Verbindungs-Protokoll ist nun separat erreichbar
-* Einblendung der Karte auf der Startseite
-* Unterscheidung von opennet- und Internet-URL ist nicht mehr nötig:
-** Modulinstallation
-** Zertifikatseinreichung
-* Status-Anzeige:
-** Nutzer-Tunnel: UGW-Server (erina/megumi/subaru) wird angezeigt
-** UGW/Spender: Anzahl der weitergeleiteten Nutzerverbindungen wird angezeigt
-* UGW-APs ohne lokale Mesh-Interfaces (nur via OpenVPN) sind nun auch über ihre Main-IP ansprechbar
-** zuvor: nur 10.2.x.y (statt 192.168.x.y)
-* Captive-Portal:
-** Zustand von wifi-Interfaces folgt nun dem Nutzer-Tunnel
-** Firewall-Konfiguration für manuell erzeugte nicht-nodogsplash-Interfaces ist vorkonfiguriert
-* Fehlerkorrekturen:
-** POE-Passthrough-Umschalter funktioniert nun
-** UGW: Korrektur der Ermittlung und Announcierung der Uplink-Bandbreite
-** CSR-Daten direkt nach Erzeugung anzeigen (zuvor war ein Neuladen nötig)
-** zeitnahe Erkennung einer ungeklärten Race-Condition bei parallelem OpenVPN-Start
-** verzögerte UGW-Portweiterleitung korrigiert
-** veraltete olsr-Announcierungen nicht mehr existenter Dienste werden nun entfernt
-** Status: Darstellung von multi-VAP-Konfigurationen ([[https://dev.opennet-initiative.de/ticket/134 Bug #134]])
-** Status: Darstellung von Zonen mit mehreren Interfaces
 
 = Interne Änderungen =
-* bei Verlust einer Gateway-Verbindung werden alle Gateway-Dienste dieses Hosts als unklar definiert
-** bisher dauerte die Verbindungsunterbrechung durch die Wartezeit auf die anderen Dienste desselben Hosts bis zu zehn Minuten
-* Monitoring:
-** die Ping-Latenz zum UGW und zum VPN-Tunnel-Gateway ist via munin auswertbar
-* OpenVPN-Client: Umstellung von "ns-cert-type" auf "remote-cert-tls"
-* experimentelle Integration von OLSRv2
+* root-Passwort ist bei einer Erstinstallation leer
+** zuvor wurde "admin" vorgegeben, da openwrt bis einschließlich Barrier Breaker den ssh-Dienst nur startete wenn ein Passwort gesetzt ist
 
 = Bemerkenswertes / Fehler / Mängel =
-* bei ath9k-Geräten im Master-Modus bleibt gelegentlich das WLAN-Interface hängen
-** Symptome: Clients verlieren die Assoziation, Master ist taub
-** manuelle Behebung: "wifi" ausführen (WLAN-Konfiguration erneut ausführen)
-** automatische Behebung: "Workaround"-Skript [https://on-i.de/wiki/Opennet_Firmware_f%C3%BCr_Fortgeschrittene#Workarounds_f.C3.BCr_bekannte_Probleme_anwenden wifi_master_hangs] auf den AP übertragen:
-    wget -O /etc/cron.5mins/on_workaround_wifi_master_hangs http://dev.opennet-initiative.de/browser/on_firmware/opennet/workarounds/on_workaround_wifi_master_hangs; chmod +x /etc/cron.5mins/on_workaround_wifi_master_hangs
 
 = Aktualisierungshinweis =

@@ -31,8 +31,6 @@ Anschließend kann diese Liste wieder geleert werden.
 ** Status: Darstellung von Zonen mit mehreren Interfaces
 
 = Interne Änderungen =
-* root-Passwort ist bei einer Erstinstallation leer
-** zuvor wurde "admin" vorgegeben, da openwrt bis einschließlich Barrier Breaker den ssh-Dienst nur startete wenn ein Passwort gesetzt ist
 * bei Verlust einer Gateway-Verbindung werden alle Gateway-Dienste dieses Hosts als unklar definiert
 ** bisher dauerte die Verbindungsunterbrechung durch die Wartezeit auf die anderen Dienste desselben Hosts bis zu zehn Minuten
 * Monitoring:

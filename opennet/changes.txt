@@ -39,5 +39,10 @@ Anschließend kann diese Liste wieder geleert werden.
 * experimentelle Integration von OLSRv2
 
 = Bemerkenswertes / Fehler / Mängel =
+* bei ath9k-Geräten im Master-Modus bleibt gelegentlich das WLAN-Interface hängen
+** Symptome: Clients verlieren die Assoziation, Master ist taub
+** manuelle Behebung: "wifi" ausführen (WLAN-Konfiguration erneut ausführen)
+** automatische Behebung: "Workaround"-Skript [https://on-i.de/wiki/Opennet_Firmware_f%C3%BCr_Fortgeschrittene#Workarounds_f.C3.BCr_bekannte_Probleme_anwenden wifi_master_hangs] auf den AP übertragen:
+    wget -O /etc/cron.5mins/on_workaround_wifi_master_hangs http://dev.opennet-initiative.de/browser/on_firmware/opennet/workarounds/on_workaround_wifi_master_hangs; chmod +x /etc/cron.5mins/on_workaround_wifi_master_hangs
 
 = Aktualisierungshinweis =

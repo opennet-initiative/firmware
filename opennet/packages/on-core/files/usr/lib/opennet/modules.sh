@@ -85,7 +85,7 @@ was_on_module_installed_before() {
 install_from_opennet_repository() {
 	trap "error_trap install_from_opennet_repository '$*'" $GUARD_TRAPS
 	local package
-	_run_opennet_opkg "update" && _run_opennet_opkg "install" "$@"
+	run_opennet_opkg "update" && run_opennet_opkg "install" "$@"
 	for package in "$@"; do
 		if get_on_modules | grep -qwF "$package"; then
 			# Eventuell schlug die Installation fehl?
@@ -112,14 +112,14 @@ install_from_opennet_repository() {
 remove_opennet_modules() {
 	local log_file
 	log_file=$(get_custom_log_filename "opkg_opennet")
-	_run_opennet_opkg --autoremove remove "$@"
+	run_opennet_opkg --autoremove remove "$@"
 	save_on_modules_list
 }
 
 
 # Ausführung eines opkg-Kommnados mit der opennet-Repository-Konfiguration und minimaler Ausgabe (nur Fehler) auf stdout.
-_run_opennet_opkg() {
-	trap "error_trap _run_opennet_opkg '$*'" $GUARD_TRAPS
+run_opennet_opkg() {
+	trap "error_trap run_opennet_opkg '$*'" $GUARD_TRAPS
 	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
 	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
 	local log_file

@@ -475,6 +475,9 @@ openvpn_get_mtu() {
 ## @details Verwaiste openvpn-Konfigurationen können aus zwei Grunden auftreten:
 ##   1) nach einem reboot wurde nicht du zuletzt aktive openvpn-Verbindung ausgewählt - somit bleibt der vorher aktive uci-Konfigurationseintrag erhalten
 ##   2) ein VPN-Verbindungsaufbau scheitert und hinterlässt einen uci-Eintrag, eine PID-Datei, jedoch keinen laufenden Prozess
+##  Achtung: falls eine Verbindung sich gerade im Aufbau befindet, wird ihre Konfiguration
+##           ebenfalls entfernt. Diese Funktion sollte also nur in ausgewählten Situation
+##           aufgerufen werden (nach einem Reboot und nach einem Verbindungsabbruch).
 cleanup_stale_openvpn_services() {
 	trap "error_trap cleanup_stale_openvpn_services '$*'" $GUARD_TRAPS
 	local service_name

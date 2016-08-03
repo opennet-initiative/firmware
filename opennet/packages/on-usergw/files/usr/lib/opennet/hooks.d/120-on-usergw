@@ -4,7 +4,6 @@ set -eu
 
 case "$1" in
 	on-usergw)
-		on-function cleanup_stale_openvpn_services
 		on-function update_on_usergw_status
 		on-function update_service_relay_status
 		;;

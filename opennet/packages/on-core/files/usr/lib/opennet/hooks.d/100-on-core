@@ -7,7 +7,6 @@ case "$1" in
 		reload_config || true
 		;;
 	openvpn)
-		on-function cleanup_stale_openvpn_services
 		/etc/init.d/openvpn reload || true
 		;;
 	on-core)

@@ -402,11 +402,12 @@ Anschließend wird das obige uci-Flag gesetzt, um eine erneute Konfiguration anc
 ### Paket-Quellen (opkg) {#opkg-repositories}
 
 Die Firmware wird mit einer Original-openwrt-Repository-Datei (*/etc/opkg.conf*) erstellt.
-Im Zuge der uci-defaults-Initialisierung (nach der Erst-Installation oder nach einem Firmware-Upgrade) wird das Opennet-Repository hinzugefügt, z.B.:
+Opennet stellt ein eigenes Repository zur Verfügung. Packeten aus diesem Repository können auf folgende Arten installiert werden:
 
-  src/gz opennet http://downloads.on/openwrt/stable/0.5.1/ar71xx/packages/opennet
+* *opkg-oni.sh* (kleines Wrapper Script; Nutzung analog zu opkg)
+* *on-function install_from_opennet_repository $PACKET*
 
-Siehe dazu die Datei */etc/uci-defaults/10-on-core-init* und die Funktion *set_opkg_download_version*.
+Details zu diesen Funktionen kann man in */usr/lib/opennet/modules.sh* finden.
 
 
 Bootvorgang {#booting}

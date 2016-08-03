@@ -163,7 +163,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 
 		for _, item in ipairs({
 				  {"networks_section", i18n("Networks"), url="network"},
-				  {"wireless_section", i18n("Wireless"), rawcontent=[[<table id="wifi_status_table"><tr/></table>]]},
+				  {"wireless_section", i18n("Wireless"), rawcontent=[[<table id="wifi_status_table"><tr>]] .. get_html_loading_spinner("wireless_section_spinner", "vertical-align:middle;") .. [[</tr></table>]]},
 				  {"neighbor_section", i18n("Neighbors (OLSRv1)"), url="neighbors"},
 				  {"neighbor_olsr2_section", i18n("Neighbors (OLSRv2)"), url="neighbors_olsr2", mod_name="on-olsr2"},
 				  {"mig_connection_section", i18n("OpenVPN"), url="mig_openvpn", mod_name="on-openvpn"},
@@ -183,7 +183,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 					<% if item.mod_name and not on_bool_function("is_on_module_installed_and_enabled", {item.mod_name}) then %>
 						<%= luci.i18n.translatef('disabled (see <a href="%s">Modules</a>)', on_url("basis", "module")) %>
 					<% elseif item.url then %>
-						<%= get_html_loading_spinner(item[1] .. "_spinnr", "vertical-align:middle;") %>
+						<%= get_html_loading_spinner(item[1] .. "_spinner", "vertical-align:middle;") %>
 						<script type="text/javascript">
 							fill_result_row("<%=item[1]%>", "<%=item.url%>")
 						</script>

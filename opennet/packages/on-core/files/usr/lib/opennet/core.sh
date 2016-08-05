@@ -598,7 +598,7 @@ generate_report() {
 	# die Skripte duerfen davon ausgehen, dass wir uns im Zielverzeichnis befinden
 	mkdir -p "$reports_dir"
 	cd "$reports_dir"
-	find /usr/lib/opennet/reports -type f | while read fname; do
+	find /usr/lib/opennet/reports -type f | sort | while read fname; do
 		[ ! -x "$fname" ] && msg_info "skipping non-executable report script: $fname" && continue
 		"$fname" || msg_error "reports script failed: $fname"
 	done

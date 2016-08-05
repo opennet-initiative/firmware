@@ -18,12 +18,12 @@ done
 
 # mehrere Namensabfragen durchfuehren
 (
-	nslookup localhost || true
+	timeout 5 nslookup localhost || true
 	echo
-	nslookup ca.on || true
+	timeout 5 nslookup ca.on || true
 	echo
-	nslookup ca.opennet-initiative.de || true
+	timeout 5 nslookup ca.opennet-initiative.de || true
 	echo
-	nslookup fsf.org || true
+	timeout 5 nslookup fsf.org || true
 ) >dns_tests.log 2>&1
 

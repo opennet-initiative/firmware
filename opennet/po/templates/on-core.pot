@@ -180,7 +180,7 @@ msgstr ""
 msgid "Generate Report"
 msgstr ""
 
-msgid "Generating a report takes about one minute"
+msgid "Generating a report takes about three minutes"
 msgstr ""
 
 msgid ""

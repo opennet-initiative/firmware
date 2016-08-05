@@ -208,8 +208,8 @@ msgstr "Erzeugen"
 msgid "Generate Report"
 msgstr "Zusammenfassung erzeugen"
 
-msgid "Generating a report takes about one minute"
-msgstr "Die Erzeugung der Zusammenfassung dauert etwa eine Minute"
+msgid "Generating a report takes about three minutes"
+msgstr "Die Erzeugung der Zusammenfassung dauert etwa drei Minuten"
 
 msgid ""
 "Great that you decided to take part in Opennet. Register the IP of your "

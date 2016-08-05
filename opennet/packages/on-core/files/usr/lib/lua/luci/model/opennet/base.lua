@@ -29,7 +29,7 @@ function action_report()
 		if luci.http.formvalue("delete") and nixio.fs.access(report_filename) then
 			nixio.fs.remove(report_filename)
 		elseif luci.http.formvalue("generate") then
-			on_function("run_delayed_in_background", {"0", "generate_report"})
+			on_schedule_task("on-function generate_report")
 		end
 		luci.template.render("opennet/on_report")
 	end

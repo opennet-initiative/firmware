@@ -1,0 +1,97 @@
+#!/bin/sh
+#
+# Group and count all connected wifi peers by signal strength ranges.
+# This plugin is suitable for wifi interfaces with a variable selection of peers
+# (e.g. mobile clients).
+# Author: Lars Kruse, devel@sumpfralle.de
+# License: GPL v3 or later
+#
+# Requirements:
+#  * "iwinfo" tool (alternatively: fall back to "iw" - with incomplete data)
+#  * root privileges (for "iw" and "iwinfo")
+#
+# Magic markers
+#%# capabilities=autoconf suggest
+#%# family=auto
+
+
+set -eu
+
+
+# thresholds for signal quality ranges: ascending values
+SIGNAL_THRESHOLDS="-88 -80 -60 0"
+
+
+# prefer "iwinfo" for information retrieval, if it is available
+if which iwinfo >/dev/null; then
+	# "iwinfo" has a stable output format but is only available on openwrt
+	get_wifi_interfaces() { iwinfo | grep "^[a-zA-Z]" | awk '{print $1}'; }
+	# return MAC of peer and the signal strength
+	get_wifi_peers() { iwinfo "$1" assoclist | grep "^[0-9a-fA-F]" | awk '{print $2}'; }
+else
+	# "iw" is available everywhere - but its output format is not recommended for non-humans
+	get_wifi_interfaces() { iw dev | awk '{ if ($1 == "Interface") print $2; }'; }
+	get_wifi_peers() { iw dev wlan0 station dump \
+		| awk '{ if (($1 == "signal") && ($2 == "avg:")) print $3}'; }
+fi
+
+
+get_level_fieldname() {
+	echo "range_${1#-}"
+}
+
+
+get_selected_interface() {
+	# filename ends with "_"? Exit script with error immediately.
+	[ "$0" != "${0%_}" ] && echo >&2 "Failed to parse wifi interface from filename" && exit 1
+	# pick the last segment after the final "_"
+	echo "$0" | sed 's/.*_//'
+}
+
+
+ACTION="${1:-}"
+
+case "$ACTION" in
+	config)
+		wifi=$(get_selected_interface)
+		echo "graph_title Wireless signal quality ranges - $wifi"
+		echo "graph_args --upper-limit 0"
+		echo "graph_vlabel Signal ranges"
+		echo "graph_category network"
+		echo "graph_info This graph shows numbers of peers with defined wifi signal ranges"
+		lower="noise"
+		draw_type="AREA"
+		for level in $SIGNAL_THRESHOLDS; do
+			fieldname=$(get_level_fieldname "$level")
+			echo "${fieldname}.label $lower...$level"
+			echo "${fieldname}.draw $draw_type"
+			draw_type="STACK"
+			lower="$level"
+		done
+		;;
+	autoconf)
+		[ -z "$(get_wifi_interfaces)" ] && echo "no (no wifi interfaces found)" && exit 1
+		echo "yes"
+		;;
+	suggest)
+		get_wifi_interfaces
+		;;
+	"")
+		wifi=$(get_selected_interface)
+		peer_data=$(get_wifi_peers "$wifi")
+		previous_count=0
+		for level in $SIGNAL_THRESHOLDS; do
+			current_count=$(echo "$peer_data" | awk '
+				BEGIN { count=0; }
+				{ if (($1 != "") && ($1 <= '$level')) count++; }
+				END { print count; }')
+			fieldname=$(get_level_fieldname "$level")
+			echo "${fieldname}.value $((current_count - previous_count))"
+			previous_count="$current_count"
+		done
+		;;
+	*)
+		echo >&2 "Invalid action (valid: config)"
+		echo >&2
+		;;
+esac

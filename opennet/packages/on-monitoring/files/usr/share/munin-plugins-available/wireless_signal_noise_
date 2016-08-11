@@ -1,6 +1,8 @@
 #!/bin/sh
 #
 # Show current signal strength and noise for all connected peers of wifi devices.
+# This plugin is suitable for wifi interfaces with a stable selection of peers
+# (e.g. infrastructure).
 # Author: Lars Kruse, devel@sumpfralle.de
 # License: GPL v3 or later
 #

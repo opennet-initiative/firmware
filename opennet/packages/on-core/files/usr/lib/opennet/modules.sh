@@ -63,6 +63,16 @@ get_on_modules() {
 }
 
 
+## @fn get_not_installed_on_modules()
+## @brief Ermittle diejenigen Module, die aktuell nicht installiert sind.
+get_not_installed_on_modules() {
+	local module
+	get_on_modules | while read module; do
+		is_package_installed "$module" || echo "$module"
+	done
+}
+
+
 ## @fn was_on_module_installed_before()
 ## @brief Prüfe ob ein Modul "früher" (vor der letzten manuellen Änderung durch den Benutzer) installiert war.
 ## @details Diese Prüfung ist hilfreich für die Auswahl von nachträglich zu installierenden Paketen.
@@ -85,6 +95,8 @@ was_on_module_installed_before() {
 install_from_opennet_repository() {
 	trap "error_trap install_from_opennet_repository '$*'" $GUARD_TRAPS
 	local package
+	local not_installed_packages
+	not_installed_packages=$(get_not_installed_on_modules)
 	run_opennet_opkg "update" && run_opennet_opkg "install" "$@"
 	for package in "$@"; do
 		if get_on_modules | grep -qwF "$package"; then
@@ -97,6 +109,13 @@ install_from_opennet_repository() {
 			#          ausgeführt werden kann.
 			on-function enable_on_module "$package"
 		fi
+	done
+	# wir wollen auch indirekt installierte Pakete aktivieren (z.B. on-openvpn via on-captive-portal)
+	echo "$not_installed_packages" | while read package; do
+		# unveraendert nicht installiert? Ignorieren ...
+		is_package_installed "$package" || continue
+		# aktivieren, falls das Modul noch abgeschaltet ist
+		_is_on_module_enabled "$package" || on-function enable_on_module "$package"
 	done
 	# anschließend speichern wir den aktuellen Zustand, falls _alle_ Pakete installiert wurden
 	for package in "$@"; do

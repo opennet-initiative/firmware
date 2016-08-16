@@ -260,7 +260,7 @@ is_package_installed() {
 	# bei parallelen Abläufen (z.B. Status-Seite).
 	#opkg list-installed | grep -q -w "^$package" && return 0
 	# schneller als via opkg
-	[ -e "${IPKG_INSTROOT:-}/usr/lib/opkg/info/${package}.control" ] && return 0
+	grep -q "^Package: $package$" "${IPKG_INSTROOT:-}/usr/lib/opkg/status" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

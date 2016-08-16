@@ -21,8 +21,7 @@ configure_free_network() {
 		uci set "${uci_prefix}.proto=static"
 		uci set "${uci_prefix}.ipaddr=$(get_on_captive_portal_default free_ipaddress)"
 		uci set "${uci_prefix}.netmask=$(get_on_captive_portal_default free_netmask)"
-		# wir aktivieren das Interface manuell via hotplug
-		uci set "${uci_prefix}.auto=0"
+		uci set "${uci_prefix}.auto=1"
 		apply_changes network
 	fi
 	# konfiguriere DHCP
@@ -249,9 +248,8 @@ change_captive_portal_wireless_disabled_state() {
 
 disable_captive_portal() {
 	trap "error_trap disable_captive_portal '$*'" $GUARD_TRAPS
-	msg_info "on-captive-portal: Interface abschalten"
+	msg_info "on-captive-portal: wifi-Interfaces abschalten"
 	# free-Interface ist aktiv - es gibt jedoch keinen Tunnel
-	ifdown "$NETWORK_FREE"
 	change_captive_portal_wireless_disabled_state "1"
 	# reload fuehrt zum sanften Stoppen
 	is_captive_portal_running && sleep 1 && captive_portal_reload
@@ -283,13 +281,12 @@ sync_captive_portal_state_with_mig_connections() {
 	fi
 	if [ -n "$device_active" -a -z "$mig_active" ]; then
 		disable_captive_portal
-	elif [ -z "$device_active" -a -n "$mig_active" ]; then
-		# kein aktives free-Interface, aber ein aktiver Tunnel
-		ifup "$NETWORK_FREE"
+	elif [ -n "$mig_active" ]; then
+		[ -z "$device_active" ] && ifup "$NETWORK_FREE"
 		change_captive_portal_wireless_disabled_state "0"
+		# warte auf das Netzwerk-Interface
+		sleep 5
 	fi
-	# warte auf das Netzwerk-Interface
-	sleep 3
 	# Portalsoftware neu laden, falls das Interface aktiv ist, jedoch kein Prozess laeuft
 	[ -n "$mig_active" ] && ! is_captive_portal_running && captive_portal_reload
 	true

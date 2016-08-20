@@ -10,5 +10,4 @@ gpio_switch_control.patch
 packages_sshfs_source.patch
 improved_dfs_detection.patch
 cpe-rx.patch
-olsrd2-v0.12.2.patch
 olsrd2_enable_plugin_ethernet_listener.patch

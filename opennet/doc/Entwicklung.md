@@ -582,6 +582,10 @@ Für ein Release sind folgende Schritte durchzuführen:
 * den Commit und das Tag zum Server pushen: ``git push --tags``
 * das erzeugte Build-Verzeichnis nach "stable" verschieben: ``cd /var/www/htdocs/downloads.opennet-initiative.de/openwrt && mv testing/VERSION stable/``
 * die "CONFIG_VERSION_NUMBER" in ``opennet/config/common`` erhöhen
+* Wiki-Doku aktualisieren:
+    * https://wiki.opennet-initiative.de/wiki/Opennet_Firmware_Versionen
+    * https://on-i.de/wiki/Opennet_Firmware_NG/Download
+    * https://wiki.opennet-initiative.de/wiki/Firmware-Aktualisierung
 
 
 Externe Dokumentationen {#doc-external}

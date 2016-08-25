@@ -43,46 +43,51 @@ get_service_name() {
 ## @returns Der Dienstname wird ausgegeben.
 notify_service() {
 	trap "error_trap notify_service '$*'" $GUARD_TRAPS
-	local service="$1"
-	local scheme="$2"
-	local host="$3"
-	local port="$4"
-	local protocol="$5"
-	local path="$6"
-	local source="$7"
-	local details="$8"
-	local service_name
-	service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
-	# Diese Attribute duerften sich nicht aendern, aber wir wollen sicherheitshalber lieber kaputten
-	# Werten vorbeugen.
-	set_service_value "$service_name" "service" "$service"
-	set_service_value "$service_name" "scheme" "$scheme"
-	set_service_value "$service_name" "host" "$host"
-	set_service_value "$service_name" "port" "$port"
-	set_service_value "$service_name" "protocol" "$protocol"
-	set_service_value "$service_name" "path" "$path"
-	# dies sind die flexiblen Attribute
-	set_service_value "$service_name" "details" "$details"
-	set_service_value "$service_name" "timestamp" "$(get_uptime_minutes)"
-	set_service_value "$service_name" "source" "$source"
-	update_service_routing_distance "$service_name"
-	echo "$service_name"
+	# wir erwarten sieben Parameter
+	[ "$#" -eq 7 ]
+	echo "$@" | notify_services
 }
 
 
-## @fn update_service_routing_distance()
-## @brief Aktualisiere Routing-Entfernung und Hop-Count eines Dienst-Anbieters
-## @param service_name der zu aktualisierende Dienst
-## @details Beide Dienst-Werte werden gelöscht, falls der Host nicht route-bar sein sollte.
-##   Diese Funktion sollte regelmäßig für alle Hosts ausgeführt werden.
-update_service_routing_distance() {
-	trap "error_trap update_service_routing_distance '$*'" $GUARD_TRAPS
-	local service_name="$1"
-	local hop
+## @fn notify_services()
+## @brief Siehe "notify_service" - jedoch effizienter im Umgang mit einer großen Anzahl von Diensten
+## @param source Quelle (z.B. "olsr")
+## @returns Alle Dienstnamen werden ausgegeben.
+notify_services() {
+	trap "error_trap notify_services '$*'" $GUARD_TRAPS
+	local source="$1"
+	local service
+	local scheme
+	local host
+	local port
+	local protocol
+	local path
+	local source
+	local details
+	local service_name
 	local etx
-	get_hop_count_and_etx "$(get_service_value "$service_name" "host")" | while read hop etx; do
-		set_service_value "$service_name" "distance" "$etx"
-		set_service_value "$service_name" "hop_count" "$hop"
+	local hop
+	while read scheme host port path protocol service details; do
+		service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
+		# Diese Attribute duerften sich nicht aendern, aber wir wollen sicherheitshalber lieber kaputten
+		# Werten vorbeugen.
+		# "details", "timestamp" und "source" sind die flexiblen Werte.
+		set_service_value "$service_name" \
+			"service" "$service" \
+			"scheme" "$scheme" \
+			"host" "$host" \
+			"port" "$port" \
+			"protocol" "$protocol" \
+			"path" "$path" \
+			"details" "$details" \
+			"timestamp" "$(get_uptime_minutes)" \
+			"source" "$source"
+		get_hop_count_and_etx "$host" | while read hop etx; do
+			set_service_value "$service_name" \
+				"distance" "$etx" \
+				"hop_count" "$hop"
+		done
+		echo "$service_name"
 	done
 }
 
@@ -336,25 +341,32 @@ filter_services_by_value() {
 }
 
 
-# Setzen eines Werts fuer einen Dienst.
-# Je nach Schluesselname wird der Inhalt in die persistente uci- oder
+## @fn set_service_value()
+## @brief Setzen eines oder mehrerer Werte fuer einen Dienst.
+## Je nach Schluesselname wird der Inhalt in die persistente uci- oder
 # die volatile tmpfs-Datenbank geschrieben.
 set_service_value() {
 	local service_name="$1"
-	local attribute="$2"
-	local value="$3"
-	# unverändert? Schnell beenden
-	[ -n "$service_name" -a "$value" = "$(get_service_value "$service_name" "$attribute")" ] && return 0
+	shift
+	local attribute
+	local value
+	local dirname
 	[ -z "$service_name" ] \
 		&& msg_error "No service given for attribute change ($attribute=$value)" \
 		&& trap "" $GUARD_TRAPS && return 1
-	local dirname
-	if echo "$PERSISTENT_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
-		dirname="$PERSISTENT_SERVICE_STATUS_DIR"
-	else
-		dirname="$VOLATILE_SERVICE_STATUS_DIR"
-	fi
-	_set_file_dict_value "$dirname/$service_name" "$attribute" "$value"
+	while [ "$#" -gt 0 ]; do
+		attribute="$1"
+		value="$2"
+		shift 2
+		# unverändert? ueberspringen ...
+		[ "$value" = "$(get_service_value "$service_name" "$attribute")" ] && continue
+		if echo "$PERSISTENT_SERVICE_ATTRIBUTES" | grep -q -w "$attribute"; then
+			dirname="$PERSISTENT_SERVICE_STATUS_DIR"
+		else
+			dirname="$VOLATILE_SERVICE_STATUS_DIR"
+		fi
+		_set_file_dict_value "$dirname/$service_name" "$attribute" "$value"
+	done
 }
 
 

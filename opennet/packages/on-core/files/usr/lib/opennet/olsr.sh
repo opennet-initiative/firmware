@@ -261,9 +261,7 @@ update_olsr_services() {
 	olsr_services=$(get_olsr_services)
 	# leere Liste? Keine Verbindung mit der Wolke? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$olsr_services" ] && return
-	echo "$olsr_services" | while read scheme ip port path proto service details; do
-		notify_service "$service" "$scheme" "$ip" "$port" "$proto" "$path" "olsr" "$details" >/dev/null
-	done
+	echo "$olsr_services" | notify_services "olsr" >/dev/null
 	local service_name
 	local timestamp
 	local min_timestamp

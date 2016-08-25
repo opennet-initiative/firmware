@@ -391,7 +391,7 @@ is_trusted_service_list_outdated() {
 	local most_recent_timestamp
 	most_recent_timestamp=$(get_services \
 		| filter_services_by_value "source" "trusted" \
-		| pipe_service_attribute "timestamp" \
+		| pipe_service_attribute "timestamp" | cut -f 2- \
 		| sort -n | tail -1)
 	# kein Zeitstempel -> dies gilt als "veraltet"
 	[ -z "$most_recent_timestamp" ] && return 0

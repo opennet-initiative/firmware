@@ -366,11 +366,11 @@ update_traceroute_gw_cache() {
         local service
         local traceroute
                 
-	get_services "gw" | pipe_service_attribute "host" | sort | uniq | while read host; do
-                #do traceroute and get result as csv back
+	get_services "gw" | pipe_service_attribute "host" | cut -f 2- | sort | uniq | while read host; do
+                # do traceroute and get result as csv back
                 traceroute=$(get_traceroute "$host")
-                #update cache file
-                $(set_service_value "$TRACEROUTE_FILENAME" "$host" "$traceroute")
+                # update cache file
+                set_service_value "$TRACEROUTE_FILENAME" "$host" "$traceroute"
         done
         # es gab eine Aenderung
         msg_info "updating traceroute to gateway servers"

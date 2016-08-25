@@ -258,7 +258,7 @@ fi
 
 if is_function_available "get_active_mig_connections"; then
 	on_vpn_cn="$(get_client_cn)"
-	on_vpn_gw="$(get_active_mig_connections | pipe_service_attribute host)"
+	on_vpn_gw="$(get_active_mig_connections | pipe_service_attribute "host" | cut -f 2-)"
 	on_vpn_status="$([ -n "$on_vpn_gw" ] && echo 1 || echo 0)"
 	on_vpn_autosearch="$([ "$(uci_get on-core.settings.service_sorting)" = "manual" ] && echo "0" || echo "1")"
 	on_vpn_sort="$(uci_get on-core.settings.service_sorting)"
@@ -273,7 +273,7 @@ if is_function_available "get_active_mig_connections"; then
 	# liste alle deaktivierten Dienste auf
 	on_vpn_blist=$(get_services "gw" | while read service_name; do
 			uci_is_true "$(get_service_value "$service_name" "disabled" "false")" && echo "$service_name" || true
-		done | pipe_service_attribute host | join)
+		done | pipe_service_attribute "host" | cut -f 2- | join)
 else
 	on_vpn_cn=
 	on_vpn_gw=

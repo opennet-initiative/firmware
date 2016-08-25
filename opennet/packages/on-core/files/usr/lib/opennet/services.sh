@@ -284,6 +284,7 @@ filter_enabled_services() {
 ##   Ergebnis stattdessen dieser Wert ausgegeben. Der 'default'-Parameter sorgt somit dafür, dass
 ##   die Anzahl der eingelesenen Zeilen in jedem Fall mit der Anzahl der ausgegebenen Zeilen
 ##   übereinstimmt.
+##   Die Ausgabe besteht aus dem Service-Namen und dem Attributinhalt (getrennt durch einen Tabulator).
 pipe_service_attribute() {
 	local key="$1"
 	local default="${2:-}"
@@ -292,7 +293,8 @@ pipe_service_attribute() {
 	while read service_name; do
 		value=$(get_service_value "$service_name" "$key")
 		[ -z "$value" ] && value="$default"
-		[ -n "$value" ] && echo "$value" || true
+		[ -n "$value" ] && printf "%s\t%s\n" "$service_name" "$value"
+		true
 	done
 }
 

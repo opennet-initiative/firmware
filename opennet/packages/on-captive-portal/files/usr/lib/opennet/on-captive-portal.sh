@@ -180,8 +180,10 @@ captive_portal_reload() {
 ## @fn captive_portal_has_devices()
 ## @brief Prüfe, ob dem Captive Portal mindestens ein physisches Netzwerk-Gerät zugeordnet ist.
 ## @details Sobald ein Netzwerk-Gerät konfiguriert ist, gilt der Captive-Portal-Dienst als aktiv.
+##    Es werden sowohl nicht-wifi-, als auch wifi-Interfaces geprueft.
 captive_portal_has_devices() {
 	[ -n "$(get_subdevices_of_interface "$NETWORK_FREE")" ] && return 0
+	[ -n "$(find_all_uci_sections wireless wifi-iface "network=$NETWORK_FREE")" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

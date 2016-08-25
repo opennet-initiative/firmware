@@ -270,10 +270,10 @@ update_olsr_services() {
 	min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "olsr_service_expire_minutes")))
 	# veraltete Dienste entfernen (nur falls die uptime groesser ist als die Verfallszeit)
 	if [ "$min_timestamp" -gt 0 ]; then
-		get_services | filter_services_by_value "source" "olsr" | while read service_name; do
-			timestamp=$(get_service_value "$service_name" "timestamp" 0)
+		get_services | filter_services_by_value "source" "olsr" | pipe_service_attribute "timestamp" "0" \
+				| while read service_name timestamp; do
 			# der Service ist zu lange nicht aktualisiert worden
-			[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
+			[ -z "$timestamp" -o "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
 			true
 		done
 	fi

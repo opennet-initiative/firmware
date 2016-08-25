@@ -9,12 +9,5 @@ set -eu
 # Netzwerkadressen ohne MAC-Identifikation
 ip a | grep -v "link/" >network_addresses.txt
 
-# wifi-Setup
-iwinfo >iwinfo.log
-
-# wifi-Umgebung
-# auf nicht-wifi-Plattformen (z.B. x86) ist iwlist (wireless-tools) nicht installiert
-which iwlist >/dev/null && iwlist scan >iwlist_scan.log 2>&1 || true
-
 # uci-Konfiguration
 uci -q show "network" >uci_network || true

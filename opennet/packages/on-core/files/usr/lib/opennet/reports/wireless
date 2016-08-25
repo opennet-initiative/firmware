@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Ueberblick ueber wireless-relevante Eigenschaften
+#
+
+set -eu
+
+
+# wifi-Setup
+iwinfo >iwinfo.log
+
+# wifi-Umgebung
+# auf nicht-wifi-Plattformen (z.B. x86) ist iwlist (wireless-tools) nicht installiert
+which iwlist >/dev/null && iwlist scan >iwlist_scan.log 2>&1 || true
+
+# uci-Konfiguration
+# Herausfiltern von privaten Informationen (siehe https://wiki.openwrt.org/doc/uci/wireless)
+uci -q show "wireless" \
+	| grep -vE "\.(macaddr|key|key[1234]|maclist|[^=]*_secret|password|priv_key_pwd)=" \
+	| cat >uci_wireless || true

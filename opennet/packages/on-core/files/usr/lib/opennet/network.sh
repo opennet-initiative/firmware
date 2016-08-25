@@ -125,7 +125,13 @@ get_current_addresses_of_network() {
 	trap "error_trap get_current_addresses_of_network '$*'" $GUARD_TRAPS
 	local network="$1"
 	local subnets=
-	(set +eu; . /lib/functions/network.sh; network_get_subnets subnets "$network"; echo "$subnets")
+	if [ "$(uci_get "network.${network}.proto")" = "none" ]; then
+		# manuell konfiguriertes Netzwerk-Interface (z.B: mesh-VPN via OpenVPN)
+		ip addr show dev "$network" | grep -wE "inet6?" | awk '{print $2}'
+	else
+		# konfiguriertes Interface
+		(set +eu; . /lib/functions/network.sh; network_get_subnets subnets "$network"; echo "$subnets")
+	fi
 }
 
 

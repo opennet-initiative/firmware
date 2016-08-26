@@ -35,7 +35,6 @@ announce_main_ip_via_hna_if_necessary() {
 	local main_ip
 	local uci_prefix
 	local mesh_ips
-	local active_mesh_ip
 	local iface
 	local some_ip
 	main_ip=$(get_main_ip)
@@ -63,14 +62,13 @@ announce_main_ip_via_hna_if_necessary() {
 			uci set "${uci_prefix}.netmask=255.255.255.255"
 		}
 		# erzeuge einen firewall-Redirect der Main-IP auf eine aktive IP (falls vorhanden)
-		active_mesh_ip=$(for some_ip in $mesh_ips; do has_active_address "$some_ip" || continue; echo "$some_ip"; break; done)
 		uci_prefix=$(find_first_uci_section "firewall" "redirect" "src_dip=$main_ip" \
-				"proto=all" "target=DNAT" "src=$ZONE_MESH")
-		[ -n "$active_mesh_ip" -a -z "$uci_prefix" ] && {
+				"proto=all" "target=DNAT" "src=$ZONE_MESH" "dest_ip=127.0.0.1")
+		[ -z "$uci_prefix" ] && {
 			uci_prefix="firewall.$(uci add "firewall" "redirect")"
 			uci set "${uci_prefix}.src=$ZONE_MESH"
 			uci set "${uci_prefix}.src_dip=$main_ip"
-			uci set "${uci_prefix}.dest_ip=$active_mesh_ip"
+			uci set "${uci_prefix}.dest_ip=127.0.0.1"
 			uci set "${uci_prefix}.proto=all"
 			uci set "${uci_prefix}.target=DNAT"
 		}

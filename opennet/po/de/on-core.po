@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2016-07-31 01:49+0200\n"
+"PO-Revision-Date: 2016-08-26 21:37+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -718,6 +718,9 @@ msgstr "Herunterladen"
 
 msgid "generate"
 msgstr "Erzeugen"
+
+msgid "or wait for the automatic re-installation"
+msgstr "oder warten Sie auf die automatische Neuinstallation"
 
 msgid "related network addresses"
 msgstr "zugehörige Netzwerkadressen"

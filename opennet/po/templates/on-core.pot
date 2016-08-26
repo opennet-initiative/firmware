@@ -627,6 +627,9 @@ msgstr ""
 msgid "generate"
 msgstr ""
 
+msgid "or wait for the automatic re-installation"
+msgstr ""
+
 msgid "related network addresses"
 msgstr ""
 

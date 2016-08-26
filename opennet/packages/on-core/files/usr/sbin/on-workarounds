@@ -1,0 +1,72 @@
+#!/bin/sh
+
+set -eu
+
+
+WORKAROUND_URL="https://dev.opennet-initiative.de/browser/on_firmware/opennet/workarounds"
+NAME_PREFIX="on_workaround"
+
+
+get_list() {
+	wget -q -O - "$WORKAROUND_URL" | grep 'title="View File"' | cut -f 2 -d ">" | cut -f 1 -d "<"
+}
+
+
+get_list_installed() {
+	find /etc/cron.* -type f -name "${NAME_PREFIX}*"
+}
+
+
+do_install() {
+	local name="$1"
+	local cron_target="$2"
+	local content
+	local cron_dir
+	local valid_cron_targets="minutely 5mins hourly daily"
+	echo "$valid_cron_targets" | grep -wq "$cron_target" || {
+		echo >&2 "Invalid cron job target ($cron_target) - it should be one of: $valid_cron_targets"
+		exit 1
+	}
+	cron_dir="/etc/cron.$cron_target"
+	content=$(wget -q -O - "$WORKAROUND_URL/$name?format=raw")
+	[ -z "$content" ] && echo >&2 "Failed to download workaround: $WORKAROUND_URL/$name" && exit 1
+	mkdir -p "$cron_dir"
+	echo "$content" >"$cron_dir/$name"
+	chmod +x "$cron_dir/$name"
+}
+
+
+do_remove() {
+	local name="$1"
+	find /etc/cron.* -type f -name "$name" -print0 | xargs -0 -r rm
+}
+
+
+ACTION="${1:-}"
+shift
+
+case "$ACTION" in
+	list)
+		get_list
+		;;
+	list-installed)
+		get_list_installed
+		;;
+	install)
+		do_install "$1" "$2"
+		;;
+	remove)
+		do_remove "$1"
+		;;
+	help|--help)
+		echo "Syntax:"
+		echo "    $(basename "$0")  list"
+		echo "    $(basename "$0")  list-installed"
+		echo "    $(basename "$0")  install NAME  { minutely | 5mins | hourly | daily }"
+		echo "    $(basename "$0")  remove NAME"
+		;;
+	*)
+		"$0" help >&2
+		exit 1
+		;;
+esac

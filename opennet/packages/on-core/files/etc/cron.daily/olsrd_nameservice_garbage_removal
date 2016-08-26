@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Die aktuell verwendete OLSRD Version (0.9.0.3-1) scheint veraltete
+# nameservice-Eintraege nicht zuverlaessig wegzuwerfen.
+# Typischerweise sammeln sich somit UGW-Announcements, da die
+# olsr-Daemons der UGWs jede Nacht mit aktualisierten Bandbreiten-
+# Zahlen neugestartet werden.
+
+set -eu
+
+# pro Port sollte es nur ein einziges openvpn-Announcement geben.
+# Wir verwenden die Anzahl der ueberschuessigen Eintrage als Indikator
+# fuer eine unerwuenschte Situation.
+garbage_count=$(grep '^openvpn:' /var/run/services_olsr | awk '{print $1}' | sort | uniq -c | awk '{sum+=$1-1;} END {print sum}')
+
+# ein gewisse Anzahl veralteter Dienste ist akzeptabel (es kostet nur mehr Verarbeitungszeit)
+if [ "$garbage_count" -gt 20 ]; then
+	/etc/init.d/olsrd restart
+fi

@@ -59,7 +59,7 @@ ON_SHELL_MODULES_NEWEST=$( (ls -dtr "$ON_SHELL_MODULES_DIR" $ON_SHELL_MODULES "$
 		| grep -vF "on-helper.sh") \
 		| sed 's/^[[:space:]]\+//' \
 		| grep -v "^$" \
-		>"$ON_SHELL_MINIMIZED"
+		>"${ON_SHELL_MINIMIZED}.$PID" && mv "${ON_SHELL_MINIMIZED}.$PID" "$ON_SHELL_MINIMIZED"
 . "$ON_SHELL_MINIMIZED"
 
 

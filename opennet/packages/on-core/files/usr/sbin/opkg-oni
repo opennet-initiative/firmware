@@ -3,4 +3,15 @@
 # opkg tool to install opennet packages
 #
 
-on-function run_opennet_opkg "$@"
+ACTION="$1"
+shift
+
+case "$ACTION" in
+	install)
+		# die Installation von Modulen benoetigt manuelle Nachbearbeitung (Aktivierung, usw.)
+		on-function install_from_opennet_repository "$@"
+		;;
+	*)
+		on-function run_opennet_opkg "$ACTION" "$@"
+		;;
+esac

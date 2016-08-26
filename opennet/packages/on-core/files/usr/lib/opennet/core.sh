@@ -20,6 +20,8 @@ LOG_MESSAGE_LENGTH=420
 SCHEDULING_DIR="${IPKG_INSTROOT:-}/var/run/on-scheduling.d"
 # beim ersten Pruefen wird der Debug-Modus ermittelt
 DEBUG_ENABLED=
+# Notfall-DNS-Eintrag, falls wir noch keine nameservice-Nachrichten erhalten haben
+FALLBACK_DNS_SERVER="192.168.0.247"
 
 
 # Aufteilung ueberlanger Zeilen
@@ -154,6 +156,7 @@ update_dns_servers() {
 	# return if we should not use DNS servers provided via olsrd
 	uci_is_false "$use_dns" && return 0
 	local servers_file
+	local server_config
 	servers_file=$(uci_get "dhcp.@dnsmasq[0].serversfile")
 	# aktiviere die "dnsmasq-serversfile"-Direktive, falls noch nicht vorhanden
 	if [ -z "$servers_file" ]; then
@@ -164,7 +167,7 @@ update_dns_servers() {
 	fi
 	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "DNS" || true)
 	# wir sortieren alphabetisch - Naehe ist uns egal
-	(
+	server_config=$(
 		get_services "dns" | filter_reachable_services | filter_enabled_services | sort | while read service; do
 			host=$(get_service_value "$service" "host")
 			port=$(get_service_value "$service" "port")
@@ -180,7 +183,10 @@ update_dns_servers() {
 		for host in $preferred_servers; do
 			echo "server=$host"
 		done
-	) | update_file_if_changed "$servers_file" || return 0
+	)
+	# falls keine DNS-Namen bekannt sind, dann verwende eine (hoffentlich gueltige) Notfall-Option
+	[ -z "$server_config" ] && server_config="server=$FALLBACK_DNS_SERVER"
+	echo "$server_config" | update_file_if_changed "$servers_file" || return 0
 	# es gab eine Aenderung
 	msg_info "updating DNS servers"
 	# Konfiguration neu einlesen

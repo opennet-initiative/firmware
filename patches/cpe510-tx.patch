@@ -1,3 +1,9 @@
+Erhoehung der niedrigen TX-Stärke der CPE510
+
+Quelle:
+* http://lists.infradead.org/pipermail/lede-dev/2016-May/000588.html
+* http://lists.infradead.org/pipermail/lede-dev/2016-May/000589.html
+
 --- a/openwrt/target/linux/ar71xx/files/arch/mips/ath79/mach-cpe510.c
 +++ b/openwrt/target/linux/ar71xx/files/arch/mips/ath79/mach-cpe510.c
 @@ -30,6 +30,9 @@

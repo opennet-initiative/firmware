@@ -35,7 +35,6 @@ _is_on_module_enabled() {
 enable_on_module() {
 	trap "error_trap enable_on_module '$*'" $GUARD_TRAPS
 	local module="$1"
-	_is_on_module_enabled "$module" && return 0
 	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
 	uci_add_list "on-core.modules.enabled" "$module"
 	apply_changes "on-core" "$module"
@@ -127,8 +126,7 @@ install_from_opennet_repository() {
 	echo "$not_installed_packages" | while read package; do
 		# unveraendert nicht installiert? Ignorieren ...
 		is_package_installed "$package" || continue
-		# aktivieren, falls das Modul noch abgeschaltet ist
-		_is_on_module_enabled "$package" || on-function enable_on_module "$package"
+		on-function enable_on_module "$package"
 	done
 	# anschließend speichern wir den aktuellen Zustand, falls _alle_ Pakete installiert wurden
 	for package in "$@"; do

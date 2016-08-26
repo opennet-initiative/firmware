@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Versuche in den ersten Minuten der Gerätelaufzeit im Minutentakt eine Installation
+# fehlender Module (nach einem Upgrade) auszuführen.
+# Dies ermöglicht die interaktionsfreie Aktualisierung eines AP.
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+missing=$(get_missing_modules)
+
+# keine fehlenden Pakete? Beenden ohne erneutes Scheduling.
+[ -z "$missing" ] && exit 0
+has_opennet_dns && install_from_opennet_repository $missing
+
+# Prüfung, ob wir die Nachinstallation beenden können?
+# Sind weniger als fünfzehn Minuten seit dem Booten vergangen? Dann wünschen wir eine erneut Ausführung.
+# Falls die Pakete installiert wurden, wird die Verkettung beim nächsten Mal aufgelöst.
+[ "$(get_uptime_minutes)" -lt 15 ] && echo "$0" | schedule_task
+exit 0

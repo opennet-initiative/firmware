@@ -218,6 +218,7 @@ function status_modules()
 			.. luci.i18n.translate("Recommended action") .. ': '
 			.. '<a href="' .. on_url("basis", "module") .. '?install=' .. string_join(missing, ",") .. '">'
 			.. luci.i18n.translate("Install missing modules")
+			.. ' (' .. luci.i18n.translate("or wait for the automatic re-installation") .. ') '
 			.. '</a></div>'
 	end
 	luci.http.write(result)

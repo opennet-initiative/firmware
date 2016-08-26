@@ -83,6 +83,19 @@ was_on_module_installed_before() {
 }
 
 
+## @fn get_missing_modules()
+## @brief Collect the names of modules that were probably installed before the last upgrade.
+get_missing_modules() {
+	local module
+	get_on_modules | while read module; do
+		is_on_module_installed_and_enabled "$module" && continue
+		is_package_installed "$module" && continue
+		was_on_module_installed_before "$module" && echo "$module"
+		true
+	done
+}
+
+
 ## @fn install_from_opennet_repository()
 ## @param packages Ein oder mehrere zu installierende Software-Pakete
 ## @returns Eventuelle Fehlermeldungen werden auf die Standardausgabe geschrieben. Der Exitcode ist immer Null.

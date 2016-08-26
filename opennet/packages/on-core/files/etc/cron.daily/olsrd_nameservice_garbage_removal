@@ -16,4 +16,5 @@ garbage_count=$(grep '^openvpn:' /var/run/services_olsr | awk '{print $1}' | sor
 # ein gewisse Anzahl veralteter Dienste ist akzeptabel (es kostet nur mehr Verarbeitungszeit)
 if [ "$garbage_count" -gt 20 ]; then
 	/etc/init.d/olsrd restart
+	on-function add_banner_event "olsr nameservice garbage cleanup"
 fi

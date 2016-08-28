@@ -141,7 +141,7 @@ update_trusted_service_list() {
 		protocol=$(echo "$line" | cut -f 5)
 		priority=$(echo "$line" | cut -f 6)
 		details=$(echo "$line" | cut -f 7-)
-		service_name=$(notify_service "$service_type" "$scheme" "$host" "$port" "$protocol" "/" "trusted" "$details")
+		service_name=$(notify_service "trusted" "$service_type" "$scheme" "$host" "$port" "$protocol" "/" "$details")
 		set_service_value "$service_name" "priority" "$priority"
 		[ -n "$is_proxy" ] && pick_local_service_relay_port "$service_name" >/dev/null
 		true

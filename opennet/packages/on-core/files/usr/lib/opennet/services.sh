@@ -40,12 +40,21 @@ get_service_name() {
 
 ## @fn notify_service()
 ## @brief Aktualisiere den Zeitstempel und die Entfernung (etx) eines Dienstes
+## @param service z.B. "gw"
+## @param scheme z.B. "openvpn"
+## @param host z.B. "192.168.0.254"
+## @param port z.B. "1600"
+## @param path z.B. "/"
+## @param protocol z.B. "udp"
+## @param details z.B. "via:megumi"
 ## @returns Der Dienstname wird ausgegeben.
 notify_service() {
 	trap "error_trap notify_service '$*'" $GUARD_TRAPS
 	# wir erwarten sieben Parameter
-	[ "$#" -eq 7 ]
-	echo "$@" | notify_services
+	[ "$#" -eq 7 -o "$#" -eq 8 ]
+	local source="$1"
+	shift
+	echo "$@" | notify_services "$source"
 }
 
 
@@ -67,7 +76,7 @@ notify_services() {
 	local service_name
 	local etx
 	local hop
-	while read scheme host port path protocol service details; do
+	while read service scheme host port path protocol details; do
 		service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 		# Diese Attribute duerften sich nicht aendern, aber wir wollen sicherheitshalber lieber kaputten
 		# Werten vorbeugen.

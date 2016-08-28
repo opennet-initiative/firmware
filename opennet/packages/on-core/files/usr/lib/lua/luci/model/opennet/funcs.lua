@@ -460,7 +460,7 @@ function process_add_service_form()
 	if not path then return luci.i18n.translate("Invalid path") end
 	details = parse_string_pattern(details, "a-zA-Z0-9._/:%s-")
 	if not details then return luci.i18n.translate("Invalid service details") end
-        local service_name = on_function("notify_service", {stype, scheme, host, port, protocol, path, "manual", details})
+        local service_name = on_function("notify_service", {"manual", stype, scheme, host, port, protocol, path, details})
 	-- die Prioritaet wird nur gesetzt, falls sie uebergeben wurde (z.B. fuer Mesh-Gateways)
 	if not is_string_empty(priority) then
 		priority = parse_number_string(priority)

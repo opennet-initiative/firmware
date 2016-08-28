@@ -165,8 +165,8 @@ get_olsr_relay_service_name_from_description() {
 	local port
 	local service_type
 	fields=$(echo "$service_description" | parse_olsr_service_descriptions)
-	port=$(echo "$fields" | cut -f 3)
-	service_type=$(echo "$fields" | cut -f 6)
+	port=$(echo "$fields" | cut -f 4)
+	service_type=$(echo "$fields" | cut -f 1)
 	get_services "${RELAYABLE_SERVICE_PREFIX}$service_type" | filter_services_by_value "local_relay_port" "$port"
 }
 

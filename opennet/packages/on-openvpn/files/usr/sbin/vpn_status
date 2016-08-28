@@ -109,7 +109,7 @@ add_gw() {
 	trap "error_trap add_gw '$*'" $GUARD_TRAPS
 	local ipaddr="$1"
 	local port="${2:-$DEFAULT_MIG_PORT}"
-	notify_service "gw" "openvpn" "$ipaddr" "$port" "udp" "/" "manual" >/dev/null
+	notify_service "manual" "gw" "openvpn" "$ipaddr" "$port" "udp" "/" >/dev/null
 }
 
 

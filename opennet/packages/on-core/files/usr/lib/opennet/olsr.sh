@@ -150,7 +150,7 @@ parse_olsr_service_descriptions() {
 		#    http://192.168.0.40:8080|tcp|ugw upload:50 download:15300 ping:23
 		[ "$scheme" = "http" -a "$port" = "8080" -a "$proto" = "tcp" ] && \
 			[ "$service" = "gw" -o "$service" = "ugw" ] && scheme=openvpn && port=1600 && proto=udp && service=gw
-		echo -e "$scheme\t$host\t$port\t$path\t$proto\t$service\t$details"
+		echo -e "$service\t$scheme\t$host\t$port\t$path\t$proto\t$details"
 	done
 }
 
@@ -162,9 +162,9 @@ parse_olsr_service_descriptions() {
 #   dns://192.168.10.4:53|udp|dns                                           #192.168.10.4
 # Parameter: service-Type (z.B. "gw", "dns", "ntp", "mesh")
 # Ergebnis (tab-separiert):
-#   SCHEME IP PORT PATH PROTO SERVICE DETAILS
+#   SERVICE SCHEME IP PORT PATH PROTO DETAILS
 # Im Fall von "http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108" entspricht dies:
-#   http   192.168.0.15   8080   tcp   ugw   upload:3 download:490 ping:108
+#   ugw	http   192.168.0.15   8080   tcp   upload:3 download:490 ping:108
 get_olsr_services() {
 	trap "error_trap get_olsr_services '$*'" $GUARD_TRAPS
 	local wanted_type="${1:-}"
@@ -183,7 +183,7 @@ get_olsr_services() {
 		sed 's/[\t ]\+#[^#]\+//' | \
 		parse_olsr_service_descriptions | \
 		# filtere die Ergebnisse nach einem Service-Typ, falls selbiger als erster Parameter angegeben wurde
-		awk '{ if (("'$wanted_type'" == "") || ("'$wanted_type'" == $6)) print $0; }'
+		awk '{ if (("'$wanted_type'" == "") || ("'$wanted_type'" == $1)) print $0; }'
 	return 0
 }
 

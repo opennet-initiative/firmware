@@ -125,9 +125,17 @@ get_current_addresses_of_network() {
 	trap "error_trap get_current_addresses_of_network '$*'" $GUARD_TRAPS
 	local network="$1"
 	local subnets=
+	local ifname
 	if [ "$(uci_get "network.${network}.proto")" = "none" ]; then
 		# manuell konfiguriertes Netzwerk-Interface (z.B: mesh-VPN via OpenVPN)
-		ip addr show dev "$network" | grep -wE "inet6?" | awk '{print $2}'
+		# Der obige Test stellt nicht eindeutig sicher, dass das Interface
+		# taetsaechlich diesen Namen traegt (z.B. "on_vpn" -> "tun0").
+		# Daher pruefen wir auch "ifname" - als Verweis auf den Interface-Namen.
+		ifname=$(uci_get "network.${network}.ifname")
+		[ -n "$ifname" ] && network="$ifname"
+		# Keine Fehlermeldungen: vielleicht haben wir den Namen falsch geraten
+		# oder das Interface ist inaktiv.
+		ip addr show dev "$network" 2>/dev/null | grep -wE "inet6?" | awk '{print $2}'
 	else
 		# konfiguriertes Interface
 		(set +eu; . /lib/functions/network.sh; network_get_subnets subnets "$network"; echo "$subnets")

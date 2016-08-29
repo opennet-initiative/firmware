@@ -140,10 +140,20 @@ install_from_opennet_repository() {
 ## @fn remove_opennet_module()
 ## @param module Name des oder der zu entfernenden Module
 remove_opennet_modules() {
-	local log_file
-	log_file=$(get_custom_log_filename "opkg_opennet")
 	run_opennet_opkg --autoremove remove "$@"
 	save_on_modules_list
+}
+
+
+## @fn redirect_to_opkg_opennet_logfile()
+## @brief Führe die gegebene Aktion aus und lenke ihre Ausgabe in die opennet-opkg-Logdatei um.
+## @details Als irrelevant bekannte Meldungen werden herausgefiltert.
+redirect_to_opkg_opennet_logfile() {
+	local log_file
+	log_file=$(get_custom_log_filename "opkg_opennet")
+	"$@" >>"$log_file" 2>&1 \
+		| grep -vF "resolve_conffiles: Existing conffile /etc/config/openvpn is different from the conffile in the new package. The new conffile will be placed at /etc/config/openvpn-opkg." \
+		| grep -v "^Collected errors:$"
 }
 
 
@@ -152,17 +162,12 @@ run_opennet_opkg() {
 	trap "error_trap run_opennet_opkg '$*'" $GUARD_TRAPS
 	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
 	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
-	local log_file
-	log_file=$(get_custom_log_filename "opkg_opennet")
 	# Vor der opkg-Ausführung müssen wir das Verzeichnis /etc/opkg verdecken, da opkg fehlerhafterweise
 	# auch bei Verwendung von "--conf" die üblichen Orte nach Konfigurationsdateien durchsucht.
 	# TODO: opkg-Bug upstream berichten
 	mount -t tmpfs -o size=32k tmpfs /etc/opkg
 	# opkg ausfuehren und dabei die angegebene Fehlermeldung ignorieren (typisch fuer Paket-Installation nach Upgrade)
-	opkg --verbosity=1 --conf "$ON_OPKG_CONF_PATH" "$@" >>"$log_file" 2>&1 \
-		| grep -vF "resolve_conffiles: Existing conffile /etc/config/openvpn is different from the conffile in the new package. The new conffile will be placed at /etc/config/openvpn-opkg." \
-		| grep -v "^Collected errors:$" \
-		|| true
+	opkg --verbosity=1 --conf "$ON_OPKG_CONF_PATH" "$@" || true
 	umount /etc/opkg
 }
 

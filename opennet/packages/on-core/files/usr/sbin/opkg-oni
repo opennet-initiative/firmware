@@ -11,6 +11,10 @@ case "$ACTION" in
 		# die Installation von Modulen benoetigt manuelle Nachbearbeitung (Aktivierung, usw.)
 		on-function install_from_opennet_repository "$@"
 		;;
+	remove)
+		# wir wuenschen --autoremove und Modul-Abschaltung
+		on-function remove_opennet_modules "@"
+		;;
 	*)
 		on-function run_opennet_opkg "$ACTION" "$@"
 		;;

@@ -66,17 +66,17 @@ function action_modules()
 	end
 	local remove_packages = get_splitted_package_names(luci.http.formvalue("remove"))
 	if not table_is_empty(remove_packages) then
-		local args = {}
+		local args = {"remove_opennet_modules"}
 		for index, value in ipairs(remove_packages) do table.insert(args, value) end
-		on_function_background("remove_opennet_modules", args)
+		on_function_background("redirect_to_opkg_opennet_logfile", args)
 		table.insert(on_hints, luci.i18n.translate("Removing modules in background."))
 		table.insert(on_hints, delay_hint)
 	end
 	local install_packages = get_splitted_package_names(luci.http.formvalue("install"))
 	if not table_is_empty(install_packages) then
-		local args = {}
+		local args = {"install_from_opennet_repository"}
 		for index, value in ipairs(install_packages) do table.insert(args, value) end
-		on_function_background("install_from_opennet_repository", args)
+		on_function_background("redirect_to_opkg_opennet_logfile", args)
 		table.insert(on_hints, luci.i18n.translate("Installing modules in background."))
 		table.insert(on_hints, delay_hint)
 	end

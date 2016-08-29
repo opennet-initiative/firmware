@@ -13,7 +13,7 @@ case "$ACTION" in
 		;;
 	remove)
 		# wir wuenschen --autoremove und Modul-Abschaltung
-		on-function remove_opennet_modules "@"
+		on-function remove_opennet_modules "$@"
 		;;
 	*)
 		on-function run_opennet_opkg "$ACTION" "$@"

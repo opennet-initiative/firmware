@@ -76,7 +76,7 @@ notify_services() {
 	local service_name
 	local etx
 	local hop
-	while read service scheme host port path protocol details; do
+	while read service scheme host port protocol path details; do
 		service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 		# Diese Attribute duerften sich nicht aendern, aber wir wollen sicherheitshalber lieber kaputten
 		# Werten vorbeugen.

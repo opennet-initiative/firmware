@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2016-08-26 21:37+0200\n"
+"PO-Revision-Date: 2016-08-29 02:12+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -41,6 +41,9 @@ msgstr "Aktion"
 
 msgid "Active: %s"
 msgstr "Aktiv: %s"
+
+msgid "Advisor (optional)"
+msgstr "Berater (optional)"
 
 msgid "Available Report"
 msgstr "Vorhandener Bericht"
@@ -145,6 +148,9 @@ msgstr "CSR-Datei herunterladen"
 
 msgid "ETX: Routing Distance (default)"
 msgstr "ETX: Routing-Entfernung (Voreinstellung)"
+
+msgid "Email of Advisor (optional)"
+msgstr "Email-Adresse des Beraters (optional)"
 
 msgid "Enabled"
 msgstr "Aktiviert"
@@ -675,8 +681,8 @@ msgstr ""
 msgid "Unknown protocol"
 msgstr "Unbekanntes Protokoll"
 
-msgid "Upload your request with one click"
-msgstr "Sende Deine Anfrage mit einem Klick"
+msgid "Upload your request"
+msgstr "Anfrage hochladen"
 
 msgid "Uptime"
 msgstr "Gerätelaufzeit"
@@ -742,6 +748,9 @@ msgstr "hochgeladen oder erzeugt an diesem Tag"
 
 msgid "use"
 msgstr "übernehmen"
+
+#~ msgid "Upload your request with one click"
+#~ msgstr "Sende Deine Anfrage mit einem Klick"
 
 #~ msgid "Neighbors"
 #~ msgstr "Nachbarn"

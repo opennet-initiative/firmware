@@ -603,8 +603,10 @@ function process_csr_submission(cert_type, errors_table)
     if submit_url then
         local cert_info = get_ssl_cert_info(cert_type)
         local csr_filename = cert_info.filename_prefix .. ".csr"
+        local advisor_name = luci.http.formvalue("advisor_name") or ""
+        local advisor_email = luci.http.formvalue("advisor_email") or ""
         -- zeige lediglich die Ausgabe von curl an
-        local result = on_function("submit_csr_via_http", {submit_url, csr_filename})
+        local result = on_function("submit_csr_via_http", {submit_url, csr_filename, advisor_name, advisor_email})
         if not is_string_empty(result) then
             -- das Upload-Resultat sollte ausgegeben werden
             luci.http.write(result)

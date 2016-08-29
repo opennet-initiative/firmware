@@ -31,6 +31,9 @@ msgstr ""
 msgid "Active: %s"
 msgstr ""
 
+msgid "Advisor (optional)"
+msgstr ""
+
 msgid "Available Report"
 msgstr ""
 
@@ -123,6 +126,9 @@ msgid "Download the CSR file"
 msgstr ""
 
 msgid "ETX: Routing Distance (default)"
+msgstr ""
+
+msgid "Email of Advisor (optional)"
 msgstr ""
 
 msgid "Enabled"
@@ -586,7 +592,7 @@ msgstr ""
 msgid "Unknown protocol"
 msgstr ""
 
-msgid "Upload your request with one click"
+msgid "Upload your request"
 msgstr ""
 
 msgid "Uptime"

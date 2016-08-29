@@ -703,7 +703,12 @@ get_potential_error_messages() {
 	#    Diese Meldung ist wohl irrelevant.
 	filters="${filters}|ERROR: Linux route add command failed"
 	# System-Fehlermeldungen (inkl. "trapped")
-	logread | grep -i error | grep -vE "(${filters#|})" | if [ -z "$max_lines" ]; then
+	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
+	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.
+	# durch frühe Auswahl einer neuen URL).
+	prefilter="uhttpd.*: sh: write error: Broken pipe"
+	# "sed /FOO/{N;d;}" löscht die Muster-Zeile, sowie die direkt nachfolgende
+	logread | sed "/$prefilter/{N;d;}" | grep -i error | grep -vE "(${filters#|})" | if [ -z "$max_lines" ]; then
 		# alle Einträge ausgeben
 		cat -
 	else

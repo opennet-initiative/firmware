@@ -151,9 +151,9 @@ remove_opennet_modules() {
 redirect_to_opkg_opennet_logfile() {
 	local log_file
 	log_file=$(get_custom_log_filename "opkg_opennet")
-	"$@" >>"$log_file" 2>&1 \
-		| grep -vF "resolve_conffiles: Existing conffile /etc/config/openvpn is different from the conffile in the new package. The new conffile will be placed at /etc/config/openvpn-opkg." \
-		| grep -v "^Collected errors:$"
+	"$@" 2>&1 \
+		| grep -vE "resolve_conffiles: Existing conffile /etc/config/(openvpn|olsrd2) is different from the conffile in the new package\. The new conffile will be placed at /etc/config/(openvpn|olsrd2)-opkg\." \
+		| grep -v "^Collected errors:$" >>"$log_file"
 }
 
 

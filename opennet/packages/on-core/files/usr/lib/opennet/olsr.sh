@@ -150,7 +150,7 @@ parse_olsr_service_descriptions() {
 		#    http://192.168.0.40:8080|tcp|ugw upload:50 download:15300 ping:23
 		[ "$scheme" = "http" -a "$port" = "8080" -a "$proto" = "tcp" ] && \
 			[ "$service" = "gw" -o "$service" = "ugw" ] && scheme=openvpn && port=1600 && proto=udp && service=gw
-		echo -e "$service\t$scheme\t$host\t$port\t$path\t$proto\t$details"
+		echo -e "$service\t$scheme\t$host\t$port\t$proto\t$path\t$details"
 	done
 }
 

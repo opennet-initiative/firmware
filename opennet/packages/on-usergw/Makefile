@@ -38,7 +38,6 @@ define Package/on-usergw/prerm
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 on-function disable_on_usergw
-on-function disable_service_relay
 endef
 
 define Package/on-usergw/postrm

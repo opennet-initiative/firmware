@@ -271,14 +271,18 @@ generate_opennet_opkg_config() {
 ## @brief Prüfe, ob ein opkg-Paket installiert ist.
 ## @param package Name des Pakets
 is_package_installed() {
+	trap "error_trap is_package_installed '$*'" $GUARD_TRAPS
 	local package="$1"
+	local status
 	# Korrekte Prüfung: via "opkg list-installed" - leider erzeugt sie locking-Fehlermeldung
 	# bei parallelen Abläufen (z.B. Status-Seite).
 	#opkg list-installed | grep -q -w "^$package" && return 0
 	# schneller als via opkg
-	grep -A 10 "^Package: $package$" "${IPKG_INSTROOT:-}/usr/lib/opkg/status" \
-		| grep "^Status:" | head -1 | grep -qw "installed" && return 0
-	trap "" $GUARD_TRAPS && return 1
+	status=$(grep -A 10 "^Package: $package$" "${IPKG_INSTROOT:-}/usr/lib/opkg/status" \
+		| grep "^Status:" | head -1 | cut -f 2- -d :)
+	[ -z "$status" ] && trap "" $GUARD_TRAPS && return 1
+	echo "$status" | grep -qE "(deinstall|not-installed)" && trap "" $GUARD_TRAPS && return 1
+	return 0
 }
 
 

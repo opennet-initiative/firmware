@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# Loesche die manuell gesetzte Firmware-Download-URL, weil diese typischerweise mit einer neuen
+# Version nicht mehr verwendbar ist (und zu Verwirrung führt).
+#
+# Dieses Skript wird nur ein einziges Mal nach einem Upgrade oder der Erstinstallation ausgefuehrt:
+#   http://wiki.openwrt.org/doc/uci#defaults
+#
+
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+uci_delete "on-core.modules.repository_url"

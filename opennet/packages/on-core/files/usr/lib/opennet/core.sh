@@ -702,6 +702,10 @@ get_potential_error_messages() {
 	#    Beim Aufbau er OpenVPN-Verbindung scheint gelegentlich noch eine alte Route verblieben zu sein.
 	#    Diese Meldung ist wohl irrelevant.
 	filters="${filters}|ERROR: Linux route add command failed"
+	# 22) ... cannot open proc entry /proc/sys/net/ipv4/conf/none/ ...
+	#    olsrd2 versucht auf /proc/-Eintraege zuzugreifen, bevor der Name des Netzwerk-Interface
+	#    feststeht ("none"). Ignorieren.
+	filters="${filters}|cannot open proc entry /proc/sys/net/ipv4/conf/none/"
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.

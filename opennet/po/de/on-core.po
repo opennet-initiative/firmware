@@ -43,7 +43,7 @@ msgid "Active: %s"
 msgstr "Aktiv: %s"
 
 msgid "Advisor (optional)"
-msgstr "Berater (optional)"
+msgstr "Betreuer (optional)"
 
 msgid "Available Report"
 msgstr "Vorhandener Bericht"
@@ -150,7 +150,7 @@ msgid "ETX: Routing Distance (default)"
 msgstr "ETX: Routing-Entfernung (Voreinstellung)"
 
 msgid "Email of Advisor (optional)"
-msgstr "Email-Adresse des Beraters (optional)"
+msgstr "E-Mail Adresse des Betreuers (optional)"
 
 msgid "Enabled"
 msgstr "Aktiviert"
@@ -328,7 +328,7 @@ msgid "Mbit/s"
 msgstr "MBit/s"
 
 msgid "Member Email Address"
-msgstr "Deine EMail Adresse"
+msgstr "Deine E-Mail Adresse"
 
 msgid "Member Name"
 msgstr "Dein Name"
@@ -726,7 +726,7 @@ msgid "generate"
 msgstr "Erzeugen"
 
 msgid "or wait for the automatic re-installation"
-msgstr "oder warten Sie auf die automatische Neuinstallation"
+msgstr "oder warte auf die automatische Neuinstallation"
 
 msgid "related network addresses"
 msgstr "zugehörige Netzwerkadressen"

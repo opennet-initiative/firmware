@@ -172,15 +172,6 @@ msgstr ""
 "Beim Senden der Zertifikatsanfrage trat leider ein Fehler auf. Du möchtest "
 "stattdessen vielleicht eine manuelle Methode verwenden."
 
-msgid ""
-"For module installation you may also use your internet connection for the "
-"download. Just pick this source below. In this case you may safely ignore "
-"the above warning regarding the availability of Opennet-DNS."
-msgstr ""
-"Für die Modul-Installation ist alternativ auch eine Internetverbindung "
-"verwendbar. Diese ist unten auszuwählen. In diesem Fall ist die obige "
-"Warnung bezüglich der fehlenden Opennet-DNS-Auflösung nicht relevant."
-
 msgid "Forwarding from DHCP-wireless network"
 msgstr "Weiterleitung aus dem DHCP-Funknetz"
 

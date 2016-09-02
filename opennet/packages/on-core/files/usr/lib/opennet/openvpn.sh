@@ -473,8 +473,10 @@ openvpn_get_mtu() {
 ## @fn cleanup_stale_openvpn_services()
 ## @brief Beräumung liegengebliebener openvpn-Konfigurationen, sowie Deaktivierung funktionsunfähiger Verbindungen.
 ## @details Verwaiste openvpn-Konfigurationen können aus zwei Grunden auftreten:
-##   1) nach einem reboot wurde nicht du zuletzt aktive openvpn-Verbindung ausgewählt - somit bleibt der vorher aktive uci-Konfigurationseintrag erhalten
-##   2) ein VPN-Verbindungsaufbau scheitert und hinterlässt einen uci-Eintrag, eine PID-Datei, jedoch keinen laufenden Prozess
+##   1) nach einem reboot wurde nicht die zuletzt aktive openvpn-Verbindung ausgewählt - somit
+##      bleibt der vorher aktive uci-Konfigurationseintrag erhalten
+##   2) ein VPN-Verbindungsaufbau scheitert und hinterlässt einen uci-Eintrag, eine PID-Datei,
+##      jedoch keinen laufenden Prozess
 ##  Achtung: falls eine Verbindung sich gerade im Aufbau befindet, wird ihre Konfiguration
 ##           ebenfalls entfernt. Diese Funktion sollte also nur in ausgewählten Situation
 ##           aufgerufen werden (nach einem Reboot und nach einem Verbindungsabbruch).

@@ -37,9 +37,6 @@ msgstr ""
 msgid "Available Report"
 msgstr ""
 
-msgid "BSSID"
-msgstr ""
-
 msgid "Base"
 msgstr ""
 
@@ -47,9 +44,6 @@ msgid ""
 "Based on your Certificate (%s), the ports from %s to %s are forwarded "
 "through the VPN-Tunnel to your Access-Point - you should enter those as your "
 "source-ports."
-msgstr ""
-
-msgid "Bitrate"
 msgstr ""
 
 msgid "CN %s"
@@ -68,9 +62,6 @@ msgid "Certificate Request contents"
 msgstr ""
 
 msgid "Certificate contents"
-msgstr ""
-
-msgid "Channel"
 msgstr ""
 
 msgid ""
@@ -134,9 +125,6 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-msgid "Encryption"
-msgstr ""
-
 msgid "Error:"
 msgstr ""
 
@@ -175,9 +163,6 @@ msgid "Forwarding from Opennet"
 msgstr ""
 
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
-msgstr ""
-
-msgid "GHz"
 msgstr ""
 
 msgid "Generate"
@@ -290,16 +275,10 @@ msgstr ""
 msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
 msgstr ""
 
-msgid "Mbit/s"
-msgstr ""
-
 msgid "Member Email Address"
 msgstr ""
 
 msgid "Member Name"
-msgstr ""
-
-msgid "Mode"
 msgstr ""
 
 msgid "Modules"
@@ -330,9 +309,6 @@ msgstr ""
 msgid "Networks"
 msgstr ""
 
-msgid "No information available"
-msgstr ""
-
 msgid "No report available"
 msgstr ""
 
@@ -343,9 +319,6 @@ msgid ""
 "Nodes in the Opennet can announce various services. These services can be "
 "used by other nodes. The most important services are Internet access, DNS "
 "and NTP."
-msgstr ""
-
-msgid "Noise"
 msgstr ""
 
 msgid "Number of routes via this neighbour"
@@ -460,9 +433,6 @@ msgstr ""
 msgid "Router summary"
 msgstr ""
 
-msgid "SSID"
-msgstr ""
-
 msgid "Save"
 msgstr ""
 
@@ -482,9 +452,6 @@ msgid "Settings"
 msgstr ""
 
 msgid "Share your local internet connection with other members"
-msgstr ""
-
-msgid "Signal"
 msgstr ""
 
 msgid "Sort order"
@@ -608,9 +575,6 @@ msgid "WAN"
 msgstr ""
 
 msgid "Wireless"
-msgstr ""
-
-msgid "Wireless is disabled or not associated"
 msgstr ""
 
 msgid ""

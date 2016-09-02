@@ -48,9 +48,6 @@ msgstr "Betreuer (optional)"
 msgid "Available Report"
 msgstr "Vorhandener Bericht"
 
-msgid "BSSID"
-msgstr "BSSID"
-
 msgid "Base"
 msgstr "Basis"
 
@@ -62,9 +59,6 @@ msgstr ""
 "Basierend auf Ihrem Zertifikat (%s) werden die Ports %s bis %s vom VPN-"
 "Gateway an Deinen Access-Point weitergeleitet. Nur diese Ports sind als "
 "eingehende Ports für Dich verwendbar."
-
-msgid "Bitrate"
-msgstr "Bitrate"
 
 msgid "CN %s"
 msgstr "CN %s"
@@ -83,9 +77,6 @@ msgstr "Details der Zertifikatsanfrage"
 
 msgid "Certificate contents"
 msgstr "Zertifikatsdaten"
-
-msgid "Channel"
-msgstr "Kanal"
 
 msgid ""
 "Choose one of the following options for submitting your certificate signing "
@@ -155,9 +146,6 @@ msgstr "E-Mail Adresse des Betreuers (optional)"
 msgid "Enabled"
 msgstr "Aktiviert"
 
-msgid "Encryption"
-msgstr "Verschlüsselung"
-
 msgid "Error:"
 msgstr "Fehler:"
 
@@ -204,9 +192,6 @@ msgstr "Weiterleitung aus dem Opennet"
 
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
-
-msgid "GHz"
-msgstr "GHz"
 
 msgid "Generate"
 msgstr "Erzeugen"
@@ -324,17 +309,11 @@ msgstr ""
 "Vielleicht möchtest Du Deinen AP mit einem benachbarten AP <a href=\"%s"
 "\">via WLAN verbinden</a>."
 
-msgid "Mbit/s"
-msgstr "MBit/s"
-
 msgid "Member Email Address"
 msgstr "Deine E-Mail Adresse"
 
 msgid "Member Name"
 msgstr "Dein Name"
-
-msgid "Mode"
-msgstr "Modus"
 
 msgid "Modules"
 msgstr "Module"
@@ -365,9 +344,6 @@ msgstr "Netzwerk"
 msgid "Networks"
 msgstr "Netzwerke"
 
-msgid "No information available"
-msgstr "Keine Informationen verfügbar"
-
 msgid "No report available"
 msgstr "Keine Zusammenfassung verfügbar"
 
@@ -382,9 +358,6 @@ msgstr ""
 "Knoten in der Opennet können verschiedene Dienste anbieten. Diese Dienste "
 "können von anderen Knoten verwendet werden. Die wichtigsten Dienste sind "
 "Internet-Zugang, Namensauflösung und Zeitsynchronisation."
-
-msgid "Noise"
-msgstr "Lärm"
 
 msgid "Number of routes via this neighbour"
 msgstr "Anzahl der Routen über diesen Nachbarn"
@@ -516,9 +489,6 @@ msgstr "Prüfe die Details von Installationsvorgängen."
 msgid "Router summary"
 msgstr "Router-Überblick"
 
-msgid "SSID"
-msgstr "SSID"
-
 msgid "Save"
 msgstr "Speichern"
 
@@ -539,9 +509,6 @@ msgstr "Einstellungen"
 
 msgid "Share your local internet connection with other members"
 msgstr "Teile Deinen lokalen Internetanschluss mit anderen Mitgliedern"
-
-msgid "Signal"
-msgstr "Signal"
 
 msgid "Sort order"
 msgstr "Sortierreihenfolge"
@@ -699,9 +666,6 @@ msgstr "WAN"
 msgid "Wireless"
 msgstr "Funknetz"
 
-msgid "Wireless is disabled or not associated"
-msgstr "Das Funknetz ist deaktiviert oder nicht assoziiert"
-
 msgid ""
 "You may want to send a <a href=\"%s\">report</a> to the Opennet community "
 "(%s)."
@@ -748,6 +712,42 @@ msgstr "hochgeladen oder erzeugt an diesem Tag"
 
 msgid "use"
 msgstr "übernehmen"
+
+#~ msgid "BSSID"
+#~ msgstr "BSSID"
+
+#~ msgid "Bitrate"
+#~ msgstr "Bitrate"
+
+#~ msgid "Channel"
+#~ msgstr "Kanal"
+
+#~ msgid "Encryption"
+#~ msgstr "Verschlüsselung"
+
+#~ msgid "GHz"
+#~ msgstr "GHz"
+
+#~ msgid "Mbit/s"
+#~ msgstr "MBit/s"
+
+#~ msgid "Mode"
+#~ msgstr "Modus"
+
+#~ msgid "No information available"
+#~ msgstr "Keine Informationen verfügbar"
+
+#~ msgid "Noise"
+#~ msgstr "Lärm"
+
+#~ msgid "SSID"
+#~ msgstr "SSID"
+
+#~ msgid "Signal"
+#~ msgstr "Signal"
+
+#~ msgid "Wireless is disabled or not associated"
+#~ msgstr "Das Funknetz ist deaktiviert oder nicht assoziiert"
 
 #~ msgid "Upload your request with one click"
 #~ msgstr "Sende Deine Anfrage mit einem Klick"

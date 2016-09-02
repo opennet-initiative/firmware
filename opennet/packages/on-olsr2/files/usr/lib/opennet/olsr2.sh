@@ -124,8 +124,7 @@ update_olsr2_interfaces() {
 			uci_add_list "${uci_prefix}.originator" "$token"
 		done
 	}
-	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
-	apply_changes_olsrd2
+	apply_changes "olsrd2"
 }
 
 
@@ -150,16 +149,7 @@ olsr2_sync_routing_tables() {
 	[ -z "$iproute_id" ] && iproute_id=$(add_routing_table "$ROUTING_TABLE_MESH_OLSR2")
 	# olsr passt sich im Zweifel der iproute-Nummer an
 	[ "$olsr2_id" != "$iproute_id" ] && uci set "${uci_prefix}.table=$iproute_id" || true
-	# TODO: die folgende Zeile vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
-	apply_changes_olsrd2
-}
-
-
-# TODO: diese Funktion vor dem naechsten Release durch "apply_changes olsrd2" ersetzen
-apply_changes_olsrd2() {
-	[ -n "$(uci changes olsrd2)" ] || return 0
-	uci commit olsrd2
-	/usr/lib/opennet/hooks.d/520-on-olsr2 on-olsr2
+	apply_changes "olsrd2"
 }
 
 

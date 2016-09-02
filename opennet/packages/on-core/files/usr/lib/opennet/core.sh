@@ -21,7 +21,11 @@ SCHEDULING_DIR="${IPKG_INSTROOT:-}/var/run/on-scheduling.d"
 # beim ersten Pruefen wird der Debug-Modus ermittelt
 DEBUG_ENABLED=
 # Notfall-DNS-Eintrag, falls wir noch keine nameservice-Nachrichten erhalten haben
-FALLBACK_DNS_SERVER="192.168.0.247"
+# aktuelle UGW-Server, sowie der DNS-Server von FoeBuD (https://digitalcourage.de/support/zensurfreier-dns-server)
+FALLBACK_DNS_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 85.214.20.141"
+# fuer Insel-UGWs benoetigen wir immer einen korrekten NTP-Server, sonst schlaegt die mesh-Verbindung fehl
+# aktuelle UGW-Server, sowie der openwrt-Pool
+FALLBACK_NTP_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 0.openwrt.pool.ntp.org"
 
 
 # Aufteilung ueberlanger Zeilen

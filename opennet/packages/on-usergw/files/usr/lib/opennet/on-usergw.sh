@@ -14,6 +14,13 @@ MESH_OPENVPN_DEVICE_PREFIX=tap
 # Namenspräfix für weiterzuleitende Dienste
 RELAYABLE_SERVICE_PREFIX="proxy-"
 UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES=360
+# Die folgenden Attribute werden dauerhaft (im Flash) gespeichert. Häufige Änderungen sind also eher unerwünscht.
+# Gruende fuer ausgefallene/unintuitive Attribute:
+#   local_relay_port: der lokale Port, der für eine Dienst-Weiterleitung verwendet wird - er sollte über reboots hinweg stabil sein
+#   *status: eine Mesh-Verbindung soll nach dem Booten schnell wieder aufgebaut werden (ohne lange MTU-Tests)
+# Wir beachten den vorherigen Zustand der Variable, damit andere Module (z.B. on-usergw) diese
+# ebenfalls beeinflussen können.
+PERSISTENT_SERVICE_ATTRIBUTES="${PERSISTENT_SERVICE_ATTRIBUTES:-} local_relay_port status vpn_status wan_status mtu_status"
 
 
 ## @fn get_on_usergw_default()

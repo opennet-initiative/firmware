@@ -15,9 +15,10 @@ DEFAULT_SERVICE_SORTING=etx
 #   priority: DNS-entdeckte Dienste enthalten ein "priority"-Attribut, nach einem reboot wieder verfügbar sein sollte
 #   rank/offset: Attribute zur Ermittlung der Dienstreihenfolge
 #   disabled: der Dienst wurde vom Nutzenden an- oder abgewählt
-#   local_relay_port: der lokale Port, der für eine Dienst-Weiterleitung verwendet wird - er sollte über reboots hinweg stabil sein
 #   source: die Quelle des Diensts (olsrd/dns/manual) muss erhalten bleiben, um ihn später löschen zu können
-PERSISTENT_SERVICE_ATTRIBUTES="service scheme host port protocol path uci_dependency file_dependency priority rank offset disabled source local_relay_port"
+# Wir beachten den vorherigen Zustand der Variable, damit andere Module (z.B. on-usergw) diese
+# ebenfalls beeinflussen können.
+PERSISTENT_SERVICE_ATTRIBUTES="${PERSISTENT_SERVICE_ATTRIBUTES:-} service scheme host port protocol path uci_dependency file_dependency priority rank offset disabled source"
 LOCAL_BIAS_MODULO=10
 SERVICES_LOG_BASE=/var/log/on-services
 

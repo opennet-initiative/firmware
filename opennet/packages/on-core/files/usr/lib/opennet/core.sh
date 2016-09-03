@@ -189,7 +189,7 @@ update_dns_servers() {
 		done
 	)
 	# falls keine DNS-Namen bekannt sind, dann verwende eine (hoffentlich gueltige) Notfall-Option
-	[ -z "$server_config" ] && server_config="server=$FALLBACK_DNS_SERVER"
+	[ -z "$server_config" ] && server_config=$(echo "$FALLBACK_DNS_SERVERS" | tr ' ' '\n' | sed 's/^/server=/')
 	echo "$server_config" | update_file_if_changed "$servers_file" || return 0
 	# es gab eine Aenderung
 	msg_info "updating DNS servers"
@@ -233,9 +233,10 @@ update_ntp_servers() {
 		done
 	fi
 	# Wir wollen keine leere Liste zurücklassen (z.B. bei einem UGW ohne Mesh-Anbindung).
-	# Also alte Werte wiederherstellen.
+	# Also alte Werte wiederherstellen, sowie zusaetzlich die default-Server.
+	# Vor allem fuer den https-Download der UGW-Server-Liste benoetigen wir eine korrekte Uhrzeit.
 	[ -z "$(uci_get "system.ntp.server")" ] && \
-		for host in $previous_entries; do uci_add_list "system.ntp.server" "$host"; done
+		for host in $previous_entries $FALLBACK_NTP_SERVERS; do uci_add_list "system.ntp.server" "$host"; done
 	apply_changes system
 }
 

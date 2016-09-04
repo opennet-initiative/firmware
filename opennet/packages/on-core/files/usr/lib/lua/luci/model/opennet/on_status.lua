@@ -89,9 +89,25 @@ function get_interfaces_info_table(networks, zoneName)
 		.. [[<th>]] .. luci.i18n.translate("IPv6") .. [[</th>]]
 		.. [[<th>]] .. luci.i18n.translate("MAC") ..  [[</th>]]
 	        .. [[</tr>]]
-	local content = ""
+	local ifaces = {}
+	local ifname
+	-- erzeuge eine Liste ohne Dopplungen (z.B. fuer wan/wan6)
 	for network in networks:gmatch("%S+") do
-		content = content .. (get_network_interface_table_row(network) or "")
+		-- ignoriere abgeschaltete Interfaces
+		if on_bool_function("is_interface_up", {network}) then
+			ifname = on_function("get_device_of_interface", {network})
+			ifaces[ifname] = ifname
+		end
+	end
+	local content = ""
+	for _, ifname in pairs(ifaces) do
+		local ip4_address = string_join(get_interface_addresses(ifname, "inet"), [[<br/>]])
+		local ip6_address = string_join(get_interface_addresses(ifname, "inet6"), [[<br/>]])
+		local mac_address = string_join(get_interface_addresses(ifname, "link/ether"), [[<br/>]])
+		content = content .. [[<tr><td>]] .. ifname .. [[</td>]]
+			.. [[<td>]] .. (ip4_address or "") .. [[</td>]]
+			.. [[<td>]] .. (ip6_address or "") .. [[</td>]]
+			.. [[<td>]] .. mac_address .. [[</td></tr>]]
 	end
 	if is_string_empty(content) then
 		-- keine Tabelle im Fall von fehlenden Interfaces
@@ -110,17 +126,7 @@ function get_interface_addresses(network_interface, address_type)
 end
 
 
-function get_network_interface_table_row(network_interface)
-	-- ignoriere abgeschaltete Interfaces
-	if not on_bool_function("is_interface_up", {network_interface}) then return nil end
-	local ifname = on_function("get_device_of_interface", {network_interface})
-	local ip4_address = string_join(get_interface_addresses(ifname, "inet"), [[<br/>]])
-	local ip6_address = string_join(get_interface_addresses(ifname, "inet6"), [[<br/>]])
-	local mac_address = string_join(get_interface_addresses(ifname, "link/ether"), [[<br/>]])
-	return [[<tr><td>]] .. ifname .. [[</td>]]
-		.. [[<td>]] .. (ip4_address or "") .. [[</td>]]
-		.. [[<td>]] .. (ip6_address or "") .. [[</td>]]
-		.. [[<td>]] .. mac_address .. [[</td></tr>]]
+function get_network_interface_table_row(ifname)
 end
 
 

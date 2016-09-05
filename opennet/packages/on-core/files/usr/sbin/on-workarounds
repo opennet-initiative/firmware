@@ -3,7 +3,8 @@
 set -eu
 
 
-WORKAROUND_URL="https://dev.opennet-initiative.de/browser/on_firmware/opennet/workarounds"
+# die https-URL wuerde curl (oder wget+openssl) erfordern
+WORKAROUND_URL="http://dev.opennet-initiative.de/browser/on_firmware/opennet/workarounds"
 NAME_PREFIX="on_workaround"
 
 

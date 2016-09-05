@@ -6,6 +6,7 @@
 
 # Ablage fuer profiling-Ergebnisse
 PROFILING_DIR=/var/run/on-profiling
+# die https-URL wuerde curl (oder wget+openssl) erfordern
 GIT_REPOSITORY_COMMIT_URL_FMT="http://dev.on-i.de/changeset/%s/on_firmware?format=diff"
 
 # erzeuge das Profiling-Verzeichnis (vorsorglich - es wird wohl unbenutzt bleiben)

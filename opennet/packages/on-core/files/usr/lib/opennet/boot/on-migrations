@@ -592,7 +592,7 @@ disable_unwanted_forward
 move_mtu_fix_to_target_zone
 
 # Bis Version 0.4-5 wurden ins lokale Netz eingehende Pakete (z.B. Portweiterleitungen) via SNAT maskiert.
-# siehe https://dev.on-i.de/ticket/73
+# siehe https://dev.opennet-initiative.de/ticket/73
 uci_delete firewall.zone_local.masq
 apply_changes firewall
 

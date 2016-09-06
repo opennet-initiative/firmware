@@ -126,10 +126,6 @@ function get_interface_addresses(network_interface, address_type)
 end
 
 
-function get_network_interface_table_row(ifname)
-end
-
-
 function status_neighbors()
 	luci.http.prepare_content("text/plain")
 	local neighbour_info = on_function("get_olsr_neighbours")

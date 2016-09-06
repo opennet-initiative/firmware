@@ -18,9 +18,9 @@ class OnUGW(OpennetTest):
         host = self.get_hosts()[UGW_HOST]
         # pruefe DNS-Verfuegbarkeit von Opennet-Hosts mit einem WAN-Interface
         # Nutzer-Hosts werden erstmal ignoriert
-        result = host.get_dns_answers("on-i.de")
+        result = host.get_dns_answers("opennet-initiative.de")
         self.assertTrue("46.4.52.124" in result,
-                "DNS-Aufloesung von 'on-i.de' liefert ein unerwartetes Ergebnis auf Host %s: %s" % (host, result))
+                "DNS-Aufloesung von 'opennet-initiative.de' liefert ein unerwartetes Ergebnis auf Host %s: %s" % (host, result))
 
     def test_20_ugw_connection(self):
         host = self.get_hosts()[UGW_HOST]

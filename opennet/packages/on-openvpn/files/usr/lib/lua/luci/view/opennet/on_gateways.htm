@@ -160,7 +160,7 @@ You may obtain a copy of the License at
 			<% elseif sorting == "hop" then %>
 				distance = gateway.hop_count;
 			<% end %>
-			result += "<a href=\"http://map.on-i.de/?route=" + filter_traceroute_for_api( gateway.traceroute ) + "\" target=\"_blank\">";
+			result += "<a href=\"http://map.opennet-initiative.de/?route=" + filter_traceroute_for_api( gateway.traceroute ) + "\" target=\"_blank\">";
 			result += String.format('%.2f', distance + gateway.offset);
 			result += "</a></td>";
 		}

@@ -227,5 +227,8 @@ function status_modules()
 			.. ' (' .. luci.i18n.translate("or wait for the automatic re-installation") .. ') '
 			.. '</a></div>'
 	end
+	if result == "" then
+		result = luci.i18n.translate("No additional modules are installed.")
+	end
 	luci.http.write(result)
 end

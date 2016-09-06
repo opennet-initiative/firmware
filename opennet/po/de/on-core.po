@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2016-08-29 02:12+0200\n"
+"PO-Revision-Date: 2016-09-06 02:16+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -334,6 +334,9 @@ msgstr "Netzwerk"
 
 msgid "Networks"
 msgstr "Netzwerke"
+
+msgid "No additional modules are installed."
+msgstr "Es sind keine zusätzlichen Module installiert."
 
 msgid "No report available"
 msgstr "Keine Zusammenfassung verfügbar"

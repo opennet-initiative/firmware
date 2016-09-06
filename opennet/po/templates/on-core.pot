@@ -147,12 +147,6 @@ msgid ""
 "approach instead. Sorry!"
 msgstr ""
 
-msgid ""
-"For module installation you may also use your internet connection for the "
-"download. Just pick this source below. In this case you may safely ignore "
-"the above warning regarding the availability of Opennet-DNS."
-msgstr ""
-
 msgid "Forwarding from DHCP-wireless network"
 msgstr ""
 
@@ -307,6 +301,9 @@ msgid "Network"
 msgstr ""
 
 msgid "Networks"
+msgstr ""
+
+msgid "No additional modules are installed."
 msgstr ""
 
 msgid "No report available"

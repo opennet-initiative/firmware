@@ -889,7 +889,8 @@ run_scheduled_tasks() {
 	# keine Ausführung, falls noch mindestens ein alter Task aktiv ist
 	find "$SCHEDULING_DIR" -type f -name "*.running" | while read fname; do
 		# veraltete Dateien werden geloescht und ignoriert
-		is_file_timestamp_older_minutes "$fname" 5 && rm -f "$fname" && continue
+		# wir müssen uns an dem langsamsten Cron-Job orientieren (MTU-Test für UGWs, ca. 5 Minuten)
+		is_file_timestamp_older_minutes "$fname" 10 && rm -f "$fname" && continue
 		# nicht-veraltete Dateien fuehren zum Abbruch der Funktion
 		msg_info "Skipping 'run_scheduled_task' due to an ongoing operation: $(tail -1 "$fname")"
 		echo "$fname"

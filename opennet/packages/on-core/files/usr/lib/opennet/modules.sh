@@ -140,7 +140,9 @@ install_from_opennet_repository() {
 ## @fn remove_opennet_module()
 ## @param module Name des oder der zu entfernenden Module
 remove_opennet_modules() {
-	run_opennet_opkg --autoremove remove "$@"
+	# "--force-remove" ist für on-monitoring notwendig, da sonst xinetd wegen einer Änderung
+	# /etc/xinet.d/munin nicht entfernt wird
+	run_opennet_opkg --autoremove --force-remove remove "$@"
 	save_on_modules_list
 }
 

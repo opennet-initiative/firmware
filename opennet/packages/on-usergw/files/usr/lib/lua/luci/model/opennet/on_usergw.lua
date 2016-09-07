@@ -95,6 +95,7 @@ function status_ugw_connection()
 	if not is_string_empty(ugw_status.mesh_servers_string) then
             result = luci.i18n.translatef("Connected Mesh Gateways: %s", ugw_status.mesh_servers_string) .. [[<br/>]]
 	    -- wir missbrauchen das munin-Plugin fuer die Ermittlung der Verbindungsanzahl
+	    -- TODO: dies löst eine Abhängigkeit von micropython aus - können wir das anders lösen?
 	    ugw_users_connection_count = luci.sys.exec(
                 "/usr/sbin/munin-node-plugin.d/on_usergw_connections | awk 'BEGIN {sum = 0} {sum += $2} END {print sum}'")
 	    result = result .. luci.i18n.translatef("Relayed user tunnel connection: %s", ugw_users_connection_count)

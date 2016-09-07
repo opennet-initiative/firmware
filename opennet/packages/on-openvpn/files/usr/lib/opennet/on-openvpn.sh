@@ -339,41 +339,40 @@ get_mig_tunnel_servers() {
 }
 
 
-## @fn get_traceroute()
+## @fn get_traceroute_csv()
 ## @brief Liefere den gecachten Traceroute zum Service zurück
 ## @param Service Name
 ## @returns CSV Liste von Hops
 get_traceroute_csv() {
-        local service_name="$1"
-        local traceroute
+	local service_name="$1"
+	local traceroute
 	local host
 
 	host=$(get_service_value "$service_name" "host")
 	traceroute=$(get_service_value "$TRACEROUTE_FILENAME" "$host")
 
-        # noch keine Tests durchgefuehrt?
-        [ -z "$traceroute" ] && return 0
-        echo "$traceroute"
+	# noch keine Tests durchgefuehrt?
+	[ -z "$traceroute" ] && return 0
+	echo "$traceroute"
 }
 
 
 ## @fn update_traceroute_gw_cache()
 ## @brief Aktualisiere den traceroute zu allen Gateway Servern.
-## @details Fuer jedes Gateway wird der traceroute ermittlelt. Ist der letzte traceroute zu lange her, wird er neuer traceroute gemacht.
 update_traceroute_gw_cache() {
-        trap "error_trap update_traceroute_gw_cache '$*'" $GUARD_TRAPS
-        local host
-        local service
-        local traceroute
-                
+	trap "error_trap update_traceroute_gw_cache '$*'" $GUARD_TRAPS
+	local host
+	local service
+	local traceroute
+
 	get_services "gw" | pipe_service_attribute "host" | cut -f 2- | sort | uniq | while read host; do
-                # do traceroute and get result as csv back
-                traceroute=$(get_traceroute "$host")
-                # update cache file
-                set_service_value "$TRACEROUTE_FILENAME" "$host" "$traceroute"
-        done
-        # es gab eine Aenderung
-        msg_info "updating traceroute to gateway servers"
+		# do traceroute and get result as csv back
+		traceroute=$(get_traceroute "$host")
+		# update cache file
+		set_service_value "$TRACEROUTE_FILENAME" "$host" "$traceroute"
+	done
+	# es gab eine Aenderung
+	msg_info "updating traceroute to gateway servers"
 }
 
 

@@ -280,8 +280,8 @@ get_hop_count_and_etx() {
 ## @param host der Ziel-IP
 ## @return Eine mit Komma getrennte Liste von IPs
 get_traceroute() {
-        local target="$1"
-        local result
+	local target="$1"
+	local result
 	
 	# wenn kein Parameter uebergeben, dann breche ab
 	[ -z "$target" ] && return 0
@@ -290,9 +290,8 @@ get_traceroute() {
 	get_ip_list() {
 		local ip=$1
 		timeout 20 traceroute -n "$ip" | tr '*' ' ' | while read line; do
-	
-        	# print IP
-	        echo "$line" | awk '{ print $2 }'
+			# print IP
+			echo "$line" | awk '{ print $2 }'
 		done | grep -v "^$" | tr '\n' ','
 	}
 	local ip_list 

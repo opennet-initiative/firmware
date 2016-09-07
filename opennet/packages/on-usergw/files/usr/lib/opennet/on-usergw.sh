@@ -345,7 +345,20 @@ get_active_ugw_connections() {
 }
 
 
-## update_mesh_gateway_firewall_rules()
+## @fn iptables_by_target_family()
+## @brief Rufe "iptables" oder "ip6tables" (abhängig von einer Ziel-IP) mit den gegebenen Parametern aus.
+## @param target die Ziel-IP anhand derer die Protokollfamilie (inet oder inet6) ermittelt wird
+## @param ... alle weiteren Parameter werden direkt an ip(6)tables uebergeben
+iptables_by_target_family() {
+	local target="$1"
+	shift
+	local command
+	is_ipv4 "$target" && command="iptables" || command="ip6tables"
+	"$command" "$@"
+}
+
+
+## @fn update_mesh_gateway_firewall_rules()
 ## @brief markiere alle lokal erzeugten Pakete, die an einen mesh-Gateway-Dienst adressiert sind
 ## @details Diese Markierung ermöglicht die Filterung (throw) der Pakete für mesh-Gateways in der
 ##   Nutzer-Tunnel-Routingtabelle.
@@ -357,6 +370,7 @@ update_mesh_gateway_firewall_rules() {
 	local chain="on_tos_mesh_vpn"
 	# Chain erzeugen oder leeren (falls sie bereits existiert)
 	iptables -t mangle --new-chain "$chain" 2>/dev/null || iptables -t mangle --flush "$chain"
+	ip6tables -t mangle --new-chain "$chain" 2>/dev/null || ip6tables -t mangle --flush "$chain"
 	# falls es keinen Tunnel-Anbieter gibt, ist nichts zu tun
 	[ -z "${TOS_NON_TUNNEL:-}" ] && return 0
 	# Regeln fuer jeden mesh-Gateway aufstellen
@@ -364,11 +378,13 @@ update_mesh_gateway_firewall_rules() {
 		host=$(get_service_value "$service" "host")
 		port=$(get_service_value "$service" "port")
 		protocol=$(get_service_value "$service" "protocol")
-		target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
-		# unaufloesbare Hostnamen ignorieren
-		[ -z "$target_ip" ] && continue
-		iptables -t mangle --insert "$chain" --destination "$host" --protocol "$protocol" --dport "$port" \
-			-j TOS --set-tos "$TOS_NON_TUNNEL"
+		query_dns "$host" | filter_routable_addresses | while read target_ip; do
+			# unaufloesbare Hostnamen ignorieren
+			[ -z "$target_ip" ] && continue
+			iptables_by_target_family "$target_ip" -t mangle --insert "$chain" \
+				--destination "$target_ip" --protocol "$protocol" --dport "$port" \
+				-j TOS --set-tos "$TOS_NON_TUNNEL"
+		done
 	done
 }
 

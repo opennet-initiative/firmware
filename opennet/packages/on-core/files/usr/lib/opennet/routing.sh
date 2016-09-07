@@ -300,8 +300,9 @@ get_traceroute() {
 	ip_list=$(echo "$ip_list" | sed "s/^to,//") #delete first line with "traceroute to ..."
 	ip_list=$(echo "$ip_list" | sed "s/???,//g") #delete all "???," of mtr output
 	ip_list=${ip_list%,} #delete last "," which is a result of loop
-	#echo $ip_list #DEBUG
-	[ -n "$ip_list" ] && echo "$ip_list" && return 0
+	# keine Ausgabe, falls leer
+	[ -z "$ip_list" ] && return 0
+	echo "$ip_list"
 }
 
 

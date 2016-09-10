@@ -82,10 +82,12 @@ uci_get_list_index() {
 	local value="$2"
 	local current
 	local index=0
+	# "head -1" statt "break" in der Schleife, um Broken-Pipe-Fehler zu vermeiden
 	uci_get_list "$uci_path" | while read current; do
-		[ "$current" = "$value" ] && echo "$index" && return 0
+		[ "$current" = "$value" ] && echo "$index"
 		: $((index++))
-	done
+		true
+	done | head -1
 	return 0
 }
 

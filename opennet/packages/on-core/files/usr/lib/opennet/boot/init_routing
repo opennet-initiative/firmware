@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -eu
+
+on-function update_olsr_interfaces
+on-function update_opennet_zone_masquerading
+on-function initialize_olsrd_policy_routing

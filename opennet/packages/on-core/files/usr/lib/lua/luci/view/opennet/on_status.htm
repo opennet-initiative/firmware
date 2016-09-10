@@ -61,7 +61,8 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 
 		local wireless_info = "<table><tr>"
 			.. luci.sys.exec("iwinfo"
-				.. " | grep -vE '(TX power offset|Frequency offset|Hardware|Type|Supports VAP|Encryption):'"
+				.. " | grep -vE '(TX power offset|Frequency offset|Hardware|Type|Supports VAP):'"
+				.. " | grep -v 'Encryption: none'"
 				.. " | sed 's/^.* ESSID:/<td><tt>ESSID:/; s/^ *//; s#$#<br/>#; s#^<br/>$#</tt></td>#'")
 			.. "</tr></table>"
 

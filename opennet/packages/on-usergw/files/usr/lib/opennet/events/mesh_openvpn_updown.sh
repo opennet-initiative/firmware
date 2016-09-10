@@ -50,16 +50,6 @@ setup_mesh_interface() {
 }
 
 
-cleanup_mesh_interface() {
-	local ifname="$1"
-	local netname
-	netname=$(get_netname "$ifname")
-	del_interface_from_zone "$ZONE_MESH" "$netname"
-	uci_delete "network.${netname}"
-	apply_changes network firewall
-}
-
-
 log_openvpn_events_and_disconnect_if_requested "mesh-openvpn-connections"
 
 
@@ -68,7 +58,20 @@ case "$script_type" in
 		setup_mesh_interface "$dev"
 		;;
 	down)
-		cleanup_mesh_interface "$dev"
+		# Aus irgendeinem Grund kann die lokale default-Route verloren gehen, wenn
+		# "apply_changes network" exakt jetzt ausgeführt wird - also leicht verschieben.
+		# Reproduzierbarkeit:
+		#  * manuelles Töten eines Mesh-VPN-Prozess
+		#  * default-Route in der main-Table fehlt
+		#  * "ifup wan" behebt das Problem
+		schedule_task <<EOF
+			. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+			sleep 10
+			netname=$(get_netname "$dev")
+			del_interface_from_zone "$ZONE_MESH" "\$netname"
+			uci_delete "network.\${netname}"
+			apply_changes network firewall
+EOF
 		;;
 esac 2>&1 | logger -t mesh-updown
 

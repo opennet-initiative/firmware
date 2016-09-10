@@ -152,8 +152,8 @@ You may obtain a copy of the License at
 			result += String.format('<td class="cbi-value-field">%.2f</td>', gateway.distance);
 		} else {
 			result += '<td class="cbi-value-field">';
-			if (gateway.distance && (gateway.offset != 0)) {
-				result += String.format('(%d)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_service_offset" />', gateway.offset, gateway.id, gateway);
+			if (gateway.offset != 0) {
+				result += String.format('(%d)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_service_offset" />&nbsp;', gateway.offset, gateway.id, gateway);
 			}
 			<% if sorting == "etx" then %>
 				distance = gateway.distance;

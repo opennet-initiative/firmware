@@ -26,18 +26,19 @@ define Package/on-core/install
 	$(call Package/opennet/install/template,$(1),$(PKG_NAME))
 endef
 
+# in dieser Sektion sind keine fuehrenden Leerzeichen erlaubt
+# (siehe https://github.com/openwrt/packages/issues/2652)
 define Package/on-core/conffiles
-	# Die Service-Beschreibungen inkl. persoenlicher Praeferenzen (offset/disable).
-	/etc/on-services.d/
-
-	# Technisch gehoeren die folgenden Dateien zu anderen Paketen.
-	# Da wir bei einer Aktualisierung die Pakete jedoch erst nachträglich installieren,
-	# ist es wohl für die Anwender weniger überraschend, wenn die Zertifikate beibehalten bleiben
-	# auch wenn das dazugehörige Paket noch nicht installiert ist.
-	# Praktisch betrifft dies nur die Situation einer zweimaligen Aktualisierung, ohne dass
-	# zwischenzeitlich openvpn installiert wurde.
-	/etc/openvpn/opennet_user/
-	/etc/openvpn/opennet_ugw/
+# Die Service-Beschreibungen inkl. persoenlicher Praeferenzen (offset/disable).
+/etc/on-services.d/
+# Technisch gehoeren die folgenden Dateien zu anderen Paketen.
+# Da wir bei einer Aktualisierung die Pakete jedoch erst nachträglich installieren,
+# ist es wohl für die Anwender weniger überraschend, wenn die Zertifikate beibehalten bleiben
+# auch wenn das dazugehörige Paket noch nicht installiert ist.
+# Praktisch betrifft dies nur die Situation einer zweimaligen Aktualisierung, ohne dass
+# zwischenzeitlich openvpn installiert wurde.
+/etc/openvpn/opennet_user/
+/etc/openvpn/opennet_ugw/
 endef
 
 define Package/on-core/postinst

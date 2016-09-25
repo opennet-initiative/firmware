@@ -50,12 +50,33 @@ setup_mesh_interface() {
 }
 
 
+# UGWs ohne lokale Mesh-Interfaces sollen auch über ihre Main-IP erreichbar sein
+# Wir konfigurieren die Main-IP abseits von uci manuell als /32-Adresse. Es gibt also keine
+# Beeinflussung des Routings. Die zusätliche Adresse wird nur konfiguriert, falls die Main-IP
+# nicht bereits auf einem realen Interface aktiv ist (siehe "ip addr show").
+# Jedes einzelne OpenVPN-Mesh-Interface erhält diese zusätzliche Adresse.
+add_main_ip_if_missing() {
+	local dev="$1"
+	local main_ip
+	main_ip=$(get_main_ip)
+	# irgendwie kein Main-IP? Ignorieren ...
+	[ -z "$main_ip" ] && return 0
+	# Ist auf einem Interface bereits eine Adresse mit dem "global"-Scope (Standard) aktiv?
+	# In diesem Fall müssen wir nichts tun.
+	ip addr show scope global | grep -qwF "inet $main_ip" && return 0
+	# Adresse mit dem scope "host" konfigurieren - das passt inhaltlich und erleichtert uns die
+	# obige Unterscheidung zwischen realen und manuell hinzugefügten Adressen.
+	ip addr add "$main_ip/32" dev "$dev" scope host
+}
+
+
 log_openvpn_events_and_disconnect_if_requested "mesh-openvpn-connections"
 
 
 case "$script_type" in
 	up)
 		setup_mesh_interface "$dev"
+		add_main_ip_if_missing "$dev"
 		;;
 	down)
 		# Aus irgendeinem Grund kann die lokale default-Route verloren gehen, wenn

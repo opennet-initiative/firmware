@@ -8,7 +8,7 @@
 #  * das WLAN-Interface ist ein 5-GHz-Interface (sonst schlaegt die Kanelerkennung fehl)
 #  * der AP ist aufgrund seiner Lage keiner exzessiven radar-aehnlichen Impulsflut ausgesetzt
 #    (ansonsten wird die Verbindung stoerend oft neu aufgebaut)
-# Zwischen zwei Reset-Vorgaengen wird eine minimale definierte Wartzeit eingehalten.
+# Zwischen zwei Reset-Vorgaengen wird eine minimale definierte Wartezeit eingehalten.
 #
 # Dieser Workaround sollte im Minutentakt angewandt werden.
 #
@@ -27,11 +27,36 @@ is_wifi_master() {
 }
 
 
-is_outdoor_channel() {
+# ist die Kanalnummer groesser als 48 oder ist es "auto"?
+# ansonsten: false
+is_dfs_channel() {
+	local channel="$1"
+	# "auto" wird wohl ein DFS-Kanal sein
+	[ "$channel" = "auto" ] && return 0
+	# ist es eine Zahl?
+	echo "$channel" | grep -q "^[0-9]\+$" || return 1
+	[ "$channel" -gt 48 ] && return 0
+	return 1
+}
+
+
+# ist aktuell ein Indoor-Channel aktiv?
+# Im Zweifel: nein
+is_dfs_channel_active() {
 	local channel
 	channel=$(iwinfo "$WIFI_DEVICE" info | grep -w Channel: | awk '{ print $4 }')
-	# dreistellige Zahl beginnend mit 1?
-	echo "$channel" | grep -q "^1[0-9][0-9]$" && return 0
+	is_dfs_channel "$channel" && return 0
+	return 1
+}
+
+
+# Diese Funktion erkennt leider auch ein 2.4GHz-Interface mit "auto"-Kanal als "DFS".
+is_dfs_channel_configured() {
+	local channel
+	for channel in $(uci show wireless | grep "\.channel=" | cut -f 2 -d "'"); do
+		is_dfs_channel "$channel" && return 0
+		true
+	done
 	return 1
 }
 
@@ -51,7 +76,8 @@ is_reset_period_elapsed() {
 
 # Abbruchbedingungen?
 is_wifi_master || exit 0
-is_outdoor_channel && exit 0
+is_dfs_channel_configured || exit 0
+is_dfs_channel_active && exit 0
 is_reset_period_elapsed || exit 0
 
 # indoor-Kanal und Periode ist abgelaufen - also reset des wifi-Interface

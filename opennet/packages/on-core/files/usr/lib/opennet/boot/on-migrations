@@ -526,7 +526,7 @@ remove_pre05_usergateway_olsr_announcement() {
 	trap "error_trap remove_pre05_usergateway_olsr_announcement '$*'" $GUARD_TRAPS
 	uci show -X olsrd | grep -q "^olsrd.cfg[^.]\+.service=http://.*:8080|tcp|ugw" || return 0
 	sed -i "/option service 'http:\/\/.*|tcp|ugw/d" /etc/config/olsrd
-	/etc/init.d/olsrd restart
+	/etc/init.d/olsrd restart || true
 }
 
 

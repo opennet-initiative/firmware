@@ -42,7 +42,7 @@ setup_mesh_interface() {
 	# expliziter olsrd-Neustart: eventuell sind noch Fragmente alter tap-Devices in
 	# der olsrd-Konfiguration eingetragen. Diese verhindern einen olsrd-Neustart,
 	# da es scheinbar keine Änderung gab.
-	/etc/init.d/olsrd restart
+	/etc/init.d/olsrd restart || true
 	# ohne dieses explizite reload reagiert die firewall seltsamerweise nicht auf die neuen Interfaces
 	/etc/init.d/firewall reload
 	# iu Kuerze moege die olsr-Interface-Liste neu erstellt werden (inkl. des neuen Interface)

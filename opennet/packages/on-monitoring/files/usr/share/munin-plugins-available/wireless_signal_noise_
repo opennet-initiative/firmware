@@ -25,7 +25,7 @@ if which iwinfo >/dev/null; then
 	# return MAC of peer and the signal strength
 	get_wifi_peers() { iwinfo "$1" assoclist | grep "^[0-9a-fA-F]" | awk '{print $1,$2}'; }
 	# the noise should be the same for all peers
-	get_wifi_noise() { iwinfo "$1" assoclist | grep "^[0-9a-fA-F]" | awk '{print $5}' | tail -1; }
+	get_wifi_noise() { iwinfo "$1" info | sed -n 's/^.* Noise: \([0-9-]\+\).*/\1/p'; }
 else
 	# "iw" is available everywhere - but its output format is not recommended for non-humans
 	get_wifi_interfaces() { iw dev | awk '{ if ($1 == "Interface") print $2; }'; }

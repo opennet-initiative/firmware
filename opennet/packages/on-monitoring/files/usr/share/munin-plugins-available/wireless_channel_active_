@@ -31,8 +31,7 @@ get_physical_interfaces_channel_descriptions() {
 }
 
 get_selected_physical_interface() {
-	# filename ends with "_"? Exit script with error immediately.
-	[ "$0" != "${0%_}" ] && echo >&2 "Failed to parse 'phy' device from filename" && exit 1
+	# The physical interface name should be safe (phyX) and needs no cleanup.
 	# pick the last segment after the final "_"
 	echo "$0" | sed 's/.*_//'
 }

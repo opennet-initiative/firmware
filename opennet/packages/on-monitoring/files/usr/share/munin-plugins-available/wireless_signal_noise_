@@ -50,11 +50,14 @@ get_ip_for_mac() {
 }
 
 
-get_selected_interface() {
-	# filename ends with "_"? Exit script with error immediately.
-	[ "$0" != "${0%_}" ] && echo >&2 "Failed to parse wifi interface from filename" && exit 1
-	# pick the last segment after the final "_"
-	echo "$0" | sed 's/.*_//'
+get_wifi_device_from_suffix() {
+	local suffix
+	local real_dev
+	# pick the part after the basename of the real file
+	suffix=$(basename "$0" | sed "s/^$(basename "$(readlink "$0")")//")
+	for real_dev in $(get_wifi_interfaces); do
+		[ "$suffix" != "$(clean_fieldname "$real_dev")" ] || echo "$real_dev"
+	done | head -1
 }
 
 
@@ -62,7 +65,7 @@ ACTION="${1:-}"
 
 case "$ACTION" in
 	config)
-		wifi=$(get_selected_interface)
+		wifi=$(get_wifi_device_from_suffix)
 		echo "graph_title Wireless signal quality - $wifi"
 		echo "graph_args --upper-limit 0"
 		echo "graph_vlabel Signal and noise [dBm]"
@@ -83,10 +86,12 @@ case "$ACTION" in
 		echo "yes"
 		;;
 	suggest)
-		get_wifi_interfaces
+		get_wifi_interfaces | while read ifname; do
+			clean_fieldname "$ifname"
+		done
 		;;
 	"")
-		wifi=$(get_selected_interface)
+		wifi=$(get_wifi_device_from_suffix)
 		peer_data=$(get_wifi_peers "$wifi")
 		echo "$peer_data" | while read mac signal; do
 			# ignore empty datasets

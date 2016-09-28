@@ -35,31 +35,24 @@ clean_fieldname() {
 }
 
 
-get_wifi_devices() {
+get_wifi_interfaces() {
 	iw dev | grep Interface | awk '{print $2}'
 }
 
-
 get_wifi_device_from_suffix() {
 	local suffix
-	local called
 	local real_dev
-	called=$(basename "$0")
-	suffix="${called#$SCRIPT_PREFIX}"
-	# empty result if the prefix did not match (and was not removed)
-	[ "$suffix" = "$0" ] && echo "" && return 0
-	# look for the matching real device (while using 'clean_fieldname')
-	for real_dev in $(get_wifi_devices); do
-		[ "$(clean_fieldname "$real_dev")" = "$suffix" ] && echo "$real_dev"
-		# let the loop finish successfully
-		true
-	done
+	# pick the part after the basename of the real file
+	suffix=$(basename "$0" | sed "s/^$(basename "$(readlink "$0")")//")
+	for real_dev in $(get_wifi_interfaces); do
+		[ "$suffix" != "$(clean_fieldname "$real_dev")" ] || echo "$real_dev"
+	done | head -1
 }
 
 
 if [ "${1:-}" = "autoconf" ]; then
 	if which iw 2>/dev/null; then
-		if [ -n "$(get_wifi_devices)" ]; then
+		if [ -n "$(get_wifi_interfaces)" ]; then
 			echo "yes"
 		else
 			echo "no (missing wifi devices)"
@@ -68,7 +61,7 @@ if [ "${1:-}" = "autoconf" ]; then
 		echo "no (missing 'iw' dependency)"
 	fi
 elif [ "${1:-}" = "suggest" ]; then
-	for dev in $(get_wifi_devices); do
+	for dev in $(get_wifi_interfaces); do
 		clean_fieldname "$dev"
 	done
 elif [ "${1:-}" = "config" ]; then

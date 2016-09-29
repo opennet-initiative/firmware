@@ -711,6 +711,9 @@ get_potential_error_messages() {
 	#    olsrd2 versucht auf /proc/-Eintraege zuzugreifen, bevor der Name des Netzwerk-Interface
 	#    feststeht ("none"). Ignorieren.
 	filters="${filters}|cannot open proc entry /proc/sys/net/ipv4/conf/none/"
+	# 23) RTNETLINK answers: Network is unreachable
+	#    bei einem OpenVPN-Verbindungsaufbau gehen die ersten Pakete verloren
+	filters="${filters}|RTNETLINK answers: Network is unreachable"
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.

@@ -79,20 +79,23 @@ case "$script_type" in
 		add_main_ip_if_missing "$dev"
 		;;
 	down)
+		netname=$(get_netname "$dev")
+		del_interface_from_zone "$ZONE_MESH" "$netname"
+		uci_delete "network.${netname}"
+		default_route=$(ip route show | grep ^default | head -1)
+		# firewall-Reload erzeugt viele Status-Zeilen - wir wollen das Log nicht ueberfuellen
+		apply_changes network firewall 2>/dev/null
 		# Aus irgendeinem Grund kann die lokale default-Route verloren gehen, wenn
-		# "apply_changes network" exakt jetzt ausgeführt wird - also leicht verschieben.
+		# "apply_changes network" ausgeführt wird.
 		# Reproduzierbarkeit:
 		#  * manuelles Töten eines Mesh-VPN-Prozess
 		#  * default-Route in der main-Table fehlt
 		#  * "ifup wan" behebt das Problem
-		schedule_task <<EOF
-			. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
-			sleep 10
-			netname=$(get_netname "$dev")
-			del_interface_from_zone "$ZONE_MESH" "\$netname"
-			uci_delete "network.\${netname}"
-			apply_changes network firewall
-EOF
+		# Wir prüfen also, ob die default-Route verlorenging und fügen sie notfalls erneut hinzu.
+		ip route show | grep -q ^default || {
+			msg_info "Lost default route during 'down' event of mesh VPN. Adding it again."
+			[ -n "$default_route" ] && ip route add $default_route 2>/dev/null || true
+		}
 		;;
 esac 2>&1 | logger -t mesh-updown
 

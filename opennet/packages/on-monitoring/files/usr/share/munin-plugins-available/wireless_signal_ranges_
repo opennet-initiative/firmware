@@ -18,6 +18,8 @@
 set -eu
 
 
+SCRIPT_PREFIX="wireless_signal_ranges_"
+
 # thresholds for signal quality ranges: ascending values
 SIGNAL_THRESHOLDS="-88 -80 -60 0"
 
@@ -50,7 +52,7 @@ get_wifi_device_from_suffix() {
 	local suffix
 	local real_dev
 	# pick the part after the basename of the real file
-	suffix=$(basename "$0" | sed "s/^$(basename "$(readlink "$0")")//")
+	suffix=$(basename "$0" | sed "s/^$SCRIPT_PREFIX//")
 	for real_dev in $(get_wifi_interfaces); do
 		[ "$suffix" != "$(clean_fieldname "$real_dev")" ] || echo "$real_dev"
 	done | head -1

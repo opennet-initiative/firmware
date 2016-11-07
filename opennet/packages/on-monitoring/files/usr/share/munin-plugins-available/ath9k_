@@ -136,7 +136,7 @@ class Station:
         HT20,LGI,1,,MCS5 ,5,185,30.6,0.0,0.0,0.0,0.0,0,0,0,0,0,82,8,1.0
         HT20,LGI,1,,MCS6 ,6,164,32.9,0.0,0.0,0.0,0.0,0,0,0,0,0,82,8,1.0
         """
-	strip_string = lambda text: text.strip()
+        strip_string = lambda text: text.strip()
         column_map = {"rate": (4, strip_string), "success": (15, int)}
         stats = {}
         with open(filename, "r") as statsfile:
@@ -422,7 +422,11 @@ class WifiPhy:
 
     def _parse_dfs_events(self):
         result = {}
-        for line in open(os.path.join(self._path, "ath9k", "dfs_stats"), "r").read().split("\n"):
+        fname = os.path.join(self._path, "ath9k", "dfs_stats")
+        if not os.path.exists(fname):
+            # older ath9k modules (e.g. Linux 3.3) did not provide this data
+            return {}
+        for line in open(fname, "r").read().split("\n"):
             tokens = line.split(":")
             if len(tokens) != 2: continue
             label, value = tokens[0].strip(), tokens[1].strip()
@@ -489,6 +493,11 @@ class Ath9kDriver:
         for phy in self.phys:
             yield from phy.get_values(scope)
 
+    def has_dfs_support(self):
+        for phy in self.phys:
+            if phy.dfs_events:
+                return True
+        return False
 
 
 def _get_up_down_pair(unit, key_up, key_down, factor=None, divider=None, use_negative=True):
@@ -546,7 +555,9 @@ if __name__ == "__main__":
             sys.exit(0)
         elif sys.argv[1] == "suggest":
             for scope in PLUGIN_SCOPES:
-                print(scope)
+                # skip the "dfs_events" scope if there is not DFS support
+                if (scope != "dfs_events") or ath9k.has_dfs_support():
+                    print(scope)
             sys.exit(0)
         elif sys.argv[1] == "version":
             print_error('olsrd Munin plugin, version %s' % plugin_version)

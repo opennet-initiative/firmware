@@ -1,4 +1,4 @@
-Hier sammeln wir Aenderungsnotizen fuer die aktuelle Firmware (seit dem letzten Release).
+Hier sammeln wir Änderungsnotizen fuer die aktuelle Firmware (seit dem letzten Release).
 Im Fall eines Release dienen die Notizen zum Befüllen des Changelogs im Wiki:
  https://wiki.opennet-initiative.de/wiki/Opennet_Firmware_Versionen
 Anschließend kann diese Liste wieder geleert werden.

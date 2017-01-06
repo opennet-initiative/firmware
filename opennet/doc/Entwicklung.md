@@ -584,7 +584,7 @@ Für ein Release sind folgende Schritte durchzuführen:
 * die "CONFIG_VERSION_NUMBER" in ``opennet/config/common`` erhöhen
 * Wiki-Doku aktualisieren:
     * https://opennet-initiative.de/wiki/Opennet_Firmware_Versionen
-    * https://opennet-initiative.de/wiki/Opennet_Firmware_NG/Download
+    * https://opennet-initiative.de/wiki/Opennet_Firmware/Download
     * https://opennet-initiative.de/wiki/Firmware-Aktualisierung
 
 

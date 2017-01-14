@@ -1,4 +1,10 @@
-IP6_PREFIX=2001:67c:1400:2432
+#permanent IPv6 Präfix (ULA)
+IP6_PREFIX_PERM=fd32:d8d3:87da:0
+#/60 Präfix von gai (IN-BERLIN)
+IP6_PREFIX_OLD=2001:67c:1400:2432
+#/48 Präfic von IN-BERLIN
+IP6_PREFIX_TMP=2a0a:4580:1010:1
+
 IP6_PREFIX_LENGTH=64
 NETWORK_LOOPBACK=on_loopback
 ROUTING_TABLE_MESH_OLSR2=olsrd2
@@ -39,7 +45,9 @@ get_mac_address() {
 ## Die Funktion ist kaum getestet - sie erzeugt sicherlich falsche Adressen (mehr als ein
 ## Doppel-Doppelpunkt, usw.).
 shorten_ipv6_address() {
-	sed 's/:0\+/:/g; s/::\+/::/g'
+	#use not the following     sed 's/:0\+/:/g; s/::\+/::/g'
+	#but the below because in '/olsrv2info route' there are ':0:' in output
+	sed 's/:00\+/:/g; s/::\+/::/g'
 }
 
 
@@ -54,14 +62,14 @@ convert_mac_to_eui64_address() {
 	# MAC-Offset hinzuaddieren
 	combined_mac=$(printf "%012x" "$(( 0x$combined_mac + mac_offset ))")
 	printf "%s:%s:%sff:fe%s:%s" "$prefix" "${combined_mac:0:4}" "${combined_mac:4:2}" \
-		"${combined_mac:6:2}" "${combined_mac:8:4}" | shorten_ipv6_address
+		"${combined_mac:6:2}" "${combined_mac:8:4}"       | shorten_ipv6_address
 }
 
 
 ## @fn get_main_ipv6_address()
 ## @brief Ermittle die IPv6-Adresse des APs anhand des EUI64-Verfahrens.
 get_main_ipv6_address() {
-	printf "%s/%s" "$(convert_mac_to_eui64_address "$IP6_PREFIX" "$(get_mac_address)")" "$IP6_PREFIX_LENGTH"
+	printf "%s/%s" "$(convert_mac_to_eui64_address "$IP6_PREFIX_PERM" "$(get_mac_address)")" "$IP6_PREFIX_LENGTH"
 }
 
 
@@ -240,11 +248,13 @@ debug_translate_macs() {
 	local sed_script_ip
 	sed_script_mac=$(echo "$MAC_HOSTNAME_MAP" | while read mac name; do
 			# Main-IP (loopback-Interface)
-			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "$IP6_PREFIX" "$mac")" "$name"
+			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "$IP6_PREFIX_PERM" "$mac")" "$name"
+			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "$IP6_PREFIX_OLD" "$mac")" "$name"
+			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "$IP6_PREFIX_TMP" "$mac")" "$name"
 			# link-local-Adressen: das "local"-Bit setzen
-			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "fe80::" "$mac" "0x020000000000")" "$name"
+			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "fe80:" "$mac" "0x020000000000")" "$name"
 			# für Nanostations: das 16. Bit hochzählen für die zweite MAC des Geräts
-			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "fe80::" "$mac" "0x020000010000")" "$name"
+			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "fe80:" "$mac" "0x020000010000")" "$name"
 		done)
 	sed_script_ip=$(echo "$IPV6_HOSTNAME_MAP" | while read ip name; do
 			printf "s/%s/%s/g;\n" "$ip" "$name"

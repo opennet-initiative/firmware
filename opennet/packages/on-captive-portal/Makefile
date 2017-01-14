@@ -29,6 +29,10 @@ endef
 define Package/on-captive-portal/postinst
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+# Das munin-Plugin "wireless_signal_noise_" offenbart die MAC-Adressen von captive-Portal-Clients.
+# Dies wollen wir nicht.
+on-function is_on_module_installed_and_enabled on-captive-portal && \
+	on-function disable_munin_plugin "wireless_signal_noise_"
 on-function on_opkg_postinst_default
 on-function apply_changes "$(PKG_NAME)"
 endef

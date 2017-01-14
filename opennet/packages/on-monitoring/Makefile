@@ -42,8 +42,12 @@ on-function schedule_task <<-EOF
 	# automatisch konfigurierte munin-Plugins verlinken
 	on-function enable_suggested_munin_plugin_names "wireless_channel_active_"
 	on-function enable_suggested_munin_plugin_names "wireless_channel_occupation_"
-	on-function enable_suggested_munin_plugin_names "wireless_signal_noise_"
 	on-function enable_suggested_munin_plugin_names "wireless_signal_ranges_"
+
+	# Das "wireless_signal_noise_"-Plugin offenbart MAC-Addressn - dies soll nicht auf einem
+	# offenen Zugangspunkt geschehen.
+	on-function is_on_module_installed_and_enabled on-captive-portal || \
+		on-function enable_suggested_munin_plugin_names "wireless_signal_noise_"
 
 	# Patch auf /usr/sbin/munin-node anwenden, um die Verwendung von Modulen zu ermöglichen
 	on-function enable_munin_plugins

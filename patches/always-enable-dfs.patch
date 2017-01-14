@@ -1,8 +1,19 @@
-Aktiviere DFS sogar im Monitor Mode
+Ermögliche selektiv das Aktivieren von DFS auch im Monitor Mode.
+
+Aktivieren
+echo 1 > /sys/module/ath9k_hw/parameters/always_dfs
+echo 1 > /sys/module/ath9k/parameters/always_dfs
+
+Deaktivieren
+echo 0 > /sys/module/ath9k/parameters/always_dfs
+echo 0 > /sys/module/ath9k_hw/parameters/always_dfs
+
+
+Credits: Till und Kai-Uwe
 
 --- /dev/null
 +++ b/openwrt/package/kernel/mac80211/patches/499_always_enable_dfs.patch
-@@ -0,0 +1,62 @@
+@@ -0,0 +1,96 @@
 +--- a/drivers/net/wireless/ath/ath9k/channel.c	2016-01-15 13:00:08.000000000 +0100
 ++++ b/drivers/net/wireless/ath/ath9k/channel.c	2017-01-02 00:29:17.023553203 +0100
 +@@ -80,7 +80,8 @@
@@ -10,8 +21,8 @@ Aktiviere DFS sogar im Monitor Mode
 + 	 * scanning and radar detection can not be used concurrently.
 + 	 */
 +-	if (hw->conf.radar_enabled) {
-++	if (hw->conf.radar_enabled || 1) {
-++		ath_dbg(common, DFS, "RADAR override in effect (" __FILE__ ", l. %d)\n", __LINE__);
+++	if (hw->conf.radar_enabled || (ath9k_always_dfs == 1)) {
+++		ath_dbg(common, DFS, "RADAR detection enabled (" __FILE__ ", l. %d)\n", __LINE__);
 + 		u32 rxfilter;
 + 
 + 		rxfilter = ath9k_hw_getrxfilter(ah);
@@ -31,23 +42,35 @@ Aktiviere DFS sogar im Monitor Mode
 + 	if (!pd->add_pulse(pd, pe))
 + 		return;
 + 	DFS_STAT_INC(sc, radar_detected);
-++#if 0
+++if (ath9k_always_dfs == 0) {
 + 	ieee80211_radar_detected(sc->hw);
-++#else
-++	ath_dbg(common, DFS, "RADAR override in effect, radar_detected suppressed (" __FILE__ ", l. %d)\n", __LINE__);
-++#endif
+++} else {
+++	ath_dbg(common, DFS, "RADAR detection enabled, radar_detected suppressed (" __FILE__ ", l. %d)\n", __LINE__);
+++}
 + }
 + 
 + /*
-+--- a/drivers/net/wireless/ath/ath9k/hw.c	2016-12-31 19:58:01.000000000 +0100
-++++ b/drivers/net/wireless/ath/ath9k/hw.c	2017-01-02 00:31:37.891519286 +0100
-+@@ -2071,7 +2071,8 @@
++--- a/drivers/net/wireless/ath/ath9k/hw.c	2017-01-10 17:13:57.801668156 +0100
+++++ b/drivers/net/wireless/ath/ath9k/hw.c	2017-01-10 17:15:50.755896588 +0100
++@@ -37,6 +37,11 @@
++ MODULE_SUPPORTED_DEVICE("Atheros 802.11n WLAN cards");
++ MODULE_LICENSE("Dual BSD/GPL");
++ 
+++static int ath9k_hw_always_dfs = 0;
+++module_param_named(always_dfs, ath9k_hw_always_dfs, int, 0644);
+++MODULE_PARM_DESC(always_dfs, "Enable DFS messages in all modes");
+++
+++
++ static void ath9k_hw_set_clockrate(struct ath_hw *ah)
++ {
++ 	struct ath_common *common = ath9k_hw_common(ah);
++@@ -2071,7 +2076,8 @@
 + 	if (AR_SREV_9565(ah) && common->bt_ant_diversity)
 + 		REG_SET_BIT(ah, AR_BTCOEX_WL_LNADIV, AR_BTCOEX_WL_LNADIV_FORCE_ON);
 + 
 +-	if (ah->hw->conf.radar_enabled) {
-++	if (ah->hw->conf.radar_enabled || 1) {
-++		ath_dbg(common, DFS, "RADAR override in effect (" __FILE__ ", l. %d)\n", __LINE__);
+++	if (ah->hw->conf.radar_enabled || (ath9k_hw_always_dfs == 1)) {
+++		ath_dbg(common, DFS, "RADAR detection enabled (" __FILE__ ", l. %d)\n", __LINE__);
 + 		/* set HW specific DFS configuration */
 + 		ah->radar_conf.ext_channel = IS_CHAN_HT40(chan);
 + 		ath9k_hw_set_radar_params(ah);
@@ -58,10 +81,33 @@ Aktiviere DFS sogar im Monitor Mode
 + 
 + 	/* if operating on a DFS channel, enable radar pulse detection */
 +-	if (sc->hw->conf.radar_enabled)
-++	if (sc->hw->conf.radar_enabled || 1) {
-++		ath_dbg(common, DFS, "RADAR override in effect (" __FILE__ ", l. %d)\n", __LINE__);
+++	if (sc->hw->conf.radar_enabled || (ath9k_always_dfs == 1)) {
+++		ath_dbg(common, DFS, "RADAR detection enabled (" __FILE__ ", l. %d)\n", __LINE__);
 + 		rfilt |= ATH9K_RX_FILTER_PHYRADAR | ATH9K_RX_FILTER_PHYERR;
 ++	}
 + 
 + 	spin_lock_bh(&sc->chan_lock);
 + 
++--- a/drivers/net/wireless/ath/ath9k/init.c	2017-01-06 22:11:58.251673645 +0100
+++++ b/drivers/net/wireless/ath/ath9k/init.c	2017-01-06 22:36:34.600625015 +0100
++@@ -45,6 +45,10 @@
++ module_param_named(nohwcrypt, ath9k_modparam_nohwcrypt, int, 0444);
++ MODULE_PARM_DESC(nohwcrypt, "Disable hardware encryption");
++ 
+++int ath9k_always_dfs = 0;
+++module_param_named(always_dfs, ath9k_always_dfs, int, 0644);
+++MODULE_PARM_DESC(always_dfs, "Enforce RADAR detection on all channels, disrupt DFS");
+++
++ int ath9k_led_blink = 1;
++ module_param_named(blink, ath9k_led_blink, int, 0444);
++ MODULE_PARM_DESC(blink, "Enable LED blink on activity");
++--- a/drivers/net/wireless/ath/ath9k/ath9k.h	2017-01-06 22:11:00.163648461 +0100
+++++ b/drivers/net/wireless/ath/ath9k/ath9k.h	2017-01-06 22:11:49.267669620 +0100
++@@ -38,6 +38,7 @@
++ extern int led_blink;
++ extern bool is_ath9k_unloaded;
++ extern int ath9k_use_chanctx;
+++extern int ath9k_always_dfs;
++ 
++ /*************************/
++ /* Descriptor Management */

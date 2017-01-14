@@ -12,3 +12,4 @@ makefile_include_opennet_packages.patch
 #cpe-rx.patch
 #cpe510-tx.patch
 #olsrd2_enable_plugin_ethernet_listener.patch
+#always-enable-dfs.patch

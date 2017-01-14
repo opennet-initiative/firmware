@@ -1,0 +1,67 @@
+Aktiviere DFS sogar im Monitor Mode
+
+--- /dev/null
++++ b/openwrt/package/kernel/mac80211/patches/499_always_enable_dfs.patch
+@@ -0,0 +1,62 @@
++--- a/drivers/net/wireless/ath/ath9k/channel.c	2016-01-15 13:00:08.000000000 +0100
+++++ b/drivers/net/wireless/ath/ath9k/channel.c	2017-01-02 00:29:17.023553203 +0100
++@@ -80,7 +80,8 @@
++ 	/* Enable radar pulse detection if on a DFS channel. Spectral
++ 	 * scanning and radar detection can not be used concurrently.
++ 	 */
++-	if (hw->conf.radar_enabled) {
+++	if (hw->conf.radar_enabled || 1) {
+++		ath_dbg(common, DFS, "RADAR override in effect (" __FILE__ ", l. %d)\n", __LINE__);
++ 		u32 rxfilter;
++ 
++ 		rxfilter = ath9k_hw_getrxfilter(ah);
++--- a/drivers/net/wireless/ath/ath9k/dfs.c	2016-01-15 13:00:08.000000000 +0100
+++++ b/drivers/net/wireless/ath/ath9k/dfs.c	2017-01-02 00:30:52.159530173 +0100
++@@ -275,6 +275,9 @@
++ static void
++ ath9k_dfs_process_radar_pulse(struct ath_softc *sc, struct pulse_event *pe)
++ {
+++	struct ath_hw *ah = sc->sc_ah;
+++	struct ath_common *common = ath9k_hw_common(ah);
+++
++ 	struct dfs_pattern_detector *pd = sc->dfs_detector;
++ 	DFS_STAT_INC(sc, pulses_processed);
++ 	if (pd == NULL)
++@@ -282,7 +285,11 @@
++ 	if (!pd->add_pulse(pd, pe))
++ 		return;
++ 	DFS_STAT_INC(sc, radar_detected);
+++#if 0
++ 	ieee80211_radar_detected(sc->hw);
+++#else
+++	ath_dbg(common, DFS, "RADAR override in effect, radar_detected suppressed (" __FILE__ ", l. %d)\n", __LINE__);
+++#endif
++ }
++ 
++ /*
++--- a/drivers/net/wireless/ath/ath9k/hw.c	2016-12-31 19:58:01.000000000 +0100
+++++ b/drivers/net/wireless/ath/ath9k/hw.c	2017-01-02 00:31:37.891519286 +0100
++@@ -2071,7 +2071,8 @@
++ 	if (AR_SREV_9565(ah) && common->bt_ant_diversity)
++ 		REG_SET_BIT(ah, AR_BTCOEX_WL_LNADIV, AR_BTCOEX_WL_LNADIV_FORCE_ON);
++ 
++-	if (ah->hw->conf.radar_enabled) {
+++	if (ah->hw->conf.radar_enabled || 1) {
+++		ath_dbg(common, DFS, "RADAR override in effect (" __FILE__ ", l. %d)\n", __LINE__);
++ 		/* set HW specific DFS configuration */
++ 		ah->radar_conf.ext_channel = IS_CHAN_HT40(chan);
++ 		ath9k_hw_set_radar_params(ah);
++--- a/drivers/net/wireless/ath/ath9k/recv.c	2016-01-15 13:00:08.000000000 +0100
+++++ b/drivers/net/wireless/ath/ath9k/recv.c	2017-01-02 00:32:21.347509158 +0100
++@@ -384,8 +384,10 @@
++ 		| ATH9K_RX_FILTER_MCAST;
++ 
++ 	/* if operating on a DFS channel, enable radar pulse detection */
++-	if (sc->hw->conf.radar_enabled)
+++	if (sc->hw->conf.radar_enabled || 1) {
+++		ath_dbg(common, DFS, "RADAR override in effect (" __FILE__ ", l. %d)\n", __LINE__);
++ 		rfilt |= ATH9K_RX_FILTER_PHYRADAR | ATH9K_RX_FILTER_PHYERR;
+++	}
++ 
++ 	spin_lock_bh(&sc->chan_lock);
++ 

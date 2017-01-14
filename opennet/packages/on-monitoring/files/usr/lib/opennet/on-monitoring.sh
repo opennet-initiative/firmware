@@ -60,6 +60,14 @@ enable_suggested_munin_plugin_names() {
 }
 
 
+disable_munin_plugin() {
+	local base_plugin="$1"
+	local active_plugin_dir="${IPKG_INSTROOT:-}/usr/sbin/munin-node-plugin.d/"
+	[ -d "$active_plugin_dir" ] || return 0
+	find "$active_plugin_dir" -type l -name "$1*" -delete
+}
+
+
 ## @fn remove_suggested_munin_plugin_names()
 ## @brief Lösche alle spezifischen Symlink-Ziele eines gegebenen Plugins.
 remove_suggested_munin_plugin_names() {

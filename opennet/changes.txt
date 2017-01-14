@@ -5,6 +5,7 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
+* MAC-Adressen von Nutzern offener Zugangspunkte werden nicht mehr via Monitoring veröffentlicht
 
 = Interne Änderungen =
 * root-Passwort ist bei einer Erstinstallation leer

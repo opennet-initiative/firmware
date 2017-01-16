@@ -1,0 +1,56 @@
+Feingranularere Debug-Flags fuer DFS-Meldungen in ath9k
+
+bisher:
+saemtliche DFS-Meldungen werden ueber Bitmaske 0x10000 aktiviert
+
+jetzt:
+Bitmaske 0x00010000 aktiviert alle DFS-Meldungen ausser den Meldungen fuer einzelne Pulse
+Bitmaske 0x10000000 aktiviert DFS-Puls-Meldungen
+
+also z.B.
+
+echo 0x10400 > /sys/kernel/debug/ieee80211/phy0/ath9k/debug (nur "RADAR found"-Meldungen)
+echo 0x10010400 > /sys/kernel/debug/ieee80211/phy0/ath9k/debug (alle Meldungen, auch Pulse)
+
+Autor: Till
+
+--- /dev/null
++++ b/openwrt/package/kernel/mac80211/patches/499_radar_pulse_debug.patch
++--- a/drivers/net/wireless/ath/ath9k/dfs.c	2017-01-15 16:21:32.878954960 +0100
+++++ b/drivers/net/wireless/ath/ath9k/dfs.c	2017-01-15 18:10:36.857764156 +0100
++@@ -308,7 +308,7 @@
++ 	DFS_STAT_INC(sc, pulses_total);
++ 	if ((rs->rs_phyerr != ATH9K_PHYERR_RADAR) &&
++ 	    (rs->rs_phyerr != ATH9K_PHYERR_FALSE_RADAR_EXT)) {
++-		ath_dbg(common, DFS,
+++		ath_dbg(common, DFS_PULSE,
++ 			"Error: rs_phyer=0x%x not a radar error\n",
++ 			rs->rs_phyerr);
++ 		DFS_STAT_INC(sc, pulses_no_dfs);
++@@ -352,7 +352,7 @@
++ 		pe.chirp = false;
++ 	}
++ 
++-	ath_dbg(common, DFS,
+++	ath_dbg(common, DFS_PULSE,
++ 		"ath9k_dfs_process_phyerr: type=%d, freq=%d, ts=%llu, "
++ 		"width=%d, rssi=%d, delta_ts=%llu\n",
++ 		ard.pulse_bw_info, pe.freq, pe.ts, pe.width, pe.rssi,
++diff -Nur a/ath.h b/ath.h
++--- a/drivers/net/wireless/ath.h	2017-01-15 16:21:03.871894590 +0100
+++++ b/drivers/net/wireless/ath.h	2017-01-15 18:09:42.369293346 +0100
++@@ -250,6 +250,7 @@
++  *	used exclusively for WLAN-BT coexistence starting from
++  *	AR9462.
++  * @ATH_DBG_DFS: radar datection
+++ * @ATH_DBG_DFS_PULSE: radar datection (messages about single pulses)
++  * @ATH_DBG_WOW: Wake on Wireless
++  * @ATH_DBG_DYNACK: dynack handling
++  * @ATH_DBG_SPECTRAL_SCAN: FFT spectral scan
++@@ -283,6 +284,7 @@
++ 	ATH_DBG_CHAN_CTX	= 0x00040000,
++ 	ATH_DBG_DYNACK		= 0x00080000,
++ 	ATH_DBG_SPECTRAL_SCAN	= 0x00100000,
+++	ATH_DBG_DFS_PULSE	= 0x10000000,
++ 	ATH_DBG_ANY		= 0xffffffff
++ };

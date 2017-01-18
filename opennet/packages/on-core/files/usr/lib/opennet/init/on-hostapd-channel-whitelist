@@ -6,7 +6,9 @@
 
 set -eu
 
-#add channel whitelist to /etc/config/wireless
+#add channel whitelist for 5GHz devices to /etc/config/wireless
 #info: the additional option chanlist is enables by one of our patches 
-uci set wireless.radio0.chanlist='36-64 100-124 132-140'
-uci commit
+if [ "11a" = "`uci get wireless.radio0.hwmode`" ]; then 
+  uci set wireless.radio0.chanlist='36-64 100-124 132-140'
+  uci commit
+fi

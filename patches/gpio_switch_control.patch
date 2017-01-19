@@ -1,7 +1,12 @@
+TODO: check whether this patch is needed in LEDE? Originally it was designed for ChaosCalmer.
+
+
 Allow GPIO control via uci during bootup
 
 GPIO control can be used for features like PoE passthrough.
 This is implemented for Ubiquiti Nanostation (XM/XW) and TP-Link CPE510.
+
+In addition to applying this patch the file gpio_switch has to be made executable afterwards.
 
 diff --git a/openwrt/package/base-files/files/etc/init.d/gpio_switch b/openwrt/package/base-files/files/etc/init.d/gpio_switch
 new file mode 100755

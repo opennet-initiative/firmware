@@ -5,7 +5,7 @@ luci_olsr_fix_empty_result.patch
 olsrd_add_ondataservice.patch
 #px5g_create_csr.patch
 #gpio_switch_control.patch
-#improved_dfs_detection.patch
+improved_dfs_detection.patch
 #cpe-rx.patch
 #cpe510-tx.patch
 #olsrd2_enable_plugin_ethernet_listener.patch

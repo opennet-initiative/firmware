@@ -62,7 +62,6 @@ CONFIG_LUCI_LANG_de=y
 CONFIG_LUCI_SRCDIET=y
 
 # System
-CONFIG_PACKAGE_bridge=y
 CONFIG_PACKAGE_mtd=y
 
 # OLSR mit relevanten Modulen

@@ -9,5 +9,5 @@ improved_dfs_detection.patch
 #cpe-rx.patch
 #cpe510-tx.patch
 olsrd2_enable_plugin_ethernet_listener.patch
-#always-enable-dfs.patch
+always-enable-dfs.patch
 #radar_pulse_debug.patch

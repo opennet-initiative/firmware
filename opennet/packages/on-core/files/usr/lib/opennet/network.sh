@@ -125,11 +125,9 @@ get_current_addresses_of_network() {
 		[ -n "$ifname" ] && network="$ifname"
 		# Keine Fehlermeldungen: vielleicht haben wir den Namen falsch geraten
 		# oder das Interface ist inaktiv.
-		ip addr show dev "$network" 2>/dev/null | grep -wE "inet6?" | awk '{print $2}'
-	else
-		# konfiguriertes Interface
-		(set +eu; . /lib/functions/network.sh; network_get_subnets subnets "$network"; echo "$subnets")
 	fi
+
+	ip addr show dev "$network" 2>/dev/null | grep -wE "inet6?" | awk '{print $2}'
 }
 
 

@@ -1,13 +1,15 @@
 [submodule "luci"]
 	path = luci
-	url = git://git.openwrt.org/project/luci.git
+	url = https://git.lede-project.org/project/luci.git
+        branch = lede-17.01
 [submodule "routing"]
 	path = routing
-	url = http://github.com/openwrt-routing/packages.git
-[submodule "openwrt"]
-	path = openwrt
-	url = git://git.openwrt.org/15.05/openwrt.git
+	url = https://git.lede-project.org/feed/routing.git
 [submodule "packages"]
 	path = packages
-	url = https://github.com/openwrt/packages.git
-	branch = for-15.05
+	url = https://git.lede-project.org/feed/packages.git
+        branch = lede-17.01
+[submodule "lede"]
+	path = lede
+	url = https://git.lede-project.org/source.git
+        branch = lede-17.01

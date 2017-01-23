@@ -21,7 +21,7 @@ update_olsr_interfaces() {
 	devices=$(get_zone_raw_devices "$ZONE_MESH")
 	# fuehrende Leerzeichen entfernen; Zeilenumbrueche in Leerzeichen verwandeln
 	value=$(echo "$interfaces $devices" | sed 's/^ *//; s/ *$//' | tr '\n' ' ' | sed 's/^ *//; s/ *$//')
-	uci set -q "olsrd.@Interface[0].interface=$value"
+	uci -q set "olsrd.@Interface[0].interface=$value"
 	apply_changes olsrd
 }
 

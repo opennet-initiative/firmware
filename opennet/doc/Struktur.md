@@ -5,13 +5,13 @@
 
 Diese Dokumentation beschäftigt sich mit der Struktur der Firmware-Buildumgebung. Die Verwendung der Umgebung ist dagegen in der [Entwicklungsdokumentation] (Entwicklung.md) beschrieben.
 
-Die Opennet-Entwicklungsumgebung ist die Zusammenfassung der openwrt-Repositories und ein paar weniger Opennet-Pakete.
+Die Opennet-Entwicklungsumgebung ist die Zusammenfassung der LEDE/OpenWrt-Repositories und ein paar weniger Opennet-Pakete.
 
-Zusätzlich enthält sie Patches gegenüber *openwrt*, die es bisher noch nicht in deren Repository geschafft haben oder die zu opennet-spezifisch sind.
+Zusätzlich enthält sie Patches gegenüber *LEDE/OpenWrt*, die es bisher noch nicht in deren Repository geschafft haben oder die zu spezifisch für Opennet sind.
 
 Die Verzeichnisse haben die folgenden Inhalte:
 
-* *openwrt* -- das openwrt-Repository (Build-Umgebung, Kernel und Basispakete)
+* *openwrt* -- das LEDE/OpenWrt-Repository (Build-Umgebung, Kernel und Basispakete)
 * openwrt-Paket-Feeds:
     * *packages* -- die meisten openwrt-Pakete
     * *routing* -- Routing-Pakete

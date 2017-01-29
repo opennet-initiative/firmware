@@ -48,7 +48,7 @@ build_platform() {
 	find "$dest_platform_dir" -perm 655 -print0 | xargs -0 --no-run-if-empty chmod 755
 
 	# copy build to export directory
-	local src_dir="$HOME/$BIN_DIR/$platform"
+	local src_dir="$HOME/$BIN_DIR"
 	rsync $RSYNC_OPTIONS "$src_dir/" "$dest_platform_dir/"
 
 	# set version number in export directories

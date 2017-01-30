@@ -42,18 +42,16 @@ build_platform() {
 
 	# prepare export directory
 	local dest_dir="$HOME/$EXPORT_DIR/$snapshot_name"
-	local dest_platform_dir="$dest_dir/$platform"
-	mkdir -p "$dest_platform_dir"
+	mkdir -p "$dest_dir"
 	# workaround for broken directory or file mode?
-	find "$dest_platform_dir" -perm 655 -print0 | xargs -0 --no-run-if-empty chmod 755
+	#find "$dest_platform_dir" -perm 655 -print0 | xargs -0 --no-run-if-empty chmod 755
 
-	# copy build to export directory
+	# copy all platform builds to export directory
 	local src_dir="$HOME/$BIN_DIR"
-	rsync $RSYNC_OPTIONS "$src_dir/" "$dest_platform_dir/"
+	rsync $RSYNC_OPTIONS "$src_dir/" "$dest_dir/"
 
 	# set version number in export directories
 	get_commit_info > "$dest_dir/__${snapshot_name}__"
-	get_commit_info > "$dest_platform_dir/__${snapshot_name}__"
 
 	# generate latest link
 	rm -f "$HOME/$EXPORT_DIR/$LATEST_LINK"

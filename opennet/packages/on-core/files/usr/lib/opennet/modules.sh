@@ -216,11 +216,18 @@ get_default_opennet_opkg_repository_url() {
 		# wir schneiden alles ab dem ersten Bindestrich ab
 		version_path="stable/$(echo "$firmware_version" | cut -f 1 -d -)"
 	fi
+	#TODO In LEDE gibt es zwei unterschiedliche packages Pfade. 
+	#     Dies muss hier umgebaut werden, damit zwei Pfade behandelt werden (auch die in z.B. targets/ar71xx/generic/packages/) 
 	# Hole "DISTRIB_TARGET" und entferne potentielle "/generic"-Suffixe (z.B. ar71xx und x86),
 	# da wir dies in unserem Repository nicht abbilden.
-	local arch_path
-	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
-	echo "$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/$arch_path/packages"
+	#	local arch_path
+	#	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
+        #	echo "$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/$arch_path/packages"
+
+	# Hole ARCH und CPU Type
+        local arch_cpu_type
+        arch_cpu_type=$(opkg status base-files | awk '/Architecture/ {print $2}')
+        echo "$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/packages/$arch_cpu_type"
 }
 
 

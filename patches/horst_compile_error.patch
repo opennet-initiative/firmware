@@ -1,0 +1,17 @@
+Fix for current compile error of horst.
+Pull request is already there and waiting for commit: https://github.com/openwrt/packages/pull/3817/commits/09466f8aa8509dc8231acff5371caff8c8ed5e7d#diff-5736588f03a5bdce678a30c9a997e1c0
+
+
+
+Index: on_firmware/packages/net/horst/Makefile
+===================================================================
+--- on_firmware.orig/packages/net/horst/Makefile
++++ on_firmware/packages/net/horst/Makefile
+@@ -26,6 +26,7 @@ PKG_BUILD_PARALLEL:=1
+ include $(INCLUDE_DIR)/package.mk
+ 
+ MAKE_FLAGS += DEBUG=1 LIBNL=tiny
++TARGET_CFLAGS += -D_GNU_SOURCE 
+ 
+ define Package/horst
+ 	SECTION:=net

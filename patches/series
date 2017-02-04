@@ -11,3 +11,4 @@ improved_dfs_detection.patch
 olsrd2_enable_plugin_ethernet_listener.patch
 always-enable-dfs.patch
 #radar_pulse_debug.patch
+horst_compile_error.patch

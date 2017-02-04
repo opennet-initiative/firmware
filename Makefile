@@ -88,11 +88,11 @@ quilt-check:
 
 patch: quilt-check
 	@# apply all patches if there are unapplied ones
-	@test -n "$(shell $(QUILT_BIN) unapplied 2>/dev/null)" && $(QUILT_BIN) push -a || false
+	@$(QUILT_BIN) push -a || [ $$? -ne 1 ]
 
 unpatch: quilt-check
 	@# revert all patches if there are applied ones
-	@test -n "$(shell $(QUILT_BIN) applied 2>/dev/null)" && $(QUILT_BIN) pop -a || false
+	@$(QUILT_BIN) pop -a || [ $$? -ne 1 ]
 
 clean: unpatch
 	$(MAKE) -C $(CUSTOM_DOC_DIR) clean

@@ -94,7 +94,7 @@ function action_modules()
 			end
 		end
 		-- Repository-URL
-		local current_url = on_function("get_configured_opennet_opkg_repository_url")
+		local current_url = on_function("get_configured_opennet_opkg_repository_base_url")
 		local new_url
 		if luci.http.formvalue("repository_url") == "custom" then
 			new_url = luci.http.formvalue("repository_url_custom")

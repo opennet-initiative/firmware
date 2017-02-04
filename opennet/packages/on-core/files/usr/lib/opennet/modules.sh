@@ -196,47 +196,36 @@ clear_cache_opennet_opkg() {
 }
 
 
-## @fn get_default_opennet_opkg_repository_url()
+## @fn get_default_opennet_opkg_repository_base_url()
 ## @brief Ermittle die automatisch ermittelte URL für die Nachinstallation von Paketen.
-## @returns Liefert die Basis-URL bis einschließlich "/packages". Lediglich der Feed-Name ist anzuhängen.
-get_default_opennet_opkg_repository_url() {
-	trap "error_trap get_default_opennet_opkg_repository_url '$*'" $GUARD_TRAPS
-	# ermittle die Firmware-Repository-URL
-	local firmware_version
-	firmware_version=$(get_on_firmware_version)
-	# leere Versionsnummer? Damit können wir nichts anfangen.
-	[ -z "$firmware_version" ] && msg_error "Failed to retrieve opennet firmware version for opkg repository URL" && return 0
-	# snapshots erkennen wir aktuell daran, dass auch Buchstaben in der Versionsnummer vorkommen
-	local version_path
-	if echo "$firmware_version" | grep -q "[a-zA-Z]"; then
-		# ein Buchstabe wurde entdeckt: unstable
-		version_path="testing/$firmware_version"
-	else
-		# kein Buchstabe wurde entdeckt: stable
-		# wir schneiden alles ab dem ersten Bindestrich ab
-		version_path="stable/$(echo "$firmware_version" | cut -f 1 -d -)"
-	fi
-	#TODO In LEDE gibt es zwei unterschiedliche packages Pfade. 
-	#     Dies muss hier umgebaut werden, damit zwei Pfade behandelt werden (auch die in z.B. targets/ar71xx/generic/packages/) 
-	# Hole "DISTRIB_TARGET" und entferne potentielle "/generic"-Suffixe (z.B. ar71xx und x86),
-	# da wir dies in unserem Repository nicht abbilden.
-	#	local arch_path
-	#	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
-        #	echo "$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/$arch_path/packages"
-
-	# Hole ARCH und CPU Type
-        local arch_cpu_type
-        arch_cpu_type=$(opkg status base-files | awk '/Architecture/ {print $2}')
-        echo "$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path/packages/$arch_cpu_type"
+## @returns Liefert die Basis-URL zurueck. Anzuhängen sind im Anschluss z.B. /packages/${arch_cpu_type} oder /targets/${arch}/generic/packages
+get_default_opennet_opkg_repository_base_url() {
+        trap "error_trap get_default_opennet_opkg_repository_base_url '$*'" $GUARD_TRAPS
+        # ermittle die Firmware-Repository-URL
+        local firmware_version
+        firmware_version=$(get_on_firmware_version)
+        # leere Versionsnummer? Damit können wir nichts anfangen.
+        [ -z "$firmware_version" ] && msg_error "Failed to retrieve opennet firmware version for opkg repository URL" && return 0
+        # snapshots erkennen wir aktuell daran, dass auch Buchstaben in der Versionsnummer vorkommen
+        local version_path
+        if echo "$firmware_version" | grep -q "[a-zA-Z]"; then
+                # ein Buchstabe wurde entdeckt: unstable
+                version_path="testing/$firmware_version"
+        else
+                # kein Buchstabe wurde entdeckt: stable
+                # wir schneiden alles ab dem ersten Bindestrich ab
+                version_path="stable/$(echo "$firmware_version" | cut -f 1 -d -)"
+        fi
+	echo "$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path"
 }
 
 
-## @fn get_configured_opennet_opkg_repository_url()
+## @fn get_configured_opennet_opkg_repository_base_url()
 ## @brief Ermittle die aktuell konfigurierte Repository-URL.
-get_configured_opennet_opkg_repository_url() {
+get_configured_opennet_opkg_repository_base_url() {
 	local url
 	url=$(uci_get "on-core.modules.repository_url")
-	[ -n "$url" ] && echo "$url" || get_default_opennet_opkg_repository_url
+	[ -n "$url" ] && echo "$url" || get_default_opennet_opkg_repository_base_url
 }
 
 
@@ -246,7 +235,7 @@ get_configured_opennet_opkg_repository_url() {
 ## @details Die URL wird via uci gespeichert. Falls sie identisch mit der Standard-URL ist, wird die Einstellung gelöscht.
 set_configured_opennet_opkg_repository_url() {
 	local repo_url="$1"
-	if [ -z "$repo_url" ] || [ "$repo_url" = "$(get_default_opennet_opkg_repository_url "opennet")" ]; then
+	if [ -z "$repo_url" ] || [ "$repo_url" = "$(get_default_opennet_opkg_repository_base_url "opennet")" ]; then
 		# Standard-Wert: loeschen
 		uci_delete "on-core.modules.repository_url"
 	else
@@ -261,18 +250,39 @@ set_configured_opennet_opkg_repository_url() {
 ## @details Die aktuelle Version wird aus dem openwrt-Versionsstring gelesen.
 generate_opennet_opkg_config() {
 	trap "error_trap generate_opennet_opkg_config '$*'" $GUARD_TRAPS
-	local repository_url
-	repository_url=$(get_configured_opennet_opkg_repository_url)
 	# schreibe den Inahlt der neuen OPKG-Konfiguration
 	echo "dest root /"
 	echo "dest ram /tmp"
 	echo "lists_dir ext /var/opkg-lists-opennet"
 	echo "option overlay_root /overlay"
 	echo
+
+	local base_url
+	base_url=$(get_configured_opennet_opkg_repository_base_url)
+	
+	#
+	# Füge non-core package hinzu (z.B. feeds routing,opennet,luci,...)
+	#
+	# Hole Architektur und CPU Type
+        local arch_cpu_type
+        arch_cpu_type=$(opkg status base-files | awk '/Architecture/ {print $2}')
+	local noncore_okgs_url
+	noncore_pkgs_url="$base_url/packages/$arch_cpu_type"
+
 	local feed
 	for feed in base packages routing telephony luci opennet; do
-		echo "src/gz on_$feed $repository_url/$feed"
+		echo "src/gz on_$feed $noncore_pkgs_url/$feed"
 	done
+
+	#
+	# Fuege zusaetzlich eine URL mit core packages hinzu (beinhaltet Kernel Module).
+	#
+        # Hole "DISTRIB_TARGET" und entferne potentielle "/generic"-Suffixe (z.B. ar71xx und x86),
+        # da wir dies in unserem Repository nicht abbilden.
+        local arch_path
+        arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
+        core_pkgs_url="$base_url/targets/$arch_path/generic/packages"
+	echo "src/gz on_core $core_pkgs_url"
 }
 
 

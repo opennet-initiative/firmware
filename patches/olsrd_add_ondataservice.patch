@@ -62,15 +62,15 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 +index 8ce6dc5..cf3b410 100644
 +--- a/Makefile
 ++++ b/Makefile
-+@@ -197,7 +197,7 @@ rpm:
++@@ -224,7 +224,7 @@ rpm:
 +
 + # This is quite ugly but at least it works
 + ifeq ($(OS),linux)
-+-SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns mini nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog
-++SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns mini nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog ondataservice ondataservice_light
++-SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo info jsoninfo mdns mini nameservice netjson p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog
+++SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo info jsoninfo mdns mini nameservice netjson p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog ondataservice ondataservice_light
 + else
 + ifeq ($(OS),win32)
-+ SUBDIRS := dot_draw httpinfo jsoninfo mini pgraph secure txtinfo
++ SUBDIRS := dot_draw httpinfo info jsoninfo mini netjson pgraph secure txtinfo
 +@@ -449,6 +449,29 @@ watchdog_install:
 + watchdog_uninstall:
 + 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/watchdog DESTDIR=$(DESTDIR) uninstall

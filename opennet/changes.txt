@@ -5,12 +5,10 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
-* MAC-Adressen von Nutzern offener Zugangspunkte werden nicht mehr via Monitoring veröffentlicht
 
 = Interne Änderungen =
-* root-Passwort ist bei einer Erstinstallation leer
-** zuvor wurde "admin" vorgegeben, da openwrt bis einschließlich Barrier Breaker den ssh-Dienst nur startete wenn ein Passwort gesetzt ist
 
 = Bemerkenswertes / Fehler / Mängel =
 
 = Aktualisierungshinweis =
+* Umstieg von OpenWRT nach LEDE 

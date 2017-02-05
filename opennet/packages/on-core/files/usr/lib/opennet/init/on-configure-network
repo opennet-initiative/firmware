@@ -122,8 +122,8 @@ configure_olsr_interfaces() {
 	local iface_phys
 	local iface_logical
 
-	# Suche nach WLAN-Interfaces
-	/sbin/wifi detect > /etc/config/wireless
+	# Erstelle wifi config in uci, falls noch keine vorhanden ist
+	/sbin/wifi config
 
 	local iface_index=0
 	while [ -n "$(uci_get "wireless.@wifi-iface[${iface_index}]")" ]; do

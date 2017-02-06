@@ -200,22 +200,22 @@ clear_cache_opennet_opkg() {
 ## @brief Ermittle die automatisch ermittelte URL für die Nachinstallation von Paketen.
 ## @returns Liefert die Basis-URL zurueck. Anzuhängen sind im Anschluss z.B. /packages/${arch_cpu_type} oder /targets/${arch}/generic/packages
 get_default_opennet_opkg_repository_base_url() {
-        trap "error_trap get_default_opennet_opkg_repository_base_url '$*'" $GUARD_TRAPS
-        # ermittle die Firmware-Repository-URL
-        local firmware_version
-        firmware_version=$(get_on_firmware_version)
-        # leere Versionsnummer? Damit können wir nichts anfangen.
-        [ -z "$firmware_version" ] && msg_error "Failed to retrieve opennet firmware version for opkg repository URL" && return 0
-        # snapshots erkennen wir aktuell daran, dass auch Buchstaben in der Versionsnummer vorkommen
-        local version_path
-        if echo "$firmware_version" | grep -q "[a-zA-Z]"; then
-                # ein Buchstabe wurde entdeckt: unstable
-                version_path="testing/$firmware_version"
-        else
-                # kein Buchstabe wurde entdeckt: stable
-                # wir schneiden alles ab dem ersten Bindestrich ab
-                version_path="stable/$(echo "$firmware_version" | cut -f 1 -d -)"
-        fi
+	trap "error_trap get_default_opennet_opkg_repository_base_url '$*'" $GUARD_TRAPS
+	# ermittle die Firmware-Repository-URL
+	local firmware_version
+	firmware_version=$(get_on_firmware_version)
+	# leere Versionsnummer? Damit können wir nichts anfangen.
+	[ -z "$firmware_version" ] && msg_error "Failed to retrieve opennet firmware version for opkg repository URL" && return 0
+	# snapshots erkennen wir aktuell daran, dass auch Buchstaben in der Versionsnummer vorkommen
+	local version_path
+	if echo "$firmware_version" | grep -q "[a-zA-Z]"; then
+		# ein Buchstabe wurde entdeckt: unstable
+		version_path="testing/$firmware_version"
+	else
+		# kein Buchstabe wurde entdeckt: stable
+		# wir schneiden alles ab dem ersten Bindestrich ab
+		version_path="stable/$(echo "$firmware_version" | cut -f 1 -d -)"
+	fi
 	echo "$ON_OPKG_REPOSITORY_URL_PREFIX/$version_path"
 }
 
@@ -264,8 +264,8 @@ generate_opennet_opkg_config() {
 	# Füge non-core package hinzu (z.B. feeds routing,opennet,luci,...)
 	#
 	# Hole Architektur und CPU Type
-        local arch_cpu_type
-        arch_cpu_type=$(opkg status base-files | awk '/Architecture/ {print $2}')
+	local arch_cpu_type
+	arch_cpu_type=$(opkg status base-files | awk '/Architecture/ {print $2}')
 	local noncore_okgs_url
 	noncore_pkgs_url="$base_url/packages/$arch_cpu_type"
 
@@ -277,11 +277,11 @@ generate_opennet_opkg_config() {
 	#
 	# Fuege zusaetzlich eine URL mit core packages hinzu (beinhaltet Kernel Module).
 	#
-        # Hole "DISTRIB_TARGET" und entferne potentielle "/generic"-Suffixe (z.B. ar71xx und x86),
-        # da wir dies in unserem Repository nicht abbilden.
-        local arch_path
-        arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
-        core_pkgs_url="$base_url/targets/$arch_path/generic/packages"
+	# Hole "DISTRIB_TARGET" und entferne potentielle "/generic"-Suffixe (z.B. ar71xx und x86),
+	# da wir dies in unserem Repository nicht abbilden.
+	local arch_path
+	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
+	core_pkgs_url="$base_url/targets/$arch_path/generic/packages"
 	echo "src/gz on_core $core_pkgs_url"
 }
 

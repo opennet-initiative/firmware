@@ -501,7 +501,7 @@ replace_in_key_value_list() {
 	local value="$3"
 	awk 'BEGIN { found=0; FS="'$separator'"; OFS=":"; RS="[ \t]"; ORS=" "; }
 	     { if ($1 == "'$search_key'") { print "'$search_key'", '$value'; found=1; } else { print $0; } }
-             END { if (found == 0) print "'$search_key'", '$value' };'
+	     END { if (found == 0) print "'$search_key'", '$value' };'
 }
 
 

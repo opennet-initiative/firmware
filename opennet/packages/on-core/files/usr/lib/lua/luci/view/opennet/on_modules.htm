@@ -112,7 +112,7 @@ on_module_descriptions["on-olsr2-netjsongraph"] = luci.i18n.translate("Experimen
 				<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url"
 					value="<%= repo_url %>" <%= checked_if_true(repo_url == configured_repo_url) %> />
 			</td>
-                        <td class="cbi-section-table-cell">
+			<td class="cbi-section-table-cell">
 				<label class="cbi-value-title">(<%= default_repo_url %>)</label>
 			</td>
 		</tr>
@@ -120,11 +120,11 @@ on_module_descriptions["on-olsr2-netjsongraph"] = luci.i18n.translate("Experimen
 			<td class="cbi-section-table-cell">
 				<label class="cbi-value-title" for="repository_url_custom"><%:Custom%></label>
 			</td>
-                        <td class="cbi-section-table-cell">
+			<td class="cbi-section-table-cell">
 				<input class="cbi-input-radio" type="radio" name="repository_url" id="repository_url_custom"
 					value="custom"	<%= checked_if_true(repo_url ~= configured_repo_url) %> />
 			</td>
-                        <td class="cbi-section-table-cell">
+			<td class="cbi-section-table-cell">
 				<input type="text" name="repository_url_custom" value="<%= configured_repo_url %>" />
 			</td>
 		</tr>

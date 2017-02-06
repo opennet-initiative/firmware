@@ -82,11 +82,13 @@ olsrd_enable_nameservice() {
 	fi
 }
 
-#disable olsrd6. By default it is enabled. We use olsrd2 for IPv6.
+
+# disable olsrd6. By default it is enabled. We use olsrd2 for IPv6.
 olsrd6_disable() {
 	trap "error_trap olsrd6_disable '$*'" $GUARD_TRAPS
-	$(/etc/init.d/olsrd6 disable)
+	/etc/init.d/olsrd6 disable
 }
+
 
 # erwuenschte Einstellungen setzen
 olsrd_enable_ondataservice

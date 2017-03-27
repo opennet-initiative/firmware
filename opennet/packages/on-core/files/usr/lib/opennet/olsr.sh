@@ -11,17 +11,32 @@ OLSR_HTTP_PORT=8080
 # uebertrage die Netzwerke, die derzeit der Zone "opennet" zugeordnet sind, in die olsr-Konfiguration
 # Anschliessend wird olsr und die firewall neugestartet.
 # Dieses Skript sollte via hotplug bei Aenderungen der Netzwerkkonfiguration ausgefuehrt werden.
+# Fuer jedes Interface wird eine separate UCI-Sektion angelegt.
 update_olsr_interfaces() {
 	trap "error_trap update_olsr_interfaces '$*'" $GUARD_TRAPS
-	local value=
+	local uci_prefix
 	local interfaces
-	interfaces=$(get_zone_interfaces "$ZONE_MESH")
-	# physische Interfaces werden beispielsweise durch die mesh-Interfaces erzeugt
-	local devices
-	devices=$(get_zone_raw_devices "$ZONE_MESH")
-	# fuehrende Leerzeichen entfernen; Zeilenumbrueche in Leerzeichen verwandeln
-	value=$(echo "$interfaces $devices" | sed 's/^ *//; s/ *$//' | tr '\n' ' ' | sed 's/^ *//; s/ *$//')
-	uci -q set "olsrd.@Interface[0].interface=$value"
+	local current
+	interfaces="$(get_zone_interfaces "$ZONE_MESH") $(get_zone_raw_devices "$ZONE_MESH")"
+	find_all_uci_sections "olsrd" "Interface" | while read uci_prefix; do
+		current=$(uci_get "${uci_prefix}.interface")
+		if echo "$interfaces" | grep -qFw "$current"; then
+			# OLSR fuer das Interface aktivieren
+		        uci set "${uci_prefix}.ignore=0"
+		else
+			# Interfaces entfernen, die nicht mehr in der on-Zone sind
+			uci_delete "$uci_prefix"
+		fi
+	done
+	# alle fehlenden Interfaces neu anlegen
+	for current in $interfaces; do
+		uci_prefix=$(find_first_uci_section "olsrd" "Interface" "interface=$current")
+		# existiert es bereits? Dann wurde es oben konfiguriert.
+		[ -n "$uci_prefix" ] && continue
+		uci_prefix="olsrd.$(uci add olsrd Interface)"
+		uci set "${uci_prefix}.interface=$current"
+		uci set "${uci_prefix}.ignore=0"
+	done
 	apply_changes olsrd
 }
 

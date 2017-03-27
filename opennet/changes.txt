@@ -7,6 +7,7 @@ Anschließend kann diese Liste wieder geleert werden.
 = Änderungen aus Nutzersicht =
 
 = Interne Änderungen =
+* vermeide unnötigen OLSR-Neustart nach Wifi-Reinitialisierung ([http://dev.opennet-initiative.de/ticket/185 Ticket #185])
 
 = Bemerkenswertes / Fehler / Mängel =
 

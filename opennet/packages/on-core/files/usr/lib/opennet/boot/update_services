@@ -9,8 +9,8 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
-# das nameservice-Trigger-Skript sorgt fuer eine baldige Aktualisierung
-"${IPKG_INSTROOT:-}/etc/olsrd/nameservice.d/on_update_services"
+# Aktualisierung der OLSR-Services in Baelde ausfuehren
+echo "on-function update_olsr_services" | on-function schedule_task
 
 
 # Prüfung, ob wir die schnelle Aktualisierung beenden können

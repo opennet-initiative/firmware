@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -eu
+
+# eine Aktualisierung des Routen-Cache ist nett fuer die Status-Webseite
+on-function update_olsr_route_cache

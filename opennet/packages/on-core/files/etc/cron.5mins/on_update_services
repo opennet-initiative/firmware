@@ -1,1 +1,9 @@
-../olsrd/nameservice.d/on_update_services
+#!/bin/sh
+
+set -eu
+
+# die Service-Aktualisierung braucht viel Zeit - wir reduzieren daher die Haeufigkeit der Ausfuehrung
+minute=$(date +%M)
+# aktualisiere die Dienste zu Beginn jeder Viertelstunde
+echo "$minute" | grep -qE "([03][0-4]|[14][5-9])" && on-function update_olsr_services
+exit 0

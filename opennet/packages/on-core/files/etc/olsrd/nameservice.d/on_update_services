@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-# unbedingt im Hintergrund (oder schnell) ausfuehren - sonst stockt der single-thread olsrd-Prozess
-echo "on-function update_olsr_route_cache; on-function update_olsr_services" | on-function schedule_task
-

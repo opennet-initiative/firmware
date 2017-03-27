@@ -2659,7 +2659,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
 ++  uint16_t checksum;
 ++  uint16_t messageLength = 0;
 ++  cJSON *json = NULL, *elem;
-++  char line [ 3000 ]; /* or other suitable maximum line size */
+++  char line [ 10000 ]; /* or other suitable maximum line size */
 ++
 ++  // open Database if this not a 'continued Transmission - and Database is already open'
 ++  if (fp == NULL) {

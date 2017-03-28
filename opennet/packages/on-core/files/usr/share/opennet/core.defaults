@@ -15,7 +15,7 @@ trusted_service_expire_minutes	3000
 # no is the numer of the interface, starting from 0
 # check /etc/init.d/on_config for usage
 # on_id_1 is the upper part, on_id_2 the lower part of the opennet id
-on_id_preset	33.127
+on_id_preset	39.127
 on_ipschema	"192.168."$((no*10+on_id_1))"."$on_id_2
 on_netmask	255.255.0.0
 

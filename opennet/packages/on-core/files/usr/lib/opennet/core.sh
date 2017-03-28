@@ -714,6 +714,9 @@ get_potential_error_messages() {
 	# 23) RTNETLINK answers: Network is unreachable
 	#    bei einem OpenVPN-Verbindungsaufbau gehen die ersten Pakete verloren
 	filters="${filters}|RTNETLINK answers: Network is unreachable"
+	# 24) olsrd2: wrote '/var/run/olsrd2_dev'
+	#    beim OLSRD2-Start wird diese Meldung auf stderr ausgegeben
+	filters="${filters}|olsrd2: wrote .*olsrd2_dev"
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.

@@ -10,7 +10,7 @@ OLSRD_CONFIG=/var/etc/olsrd.conf
 [ -e "$OLSRD_CONFIG" ] && cat "$OLSRD_CONFIG" >olsrd.conf
 
 # Konfiguration des laufenden Prozess
-on-function request_olsrd_txtinfo config >olsrd_runtime.conf
+on-function request_olsrd_txtinfo con >olsrd_runtime.conf
 
 # Routen, Nachbarn, usw.
 on-function request_olsrd_txtinfo all >olsrd_routes.log
@@ -20,4 +20,3 @@ OLSRD_SERVICES=/var/run/services_olsr
 
 # falls die obige Datei nicht existiert, soll trotzdem ein Wahrheitswert zurueckgeliefert werden
 exit 0
-

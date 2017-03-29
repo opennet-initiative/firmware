@@ -314,7 +314,7 @@ update_olsr_route_cache() {
 	local tmpfile="${OLSR_ROUTE_CACHE_FILE}.new"
 	# Bei der Ausfuehrung via cron wird SIGPIPE eventuell behandelt, auf dass die Ausfuehrung
 	# ohne Erzeugung der Datei abbrechen koennte. Daher ist die &&-Verknuepfung sinnvoll.
-	request_olsrd_txtinfo routes | grep "^[0-9]" | sed 's#/32##' > "$tmpfile" && mv "$tmpfile" "$OLSR_ROUTE_CACHE_FILE"
+	request_olsrd_txtinfo rou | grep "^[0-9]" | sed 's#/32##' > "$tmpfile" && mv "$tmpfile" "$OLSR_ROUTE_CACHE_FILE"
 	return 0
 }
 
@@ -348,7 +348,7 @@ get_olsr_neighbours() {
 	local nlq
 	local etx
 	local route_count
-	request_olsrd_txtinfo links | grep "^[0-9]" | awk '{ print $2,$4,$5,$6 }' | while read ip lq nlq etx; do
+	request_olsrd_txtinfo lin | grep "^[0-9]" | awk '{ print $2,$4,$5,$6 }' | while read ip lq nlq etx; do
 		echo "$ip $lq $nlq $etx $(get_olsr_route_count_by_neighbour "$ip")"
 	done
 }

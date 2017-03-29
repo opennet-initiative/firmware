@@ -167,7 +167,7 @@ def get_address_device_mapping():
 
 def count_routes_by_neighbour(address_mapping, ignore_list):
     node_count = {}
-    for line in query_olsrd_txtservice("routes"):
+    for line in query_olsrd_txtservice("rou"):
         # example line content:
         #    192.168.1.79/32 192.168.12.38   4       4.008   wlan0
         tokens = line.split()
@@ -192,7 +192,7 @@ def get_olsr_links():
     hna_list = [line.split()[0] for line in query_olsrd_txtservice("hna")]
     route_count = count_routes_by_neighbour(mid_mapping, hna_list)
     result = []
-    for line in query_olsrd_txtservice("links"):
+    for line in query_olsrd_txtservice("lin"):
         tokens = line.split()
         # the "cost" may be infinite
         if tokens[-1] == "INFINITE":

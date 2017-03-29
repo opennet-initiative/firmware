@@ -72,7 +72,7 @@ create_database() {
 
 
 print_interfaces_2_6() {
-  olsr_interfaces=$(on-function request_olsrd_txtinfo int)
+  olsr_interfaces=$(request_olsrd_txtinfo "int")
   dhcp_fwd=
   for if_name in $(ls /sys/class/net/ | grep -v "^lo$"); do
     iface_up=$(cat "/sys/class/net/${if_name}/operstate")
@@ -244,7 +244,7 @@ on_core_insttime=$(opkg status on-core | awk '{if (/Installed-Time/) printf $2;}
 on_packages=$(opkg status | awk '{if ($1 == "Package:" && $2 ~ "^on-" && $2 != "on-core") print $2}' | join)
 
 on_olsrd_status="$(pidof olsrd >/dev/null && echo "1" || echo "0")"
-on_olsr_mainip="$(on-function request_olsrd_txtinfo "config" | awk '/MainIp/ {print $2}')"
+on_olsr_mainip="$(request_olsrd_txtinfo "con" | awk '/MainIp/ {print $2}')"
 
 
 if is_function_available "captive_portal_get_property"; then
@@ -290,7 +290,7 @@ if is_function_available "get_active_ugw_connections"; then
 	on_ugw_possible=$(get_services mesh | pipe_service_attribute "status" | while read status; do uci_is_true "$status" && echo "." || true; done | grep -q . && echo "1" || echo "0")
 	on_ugw_tunnel="$([ -n "$(get_active_ugw_connections)" ] && echo "1" || echo "0")"
 	# ermittle alle Nachbarn, die via tap-Interface verbunden sind - dies ist etwas ungenau, aber besser geht es wohl nicht
-	on_ugw_connected=$(echo /neighbors | nc localhost 2006 | grep "^[0-9]" | awk '{print $1}' | while read neighbor; do ip route get "$neighbor" 2>/dev/null | awk '/dev '$MESH_OPENVPN_DEVICE_PREFIX'/ {print $1}'; done | join)
+	on_ugw_connected=$(request_olsrd_txtinfo "nei" | grep "^[0-9]" | awk '{print $1}' | while read neighbor; do ip route get "$neighbor" 2>/dev/null | awk '/dev '$MESH_OPENVPN_DEVICE_PREFIX'/ {print $1}'; done | join)
 	_on_ugw_services=$(get_services mesh | filter_enabled_services | sort_services_by_priority)
 	on_ugw_presetnames=$(echo "$_on_ugw_services" | pipe_service_attribute "host")
 	# wir nehmen jeweils die erste IP der Namensaufloesung (typischer IPv4)

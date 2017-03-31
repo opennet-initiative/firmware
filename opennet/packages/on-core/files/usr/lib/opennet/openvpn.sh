@@ -245,8 +245,14 @@ verify_vpn_connection() {
 	# read the additional options from the config file (for debug purposes)
 	file_opts=$(grep -v "^$" "$config_file" | grep -v "^#" | sed 's/^/--/' | tr '\n' ' ')
 	rm -f "$config_file"
-	grep -q "Initial packet" "$log_file" && return 0
-	msg_debug "openvpn test failed: openvpn $file_opts"
+	if [ -e "$log_file" ]; then
+		grep -q "Initial packet" "$log_file" && return 0
+		msg_debug "openvpn test failed: openvpn $file_opts"
+	else
+		# Die Log-Datei sollte nur dann fehlen, wenn die openvpn-Konfiguration defekt ist
+		# und somit den Start von openvpn verhindert.
+		msg_error "openvpn test failed unexpectedly: configuration error?"
+	fi
 	trap "" $GUARD_TRAPS && return 1
 }
 

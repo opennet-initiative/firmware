@@ -31,7 +31,7 @@ mute-replay-warnings
 dev tun
 dev-type tun
 
-script-security 2 execve
+script-security 2
 
 up /usr/lib/opennet/events/mig_openvpn_updown.sh
 down /usr/lib/opennet/events/mig_openvpn_updown.sh

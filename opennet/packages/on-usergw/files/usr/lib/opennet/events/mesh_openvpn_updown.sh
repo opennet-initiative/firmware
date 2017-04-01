@@ -94,7 +94,8 @@ case "$script_type" in
 		# Wir prüfen also, ob die default-Route verlorenging und fügen sie notfalls erneut hinzu.
 		ip route show | grep -q ^default || {
 			msg_info "Lost default route during 'down' event of mesh VPN. Adding it again."
-			[ -n "$default_route" ] && ip route add $default_route 2>/dev/null || true
+			[ -n "$default_route" ] && ip route replace $default_route 2>/dev/null
+			true
 		}
 		;;
 esac 2>&1 | logger -t mesh-updown

@@ -364,7 +364,7 @@ end
 function parse_hostname_string(text)
 	local text = text or ""
 	-- IPv4/IPv6 oder Hostname (sehr tolerante Filter - ausreichend fuer die Erkennung boeser Eingaben)
-	return string.match(text, "^[0-9A-Fa-f:.]$") or string.match(text, "^[a-zA-Z0-9.-]+$")
+	return string.match(text, "^[0-9A-Fa-f:.]+$") or string.match(text, "^[a-zA-Z0-9.-]+$")
 end
 
 

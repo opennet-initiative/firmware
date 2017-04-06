@@ -6,7 +6,7 @@ UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 MESH_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-ugw.template
 TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-services.csv
-## eine beliebige Portnummer, auf der wir keinen udp-Dienst vermuten
+## auf den UGW-Servern ist via inetd der Dienst "discard" erreichbar
 SPEEDTEST_UPLOAD_PORT=discard
 SPEEDTEST_SECONDS=20
 ## dieser Wert muss mit der VPN-Konfigurationsvorlage synchron gehalten werden

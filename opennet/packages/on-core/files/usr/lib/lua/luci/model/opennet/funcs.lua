@@ -451,7 +451,10 @@ function process_add_service_form()
 	if not host then return luci.i18n.translate("Invalid host") end
         port = parse_number_string(port)
 	if not port then return luci.i18n.translate("Invalid port") end
-	if (protocol ~= "udp") and (protocol ~= "tcp") then return luci.i18n.translate("Unknown protocol") end
+	if (protocol ~= "udp") and (protocol ~= "udp4") and (protocol ~= "udp6")
+                and (protocol ~= "tcp") and (protocol ~= "tcp4") and (protocol ~= "tcp6") then
+            return luci.i18n.translate("Unknown protocol")
+        end
 	scheme = parse_string_pattern(scheme, "a-z")
 	if not scheme then return luci.i18n.translate("Invalid service scheme") end
 	stype = parse_string_pattern(stype, "a-z")

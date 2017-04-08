@@ -113,7 +113,8 @@ case "$ACTION" in
 			fieldname=$(clean_fieldname "peer_${mac}")
 			echo "signal_${fieldname}.value $signal"
 		done
-		echo "noise.value $(get_wifi_noise "$wifi")"
+		noise=$(get_wifi_noise "$wifi")
+		echo "noise.value ${noise:-U}"
 		;;
 	*)
 		echo >&2 "Invalid action (valid: config)"

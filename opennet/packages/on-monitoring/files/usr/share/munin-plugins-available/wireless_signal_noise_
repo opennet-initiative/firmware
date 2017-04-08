@@ -37,6 +37,12 @@ else
 	# TODO: there seems to be no way to retrieve the noise level via "iw"
 	get_wifi_noise() { echo; }
 fi
+if which arp >/dev/null; then
+	# openwrt does not provide 'arp' by default
+	get_arp() { arp -n; }
+else
+	get_arp() { cat /proc/net/arp; }
+fi
 
 
 clean_fieldname() {
@@ -46,7 +52,7 @@ clean_fieldname() {
 
 get_ip_for_mac() {
 	local ip
-	ip=$(arp -n | grep -iw "$1$" | awk '{print $1}' | sort | head -1)
+	ip=$(get_arp | grep -iw "$1$" | awk '{print $1}' | sort | head -1)
 	[ -n "$ip" ] && echo "$ip" && return 0
 	# no IP found - return MAC instead
 	echo "$1"

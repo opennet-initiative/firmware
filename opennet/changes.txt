@@ -5,6 +5,10 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
+* UGW-APs (Spender) verbinden sich nun auch via IPv6 mit UGW-Servern
+** seit OpenVPN v2.4 (verbesserte Dual-Stack-Unterstützung)
+* regelmäßiger Kabelverbindungsverlust von Nanostation M5 Loco XW ist behoben ("eth0-Bug")
+** [https://dev.opennet-initiative.de/ticket/94 Ticket #94]
 
 = Interne Änderungen =
 * vermeide unnötigen OLSR-Neustart nach Wifi-Reinitialisierung ([http://dev.opennet-initiative.de/ticket/185 Ticket #185])

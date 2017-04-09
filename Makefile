@@ -27,6 +27,7 @@ help:
 	$(info - feeds			die Paket-Feeds (siehe openwrt/feeds.conf) neu einlesen)
 	$(info - patch			die opennet-Patches via quilt anwenden (siehe ./patches/*.patch))
 	$(info - unpatch		die opennet-Patches zurücknehmen (empfehlenswert vor jedem "git pull"))
+	$(info - pull-submodules	eingebundene git-submodules via 'git pull' aktualisieren)
 
 list-archs:
 	$(info $(ARCHS))
@@ -93,6 +94,12 @@ patch: quilt-check
 unpatch: quilt-check
 	@# revert all patches if there are applied ones
 	@$(QUILT_BIN) pop -a || [ $$? -ne 1 ]
+
+pull-submodules: unpatch
+	(cd lede && git pull)
+	(cd packages && git pull)
+	(cd routing && git pull)
+	(cd luci && git pull)
 
 clean: unpatch
 	$(MAKE) -C $(CUSTOM_DOC_DIR) clean

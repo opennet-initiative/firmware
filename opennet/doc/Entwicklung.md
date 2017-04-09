@@ -198,23 +198,14 @@ Einen bestehenden Patch verändern {#patch-change}
 Paket-Repositories oder das openwrt-Repository aktualisieren {#update-repo}
 ------------------------------------------------------------
 
-1. alle Patches zurücknehmen:
+Die verwendeten Basis-Repositories (LEDE/OpenWRT), Pakete, Routing und Luci sind als git-submodules in das opennet-Firmware-Repository eingebunden. Somit sind sie auf spezifische Commits (mittels ihrer Hash-ID) festgelegt.
+Neue Commits in dem zugrundeliegenden Branch werden von uns also nicht automatisch verwendet. Daher sollten wir gelegentlich zum aktuellen HEAD des Basis-Brach (z.B. "lede-17.01") wechseln.
 
-        make unpatch
-
-2. in das Repository-Verzeichnis wechseln und zum gewünschten Commit wechseln (für spezifische commits: *git checkout*):
-
-        cd openwrt; git pull; cd ..
-
-3. Patches wieder anwenden:
-
-        make patch
-
-4. herumprobieren
-
-5. falls der Commit als aktueller Repository-Zustand gespeichert werden soll, dann committen:
-
-        git commit openwrt
+    make pull-submodules
+    # die geänderten Submodule-Commit-IDs akzeptieren (hier: interaktiv)
+    git add -p
+    # die geänderten Submodule-Commit-IDs für zukünftige Builds festlegen
+    git commit
 
 
 Einen neuen Paket-Feed einbinden {#feed-add}

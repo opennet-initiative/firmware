@@ -3,7 +3,6 @@ makefile_include_opennet_packages.patch
 hostapd_option_chanlist.patch
 luci_olsr_fix_empty_result.patch
 olsrd_add_ondataservice.patch
-#px5g_create_csr.patch
 #gpio_switch_control.patch
 improved_dfs_detection.patch
 #cpe-rx.patch

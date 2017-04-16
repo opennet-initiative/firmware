@@ -96,10 +96,10 @@ unpatch: quilt-check
 	@$(QUILT_BIN) pop -a || [ $$? -ne 1 ]
 
 pull-submodules: unpatch
-	(cd lede && git pull)
-	(cd packages && git pull)
-	(cd routing && git pull)
-	(cd luci && git pull)
+	@#use 'git submodule' for updating submodules. When using 'git pull' in submodule directory then the error 'detached head' occurs. There are two ways to solve this:
+	@# 1. use 'git submodule update --remote --checkout'
+	@# 2. go into every submodules directory, find out which remote branch it relies on, checkout this branch. 
+	git submodule update --remote --checkout
 
 clean: unpatch
 	$(MAKE) -C $(CUSTOM_DOC_DIR) clean

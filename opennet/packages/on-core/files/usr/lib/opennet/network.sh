@@ -245,7 +245,7 @@ get_subdevices_of_interface() {
 			echo "$device"
 		done
 		# wir fügen das Ergebnis der ubus-Abfrage hinzu (unten werden Duplikate entfernt)
-		(set +eu; local ifname; . /lib/functions/network.sh; network_get_physdev ifname "$interface"; echo "$ifname"; set -eu)
+		_run_system_network_function "network_get_physdev" "$interface"
 	} | tr ' ' '\n' | sort | uniq | while read device; do
 		# Falls das Verzeichnis existiert, ist es wohl eine Bridge, deren Bestandteile wir ausgeben.
 		# Ansonsten wird das Device ausgegeben.

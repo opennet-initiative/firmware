@@ -114,20 +114,10 @@ update_opennet_zone_masquerading() {
 get_current_addresses_of_network() {
 	trap "error_trap get_current_addresses_of_network '$*'" $GUARD_TRAPS
 	local network="$1"
-	local subnets=
-	local ifname
-	if [ "$(uci_get "network.${network}.proto")" = "none" ]; then
-		# manuell konfiguriertes Netzwerk-Interface (z.B: mesh-VPN via OpenVPN)
-		# Der obige Test stellt nicht eindeutig sicher, dass das Interface
-		# taetsaechlich diesen Namen traegt (z.B. "on_vpn" -> "tun0").
-		# Daher pruefen wir auch "ifname" - als Verweis auf den Interface-Namen.
-		ifname=$(uci_get "network.${network}.ifname")
-		[ -n "$ifname" ] && network="$ifname"
-		# Keine Fehlermeldungen: vielleicht haben wir den Namen falsch geraten
-		# oder das Interface ist inaktiv.
-	fi
-
-	ip addr show dev "$network" 2>/dev/null | grep -wE "inet6?" | awk '{print $2}'
+	{
+		_run_system_network_function "network_get_subnets" "$network"
+		_run_system_network_function "network_get_subnets6" "$network"
+	} | xargs echo
 }
 
 
@@ -216,6 +206,23 @@ is_device_in_zone() {
 	trap "" $GUARD_TRAPS && return 1
 }
 
+
+## @fn _run_system_network_function()
+## @brief Führe eine der in /lib/functions/network.sh definierten Funktionen aus.
+## @params func: der Name der Funktion
+## @params ...: alle anderen Parameter werden der Funktion nach der Zielvariable (also ab
+##              Parameter #2) übergeben
+## @returns: die Ausgabe der Funktion
+_run_system_network_function() {
+	local func=$1
+	local result
+	shift
+	set +eu
+	. /lib/functions/network.sh
+	"$func" result "$@"
+	[ -n "$result" ] && echo "$result"
+	set -eu
+}
 
 ## @fn get_subdevices_of_interface()
 ## @brief Ermittle die physischen Netzwerk-Geräte (bis auf wifi), die zu einem logischen Netzwerk-Interface gehören.

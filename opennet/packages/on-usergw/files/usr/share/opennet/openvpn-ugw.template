@@ -21,7 +21,7 @@ mute-replay-warnings
 dev tap
 dev-type tap
 
-script-security 2 execve
+script-security 2
 
 up /usr/lib/opennet/events/mesh_openvpn_updown.sh
 down /usr/lib/opennet/events/mesh_openvpn_updown.sh

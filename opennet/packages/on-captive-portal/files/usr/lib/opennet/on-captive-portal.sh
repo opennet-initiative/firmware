@@ -194,9 +194,9 @@ captive_portal_has_devices() {
 captive_portal_repair_empty_network_bridge() {
 	local uci_prefix="network.${NETWORK_FREE}"
 	local sub_device_count
-	if [ "$(uci_get "${uci_prefix}.type")" = "bridge" -a "$(uci_get "${uci_prefix}.ifname")" = "none" ]; then
+	if [ "$(uci_get "${uci_prefix}.type")" = "bridge" ] && [ "$(uci_get "${uci_prefix}.ifname")" = "none" ]; then
 		# verdaechtig: Bruecke mit "none"-Device
-	        sub_device_count=$(get_subdevices_of_interface "$NETWORK_FREE" | wc -w)
+		sub_device_count=$(get_subdevices_of_interface "$NETWORK_FREE" | wc -w)
 		if [ "$sub_device_count" -eq "1" ]; then
 			# wifi-Device is konfiguriert - Bruecke und "none" kann entfernt werden
 			uci_delete "${uci_prefix}.type"
@@ -218,7 +218,7 @@ captive_portal_uses_wifi_only_bridge() {
 	local ifname
 	if [ "$(uci_get "${uci_prefix}.type")" = "bridge" ]; then
 		ifname=$(uci_get "${uci_prefix}.ifname")
-		if [ -z "$ifname" -o "$ifname" = "none" ]; then
+		if [ -z "$ifname" ] || [ "$ifname" = "none" ]; then
 			if [ -n "$(get_subdevices_of_interface "$NETWORK_FREE")" ]; then
 				# anscheinend handelt es sich um eine reine wifi-Bridge
 				return 0
@@ -281,7 +281,7 @@ sync_captive_portal_state_with_mig_connections() {
 			true
 		done
 	fi
-	if [ -n "$device_active" -a -z "$mig_active" ]; then
+	if [ -n "$device_active" ] && [ -z "$mig_active" ]; then
 		disable_captive_portal
 	elif [ -n "$mig_active" ]; then
 		[ -z "$device_active" ] && ifup "$NETWORK_FREE"
@@ -342,7 +342,7 @@ get_captive_portal_clients() {
 		[ "$key" = "active" ] && activity_timestamp="$value"
 		[ "$key" = "downloaded" ] && traffic_download="$value"
 		[ "$key" = "uploaded" ] && traffic_upload="$value"
-		if [ -z "$key" -a -n "$ip_address" ]; then
+		if [ -z "$key" ] && [ -n "$ip_address" ]; then
 			# leere Eingabezeile trennt Clients: Ausgabe des vorherigen Clients
 			printf "%s\t%s\t%s\t%s\t%s\t%s\n" \
 				"$ip_address" "$mac_address" "$connection_timestamp" \

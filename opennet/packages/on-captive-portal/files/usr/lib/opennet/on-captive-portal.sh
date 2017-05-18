@@ -46,12 +46,12 @@ configure_free_network() {
 captive_portal_get_or_create_config() {
 	trap "error_trap captive_portal_get_or_create_config '$*'" $GUARD_TRAPS
 	local uci_prefix
-	uci_prefix=$(find_first_uci_section "nodogsplash" "instance" "network=$NETWORK_FREE")
+	uci_prefix=$(find_first_uci_section "nodogsplash" "nodogsplash" "network=$NETWORK_FREE")
 	# gefunden? Zurueckliefern ...
 	if [ -z "$uci_prefix" ]; then
 		# neu mit grundlegenden Einstellungen anlegen
 		# Detail-Konfiguration findet via uci-defaults nur einmalig statt (damit der Nutzer sie überschreiben kann)
-		uci_prefix="nodogsplash.$(uci add "nodogsplash" "instance")"
+		uci_prefix="nodogsplash.$(uci add "nodogsplash" "nodogsplash")"
 		# wir aktivieren den Dienst generell - der Nutzer muss dem Device aktiv ein Gerät hinzufügen, um es zu aktivieren
 		uci set "${uci_prefix}.enabled=1"
 		uci set "${uci_prefix}.network=$NETWORK_FREE"

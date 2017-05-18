@@ -561,6 +561,16 @@ auto_enable_on_free_network() {
 }
 
 
+## @fn nodogsplash_rename_config_section_type()
+## @brief Bis v0.5.3 hatten die nodogsplash-Konfigurations-Sektionen den Typ "instance".
+##        Seit v0.5.4 ist es "nodogsplash".
+nodogsplash_rename_config_section_type() {
+	# kein falscher Typ? Fertig ...
+	grep -q "^config instance$" /etc/config/nodogsplash || return 0
+	sed -i 's/^config instance$/config nodogsplash/' /etc/config/nodogsplash
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -614,3 +624,4 @@ remove_pre05_usergateway_olsr_announcement
 remove_pre05_usergateway_tap_interfaces
 remove_pre05_on_usergw_settings
 auto_enable_on_free_network
+nodogsplash_rename_config_section_type

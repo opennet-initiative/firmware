@@ -1,0 +1,57 @@
+#!/bin/sh
+#
+# Ueberblick ueber Routen zu oeffentlichen IPs
+#
+
+set -eu
+
+
+ping_host() {
+	echo -n "ping $1 - "
+	ping -W 2 -c 3 "$1" >/dev/null && echo "OK" || echo "Error"
+}
+
+
+ping6_host() {
+	echo -n "ping6 $1 - "
+	ping6 -W 2 -c 3 "$1" >/dev/null && echo "OK" || echo "Error"
+}
+
+
+traceroute_target() {
+	traceroute -n -w 1 -m 16 "$1"
+}
+
+
+traceroute6_target() {
+	traceroute6 -n -w 1 -m 16 "$1"
+}
+
+
+(
+	ping_host 139.30.241.200
+	ping_host 62.141.37.125
+	ping_host 91.205.174.15
+	ping_host 46.4.52.112
+	ping_host 8.8.8.8
+	ping6_host 2001:638:804:2228:222:19ff:fe27:b958
+	ping6_host 2001:4ba0:cafe:11d::1
+	ping6_host 2a02:c200:0:10:3:0:6311:1
+	ping6_host 2a01:4f8:140:1222::1:7
+	ping6_host 2001:4860:4860::8888
+) >ping_public.log &
+
+(
+	traceroute_target 139.30.241.200
+	traceroute_target 62.141.37.125
+	traceroute_target 91.205.174.15
+	traceroute_target 46.4.52.112
+	traceroute_target 8.8.8.8
+	traceroute6_target 2001:638:804:2228:222:19ff:fe27:b958
+	traceroute6_target 2001:4ba0:cafe:11d::1
+	traceroute6_target 2a02:c200:0:10:3:0:6311:1
+	traceroute6_target 2a01:4f8:140:1222::1:7
+	traceroute6_target 2001:4860:4860::8888
+) >traceroute_public.log &
+
+wait

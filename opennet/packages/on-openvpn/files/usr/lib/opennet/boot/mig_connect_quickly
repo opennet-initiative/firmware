@@ -12,7 +12,6 @@ has_mig_openvpn_credentials || exit 0
 echo "on-function update_mig_connection_status" | schedule_task
 
 # Führe dieses Skript nach dem Booten kurz hintereinander aus, um einen schnellen Verbindungsaufbau zu ermöglichen
-local delay
 for delay in 100 200 300 400 500 600; do
 	run_delayed_in_background "$delay" 'echo "on-function update_mig_connection_status" | schedule_task'
 done

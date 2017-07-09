@@ -17,3 +17,5 @@ horst_compile_error.patch
 #   $ curl --form "foo=bar" http://on-i.de/
 #   curl: (27) PRNG seeding failed
 lede-17.01-curl-upgrade.patch
+
+hostapd_switch_to_DFS.patch

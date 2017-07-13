@@ -51,7 +51,7 @@ if [ -e "$LAST_RX_COUNTER_FILE" ] && get_rx_counters | cmp -s "$LAST_RX_COUNTER_
 	date +%s >"$RESET_TIMESTAMP_FILE"
 	# es scheint Situationen zu geben, in denen hostapd sich selbst blockiert
 	# siehe https://dev.opennet-initiative.de/ticket/184
-	killall -q -TERM hostapd
+	killall -q -TERM hostapd || true
 	wifi
 else
 	# neue Zaehler speichern

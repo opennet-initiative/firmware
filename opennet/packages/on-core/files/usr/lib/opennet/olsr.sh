@@ -242,7 +242,7 @@ update_olsr_services() {
 
 ## @fn request_olsrd_txtinfo()
 ## @brief Sende eine Anfrage an das txtinfo-Interface von olsrd
-## @param request Der zu sende Request-Pfad (z.B. "links" oder "neighbours")
+## @param request Der zu sende Request-Pfad (z.B. "lin" oder "nei")
 ## @details Bei Problemen mit dem Verbindungsaufbau erscheint ein Hinweis im syslog.
 request_olsrd_txtinfo() {
 	local request="$1"

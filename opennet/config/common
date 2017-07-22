@@ -10,9 +10,9 @@ CONFIG_VERSION_REPO="http://downloads.openwrt.org/%n/15.05/%S/packages"
 # reduzierte Squashfs-Blockgroesse Standard: 256)
 #CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=256
 # blocksize=64 reduziert den RAM-Bedarf um ca. ? MB - dagegen steigt der Flash-Bedarf um ? kB.
-CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=64
+#CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=64
 # blocksize=16 reduziert den RAM-Bedarf um ca. 2 MB - dagegen steigt der Flash-Bedarf um 800 kB.
-#CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=16
+CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=16
 
 # unnoetiges optional machen
 CONFIG_PACKAGE_block-mount=m

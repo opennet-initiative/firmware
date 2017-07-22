@@ -82,8 +82,7 @@ end
 
 
 function status_ugw_connection()
-    luci.http.prepare_content("text/plain")
-    local result = ""
+    local status_lines = {}
     if on_bool_function("has_mesh_openvpn_credentials") then
         -- Zertifikat und Schluessel sind vorhanden
         local ugw_status = {}
@@ -92,22 +91,28 @@ function status_ugw_connection()
             table.insert(ugw_status.mesh_servers, get_service_value(service_name, "host"))
         end
         ugw_status.mesh_servers_string = string_join(ugw_status.mesh_servers, ", ")
-	if not is_string_empty(ugw_status.mesh_servers_string) then
-            result = luci.i18n.translatef("Connected Mesh Gateways: %s", ugw_status.mesh_servers_string) .. [[<br/>]]
-	    -- wir missbrauchen das munin-Plugin fuer die Ermittlung der Verbindungsanzahl
-	    -- TODO: dies löst eine Abhängigkeit von micropython aus - können wir das anders lösen?
-	    ugw_users_connection_count = luci.sys.exec(
-                "/usr/sbin/munin-node-plugin.d/on_usergw_connections | awk 'BEGIN {sum = 0} {sum += $2} END {print sum}'")
-	    result = result .. luci.i18n.translatef("Relayed user tunnel connection: %s", ugw_users_connection_count)
+        if not is_string_empty(ugw_status.mesh_servers_string) then
+            table.insert(status_lines, luci.i18n.translatef("Connected Mesh Gateways: %s", ugw_status.mesh_servers_string))
         else
-            result = luci.i18n.translate("No Mesh Gateways connected")
-	end
+            table.insert(status_lines, luci.i18n.translate("No Mesh Gateways connected"))
+        end
     else
         -- kein Zertifikat vorhanden
-	result = '<span>' .. luci.i18n.translate("Certificate is missing") .. " (" ..
-	    luci.i18n.translate("see") ..
-	    ' <a href="' .. on_url("mesh_tunnel", "zertifikat") .. '">' ..
-	    luci.i18n.translate("Certificate management") .. "</a>).</span>"
+	table.insert(status_lines, luci.i18n.translate("Certificate is missing")
+            .. " (" ..  luci.i18n.translate("see")
+            .. ' <a href="' .. on_url("mesh_tunnel", "zertifikat") .. '">'
+            ..  luci.i18n.translate("Certificate management") .. "</a>).")
     end
-    luci.http.write(result)
+    -- weitergeleitete Nutzerverbindungen koennen auch ohne Mesh-VPN existieren (nur service-relay)
+    if file_exists("/usr/sbin/munin-node-plugin.d/on_usergw_connections") then
+        -- wir missbrauchen das munin-Plugin fuer die Ermittlung der Verbindungsanzahl
+        -- TODO: dies löst eine Abhängigkeit von micropython aus - können wir das anders lösen?
+        ugw_users_connection_count = luci.sys.exec(
+            "/usr/sbin/munin-node-plugin.d/on_usergw_connections | awk 'BEGIN {sum = 0} {sum += $2} END {print sum}'")
+    else
+        ugw_users_connection_count = luci.i18n.translate("unknown (the 'on-monitoring' module is required for this information)")
+    end
+    table.insert(status_lines, luci.i18n.translatef("Relayed user tunnel connections: %s", ugw_users_connection_count))
+    luci.http.prepare_content("text/plain")
+    luci.http.write(string_join(status_lines, [[<br/>]]))
 end

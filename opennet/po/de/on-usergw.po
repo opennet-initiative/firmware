@@ -141,7 +141,7 @@ msgstr "Port"
 msgid "Priority"
 msgstr "Priorität"
 
-msgid "Relayed user tunnel connection: %s"
+msgid "Relayed user tunnel connections: %s"
 msgstr "Weitergeleitete Nutzer-Tunnel: %s"
 
 msgid "Relaying external Services for the Opennet Mesh"
@@ -281,6 +281,9 @@ msgstr "Offset zurücksetzen"
 
 msgid "see"
 msgstr "siehe"
+
+msgid "unknown (the 'on-monitoring' module is required for this information)"
+msgstr "unbekannt (das 'on-monitoring'-Modul wird für diese Information benötigt)"
 
 msgid "upload to Internet %s kBit/s | download from Internet %s kBit/s"
 msgstr ""

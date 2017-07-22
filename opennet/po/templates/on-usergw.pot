@@ -116,7 +116,7 @@ msgstr ""
 msgid "Priority"
 msgstr ""
 
-msgid "Relayed user tunnel connection: %s"
+msgid "Relayed user tunnel connections: %s"
 msgstr ""
 
 msgid "Relaying external Services for the Opennet Mesh"

@@ -5,6 +5,7 @@
 require "luci.config"
 require "luci.util"
 require "luci.sys"
+require "nixio.fs"
 
 
 html_resource_base = luci.config.main.resourcebase
@@ -89,6 +90,13 @@ function table_is_empty(data)
 		return false
 	end
 	return true
+end
+
+
+--- @brief Prüfe ob eine Datei existiert.
+--- @param filename Dateiename
+function file_exists(filename)
+	return nixio.fs.access(filename)
 end
 
 

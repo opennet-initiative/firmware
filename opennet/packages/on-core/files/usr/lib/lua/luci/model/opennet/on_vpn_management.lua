@@ -16,7 +16,7 @@ require("luci.model.opennet.funcs")
 
 
 function replace_file(source, target)
-	if nixio.fs.access(target) then
+	if file_exists(target) then
 		nixio.fs.move(target, target .. "_bak")
 	end
 	nixio.fs.move(source, target)
@@ -28,10 +28,9 @@ end
 -- cert_type is user or mesh
 function upload_file(cert_type)
 	local cert_info = get_ssl_cert_info(cert_type)
-	local upload_exists = nixio.fs.access(upload_file_location)
 	local upload_value = luci.http.formvalue("opensslfile")
-	if not upload_exists then return end
-	if not nixio.fs.access(cert_info.cert_dir) then nixio.fs.mkdirr(cert_info.cert_dir) end
+	if not file_exists(upload_file_location) then return end
+	if not file_exists(cert_info.cert_dir) then nixio.fs.mkdirr(cert_info.cert_dir) end
 	if string.find(upload_value, ".key") then
 		replace_file(upload_file_location, cert_info.filename_prefix .. ".key")
 	elseif string.find(upload_value, ".crt") then
@@ -72,7 +71,7 @@ function check_cert_status(cert_type)
 	local crt_filename = cert_info.filename_prefix .. ".crt"
 	local post_processing = "2>/dev/null | md5sum"
 	local certstatus = {}
-	certstatus.on_csr_exists = nixio.fs.access(csr_filename)
+	certstatus.on_csr_exists = file_exists(csr_filename)
 	if certstatus.on_csr_exists then
 		certstatus.on_csr_date = nixio.fs.stat(csr_filename, "mtime")
 		certstatus.on_csr_modulus = space_split(trim_string(
@@ -81,7 +80,7 @@ function check_cert_status(cert_type)
 		certstatus.on_csr_date = ""
 		certstatus.on_csr_modulus = ""
 	end
-	certstatus.on_key_exists = nixio.fs.access(key_filename)
+	certstatus.on_key_exists = file_exists(key_filename)
 	if certstatus.on_key_exists then
 		certstatus.on_key_date = nixio.fs.stat(key_filename, "mtime")
 		certstatus.on_key_modulus = space_split(trim_string(
@@ -90,7 +89,7 @@ function check_cert_status(cert_type)
 		certstatus.on_key_date = ""
 		certstatus.on_key_modulus = ""
 	end
-	certstatus.on_crt_exists = nixio.fs.access(crt_filename)
+	certstatus.on_crt_exists = file_exists(crt_filename)
 	if certstatus.on_crt_exists then
 		certstatus.on_crt_date = nixio.fs.stat(crt_filename, "mtime")
 		certstatus.on_crt_modulus = space_split(trim_string(
@@ -113,7 +112,7 @@ local file
 -- Diese Funktion muss in der index-Funktion eines controllers ausgefuehrt werden.
 luci.http.setfilehandler(
 	function(meta, chunk, eof)
-		if not nixio.fs.access(upload_file_location) and not file and chunk and #chunk > 0 then
+		if not file_exists(upload_file_location) and not file and chunk and #chunk > 0 then
 			file = io.open(upload_file_location, "w")
 		end
 		if file and chunk then file:write(chunk) end

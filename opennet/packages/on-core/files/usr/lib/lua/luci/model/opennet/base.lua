@@ -18,7 +18,7 @@ local report_filename = "/tmp/on_report.tar.gz"
 
 function action_report()
 	require("luci.sys")
-	if luci.http.formvalue("download") and nixio.fs.access(report_filename) then
+	if luci.http.formvalue("download") and file_exists(report_filename) then
 		local timestamp = nixio.fs.stat(report_filename, "mtime")
 		local fhandle = io.open(report_filename, "r")
 		luci.http.header('Content-Disposition', 'attachment; filename="AP-report-%s-%s.tar.gz"' % {
@@ -26,7 +26,7 @@ function action_report()
 		luci.http.prepare_content("application/x-targz")
 		luci.ltn12.pump.all(luci.ltn12.source.file(fhandle), luci.http.write)
 	else
-		if luci.http.formvalue("delete") and nixio.fs.access(report_filename) then
+		if luci.http.formvalue("delete") and file_exists(report_filename) then
 			nixio.fs.remove(report_filename)
 		elseif luci.http.formvalue("generate") then
 			on_schedule_task("on-function generate_report")
@@ -38,7 +38,7 @@ end
 
 function get_report_timestamp()
 	local info
-	if nixio.fs.access(report_filename) then
+	if file_exists(report_filename) then
 		info = nixio.fs.stat(report_filename, "mtime")
 	else
 		info = nil

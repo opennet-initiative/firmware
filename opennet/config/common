@@ -92,6 +92,7 @@ CONFIG_OPENVPN_openssl_ENABLE_MULTIHOME=n
 CONFIG_OPENVPN_openssl_ENABLE_PORT_SHARE=n
 CONFIG_OPENVPN_openssl_ENABLE_DEF_AUTH=n
 CONFIG_OPENVPN_openssl_ENABLE_PF=n
+CONFIG_OPENVPN_openssl_ENABLE_IPROUTE2=y
 # der mtu-Test beim UGW-Verbingsaufbau ist bei "--enable-small" nicht enthalten
 CONFIG_OPENVPN_openssl_ENABLE_SMALL=n
 

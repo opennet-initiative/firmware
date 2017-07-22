@@ -141,6 +141,9 @@ msgstr "Port"
 msgid "Priority"
 msgstr "Priorität"
 
+msgid "Protocol"
+msgstr "Protokoll"
+
 msgid "Relayed user tunnel connections: %s"
 msgstr "Weitergeleitete Nutzer-Tunnel: %s"
 
@@ -269,6 +272,9 @@ msgstr "löschen"
 
 msgid "disable"
 msgstr "abschalten"
+
+msgid "enable"
+msgstr "aktivieren"
 
 msgid "move down"
 msgstr "nach unten bewegen"

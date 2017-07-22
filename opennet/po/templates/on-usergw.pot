@@ -116,6 +116,9 @@ msgstr ""
 msgid "Priority"
 msgstr ""
 
+msgid "Protocol"
+msgstr ""
+
 msgid "Relayed user tunnel connections: %s"
 msgstr ""
 
@@ -221,6 +224,9 @@ msgstr ""
 msgid "disable"
 msgstr ""
 
+msgid "enable"
+msgstr ""
+
 msgid "move down"
 msgstr ""
 
@@ -231,6 +237,9 @@ msgid "reset offset"
 msgstr ""
 
 msgid "see"
+msgstr ""
+
+msgid "unknown (the 'on-monitoring' module is required for this information)"
 msgstr ""
 
 msgid "upload to Internet %s kBit/s | download from Internet %s kBit/s"

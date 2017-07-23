@@ -31,22 +31,22 @@ define Package/on-captive-portal/postinst
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
 # Das munin-Plugin "wireless_signal_noise_" offenbart die MAC-Adressen von captive-Portal-Clients.
 # Dies wollen wir nicht.
-on-function is_on_module_installed_and_enabled on-captive-portal && \
-	on-function disable_munin_plugin "wireless_signal_noise_"
-on-function on_opkg_postinst_default
-on-function apply_changes "$(PKG_NAME)"
+"$${IPKG_INSTROOT:-}/usr/bin/on-function" is_on_module_installed_and_enabled on-captive-portal && \
+	"$${IPKG_INSTROOT:-}/usr/bin/on-function" disable_munin_plugin "wireless_signal_noise_"
+"$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postinst_default
+"$${IPKG_INSTROOT:-}/usr/bin/on-function" apply_changes "$(PKG_NAME)"
 endef
 
 define Package/on-captive-portal/prerm
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-on-function disable_captive_portal
+"$${IPKG_INSTROOT:-}/usr/bin/on-function" disable_captive_portal
 endef
 
 define Package/on-captive-portal/postrm
 #!/bin/sh
 [ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-on-function on_opkg_postrm_default
+"$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postrm_default
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

@@ -44,8 +44,8 @@ endef
 define Package/on-core/postinst
 #!/bin/sh
 [ -n "$${IPKG_INSTROOT}" ] || {
-  on-function on_opkg_postinst_default
-  on-function apply_changes "$(PKG_NAME)"
+  "$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postinst_default
+  "$${IPKG_INSTROOT:-}/usr/bin/on-function" apply_changes "$(PKG_NAME)"
 }
 endef
 

@@ -10,7 +10,7 @@ define Package/on-olsr2
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <dev@opennet-initiative.de>
   TITLE:=OLSRv2-Routing
-  DEPENDS+=+oonf-olsrd2
+  DEPENDS+=+on-core +oonf-olsrd2
 endef
 
 define Package/on-olsr2/description

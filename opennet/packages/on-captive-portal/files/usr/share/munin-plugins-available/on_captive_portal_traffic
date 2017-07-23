@@ -19,12 +19,12 @@ if [ "${1:-}" = "config" ]; then
 	echo "traffic_volume_tx.cdef traffic_volume_tx,8,*"
 
 else
-	# Ermittlung des Verkehrs ist leider nicht sicher via ndsctl möglich.
-	# Wir versuchen es trotzdem so gut wie möglich: Addieren der Verkehrszahlen aller Clients.
-	# Jedes Mal wenn sich ein Client trennt, fehlt sein _gesamtes_ Verkehrsvolumen - dies führt
-	# regelmäßig zu Verzerrung und gelegentlich sogar zu Null-Messungen.
-	incoming=$(ndsctl status | grep "^  Download:" | awk 'BEGIN { sum=0 } { sum+=$2 } END { print sum * 1024 }')
-	echo "traffic_volume_rx.value $incoming"
-	outgoing=$(ndsctl status | grep "^  Upload:" | awk 'BEGIN { sum=0 } { sum+=$2 } END { print sum * 1024 }')
-	echo "traffic_volume_tx.value $outgoing"
+	for device in $(get_subdevices_of_interface "$NETWORK_FREE"); do
+		printf "%d %d\n" "$(cat "/sys/class/net/$device/statistics/rx_bytes")" "$(cat "/sys/class/net/$device/statistics/tx_bytes")"
+	done | awk '{
+		rx+=$1; tx+=$2; }
+		END {
+			print("traffic_volume_rx.value " rx);
+			print("traffic_volume_tx.value " tx);
+		}'
 fi

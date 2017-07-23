@@ -80,10 +80,7 @@ msgstr ""
 msgid "Upload (MB)"
 msgstr ""
 
-msgid ""
-"Users do not need to authenticate themselves. Basic information about using "
-"a public Opennet hotspot is presented during the first http connection "
-"attempt."
+msgid "Users do not need to authenticate themselves."
 msgstr ""
 
 msgid "VPN Tunnel"

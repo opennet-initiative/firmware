@@ -12,6 +12,4 @@ uci_delete "network.$NETWORK_FREE"
 # Zone vollstaendig loeschen
 delete_firewall_zone "$ZONE_FREE"
 
-# wir behalten die nodogsplash-Konfiguration - dort sind eventuell lokale Einstellungen zu finden
-
 apply_changes firewall

@@ -47,7 +47,7 @@ function status_network()
 	print_zone_info("ZONE_LOCAL")
 	print_zone_info("ZONE_MESH")
 	print_zone_info("ZONE_WAN")
-	if on_bool_function("is_function_available", {"captive_portal_get_or_create_config"}) then
+	if on_bool_function("is_function_available", {"is_captive_portal_running"}) then
 		print_zone_info("ZONE_FREE")
 	end
 end

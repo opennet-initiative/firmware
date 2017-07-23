@@ -10,7 +10,7 @@ define Package/on-captive-portal
   URL:=http://www.opennet-initiative.de/
   MAINTAINER:=Philipp Markwardt <philipp.markwardt@on-i.de>
   TITLE:=Captive Portal Extension
-  DEPENDS+=+on-openvpn +nodogsplash
+  DEPENDS+=+on-openvpn
 endef
 
 define Package/on-captive-portal/description

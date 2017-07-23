@@ -23,5 +23,5 @@ function index()
 	on_entry({"zugangspunkt"}, call("action_on_captive_portal"), i18n("Public Hotspot"), 80, "on_captive_portal").leaf = 1
 
 	-- Einbindung in die Status-Seite mit dortigem Link
-	on_entry_no_auth({"status", "zugangspunkt"}, call("action_captive_portal")).leaf = true
+	on_entry_no_auth({"status", "zugangspunkt"}, call("status_captive_portal")).leaf = true
 end

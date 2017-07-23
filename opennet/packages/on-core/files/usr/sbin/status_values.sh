@@ -247,9 +247,10 @@ on_olsrd_status="$(pidof olsrd >/dev/null && echo "1" || echo "0")"
 on_olsr_mainip="$(request_olsrd_txtinfo "con" | awk '/MainIp/ {print $2}')"
 
 
-if is_function_available "captive_portal_get_property"; then
-	on_wifidog_status="$(pidof nodogsplash >/dev/null && echo "1" || echo "0")"
-	on_wifidog_id=$(captive_portal_get_property "name")
+if is_function_available "is_captive_portal_running"; then
+	on_wifidog_status="$(is_captive_portal_running && echo "1" || echo "0")"
+	# we do not have specific names anymore
+	on_wifidog_id=$on_id
 else
 	on_wifidog_status=
 	on_wifidog_id=

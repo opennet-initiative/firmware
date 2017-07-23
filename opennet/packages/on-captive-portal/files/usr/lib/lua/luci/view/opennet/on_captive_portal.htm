@@ -20,40 +20,14 @@ You may obtain a copy of the License at
 <%= html_display_message_list(on_errors, "error") %>
 
 
-<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 <div class="cbi-map">
 <div class="cbi-map-descr">
 	<p><%:You may want to run a public hotspot in your area.%></p>
 	<p><%:This requires a working VPN connection:%>
 		<a href="<%= on_url("mig_openvpn") %>"><%:VPN Tunnel%></a></p>
 	<p><%:Disable the Hotspot feature by removing the physical device from the 'free' network interface.%></p>
-	<p><%:Users do not need to authenticate themselves. Basic information about using a public Opennet hotspot is presented during the first http connection attempt.%></p>
+	<p><%:Users do not need to authenticate themselves.%></p>
 </div>
-
-<%# hotspot settings %>
-<fieldset class="cbi-section">
-	<legend><%:Hotspot Settings%></legend>
-	<div class="cbi-section-descr">
-		<p><%:The hotspot name describes the location of this hotspot (informal).%></p>
-		<p><%:The redirection URL is delivered by an HTTP Redirect (307) during the first HTTP connection attempt of a client.%></p>
-	</div>
-	<div class="cbi-section-node">
-		<div class="cbi-value">
-			<label class="cbi-value-title" for="name"><%:Hotspot Name%>:</label>
-			<div class="cbi-value-field">
-				<input type="text" class="cbi-input-text" size="20"
-					name="captive_portal_node_name" value="<%=luci.util.pcdata(portal_name)%>" />
-			</div>
-		</div>
-		<div class="cbi-value">
-			<label class="cbi-value-title" for="name"><%:Redirection URL%>:</label>
-			<div class="cbi-value-field">
-				<input type="text" class="cbi-input-text" size="50"
-					name="captive_portal_url" value="<%=luci.util.pcdata(portal_url)%>" />
-			</div>
-		</div>
-	</div>
-</fieldset>
 
 <%# list of hotspot clients %>
 <fieldset class="cbi-section">
@@ -67,9 +41,8 @@ You may obtain a copy of the License at
 			<th><%:Local IP Address%></th>
 			<th><%:Client MAC Address%></th>
 			<th><%:Connected since%></th>
-			<th><%:Last activity%></th>
-			<th><%:Download (MB)%></th>
-			<th><%:Upload (MB)%></th>
+			<th><%:Download (Packets)%></th>
+			<th><%:Upload (Packets)%></th>
 		</tr>
 		<% for index, client_info in ipairs(line_split(on_function("get_captive_portal_clients"))) do %>
 		<tr class="cbi-section-table-row">
@@ -81,21 +54,14 @@ You may obtain a copy of the License at
 			<td class="cbi-value-field"><%= details[2] %></td>
 			<%# Verbindungsbeginn %>
 			<td class="cbi-value-field"><%= luci.util.pcdata(get_timestamp_age_string(tonumber(details[3]))) %></td>
-			<%# letzte Aktivität %>
-			<td class="cbi-value-field"><%= luci.util.pcdata(get_timestamp_age_string(tonumber(details[4]))) %></td>
 			<%# Download %>
-			<td class="cbi-value-field"><%= math.floor(details[5] / 1000) %></td>
+			<td class="cbi-value-field"><%= details[4] %></td>
 			<%# Upload %>
-			<td class="cbi-value-field"><%= math.floor(details[6] / 1000) %></td>
+			<td class="cbi-value-field"><%= details[5] %></td>
 		</tr>
 		<% end %>
 	</table>
 </fieldset>
-
 </div>
-<div class="cbi-page-actions">
-	<input class="cbi-button cbi-button-save" type="submit" name="save" value="<%:Save%>" />
-</div>
-</form>
 
 <%+footer%>

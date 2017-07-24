@@ -1,6 +1,6 @@
 die opennet-Pakete verwenden gemeinsame Makefile-Elemente
 --- /dev/null
-+++ b/openwrt/include/opennet.mk
++++ b/lede/include/opennet.mk
 @@ -0,0 +1,54 @@
 +# wir lesen die Versionsnummer aus der config-Datei
 +VERSION_NUMBER = $(shell cat "$(TOPDIR)/.config" | grep "^CONFIG_VERSION_NUMBER=" | cut -f 2- -d =)

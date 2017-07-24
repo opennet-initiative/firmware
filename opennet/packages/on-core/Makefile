@@ -43,10 +43,9 @@ endef
 
 define Package/on-core/postinst
 #!/bin/sh
-[ -n "$${IPKG_INSTROOT}" ] || {
-  "$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postinst_default
-  "$${IPKG_INSTROOT:-}/usr/bin/on-function" apply_changes "$(PKG_NAME)"
-}
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
+on-function on_opkg_postinst_default
+on-function apply_changes "$(PKG_NAME)"
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

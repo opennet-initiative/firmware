@@ -28,8 +28,8 @@ endef
 
 define Package/on-olsr2-netjsongraph/postinst
 #!/bin/sh
-[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postinst_default
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
+on-function on_opkg_postinst_default
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

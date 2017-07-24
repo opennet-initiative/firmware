@@ -30,21 +30,21 @@ endef
 
 define Package/on-usergw/postinst
 #!/bin/sh
-[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postinst_default
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" apply_changes "$(PKG_NAME)"
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
+on-function on_opkg_postinst_default
+on-function apply_changes "$(PKG_NAME)"
 endef
 
 define Package/on-usergw/prerm
 #!/bin/sh
-[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" disable_on_usergw
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
+on-function disable_on_usergw
 endef
 
 define Package/on-usergw/postrm
 #!/bin/sh
-[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postrm_default
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
+on-function on_opkg_postrm_default
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

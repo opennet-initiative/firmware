@@ -30,21 +30,21 @@ endef
 
 define Package/on-openvpn/postinst
 #!/bin/sh
-[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postinst_default
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" cleanup_stale_openvpn_services
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" apply_changes "$(PKG_NAME)"
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
+on-function on_opkg_postinst_default
+on-function cleanup_stale_openvpn_services
+on-function apply_changes "$(PKG_NAME)"
 endef
 
 define Package/on-openvpn/postrm
 #!/bin/sh
-[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
 # multiping-Hosts aus Monitoring entfernen (siehe updown-Ereignis-Skript)
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" is_package_installed "on-monitoring" && {
-	"$${IPKG_INSTROOT:-}/usr/bin/on-function" del_monitoring_multiping_host_by_label "gateway"
-	"$${IPKG_INSTROOT:-}/usr/bin/on-function" del_monitoring_multiping_host_by_label "ugw"
+on-function is_package_installed "on-monitoring" && {
+	on-function del_monitoring_multiping_host_by_label "gateway"
+	on-function del_monitoring_multiping_host_by_label "ugw"
 }
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postrm_default
+on-function on_opkg_postrm_default
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

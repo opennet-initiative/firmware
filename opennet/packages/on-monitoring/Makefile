@@ -28,11 +28,11 @@ endef
 
 define Package/on-monitoring/postinst
 #!/bin/sh
-[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
 
 # zuerst die Caches zuruecksetzen
 # erst nach der Cache-Loeschung sind die neuen Funktionen verfuegbar
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postinst_default
+/usr/bin/on-function on_opkg_postinst_default
 
 on-function schedule_task <<-EOF
 	# Leider, leider ist muninlite noch nicht installiert, wenn diese Funktion aufgerufen wird.
@@ -40,36 +40,36 @@ on-function schedule_task <<-EOF
 	sleep 20
 
 	# automatisch konfigurierte munin-Plugins verlinken
-	"$${IPKG_INSTROOT:-}/usr/bin/on-function" enable_suggested_munin_plugin_names "wireless_channel_active_"
-	"$${IPKG_INSTROOT:-}/usr/bin/on-function" enable_suggested_munin_plugin_names "wireless_channel_occupation_"
-	"$${IPKG_INSTROOT:-}/usr/bin/on-function" enable_suggested_munin_plugin_names "wireless_signal_ranges_"
+	on-function enable_suggested_munin_plugin_names "wireless_channel_active_"
+	on-function enable_suggested_munin_plugin_names "wireless_channel_occupation_"
+	on-function enable_suggested_munin_plugin_names "wireless_signal_ranges_"
 
 	# Das "wireless_signal_noise_"-Plugin offenbart MAC-Addressn - dies soll nicht auf einem
 	# offenen Zugangspunkt geschehen.
-	"$${IPKG_INSTROOT:-}/usr/bin/on-function" is_on_module_installed_and_enabled on-captive-portal || \
-		"$${IPKG_INSTROOT:-}/usr/bin/on-function" enable_suggested_munin_plugin_names "wireless_signal_noise_"
+	on-function is_on_module_installed_and_enabled on-captive-portal || \
+		on-function enable_suggested_munin_plugin_names "wireless_signal_noise_"
 
 	# Patch auf /usr/sbin/munin-node anwenden, um die Verwendung von Modulen zu ermöglichen
-	"$${IPKG_INSTROOT:-}/usr/bin/on-function" enable_munin_plugins
+	on-function enable_munin_plugins
 EOF
 
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" apply_changes "$(PKG_NAME)"
+on-function apply_changes "$(PKG_NAME)"
 endef
 
 define Package/on-monitoring/prerm
 #!/bin/sh
-[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
 # wir nehmen an, dass munin abgeschaltet werden soll, wenn der Nutzer das "on-monitoring"-Paket entfernt
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" disable_monitoring
+on-function disable_monitoring
 
 # automatisch konfigurierte munin-Plugins entfernen
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" remove_suggested_munin_plugin_names "wireless_channel_occupation_"
+on-function remove_suggested_munin_plugin_names "wireless_channel_occupation_"
 endef
 
 define Package/on-monitoring/postrm
 #!/bin/sh
-[ "$${IPKG_NO_SCRIPT:-}" = "1" ] && exit 0
-"$${IPKG_INSTROOT:-}/usr/bin/on-function" on_opkg_postrm_default
+[ -n "$${IPKG_INSTROOT:-}" ] && exit 0
+on-function on_opkg_postrm_default
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

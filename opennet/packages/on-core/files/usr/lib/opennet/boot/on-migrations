@@ -561,6 +561,23 @@ auto_enable_on_free_network() {
 }
 
 
+## @fn rename_gpio_switch_poe_passthrough
+## @brief Im Dezember 2015 (siehe 67e1c8701215724dcee9fabcbd7a397ea76e1a9d) wurde im openwrt-
+##        Repository das Config-Sektions-Präfix 'gpio_switch_' von steuerbaren GPIO-Signalen
+##        entfernt. Somit wollen wir auf Geräten mit alten Einstellungen diese über die neu
+##        generierten Vorgabeeinstellungen schreiben.
+rename_gpio_switch_poe_passthrough() {
+	# keine alten Einstellungen? Nichts zu tun ...
+	[ -z "$(uci_get "system.gpio_switch_poe_passthrough")" ] && return 0
+	# sicherheitshalber neu generierten Zustand loeschen (der Schaltzustand wird "aus" sein)
+	uci_delete "system.poe_passthrough"
+	# alte Einstellungen an neue Stelle schreiben
+	uci rename system.gpio_switch_poe_passthrough=poe_passthrough
+	uci commit system
+	reload_config
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -614,3 +631,4 @@ remove_pre05_usergateway_olsr_announcement
 remove_pre05_usergateway_tap_interfaces
 remove_pre05_on_usergw_settings
 auto_enable_on_free_network
+rename_gpio_switch_poe_passthrough

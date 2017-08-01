@@ -130,10 +130,10 @@ function action_settings()
 	end
 	-- POE passthrough
 	if luci.http.formvalue("has_poe_passthrough") then
-		if luci.http.formvalue("gpio_switch_poe_passthrough") then
-			luci.sys.exec("uci set system.gpio_switch_poe_passthrough.value=1")
+		if luci.http.formvalue("poe_passthrough") then
+			luci.sys.exec("uci set system.poe_passthrough.value=1")
 		else
-			luci.sys.exec("uci set system.gpio_switch_poe_passthrough.value=0")
+			luci.sys.exec("uci set system.poe_passthrough.value=0")
 		end
 	end
 	on_function("apply_changes", {"on-core"})

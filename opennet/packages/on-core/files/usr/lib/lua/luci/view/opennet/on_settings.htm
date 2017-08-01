@@ -24,8 +24,8 @@ require("luci.model.opennet.funcs")
 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 
 <%# TODO: diese Funktion gehört in ein separates luci-Paket, das in openwrt integriert werden sollte %>
-<% if cursor:get("system", "gpio_switch_poe_passthrough") then %>
-	<% local is_enabled = (cursor:get("system", "gpio_switch_poe_passthrough", "value") == "1") %>
+<% if cursor:get("system", "poe_passthrough") then %>
+	<% local is_enabled = (cursor:get("system", "poe_passthrough", "value") == "1") %>
 	<div class="cbi-map"><fieldset class="cbi-section">
 	<legend><%:POE Passthrough%></legend>
 		<div class="cbi-section-descr"><%:Devices with multiple ethernet ports may be able to supply chained devices with power.%></div>
@@ -34,7 +34,7 @@ require("luci.model.opennet.funcs")
 				<label class="cbi-value-title" for="poe_passthrough"><%:POE Passthrough%>:</label>
 				<div class="cbi-value-field">
 					<input class="cbi-input-checkbox" value="1"
-						type="checkbox" id="poe_passthrough" name="gpio_switch_poe_passthrough"
+						type="checkbox" id="poe_passthrough" name="poe_passthrough"
 						<%= is_enabled and 'checked="checked"' or '' %> />
 					<input type="hidden" name="has_poe_passthrough" value="1" />
 				</div>

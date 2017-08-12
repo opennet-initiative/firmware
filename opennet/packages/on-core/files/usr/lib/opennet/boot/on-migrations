@@ -578,6 +578,19 @@ rename_gpio_switch_poe_passthrough() {
 }
 
 
+## @fn rename_tun_to_tun_on_user
+## @brief Vor v0.5.4 wurde das Netzwerk-Interface des Nutzer-VPN durch openvpn mit dem automatisch
+##        vergebenen Namen "tun0" bezeichnet.
+##        Aufgrund potentieller Uneindeutigkeit durch Timing-Probleme heißt das Interface seit
+##        v0.5.4 "tun-on-user".
+rename_tun_to_tun_on_user() {
+	[ "$(uci_get "network.on_vpn.ifname")" = "tun0" ] || return 0
+	uci set "network.on_vpn.ifname=tun-on-user"
+	uci commit network
+	reload_config
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -632,3 +645,4 @@ remove_pre05_usergateway_tap_interfaces
 remove_pre05_on_usergw_settings
 auto_enable_on_free_network
 rename_gpio_switch_poe_passthrough
+rename_tun_to_tun_on_user

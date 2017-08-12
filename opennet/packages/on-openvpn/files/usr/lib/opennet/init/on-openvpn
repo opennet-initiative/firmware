@@ -13,7 +13,7 @@ configure_tunnel_network() {
 	# add new network to configuration (to be recognized by olsrd)
 	uci set "${uci_prefix}=interface"
 	uci set "${uci_prefix}.proto=none"
-	uci set "${uci_prefix}.ifname=tun0"
+	uci set "${uci_prefix}.ifname=tun-on-user"
 
 	apply_changes network
 }

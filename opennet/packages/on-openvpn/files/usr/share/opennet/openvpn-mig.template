@@ -28,7 +28,7 @@ hand-window 30
 # man openvpn: Silence the output of replay warnings, which are a common false alarm on WiFi networks.
 mute-replay-warnings
 
-dev tun
+dev tun-on-user
 dev-type tun
 
 script-security 2

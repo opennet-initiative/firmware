@@ -59,6 +59,13 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 		<%
 		local boardinfo = luci.util.ubus("system", "board") or { }
 		local boardinfo_formatted = pcdata(boardinfo.model or boardinfo.system or "?")
+		local usable_memory = tonumber(on_function("get_memory_size"))
+		local real_memory = math.pow(2, math.floor(math.log(usable_memory) / math.log(2) + 0.99))
+		local memory_info = luci.i18n.translatef("Memory: %d MB", real_memory)
+		if real_memory <= 32 then
+			memory_info = memory_info .. " (" .. luci.i18n.translate("very small memory: only suitable for simple (backbone) installations") .. ")"
+		end
+		local hardare_info = luci.i18n.translatef("Model: %s", boardinfo_formatted) .. "<br/>" .. memory_info
 		local wireless_info = "<table><tr>"
 			.. luci.sys.exec("iwinfo"
 				.. " | grep -vE '(TX power offset|Frequency offset|Hardware|Type|Supports VAP):'"
@@ -77,7 +84,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 				  {"captive_portal_section", i18n("Public Hotspot"), url="zugangspunkt", mod_name="on-captive-portal"},
 				  {"modules_section", i18n("Opennet Modules"), url="modules"},
 				  {"issues_section", i18n("Issue Indicators"), url="issues"},
-				  {"hardware_section", i18n("Hardware Information"), content=boardinfo_formatted},
+				  {"hardware_section", i18n("Hardware Information"), rawcontent=hardare_info},
 				  {"uptime_section", i18n("Uptime"), content=luci.sys.exec("uptime")},
 				  {"system_section", i18n("System"), content=luci.sys.exec("uname -a")},
 			  }) do

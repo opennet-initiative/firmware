@@ -13,8 +13,8 @@ msgstr ""
 msgid "Client MAC Address"
 msgstr "MAC-Adresse des Geräts"
 
-msgid "Connected clients: %d | Hotspot name: %s"
-msgstr "Verbundene Geräte: %d | Hotspot-Name: %s"
+msgid "Connected clients: %d"
+msgstr "Verbundene Geräte: %d"
 
 msgid "Connected since"
 msgstr "Verbunden seit"
@@ -29,35 +29,17 @@ msgstr ""
 msgid "Disabled: failed to enable the '%s' network interface."
 msgstr "Inaktiv: die Netzwerkschnittstelle '%s' konnte nicht aktivert werden."
 
-msgid "Disabled: failed to start the 'nodogsplash' service."
-msgstr "Inaktiv: Fehler beim Starten des Diensts \"nodogsplash\"."
-
 msgid "Disabled: no network device is assigned to the '%s' zone."
 msgstr "Inaktiv: der '%s'-Zone wurde kein Netzwerk-Gerät zugewiesen."
 
 msgid "Disabled: the VPN tunnel is not running."
 msgstr "Inaktiv: der VPN-Tunnel ist nicht aufgebaut."
 
-msgid "Download (MB)"
-msgstr "Download (MB)"
+msgid "Download (Packets)"
+msgstr "Heruntergeladen (Pakete)"
 
 msgid "Hotspot Clients"
 msgstr "Hotspot-Nutzende"
-
-msgid "Hotspot Name"
-msgstr "Name des offenen Zugangspunkts"
-
-msgid "Hotspot Settings"
-msgstr "Einstellungen für offenen Zugangspunkt"
-
-msgid "Ignoring the URL due to invalid characters."
-msgstr "Die neue URL wurde aufgrund von ungültigen Zeichen ignoriert."
-
-msgid "Ignoring the node name due to invalid characters."
-msgstr "Der neue Name wurde aufgrund von ungültigen Zeichen ignoriert."
-
-msgid "Last activity"
-msgstr "Letzte Aktivität"
 
 msgid "Local IP Address"
 msgstr "Lokale IP-Adresse"
@@ -68,30 +50,14 @@ msgstr "Nummer"
 msgid "Public Hotspot"
 msgstr "Offener Zugangspunkt"
 
-msgid "Redirection URL"
-msgstr "Umleitungs-URL"
-
-msgid "Save"
-msgstr "Speichern"
-
 msgid "The hotspot client list is only available locally."
 msgstr "Die Hotspot-Geräteliste ist nur lokal verfügbar."
-
-msgid "The hotspot name describes the location of this hotspot (informal)."
-msgstr "Der Hotspot-Name beschreibt den Ort dieses Hotspots (formlos)."
-
-msgid ""
-"The redirection URL is delivered by an HTTP Redirect (307) during the first "
-"HTTP connection attempt of a client."
-msgstr ""
-"Die Umleitungs-URL wird als HTTP-Umleitung (307) beim ersten Versuch eines "
-"HTTP-Verbindungsaufbaus an den Client ausgeliefert."
 
 msgid "This requires a working VPN connection:"
 msgstr "Dies erfordert eine funktionierende VPN Verbindung:"
 
-msgid "Upload (MB)"
-msgstr "Upload (MB)"
+msgid "Upload (Packets)"
+msgstr "Hochgeladen (Pakete)"
 
 msgid "Users do not need to authenticate themselves."
 msgstr "Nutzende müssen sich nicht authentifizieren."
@@ -116,9 +82,9 @@ msgid ""
 "non-wifi interface or disable bridging."
 msgstr ""
 "Du solltest die Schnittstelle '%s' <a href=\"%s\">umkonfigurieren</a>. "
-"Derzeit ist sie als Brücke bestehend aus WLAN-Interfaces (und nichts anderem)"
-" konfiguriert. Diese Konfiguration ist als problematisch bekannt. Bitte füge "
-"ein nicht-WLAN-Interface hinzu oder entferne die Brücke."
+"Derzeit ist sie als Brücke bestehend aus WLAN-Interfaces (und nichts "
+"anderem) konfiguriert. Diese Konfiguration ist als problematisch bekannt. "
+"Bitte füge ein nicht-WLAN-Interface hinzu oder entferne die Brücke."
 
 msgid "You may want to run a public hotspot in your area."
 msgstr ""
@@ -133,12 +99,52 @@ msgstr ""
 "Netzwerkkonfiguration '%s' zuordnen, um den offenen Zugangspunkt in Betrieb "
 "zu nehmen."
 
+#~ msgid "Connected clients: %d | Hotspot name: %s"
+#~ msgstr "Verbundene Geräte: %d | Hotspot-Name: %s"
+
+#~ msgid "Disabled: failed to start the 'nodogsplash' service."
+#~ msgstr "Inaktiv: Fehler beim Starten des Diensts \"nodogsplash\"."
+
+#~ msgid "Download (MB)"
+#~ msgstr "Download (MB)"
+
+#~ msgid "Hotspot Name"
+#~ msgstr "Name des offenen Zugangspunkts"
+
+#~ msgid "Hotspot Settings"
+#~ msgstr "Einstellungen für offenen Zugangspunkt"
+
+#~ msgid "Ignoring the URL due to invalid characters."
+#~ msgstr "Die neue URL wurde aufgrund von ungültigen Zeichen ignoriert."
+
+#~ msgid "Ignoring the node name due to invalid characters."
+#~ msgstr "Der neue Name wurde aufgrund von ungültigen Zeichen ignoriert."
+
+#~ msgid "Last activity"
+#~ msgstr "Letzte Aktivität"
+
+#~ msgid "Redirection URL"
+#~ msgstr "Umleitungs-URL"
+
+#~ msgid "Save"
+#~ msgstr "Speichern"
+
+#~ msgid "The hotspot name describes the location of this hotspot (informal)."
+#~ msgstr "Der Hotspot-Name beschreibt den Ort dieses Hotspots (formlos)."
+
+#~ msgid ""
+#~ "The redirection URL is delivered by an HTTP Redirect (307) during the "
+#~ "first HTTP connection attempt of a client."
+#~ msgstr ""
+#~ "Die Umleitungs-URL wird als HTTP-Umleitung (307) beim ersten Versuch "
+#~ "eines HTTP-Verbindungsaufbaus an den Client ausgeliefert."
+
+#~ msgid "Upload (MB)"
+#~ msgstr "Upload (MB)"
+
 #~ msgid ""
 #~ "You need to attach a physical network device to the 'free' interface in "
 #~ "order to enable the Hotspot feature."
 #~ msgstr ""
 #~ "Du musst ein physisches Netzwerk-Gerät mit der 'free'-Schnittstelle "
 #~ "verbinden, um die Funktionalität des offenen Zugangspunkts zu aktivieren."
-
-#~ msgid "Connected clients: %d"
-#~ msgstr "Verbundene Geräte: %d"

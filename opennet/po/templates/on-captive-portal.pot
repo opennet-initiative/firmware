@@ -4,7 +4,7 @@ msgstr "Content-Type: text/plain; charset=UTF-8"
 msgid "Client MAC Address"
 msgstr ""
 
-msgid "Connected clients: %d | Hotspot name: %s"
+msgid "Connected clients: %d"
 msgstr ""
 
 msgid "Connected since"
@@ -18,34 +18,16 @@ msgstr ""
 msgid "Disabled: failed to enable the '%s' network interface."
 msgstr ""
 
-msgid "Disabled: failed to start the 'nodogsplash' service."
-msgstr ""
-
 msgid "Disabled: no network device is assigned to the '%s' zone."
 msgstr ""
 
 msgid "Disabled: the VPN tunnel is not running."
 msgstr ""
 
-msgid "Download (MB)"
+msgid "Download (Packets)"
 msgstr ""
 
 msgid "Hotspot Clients"
-msgstr ""
-
-msgid "Hotspot Name"
-msgstr ""
-
-msgid "Hotspot Settings"
-msgstr ""
-
-msgid "Ignoring the URL due to invalid characters."
-msgstr ""
-
-msgid "Ignoring the node name due to invalid characters."
-msgstr ""
-
-msgid "Last activity"
 msgstr ""
 
 msgid "Local IP Address"
@@ -57,27 +39,13 @@ msgstr ""
 msgid "Public Hotspot"
 msgstr ""
 
-msgid "Redirection URL"
-msgstr ""
-
-msgid "Save"
-msgstr ""
-
 msgid "The hotspot client list is only available locally."
-msgstr ""
-
-msgid "The hotspot name describes the location of this hotspot (informal)."
-msgstr ""
-
-msgid ""
-"The redirection URL is delivered by an HTTP Redirect (307) during the first "
-"HTTP connection attempt of a client."
 msgstr ""
 
 msgid "This requires a working VPN connection:"
 msgstr ""
 
-msgid "Upload (MB)"
+msgid "Upload (Packets)"
 msgstr ""
 
 msgid "Users do not need to authenticate themselves."

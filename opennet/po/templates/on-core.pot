@@ -74,6 +74,9 @@ msgid ""
 "connection."
 msgstr ""
 
+msgid "Configured Mesh Wifi"
+msgstr ""
+
 msgid "Country"
 msgstr ""
 
@@ -159,6 +162,9 @@ msgstr ""
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr ""
 
+msgid "Free space"
+msgstr ""
+
 msgid "Generate"
 msgstr ""
 
@@ -236,6 +242,12 @@ msgstr ""
 msgid "Issue Indicators"
 msgstr ""
 
+msgid "Join Network"
+msgstr ""
+
+msgid "Join Network: Wireless Scan"
+msgstr ""
+
 msgid "Key Generation"
 msgstr ""
 
@@ -273,6 +285,12 @@ msgid "Member Email Address"
 msgstr ""
 
 msgid "Member Name"
+msgstr ""
+
+msgid "Memory: %d MB"
+msgstr ""
+
+msgid "Model: %s"
 msgstr ""
 
 msgid "Modules"
@@ -418,6 +436,9 @@ msgstr ""
 msgid "Removing modules in background."
 msgstr ""
 
+msgid "Repeat scan"
+msgstr ""
+
 msgid "Report"
 msgstr ""
 
@@ -449,6 +470,9 @@ msgid "Settings"
 msgstr ""
 
 msgid "Share your local internet connection with other members"
+msgstr ""
+
+msgid "Signal"
 msgstr ""
 
 msgid "Sort order"
@@ -582,6 +606,9 @@ msgstr ""
 msgid "and"
 msgstr ""
 
+msgid "dB"
+msgstr ""
+
 msgid "device"
 msgstr ""
 
@@ -616,4 +643,7 @@ msgid "uploaded or generated on this date."
 msgstr ""
 
 msgid "use"
+msgstr ""
+
+msgid "very small memory: only suitable for simple (backbone) installations"
 msgstr ""

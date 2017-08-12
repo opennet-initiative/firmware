@@ -89,6 +89,9 @@ msgid ""
 "connection."
 msgstr "Wähle deine Paketquelle in Abhängigkeit von deiner Netzwerkanbindung"
 
+msgid "Configured Mesh Wifi"
+msgstr "Konfiguriertes Mesh-Funknetz"
+
 msgid "Country"
 msgstr "Land"
 
@@ -184,6 +187,9 @@ msgstr "Weiterleitung aus dem Opennet"
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
 
+msgid "Free space"
+msgstr "Freier Speicher"
+
 msgid "Generate"
 msgstr "Erzeugen"
 
@@ -264,6 +270,12 @@ msgstr "Ungültiger Diensttyp"
 msgid "Issue Indicators"
 msgstr "Problemindikatoren"
 
+msgid "Join Network"
+msgstr "Mit Netzwerk verbinden"
+
+msgid "Join Network: Wireless Scan"
+msgstr "Netzwerkauswahl: Suche nach Funknetzen"
+
 msgid "Key Generation"
 msgstr "Schlüsselerzeugung"
 
@@ -305,6 +317,12 @@ msgstr "Deine E-Mail Adresse"
 
 msgid "Member Name"
 msgstr "Dein Name"
+
+msgid "Memory: %d MB"
+msgstr "Arbeitsspeicher: %d MB"
+
+msgid "Model: %s"
+msgstr "Modell: %s"
 
 msgid "Modules"
 msgstr "Module"
@@ -471,6 +489,9 @@ msgstr "Handlungsempfehlung"
 msgid "Removing modules in background."
 msgstr "Entferne Module im Hintergrund."
 
+msgid "Repeat scan"
+msgstr "Suche wiederholen"
+
 msgid "Report"
 msgstr "Zusammenfassung"
 
@@ -503,6 +524,9 @@ msgstr "Einstellungen"
 
 msgid "Share your local internet connection with other members"
 msgstr "Teile Deinen lokalen Internetanschluss mit anderen Mitgliedern"
+
+msgid "Signal"
+msgstr "Signal"
 
 msgid "Sort order"
 msgstr "Sortierreihenfolge"
@@ -671,6 +695,9 @@ msgstr ""
 msgid "and"
 msgstr "und"
 
+msgid "dB"
+msgstr "dB"
+
 msgid "device"
 msgstr "Schnittstelle"
 
@@ -707,6 +734,9 @@ msgstr "hochgeladen oder erzeugt an diesem Tag"
 msgid "use"
 msgstr "übernehmen"
 
+msgid "very small memory: only suitable for simple (backbone) installations"
+msgstr "sehr kleiner Speicher: nur verwendbar für einfache (Backbone) Installationen"
+
 #~ msgid "BSSID"
 #~ msgstr "BSSID"
 
@@ -736,9 +766,6 @@ msgstr "übernehmen"
 
 #~ msgid "SSID"
 #~ msgstr "SSID"
-
-#~ msgid "Signal"
-#~ msgstr "Signal"
 
 #~ msgid "Wireless is disabled or not associated"
 #~ msgstr "Das Funknetz ist deaktiviert oder nicht assoziiert"

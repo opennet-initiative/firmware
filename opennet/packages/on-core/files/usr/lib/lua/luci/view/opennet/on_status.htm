@@ -57,8 +57,8 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 <div class="cbi-map"><fieldset class="cbi-section">
 	<table class="cbi-section-table" id="status_table">
 		<%
-		local hardware_info = luci.sys.exec("echo -e \"Model: \$(cat /proc/diag/model 2>/dev/null)\\n\$(cat /proc/cpuinfo)\" | awk 'BEGIN {FS=\":\"; no=0} /Processor|Hardware|system type|machine|Model|vendor_id/ {gsub(\"[\\t]\", \"\"); if (no > 0) printf \" | \"; if (\$2) { no=1; printf \$1\":\"\$2}} END {printf \"\\n\";}'")
-
+		local boardinfo = luci.util.ubus("system", "board") or { }
+		local boardinfo_formatted = pcdata(boardinfo.model or boardinfo.system or "?")
 		local wireless_info = "<table><tr>"
 			.. luci.sys.exec("iwinfo"
 				.. " | grep -vE '(TX power offset|Frequency offset|Hardware|Type|Supports VAP):'"
@@ -77,7 +77,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 				  {"captive_portal_section", i18n("Public Hotspot"), url="zugangspunkt", mod_name="on-captive-portal"},
 				  {"modules_section", i18n("Opennet Modules"), url="modules"},
 				  {"issues_section", i18n("Issue Indicators"), url="issues"},
-				  {"hardware_section", i18n("Hardware Information"), content=hardware_info},
+				  {"hardware_section", i18n("Hardware Information"), content=boardinfo_formatted},
 				  {"uptime_section", i18n("Uptime"), content=luci.sys.exec("uptime")},
 				  {"system_section", i18n("System"), content=luci.sys.exec("uname -a")},
 			  }) do

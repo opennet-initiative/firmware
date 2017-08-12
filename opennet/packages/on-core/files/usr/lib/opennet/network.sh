@@ -63,14 +63,7 @@ add_zone_forward() {
 	trap "error_trap add_zone_forward '$*'" $GUARD_TRAPS
 	local source="$1"
 	local dest="$2"
-	local uci_prefix
-	uci_prefix=$(find_first_uci_section firewall forwarding "src=$source" "dest=$dest")
-	# die Weiterleitungsregel existiert bereits -> Ende
-	[ -n "$uci_prefix" ] && return 0
-	# neue Regel erstellen
-	uci_prefix="firewall.$(uci add firewall forwarding)"
-	uci set "${uci_prefix}.src=$source"
-	uci set "${uci_prefix}.dest=$dest"
+	create_uci_section_if_missing "firewall" "forwarding" "src=$source" "dest=$dest" || true
 }
 
 

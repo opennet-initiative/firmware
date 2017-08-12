@@ -200,5 +200,27 @@ prepare_on_uci_settings() {
 	done
 }
 
+
+## @fn create_uci_section_if_missing
+## @brief Prüfe, ob eine definierte UCI-Sektion existiert und lege sie andernfalls an.
+## @returns Sektion wurde angelegt (True) oder war bereits vorhanden (false).
+create_uci_section_if_missing() {
+	trap "error_trap create_uci_section_if_missing '$*'" $GUARD_TRAPS
+	local config="$1"
+	local stype="$2"
+	local key_value
+	local uci_prefix
+	shift 2
+	# liefere "falsch" zurück (Sektion war bereits vorhanden)
+	[ -n "$(find_first_uci_section "$config" "$stype")" ] && { trap "" $GUARD_TRAPS; return 1; }
+	# uci-Sektion fehlt -> anlegen
+	uci_prefix="$config.$(uci add "$config" "$stype")"
+	for key_value in "$@"; do
+		uci set "$uci_prefix.$key_value"
+	done
+	# liefere "wahr" zurück (Sektion wurde angelegt)
+	return 0
+}
+
 # Ende der Doku-Gruppe
 ## @}

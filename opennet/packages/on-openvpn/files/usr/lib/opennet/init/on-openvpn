@@ -1,6 +1,7 @@
 #!/bin/sh
 
 
+# shellcheck disable=SC1090
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
@@ -20,26 +21,26 @@ configure_tunnel_network() {
 
 
 configure_tunnel_firewall() {
+	local was_changed=0
 	local uci_prefix
 	uci_prefix=$(find_first_uci_section firewall zone "name=$ZONE_TUNNEL")
 
-	# Abbruch falls die Zone bereits vorhanden ist
-	[ -n "$(uci_get "$uci_prefix")" ] && return
-
-	# Zone fuer ausgehenden Verkehr definieren
-	uci_prefix=firewall.$(uci add firewall zone)
-	uci set "${uci_prefix}.name=$ZONE_TUNNEL"
-	uci add_list "${uci_prefix}.network=$NETWORK_TUNNEL"
-	uci set "${uci_prefix}.forward=REJECT"
-	uci set "${uci_prefix}.input=REJECT"
-	uci set "${uci_prefix}.output=ACCEPT"
-	uci set "${uci_prefix}.masq=1"
-
-	# Weiterleitung aus dem lokalen Netzwerk heraus erlauben
-	uci_prefix=firewall.$(uci add firewall forwarding)
-	uci set "${uci_prefix}.src=$ZONE_LOCAL"
-	uci set "${uci_prefix}.dest=$ZONE_TUNNEL"
-
+	# Zone erzeugen, falls sie noch nicht vorhanden ist
+	if [ -z "$(uci_get "$uci_prefix")" ]; then
+		# Zone fuer ausgehenden Verkehr definieren
+		uci_prefix=firewall.$(uci add firewall zone)
+		uci set "${uci_prefix}.name=$ZONE_TUNNEL"
+		uci add_list "${uci_prefix}.network=$NETWORK_TUNNEL"
+		uci set "${uci_prefix}.forward=REJECT"
+		uci set "${uci_prefix}.input=REJECT"
+		uci set "${uci_prefix}.output=ACCEPT"
+		uci set "${uci_prefix}.masq=1"
+		was_changed=1
+	fi
+	create_uci_section_if_missing firewall forwarding \
+			"src=$ZONE_LOCAL" "dest=$ZONE_TUNNEL" \
+		&& was_changed=1
+	[ "$was_changed" = "0" ] && return 0
 	apply_changes firewall
 }
 

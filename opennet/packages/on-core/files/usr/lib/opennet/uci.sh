@@ -212,7 +212,7 @@ create_uci_section_if_missing() {
 	local uci_prefix
 	shift 2
 	# liefere "falsch" zurück (Sektion war bereits vorhanden)
-	[ -n "$(find_first_uci_section "$config" "$stype")" ] && { trap "" $GUARD_TRAPS; return 1; }
+	[ -n "$(find_first_uci_section "$config" "$stype" "$@")" ] && { trap "" $GUARD_TRAPS; return 1; }
 	# uci-Sektion fehlt -> anlegen
 	uci_prefix="$config.$(uci add "$config" "$stype")"
 	for key_value in "$@"; do

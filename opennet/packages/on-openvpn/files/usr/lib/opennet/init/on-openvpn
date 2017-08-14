@@ -43,7 +43,7 @@ configure_tunnel_firewall() {
 	create_uci_section_if_missing firewall rule \
 			"src=$ZONE_TUNNEL" "dest_port=22" "target=ACCEPT" "name=on-user-ssh" \
 		&& was_changed=1
-	create_uci_section_if_missing firewall rule
+	create_uci_section_if_missing firewall rule \
 			"src=$ZONE_TUNNEL" "proto=icmp" "target=ACCEPT" "name=on-user-icmp" \
 		&& was_changed=1
 	[ "$was_changed" = "0" ] && return 0

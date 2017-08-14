@@ -246,12 +246,18 @@ update_olsr_services() {
 ## @details Bei Problemen mit dem Verbindungsaufbau erscheint ein Hinweis im syslog.
 request_olsrd_txtinfo() {
 	local request="$1"
-	echo "/$request" | timeout 2 nc localhost 2006 2>/dev/null || {
+	if ! echo "/$request" | timeout 2 nc localhost 2006 2>/dev/null; then
 		# keine Fehlermeldung, falls wir uns gerade noch im Boot-Prozess befinden
 		# Dies tritt besonders nach einem Reboot via Web-Interface auf, da dann die Status-Seite
 		# noch während des Hochfahrens abgerufen wird.
 		[ "$(get_uptime_seconds)" -lt 180 ] || msg_error "request_olsrd_txtinfo: olsrd is not responding"
-	}
+	fi | if [ "$request" = "con" ] || [ "$request" = "all" ]; then
+		# die Konfiguration und "all" sind ein unklares Format (fuer Menschen)
+		cat
+	else
+		# alle nicht-Daten-Zeilen entfernen
+		sed '1,/^Table: /d' | sed 1d | grep -v "^$"
+	fi
 }
 
 # Ende der Doku-Gruppe

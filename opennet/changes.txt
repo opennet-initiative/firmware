@@ -5,13 +5,24 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
+* Ein-Klick-Konfiguration (als Client) eines WLAN-Netzes aus der Umgebung
+* Kanalwechsel durch Radarsignale (5 GHz):
+** deutlicher weniger fehlerhafte Positiv-Meldungen (also Rauschen wird seltener als Radar missverstanden)
+** es findet kein Wechsel auf einen Indoor-Kanal mehr statt (bessere Sendeleistung, keine Normverletzung)
 * UGW-APs (Spender) verbinden sich nun auch via IPv6 mit UGW-Servern
 ** seit OpenVPN v2.4 (verbesserte Dual-Stack-Unterstützung)
 * regelmäßiger Kabelverbindungsverlust von Nanostation M5 Loco XW ist behoben ("eth0-Bug")
 ** [https://dev.opennet-initiative.de/ticket/94 Ticket #94]
+* UGW-APs zeigen Anzahl der weitergeleiteten Verbindungen auch dann an, wenn kein VPN aufgebaut wurde
+* keine Splash-Seitenumlenkung auf offenen Zugangspunkten (sofort unbeschränkter Zugang für alle)
+* Anzeige der Größe des Arbeitsspeichers auf Status-Seite
+* verfügbaren Flash-Speicher bei Modul-Installation anzeigen
 
 = Interne Änderungen =
 * vermeide unnötigen OLSR-Neustart nach Wifi-Reinitialisierung ([http://dev.opennet-initiative.de/ticket/185 Ticket #185])
+* deutlich reduzierter Load durch seltenere Aktualisierung der via OLSR announcierten Dienste
+* die Module 'on-openvpn' und 'on-olsr2' sind nun standardmäßig in der Firmware enthalten
+** 'on-openvpn' is abgeschaltet, 'on-olsr2' ist aktiviert
 
 = Bemerkenswertes / Fehler / Mängel =
 

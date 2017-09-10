@@ -54,6 +54,8 @@ is_dfs_channel_active() {
 is_dfs_channel_configured() {
 	local channel
 	for channel in $(uci show wireless | grep "\.channel=" | cut -f 2 -d "'"); do
+		# workaround fuer alte uci-Version (z.B. Firmware v0.5.1) ohne Single-Quotes
+		echo "$channel" | grep -q "=" && channel=$(echo "$channel" | sed 's/^.*=//')
 		is_dfs_channel "$channel" && return 0
 		true
 	done

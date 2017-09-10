@@ -140,16 +140,21 @@ def query_olsrd_txtservice(section=""):
         request = bytes("/%s" % section)
     conn.sendall(request)
     fconn = conn.makefile()
-    # "enumerate" is not suitable since it reads all lines at once (not a generator in micropython)
-    index = 0
+    in_header = True
+    in_body_count = 0
     for line in fconn.readlines():
-        # skip the first five lines - they are headers
-        if index < 5:
-            index += 1
-            continue
-        line = line.strip()
-        if line:
-            yield line
+        if in_header:
+            if not line.strip():
+                # the empty line marks the end of the header
+                in_header = False
+            # ignore header lines (nothing to be done)
+        else:
+            # skip the first two body lines - they are table headers
+            if in_body_count >= 2:
+                line = line.strip()
+                if line:
+                    yield line
+            in_body_count += 1
     fconn.close()
     conn.close()
 
@@ -159,8 +164,10 @@ def get_address_device_mapping():
     for line in query_olsrd_txtservice("mid"):
         # example line content:
         #    192.168.2.171   192.168.22.171;192.168.12.171
-        device_id, mids = line.split()
-        for mid in mids.split(";"):
+        # since olsr v0.9.5:
+        #    192.168.2.171   192.168.22.171    192.168.12.171
+        device_id, mids = line.split(None, 1)
+        for mid in mids.replace(";", " ").split():
             mapping[mid] = device_id
     return mapping
 

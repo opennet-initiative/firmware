@@ -130,7 +130,7 @@ end
 function check_and_warn_module_state(module_name, errors)
 	if not on_bool_function("is_on_module_installed_and_enabled", {module_name}) then
 		table.insert(errors, luci.i18n.translatef(
-			[[The module '%s' is currently disabled (see 'Opennet -> Base -> Settings').]], module_name))
+			[[The module '%s' is currently disabled (see 'Opennet -> Base -> Modules').]], module_name))
 	end
 end
 

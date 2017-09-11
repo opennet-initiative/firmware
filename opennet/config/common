@@ -4,7 +4,7 @@ CONFIG_VERSIONOPT=y
 CONFIG_VERSION_MANUFACTURER="Opennet Initiative e.V."
 CONFIG_VERSION_NUMBER="0.5.4"
 
-#setze OpenWRT Downloadpfad+Versionsnummer explizit weil wir die OpenWRT Versionsnummer mit unserer Versionsnummer ueberschreiben.
+# setze OpenWRT Downloadpfad+Versionsnummer explizit weil wir die OpenWRT Versionsnummer mit unserer Versionsnummer ueberschreiben.
 CONFIG_VERSION_REPO="http://downloads.lede-project.org/releases/17.01.2"
 
 # reduzierte Squashfs-Blockgroesse Standard: 256)
@@ -13,6 +13,19 @@ CONFIG_VERSION_REPO="http://downloads.lede-project.org/releases/17.01.2"
 CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=64
 # blocksize=16 reduziert den RAM-Bedarf um ca. 2 MB - dagegen steigt der Flash-Bedarf um 800 kB.
 #CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=16
+
+# Platzreduktion
+CONFIG_SIGNED_PACKAGES=n
+CONFIG_KERNEL_CRASHLOG=n
+CONFIG_KERNEL_SWAP=n
+CONFIG_KERNEL_KALLSYMS=n
+CONFIG_KERNEL_MAGIC_SYSRQ=n
+CONFIG_KERNEL_COREDUMP=n
+CONFIG_KERNEL_ELF_CORE=n
+CONFIG_BUSYBOX_CONFIG_FEATURE_BUFFERS_USE_MALLOC=y
+CONFIG_BUSYBOX_CONFIG_FEATURE_SEAMLESS_GZ=n
+CONFIG_BUSYBOX_CONFIG_MKSWAP=n
+CONFIG_PACKAGE_usign=n
 
 # unnoetiges optional machen
 CONFIG_PACKAGE_block-mount=m

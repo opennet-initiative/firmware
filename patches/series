@@ -11,12 +11,4 @@ olsrd2_enable_plugin_ethernet_listener.patch
 always-enable-dfs.patch
 #radar_pulse_debug.patch
 horst_compile_error.patch
-
-# nur fuer Builds basierend auf LEDE 17.01 notwendig
-# Ursache: https://github.com/curl/curl/issues/1268
-# Test des Fehlers (sollte nur mit curl 7.52 auftreten):
-#   $ curl --form "foo=bar" http://on-i.de/
-#   curl: (27) PRNG seeding failed
-lede-17.01-curl-upgrade.patch
-
 hostapd_switch_to_DFS.patch

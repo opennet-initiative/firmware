@@ -613,8 +613,8 @@ generate_report() {
 		[ ! -x "$fname" ] && msg_info "skipping non-executable report script: $fname" && continue
 		"$fname" || msg_error "reports script failed: $fname"
 	done
-	cd "$temp_dir"
-	tar czf "$tar_file" "report"
+	# "tar" unterstuetzt "-c" nicht - also komprimieren wir separat
+	tar cC "$temp_dir" "report" | gzip >"$tar_file"
 	rm -r "$temp_dir"
 	mv "$tar_file" "$REPORTS_FILE"
 }

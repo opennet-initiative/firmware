@@ -8,7 +8,7 @@ GIT_CURRENT_RELEASE_TAG = $(shell git tag -l --points-at HEAD | sed 's/^v//g')
 NEXT_VERSION = $(shell grep "^CONFIG_VERSION_NUMBER=" "$(COMMON_CONFIG)" | cut -f 2 -d '"')
 
 SMALLCONFIG = bcm47xx
-BIGCONFIG = ar71xx ixp4xx sunxi uml x86
+BIGCONFIG = ar71xx ixp4xx ramips sunxi uml x86
 
 .PHONY: all list $(SMALLCONFIG) $(BIGCONFIG) save-config check-old-config list-subarch help
 

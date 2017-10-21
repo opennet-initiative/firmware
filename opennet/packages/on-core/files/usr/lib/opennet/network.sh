@@ -81,9 +81,9 @@ update_opennet_zone_masquerading() {
 	uci_delete "${uci_prefix}.masq_src"
 	# aktuelle Netzwerke wieder hinzufuegen
 	for network in $(get_zone_interfaces "$ZONE_LOCAL"; get_zone_interfaces "$ZONE_WAN"); do
-		network_with_prefix=$(get_current_addresses_of_network "$network")
-		[ -z "$network_with_prefix" ] && continue
-		uci_add_list "${uci_prefix}.masq_src" "$network_with_prefix"
+		for network_with_prefix in $(get_current_addresses_of_network "$network"); do
+			uci_add_list "${uci_prefix}.masq_src" "$network_with_prefix"
+		done
 	done
 	# leider ist masq_src im Zweifelfall nicht "leer", sondern enthaelt ein Leerzeichen
 	if uci_get "${uci_prefix}.masq_src" | grep -q "[^ \t]"; then

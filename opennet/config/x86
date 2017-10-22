@@ -35,5 +35,7 @@ CONFIG_PACKAGE_kmod-tun=y
 CONFIG_PACKAGE_kmod-via-rhine=y
 CONFIG_PACKAGE_kmod-via-velocity=y
 
-CONFIG_PACKAGE_resolveip=m
+# support for triggered shutdown of virtual machines
+CONFIG_PACKAGE_acpid=y
 
+CONFIG_PACKAGE_resolveip=m

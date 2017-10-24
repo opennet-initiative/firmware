@@ -21,7 +21,7 @@ end
 
 
 function action_on_openvpn_mesh_keys()
-    local on_errors
+    local on_errors = {}
     -- sofortiges Ende, falls der Upload erfolgreich verlief
     if process_csr_submission("mesh", on_errors) then return end
     local result = process_openvpn_certificate_form("mesh")

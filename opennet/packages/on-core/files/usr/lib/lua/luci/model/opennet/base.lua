@@ -190,7 +190,11 @@ end
 
 
 function action_network()
+	local uci = require "luci.model.uci"
+	local cursor = uci.cursor()
 	local on_errors = {}
+	local page_data = {}
+
 	local ssid = luci.http.formvalue("ssid")
 	if ssid then
 		local dev = "default_radio0"
@@ -200,5 +204,8 @@ function action_network()
 		luci.sys.exec("uci commit wireless")
 		luci.sys.exec("reload_config")
 	end
-	luci.template.render("opennet/on_network", { on_errors=on_errors })
+	page_data["on_errors"] = on_errors
+	page_data["mesh_interfaces"] = get_network_zone_interfaces(on_function("get_variable", {"ZONE_MESH"}))
+	page_data["opennet_id"] = cursor:get("on-core", "settings", "on_id")
+	luci.template.render("opennet/on_network", page_data)
 end

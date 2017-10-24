@@ -16,10 +16,7 @@ You may obtain a copy of the License at
 <%+cbi/apply_xhr%>
 
 <%
-local uci = require "luci.model.uci"
-local cursor = uci.cursor()
 local form_id = luci.http.formvalue("form_id")
-local devices = { "on_eth_", "on_wifi_" }
 local show_invalid_id_warning = false
 
 
@@ -75,8 +72,7 @@ end
 			<fieldset class="cbi-section-node">
 				<div class="cbi-value">
 					<label class="cbi-value-title">
-						<input type="value" name="form_id"
-							value="<%= cursor:get("on-core", "settings", "on_id") %>" />
+						<input type="value" name="new_opennet_id" value="<%= opennet_id %>" />
 					</label>
 					<div class="cbi-value-field">
 						<input type="submit" class="cbi-button cbi-button-apply" value="<%:use%>" />
@@ -92,21 +88,12 @@ end
 		<fieldset class="cbi-section">
 			<fieldset class="cbi-section-node">
 				<table class="cbi-section-table">
-				<%
-				for index = 1, #devices do
-					local count = 0
-					while (cursor:get_all("network", devices[index]..count)) do
-						local v = cursor:get_all("network", devices[index]..count)
-						%>
-						<tr id="cbi-network-lan" class="cbi-section-table-row">
-							<th><h3><%=v[".name"]%> (<%:device%> <%=v.ifname%>)</h3></th>
-							<td class="cbi-value-field"><div id="cbi-network-lan-ipaddr"><%=v.ipaddr%> / <%=v.netmask%></div></td>
-						</tr>
-						<%
-						count = count + 1
-					end
-				end
-				%>
+					<% for _, net in ipairs(mesh_interfaces) do %>
+					<tr id="cbi-network-lan" class="cbi-section-table-row">
+						<th><h3><%=net[".name"]%> (<%:device%> <%=net.ifname%>)</h3></th>
+						<td class="cbi-value-field"><div id="cbi-network-lan-ipaddr"><%=net.ipaddr%> / <%=net.netmask%></div></td>
+					</tr>
+				<% end %>
 				</table>
 			</fieldset>
 		</fieldset>

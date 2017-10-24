@@ -38,4 +38,4 @@ get_source_and_target_params_null_terminated | xargs -0 -- rsync $RSYNC_OPTS || 
 	get_source_and_target_params_null_terminated | xargs -0 -- scp $SCP_OPTS
 }
 # vorsichtshalber: luci-Neustart und shell-Modul-Cleanup
-ssh "$TARGET_HOST" "on-function clear_caches"
+ssh "$TARGET_HOST" "on-function clear_caches; on-function clean_luci_restart"

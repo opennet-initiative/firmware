@@ -7,6 +7,8 @@ require "luci.util"
 require "luci.sys"
 require "nixio.fs"
 
+local uci = require "luci.model.uci"
+local cursor = uci.cursor()
 
 html_resource_base = luci.config.main.resourcebase
 SYSROOT = os.getenv("LUCI_SYSROOT") or ""
@@ -122,6 +124,27 @@ function get_services_sorted_by_priority(service_type)
 end
 
 
+--- @fn get_network_zone_interfaces()
+--- @brief Liefere die Netzwerk-Interfaces-Objekte zurück, die zu einer Zone gehören.
+--- @param zone_name Name einer Netzwerk-Zone
+function get_network_zone_interfaces(zone_name)
+	local result = {}
+	cursor:foreach("firewall", "zone", function(zone)
+		if zone.name == zone_name then
+			for _, net_name in ipairs(zone.network) do
+				cursor:foreach("network", "interface", function(net)
+					if net_name == net[".name"] then
+						table.insert(result, net)
+					end
+				end)
+			end
+		end
+	end)
+	return result
+end
+
+
+--- @fn check_and_warn_module_state()
 --- @brief Füge eine Warnung zur gegebenen "errors"-Tabelle hinzu, falls das angegebene Modul derzeit abgeschaltet ist.
 --- @param module_name Name eines Opennet-Moduls, dessen Aktivierungszustand geprüft werden soll
 --- @param errors Liste von Fehlern, die eventuell erweitert wird

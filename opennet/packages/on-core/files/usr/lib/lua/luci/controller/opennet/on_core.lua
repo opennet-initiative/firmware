@@ -43,7 +43,7 @@ function index()
 	require ("luci.model.opennet.base")
 	page = on_entry({"basis"}, nil, i18n("Base"), 20)
 	page.target = on_alias("basis", "funknetz")
-	on_entry({"basis", "funknetz"}, template("opennet/on_network"), i18n("Network"), 20).leaf = true
+	on_entry({"basis", "funknetz"}, call("action_network"), i18n("Network"), 20).leaf = true
 	on_entry({"basis", "module"}, call("action_modules"), i18n("Modules"), 30).leaf = true
 	on_entry({"basis", "einstellungen"}, call("action_settings"), i18n("Settings"), 40).leaf = true
 	on_entry({"basis", "portweiterleitung"}, call("action_portmapping"), i18n("Port-Mapping"), 60).leaf = true

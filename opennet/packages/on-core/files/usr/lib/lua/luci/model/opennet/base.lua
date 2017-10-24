@@ -187,3 +187,18 @@ function action_portmapping()
 
 	luci.template.render("opennet/on_portmapping", { show_more_info = show_more_info })
 end
+
+
+function action_network()
+	local on_errors = {}
+	local ssid = luci.http.formvalue("ssid")
+	if ssid then
+		local dev = "default_radio0"
+
+		luci.sys.exec("uci set wireless." .. dev .. ".mode=sta")
+		luci.sys.exec("uci set wireless." .. dev .. ".ssid=" .. ssid )
+		luci.sys.exec("uci commit wireless")
+		luci.sys.exec("reload_config")
+	end
+	luci.template.render("opennet/on_network", { on_errors=on_errors })
+end

@@ -16,17 +16,17 @@ You may obtain a copy of the License at
 <%+cbi/apply_xhr%>
 
 <%
-local form_id = luci.http.formvalue("form_id")
+local new_opennet_id = luci.http.formvalue("new_opennet_id")
 local show_invalid_id_warning = false
 
 
-if (form_id) then
+if (new_opennet_id) then
 	function split_numbers(str)
 		local t = { }
 		str:gsub("%d+", function (w) table.insert(t, tonumber(w)) end)
 		return t
 	end
-	local numbers = split_numbers(form_id)
+	local numbers = split_numbers(new_opennet_id)
 
 	local major
 	local minor

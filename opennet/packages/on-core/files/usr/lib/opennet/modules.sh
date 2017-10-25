@@ -7,6 +7,18 @@
 ON_OPKG_REPOSITORY_URL_PREFIX="http://downloads.opennet-initiative.de/openwrt"
 # temporäre Datei für Installation von Opennet-Paketen
 ON_OPKG_CONF_PATH="${IPKG_INSTROOT:-}/tmp/opkg-opennet.conf"
+DEFAULT_MODULES_ENABLED="on-olsr2"
+
+
+# Erzeuge die uci-Sektion "on-core.modules" und aktiviere Standard-Module.
+_prepare_on_modules() {
+	local module
+	[ -n "$(uci_get "on-core.modules")" ] && return
+	uci set "on-core.modules=modules"
+	for module in $DEFAULT_MODULES_ENABLED; do
+		enable_on_module "$module"
+	done
+}
 
 
 ## @fn is_on_module_installed_and_enabled()
@@ -17,6 +29,7 @@ ON_OPKG_CONF_PATH="${IPKG_INSTROOT:-}/tmp/opkg-opennet.conf"
 is_on_module_installed_and_enabled() {
 	trap "error_trap is_on_module_installed_and_enabled '$*'" $GUARD_TRAPS
 	local module="$1"
+	_prepare_on_modules
 	is_package_installed "$module" && _is_on_module_enabled "$module" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
@@ -24,6 +37,7 @@ is_on_module_installed_and_enabled() {
 
 _is_on_module_enabled() {
 	local module="$1"
+	_prepare_on_modules
 	uci_is_in_list "on-core.modules.enabled" "$module" && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
@@ -35,7 +49,7 @@ _is_on_module_enabled() {
 enable_on_module() {
 	trap "error_trap enable_on_module '$*'" $GUARD_TRAPS
 	local module="$1"
-	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
+	_prepare_on_modules
 	uci_add_list "on-core.modules.enabled" "$module"
 	apply_changes "on-core" "$module"
 }
@@ -179,6 +193,7 @@ run_opennet_opkg() {
 ## @details Nach einer Aktualisierung ermöglicht diese Sicherung die Nachinstallation fehlender Pakete.
 save_on_modules_list() {
 	local modname
+	_prepare_on_modules
 	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
 	get_on_modules | while read modname; do
 		is_package_installed "$modname" \
@@ -224,6 +239,7 @@ get_default_opennet_opkg_repository_base_url() {
 ## @brief Ermittle die aktuell konfigurierte Repository-URL.
 get_configured_opennet_opkg_repository_base_url() {
 	local url
+	_prepare_on_modules
 	url=$(uci_get "on-core.modules.repository_url")
 	[ -n "$url" ] && echo "$url" || get_default_opennet_opkg_repository_base_url
 }
@@ -235,6 +251,7 @@ get_configured_opennet_opkg_repository_base_url() {
 ## @details Die URL wird via uci gespeichert. Falls sie identisch mit der Standard-URL ist, wird die Einstellung gelöscht.
 set_configured_opennet_opkg_repository_url() {
 	local repo_url="$1"
+	_prepare_on_modules
 	if [ -z "$repo_url" ] || [ "$repo_url" = "$(get_default_opennet_opkg_repository_base_url "opennet")" ]; then
 		# Standard-Wert: loeschen
 		uci_delete "on-core.modules.repository_url"

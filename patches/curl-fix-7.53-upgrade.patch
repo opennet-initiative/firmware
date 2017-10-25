@@ -1,0 +1,14 @@
+Das Upgrade von curl auf die Version 7.53 erfordert die Anpassung eines LEDE-Patchs.
+--- a/lede/package/network/utils/curl/patches/102-CVE-2017-7468.patch
++++ b/lede/package/network/utils/curl/patches/102-CVE-2017-7468.patch
+@@ -84,8 +84,8 @@ Reported-by: lijian996@users.noreply.git
+    /* Put our freshly minted SSL session in cache */
+ -  if(data->set.general_ssl.sessionid) {
+ +  if(SSL_SET_OPTION(primary.sessionid)) {
+-     const uint8_t *ssl_sessionid = ssl_get_session_id_size(ssl);
+-     size_t ssl_idsize = ssl_get_session_id(ssl);
++     const uint8_t *ssl_sessionid = ssl_get_session_id(ssl);
++     size_t ssl_idsize = ssl_get_session_id_size(ssl);
+      Curl_ssl_sessionid_lock(conn);
+ --- a/lib/vtls/cyassl.c
+ +++ b/lib/vtls/cyassl.c

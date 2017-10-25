@@ -20,3 +20,4 @@ horst_compile_error.patch
 lede-17.01-curl-upgrade.patch
 
 hostapd_switch_to_DFS.patch
+curl-fix-7.53-upgrade.patch

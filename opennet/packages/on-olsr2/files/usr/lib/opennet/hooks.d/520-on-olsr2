@@ -15,6 +15,6 @@ case "$1" in
 	on-olsr2)
 		on-function init_policy_routing_ipv6
 		on-function update_olsr2_interfaces
-		/etc/init.d/olsrd2 reload >/dev/null || true
+		on-function update_olsr2_daemon_state
 		;;
 esac

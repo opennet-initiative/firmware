@@ -147,6 +147,21 @@ update_olsr2_interfaces() {
 }
 
 
+## @update_olsr2_daemon_state()
+## @brief Aktiviere oder deaktiviere den olsrd2-Dienst - je nach Modul-Aktiviertheit.
+update_olsr2_daemon_state() {
+	if is_on_module_installed_and_enabled "on-olsr2"; then
+		/etc/init.d/olsrd2 enable || true
+		[ -z "$(pgrep olsrd2)" ] && /etc/init.d/olsrd2 start
+		/etc/init.d/olsrd2 reload >/dev/null || true
+	else
+		/etc/init.d/olsrd2 disable || true
+		[ -n "$(pgrep olsrd2)" ] && /etc/init.d/olsrd2 stop
+		true
+	fi
+}
+
+
 ## @fn olsr2_sync_routing_tables()
 ## @brief Synchronisiere die olsrd-Routingtabellen-Konfiguration mit den iproute-Routingtabellennummern.
 ## @details Im Konfliktfall wird die olsrd-Konfiguration an die iproute-Konfiguration angepasst.

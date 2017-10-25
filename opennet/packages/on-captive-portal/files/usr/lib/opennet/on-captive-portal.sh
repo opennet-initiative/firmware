@@ -206,11 +206,15 @@ get_captive_portal_clients() {
 	local mac_address
 	local timestamp
 	local packets_rxtx
+	# Die "iwinfo assoclist" ist wahrscheinlich der einzige brauchbare Weg, um
+	# Verkehrsstatistiken zu beliebigen Peers zu erhalten. Wir müssen es also gar nicht erst
+	# mit anderen (nicht-wifi) Interfaces versuchen.
+	local assoclist=$(iwinfo wlan0 assoclist 2>/dev/null || true)
 	# erzwinge eine leere Zeile am Ende fuer die finale Ausgabe des letzten Clients
 	while read timestamp mac_address ip_address hostname misc; do
 		# eine assoclist-Zeile sieht etwa folgendermassen aus:
 		#    TX: 6.5 MBit/s, MCS 0, 20MHz                     217 Pkts.
-		packets_rxtx=$(iwinfo wlan0 assoclist | awk '
+		packets_rxtx=$(echo "$assoclist" | awk '
 			BEGIN { my_mac = tolower("'"$mac_address"'"); }
 			{
 				if ($1 ~ /^(..:){5}..$/) current_mac = tolower($1);

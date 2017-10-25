@@ -177,13 +177,8 @@ get_captive_portal_client_count() {
 	local device
 	if is_captive_portal_running; then
 		for device in $(get_subdevices_of_interface "$NETWORK_FREE"); do
-			# eine TX-Zeile sieht beispielsweise folgendermassen aus:
-			#    TX: 21.7 MBit/s, MCS 2, 20MHz                    271 Pkts.
-			# Wir filtern die Zeilen mit "TX" heraus und entnehmen den Paketzaehler.
-			# Wenn der Paketzaehler mindestens 100 erreicht hat, dann halten wir sie
-			# für eine zählbare Verbindung (mehr als nur ein handshake).
-			this_count=$(iwinfo "$device" assoclist \
-				| awk '{ if (($1 == "TX:") && ($(NF-1) >= 100)) count++; } END { print count; }')
+			# determine the number of valid arp cache items for this interface
+			this_count=$(grep "[[:space:]]$device$" /proc/net/arp | grep -vFw "00:00:00:00:00:00" | wc -l)
 			count=$((count + this_count))
 		done
 	fi

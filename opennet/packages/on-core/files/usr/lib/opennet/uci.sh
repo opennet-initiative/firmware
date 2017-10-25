@@ -57,7 +57,7 @@ uci_add_list() {
 
 
 ## @fn uci_get_list()
-## @brief Liefere alle einzelenen Elemente einer UCI-Liste zurück.
+## @brief Liefere alle einzelnen Elemente einer UCI-Liste zurück.
 ## @param uci_path Der UCI-Pfad eines Elements.
 ## @returns Die Einträge sind zeilenweise voneinander getrennt.
 uci_get_list() {

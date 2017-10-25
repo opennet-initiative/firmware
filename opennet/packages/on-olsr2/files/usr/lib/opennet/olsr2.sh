@@ -120,7 +120,13 @@ update_olsr2_interfaces() {
 		[ -n "$(uci_get "${uci_prefix}.bindto")" ] || {
 			for token in $ipv6_limit; do uci_add_list "${uci_prefix}.bindto" "$token"; done
 		}
-		# alle Netzwerkschnittstellen eintragen
+		# Die Liste der Netzwerkschnittstellen aktualisieren.
+		# Alle veralteten Einträge entfernen.
+		for token in $(uci_get_list "${uci_prefix}.name"); do
+			echo "$interfaces" | grep -qwF "$token" && continue
+			uci_delete_list "${uci_prefix}.name" "$token"
+		done
+		# Alle neuen hinzufügen.
 		for token in $interfaces; do uci_add_list "${uci_prefix}.name" "$token"; done
 		is_configured=1
 	done

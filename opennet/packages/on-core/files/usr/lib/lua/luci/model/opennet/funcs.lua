@@ -134,7 +134,7 @@ function get_network_zone_interfaces(zone_name)
 			for _, net_name in ipairs(zone.network) do
 				cursor:foreach("network", "interface", function(net)
 					if net_name == net[".name"] then
-						table.insert(result, net)
+						result[net_name] = net
 					end
 				end)
 			end

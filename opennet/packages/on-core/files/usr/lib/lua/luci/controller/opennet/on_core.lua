@@ -40,10 +40,20 @@ function index()
 
 
 	-- Grundlegende Einstellungen (/basis)
-	require ("luci.model.opennet.base")
+	require "luci.model.opennet.base"
+	require "luci.model.opennet.funcs"
 	page = on_entry({"basis"}, nil, i18n("Base"), 20)
-	page.target = on_alias("basis", "funknetz")
-	on_entry({"basis", "funknetz"}, call("action_network"), i18n("Network"), 20).leaf = true
+	page.target = on_alias("basis", "network")
+
+	page = on_entry({"basis", "network"}, nil, i18n("Network"), 20)
+	page.target = on_alias("basis", "network", "opennet_id")
+	on_entry({"basis", "network", "opennet_id"}, call("action_network"), i18n("Opennet ID"))
+	for device_name, wifi_device in pairs(get_wifi_devices()) do
+		on_entry({"basis", "network", device_name},
+			call("action_wifi_device", device_name),
+			i18n("Wireless Interface") .. ' "' .. device_name .. '"').leaf = true
+	end
+
 	on_entry({"basis", "module"}, call("action_modules"), i18n("Modules"), 30).leaf = true
 	on_entry({"basis", "einstellungen"}, call("action_settings"), i18n("Settings"), 40).leaf = true
 	on_entry({"basis", "portweiterleitung"}, call("action_portmapping"), i18n("Port-Mapping"), 60).leaf = true

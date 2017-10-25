@@ -1,0 +1,68 @@
+<%#
+Opennet Firmware
+
+Copyright 2017 Lars Kruse <devel@sumpfralle.de>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+<%+header%>
+<h2><a id="content" name="content"><%:Wireless Interface%>: <%= wifi_device_name %></a></h2>
+<%+cbi/apply_xhr%>
+
+
+
+<h2><a id="content" name="content"><%:Configured Mesh Wifi%></a></h2>
+
+<div class="cbi-map">
+<fieldset class="cbi-section">
+<table class="cbi-section-table" style="empty-cells:hide">
+	<tr class="cbi-section-table-row">
+		<td class="cbi-value-field" style="vertical-align:middle; text-align:left; padding:3px">
+			<% for iface_name, iface in pairs(wifi_current_ssids) do %>
+				<big><strong><%= iface.ssid %></strong></big><br />
+			<% end %>
+		</td>
+	</tr>
+</table>
+</fieldset>
+</div>
+
+
+<h2 name="content"><%:Join Network: Wireless Scan%></h2>
+
+<%-
+
+
+-%>
+
+<div class="cbi-map">
+<fieldset class="cbi-section">
+<table class="cbi-section-table" style="empty-cells:hide">
+	<%- for _, peer in ipairs(wifi_scan_result) do %>
+		<tr class="cbi-section-table-row">
+			<td class="cbi-value-field" style="width:16px; padding:3px">
+				<abbr title="<%:Signal%>: <%= peer["signal"] %> <%:dB%>"><%= peer["signal"] %></abbr>
+			</td>
+			<td class="cbi-value-field" style="text-align:left; padding:3px">
+				<form method="post" action="<%= REQUEST_URI %>" enctype="multipart/form-data">
+					<input type="hidden" name="new_client_ssid" value="<%= peer["ssid"] %>" />
+					<input class="cbi-button cbi-button-apply" type="submit" value="<%= peer["ssid"] %>" />
+				</form>
+			</td>
+		</tr>
+	<%- end -%>
+</table>
+</fieldset>
+</div>
+<div class="cbi-page-actions right">
+	<form class="inline" action="<%= REQUEST_URI %>" method="post">
+		<input class="cbi-button cbi-input-find" type="submit" value="<%:Repeat scan%>" />
+	</form>
+</div>
+
+<%+footer%>

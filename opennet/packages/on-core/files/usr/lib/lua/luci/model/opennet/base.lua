@@ -195,17 +195,47 @@ function action_network()
 	local on_errors = {}
 	local page_data = {}
 
-	local ssid = luci.http.formvalue("ssid")
-	if ssid then
-		local dev = "default_radio0"
-
-		luci.sys.exec("uci set wireless." .. dev .. ".mode=sta")
-		luci.sys.exec("uci set wireless." .. dev .. ".ssid=" .. ssid )
-		luci.sys.exec("uci commit wireless")
-		luci.sys.exec("reload_config")
-	end
 	page_data["on_errors"] = on_errors
 	page_data["mesh_interfaces"] = get_network_zone_interfaces(on_function("get_variable", {"ZONE_MESH"}))
 	page_data["opennet_id"] = cursor:get("on-core", "settings", "on_id")
 	luci.template.render("opennet/on_network", page_data)
+end
+
+
+function action_wifi_device(wifi_device_name)
+	local uci = require "luci.model.uci"
+	local cursor = uci.cursor()
+	local on_errors = {}
+	local page_data = {}
+
+	local new_client_ssid = luci.http.formvalue("new_client_ssid")
+	if new_client_ssid then
+		local has_configured = false
+		cursor.foreach("wireless", "wifi-iface", function(iface)
+			if iface.device == wifi_device_name then
+				if not has_configured then
+					cursor:set("wireless", iface[".name"], "mode", "sta")
+					cursor:set("wireless", iface[".name"], "ssid", new_client_ssid)
+					has_configured = true
+				else
+					-- wir entfernen alle weiteren WLAN-Interfaces
+					cursor:delete("wireless", iface[".name"])
+				end
+			end
+		end)
+		if has_configured then
+			cursor:commit("wireless")
+			-- Quelle: luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
+			luci.sys.call("(env -i /bin/ubus call network reload) >/dev/null 2>/dev/null")
+		end
+	end
+	page_data["wifi_device_name"] = wifi_device_name
+	page_data["wifi_current_ssids"] = get_wifi_interfaces(wifi_device_name)
+	page_data["wifi_scan_result"] = {}
+	for _, line in ipairs(line_split(on_function(
+			"get_potential_opennet_scan_results_for_device", {wifi_device_name}))) do
+		local details = space_split(line)
+		table.insert(page_data["wifi_scan_result"], {signal=details[1], ssid=details[2]})
+	end
+	luci.template.render("opennet/on_wifi_device", page_data)
 end

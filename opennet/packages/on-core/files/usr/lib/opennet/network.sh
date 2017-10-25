@@ -420,5 +420,15 @@ get_ipv4_of_mac() {
 	cat /proc/net/arp | awk '{ if ($4 == "'$ip'") print $1; }' | sort | head -1
 }
 
+
+get_potential_opennet_scan_results_for_device() {
+	local device="$1"
+	iwinfo "$device" scan | awk '{
+			if ($1 == "ESSID:") essid=$2;
+			if ($1 == "Signal:") signal=$2;
+			if (($1 == "Encryption:") && ($2 == "none")) print(signal, essid); }' \
+		| sort -rn | sed 's/\"//g' | grep -iE "(on|opennet)" | grep -v "Telekom_FON"
+}
+
 # Ende der Doku-Gruppe
 ## @}

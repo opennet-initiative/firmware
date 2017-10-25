@@ -144,6 +144,26 @@ function get_network_zone_interfaces(zone_name)
 end
 
 
+function get_wifi_devices()
+	local result = {}
+	cursor:foreach("wireless", "wifi-device", function(dev)
+		result[dev[".name"]] = dev
+	end)
+	return result
+end
+
+
+function get_wifi_interfaces(wifi_device_name)
+	local result = {}
+	cursor:foreach("wireless", "wifi-iface", function(iface)
+		if iface.device == wifi_device_name then
+			result[iface[".name"]] = iface
+		end
+	end)
+	return result
+end
+
+
 --- @fn check_and_warn_module_state()
 --- @brief Füge eine Warnung zur gegebenen "errors"-Tabelle hinzu, falls das angegebene Modul derzeit abgeschaltet ist.
 --- @param module_name Name eines Opennet-Moduls, dessen Aktivierungszustand geprüft werden soll

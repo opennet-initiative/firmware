@@ -16,7 +16,7 @@
 #   * micropython
 #
 #
-# Copyright (C) 2015 Lars Kruse <devel@sumpfralle.de>
+# Copyright (C) 2015-2017 Lars Kruse <devel@sumpfralle.de>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ The following graphs are generated for each physical ath9k interface:
 """
 
 
-plugin_version = "0.3"
+plugin_version = "0.4"
 
 STATION_TRAFFIC_COUNTERS = ("rx_bytes", "tx_bytes", "rx_packets", "tx_packets")
 STATION_EVENT_COUNTERS = ("tx_retry_count", "tx_retry_failed", "tx_filtered", "tx_fragments",
@@ -475,7 +475,7 @@ class Ath9kDriver:
     def __init__(self, path, graph_base):
         self._path = path
         self._graph_base = graph_base
-        self.phys = self._parse_phys()
+        self.phys = list(self._parse_phys())
 
     def _parse_phys(self):
         if not os.path.exists(self._path):
@@ -498,6 +498,9 @@ class Ath9kDriver:
             if phy.dfs_events:
                 return True
         return False
+
+    def has_devices(self):
+        return len(self.phys) > 0
 
 
 def _get_up_down_pair(unit, key_up, key_down, factor=None, divider=None, use_negative=True):
@@ -554,10 +557,11 @@ if __name__ == "__main__":
                 print('no')
             sys.exit(0)
         elif sys.argv[1] == "suggest":
-            for scope in PLUGIN_SCOPES:
-                # skip the "dfs_events" scope if there is not DFS support
-                if (scope != "dfs_events") or ath9k.has_dfs_support():
-                    print(scope)
+            if ath9k.has_devices():
+                for scope in PLUGIN_SCOPES:
+                    # skip the "dfs_events" scope if there is not DFS support
+                    if (scope != "dfs_events") or ath9k.has_dfs_support():
+                        print(scope)
             sys.exit(0)
         elif sys.argv[1] == "version":
             print_error('olsrd Munin plugin, version %s' % plugin_version)

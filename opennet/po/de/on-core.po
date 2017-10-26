@@ -1,8 +1,8 @@
-# Lars Kruse <devel@sumpfralle.de>, 2014, 2015, 2016.
+# Lars Kruse <devel@sumpfralle.de>, 2014, 2015, 2016, 2017.
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2016-09-06 02:16+0200\n"
+"PO-Revision-Date: 2017-10-26 02:37+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -270,9 +270,6 @@ msgstr "Ungültiger Diensttyp"
 msgid "Issue Indicators"
 msgstr "Problemindikatoren"
 
-msgid "Join Network"
-msgstr "Mit Netzwerk verbinden"
-
 msgid "Join Network: Wireless Scan"
 msgstr "Netzwerkauswahl: Suche nach Funknetzen"
 
@@ -320,6 +317,9 @@ msgstr "Dein Name"
 
 msgid "Memory: %d MB"
 msgstr "Arbeitsspeicher: %d MB"
+
+msgid "Mesh Interface Addresses"
+msgstr "Mesh-Interface-Adressen"
 
 msgid "Model: %s"
 msgstr "Modell: %s"
@@ -684,6 +684,9 @@ msgstr "WAN"
 msgid "Wireless"
 msgstr "Funknetz"
 
+msgid "Wireless Interface"
+msgstr "Funknetz-Schnittstelle"
+
 msgid ""
 "You may want to send a <a href=\"%s\">report</a> to the Opennet community "
 "(%s)."
@@ -712,9 +715,6 @@ msgstr "Erzeugen"
 
 msgid "or wait for the automatic re-installation"
 msgstr "oder warte auf die automatische Neuinstallation"
-
-msgid "related network addresses"
-msgstr "zugehörige Netzwerkadressen"
 
 msgid "search file"
 msgstr "suche Datei"

@@ -242,9 +242,6 @@ msgstr ""
 msgid "Issue Indicators"
 msgstr ""
 
-msgid "Join Network"
-msgstr ""
-
 msgid "Join Network: Wireless Scan"
 msgstr ""
 
@@ -288,6 +285,9 @@ msgid "Member Name"
 msgstr ""
 
 msgid "Memory: %d MB"
+msgstr ""
+
+msgid "Mesh Interface Addresses"
 msgstr ""
 
 msgid "Model: %s"
@@ -598,6 +598,9 @@ msgstr ""
 msgid "Wireless"
 msgstr ""
 
+msgid "Wireless Interface"
+msgstr ""
+
 msgid ""
 "You may want to send a <a href=\"%s\">report</a> to the Opennet community "
 "(%s)."
@@ -622,9 +625,6 @@ msgid "generate"
 msgstr ""
 
 msgid "or wait for the automatic re-installation"
-msgstr ""
-
-msgid "related network addresses"
 msgstr ""
 
 msgid "search file"

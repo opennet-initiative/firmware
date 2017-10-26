@@ -717,6 +717,11 @@ get_potential_error_messages() {
 	# 24) olsrd2: wrote '/var/run/olsrd2_dev'
 	#    beim OLSRD2-Start wird diese Meldung auf stderr ausgegeben
 	filters="${filters}|olsrd2: wrote .*olsrd2_dev"
+	# 25) nl80211 not found
+	#    Während der initialen wireless-Konfigurationsermittlung beim ersten Boot-Vorgang wird
+	#    "iw" aufgerufen, auch wenn eventuell kein wifi-Interface vorhanden ist. In diesem Fall
+	#    wird der obige Hinweis ausgegeben.
+	filters="${filters}|nl80211 not found"
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.

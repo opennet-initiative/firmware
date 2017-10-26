@@ -44,6 +44,13 @@ on-function schedule_task <<-EOF
 	on-function enable_suggested_munin_plugin_names "wireless_channel_occupation_"
 	on-function enable_suggested_munin_plugin_names "wireless_signal_ranges_"
 
+	# Die Komponenten "traffic" und "events" des ath9k-Plugins offenbaren Verkehrsmuster von
+	# individuellen Nachbarn - wir aktivieren also nur die unverfänglichen "rcstats".
+	# Wobei wir auf eine Aktivierung verzichten, falls es kein wifi-Interface gibt. Dies
+	# können wir an der leeren Ausgabe von "suggest" erkennen.
+	[ -n "$(/usr/share/munin-plugins-available/ath9k_ suggest)" ] && \
+		ln -sfn ../../share/munin-plugins-available/ath9k_ /usr/sbin/munin-node-plugin.d/
+
 	# Das "wireless_signal_noise_"-Plugin offenbart MAC-Addressn - dies soll nicht auf einem
 	# offenen Zugangspunkt geschehen.
 	on-function is_on_module_installed_and_enabled on-captive-portal || \

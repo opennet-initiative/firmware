@@ -214,8 +214,10 @@ function action_wifi_device(wifi_device_name)
 		cursor.foreach("wireless", "wifi-iface", function(iface)
 			if iface.device == wifi_device_name then
 				if not has_configured then
+					cursor:set("wireless", wifi_device_name, "channel", "auto")
 					cursor:set("wireless", iface[".name"], "mode", "sta")
 					cursor:set("wireless", iface[".name"], "ssid", new_client_ssid)
+					cursor:set("wireless", iface[".name"], "encryption", "none")
 					has_configured = true
 				else
 					-- wir entfernen alle weiteren WLAN-Interfaces

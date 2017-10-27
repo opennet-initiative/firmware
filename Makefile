@@ -115,3 +115,6 @@ autobuilder-clean:
 	git submodule foreach git clean -f
 	@# eventuelle Patch-Reste entfernen (z.B. die feeds.conf)
 	quilt pop -a -f || true
+	@# Entferne vorherige Build-Images. Aufgrund der unterschiedlichen Dateinamen pro Build
+	@# wuerden sich sonst viele Dateien ansammeln.
+	rm -rf "$(OPENWRT_DIR)/bin/targets"

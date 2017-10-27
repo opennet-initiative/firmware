@@ -51,6 +51,10 @@ build_platform() {
 	# set version number in export directories
 	get_commit_info > "$dest_dir/__${snapshot_name}__"
 
+	# Update the (probably outdated) timestamp of the unrelated parent directory.
+	# (the "get_commit_info" line above is not sufficient - since the file may exist before)
+	touch "$dest_dir"
+
 	# generate latest link
 	rm -f "$HOME/$EXPORT_DIR/$LATEST_LINK"
 	(cd "$HOME/$EXPORT_DIR" && ln -s "$snapshot_name" "$LATEST_LINK")

@@ -118,3 +118,8 @@ autobuilder-clean:
 	@# Entferne vorherige Build-Images. Aufgrund der unterschiedlichen Dateinamen pro Build
 	@# wuerden sich sonst viele Dateien ansammeln.
 	rm -rf "$(OPENWRT_DIR)/bin/targets"
+	@# Entferne den vorherigen Zustand des "base-files"-Paket. Andernfalls enthaelt der
+	@# naechste Build veraltete Versionsnummern.
+	if [ -e "$(OPENWRT_DIR)/build_dir" ]; then \
+		find "$(OPENWRT_DIR)/build_dir/" -type d -name base-files \
+			| xargs --no-run-if-empty rm -rf; fi

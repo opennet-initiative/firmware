@@ -43,8 +43,6 @@ build_platform() {
 	# prepare export directory
 	local dest_dir="$HOME/$EXPORT_DIR/$snapshot_name"
 	mkdir -p "$dest_dir"
-	# workaround for broken directory or file mode?
-	#find "$dest_platform_dir" -perm 655 -print0 | xargs -0 --no-run-if-empty chmod 755
 
 	# copy all platform builds to export directory
 	local src_dir="$HOME/$BIN_DIR"

@@ -191,6 +191,15 @@ update_olsr_services() {
 	# leere Liste? Keine Verbindung mit der Wolke? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$olsr_services" ] && return
 	echo "$olsr_services" | notify_services "olsr" >/dev/null
+	# aktualisiere DNS- und NTP-Dienste
+	apply_changes on-core
+}
+
+
+## @fn remove_old_olsr_services()
+## @brief Entferne OLSR-Dienste, deren Einträge veraltet sind.
+## @details Diese Funktion sollte etwa stündlich ausgeführt werden.
+remove_old_olsr_services() {
 	local service_name
 	local timestamp
 	local min_timestamp

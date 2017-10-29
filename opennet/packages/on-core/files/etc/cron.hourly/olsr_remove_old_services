@@ -1,0 +1,3 @@
+#!/bin/sh
+
+on-function remove_old_olsr_services

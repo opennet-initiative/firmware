@@ -4,5 +4,6 @@ set -eu
 
 # die Service-Aktualisierung braucht viel Zeit - wir reduzieren daher die Haeufigkeit der Ausfuehrung
 # aktualisiere die Dienste zu Beginn jeder Viertelstunde
-date +%M | grep -qE "([03][0-4]|[14][5-9])" && on-function update_olsr_services
+date +%M | grep -qE "([03][0-4]|[14][5-9])" \
+	&& echo "on-function update_olsr_services" | on-function schedule_task
 exit 0

@@ -145,28 +145,7 @@ EOF
 # Einlesen eines olsrd-Nameservice-Service.
 # Details zum Eingabe- und Ausgabeformat: siehe "get_olsr_services".
 parse_olsr_service_descriptions() {
-	trap "error_trap parse_olsr_service_descriptions '$*'" $GUARD_TRAPS
-	local url
-	local proto
-	local service
-	local details
-	local scheme
-	local host
-	local port
-	local path
-	# verwende "|" und Leerzeichen als Separatoren
-	local IFS='| '
-	while read url proto service details; do
-		scheme=$(echo "$url" | cut -f 1 -d :)
-		host=$(echo "$url" | cut -f 3 -d / | cut -f 1 -d :)
-		port=$(echo "$url" | cut -f 3 -d / | cut -f 2 -d :)
-		path=/$(echo "$url" | cut -f 4- -d /)
-		# Firmware-Versionen bis v0.4-5 veroeffentlichten folgendes Format:
-		#    http://192.168.0.40:8080|tcp|ugw upload:50 download:15300 ping:23
-		[ "$scheme" = "http" -a "$port" = "8080" -a "$proto" = "tcp" ] && \
-			[ "$service" = "gw" -o "$service" = "ugw" ] && scheme=openvpn && port=1600 && proto=udp && service=gw
-		echo -e "$service\t$scheme\t$host\t$port\t$proto\t$path\t$details"
-	done
+	awk -f /usr/lib/opennet/olsr_parse_service_descriptions.awk
 }
 
 
@@ -184,18 +163,8 @@ get_olsr_services() {
 	trap "error_trap get_olsr_services '$*'" $GUARD_TRAPS
 	local wanted_type="${1:-}"
 	local filter_service
-	local url
-	local proto
-	local service
-	local details
-	local scheme
-	local host
-	local port
-	local path
 	[ ! -e "$SERVICES_FILE" ] && msg_debug "no olsr-services file found: $SERVICES_FILE" && return 0
-	# remove trailing commentary (containing the service's source IP address)
-	grep "^[^#]" "$SERVICES_FILE" | \
-		sed 's/[\t ]\+#[^#]\+//' | \
+	sort "$SERVICES_FILE" | uniq | \
 		parse_olsr_service_descriptions | \
 		# filtere die Ergebnisse nach einem Service-Typ, falls selbiger als erster Parameter angegeben wurde
 		awk '{ if (("'$wanted_type'" == "") || ("'$wanted_type'" == $1)) print $0; }'

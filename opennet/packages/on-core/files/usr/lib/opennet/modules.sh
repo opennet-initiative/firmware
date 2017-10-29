@@ -50,6 +50,7 @@ enable_on_module() {
 	trap "error_trap enable_on_module '$*'" $GUARD_TRAPS
 	local module="$1"
 	_prepare_on_modules
+	warn_if_unknown_module "$module"
 	uci_add_list "on-core.modules.enabled" "$module"
 	apply_changes "on-core" "$module"
 }
@@ -61,9 +62,22 @@ enable_on_module() {
 disable_on_module() {
 	trap "error_trap disable_on_module '$*'" $GUARD_TRAPS
 	local module="$1"
+	warn_if_unknown_module "$module"
 	_is_on_module_enabled "$module" || return 0
 	uci_delete_list "on-core.modules.enabled" "$module"
 	apply_changes "on-core" "$module"
+}
+
+
+## @fn warn_if_unknown_module()
+## @brief Gib eine Warnung aus, falls der angegebene Modul-Name unbekannt ist.
+## @details Das Ergebnis der Prüfung ist nur für Warnmeldungen geeignet, da es im Laufe der Zeit
+##          Veränderungen in der Liste der bekannten Module geben kann.
+warn_if_unknown_module() {
+	local module="$1"
+	get_on_modules | grep -qwF "$module" && return 0
+	echo >&2 "The opennet module name '$module' is unknown - probably misspelled?"
+	echo >&2 "The following module names are known: $(get_on_modules | xargs echo)"
 }
 
 

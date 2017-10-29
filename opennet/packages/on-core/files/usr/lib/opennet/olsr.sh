@@ -256,7 +256,7 @@ request_olsrd_txtinfo() {
 		cat
 	else
 		# alle nicht-Daten-Zeilen entfernen
-		sed '1,/^Table: /d' | sed 1d | grep -v "^$"
+		sed '1,/^Table: /d' | sed '1d; /^$/d'
 	fi
 }
 

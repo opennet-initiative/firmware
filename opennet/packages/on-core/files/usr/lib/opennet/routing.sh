@@ -314,7 +314,7 @@ update_olsr_route_cache() {
 	local tmpfile="${OLSR_ROUTE_CACHE_FILE}.new"
 	# Bei der Ausfuehrung via cron wird SIGPIPE eventuell behandelt, auf dass die Ausfuehrung
 	# ohne Erzeugung der Datei abbrechen koennte. Daher ist die &&-Verknuepfung sinnvoll.
-	request_olsrd_txtinfo rou | grep "^[0-9]" | sed 's#/32##' > "$tmpfile" && mv "$tmpfile" "$OLSR_ROUTE_CACHE_FILE"
+	request_olsrd_txtinfo rou | sed '/^[^0-9]/d; s#/32##' > "$tmpfile" && mv "$tmpfile" "$OLSR_ROUTE_CACHE_FILE"
 	return 0
 }
 

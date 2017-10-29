@@ -48,7 +48,7 @@ def get_connections_by_target():
                     [ASSURED] use=2
                 Linux 3.2:
                     ipv4     2 udp      17 179
-                    src=192.168.2.218 dst=192.168.0.254 sport=55955 dport=1600
+                    src=192.168.2.218 dst=192.168.2.254 sport=55955 dport=1600
                     src=62.141.37.125 dst=139.30.241.200 sport=1600 dport=55955
                     [ASSURED] mark=0 zone=0 use=2
             """

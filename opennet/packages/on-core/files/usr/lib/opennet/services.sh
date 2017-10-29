@@ -43,7 +43,7 @@ get_service_name() {
 ## @brief Aktualisiere den Zeitstempel und die Entfernung (etx) eines Dienstes
 ## @param service z.B. "gw"
 ## @param scheme z.B. "openvpn"
-## @param host z.B. "192.168.0.254"
+## @param host z.B. "192.168.2.254"
 ## @param port z.B. "1600"
 ## @param path z.B. "/"
 ## @param protocol z.B. "udp"

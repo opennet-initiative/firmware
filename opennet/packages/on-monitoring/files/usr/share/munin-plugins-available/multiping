@@ -12,7 +12,7 @@
 # Specify additional hosts:
 #  uci set on-monitoring.plugin_multiping=plugin
 #  uci add_list on-monitoring.plugin_multiping.hosts="8.8.8.8"
-#  uci add_list on-monitoring.plugin_multiping.hosts="192.168.0.254"
+#  uci add_list on-monitoring.plugin_multiping.hosts="192.168.10.1"
 #  uci add_list on-monitoring.plugin_multiping.hosts="10.1.0.1=gateway"
 #
 #

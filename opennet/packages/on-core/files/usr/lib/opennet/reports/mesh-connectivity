@@ -41,7 +41,7 @@ traceroute_target() {
 	# subaru (nur seine tap-mesh-IP ist erreichbar)
 	traceroute_target 10.2.0.248
 	# tamago/titan
-	traceroute_target 192.168.0.254
+	traceroute_target 192.168.10.1
 	# Schweriner Dom
 	traceroute_target 192.168.1.93
 ) >traceroute.log &

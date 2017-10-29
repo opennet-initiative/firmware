@@ -286,22 +286,18 @@ get_traceroute() {
 	# wenn kein Parameter uebergeben, dann breche ab
 	[ -z "$target" ] && return 0
 	
-	# ignore first lines ("HOST:"; "Start:")
-	get_ip_list() {
-		local ip=$1
-		timeout 20 traceroute -n "$ip" | tr '*' ' ' | while read line; do
-			# print IP
-			echo "$line" | awk '{ print $2 }'
-		done | grep -v "^$" | tr '\n' ','
-	}
-	local ip_list 
-	ip_list=$(get_ip_list "$target")
-	ip_list=$(echo "$ip_list" | sed "s/^to,//") #delete first line with "traceroute to ..."
-	ip_list=$(echo "$ip_list" | sed "s/???,//g") #delete all "???," of mtr output
-	ip_list=${ip_list%,} #delete last "," which is a result of loop
-	# keine Ausgabe, falls leer
-	[ -z "$ip_list" ] && return 0
-	echo "$ip_list"
+	# Verarbeitung:
+	#  - erste Zeile auslassen (traceroute-Header)
+	#  - unbekannte Hops ignorieren ("*" oder "???")
+	#  - Einträge durch Kommata separieren
+	timeout 20 traceroute -w 1 -q 1 -n "$target" | awk '
+		{ if ((NR > 1) && ($2 != "*") && ($2 != "???") && $2) {
+			if (NR == 2) {
+				printf($2);
+			} else {
+				printf(",%s", $2);
+			}
+		}}'
 }
 
 

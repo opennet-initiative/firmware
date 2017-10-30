@@ -12,12 +12,8 @@ DEFAULT_MODULES_ENABLED="on-olsr2"
 
 # Erzeuge die uci-Sektion "on-core.modules" und aktiviere Standard-Module.
 _prepare_on_modules() {
-	local module
 	[ -n "$(uci_get "on-core.modules")" ] && return
 	uci set "on-core.modules=modules"
-	for module in $DEFAULT_MODULES_ENABLED; do
-		enable_on_module "$module"
-	done
 }
 
 

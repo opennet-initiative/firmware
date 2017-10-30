@@ -501,6 +501,7 @@ enable_uhttpd_redirect() {
 ##   Nutzungsform zu erraten und die dazu passende Modulliste zu speichern.
 guess_previously_used_modules() {
 	trap "error_trap guess_previously_used_modules '$*'" $GUARD_TRAPS
+	local module
 	# falls bereits etwas in der uci-Sektion gespeichert wurde, ist keine Nachbereitung noetig
 	[ -n "$(uci -q show "on-core.modules")" ] && return 0
 	# Zweig anlegen
@@ -514,7 +515,10 @@ guess_previously_used_modules() {
 		&& uci_add_list "on-core.modules.installed" "on-captive-portal"
 	[ -e "/etc/xinetd.d/munin" ] \
 		&& uci_add_list "on-core.modules.installed" "on-monitoring"
-	true
+	# enable default modules
+	for module in $DEFAULT_MODULES_ENABLED; do
+		enable_on_module "$module"
+	done
 }
 
 

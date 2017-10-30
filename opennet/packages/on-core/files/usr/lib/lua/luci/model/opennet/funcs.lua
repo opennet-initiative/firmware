@@ -130,7 +130,7 @@ end
 function get_network_zone_interfaces(zone_name)
 	local result = {}
 	cursor:foreach("firewall", "zone", function(zone)
-		if zone.name == zone_name then
+		if (zone.name == zone_name) and zone.network then
 			for _, net_name in ipairs(zone.network) do
 				cursor:foreach("network", "interface", function(net)
 					if net_name == net[".name"] then

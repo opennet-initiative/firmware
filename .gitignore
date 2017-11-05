@@ -1,2 +1,4 @@
 .pc
+.*.sw[op]
 *~
+/build-doc/

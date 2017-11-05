@@ -5,7 +5,7 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
-* Ein-Klick-Konfiguration (als Client) eines WLAN-Netzes aus der Umgebung
+* Ein-Klick-Konfiguration als Client eines WLAN-Netzes aus der Umgebung
 * Kanalwechsel durch Radarsignale (5 GHz):
 ** deutlicher weniger fehlerhafte Positiv-Meldungen (also Rauschen wird seltener als Radar missverstanden)
 ** es findet kein Wechsel auf einen Indoor-Kanal mehr statt (bessere Sendeleistung, keine Normverletzung)
@@ -13,18 +13,20 @@ Anschließend kann diese Liste wieder geleert werden.
 ** seit OpenVPN v2.4 (verbesserte Dual-Stack-Unterstützung)
 * regelmäßiger Kabelverbindungsverlust von Nanostation M5 Loco XW ist behoben ("eth0-Bug")
 ** [https://dev.opennet-initiative.de/ticket/94 Ticket #94]
+* OLSR2 (mit IPv6 im Mesh) ist nun standardmäßig aktiviert
+* "on-openvpn" ist standardmäßig Teil der Firmware (muss jedoch manuell aktiviert werden)
 * UGW-APs zeigen Anzahl der weitergeleiteten Verbindungen auch dann an, wenn kein VPN aufgebaut wurde
 * keine Splash-Seitenumlenkung auf offenen Zugangspunkten (sofort unbeschränkter Zugang für alle)
 * Anzeige der Größe des Arbeitsspeichers auf Status-Seite
 * verfügbaren Flash-Speicher bei Modul-Installation anzeigen
 
 = Interne Änderungen =
-* vermeide unnötigen OLSR-Neustart nach Wifi-Reinitialisierung ([http://dev.opennet-initiative.de/ticket/185 Ticket #185])
+* vermeide unnötigen OLSR-Neustart nach Wifi-Reinitialisierung ([https://dev.opennet-initiative.de/ticket/185 Ticket #185])
 * deutlich reduzierter Load durch seltenere Aktualisierung der via OLSR announcierten Dienste
 * die Module 'on-openvpn' und 'on-olsr2' sind nun standardmäßig in der Firmware enthalten
 ** 'on-openvpn' is abgeschaltet, 'on-olsr2' ist aktiviert
+* Umstieg von OpenWRT nach LEDE (17.01) als Basis-Distribution
+* deutlich weniger Load durch effizientere Verarbeitung der via OLSR-Nameservice announcierten Dienste
 
 = Bemerkenswertes / Fehler / Mängel =
-
-= Aktualisierungshinweis =
-* Umstieg von OpenWRT nach LEDE 
+* bei älteren Nanostation-Geräten (Modellreihe "XM", Baujahr vor 2014) kann es zu Load-Problemen kommen ([https://dev.opennet-initiative.de/ticket/187 Ticket #187])

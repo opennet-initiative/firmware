@@ -109,10 +109,10 @@ clean: unpatch
 autobuilder-clean:
 	git fetch --all
 	git reset --hard origin/master
-	git submodule update
 	@# eventuell Reste von (zwischenzeitlich geaenderten) Patches entfernen
 	git submodule foreach git reset --hard
 	git submodule foreach git clean -f
+	git submodule update
 	@# eventuelle Patch-Reste entfernen (z.B. die feeds.conf)
 	quilt pop -a -f || true
 	@# Entferne vorherige Build-Images. Aufgrund der unterschiedlichen Dateinamen pro Build

@@ -53,22 +53,30 @@ are_multiple_olsrd_processes_alive() {
 }
 
 
+# Pruefe, ob der olsrd-Prozess lebt und Anfragen beantwortet.
 is_olsrd_txtinfo_empty() {
-	[ -z "$(request_olsrd_txtinfo all)" ] && return 0
-	return 1
+	request_olsrd_txtinfo con | grep -q . && return 1
+	# Da es gelegentlich Fehlerkennungen von Ausfällen gab, prüfen wir im Fehlerfall zweimal.
+	sleep 3
+	request_olsrd_txtinfo con | grep -q . && return 1
+	return 0
 }
 
+
+# Warte ein wenig, um anderen cron-gesteuerten Prozessen mit olsrd-Zugriff
+# (z.B. die Routen-Cache-Aktualisierung) den Vortritt zu lassen.
+sleep 23
 
 if ! is_olsrd_running; then
 	# the service is not running
 	olsr_service_action restart
 	add_banner_event "olsrd restart (missing process)"
-elif  is_olsrd_txtinfo_empty; then
+elif is_olsrd_txtinfo_empty; then
 	# The process is alive, but does not respond to txtinfo requests.
 	# These failures happened in 2017 with OLSR v0.9.5.
 	olsr_service_action restart
 	add_banner_event "olsrd restart (empty txtinfo)"
-elif  is_routing_table_out_of_sync; then
+elif is_routing_table_out_of_sync; then
 	# The routing table does not reflect the content of OLSRD's topology information.
 	olsr_service_action restart
 	add_banner_event "olsrd restart (routes out of sync)"

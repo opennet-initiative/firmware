@@ -23,8 +23,18 @@ is_olsrd_running() {
 		pidof olsrd >/dev/null && return 0
 		return 1
 	else
-		system_service_check /usr/sbin/olsrd "$pid_file" && return 0
-		return 1
+		if system_service_check /usr/sbin/olsrd "$pid_file"; then
+			return 0
+		else
+			# Falls die PID-Datei eine falsche PID enthält, dann wird
+			# "/etc/init.d/olsrd restart" dauerhaft fehlschlagen, da es nie den alten
+			# Prozess tötet. Der restart wird also immer nur in einem Fehler beim
+			# Port-Bind enden.
+			# Daher töten wir den Prozess manuell. Anschließend klappt der
+			# Prozess-Start und eine valide PID wird geschrieben.
+			killall olsrd || true
+			return 1
+		fi
 	fi
 }
 

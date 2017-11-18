@@ -214,7 +214,9 @@ get_captive_portal_clients() {
 	# Die "iwinfo assoclist" ist wahrscheinlich der einzige brauchbare Weg, um
 	# Verkehrsstatistiken zu beliebigen Peers zu erhalten. Wir müssen es also gar nicht erst
 	# mit anderen (nicht-wifi) Interfaces versuchen.
-	local assoclist=$(iwinfo wlan0 assoclist 2>/dev/null || true)
+	local assoclist
+	assoclist=$(for device in $(get_subdevices_of_interface "$NETWORK_FREE"); do \
+		iwinfo wlan0 assoclist 2>/dev/null || true; done)
 	# erzwinge eine leere Zeile am Ende fuer die finale Ausgabe des letzten Clients
 	while read timestamp mac_address ip_address hostname misc; do
 		# eine assoclist-Zeile sieht etwa folgendermassen aus:

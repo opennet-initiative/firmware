@@ -174,11 +174,16 @@ is_captive_portal_running() {
 get_captive_portal_client_count() {
 	local count=0
 	local this_count=
+	local assoclist
 	local device
 	if is_captive_portal_running; then
 		for device in $(get_subdevices_of_interface "$NETWORK_FREE"); do
-			# determine the number of valid arp cache items for this interface
-			this_count=$(grep "[[:space:]]$device$" /proc/net/arp | grep -vFw "00:00:00:00:00:00" | wc -l)
+			if assoclist=$(iwinfo "$device" assoclist 2>/dev/null); then
+				this_count=$(echo "$assoclist" | awk '{ if (($1 == "TX:") && ($(NF-1) >= 100)) count++; } END { print count; }')
+			else
+				# determine the number of valid arp cache items for this interface
+				this_count=$(grep "[[:space:]]$device$" /proc/net/arp | grep -vFw "00:00:00:00:00:00" | wc -l)
+			fi
 			count=$((count + this_count))
 		done
 	fi

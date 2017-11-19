@@ -138,6 +138,8 @@ CONFIG_PACKAGE_kmod-usb3=m
 CONFIG_PACKAGE_kmod-usbip=m
 # optional: RAM-Kompression fuer Speicherknappheit
 CONFIG_PACKAGE_kmod-zram=m
+# Kernel-Konfiguration anschauen (/proc/config.gz)
+CONFIG_PACKAGE_kmod-ikconfig=m
 
 # Paket-Minimierung
 CONFIG_PACKAGE_ppp=m

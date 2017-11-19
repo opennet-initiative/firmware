@@ -33,9 +33,14 @@ CONFIG_PACKAGE_kmod-r8169=y
 CONFIG_PACKAGE_kmod-sis900=y
 CONFIG_PACKAGE_kmod-tg3=y
 CONFIG_PACKAGE_kmod-tun=y
-CONFIG_PACKAGE_kmod-usb3=y
 CONFIG_PACKAGE_kmod-via-rhine=y
 CONFIG_PACKAGE_kmod-via-velocity=y
+
+# die APU-Geräte booten ohne initrd - also muss der Kernel USB-Unterstützung mitbringen
+# (in der common-Datei für alle Architekturen sind die USB-Module nur als "m" gesetzt)
+CONFIG_PACKAGE_kmod-usb2=y
+CONFIG_PACKAGE_kmod-usb3=y
+CONFIG_PACKAGE_kmod-usb-storage=y
 
 # support for triggered shutdown of virtual machines
 CONFIG_PACKAGE_acpid=y

@@ -293,13 +293,17 @@ _get_device_traffic() {
 	local seconds="$2"
 	local sys_path="/sys/class/net/$device"
 	[ ! -d "$sys_path" ] && msg_error "Failed to find '$sys_path' for '_get_device_traffic'" && return 0
+	# Ausgabe einer Zeile mit vier Zahlen: start_rx start_tx end_rx end_tx
+	# Die sed-Filterung am Ende sorgt dafür, dass negative Zahlen (bei zwischenzeitlicher
+	# Interface-Neukonfiguration) durch eine Null ersetzt werden.
 	{
 		cat "$sys_path/statistics/rx_bytes"
 		cat "$sys_path/statistics/tx_bytes"
 		sleep "$seconds"
 		cat "$sys_path/statistics/rx_bytes"
 		cat "$sys_path/statistics/tx_bytes"
-	} | tr '\n' ' ' | awk '{ print int((8 * ($3-$1)) / 1024 / '$seconds' + 0.5) "\t" int((8 * ($4-$2)) / 1024 / '$seconds' + 0.5) }'
+	} | tr '\n' ' ' | awk '{ print int((8 * ($3-$1)) / 1024 / '$seconds' + 0.5) "\t" int((8 * ($4-$2)) / 1024 / '$seconds' + 0.5) }' \
+		| sed 's/\(-[[:digit:]]\+\)/0/g'
 }
 
 

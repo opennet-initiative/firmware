@@ -13,6 +13,7 @@
 
 
 # include helper functions
+# shellcheck disable=SC1090
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
@@ -33,17 +34,20 @@ print_status() {
 	sorting=$(get_service_sorting)
 	format_string="%6s %-16s %18s %7s %4s\n"
 
+	# shellcheck disable=SC2059
 	printf "$format_string" "active" "IP" "Quality" "VPN" "Age"
-	get_services "gw" | sort_services_by_priority | while read service_name; do
+	get_services "gw" | sort_services_by_priority | while read -r service_name; do
 		host_description=$(get_service_value "$service_name" "host")
 		# haenge den Port an den Hostnamen, falls es nicht der Standard-Port ist
 		port=$(get_service_value "$service_name" "port")
 		[ "$port" != "$DEFAULT_MIG_PORT" ] && host_description="$host_description:$port"
 		if uci_is_true "$(get_service_value "$service_name" "disabled" "false")"; then
 			# der Dienst wird ignoriert
+			# shellcheck disable=SC2059
 			printf "$format_string" "" "$host_description" "disabled" "" ""
 		elif [ -z "$(get_service_value "$service_name" "distance")" ]; then
 			# der Dienst ist nicht erreichbar
+			# shellcheck disable=SC2059
 			printf "$format_string" "" "$host_description" "unreachable" "" ""
 		else
 			# der Dienst wurde nicht abgeschaltet
@@ -54,7 +58,7 @@ print_status() {
 				age=
 			fi
 			status=$(get_service_value "$service_name" "status")
-			if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
+			if [ "$sorting" = "hop" ] || [ "$sorting" = "etx" ]; then
 				offset=$(get_service_value "$service_name" "offset")
 				quality=$(get_distance_with_offset "$service_name")
 				quality=$(printf "%.1f" "$quality")
@@ -73,6 +77,7 @@ print_status() {
 			else
 				active=""
 			fi
+			# shellcheck disable=SC2059
 			printf "$format_string" "$active" "$host_description" "$quality" "$status" "$age"
 		fi
 	done
@@ -111,7 +116,8 @@ move_down()	{ move_service_down	"$1" "gw"; }
 
 
 add_gw() {
-	trap "error_trap add_gw '$*'" $GUARD_TRAPS
+	# shellcheck disable=SC2086
+	trap 'error_trap add_gw "$*"' $GUARD_TRAPS
 	local ipaddr="$1"
 	local port="${2:-$DEFAULT_MIG_PORT}"
 	notify_service "manual" "gw" "openvpn" "$ipaddr" "$port" "udp" "/" >/dev/null

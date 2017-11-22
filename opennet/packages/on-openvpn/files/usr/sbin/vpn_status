@@ -82,20 +82,25 @@ print_status() {
 print_usage() {
 	echo
 	echo "*** vpn_status supports the following actions: ***"
-	echo "add_gw IP [PORT] - manually add a gateway"
-	echo "move_top IP      - move a gateway to the top of the priority list"
-	echo "move_up IP       - move a gateway one step up"
-	echo "move_down IP     - move a gateway one step down"
-	echo "status           - show all VPN gateways and their status"
-	echo "start            - start the VPN tunnel"
-	echo "stop             - stop the VPN tunnel"
-	echo "restart          - restart the VPN tunnel"
+	echo "add_gw IP [PORT]    - manually add a gateway"
+	echo "move_top IP [PORT]  - move a gateway to the top of the priority list"
+	echo "move_up IP [PORT]   - move a gateway one step up"
+	echo "move_down IP [PORT] - move a gateway one step down"
+	echo "status              - show all VPN gateways and their status"
+	echo "start               - start the VPN tunnel"
+	echo "stop                - stop the VPN tunnel"
+	echo "restart             - restart the VPN tunnel"
 }
 
 
-_get_gateway_service_from_ip() {
+_get_gateway_service_name() {
 	local host="$1"
-	get_services "gw" | filter_services_by_value "host" "$host" | tail -1
+	local port="$2"
+	get_services "gw" | if [ -n "$port" ]; then
+		filter_services_by_value "host" "$host" "port" "$port"
+	else
+		filter_services_by_value "host" "$host"
+	fi | tail -1
 }
 
 
@@ -114,13 +119,14 @@ add_gw() {
 
 
 ACTION=help
-[ $# -ge 1 ] && ACTION=$1
+[ $# -ge 1 ] && ACTION=$1 && shift
 
 case "$ACTION" in
 	move_top|move_up|move_down)
-		[ $# -ne 2 ] && echo >&2 "ERROR: '$ACTION' requires one more parameter" && exit 1
-		host="$2"
-		service_name=$(_get_gateway_service_from_ip "$host")
+		{ [ $# -lt 1 ] || [ $# -gt 2 ]; } && echo >&2 "ERROR: '$ACTION' requires one or two parameters" && exit 1
+		host="$1"
+		port="${2:-}"
+		service_name=$(_get_gateway_service_name "$host" "$port")
 		if [ -n "$service_name" ]; then
 			"$ACTION" "$service_name"
 		else
@@ -128,10 +134,10 @@ case "$ACTION" in
 		fi
 	;;
 	add_gw)
-		[ $# -ge 2 ] && echo >&2 "ERROR: '$ACTION' requires one more parameter" && exit 1
-		shift
-		# Uebergabeparameter sind der Hostname und (optional) der Port
-		"$ACTION" "$@"
+		{ [ $# -lt 1 ] || [ $# -gt 2 ]; } && echo >&2 "ERROR: '$ACTION' requires one or two parameters" && exit 1
+		host="$1"
+		port="${2:-}"
+		"$ACTION" "$host" "$port"
 	;;
 	status)
 		print_status

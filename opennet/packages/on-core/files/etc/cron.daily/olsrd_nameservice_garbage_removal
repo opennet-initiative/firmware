@@ -14,6 +14,6 @@ set -eu
 garbage_count=$(grep '^openvpn:' /var/run/services_olsr | awk '{print $1}' | sort | uniq -c | awk '{sum+=$1-1;} END {print sum}')
 
 # ein gewisse Anzahl veralteter Dienste ist akzeptabel (es kostet nur mehr Verarbeitungszeit)
-if [ "$garbage_count" -gt 20 ]; then
+if [ "$garbage_count" -gt 40 ]; then
 	/etc/init.d/olsrd restart || true
 fi

@@ -42,7 +42,7 @@ configure_dnsmasq() {
 
 add_crontab_entries() {
 	local crontab_file=/etc/crontabs/root
-	local cron_prefix="[ -x /usr/bin/on-function ] && /usr/bin/on-function run_parts"
+	local cron_prefix="[ -x /usr/bin/on-function ] && /usr/bin/on-function run_with_cron_lock run_parts"
 	local cron_suffix="2>&1 | logger -t cron-error"
 	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.minutely" \
 		"* * * * *		$cron_prefix /etc/cron.minutely $cron_suffix"

@@ -26,6 +26,8 @@ FALLBACK_DNS_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 85.214.20.141"
 # fuer Insel-UGWs benoetigen wir immer einen korrekten NTP-Server, sonst schlaegt die mesh-Verbindung fehl
 # aktuelle UGW-Server, sowie der openwrt-Pool
 FALLBACK_NTP_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 0.openwrt.pool.ntp.org"
+CRON_LOCK_FILE=/var/run/on-cron.lock
+CRON_LOCK_MAX_AGE_MINUTES=15
 
 
 # Aufteilung ueberlanger Zeilen
@@ -376,6 +378,44 @@ get_main_ip() {
 }
 
 
+## @fn run_with_cron_lock()
+## @details Führe eine Aktion aus, falls das Lock für Cron-Jobs übernommen werden konnte
+## @params command alle Parameter werden als auszuführendes Kommando interpretiert
+run_with_cron_lock() {
+	local returncode
+	if acquire_lock "$CRON_LOCK_FILE" "$CRON_LOCK_MAX_AGE_MINUTES"; then
+		set +e
+		"$@"
+		returncode=$?
+		set -e
+		rm -f "$CRON_LOCK_FILE"
+		return "$returncode"
+	fi
+}
+
+
+## @fn acquire_lock()
+## @brief Prüfe ob eine Lock-Datei existiert und nicht veraltet ist.
+## @details Die folgenden Zustände werden behandelt:
+##    A) die Datei existiert, ist jedoch veraltet -> Erfolg, Zeitstempel der Datei aktualisieren
+##    B) die Datei existiert und ist noch nicht veraltet -> Fehlschlag
+##    C) die Datei existiert nicht -> Erfolg, Datei wird angelegt
+## @returns Erfolg (Lock erhalten) oder Misserfolg (Lock ist bereits vergeben)
+acquire_lock() {
+	local lock_file="$1"
+	local max_age_minutes="$2"
+	local file_timestamp
+	if [ ! -e "$lock_file" ] \
+			|| is_file_timestamp_older_minutes "$lock_file" "$max_age_minutes"; then
+		touch "$lock_file"
+		return 0
+	fi
+	# die Lock-Datei existiert und ist nicht alt genug
+	msg_info "Failed to aquire lock file: $lock_file"
+	trap "" $GUARD_TRAPS && return 1
+}
+
+
 # Pruefe ob eine PID-Datei existiert und ob die enthaltene PID zu einem Prozess
 # mit dem angegebenen Namen (nur Dateiname - ohne Pfad) verweist.
 # Parameter PID-Datei: vollstaendiger Pfad
@@ -523,7 +563,7 @@ get_uptime_minutes() {
 ## @brief Prüfe ob die Datei älter ist als die angegebene Zahl von Minuten.
 ## @details Alle Fehlerfälle (Datei existiert nicht, Zeitstempel liegt in der Zukunft, ...) werden
 ##   als "veraltet" gewertet.
-## @returns True, falls die Datei zu ist oder falls ein Fehler auftrat.
+## @returns True, falls die Datei existiert und älter als angegeben ist - ansonsten "False"
 is_file_timestamp_older_minutes() {
 	trap "error_trap is_file_timestamp_older_minutes '$*'" $GUARD_TRAPS
 	local filename="$1"

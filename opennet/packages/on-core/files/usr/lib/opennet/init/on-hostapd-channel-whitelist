@@ -4,11 +4,24 @@
 #   http://wiki.openwrt.org/doc/uci#defaults
 #
 
-set -eu
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
-#add channel whitelist for 5GHz devices to /etc/config/wireless
-#info: the additional option chanlist is enables by one of our patches 
-if [ "11a" = "`uci get wireless.radio0.hwmode`" ]; then 
-  uci set wireless.radio0.chanlist='36-64 100-124 132-140'
-  uci commit
-fi
+
+# add channel whitelist for 5GHz devices to /etc/config/wireless
+# info: the additional option "chanlist" is enabled by one of our patches
+# TODO: move this adjustment to a future "configure as wifi master" web interface action
+find_all_uci_sections wireless wifi-device "hwmode=11a" "channel=auto" | while read -r device_uci_prefix; do
+	# do not touch non-empty chanlists
+	[ -n "$(uci_get "${device_uci_prefix}.chanlist")" ] && continue
+	# the device name could be "radio0" or similar
+	device_name=$(echo "$device_uci_prefix" | cut -f 2 -d .)
+	# do not touch devices without a master interface
+	ap_interfaces=$(find_all_uci_sections wireless wifi-iface "device=$device_name" "mode=ap")
+	[ -z "$ap_interfaces" ] && continue
+	# Use one (random) indoor channel and multiple outdoor channels. This allows a usable
+	# fallback even under bad conditions.
+	indoor_channel=$(( 36 + 4 * $(get_random 4) ))
+	# use all outdoor channels except 128 (used by the local weather station)
+	uci set "${device_uci_prefix}.chanlist=$indoor_channel 100-124 132-140"
+	uci commit "$device_uci_prefix"
+done

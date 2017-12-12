@@ -1,0 +1,26 @@
+add GPIO configuration for POE passthrough of Ubiquiti EdgeRouter
+--- /dev/null
++++ b/lede/target/linux/ramips/base-files/etc/board.d/03_gpio_switches
+@@ -0,0 +1,22 @@
++#!/bin/sh
++#
++# Copyright (C) 2017 OpenWrt.org
++#
++
++. /lib/functions/uci-defaults.sh
++. /lib/ramips.sh
++
++board_config_update
++
++board=$(ramips_board_name)
++
++case "$board" in
++ubnt-erx)
++	# passthrough for port 4
++	ucidef_add_gpio_switch "poe_passthrough" "PoE Passthrough" "0"
++	;;
++esac
++
++board_config_flush
++
++exit 0

@@ -1,3 +1,4 @@
+poe_passthrough_ubnt_edgerouter.patch
 oni-feeds.patch
 makefile_include_opennet_packages.patch
 hostapd_option_chanlist.patch

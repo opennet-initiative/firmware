@@ -1,0 +1,79 @@
+#!/bin/sh
+
+set -eu
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+echo "****** System ******"
+printf "Uptime and Load: %s\n" "$(uptime)"
+error_messages=$(get_potential_error_messages)
+if [ -n "$error_messages" ]; then
+	echo "Potential error messages:"
+	echo "$error_messages" | tail -5 | sed 's/^/\t/'
+fi
+echo
+
+echo "****** OLSRv1 Links ******"
+echo /lin | nc localhost 2006 | sed '1,/^Local IP/d; /^$/d'
+echo
+
+
+if is_on_module_installed_and_enabled on-olsr2; then
+	echo "****** OLSRv2 Links ******"
+	echo /nhdpinfo neighbor | nc localhost 2009 \
+		| cut -f 1,6,7,10,12 \
+		| xargs -r printf "%s  symmetric=%s  linkcount=%s  metric_in=%s  metric_out=%s\n"
+	echo
+fi
+
+
+# WLAN
+iwinfo_out=$(iwinfo)
+if [ -n "$iwinfo_out" ]; then
+	echo "****** WLAN ******"
+	echo "$iwinfo_out" | awk '{
+		if ($2 == "ESSID:") {name=$1; print $0};
+		if ($1 ~ /^(Mode|Tx-Power|Signal|Bit Rate|Hardware):$/) print $0;
+		if ($1 == "Hardware:") {
+			printf("          Associated peers: ");
+			system(sprintf("iwinfo %s assoclist | grep ^\"[^ ]\" | wc -l", name));
+		}
+	}'
+	echo
+fi
+
+
+# on-openvpn
+if is_on_module_installed_and_enabled on-openvpn; then
+	echo "****** OpenVPN connection ******"
+	current_connections=$(get_active_mig_connections)
+	if [ -z "$current_connections" ]; then
+		echo "no internet connection"
+	else
+		echo "$current_connections" | while read service; do
+			printf "%s:%s via %s\n" \
+				"$(get_service_value "$service" host)" \
+				"$(get_service_value "$service" port)" \
+				"$(get_service_detail "$service" public_host | grep . || echo 'unknown')"
+		done
+	fi
+	echo
+fi
+
+
+# on-usergw
+if is_on_module_installed_and_enabled on-usergw; then
+	echo "****** User-Gateway connections ******"
+	current_connections=$(get_active_ugw_connections)
+	if [ -z "$current_connections" ]; then
+		echo "no user gateway connections"
+	else
+		echo "$current_connections" | while read service; do
+			printf "%s:%s\n" \
+				"$(get_service_value "$service" host)" \
+				"$(get_service_value "$service" port)"
+		done
+	fi
+	echo
+fi

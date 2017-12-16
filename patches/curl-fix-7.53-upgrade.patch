@@ -12,3 +12,14 @@ Das Upgrade von curl auf die Version 7.53 erfordert die Anpassung eines LEDE-Pat
       Curl_ssl_sessionid_lock(conn);
  --- a/lib/vtls/cyassl.c
  +++ b/lib/vtls/cyassl.c
+--- a/lede/package/network/utils/curl/patches/106-CVE-2017-8817.patch
++++ b/lede/package/network/utils/curl/patches/106-CVE-2017-8817.patch
+@@ -73,7 +73,7 @@ index dc1cc03bc..6eb37d81d 100644
+ @@ -121,6 +121,7 @@
+  test1128 test1129 test1130 test1131 test1132 test1133 test1134 test1135 \
+  test1136 test1137 test1138 test1139 test1140 test1141 test1142 test1143 \
+- test1144 \
++ test1144 test1145 test1146 \
+ +test1163 \
+  test1200 test1201 test1202 test1203 test1204 test1205 test1206 test1207 \
+  test1208 test1209 test1210 test1211 test1212 test1213 test1214 test1215 \

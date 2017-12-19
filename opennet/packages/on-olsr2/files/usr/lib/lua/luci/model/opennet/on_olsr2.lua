@@ -7,7 +7,7 @@ function status_neighbors_olsr2()
 			'<th>' ..  luci.i18n.translate("Name") .. "</th>" ..
 			'<th>' ..  luci.i18n.translate("IP-Address") .. "</th>" ..
 			'<th>' ..  luci.i18n.translate("Interface") .. "</th>" ..
-			'<th><abbr title="' .. luci.i18n.translate("Potential outgoing rate: estimated by this host") .. '">Announced RX Rate</abbr></th>' ..
+			'<th><abbr title="' .. luci.i18n.translate("Potential outgoing rate: estimated by this host") .. '">Announced TX Rate</abbr></th>' ..
 			'<th><abbr title="' .. luci.i18n.translate("Potential incoming rate: estimated by our neighbour") .. '">Received RX Rate</abbr></th>' ..
 			'<th><abbr title="' .. luci.i18n.translate("Number of routes via this neighbour") .. '">Routes</abbr></th>' ..
 			'</tr>'

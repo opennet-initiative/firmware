@@ -247,12 +247,12 @@ get_olsr2_neighbours() {
 	local incoming_rate
 	local outgoing_rate
 	local route_count
-	request_olsrd2_txtinfo "nhdpinfo" "link" | awk '{ print $1,$2,$10,$11,$15,$17 }' \
-			| while read interface link_ipv6 mac ipv6 incoming_rate outgoing_rate; do
+	request_olsrd2_txtinfo "nhdpinfo" "link" | awk '{ print $1,$2,$10,$14,$18,$20 }' \
+			| while read -r interface link_ipv6 mac ipv6 incoming_rate outgoing_rate; do
 		ipv4=$(get_ipv4_of_mac "$mac")
 		[ -z "$ipv4" ] && ipv4="?"
 		route_count=$(get_olsr2_route_count_by_neighbour "$link_ipv6")
-		echo "$ipv4 $ipv6 $interface $incoming_rate $outgoing_rate $route_count"
+		echo "$ipv4 $ipv6 $interface $outgoing_rate $incoming_rate $route_count"
 	done
 }
 

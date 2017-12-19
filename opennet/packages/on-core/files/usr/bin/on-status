@@ -22,8 +22,8 @@ echo
 if is_on_module_installed_and_enabled on-olsr2; then
 	echo "****** OLSRv2 Links ******"
 	echo /nhdpinfo neighbor | nc localhost 2009 \
-		| cut -f 1,6,7,10,12 \
-		| xargs -r printf "%s  symmetric=%s  linkcount=%s  metric_in=%s  metric_out=%s\n"
+		| cut -f 1,3,4,7,9 \
+		| xargs -r printf "%s\tsymmetric=%s\tlinkcount=%s\tmetric_in=%s\tmetric_out=%s\n"
 	echo
 fi
 

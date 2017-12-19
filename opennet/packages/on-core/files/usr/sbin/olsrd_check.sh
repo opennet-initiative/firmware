@@ -65,10 +65,10 @@ are_multiple_olsrd_processes_alive() {
 
 # Pruefe, ob der olsrd-Prozess lebt und Anfragen beantwortet.
 is_olsrd_txtinfo_empty() {
-	request_olsrd_txtinfo con | grep -q . && return 1
+	[ -n "$(request_olsrd_txtinfo con)" ] && return 1
 	# Da es gelegentlich Fehlerkennungen von Ausfällen gab, prüfen wir im Fehlerfall zweimal.
 	sleep 3
-	request_olsrd_txtinfo con | grep -q . && return 1
+	[ -n "$(request_olsrd_txtinfo con)" ] && return 1
 	return 0
 }
 

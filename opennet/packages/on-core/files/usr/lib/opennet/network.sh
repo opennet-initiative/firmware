@@ -422,13 +422,57 @@ get_ipv4_of_mac() {
 }
 
 
-get_potential_opennet_scan_results_for_device() {
-	local device="$1"
-	iwinfo "$device" scan | awk '{
+filter_potential_opennet_scan_results() {
+	awk '{
 			if ($1 == "ESSID:") essid=$2;
 			if ($1 == "Signal:") signal=$2;
 			if (($1 == "Encryption:") && ($2 == "none")) print(signal, essid); }' \
-		| sort -rn | sed 's/\"//g' | grep -iE "(on|opennet)" | grep -v "Telekom_FON"
+		| sort -rn | sed 's/\"//g' \
+		| grep -v "Telekom_FON" \
+		| grep -vF "join.opennet-initiative.de" \
+		| grep -iE "(on|opennet)"
+}
+
+
+get_potential_opennet_scan_results_for_device() {
+	local device="$1"
+	local result
+	local delay
+	# Leider funktioniert der Scan mit aktivierter "chanlist"-Option nicht (der Prozess hängt).
+	# Also speichern wir den aktuellen Konfigurationsstand, deaktivieren die chanlist vor dem
+	# Scan und stellen den vorherigen Zustand anschließend wieder her.
+	local old_config
+	local uci_prefix
+	# Keine Konfiguration?  Nichts zu tun ...
+	[ -s /etc/config/wireless ] || return 0
+	old_config=$(cat /etc/config/wireless)
+	# Ändere Konfigurationen, um einen erfolgreichen scan sicherzustellen.
+	find_all_uci_sections wireless wifi-device | while read -r uci_prefix; do
+		uci_delete "${uci_prefix}.chanlist"
+		uci set "${uci_prefix}.channel=auto"
+	done
+	find_all_uci_sections wireless wifi-iface | while read -r uci_prefix; do
+		uci set "${uci_prefix}.mode=ap"
+		uci set "${uci_prefix}.ssid=on-temporary-scanning"
+	done
+	# neu konfigurieren
+	uci commit wireless
+	wifi || true
+	# kurz auf angewandte Konfiguration warten
+	sleep 5
+	# wiederhole den Scan mehrmals, falls das Ergebnis leer ist
+	for delay in 1 2 3; do
+		# unter bestimmten Umständen kann der Scan hängenbleiben
+		result=$(timeout 15 iwinfo "$device" scan | filter_potential_opennet_scan_results || true)
+		# keine weitere Wiederholung, falls es eine Ausgabe gab
+		[ -n "$result" ] && break
+		sleep "$delay"
+	done
+	# alten Zustand wiederherstellen
+	echo "$old_config" >/etc/config/wireless
+	uci commit wireless
+	wifi || true
+	echo "$result"
 }
 
 # Ende der Doku-Gruppe

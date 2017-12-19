@@ -231,7 +231,6 @@ get_subdevices_of_interface() {
 	local interface="$1"
 	local device
 	local uci_prefix
-	local current_interface
 	{
 		# kabelgebundene Geräte
 		for device in $(uci_get "network.${interface}.ifname"); do
@@ -242,7 +241,7 @@ get_subdevices_of_interface() {
 		done
 		# wir fügen das Ergebnis der ubus-Abfrage hinzu (unten werden Duplikate entfernt)
 		_run_system_network_function "network_get_physdev" "$interface"
-	} | tr ' ' '\n' | sort | uniq | while read device; do
+	} | tr ' ' '\n' | sort | uniq | while read -r device; do
 		# Falls das Verzeichnis existiert, ist es wohl eine Bridge, deren Bestandteile wir ausgeben.
 		# Ansonsten wird das Device ausgegeben.
 		ls "/sys/devices/virtual/net/$device/brif/" 2>/dev/null || echo "$device"
@@ -284,11 +283,10 @@ get_zone_of_device() {
 	trap "error_trap get_zone_of_device '$*'" $GUARD_TRAPS
 	local device="$1"
 	local uci_prefix
-	local devices
 	local zone
 	local interface
 	local current_device
-	find_all_uci_sections firewall zone | while read uci_prefix; do
+	find_all_uci_sections firewall zone | while read -r uci_prefix; do
 		zone=$(uci_get "${uci_prefix}.name")
 		for interface in $(get_zone_interfaces "$zone"); do
 			for current_device in \
@@ -314,7 +312,7 @@ get_zone_of_interface() {
 	local uci_prefix
 	local interfaces
 	local zone
-	find_all_uci_sections firewall zone | while read uci_prefix; do
+	find_all_uci_sections firewall zone | while read -r uci_prefix; do
 		zone=$(uci_get "${uci_prefix}.name")
 		interfaces=$(get_zone_interfaces "$zone")
 		is_in_list "$interface" "$interfaces" && echo -n "$zone" && return 0 || true
@@ -360,7 +358,7 @@ get_all_network_interfaces() {
 	local interface
 	# Die uci-network-Spezifikation sieht keine anonymen uci-Sektionen fuer Netzwerk-Interfaces vor.
 	# Somit ist es wohl korrekt, auf die Namen als Teil des uci-Pfads zu vertrauen.
-	find_all_uci_sections "network" "interface" | cut -f 2 -d . | while read interface; do
+	find_all_uci_sections "network" "interface" | cut -f 2 -d . | while read -r interface; do
 		# ignoriere loopback-Interfaces und ungueltige
 		[ -z "$interface" -o "$interface" = "none" -o "$interface" = "loopback" ] && continue
 		# alle uebrigen sind reale Interfaces
@@ -383,7 +381,7 @@ delete_firewall_zone() {
 	uci_delete "$uci_prefix"
 	for section in "forwarding" "redirect" "rule"; do
 		for key in "src" "dest"; do
-			find_all_uci_sections firewall "$section" "${key}=$zone" | while read uci_prefix; do
+			find_all_uci_sections firewall "$section" "${key}=$zone" | while read -r uci_prefix; do
 				uci_delete "$uci_prefix"
 			done
 		done
@@ -420,7 +418,7 @@ is_interface_up() {
 ## @param mac MAC-Adresse eines Nachbarn
 get_ipv4_of_mac() {
 	local ip="$1"
-	cat /proc/net/arp | awk '{ if ($4 == "'$ip'") print $1; }' | sort | head -1
+	awk '{ if ($4 == "'"$ip"'") print $1; }' /proc/net/arp | sort | head -1
 }
 
 

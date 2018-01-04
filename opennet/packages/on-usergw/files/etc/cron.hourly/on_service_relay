@@ -3,4 +3,3 @@
 set -eu
 
 on-function update_service_relay_status
-

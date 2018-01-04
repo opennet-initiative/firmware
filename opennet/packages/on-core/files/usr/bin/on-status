@@ -37,7 +37,7 @@ if [ -n "$iwinfo_out" ]; then
 		if ($1 ~ /^(Mode|Tx-Power|Signal|Bit Rate|Hardware):$/) print $0;
 		if ($1 == "Hardware:") {
 			printf("          Associated peers: ");
-			system(sprintf("iwinfo %s assoclist | grep ^\"[^ ]\" | wc -l", name));
+			system(sprintf("iwinfo %s assoclist | grep ^[0-9a-fA-F] | wc -l", name));
 		}
 	}'
 	echo

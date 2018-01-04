@@ -12,6 +12,7 @@
 #
 
 
+# shellcheck disable=SC1090
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
@@ -36,7 +37,7 @@ setup_mesh_interface() {
 	# indirekte Interface/Network-Zuordnung (siehe obigen Mailinglisten-Beitrag)
 	# Auf diesem Weg bleibt die IP-Konfiguration des Device erhalten.
 	local ubus_dev="network.interface.${netname}"
-	ubus call "$ubus_dev" add_device '{ "name": "'$ifname'" }'
+	ubus call "$ubus_dev" add_device '{ "name": "'"$ifname"'" }'
 	# die obige ubus-Aktion wird nebenlaeufig abgearbeitet - wir muessen das Ergebnis abwarten
 	ubus -t 10 wait_for "$ubus_dev"
 	# expliziter olsrd-Neustart: eventuell sind noch Fragmente alter tap-Devices in
@@ -73,6 +74,8 @@ add_main_ip_if_missing() {
 log_openvpn_events_and_disconnect_if_requested "mesh-openvpn-connections"
 
 
+# "script_type" wird von openvpn als Umgebungsvariable definiert (up/down).
+# shellcheck disable=SC2154
 case "$script_type" in
 	up)
 		setup_mesh_interface "$dev"

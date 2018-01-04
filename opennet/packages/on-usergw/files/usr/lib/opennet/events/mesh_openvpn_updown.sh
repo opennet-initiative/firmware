@@ -93,8 +93,18 @@ case "$script_type" in
 		#  * "ifup wan" behebt das Problem
 		# Wir prüfen also, ob die default-Route verlorenging und fügen sie notfalls erneut hinzu.
 		ip route show | grep -q ^default || {
-			msg_info "Lost default route during 'down' event of mesh VPN. Adding it again."
-			[ -n "$default_route" ] && ip route replace $default_route 2>/dev/null
+			if [ -n "$default_route" ]; then
+				# Es gab eine vorherige Route, die wir wiederherstellen können.
+				add_banner_event "Lost default route during 'down' event of mesh VPN. Adding it again."
+				# shellcheck disable=SC2086
+				ip route replace $default_route 2>/dev/null
+			else
+				# Schon vor dem "down"-Event gab es keine default-Route - wir
+				# verwenden also die allgemeine Korrektur-Funktion.
+				# Das "banner"-Event wird durch die "fix"-Funktion erzeugt - also nur "info".
+				msg_info "Detected lost default route during 'down' event of mesh VPN. Adding it again."
+				fix_wan_route_if_missing
+			fi
 			true
 		}
 		;;

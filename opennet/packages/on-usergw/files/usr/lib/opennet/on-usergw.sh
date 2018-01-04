@@ -427,10 +427,34 @@ is_trusted_service_list_outdated() {
 }
 
 
+## @fn fix_wan_route_if_missing()
+## @brief Prüfe, ob die default-Route trotz aktivem WAN-Interface fehlt. In diesem Fall füge sie
+##        mit "ifup wan" wieder hinzu.
+## @details Die Ursache für die fehlende default-Route ist unklar.
+fix_wan_route_if_missing() {
+	trap "error_trap fix_wan_route_if_missing '$*'" $GUARD_TRAPS
+	# default route exists? Nothing to fix ...
+	ip route show | grep ^default | head -1 | grep -q . && return 0
+	(
+		# tolerante Shell-Interpretation fuer OpenWrt-Code
+		set +eu
+		. /lib/functions/network.sh
+		network_find_wan wan_interface
+		if [ -n "$wan_interface" ] && network_is_up "$wan_interface"; then
+			add_banner_event "Missing default route - reinitialize '$wan_interface'"
+			ifup "$wan_interface" || true
+		fi
+		set -eu
+	)
+}
+
+
 ## @fn update_on_usergw_status()
 ## @brief Baue Verbindungen auf oder trenne sie - je nach Modul-Status.
 update_on_usergw_status() {
+	trap "error_trap update_on_usergw_status '$*'" $GUARD_TRAPS
 	if is_on_module_installed_and_enabled "on-usergw"; then
+		fix_wan_route_if_missing
 		is_trusted_service_list_outdated && update_trusted_service_list
 		update_mesh_gateway_firewall_rules
 		# ohne Zertifikat ist nicht mehr zu tun

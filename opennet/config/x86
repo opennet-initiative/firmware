@@ -2,8 +2,6 @@ CONFIG_TARGET_x86=y
 CONFIG_TARGET_x86_generic=y
 CONFIG_TARGET_x86_generic_Wrap=y
 
-CONFIG_GRUB_IMAGES=n
-
 #
 # Root filesystem images
 #

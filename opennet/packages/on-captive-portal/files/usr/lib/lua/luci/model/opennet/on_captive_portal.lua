@@ -38,7 +38,7 @@ function status_captive_portal()
 	local free_device = on_function("get_variable", {"NETWORK_FREE"})
 	if on_bool_function("is_captive_portal_running") then
 		-- die Funktion ist aktiv - melde Zustand
-		status = luci.i18n.translatef("Connected clients: %d",
+		status = luci.i18n.translatef("Connected clients: %s",
 			on_function("get_captive_portal_client_count"))
 	elseif on_bool_function("captive_portal_uses_wifi_only_bridge") then
 		status = luci.i18n.translatef("Warning: the Captive Portal interface (%s) seems to be a bridge containing only wifi devices. This setup is known to cause problems: you should add a non-wifi device or disable bridging.", free_device)

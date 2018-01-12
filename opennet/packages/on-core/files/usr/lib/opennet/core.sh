@@ -762,6 +762,11 @@ get_potential_error_messages() {
 	#    "iw" aufgerufen, auch wenn eventuell kein wifi-Interface vorhanden ist. In diesem Fall
 	#    wird der obige Hinweis ausgegeben.
 	filters="${filters}|nl80211 not found"
+	# 26) OLSRd2[...]: WARN(os_interface) ...: Error, cannot open proc entry /proc/sys/net/ipv4/conf/on_wifi_1/... No such file or directory
+	#    olsrd2 versucht auf /proc/-Eintraege mittels des Namens eines logischen
+	#    Netzwerk-Interface (z.B. "on_eth_0") zuzugreifen, obwohl das System nur die physischen
+	#    Interfaces kennt.
+	filters="${filters}|OLSRd2.*cannot open proc entry /proc/sys/net/.*/conf/on_"
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.

@@ -15,7 +15,8 @@ garbage_count=$(grep '^openvpn:' /var/run/services_olsr | awk '{print $1}' | sor
 
 # ein gewisse Anzahl veralteter Dienste ist akzeptabel (es kostet nur mehr Verarbeitungszeit)
 if [ "$garbage_count" -gt 40 ]; then
-	# Warte ein wenig, um nicht die olsr-Pruefung oder die Routen-Cache-Aktualisierung zu stoeren.
-	sleep 15
 	/etc/init.d/olsrd restart || true
+	# Warte ein wenig, damit für nachfolgende Cron-Jobs (z.B. olsr-Pruefung oder die
+	# Routen-Cache-Aktualisierung) wieder die Routen zur Verfügung stehen.
+	sleep 20
 fi

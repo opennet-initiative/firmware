@@ -172,11 +172,12 @@ is_captive_portal_running() {
 ## @brief Ermittle die Anzahl der verbundenen Clients. Leere Ausgabe, falls keine aktiven
 ##        Interfaces vorhanden sind.
 get_captive_portal_client_count() {
-	local count=0
-	local this_count=
+	local count=
+	local this_count
 	local assoclist
 	local device
 	if is_captive_portal_running; then
+		count=0
 		for device in $(get_subdevices_of_interface "$NETWORK_FREE"); do
 			if assoclist=$(iwinfo "$device" assoclist 2>/dev/null); then
 				this_count=$(echo "$assoclist" | awk '{ if (($1 == "TX:") && ($(NF-1) >= 100)) count++; } END { print count; }')
@@ -190,7 +191,7 @@ get_captive_portal_client_count() {
 	# Liefere keine Ausgabe (leer), falls wir gar nichts zum Zaehlen gefunden haben.
 	# Dadurch kann das munin-Plugin (und andere Aufrufer) erkennen, dass das Portal nicht
 	# laeuft.
-	[ -z "$this_count" ] && return 0
+	[ -z "$count" ] && return 0
 	echo -n "$count"
 }
 

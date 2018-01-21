@@ -114,7 +114,7 @@ update_captive_portal_status() {
 change_captive_portal_wireless_disabled_state() {
 	local state="$1"
 	local uci_prefix
-	find_all_uci_sections wireless wifi-iface "network=$NETWORK_FREE" | while read uci_prefix; do
+	find_all_uci_sections wireless wifi-iface "network=$NETWORK_FREE" | while read -r uci_prefix; do
 		uci set "${uci_prefix}.disabled=$state"
 	done
 	apply_changes wireless
@@ -122,7 +122,7 @@ change_captive_portal_wireless_disabled_state() {
 
 
 disable_captive_portal() {
-	trap "error_trap disable_captive_portal '$*'" $GUARD_TRAPS
+	trap "error_trap disable_captive_portal" $GUARD_TRAPS
 	msg_info "on-captive-portal: wifi-Interfaces abschalten"
 	# free-Interface ist aktiv - es gibt jedoch keinen Tunnel
 	change_captive_portal_wireless_disabled_state "1"
@@ -134,7 +134,7 @@ disable_captive_portal() {
 ## @details Diese Funktion wird nach Statusänderungen des VPN-Interface, sowie innerhalb eines
 ##   regelmäßigen cronjobs ausgeführt.
 sync_captive_portal_state_with_mig_connections() {
-	trap "error_trap sync_captive_portal_state_with_mig_connections '$*'" $GUARD_TRAPS
+	trap "error_trap sync_captive_portal_state_with_mig_connections" $GUARD_TRAPS
 	# eventuelle defekte/verwirrende Netzwerk-Konfiguration korrigieren
 	captive_portal_repair_empty_network_bridge
 	# Abbruch, falls keine Netzwerk-Interfaces zugeordnet wurden
@@ -207,7 +207,7 @@ get_captive_portal_client_count() {
 ##   * Upload-Verkehrsvolumen (kByte)
 ## Der Einfachheit halber nehmen wir an, dass alle DHCP-Clients auch Captive-Portal-Clients sind.
 get_captive_portal_clients() {
-	trap "error_trap get_captive_portal_clients '$*'" $GUARD_TRAPS
+	trap 'error_trap get_captive_portal_clients "'"$*"'"' $GUARD_TRAPS
 	local ip_address
 	local mac_address
 	local timestamp
@@ -219,7 +219,7 @@ get_captive_portal_clients() {
 	assoclist=$(for device in $(get_subdevices_of_interface "$NETWORK_FREE"); do \
 		iwinfo wlan0 assoclist 2>/dev/null || true; done)
 	# erzwinge eine leere Zeile am Ende fuer die finale Ausgabe des letzten Clients
-	while read timestamp mac_address ip_address hostname misc; do
+	while read -r timestamp mac_address ip_address hostname misc; do
 		# eine assoclist-Zeile sieht etwa folgendermassen aus:
 		#    TX: 6.5 MBit/s, MCS 0, 20MHz                     217 Pkts.
 		packets_rxtx=$(echo "$assoclist" | awk '

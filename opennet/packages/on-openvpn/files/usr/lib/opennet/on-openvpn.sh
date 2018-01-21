@@ -74,7 +74,7 @@ select_mig_connection() {
 ## @ref mig-switch
 find_and_select_best_gateway() {
 	trap "error_trap find_and_select_best_gateway '$*'" $GUARD_TRAPS
-	local force_switch_now=${1:-false}
+	local force_switch_now="${1:-false}"
 	local service_name
 	local host
 	local best_gateway=
@@ -259,7 +259,7 @@ get_client_cn() {
 ## @details Jeder AP bekommt einen Bereich von zehn Ports fuer die Port-Weiterleitung zugeteilt.
 get_mig_port_forward_range() {
 	trap "error_trap get_mig_port_forward_range '$*'" $GUARD_TRAPS
-	local client_cn=${1:-}
+	local client_cn="${1:-}"
 	[ -z "$client_cn" ] && client_cn=$(get_client_cn)
 	local port_count=10
 	local cn_address=

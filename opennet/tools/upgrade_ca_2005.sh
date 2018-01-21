@@ -146,7 +146,8 @@ replace_file_safely() {
 
 get_ca_version() {
 	local filename="$1"
-	local local_checksum=$(get_clean_md5sum <"$filename")
+	local local_checksum
+	local_checksum=$(get_clean_md5sum <"$filename")
 	if [ "$local_checksum" = "$CA_2005_CHECKSUM" ]; then
 		echo 2005
 	elif [ "$local_checksum" = "$CA_2013_CHECKSUM" ]; then

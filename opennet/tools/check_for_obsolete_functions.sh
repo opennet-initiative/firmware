@@ -66,7 +66,8 @@ get_shell_func_calls() {
 check_lua_function_in_use() {
 	local funcname="$1"
 	local fname
-	local count=$(get_lua_files | while read fname; do get_lua_func_calls "$fname" "$funcname"; done | wc -l)
+	local count
+	count=$(get_lua_files | while read -r fname; do get_lua_func_calls "$fname" "$funcname"; done | wc -l)
 	# mehr als ein Vorkommen (inkl. der Definition der Funktion)? -> ok
 	[ "$count" -gt 1 ] && return 0
 	return 1
@@ -124,4 +125,3 @@ case "$ACTION" in
 		exit 1
 		;;
 esac
-

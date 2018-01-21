@@ -13,7 +13,7 @@ if [ "$#" -lt 1 ] || [ -z "$1" ]; then
 fi >&2
 
 get_location_from_api() {
-  local ip=$1
+  local ip="$1"
   #extract value of post_address
   # sample input:   "post_address":"xyz"
   # sample output:  xyz

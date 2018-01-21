@@ -37,7 +37,8 @@ get_commit_info() {
 
 build_platform() {
 	local platform="$1"
-	local snapshot_name=$(get_snapshot_name)
+	local snapshot_name
+	snapshot_name=$(get_snapshot_name)
 	[ -z "$snapshot_name" ] && return 1
 
 	# prepare export directory
@@ -62,7 +63,8 @@ build_platform() {
 
 
 export_doc() {
-	local snapshot_name=$(get_snapshot_name)
+	local snapshot_name
+	snapshot_name=$(get_snapshot_name)
 	[ -z "$snapshot_name" ] && return 1
 	local dest_dir="$HOME/$EXPORT_DIR/$snapshot_name/doc"
 	mkdir -p "$dest_dir"

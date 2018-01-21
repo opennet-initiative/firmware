@@ -150,7 +150,7 @@ initialize_olsrd_policy_routing() {
 	local iface
 	local current
 	local table
-	local priority=$OLSR_POLICY_DEFAULT_PRIORITY
+	local priority="$OLSR_POLICY_DEFAULT_PRIORITY"
 
 	# Sicherstellen, dass die Tabellen existieren und zur olsrd-Konfiguration passen
 	olsr_sync_routing_tables

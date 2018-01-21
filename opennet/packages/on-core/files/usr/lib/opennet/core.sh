@@ -174,10 +174,10 @@ update_dns_servers() {
 	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "DNS" || true)
 	# wir sortieren alphabetisch - Naehe ist uns egal
 	server_config=$(
-		get_services "dns" | filter_reachable_services | filter_enabled_services | sort | while read service; do
+		get_services "dns" | filter_reachable_services | filter_enabled_services | sort | while read -r service; do
 			host=$(get_service_value "$service" "host")
 			port=$(get_service_value "$service" "port")
-			[ -n "$port" -a "$port" != "53" ] && host="$host#$port"
+			[ -n "$port" ] && [ "$port" != "53" ] && host="$host#$port"
 			# Host nur schreiben, falls kein bevorzugter Host gefunden wurde
 			[ -z "$preferred_servers" ] && echo "server=$host"
 			# Die interne Domain soll vorranging von den via olsrd verbreiteten DNS-Servern bedient werden.
@@ -227,10 +227,10 @@ update_ntp_servers() {
 			uci_add_list "system.ntp.server" "$host"
 		done
 	else
-		get_services "ntp" | filter_reachable_services | filter_enabled_services | sort | while read service; do
+		get_services "ntp" | filter_reachable_services | filter_enabled_services | sort | while read -r service; do
 			host=$(get_service_value "$service" "host")
 			port=$(get_service_value "$service" "port")
-			[ -n "$port" -a "$port" != "123" ] && host="$host:$port"
+			[ -n "$port" ] && [ "$port" != "123" ] && host="$host:$port"
 			uci_add_list "system.ntp.server" "$host"
 		done
 	fi
@@ -288,7 +288,7 @@ clean_restart_log() {
 ##   ein beliebiges whitespace-Zeichen getrennt.
 ##   Dieses Dateiformat wird beispielsweise für die Dienst-Zustandsdaten verwendet.
 ##   Zusätzlich ist diese Funktion auch zum Parsen von openvpn-Konfigurationsdateien geeignet.
-_get_file_dict_value() { local key="$1"; shift; { grep "^$key[[:space:]]" "$@" 2>/dev/null || true; } | while read key value; do echo -n "$value"; done; }
+_get_file_dict_value() { local key="$1"; shift; { grep "^$key[[:space:]]" "$@" 2>/dev/null || true; } | while read -r key value; do echo -n "$value"; done; }
 
 
 ## @fn _get_file_dict_keys()
@@ -427,7 +427,7 @@ check_pid_file() {
 	local pid
 	local current_process
 	[ -z "$pid_file" -o ! -e "$pid_file" ] && trap "" $GUARD_TRAPS && return 1
-	pid=$(cat "$pid_file" | sed 's/[^0-9]//g')
+	pid=$(sed 's/[^0-9]//g' "$pid_file")
 	# leere/kaputte PID-Datei
 	[ -z "$pid" ] && trap "" $GUARD_TRAPS && return 1
 	# Prozess-Datei ist kein symbolischer Link?
@@ -459,7 +459,7 @@ apply_changes() {
 			uci commit "$config"
 			echo "$config"
 		fi
-	done | grep -v "^$" | sort | uniq | while read config; do
+	done | grep -v "^$" | sort | uniq | while read -r config; do
 		run_parts "${IPKG_INSTROOT:-}/usr/lib/opennet/hooks.d" "$config"
 	done
 	return 0
@@ -489,7 +489,7 @@ set_opennet_id() {
 	uci set "on-core.settings.on_id=$new_id"
 	apply_changes on-core
 	# Hostnamen konfigurieren
-	find_all_uci_sections system system | while read uci_prefix; do
+	find_all_uci_sections system system | while read -r uci_prefix; do
 		uci set "${uci_prefix}.hostname=AP-$(echo "$new_id" | tr . -)"
 	done
 	apply_changes system
@@ -522,7 +522,7 @@ get_from_key_value_list() {
 	local separator="$2"
 	local key_value
 	local key
-	{ sed 's/[ \t]\+/\n/g'; echo; } | while read key_value; do
+	{ sed 's/[ \t]\+/\n/g'; echo; } | while read -r key_value; do
 		key=$(echo "$key_value" | cut -f 1 -d "$separator")
 		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break || true
 	done
@@ -649,7 +649,7 @@ generate_report() {
 	# die Skripte duerfen davon ausgehen, dass wir uns im Zielverzeichnis befinden
 	mkdir -p "$reports_dir"
 	cd "$reports_dir"
-	find /usr/lib/opennet/reports -type f | sort | while read fname; do
+	find /usr/lib/opennet/reports -type f | sort | while read -r fname; do
 		[ ! -x "$fname" ] && msg_info "skipping non-executable report script: $fname" && continue
 		"$fname" || msg_error "reports script failed: $fname"
 	done
@@ -666,7 +666,7 @@ generate_report() {
 ## @details Falls diese Funktion ein nicht-leeres Ergebnis zurückliefert, kann dies als Hinweis für den
 ##   Nutzer verwendet werden, auf dass er einen Fehlerbericht einreicht.
 get_potential_error_messages() {
-	local max_lines=${1:-}
+	local max_lines="${1:-}"
 	local filters=
 	# 1) get_service_as_csv
 	#    Wir ignorieren "get_service_as_csv"-Meldungen - diese werden durch asynchrone Anfragen des
@@ -801,7 +801,7 @@ line_in_file() {
 	[ ! -e "$filename" ] && echo "$new_line" >"$filename" && return 0
 	# Datei einlesen - zum Muster passende Zeilen austauschen - notfalls neue Zeile anfuegen
 	(
-		while read line; do
+		while read -r line; do
 			echo "$line" | grep -q "$pattern" && echo "$new_line" || echo "$line"
 		done <"$filename"
 		# die neue Zeile hinzufuegen, falls das Muster in der alten Datei nicht vorhanden war
@@ -817,7 +817,8 @@ is_in_list() {
 	local list="$2"
 	local token
 	for token in $list; do
-		[ "$token" = "$target" ] && return 0 || true
+		[ "$token" = "$target" ] && return 0
+		true
 	done
 	# kein passendes Token gefunden
 	trap "" $GUARD_TRAPS && return 1
@@ -908,7 +909,7 @@ _get_parts_dir_files() {
 	# Abbruch, falls es das Verzeichnis nicht gibt
 	[ -e "$parts_dir" ] || return 0
 	# ignoriere Dateinamen mit ungueltigen Zeichen (siehe 'man run-parts')
-	find "$parts_dir" -maxdepth 1 | grep "/[a-zA-Z0-9_-]\+$" | while read fname; do
+	find "$parts_dir" -maxdepth 1 | grep "/[a-zA-Z0-9_-]\+$" | while read -r fname; do
 		# ignoriere verwaiste symlinks
 		[ -f "$fname" ] || continue
 		# ignoriere Dateien ohne Ausführungsrechte
@@ -929,7 +930,7 @@ run_parts() {
 	local rundir="$1"
 	shift
 	local fname
-	_get_parts_dir_files "$rundir" | while read fname; do
+	_get_parts_dir_files "$rundir" | while read -r fname; do
 		msg_debug "on-run-parts: executing $fname"
 		# ignoriere Fehler bei der Ausfuehrung
 		"$fname" "$@" || true
@@ -946,7 +947,7 @@ run_scheduled_tasks() {
 	local temp_fname
 	[ -d "$SCHEDULING_DIR" ] || return 0
 	# keine Ausführung, falls noch mindestens ein alter Task aktiv ist
-	find "$SCHEDULING_DIR" -type f -name "*.running" | while read fname; do
+	find "$SCHEDULING_DIR" -type f -name "*.running" | while read -r fname; do
 		# veraltete Dateien werden geloescht und ignoriert
 		# wir müssen uns an dem langsamsten Cron-Job orientieren:
 		#	- MTU-Test für UGWs: ca. 5 Minuten
@@ -957,7 +958,7 @@ run_scheduled_tasks() {
 		echo "$fname"
 		# der Abbruch findet erst ausserhalb der while-Schleife statt, da das return nicht den loop verlaesst
 	done | grep -q . && return 0
-	find "$SCHEDULING_DIR" -type f | grep -v "\.running$" | while read fname; do
+	find "$SCHEDULING_DIR" -type f | grep -v "\.running$" | while read -r fname; do
 		temp_fname="${fname}.running"
 		# zuerst schnell wegbewegen, damit wir keine Ereignisse verpassen
 		# Im Fehlerfall (eine race condition) einfach beim naechsten Eintrag weitermachen.
@@ -995,7 +996,7 @@ schedule_parts() {
 	trap "error_trap schedule_parts '$*'" $GUARD_TRAPS
 	local schedule_dir="$1"
 	local fname
-	_get_parts_dir_files "$schedule_dir" | while read fname; do
+	_get_parts_dir_files "$schedule_dir" | while read -r fname; do
 		msg_debug "on-schedule-parts: scheduling $fname"
 		# ignoriere Fehler bei der Ausfuehrung
 		echo "$fname" | schedule_task
@@ -1043,7 +1044,7 @@ get_flash_backup() {
 	local size
 	local blocksize
 	local label
-	grep "^mtd[0-9]\+:" /proc/mtd | while read name size blocksize label; do
+	grep "^mtd[0-9]\+:" /proc/mtd | while read -r name size blocksize label; do
 		# abschliessenden Doppelpunkt entfernen
 		name="${name%:}"
 		# hexadezimal-Zahl umrechnen

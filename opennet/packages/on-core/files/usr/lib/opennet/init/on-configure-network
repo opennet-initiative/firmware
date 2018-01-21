@@ -47,14 +47,15 @@ configure_opennet_zone() {
 
 configure_olsr_radio() {
 	trap "error_trap configure_olsr_radio '$*'" $GUARD_TRAPS
-	local iface_index=$1
-	local iface_logical=$2
-	local iface_phys=$3
+	local iface_index="$1"
+	local iface_logical="$2"
+	local iface_phys="$3"
 
-	local uci_wifi=wireless.@wifi-iface[$iface_index]
-	local uci_radio=wireless.$(uci_get "${uci_wifi}.device")
+	local uci_wifi="wireless.@wifi-iface[$iface_index]"
+	local uci_radio
 	local radio_hwmode
 	local bssid
+	uci_radio="wireless.$(uci_get "${uci_wifi}.device")"
 	radio_hwmode=$(uci_get "${uci_radio}.hwmode")
 	bssid=$(get_on_core_default wifi_bssid)
 
@@ -84,10 +85,10 @@ configure_olsr_radio() {
 
 configure_olsr_single_interface() {
 	trap "error_trap configure_olsr_single_interface '$*'" $GUARD_TRAPS
-	local iface_logical=$1
-	local iface_addr=$2
-	local iface_netmask=$3
-	local iface_phys=$4
+	local iface_logical="$1"
+	local iface_addr="$2"
+	local iface_netmask="$3"
+	local iface_phys="$4"
 
 	# configure on_wifi
 	uci set "network.${iface_logical}=interface"

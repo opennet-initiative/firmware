@@ -201,7 +201,7 @@ msgstr "Die Erzeugung der Zusammenfassung dauert etwa drei Minuten"
 
 msgid ""
 "Great that you decided to take part in Opennet. Register the IP of your "
-"Access-Point in the %sOpennet-Wiki%s and aquire a free IP-Address. Please "
+"Access-Point in the %sOpennet-Wiki%s and acquire a free IP-Address. Please "
 "read the information %sin the wiki%s for further details."
 msgstr ""
 "Schön, dass Du Dich entschieden hast, am Opennet teilzunehmen. Wähle Dir "

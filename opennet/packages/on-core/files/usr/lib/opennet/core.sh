@@ -411,7 +411,7 @@ acquire_lock() {
 		return 0
 	fi
 	# die Lock-Datei existiert und ist nicht alt genug
-	msg_info "Failed to aquire lock file: $lock_file"
+	msg_info "Failed to acquire lock file: $lock_file"
 	trap "" $GUARD_TRAPS && return 1
 }
 

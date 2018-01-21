@@ -1,7 +1,7 @@
-# Lars Kruse <devel@sumpfralle.de>, 2015, 2016.
+# Lars Kruse <devel@sumpfralle.de>, 2015, 2016, 2018.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2016-07-31 01:48+0200\n"
+"PO-Revision-Date: 2018-01-21 07:10+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -13,8 +13,8 @@ msgstr ""
 msgid "Client MAC Address"
 msgstr "MAC-Adresse des Geräts"
 
-msgid "Connected clients: %d"
-msgstr "Verbundene Geräte: %d"
+msgid "Connected clients: %s"
+msgstr "Verbundene Geräte: %s"
 
 msgid "Connected since"
 msgstr "Verbunden seit"
@@ -98,6 +98,9 @@ msgstr ""
 "Du solltest eine <a href=\"%s\">Netzwerk-Schnittstelle</a> der "
 "Netzwerkkonfiguration '%s' zuordnen, um den offenen Zugangspunkt in Betrieb "
 "zu nehmen."
+
+#~ msgid "Connected clients: %d"
+#~ msgstr "Verbundene Geräte: %d"
 
 #~ msgid "Connected clients: %d | Hotspot name: %s"
 #~ msgstr "Verbundene Geräte: %d | Hotspot-Name: %s"

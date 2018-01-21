@@ -1,8 +1,8 @@
-# Lars Kruse <devel@sumpfralle.de>, 2014, 2015, 2016, 2017.
+# Lars Kruse <devel@sumpfralle.de>, 2014, 2015, 2016, 2017, 2018.
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2017-10-26 02:37+0200\n"
+"PO-Revision-Date: 2018-01-21 07:12+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -190,6 +190,9 @@ msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
 msgid "Free space"
 msgstr "Freier Speicher"
 
+msgid "Full Member Name"
+msgstr "Vor- und Nachname"
+
 msgid "Generate"
 msgstr "Erzeugen"
 
@@ -311,9 +314,6 @@ msgstr ""
 
 msgid "Member Email Address"
 msgstr "Deine E-Mail Adresse"
-
-msgid "Member Name"
-msgstr "Dein Name"
 
 msgid "Memory: %d MB"
 msgstr "Arbeitsspeicher: %d MB"
@@ -586,6 +586,13 @@ msgstr ""
 "Verbindung an einen externen Opennet-Gateway, falls Du dies wünschst."
 
 msgid ""
+"The following data will only be used along with your membership. It will not "
+"be published."
+msgstr ""
+"Die folgenden Daten werden ausschließlich für die Mitgliedschaft im Verein "
+"verwendet. Sie werden nicht veröffentlicht."
+
+msgid ""
 "The following ports will be forwarded from Opennet (usually WIFI) to "
 "computers in your local network. They are usually not reachable directly "
 "from the Internet. This section might contain forwardings for Free Internet "
@@ -736,6 +743,9 @@ msgstr "übernehmen"
 msgid "very small memory: only suitable for simple (backbone) installations"
 msgstr ""
 "sehr kleiner Speicher: nur verwendbar für einfache (Backbone) Installationen"
+
+#~ msgid "Member Name"
+#~ msgstr "Dein Name"
 
 #~ msgid ""
 #~ "The module '%s' is currently disabled (see 'Opennet -> Base -> Settings')."

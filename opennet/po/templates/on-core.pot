@@ -165,6 +165,9 @@ msgstr ""
 msgid "Free space"
 msgstr ""
 
+msgid "Full Member Name"
+msgstr ""
+
 msgid "Generate"
 msgstr ""
 
@@ -279,9 +282,6 @@ msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
 msgstr ""
 
 msgid "Member Email Address"
-msgstr ""
-
-msgid "Member Name"
 msgstr ""
 
 msgid "Memory: %d MB"
@@ -520,6 +520,11 @@ msgid ""
 "The WAN Interface is used for your local Internet-Connection (for instance "
 "DSL). It will be used for your local traffic and to map Usergateways into "
 "Opennet = Share your Internet Connection if you choose to."
+msgstr ""
+
+msgid ""
+"The following data will only be used along with your membership. It will not "
+"be published."
 msgstr ""
 
 msgid ""

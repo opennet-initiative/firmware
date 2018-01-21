@@ -4,7 +4,7 @@ msgstr "Content-Type: text/plain; charset=UTF-8"
 msgid "Client MAC Address"
 msgstr ""
 
-msgid "Connected clients: %d"
+msgid "Connected clients: %s"
 msgstr ""
 
 msgid "Connected since"

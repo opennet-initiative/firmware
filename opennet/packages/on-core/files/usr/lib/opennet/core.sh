@@ -28,6 +28,7 @@ FALLBACK_DNS_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 85.214.20.141"
 FALLBACK_NTP_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 0.openwrt.pool.ntp.org"
 CRON_LOCK_FILE=/var/run/on-cron.lock
 CRON_LOCK_MAX_AGE_MINUTES=15
+CRON_LOCK_WAIT_TIMEOUT_SECONDS=30
 
 
 # Aufteilung ueberlanger Zeilen
@@ -383,7 +384,10 @@ get_main_ip() {
 ## @params command alle Parameter werden als auszuführendes Kommando interpretiert
 run_with_cron_lock() {
 	local returncode
-	if acquire_lock "$CRON_LOCK_FILE" "$CRON_LOCK_MAX_AGE_MINUTES"; then
+	# Der Timeout ist nötig, weil alle cron-Jobs gleichzeitig gestartet werden. Somit treffen
+	# der minütige und der fünf-minütige cron-Job aufeinandern und möchten dasselbe Lock
+	# halten. Die maximale Wartezeit löst wahrscheinlich die meisten Konflikte.
+	if acquire_lock "$CRON_LOCK_FILE" "$CRON_LOCK_MAX_AGE_MINUTES" "$CRON_LOCK_WAIT_TIMEOUT_SECONDS"; then
 		set +e
 		"$@"
 		returncode=$?
@@ -394,25 +398,37 @@ run_with_cron_lock() {
 }
 
 
+is_lock_available() {
+	local lock_file="$1"
+	local max_age_minutes="$2"
+	# Fehlerfall: die Lock-Datei existiert und ist nicht alt genug
+	[ ! -e "$lock_file" ] || is_file_timestamp_older_minutes "$lock_file" "$max_age_minutes"
+}
+
+
 ## @fn acquire_lock()
 ## @brief Prüfe ob eine Lock-Datei existiert und nicht veraltet ist.
 ## @details Die folgenden Zustände werden behandelt:
 ##    A) die Datei existiert, ist jedoch veraltet -> Erfolg, Zeitstempel der Datei aktualisieren
 ##    B) die Datei existiert und ist noch nicht veraltet -> Fehlschlag
 ##    C) die Datei existiert nicht -> Erfolg, Datei wird angelegt
+##    Warte notfalls einen Timeout ab, bis das Lock frei wird.
 ## @returns Erfolg (Lock erhalten) oder Misserfolg (Lock ist bereits vergeben)
 acquire_lock() {
 	local lock_file="$1"
 	local max_age_minutes="$2"
-	local file_timestamp
-	if [ ! -e "$lock_file" ] \
-			|| is_file_timestamp_older_minutes "$lock_file" "$max_age_minutes"; then
-		touch "$lock_file"
-		return 0
-	fi
-	# die Lock-Datei existiert und ist nicht alt genug
-	msg_info "Failed to acquire lock file: $lock_file"
-	trap "" $GUARD_TRAPS && return 1
+	local timeout="$3"
+	local timeout_limit
+	timeout_limit=$(( $(date +%s) + timeout ))
+	while ! is_lock_available "$lock_file" "$max_age_minutes"; do
+		if [ "$(date +%s)" -ge "$timeout_limit" ]; then
+			msg_info "Failed to acquire lock file: $lock_file"
+			trap "" $GUARD_TRAPS && return 1
+		fi
+		sleep "$(( $(get_random 10) + 1 ))"
+	done
+	touch "$lock_file"
+	return 0
 }
 
 

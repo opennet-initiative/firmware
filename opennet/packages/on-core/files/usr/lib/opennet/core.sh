@@ -166,10 +166,10 @@ update_dns_servers() {
 	servers_file=$(uci_get "dhcp.@dnsmasq[0].serversfile")
 	# aktiviere die "dnsmasq-serversfile"-Direktive, falls noch nicht vorhanden
 	if [ -z "$servers_file" ]; then
-	       servers_file="$DNSMASQ_SERVERS_FILE_DEFAULT"
-	       uci set "dhcp.@dnsmasq[0].serversfile=$servers_file"
-	       uci commit "dhcp.@dnsmasq[0]"
-	       reload_config
+		servers_file="$DNSMASQ_SERVERS_FILE_DEFAULT"
+		uci set "dhcp.@dnsmasq[0].serversfile=$servers_file"
+		uci commit "dhcp.@dnsmasq[0]"
+		reload_config
 	fi
 	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "DNS" || true)
 	# wir sortieren alphabetisch - Naehe ist uns egal
@@ -540,8 +540,8 @@ replace_in_key_value_list() {
 	local separator="$2"
 	local value="$3"
 	awk 'BEGIN { found=0; FS="'$separator'"; OFS=":"; RS="[ \t]"; ORS=" "; }
-	     { if ($1 == "'$search_key'") { print "'$search_key'", '$value'; found=1; } else { print $0; } }
-	     END { if (found == 0) print "'$search_key'", '$value' };'
+		{ if ($1 == "'$search_key'") { print "'$search_key'", '$value'; found=1; } else { print $0; } }
+		END { if (found == 0) print "'$search_key'", '$value' };'
 }
 
 

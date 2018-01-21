@@ -465,6 +465,9 @@ get_potential_opennet_scan_results_for_device() {
 	# neu konfigurieren
 	uci commit wireless
 	wifi || true
+	# Originale Konfigurationsdatei schnell wiederherstellen, um das Zeitfenster für Fehler
+	# durch parallele Operationen klein zu halten.
+	echo "$old_config" >/etc/config/wireless
 	# kurz auf angewandte Konfiguration warten
 	sleep 5
 	# wiederhole den Scan mehrmals, falls das Ergebnis leer ist
@@ -475,8 +478,7 @@ get_potential_opennet_scan_results_for_device() {
 		[ -n "$result" ] && break
 		sleep "$delay"
 	done
-	# alten Zustand wiederherstellen
-	echo "$old_config" >/etc/config/wireless
+	# die wiederhergestellte originale Konfiguration wiederherstellen
 	uci commit wireless
 	wifi || true
 	echo "$result"

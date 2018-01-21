@@ -20,7 +20,7 @@ is_olsrd_running() {
 		# Falls wir keine gueltige PID-Datei finden, dann pruefen wir lediglich,
 		# ob irgendein olsrd laeuft - dies ist natuerlich nicht sehr zuverlässig.
 		msg_error "Failed to find PID file location for olsrd"
-		pidof olsrd >/dev/null && return 0
+		pgrep '/olsrd$' >/dev/null && return 0
 		return 1
 	else
 		if system_service_check /usr/sbin/olsrd "$pid_file"; then
@@ -57,7 +57,7 @@ is_routing_table_out_of_sync() {
 # weiterlaufen und den Port blockieren?
 are_multiple_olsrd_processes_alive() {
 	local process_count
-	process_count=$(pidof olsrd | wc -w)
+	process_count=$(pgrep '/olsrd$' | wc -w)
 	[ "$process_count" -gt 1 ] && return 0
 	return 1
 }

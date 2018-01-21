@@ -243,7 +243,7 @@ on_core_ver=$(opkg status on-core | awk '{if (/Version/) printf $2;}')
 on_core_insttime=$(opkg status on-core | awk '{if (/Installed-Time/) printf $2;}')
 on_packages=$(opkg status | awk '{if ($1 == "Package:" && $2 ~ "^on-" && $2 != "on-core") print $2}' | join)
 
-on_olsrd_status="$(pidof olsrd >/dev/null && echo "1" || echo "0")"
+on_olsrd_status="$(pgrep '/olsrd$' >/dev/null && echo "1" || echo "0")"
 on_olsr_mainip="$(request_olsrd_txtinfo "con" | awk '/MainIp/ {print $2}')"
 
 

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+
+# shellcheck disable=SC1090
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+
+is_on_module_installed_and_enabled "on-olsr2" || exit 0
+
+# der Prozess lebt
+[ -n "$(pidof olsrd2)" ] && exit
+
+# anscheinend ist der Prozess nicht aktiv
+add_banner_event "olsrd2 restart"
+/etc/init.d/olsrd2 restart >/dev/null

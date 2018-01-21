@@ -766,10 +766,11 @@ get_potential_error_messages() {
 	#    olsrd2 versucht auf /proc/-Eintraege mittels des Namens eines logischen
 	#    Netzwerk-Interface (z.B. "on_eth_0") zuzugreifen, obwohl das System nur die physischen
 	#    Interfaces kennt.
+	filters="${filters}|cannot open proc entry /proc/sys/net/ipv4/conf/on_"
 	# 27) OLSRd2[...]: WARN(os_interface) ...: WARNING! Could not disable the IP spoof filter
 	#    Im Anschluss an den obigen (26) Fehlversuch, fuer ein logisches Netzwerk-Interface den
 	#    rp_filter zu deaktivieren, wird diese Warnung ausgegeben. Sie ist nicht relevant.
-	filters="${filters}|OLSRd2.*Could not disable the IP spoof filter"
+	filters="${filters}|WARN\(os_interface\).*Could not disable (the IP spoof filter|ICMP redirects)"
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.

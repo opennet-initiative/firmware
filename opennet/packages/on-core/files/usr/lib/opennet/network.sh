@@ -429,6 +429,7 @@ filter_potential_opennet_scan_results() {
 			if (($1 == "Encryption:") && ($2 == "none")) print(signal, essid); }' \
 		| sort -rn | sed 's/\"//g' \
 		| grep -v "Telekom_FON" \
+		| grep -v "Vodafone" \
 		| grep -vF "join.opennet-initiative.de" \
 		| grep -iE "(on|opennet)"
 }

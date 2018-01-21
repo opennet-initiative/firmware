@@ -1,0 +1,19 @@
+the swap plugin should return "U" if no value was found
+
+The value can be missing if the respective kernel module is not available.
+--- /dev/null
++++ b/packages/admin/muninlite/patches/310-fix-swap-output.patch
+@@ -0,0 +1,13 @@
++--- a/plugins/swap
+++++ b/plugins/swap
++@@ -17,8 +17,8 @@
++ fetch_swap() {
++   if [ -f /proc/vmstat ]; then
++     SINFO=$(cat /proc/vmstat)
++-    echo "swap_in.value" $(echo "$SINFO" | grep "^pswpin" | cut -d\  -f2)
++-    echo "swap_out.value" $(echo "$SINFO" | grep "^pswpout" | cut -d\  -f2)
+++    echo "swap_in.value" $(echo "$INFO" | awk 'BEGIN { result="U"; } { if ($1 == "pswpin") result=$2; } END { print(result); }')
+++    echo "swap_out.value" $(echo "$INFO" | awk 'BEGIN { result="U"; } { if ($1 == "pswpout") result=$2; } END { print(result); }')
++   else
++     SINFO=$(grep "^swap" /proc/stat)
++     echo "swap_in.value" $(echo "$SINFO" | cut -d\  -f2)

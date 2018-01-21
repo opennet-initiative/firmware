@@ -19,6 +19,9 @@ You may obtain a copy of the License at
 		<input type="submit" name="force_show_generatefields" class="cbi-button-plain" value="<%:...show...%>" />
 	</form>
 <% else
+	<div class="cbi-section-descr">
+		<%:The following data will only be used along with your membership. It will not be published.%>
+	</div>
 
 	if (openssl.commonName == "") then openssl.commonName=test end %>
 
@@ -54,7 +57,7 @@ You may obtain a copy of the License at
 		</div>
 	</div>
 	<div class="cbi-value">
-		<label class="cbi-value-title"><%:Member Name%></label>
+		<label class="cbi-value-title"><%:Full Member Name%></label>
 		<div class="cbi-value-field">
 			<input type="text" size="48" name="openssl.organizationName" value="<%=openssl.organizationName%>" />
 		</div>

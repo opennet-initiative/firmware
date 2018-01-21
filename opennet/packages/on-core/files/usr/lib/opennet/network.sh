@@ -29,7 +29,7 @@ query_dns_reverse() {
 ## @returns Der Exitcode ist Null, falls on-DNS verfügbar ist.
 ## @details Die maximale Laufzeit dieser Funktion ist auf eine Sekunde begrenzt.
 has_opennet_dns() {
-	trap "error_trap has_opennet_dns '$*'" $GUARD_TRAPS
+	trap 'error_trap has_opennet_dns "'"$*"'"' $GUARD_TRAPS
 	# timeout ist kein shell-builtin - es benoetigt also ein global ausfuehrbares Kommando
 	timeout "$DNS_TIMEOUT" on-function query_dns "$DNS_SERVICE_REFERENCE" | grep -q . && return 0
 	trap "" $GUARD_TRAPS && return 1
@@ -42,7 +42,7 @@ has_opennet_dns() {
 ## @param duration die Dauer der Ping-Kommunikation in Sekunden (falls ungesetzt: 5)
 ## @returns Ausgabe der mittleren Ping-Zeit in ganzen Sekunden; bei Nichterreichbarkit ist die Ausgabe leer
 get_ping_time() {
-	trap "error_trap get_ping_time '$*'" $GUARD_TRAPS
+	trap 'error_trap get_ping_time "'"$*"'"' $GUARD_TRAPS
 	local target="$1"
 	local duration="${2:-5}"
 	local ip
@@ -60,7 +60,7 @@ get_ping_time() {
 # WICHTIG: anschliessend muss "uci commit firewall" ausgefuehrt werden
 # Parameter: Quell-Zone und Ziel-Zone
 add_zone_forward() {
-	trap "error_trap add_zone_forward '$*'" $GUARD_TRAPS
+	trap 'error_trap add_zone_forward "'"$*"'"' $GUARD_TRAPS
 	local source="$1"
 	local dest="$2"
 	create_uci_section_if_missing "firewall" "forwarding" "src=$source" "dest=$dest" || true
@@ -70,7 +70,7 @@ add_zone_forward() {
 # Das Masquerading in die Opennet-Zone soll nur fuer bestimmte Quell-Netze erfolgen.
 # Diese Funktion wird bei hotplug-Netzwerkaenderungen ausgefuehrt.
 update_opennet_zone_masquerading() {
-	trap "error_trap update_opennet_zone_masquerading '$*'" $GUARD_TRAPS
+	trap 'error_trap update_opennet_zone_masquerading "'"$*"'"' $GUARD_TRAPS
 	local network
 	local network_with_prefix
 	local uci_prefix
@@ -108,7 +108,7 @@ update_opennet_zone_masquerading() {
 ## @param network logisches Netzwerk-Interface
 ## @details Es werden sowohl IPv4- als auch IPv6-Adressen zurückgeliefert.
 get_current_addresses_of_network() {
-	trap "error_trap get_current_addresses_of_network '$*'" $GUARD_TRAPS
+	trap 'error_trap get_current_addresses_of_network "'"$*"'"' $GUARD_TRAPS
 	local network="$1"
 	{
 		_run_system_network_function "network_get_subnets" "$network"
@@ -119,7 +119,7 @@ get_current_addresses_of_network() {
 
 # Liefere die logischen Netzwerk-Schnittstellen einer Zone zurueck.
 get_zone_interfaces() {
-	trap "error_trap get_zone_interfaces '$*'" $GUARD_TRAPS
+	trap 'error_trap get_zone_interfaces "'"$*"'"' $GUARD_TRAPS
 	local zone="$1"
 	local uci_prefix
 	local interfaces
@@ -139,7 +139,7 @@ get_zone_interfaces() {
 ## @details Hier werden _nicht_ die logischen Interfaces in die physischen aufgeloest, sondern
 ##   es wird lediglich der Inhalt des 'devices'-Eintrags einer Firewall-Zone ausgelesen.
 get_zone_raw_devices() {
-	trap "error_trap get_zone_raw_devices '$*'" $GUARD_TRAPS
+	trap 'error_trap get_zone_raw_devices "'"$*"'"' $GUARD_TRAPS
 	local zone="$1"
 	local uci_prefix
 	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
@@ -150,14 +150,15 @@ get_zone_raw_devices() {
 
 # Ist das gegebene physische Netzwerk-Interface Teil einer Firewall-Zone?
 is_device_in_zone() {
-	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
+	trap 'error_trap is_device_in_zone "'"$*"'"' $GUARD_TRAPS
 	local device="$1"
 	local zone="$2"
 	local log_interface
 	local item
 	for log_interface in $(get_zone_interfaces "$2"); do
 		for item in $(get_subdevices_of_interface "$log_interface"); do
-			[ "$device" = "$item" ] && return 0 || true
+			[ "$device" = "$item" ] && return 0
+			true
 		done
 	done
 	trap "" $GUARD_TRAPS && return 1
@@ -170,7 +171,8 @@ is_interface_in_zone() {
 	local zone="$2"
 	local item
 	for item in $(get_zone_interfaces "$zone"); do
-		[ "$item" = "$interface" ] && return 0 || true
+		[ "$item" = "$interface" ] && return 0
+		true
 	done
 	trap "" $GUARD_TRAPS && return 1
 }
@@ -181,22 +183,25 @@ is_interface_in_zone() {
 ## @details Ein Bridge-Interface wird als Gerät betrachtet und zurückgeliefert (nicht seine Einzelteile).
 get_device_of_interface() {
 	local interface="$1"
-	[ "$(uci_get "network.${interface}.type")" = "bridge" ] \
-		&& echo "br-$interface" \
-		|| get_subdevices_of_interface "$interface"
+	if [ "$(uci_get "network.${interface}.type")" = "bridge" ]; then
+		echo "br-$interface"
+	else
+		get_subdevices_of_interface "$interface"
+	fi
 }
 
 
 # Ist das gegebene physische Netzwerk-Interface Teil einer Firewall-Zone?
 is_device_in_zone() {
-	trap "error_trap is_device_in_zone '$*'" $GUARD_TRAPS
+	trap 'error_trap is_device_in_zone "'"$*"'"' $GUARD_TRAPS
 	local device="$1"
 	local zone="$2"
 	local log_interface
 	local item
 	for log_interface in $(get_zone_interfaces "$2"); do
 		for item in $(get_subdevices_of_interface "$log_interface"); do
-			[ "$device" = "$item" ] && return 0 || true
+			[ "$device" = "$item" ] && return 0
+			true
 		done
 	done
 	trap "" $GUARD_TRAPS && return 1
@@ -210,7 +215,7 @@ is_device_in_zone() {
 ##              Parameter #2) übergeben
 ## @returns: die Ausgabe der Funktion
 _run_system_network_function() {
-	local func=$1
+	local func="$1"
 	local result
 	shift
 	set +eu
@@ -227,7 +232,7 @@ _run_system_network_function() {
 ##   ermittelbar.
 ## @returns Der oder die Namen der physischen Netzwerk-Geräte oder nichts.
 get_subdevices_of_interface() {
-	trap "error_trap get_subdevices_of_interface '$*'" $GUARD_TRAPS
+	trap 'error_trap get_subdevices_of_interface "'"$*"'"' $GUARD_TRAPS
 	local interface="$1"
 	local device
 	local uci_prefix
@@ -236,7 +241,7 @@ get_subdevices_of_interface() {
 		for device in $(uci_get "network.${interface}.ifname"); do
 			# entferne Alias-Nummerierungen
 			device=$(echo "$device" | cut -f 1 -d :)
-			[ -z "$device" -o "$device" = "none" ] && continue
+			[ -z "$device" ] || [ "$device" = "none" ] && continue
 			echo "$device"
 		done
 		# wir fügen das Ergebnis der ubus-Abfrage hinzu (unten werden Duplikate entfernt)
@@ -280,7 +285,7 @@ del_interface_from_zone() {
 ## @details Das Ergebnis ist ein leerer String, falls zu diesem Interface keine Zone existiert
 ##   oder falls es das Interface nicht gibt.
 get_zone_of_device() {
-	trap "error_trap get_zone_of_device '$*'" $GUARD_TRAPS
+	trap 'error_trap get_zone_of_device "'"$*"'"' $GUARD_TRAPS
 	local device="$1"
 	local uci_prefix
 	local zone
@@ -307,7 +312,7 @@ get_zone_of_device() {
 ## @details Das Ergebnis ist ein leerer String, falls zu diesem Interface keine Zone existiert
 ##   oder falls es das Interface nicht gibt.
 get_zone_of_interface() {
-	trap "error_trap get_zone_of_interface '$*'" $GUARD_TRAPS
+	trap 'error_trap get_zone_of_interface "'"$*"'"' $GUARD_TRAPS
 	local interface="$1"
 	local uci_prefix
 	local interfaces
@@ -315,7 +320,8 @@ get_zone_of_interface() {
 	find_all_uci_sections firewall zone | while read -r uci_prefix; do
 		zone=$(uci_get "${uci_prefix}.name")
 		interfaces=$(get_zone_interfaces "$zone")
-		is_in_list "$interface" "$interfaces" && echo -n "$zone" && return 0 || true
+		is_in_list "$interface" "$interfaces" && echo -n "$zone" && return 0
+		true
 	done
 	# ein leerer Rueckgabewert gilt als Fehler
 	return 0
@@ -328,7 +334,7 @@ get_zone_of_interface() {
 # 2. Netzwerkname beginnend mit "on_wifi", "on_eth", ...
 # 3. alphabetische Sortierung der Netzwerknamen
 get_sorted_opennet_interfaces() {
-	trap "error_trap get_sorted_opennet_interfaces '$*'" $GUARD_TRAPS
+	trap 'error_trap get_sorted_opennet_interfaces "'"$*"'"' $GUARD_TRAPS
 	local order
 	local network
 	# wir vergeben einfach statische Ordnungsnummern:
@@ -360,7 +366,7 @@ get_all_network_interfaces() {
 	# Somit ist es wohl korrekt, auf die Namen als Teil des uci-Pfads zu vertrauen.
 	find_all_uci_sections "network" "interface" | cut -f 2 -d . | while read -r interface; do
 		# ignoriere loopback-Interfaces und ungueltige
-		[ -z "$interface" -o "$interface" = "none" -o "$interface" = "loopback" ] && continue
+		[ -z "$interface" ] || [ "$interface" = "none" ] || [ "$interface" = "loopback" ] && continue
 		# alle uebrigen sind reale Interfaces
 		echo "$interface"
 	done | sort | uniq
@@ -395,7 +401,7 @@ delete_firewall_zone() {
 ## @details Im Fall eines Bridge-Interface wird sowohl der Status der Bridge (muss aktiv sein), als
 ##   auch der Status der Bridge-Teilnehmer (mindestens einer muss aktiv sein) geprüft.
 is_interface_up() {
-	trap "error_trap is_interface_up '$*'" $GUARD_TRAPS
+	trap 'error_trap is_interface_up "'"$*"'"' $GUARD_TRAPS
 	local interface="$1"
 	# falls es ein uebergeordnetes Bridge-Interface geben sollte, dann muss dies ebenfalls aktiv sein
 	if [ "$(uci_get "network.${interface}.type")" = "bridge" ]; then

@@ -163,7 +163,7 @@ function status_neighbors()
 		response = response .. '<div class="errorbox">' ..
 			luci.i18n.translate("Currently there are no known routing neighbours.") .. " " ..
 			luci.i18n.translatef('Maybe you want to connect to a local <a href="%s">wifi peer</a>.',
-				luci.dispatcher.build_url("admin", "network", "wireless")) ..
+				get_wifi_setup_link()) ..
 			'</div>'
 	end
 	luci.http.write(response)

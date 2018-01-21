@@ -153,6 +153,16 @@ function get_wifi_devices()
 end
 
 
+function get_wifi_setup_link()
+	require("luci.model.opennet.urls")
+	for name, dev in pairs(get_wifi_devices()) do
+		return on_url("basis", "network", name)
+	end
+	-- kein Interface?
+	return on_url("basis", "network")
+end
+
+
 function get_wifi_interfaces(wifi_device_name)
 	local result = {}
 	cursor:foreach("wireless", "wifi-iface", function(iface)

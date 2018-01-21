@@ -207,10 +207,10 @@ function action_wifi_device(wifi_device_name)
 	local cursor = uci.cursor()
 	local on_errors = {}
 	local page_data = {}
+	local has_configured = false
 
 	local new_client_ssid = luci.http.formvalue("new_client_ssid")
 	if new_client_ssid then
-		local has_configured = false
 		cursor.foreach("wireless", "wifi-iface", function(iface)
 			if iface.device == wifi_device_name then
 				if not has_configured then
@@ -236,10 +236,14 @@ function action_wifi_device(wifi_device_name)
 	page_data["wifi_device_name"] = wifi_device_name
 	page_data["wifi_current_ssids"] = get_wifi_interfaces(wifi_device_name)
 	page_data["wifi_scan_result"] = {}
-	for _, line in ipairs(line_split(on_function(
-			"get_potential_opennet_scan_results_for_device", {wifi_device_name}))) do
-		local details = space_split(line)
-		table.insert(page_data["wifi_scan_result"], {signal=details[1], ssid=details[2]})
+	-- Den Scan nicht ausfuehren, falls wir gerade das Interface neu konfiguriert haben.
+	-- Dies reduziert die Wahrscheinlichkeit von Problemen durch die invasive Scan-Operation.
+	if not has_configured then
+		for _, line in ipairs(line_split(on_function(
+				"get_potential_opennet_scan_results_for_device", {wifi_device_name}))) do
+			local details = space_split(line)
+			table.insert(page_data["wifi_scan_result"], {signal=details[1], ssid=details[2]})
+		end
 	end
 	luci.template.render("opennet/on_wifi_device", page_data)
 end

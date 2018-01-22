@@ -207,6 +207,7 @@ function action_wifi_device(wifi_device_name)
 	local cursor = uci.cursor()
 	local on_errors = {}
 	local page_data = {}
+	page_data["on_hints"] = {}
 	local has_configured = false
 
 	local new_client_ssid = luci.http.formvalue("new_client_ssid")
@@ -231,10 +232,18 @@ function action_wifi_device(wifi_device_name)
 			cursor:commit("wireless")
 			-- Quelle: luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
 			luci.sys.call("(env -i /bin/ubus call network reload) >/dev/null 2>/dev/null")
+			table.insert(page_data["on_hints"], luci.i18n.translatef(
+				"Configured new wireless network (SSID): %s", new_client_ssid))
 		end
 	end
 	page_data["wifi_device_name"] = wifi_device_name
-	page_data["wifi_current_ssids"] = get_wifi_interfaces(wifi_device_name)
+	if has_configured then
+		-- "get_wifi_interfaces" ermittelt leider (wahrscheinlich aufgrund von
+		-- luci-basiertem uci-Caching) nur den vorherigen Wert. Also schummeln wir.
+		page_data["wifi_current_ssids"] = {new_client_ssid}
+	else
+		page_data["wifi_current_ssids"] = get_wifi_interfaces(wifi_device_name)
+	end
 	page_data["wifi_scan_result"] = {}
 	-- Den Scan nicht ausfuehren, falls wir gerade das Interface neu konfiguriert haben.
 	-- Dies reduziert die Wahrscheinlichkeit von Problemen durch die invasive Scan-Operation.
@@ -244,6 +253,9 @@ function action_wifi_device(wifi_device_name)
 			local details = space_split(line)
 			table.insert(page_data["wifi_scan_result"], {signal=details[1], ssid=details[2]})
 		end
+		-- Warte ein wenig, damit olsrd (er wurde indirekt automatisch neugestartet) Zeit
+		-- hat, die Route wiederaufzubauen, damit das Antwortpaket zugestellt werden kann.
+		luci.sys.exec("sleep 5")
 	end
 	luci.template.render("opennet/on_wifi_device", page_data)
 end

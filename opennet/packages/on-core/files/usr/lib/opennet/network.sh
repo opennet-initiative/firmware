@@ -469,11 +469,11 @@ get_potential_opennet_scan_results_for_device() {
 	# durch parallele Operationen klein zu halten.
 	echo "$old_config" >/etc/config/wireless
 	# kurz auf angewandte Konfiguration warten
-	sleep 5
+	sleep 1
 	# wiederhole den Scan mehrmals, falls das Ergebnis leer ist
 	for delay in 1 2 3; do
 		# unter bestimmten Umständen kann der Scan hängenbleiben
-		result=$(timeout 15 iwinfo "$device" scan | filter_potential_opennet_scan_results || true)
+		result=$(timeout 10 iwinfo "$device" scan | filter_potential_opennet_scan_results || true)
 		# keine weitere Wiederholung, falls es eine Ausgabe gab
 		[ -n "$result" ] && break
 		sleep "$delay"

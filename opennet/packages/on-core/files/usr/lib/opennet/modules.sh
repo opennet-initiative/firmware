@@ -301,14 +301,10 @@ generate_opennet_opkg_config() {
 		echo "src/gz on_$feed $noncore_pkgs_url/$feed"
 	done
 
-	#
 	# Fuege zusaetzlich eine URL mit core packages hinzu (beinhaltet Kernel Module).
-	#
-	# Hole "DISTRIB_TARGET" und entferne potentielle "/generic"-Suffixe (z.B. ar71xx und x86),
-	# da wir dies in unserem Repository nicht abbilden.
 	local arch_path
-	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET" | sed 's#/generic$##')
-	core_pkgs_url="$base_url/targets/$arch_path/generic/packages"
+	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET")
+	core_pkgs_url="$base_url/targets/$arch_path/packages"
 	echo "src/gz on_core $core_pkgs_url"
 }
 

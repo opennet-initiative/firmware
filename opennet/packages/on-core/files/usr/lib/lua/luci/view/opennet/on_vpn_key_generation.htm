@@ -18,12 +18,12 @@ You may obtain a copy of the License at
 	<form method="post" action="<%=REQUEST_URI%>">
 		<input type="submit" name="force_show_generatefields" class="cbi-button-plain" value="<%:...show...%>" />
 	</form>
-<% else
+<% else %>
+	<% if (openssl.commonName == "") then openssl.commonName=test end %>
+
 	<div class="cbi-section-descr">
 		<%:The following data will only be used along with your membership. It will not be published.%>
 	</div>
-
-	if (openssl.commonName == "") then openssl.commonName=test end %>
 
 	<form method="post" action="<%=REQUEST_URI%>?generate=true">
 	<div class="cbi-value">

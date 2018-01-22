@@ -51,6 +51,7 @@ if (new_opennet_id) then
 		if (0 <= major) and (major <= 255) and (1 <= minor) and (minor <= 255) then
 			local id_string = major .. "." .. minor
 			on_function("set_opennet_id", {id_string})
+			luci.sys.call("sleep 3")
 		else
 			show_invalid_id_warning = true
 		end

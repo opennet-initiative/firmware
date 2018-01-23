@@ -163,11 +163,11 @@ function get_wifi_setup_link()
 end
 
 
-function get_wifi_interfaces(wifi_device_name)
+function get_wifi_device_ssids(wifi_device_name)
 	local result = {}
 	cursor:foreach("wireless", "wifi-iface", function(iface)
 		if iface.device == wifi_device_name then
-			result[iface[".name"]] = iface
+			table.insert(result, iface.ssid)
 		end
 	end)
 	return result

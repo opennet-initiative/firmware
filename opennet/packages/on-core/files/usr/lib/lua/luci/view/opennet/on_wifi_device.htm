@@ -24,8 +24,8 @@ You may obtain a copy of the License at
 <table class="cbi-section-table" style="empty-cells:hide">
 	<tr class="cbi-section-table-row">
 		<td class="cbi-value-field" style="vertical-align:middle; text-align:left; padding:3px">
-			<% for iface_name, iface in pairs(wifi_current_ssids) do %>
-				<big><strong><%= iface.ssid %></strong></big><br />
+			<% for _, ssid in pairs(wifi_current_ssids) do %>
+				<big><strong><%= ssid %></strong></big><br />
 			<% end %>
 		</td>
 	</tr>

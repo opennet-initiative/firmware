@@ -238,11 +238,11 @@ function action_wifi_device(wifi_device_name)
 	end
 	page_data["wifi_device_name"] = wifi_device_name
 	if has_configured then
-		-- "get_wifi_interfaces" ermittelt leider (wahrscheinlich aufgrund von
+		-- "get_wifi_device_ssids" ermittelt leider (wahrscheinlich aufgrund von
 		-- luci-basiertem uci-Caching) nur den vorherigen Wert. Also schummeln wir.
 		page_data["wifi_current_ssids"] = {new_client_ssid}
 	else
-		page_data["wifi_current_ssids"] = get_wifi_interfaces(wifi_device_name)
+		page_data["wifi_current_ssids"] = get_wifi_device_ssids(wifi_device_name)
 	end
 	page_data["wifi_scan_result"] = {}
 	-- Den Scan nicht ausfuehren, falls wir gerade das Interface neu konfiguriert haben.

@@ -30,7 +30,9 @@ list-subarchs:
 
 $(BIGCONFIG) $(SMALLCONFIG):
 	@$(MAKE) save-config
-	@cat "$@" "$(COMMON_CONFIG)" > "$(CURRENT_CONFIG)"
+	@# The order of settings is important: earlier settings ("common") are overwritten by
+	@# target-specific ("$@") options.
+	@cat "$(COMMON_CONFIG)" "$@" > "$(CURRENT_CONFIG)"
 	@# replace modules with builtins ('=m' -> '=y') for big devices
 	@# TODO: pruefen, wie/ob wir zukuenftig small/big (4/8 MB) erzeugen wollen; das Aktivieren aller "m"-Pakete ist keine Option
 	@#echo " $(BIGCONFIG) " | grep -q " $@ " && sed -i 's/=m$$/=y/i' "$(CURRENT_CONFIG)"

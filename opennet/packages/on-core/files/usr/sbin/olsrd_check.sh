@@ -1,6 +1,9 @@
 #!/bin/sh
 
 
+OLSRD_READY_DELAY=5
+
+
 # shellcheck disable=SC1090
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
@@ -10,6 +13,9 @@ olsr_service_action() {
 	local action="$1"
 	update_olsr_interfaces
 	/etc/init.d/olsrd "$action" >/dev/null || true
+	# Warte ein wenig, bis olsrd seinen internen Status aktualisiert hat.
+	# Andernfalls schlagen vielleicht anschließende Prüfungen fehl.
+	sleep "$OLSRD_READY_DELAY"
 }
 
 
@@ -73,9 +79,8 @@ is_olsrd_txtinfo_empty() {
 }
 
 
-# Warte ein wenig, um anderen cron-gesteuerten Prozessen mit olsrd-Zugriff
-# (z.B. die Routen-Cache-Aktualisierung) den Vortritt zu lassen.
-sleep 23
+# Warte ein wenig, um sicherzugehen, dass olsrd nicht gerade frisch gestartet wurde.
+sleep "$OLSRD_READY_DELAY"
 
 if ! is_olsrd_running; then
 	# the service is not running

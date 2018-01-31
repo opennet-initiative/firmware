@@ -101,8 +101,6 @@ configure_ipv6_address() {
 ## @brief Mesh-Interfaces ermitteln und für olsrd2 konfigurieren
 update_olsr2_interfaces() {
 	local interfaces
-	local existing_interfaces
-	local ifnames
 	local uci_prefix
 	local token
 	local is_configured=0
@@ -178,16 +176,17 @@ olsr2_sync_routing_tables() {
 	olsr2_id=$(uci_get "${uci_prefix}.table")
 	iproute_id=$(get_routing_table_id "$ROUTING_TABLE_MESH_OLSR2")
 	# beide sind gesetzt und identisch? Alles ok ...
-	[ -n "$olsr2_id" -a "$olsr2_id" = "$iproute_id" ] && continue
+	[ -n "$olsr2_id" ] && [ "$olsr2_id" = "$iproute_id" ] && return 0
 	# eventuell Tabelle erzeugen, falls sie noch nicht existiert
 	[ -z "$iproute_id" ] && iproute_id=$(add_routing_table "$ROUTING_TABLE_MESH_OLSR2")
 	# olsr passt sich im Zweifel der iproute-Nummer an
-	[ "$olsr2_id" != "$iproute_id" ] && uci set "${uci_prefix}.table=$iproute_id" || true
+	[ "$olsr2_id" != "$iproute_id" ] && uci set "${uci_prefix}.table=$iproute_id"
 	apply_changes "olsrd2"
 }
 
 
 init_policy_routing_ipv6() {
+	local iface
 	olsr2_sync_routing_tables
 	# die Uplink-Tabelle ist unabhaengig von olsr
 	add_routing_table "$ROUTING_TABLE_ON_UPLINK" >/dev/null
@@ -206,7 +205,7 @@ init_policy_routing_ipv6() {
 	# Pakete mit passendem Ziel orientieren sich an der main-Tabelle
 	# Alle Ziele ausserhalb der mesh-Zone sind geeignet (z.B. local, free, ...).
 	# Wir wollen dadurch explizit keine potentielle default-Route verwenden.
-	get_all_network_interfaces | while read iface; do
+	get_all_network_interfaces | while read -r iface; do
 		is_interface_in_zone "$iface" "$ZONE_MESH" && continue
 		add_network_policy_rule_by_destination inet6 "$iface" table main
 	done
@@ -223,7 +222,7 @@ init_policy_routing_ipv6() {
 
 
 request_olsrd2_txtinfo() {
-	echo /$@ | timeout 2 nc localhost 2009 2>/dev/null
+	echo "/$*" | timeout 2 nc localhost 2009 2>/dev/null
 }
 
 
@@ -231,7 +230,7 @@ request_olsrd2_txtinfo() {
 ## @brief Liefere die Anzahl von olsr-Routen, die auf einen bestimmten Routing-Nachbarn verweisen.
 get_olsr2_route_count_by_neighbour() {
 	local neighbour_link_ipv6="$1"
-	request_olsrd2_txtinfo "olsrv2info" "route" | awk '{ if ($2 == "'$neighbour_link_ipv6'") print $1; }' | wc -l
+	request_olsrd2_txtinfo "olsrv2info" "route" | awk '{ if ($2 == "'"$neighbour_link_ipv6"'") print $1; }' | wc -l
 }
 
 
@@ -258,8 +257,9 @@ get_olsr2_neighbours() {
 
 
 debug_ping_all_olsr2_hosts() {
-	ip -6 route show table olsrd2 | awk '{print $1}' | while read a; do
-		ping6 -w 1 -c 1 "$a" >/dev/null 2>&1 && printf "OK\t$a\n" || printf "FAIL\t$a\n"
+	local a
+	ip -6 route show table olsrd2 | awk '{print $1}' | while read -r a; do
+		ping6 -w 1 -c 1 "$a" >/dev/null 2>&1 && printf "OK\t%s\n" "$a" || printf "FAIL\t%s\n" "$a"
 	done
 }
 
@@ -272,7 +272,7 @@ debug_translate_macs() {
 	local name
 	local sed_script_mac
 	local sed_script_ip
-	sed_script_mac=$(echo "$MAC_HOSTNAME_MAP" | while read mac name; do
+	sed_script_mac=$(echo "$MAC_HOSTNAME_MAP" | while read -r mac name; do
 			# Main-IP (loopback-Interface)
 			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "$IP6_PREFIX_PERM" "$mac")" "$name"
 			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "$IP6_PREFIX_OLD" "$mac")" "$name"
@@ -282,7 +282,7 @@ debug_translate_macs() {
 			# für Nanostations: das 16. Bit hochzählen für die zweite MAC des Geräts
 			printf "s/%s/%s/g;\n" "$(convert_mac_to_eui64_address "fe80:" "$mac" "0x020000010000")" "$name"
 		done)
-	sed_script_ip=$(echo "$IPV6_HOSTNAME_MAP" | while read ip name; do
+	sed_script_ip=$(echo "$IPV6_HOSTNAME_MAP" | while read -r ip name; do
 			printf "s/%s/%s/g;\n" "$ip" "$name"
 		done)
 	sed -e "$sed_script_mac" -e "$sed_script_ip"

@@ -8,6 +8,7 @@ IP6_PREFIX_TMP=2a0a:4580:1010:1
 IP6_PREFIX_LENGTH=64
 NETWORK_LOOPBACK=on_loopback
 ROUTING_TABLE_MESH_OLSR2=olsrd2
+OLSR2_POLICY_DEFAULT_PRIORITY=20000
 # interne Zahl fuer die "Domain" in olsr2
 OLSR2_DOMAIN=0
 
@@ -106,7 +107,7 @@ update_olsr2_interfaces() {
 	local is_configured=0
 	# auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
 	local ipv6_limit="-0.0.0.0/0 -::1/128 default_accept"
-	interfaces="loopback $(get_zone_interfaces "$ZONE_MESH")"
+	interfaces="$NETWORK_LOOPBACK $(get_zone_interfaces "$ZONE_MESH")"
 	# alle konfigurierten Interfaces durchgehen und überflüssige löschen
 	for uci_prefix in $(find_all_uci_sections "olsrd2" "interface"); do
 		# seit olsrd2 v0.12 benötigen wir "ifname" nicht mehr
@@ -187,37 +188,46 @@ olsr2_sync_routing_tables() {
 
 init_policy_routing_ipv6() {
 	local iface
+	local priority="$OLSR2_POLICY_DEFAULT_PRIORITY"
 	olsr2_sync_routing_tables
 	# die Uplink-Tabelle ist unabhaengig von olsr
 	add_routing_table "$ROUTING_TABLE_ON_UPLINK" >/dev/null
 
 	# alte Regel loeschen, falls vorhanden
 	delete_policy_rule inet6 table "$ROUTING_TABLE_MESH_OLSR2"
+	delete_policy_rule inet6 table "$ROUTING_TABLE_ON_UPLINK"
 	delete_policy_rule inet6 table main
 
 	# free-Verkehr geht immer in den Tunnel (falls das Paket installiert ist)
-	[ -n "${ZONE_FREE:-}" ] \
-		&& add_zone_policy_rules_by_iif inet6 "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK"
+	if [ -n "${ZONE_FREE:-}" ]; then
+		add_zone_policy_rules_by_iif inet6 "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK" prio "$priority"
+		priority=$((priority + 1))
+	fi
 
 	# sehr wichtig - also zuerst: keine vorbeifliegenden Mesh-Pakete umlenken
-	add_zone_policy_rules_by_iif inet6 "$ZONE_MESH" table "$ROUTING_TABLE_MESH_OLSR2"
+	add_zone_policy_rules_by_iif inet6 "$ZONE_MESH" table "$ROUTING_TABLE_MESH_OLSR2" prio "$priority"
+	priority=$((priority + 1))
 
 	# Pakete mit passendem Ziel orientieren sich an der main-Tabelle
 	# Alle Ziele ausserhalb der mesh-Zone sind geeignet (z.B. local, free, ...).
 	# Wir wollen dadurch explizit keine potentielle default-Route verwenden.
 	get_all_network_interfaces | while read -r iface; do
+		[ "$iface" = "$NETWORK_LOOPBACK" ] && continue
 		is_interface_in_zone "$iface" "$ZONE_MESH" && continue
-		add_network_policy_rule_by_destination inet6 "$iface" table main
+		add_network_policy_rule_by_destination inet6 "$iface" table main prio "$priority"
 	done
+	priority=$((priority + 1))
 
 	# alle nicht-mesh-Quellen routen auch ins olsr-Netz
-	ip -family inet6 rule add table "$ROUTING_TABLE_MESH_OLSR2"
+	ip -family inet6 rule add table "$ROUTING_TABLE_MESH_OLSR2" prio "$priority"
+	priority=$((priority + 1))
 	# Routen, die nicht den lokalen Netz-Interfaces entsprechen (z.B. default-Routen)
-	ip -family inet6 rule add table main
+	ip -family inet6 rule add table main prio "$priority"
+	priority=$((priority + 1))
 
 
 	# die VPN-Tunnel fungieren fuer alle anderen Pakete als default-GW
-	ip -family inet6 rule add table "$ROUTING_TABLE_ON_UPLINK"
+	ip -family inet6 rule add table "$ROUTING_TABLE_ON_UPLINK" prio "$priority"
 }
 
 

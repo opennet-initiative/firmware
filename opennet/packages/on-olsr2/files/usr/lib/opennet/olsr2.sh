@@ -51,9 +51,8 @@ get_mac_address() {
 ## Die Funktion ist kaum getestet - sie erzeugt sicherlich falsche Adressen (mehr als ein
 ## Doppel-Doppelpunkt, usw.).
 shorten_ipv6_address() {
-	#use not the following     sed 's/:0\+/:/g; s/::\+/::/g'
-	#but the below because in '/olsrv2info route' there are ':0:' in output
-	sed 's/:00\+/:/g; s/::\+/::/g'
+	# entferne alle führenden Nullen; ersetze die erste Gruppe von Nullen durch "::"
+	sed 's/:0\+\([1-9a-f]\)/:\1/g; s/\(:0\+\)\+:/::/'
 }
 
 
@@ -68,7 +67,7 @@ convert_mac_to_eui64_address() {
 	# MAC-Offset hinzuaddieren
 	combined_mac=$(printf "%012x" "$(( 0x$combined_mac + mac_offset ))")
 	printf "%s:%s:%sff:fe%s:%s" "$prefix" "${combined_mac:0:4}" "${combined_mac:4:2}" \
-		"${combined_mac:6:2}" "${combined_mac:8:4}"       | shorten_ipv6_address
+		"${combined_mac:6:2}" "${combined_mac:8:4}" | shorten_ipv6_address
 }
 
 

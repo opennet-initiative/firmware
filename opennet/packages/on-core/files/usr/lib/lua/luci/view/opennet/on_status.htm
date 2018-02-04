@@ -73,12 +73,16 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 				.. " | grep -v 'Supports VAPs:'"
 				.. " | sed 's/^.* ESSID:/<td><tt>ESSID:/; s/^ *//; s#$#<br/>#; s#^<br/>$#</tt></td>#'")
 			.. "</tr></table>"
+		local netgraph_olsr2_link = [[<a href="/olsr2.html" target="_blank">]]
+			.. luci.i18n.translate("Network Graph Visualization")
+			.. [[</a>]]
 
 		for _, item in ipairs({
 				  {"networks_section", i18n("Networks"), url="network"},
 				  {"wireless_section", i18n("Wireless"), rawcontent=wireless_info},
 				  {"neighbor_section", i18n("Neighbors (OLSRv1)"), url="neighbors"},
 				  {"neighbor_olsr2_section", i18n("Neighbors (OLSRv2)"), url="neighbors_olsr2", mod_name="on-olsr2"},
+				  {"netgraph_olsr2", i18n("Network Graph (OLSRv2)"), rawcontent=netgraph_olsr2_link, mod_name="on-olsr2-netjsongraph"},
 				  {"mig_connection_section", i18n("OpenVPN"), url="mig_openvpn", mod_name="on-openvpn"},
 				  {"ugw_connection_section", i18n("Internet Sharing"), url="mesh_verbindungen", mod_name="on-usergw"},
 				  {"captive_portal_section", i18n("Public Hotspot"), url="zugangspunkt", mod_name="on-captive-portal"},

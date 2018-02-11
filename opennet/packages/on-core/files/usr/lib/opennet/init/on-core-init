@@ -45,14 +45,27 @@ add_crontab_entries() {
 	local crontab_file=/etc/crontabs/root
 	local cron_prefix="[ -x /usr/bin/on-function ] && /usr/bin/on-function run_with_cron_lock run_parts"
 	local cron_suffix="2>&1 | logger -t cron-error"
+	local random_hourly_minute
+	local random_daily_minute
+	# Erzeuge unterschiedliche Minuten-Werte (die nicht auf 0 oder 5 enden) für stündliche und
+	# tägliche Cron-Jobs.
+	while [ -z "$random_hourly_minute" ] \
+			|| echo "$random_hourly_minute" | grep -q "[05]$"; do
+		random_hourly_minute=$(get_random 60)
+	done
+	while [ -z "$random_daily_minute" ] \
+			|| [ "$random_hourly_minute" = "$random_daily_minute" ] \
+			|| echo "$random_daily_minute" | grep -q "[05]$"; do
+		random_daily_minute=$(get_random 60)
+	done
 	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.minutely" \
 		"* * * * *		$cron_prefix /etc/cron.minutely $cron_suffix"
 	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.5mins" \
 		"*/5 * * * *		$cron_prefix /etc/cron.5mins $cron_suffix"
 	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.hourly" \
-		"$(get_random 60) * * * *		$cron_prefix /etc/cron.hourly $cron_suffix"
+		"$random_hourly_minute * * * *		$cron_prefix /etc/cron.hourly $cron_suffix"
 	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.daily" \
-		"$(get_random 60) $(( $(get_random 3) + 3)) * * *		$cron_prefix /etc/cron.daily $cron_suffix"
+		"$random_daily_minute $(( $(get_random 3) + 3)) * * *		$cron_prefix /etc/cron.daily $cron_suffix"
 	# es ist schwer zu pruefen, ob die Datei sich geaendert hat - also einfach neustarten
 	/etc/init.d/cron restart
 }

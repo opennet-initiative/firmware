@@ -31,7 +31,7 @@ traceroute6_target() {
 (
 	ping_host 139.30.241.200
 	ping_host 62.141.37.125
-	ping_host 91.205.174.15
+	ping_host 85.214.243.122
 	ping_host 46.4.52.112
 	ping_host 8.8.8.8
 	ping6_host 2001:638:804:2228:222:19ff:fe27:b958
@@ -44,7 +44,7 @@ traceroute6_target() {
 (
 	traceroute_target 139.30.241.200
 	traceroute_target 62.141.37.125
-	traceroute_target 91.205.174.15
+	traceroute_target 85.214.243.122
 	traceroute_target 46.4.52.112
 	traceroute_target 8.8.8.8
 	traceroute6_target 2001:638:804:2228:222:19ff:fe27:b958

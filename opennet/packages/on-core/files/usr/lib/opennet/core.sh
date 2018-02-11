@@ -868,7 +868,11 @@ is_function_available() {
 ## @returns Eine zufällige Ganzzahl.
 get_random() {
 	local range="$1"
-	echo "$range" | awk '{srand(systime()); print int(rand() * $1); }'
+	local random_number
+	# Setze eine "1" vor eine zufällige Anzahl von Ziffern (vermeide Oktal-Zahl-Behandlung).
+	# Begrenze die Anzahl von Ziffern, um Rundungen in awk zu vermeiden.
+	random_number="1$(dd if=/dev/urandom bs=10 count=1 2>/dev/null | md5sum | tr -dc "0123456789" | cut -c 1-6)"
+	printf "%d %d" "$range" "$random_number" | awk '{print $2 % $1; }'
 }
 
 

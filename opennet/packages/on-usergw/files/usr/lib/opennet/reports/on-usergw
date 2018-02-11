@@ -6,5 +6,11 @@
 set -eu
 
 
-# uci-Konfiguration
-uci -q show "on-usergw" >uci_on-usergw || true
+# mesh-VPN-Verbindungen
+ugw_status status >ugw_status.txt || true
+
+# Verbindungs-Log kopieren
+cp /var/log/mesh-openvpn-connections.log . || true
+
+# Logs der Verbindungsversuche kopieren
+cp /var/log/on-services/mesh_openvpn_* . || true

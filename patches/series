@@ -24,3 +24,4 @@ hostapd_switch_to_DFS.patch
 curl-fix-7.53-upgrade.patch
 muninlite_swap.patch
 muninlite_makefile.patch
+regdb_channels.patch

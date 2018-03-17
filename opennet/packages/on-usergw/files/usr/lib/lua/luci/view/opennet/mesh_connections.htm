@@ -159,7 +159,7 @@ You may obtain a copy of the License at
 
 	</table>
 	</form>
-	<% if not services then write(html_box(luci.i18n.translate("No Mesh Gateways were found. Probably there is no DNS service available. Maybe you want to verify your internet connection.", "error"))) end %>
+	<% if not services then write(html_box(luci.i18n.translate("No Mesh Gateways were found. Probably there is no DNS service available. Maybe you want to verify your internet connection."), "error")) end %>
     </fieldset>
 </fieldset>
 

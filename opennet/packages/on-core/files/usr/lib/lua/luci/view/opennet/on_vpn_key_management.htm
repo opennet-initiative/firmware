@@ -76,9 +76,9 @@ You may obtain a copy of the License at
 	<% if certstatus.on_crt_exists and certstatus.on_key_exists and (certstatus.on_crt_modulus ~= certstatus.on_key_modulus) then %>
 		<div class="cbi-value-description">
 			<% if certstatus.on_csr_modulus == certstatus.on_key_modulus then %>
-				<%=html_box(luci.i18n.translate("Private Key and Certificate do not match. Please replace Certificate!", "error"))%>
+				<%=html_box(luci.i18n.translate("Private Key and Certificate do not match. Please replace Certificate!"), "error")%>
 			<% else %>
-				<%=html_box(luci.i18n.translate("Private Key and Certificate do not match. Certificate-Request also does not match Private Key, therefore sending the Certificate Request to opennet authority will not help. Please replace Certificate or Private Key or regenerate Key and Certificate Request.", "error"))%>
+				<%=html_box(luci.i18n.translate("Private Key and Certificate do not match. Certificate-Request also does not match Private Key, therefore sending the Certificate Request to opennet authority will not help. Please replace Certificate or Private Key or regenerate Key and Certificate Request."), "error")%>
 			<% end %>
 		</div>
 	<% end %>

@@ -2,7 +2,7 @@ Allow switching to DFS channel after radar detection. See:
 https://w1.fi/cgit/hostap/commit/src/ap/dfs.c?id=04f667fcdde158c1baf8d99516c96d21b878b919
 
 --- /dev/null
-+++ b/lede/package/network/services/hostapd/patches/499-dfs-ETSI.patch
++++ b/openwrt/package/network/services/hostapd/patches/499-dfs-ETSI.patch
 @@ -0,0 +1,14 @@
 +--- a/src/ap/dfs.c
 ++++ b/src/ap/dfs.c

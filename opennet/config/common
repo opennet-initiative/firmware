@@ -8,7 +8,7 @@ CONFIG_VERSION_CODE_FILENAMES=n
 
 # setze OpenWRT Downloadpfad+Versionsnummer explizit weil wir die OpenWRT Versionsnummer mit unserer Versionsnummer ueberschreiben.
 # TODO: diesen Wert wollen wir automatisch ermitteln lassen, um ihn nicht manuell pflegen zu muessen
-CONFIG_VERSION_REPO="http://downloads.lede-project.org/releases/17.01.4"
+CONFIG_VERSION_REPO="http://downloads.openwrt.org/releases/17.01.4"
 
 # reduzierte Squashfs-Blockgroesse Standard: 256)
 #CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=256

@@ -9,10 +9,10 @@ Date:   Mon Mar 13 20:07:14 2017 +0100
     
     Signed-off-by: Hauke Mehrtens <hauke@hauke-m.de>
 
-diff --git a/lede/package/network/utils/curl/Makefile b/lede/package/network/utils/curl/Makefile
+diff --git a/openwrt/package/network/utils/curl/Makefile b/openwrt/package/network/utils/curl/Makefile
 index 950044a226..d9e906c282 100644
---- a/lede/package/network/utils/curl/Makefile
-+++ b/lede/package/network/utils/curl/Makefile
+--- a/openwrt/package/network/utils/curl/Makefile
++++ b/openwrt/package/network/utils/curl/Makefile
 @@ -8,8 +8,8 @@
  include $(TOPDIR)/rules.mk
  
@@ -33,10 +33,10 @@ index 950044a226..d9e906c282 100644
  
  PKG_LICENSE:=MIT
  PKG_LICENSE_FILES:=COPYING
-diff --git a/lede/package/network/utils/curl/patches/001-curl-https-openssl-fix.patch b/package/network/utils/curl/patches/001-curl-https-openssl-fix.patch
+diff --git a/openwrt/package/network/utils/curl/patches/001-curl-https-openssl-fix.patch b/package/network/utils/curl/patches/001-curl-https-openssl-fix.patch
 deleted file mode 100644
 index 259f618d46..0000000000
---- a/lede/package/network/utils/curl/patches/001-curl-https-openssl-fix.patch
+--- a/openwrt/package/network/utils/curl/patches/001-curl-https-openssl-fix.patch
 +++ /dev/null
 @@ -1,34 +0,0 @@
 -From a7b38c9dc98481e4a5fc37e51a8690337c674dfb Mon Sep 17 00:00:00 2001
@@ -73,10 +73,10 @@ index 259f618d46..0000000000
 - #endif
 - 
 - void Curl_ssl_close(struct connectdata *conn, int sockindex)
-diff --git a/lede/package/network/utils/curl/patches/200-no_docs_tests.patch b/lede/package/network/utils/curl/patches/200-no_docs_tests.patch
+diff --git a/openwrt/package/network/utils/curl/patches/200-no_docs_tests.patch b/openwrt/package/network/utils/curl/patches/200-no_docs_tests.patch
 index 139c05e64b..2fbcf59a41 100644
---- a/lede/package/network/utils/curl/patches/200-no_docs_tests.patch
-+++ b/lede/package/network/utils/curl/patches/200-no_docs_tests.patch
+--- a/openwrt/package/network/utils/curl/patches/200-no_docs_tests.patch
++++ b/openwrt/package/network/utils/curl/patches/200-no_docs_tests.patch
 @@ -1,6 +1,6 @@
  --- a/Makefile.am
  +++ b/Makefile.am
@@ -94,10 +94,10 @@ index 139c05e64b..2fbcf59a41 100644
   
   bin_SCRIPTS = curl-config
   SUBDIRS = lib src include
-diff --git a/lede/package/network/utils/curl/patches/310-mbedtls-disable-runtime-version-check.patch b/lede/package/network/utils/curl/patches/310-mbedtls-disable-runtime-version-check.patch
+diff --git a/openwrt/package/network/utils/curl/patches/310-mbedtls-disable-runtime-version-check.patch b/openwrt/package/network/utils/curl/patches/310-mbedtls-disable-runtime-version-check.patch
 index 22b838daa0..89e057eb91 100644
---- a/lede/package/network/utils/curl/patches/310-mbedtls-disable-runtime-version-check.patch
-+++ b/lede/package/network/utils/curl/patches/310-mbedtls-disable-runtime-version-check.patch
+--- a/openwrt/package/network/utils/curl/patches/310-mbedtls-disable-runtime-version-check.patch
++++ b/openwrt/package/network/utils/curl/patches/310-mbedtls-disable-runtime-version-check.patch
 @@ -1,6 +1,6 @@
  --- a/lib/vtls/mbedtls.c
  +++ b/lib/vtls/mbedtls.c
@@ -106,10 +106,10 @@ index 22b838daa0..89e057eb91 100644
   
   size_t Curl_mbedtls_version(char *buffer, size_t size)
   {
-diff --git a/lede/package/network/utils/curl/patches/100-CVE-2017-2629.patch b/lede/package/network/utils/curl/patches/100-CVE-2017-2629.patch
+diff --git a/openwrt/package/network/utils/curl/patches/100-CVE-2017-2629.patch b/openwrt/package/network/utils/curl/patches/100-CVE-2017-2629.patch
 deleted file mode 100644
 index f2cd869c5b..0000000000
---- a/lede/package/network/utils/curl/patches/100-CVE-2017-2629.patch
+--- a/openwrt/package/network/utils/curl/patches/100-CVE-2017-2629.patch
 +++ /dev/null
 @@ -1,33 +0,0 @@
 -From a00a42b4abe8363a46071bb3b43b1b7138f5259b Mon Sep 17 00:00:00 2001

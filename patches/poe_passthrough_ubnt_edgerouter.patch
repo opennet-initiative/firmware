@@ -1,6 +1,6 @@
 add GPIO configuration for POE passthrough of Ubiquiti EdgeRouter
 --- /dev/null
-+++ b/lede/target/linux/ramips/base-files/etc/board.d/03_gpio_switches
++++ b/openwrt/target/linux/ramips/base-files/etc/board.d/03_gpio_switches
 @@ -0,0 +1,22 @@
 +#!/bin/sh
 +#

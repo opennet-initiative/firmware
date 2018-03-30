@@ -198,7 +198,7 @@ Einen bestehenden Patch verändern {#patch-change}
 Paket-Repositories oder das openwrt-Repository aktualisieren {#update-repo}
 ------------------------------------------------------------
 
-Die verwendeten Basis-Repositories (LEDE/OpenWRT), Pakete, Routing und Luci sind als git-submodules in das opennet-Firmware-Repository eingebunden. Somit sind sie auf spezifische Commits (mittels ihrer Hash-ID) festgelegt.
+Die verwendeten Basis-Repositories (OpenWRT), Pakete, Routing und Luci sind als git-submodules in das opennet-Firmware-Repository eingebunden. Somit sind sie auf spezifische Commits (mittels ihrer Hash-ID) festgelegt.
 Neue Commits in dem zugrundeliegenden Branch werden von uns also nicht automatisch verwendet. Daher sollten wir gelegentlich zum aktuellen HEAD des Basis-Brach (z.B. "lede-17.01") wechseln.
 
     make pull-submodules

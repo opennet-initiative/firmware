@@ -91,7 +91,7 @@ patch: quilt-check
 	@# apply all patches if there are unapplied ones
 	@$(QUILT_BIN) push -a || [ $$? -ne 1 ]
 	# remove "chmod" as soon as the patch "poe_passthrough_ubnt_edgerouter" reached upstream
-	chmod +x lede/target/linux/ramips/base-files/etc/board.d/03_gpio_switches
+	chmod +x openwrt/target/linux/ramips/base-files/etc/board.d/03_gpio_switches
 
 unpatch: quilt-check
 	@# revert all patches if there are applied ones

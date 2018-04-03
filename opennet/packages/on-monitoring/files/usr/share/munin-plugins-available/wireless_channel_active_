@@ -76,7 +76,8 @@ ACTION="${1:-}"
 
 case "$ACTION" in
 	config)
-		do_config
+		do_config || exit 1
+		[ "${MUNIN_CAP_DIRTYCONFIG:-0}" = 1 ] && do_fetch
 		;;
 	autoconf)
 		if [ -z "$(get_physicial_interfaces)" ]; then

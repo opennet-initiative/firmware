@@ -93,7 +93,7 @@ do_fetch() {
 	for level in $SIGNAL_THRESHOLDS; do
 		current_count=$(echo "$peer_data" | awk '
 			BEGIN { count=0; }
-			{ if (($1 != "") && ($1 <= '$level')) count++; }
+			{ if (($1 != "") && ($1 <= '"$level"')) count++; }
 			END { print count; }')
 		fieldname=$(get_level_fieldname "$level")
 		echo "${fieldname}.value $((current_count - previous_count))"
@@ -113,7 +113,7 @@ case "$ACTION" in
 		echo "yes"
 		;;
 	suggest)
-		get_wifi_interfaces | while read ifname; do
+		get_wifi_interfaces | while read -r ifname; do
 			clean_fieldname "$ifname"
 		done
 		;;

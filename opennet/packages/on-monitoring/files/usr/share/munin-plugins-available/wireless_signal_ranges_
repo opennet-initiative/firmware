@@ -59,25 +59,54 @@ get_wifi_device_from_suffix() {
 }
 
 
+do_config() {
+	local wifi
+	local lower
+	local draw_type
+	wifi=$(get_wifi_device_from_suffix)
+	echo "graph_title Wireless signal quality ranges - $wifi"
+	echo "graph_args --upper-limit 0"
+	echo "graph_vlabel Signal ranges"
+	echo "graph_category network"
+	echo "graph_info This graph shows numbers of peers with defined wifi signal ranges"
+	lower="noise"
+	draw_type="AREA"
+	for level in $SIGNAL_THRESHOLDS; do
+		fieldname=$(get_level_fieldname "$level")
+		echo "${fieldname}.label $lower...$level"
+		echo "${fieldname}.draw $draw_type"
+		draw_type="STACK"
+		lower="$level"
+	done
+}
+
+
+do_fetch() {
+	local wifi
+	local peer_data
+	local previous_count
+	local current_count
+	local fieldname
+	wifi=$(get_wifi_device_from_suffix)
+	peer_data=$(get_wifi_peers "$wifi")
+	previous_count=0
+	for level in $SIGNAL_THRESHOLDS; do
+		current_count=$(echo "$peer_data" | awk '
+			BEGIN { count=0; }
+			{ if (($1 != "") && ($1 <= '$level')) count++; }
+			END { print count; }')
+		fieldname=$(get_level_fieldname "$level")
+		echo "${fieldname}.value $((current_count - previous_count))"
+		previous_count="$current_count"
+	done
+}
+
+
 ACTION="${1:-}"
 
 case "$ACTION" in
 	config)
-		wifi=$(get_wifi_device_from_suffix)
-		echo "graph_title Wireless signal quality ranges - $wifi"
-		echo "graph_args --upper-limit 0"
-		echo "graph_vlabel Signal ranges"
-		echo "graph_category network"
-		echo "graph_info This graph shows numbers of peers with defined wifi signal ranges"
-		lower="noise"
-		draw_type="AREA"
-		for level in $SIGNAL_THRESHOLDS; do
-			fieldname=$(get_level_fieldname "$level")
-			echo "${fieldname}.label $lower...$level"
-			echo "${fieldname}.draw $draw_type"
-			draw_type="STACK"
-			lower="$level"
-		done
+		do_config
 		;;
 	autoconf)
 		[ -z "$(get_wifi_interfaces)" ] && echo "no (no wifi interfaces found)" && exit 1
@@ -89,18 +118,7 @@ case "$ACTION" in
 		done
 		;;
 	"")
-		wifi=$(get_wifi_device_from_suffix)
-		peer_data=$(get_wifi_peers "$wifi")
-		previous_count=0
-		for level in $SIGNAL_THRESHOLDS; do
-			current_count=$(echo "$peer_data" | awk '
-				BEGIN { count=0; }
-				{ if (($1 != "") && ($1 <= '$level')) count++; }
-				END { print count; }')
-			fieldname=$(get_level_fieldname "$level")
-			echo "${fieldname}.value $((current_count - previous_count))"
-			previous_count="$current_count"
-		done
+		do_fetch
 		;;
 	*)
 		echo >&2 "Invalid action (valid: config)"

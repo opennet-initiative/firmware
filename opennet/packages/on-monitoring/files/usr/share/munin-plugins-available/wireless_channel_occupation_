@@ -50,23 +50,11 @@ get_wifi_device_from_suffix() {
 }
 
 
-if [ "${1:-}" = "autoconf" ]; then
-	if which iw 2>/dev/null; then
-		if [ -n "$(get_wifi_interfaces)" ]; then
-			echo "yes"
-		else
-			echo "no (missing wifi devices)"
-		fi
-	else
-		echo "no (missing 'iw' dependency)"
-	fi
-elif [ "${1:-}" = "suggest" ]; then
-	for dev in $(get_wifi_interfaces); do
-		clean_fieldname "$dev"
-	done
-elif [ "${1:-}" = "config" ]; then
+do_config() {
+	local device
+	local dev_field
 	device=$(get_wifi_device_from_suffix)
-	[ -z "$device" ] && echo >&2 "Invalid wifi device name given" && exit 1
+	[ -z "$device" ] && echo >&2 "Invalid wifi device name given" && return 1
 	echo "graph_title Channel Occupation of $device"
 	echo "graph_vlabel %"
 	echo "graph_category wireless"
@@ -95,13 +83,38 @@ elif [ "${1:-}" = "config" ]; then
 	echo "${dev_field}_transmit.type DERIVE"
 	echo "${dev_field}_transmit.draw STACK"
 	echo "${dev_field}_transmit.cdef 100,${dev_field}_transmit,${dev_field}_active,/,*"
-else
+}
+
+
+do_fetch() {
+	local device
 	device=$(get_wifi_device_from_suffix)
-	[ -z "$device" ] && echo >&2 "Invalid wifi device name given" && exit 1
+	[ -z "$device" ] && echo >&2 "Invalid wifi device name given" && return 1
 	iw dev "$device" survey dump \
 		| grep -F -A 5 "[in use]" \
 		| grep -E "channel (busy|receive|transmit|active) time:" \
 		| awk '{print "'${device}_'"$2"'.value'",$4}'
+}
+
+
+if [ "${1:-}" = "autoconf" ]; then
+	if which iw 2>/dev/null; then
+		if [ -n "$(get_wifi_interfaces)" ]; then
+			echo "yes"
+		else
+			echo "no (missing wifi devices)"
+		fi
+	else
+		echo "no (missing 'iw' dependency)"
+	fi
+elif [ "${1:-}" = "suggest" ]; then
+	for dev in $(get_wifi_interfaces); do
+		clean_fieldname "$dev"
+	done
+elif [ "${1:-}" = "config" ]; then
+	do_config
+else
+	do_fetch
 fi
 
 exit 0

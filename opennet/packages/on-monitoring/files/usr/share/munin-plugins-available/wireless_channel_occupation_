@@ -93,7 +93,7 @@ do_fetch() {
 	iw dev "$device" survey dump \
 		| grep -F -A 5 "[in use]" \
 		| grep -E "channel (busy|receive|transmit|active) time:" \
-		| awk '{print "'${device}_'"$2"'.value'",$4}'
+		| awk '{print "'"${device}_"'"$2"'.value'",$4}'
 }
 
 

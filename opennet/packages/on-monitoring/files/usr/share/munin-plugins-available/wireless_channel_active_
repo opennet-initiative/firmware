@@ -37,25 +37,44 @@ get_selected_physical_interface() {
 }
 
 
+do_config() {
+	local phy
+	local draw_type
+	phy=$(get_selected_physical_interface)
+	echo "graph_title Wireless channel usage - $phy"
+	echo "graph_args --base 1000 -r --lower-limit 0 --upper-limit 100"
+	echo "graph_vlabel Channel usage by time in percent"
+	echo "graph_category network"
+	echo "graph_info This graph shows the currently used channel of your WiFi device(s)"
+	draw_type="AREA"
+	get_physical_interfaces_channel_descriptions "$phy" | while read channel description; do
+		fieldname="channel_${channel}"
+		echo "${fieldname}.label $description"
+		echo "${fieldname}.draw $draw_type"
+		# percent scaling
+		echo "${fieldname}.cdef 100,${fieldname},*"
+		draw_type="STACK"
+	done
+}
+
+
+do_fetch() {
+	local phy
+	local current_channel
+	phy=$(get_selected_physical_interface)
+	current_channel=$(get_physicial_interface_current_channel "$phy")
+	get_physical_interfaces_channel_descriptions "$phy" | while read channel description; do
+		[ "$current_channel" = "$channel" ] && value=1 || value=0
+		echo "channel_${channel}.value $value"
+	done
+}
+
+
 ACTION="${1:-}"
 
 case "$ACTION" in
 	config)
-		phy=$(get_selected_physical_interface)
-		echo "graph_title Wireless channel usage - $phy"
-		echo "graph_args --base 1000 -r --lower-limit 0 --upper-limit 100"
-		echo "graph_vlabel Channel usage by time in percent"
-		echo "graph_category network"
-		echo "graph_info This graph shows the currently used channel of your WiFi device(s)"
-		draw_type="AREA"
-		get_physical_interfaces_channel_descriptions "$phy" | while read channel description; do
-			fieldname="channel_${channel}"
-			echo "${fieldname}.label $description"
-			echo "${fieldname}.draw $draw_type"
-			# percent scaling
-			echo "${fieldname}.cdef 100,${fieldname},*"
-			draw_type="STACK"
-		done
+		do_config
 		;;
 	autoconf)
 		[ -z "$(get_physicial_interfaces)" ] && echo "no (no wifi interfaces found)" && exit 1
@@ -66,12 +85,7 @@ case "$ACTION" in
 		get_physicial_interfaces
 		;;
 	"")
-		phy=$(get_selected_physical_interface)
-		current_channel=$(get_physicial_interface_current_channel "$phy")
-		get_physical_interfaces_channel_descriptions "$phy" | while read channel description; do
-			[ "$current_channel" = "$channel" ] && value=1 || value=0
-			echo "channel_${channel}.value $value"
-		done
+		do_fetch
 		;;
 	*)
 		echo >&2 "Invalid action (valid: config)"

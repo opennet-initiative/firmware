@@ -576,6 +576,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "config":
             do_config(ath9k)
+            if os.getenv("MUNIN_CAP_DIRTYCONFIG") == "1":
+                do_fetch(ath9k)
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
             if os.path.exists(SYS_BASE_DIR):

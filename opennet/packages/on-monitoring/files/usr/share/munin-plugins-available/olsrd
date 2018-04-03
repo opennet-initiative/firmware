@@ -351,6 +351,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "config":
             do_config()
+            if os.getenv("MUNIN_CAP_DIRTYCONFIG") == "1":
+                do_fetch()
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
             if os.path.exists(os.getenv('OLSRD_BIN_PATH', '/usr/sbin/olsrd')):

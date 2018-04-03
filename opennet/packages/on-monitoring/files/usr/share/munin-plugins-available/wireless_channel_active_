@@ -77,9 +77,11 @@ case "$ACTION" in
 		do_config
 		;;
 	autoconf)
-		[ -z "$(get_physicial_interfaces)" ] && echo "no (no wifi interfaces found)" && exit 1
-		echo "yes"
-		exit 0
+		if [ -z "$(get_physicial_interfaces)" ]; then
+			echo "no (no wifi interfaces found)"
+		else
+			echo "yes"
+		fi
 		;;
 	suggest)
 		get_physicial_interfaces

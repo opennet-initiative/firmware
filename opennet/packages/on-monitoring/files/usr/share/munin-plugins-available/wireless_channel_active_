@@ -47,7 +47,7 @@ do_config() {
 	echo "graph_category network"
 	echo "graph_info This graph shows the currently used channel of your WiFi device(s)"
 	draw_type="AREA"
-	get_physical_interfaces_channel_descriptions "$phy" | while read channel description; do
+	get_physical_interfaces_channel_descriptions "$phy" | while read -r channel description; do
 		fieldname="channel_${channel}"
 		echo "${fieldname}.label $description"
 		echo "${fieldname}.draw $draw_type"
@@ -63,7 +63,7 @@ do_fetch() {
 	local current_channel
 	phy=$(get_selected_physical_interface)
 	current_channel=$(get_physicial_interface_current_channel "$phy")
-	get_physical_interfaces_channel_descriptions "$phy" | while read channel description; do
+	get_physical_interfaces_channel_descriptions "$phy" | while read -r channel description; do
 		[ "$current_channel" = "$channel" ] && value=1 || value=0
 		echo "channel_${channel}.value $value"
 	done

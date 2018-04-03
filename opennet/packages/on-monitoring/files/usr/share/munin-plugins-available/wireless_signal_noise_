@@ -132,7 +132,8 @@ case "$ACTION" in
 		do_fetch
 		;;
 	*)
-		echo >&2 "Invalid action (valid: config)"
+		echo >&2 "Invalid action (valid: config / suggest / autoconf / <empty>)"
 		echo >&2
+		exit 2
 		;;
 esac

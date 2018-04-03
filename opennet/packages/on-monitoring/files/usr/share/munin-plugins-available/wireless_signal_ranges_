@@ -64,6 +64,7 @@ do_config() {
 	local lower
 	local draw_type
 	wifi=$(get_wifi_device_from_suffix)
+	[ -z "$wifi" ] && echo >&2 "Missing wifi: $wifi" && return 1
 	echo "graph_title Wireless signal quality ranges - $wifi"
 	echo "graph_args --upper-limit 0"
 	echo "graph_vlabel Signal ranges"
@@ -88,6 +89,7 @@ do_fetch() {
 	local current_count
 	local fieldname
 	wifi=$(get_wifi_device_from_suffix)
+	[ -z "$wifi" ] && echo >&2 "Missing wifi: $wifi" && return 1
 	peer_data=$(get_wifi_peers "$wifi")
 	previous_count=0
 	for level in $SIGNAL_THRESHOLDS; do

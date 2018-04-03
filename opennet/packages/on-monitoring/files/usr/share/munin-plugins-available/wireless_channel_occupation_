@@ -112,7 +112,8 @@ elif [ "${1:-}" = "suggest" ]; then
 		clean_fieldname "$dev"
 	done
 elif [ "${1:-}" = "config" ]; then
-	do_config
+	do_config || exit 1
+	[ "${MUNIN_CAP_DIRTYCONFIG:-0}" = 1 ] && do_fetch
 else
 	do_fetch
 fi

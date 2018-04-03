@@ -41,6 +41,7 @@ do_config() {
 	local phy
 	local draw_type
 	phy=$(get_selected_physical_interface)
+	[ -z "$phy" ] && echo >&2 "Missing wireless PHY: $phy" && return 1
 	echo "graph_title Wireless channel usage - $phy"
 	echo "graph_args --base 1000 -r --lower-limit 0 --upper-limit 100"
 	echo "graph_vlabel Channel usage by time in percent"
@@ -62,6 +63,7 @@ do_fetch() {
 	local phy
 	local current_channel
 	phy=$(get_selected_physical_interface)
+	[ -z "$phy" ] && echo >&2 "Missing wireless PHY: $phy" && return 1
 	current_channel=$(get_physicial_interface_current_channel "$phy")
 	get_physical_interfaces_channel_descriptions "$phy" | while read -r channel description; do
 		[ "$current_channel" = "$channel" ] && value=1 || value=0

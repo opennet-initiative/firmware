@@ -263,69 +263,48 @@ def get_ping_times(hosts):
     return result
 
 
-if __name__ == "__main__":
-    # parse arguments
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "config":
-            links = list(get_olsr_links())
+def do_config():
+    links = list(get_olsr_links())
 
-            # link quality with regard to neighbours
-            print("multigraph olsr_link_quality")
-            print(LQ_GRAPH_CONFIG.format(title="OLSR Link Quality"))
-            for link in links:
-                print(LQ_VALUES_CONFIG.format(
-                    label=link["remote"],
-                    suffix="_{host}".format(host=get_clean_fieldname(link["remote"])),
-                    draw_type="AREASTACK"))
-            for link in links:
-                print("multigraph olsr_link_quality.host_{remote}"
-                      .format(remote=get_clean_fieldname(link["remote"])))
-                title = "Link Quality towards {host}".format(host=link["remote"])
-                print(LQ_GRAPH_CONFIG.format(title=title))
-                print(LQ_VALUES_CONFIG.format(label="Link Quality", suffix="", draw_type="AREA"))
+    # link quality with regard to neighbours
+    print("multigraph olsr_link_quality")
+    print(LQ_GRAPH_CONFIG.format(title="OLSR Link Quality"))
+    for link in links:
+        print(LQ_VALUES_CONFIG.format(
+            label=link["remote"],
+            suffix="_{host}".format(host=get_clean_fieldname(link["remote"])),
+            draw_type="AREASTACK"))
+    for link in links:
+        print("multigraph olsr_link_quality.host_{remote}"
+              .format(remote=get_clean_fieldname(link["remote"])))
+        title = "Link Quality towards {host}".format(host=link["remote"])
+        print(LQ_GRAPH_CONFIG.format(title=title))
+        print(LQ_VALUES_CONFIG.format(label="Link Quality", suffix="", draw_type="AREA"))
 
-            # link count ("number of nodes behind each neighbour")
-            print("multigraph olsr_neighbour_link_count")
-            print(NEIGHBOUR_COUNT_CONFIG)
-            for link in links:
-                print(NEIGHBOUR_COUNT_VALUE
-                      .format(host=link["remote"],
-                              host_fieldname=get_clean_fieldname(link["remote"]),
-                              draw_type="AREASTACK"))
+    # link count ("number of nodes behind each neighbour")
+    print("multigraph olsr_neighbour_link_count")
+    print(NEIGHBOUR_COUNT_CONFIG)
+    for link in links:
+        print(NEIGHBOUR_COUNT_VALUE
+              .format(host=link["remote"], host_fieldname=get_clean_fieldname(link["remote"]),
+                      draw_type="AREASTACK"))
 
-            # neighbour ping
-            print("multigraph olsr_neighbour_ping")
-            print(NEIGHBOUR_PING_CONFIG.format(title="Ping time of neighbours"))
-            for link in links:
-                print(NEIGHBOUR_PING_VALUE
-                      .format(host=link["remote"],
-                              host_fieldname=get_clean_fieldname(link["remote"])))
-            # neighbour pings - single subgraphs
-            for link in links:
-                remote = get_clean_fieldname(link["remote"])
-                print("multigraph olsr_neighbour_ping.host_{remote}".format(remote=remote))
-                title = "Ping time of {remote}".format(remote=remote)
-                print(NEIGHBOUR_PING_CONFIG.format(title=title))
-                print(NEIGHBOUR_PING_VALUE.format(host=link["remote"], host_fieldname=remote))
+    # neighbour ping
+    print("multigraph olsr_neighbour_ping")
+    print(NEIGHBOUR_PING_CONFIG.format(title="Ping time of neighbours"))
+    for link in links:
+        print(NEIGHBOUR_PING_VALUE
+              .format(host=link["remote"], host_fieldname=get_clean_fieldname(link["remote"])))
+    # neighbour pings - single subgraphs
+    for link in links:
+        remote = get_clean_fieldname(link["remote"])
+        print("multigraph olsr_neighbour_ping.host_{remote}".format(remote=remote))
+        title = "Ping time of {remote}".format(remote=remote)
+        print(NEIGHBOUR_PING_CONFIG.format(title=title))
+        print(NEIGHBOUR_PING_VALUE.format(host=link["remote"], host_fieldname=remote))
 
-            sys.exit(0)
-        elif sys.argv[1] == "autoconf":
-            if os.path.exists(os.getenv('OLSRD_BIN_PATH', '/usr/sbin/olsrd')):
-                print('yes')
-            else:
-                print('no')
-            sys.exit(0)
-        elif sys.argv[1] == "version":
-            print('olsrd Munin plugin, version %s' % plugin_version)
-            sys.exit(0)
-        elif sys.argv[1] == "":
-            # ignore
-            pass
-        else:
-            # unknown argument
-            sys.stderr.write("Unknown argument{eol}".format(eol=LINESEP))
-            sys.exit(1)
 
+def do_fetch():
     # output values
     links = list(get_olsr_links())
 
@@ -365,6 +344,32 @@ if __name__ == "__main__":
         remote = get_clean_fieldname(link["remote"])
         print("multigraph olsr_neighbour_ping.host_{remote}".format(remote=remote))
         print("neighbour_{remote}.value {value}".format(remote=remote, value=value))
+
+
+if __name__ == "__main__":
+    # parse arguments
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "config":
+            do_config()
+            sys.exit(0)
+        elif sys.argv[1] == "autoconf":
+            if os.path.exists(os.getenv('OLSRD_BIN_PATH', '/usr/sbin/olsrd')):
+                print('yes')
+            else:
+                print('no')
+            sys.exit(0)
+        elif sys.argv[1] == "version":
+            print('olsrd Munin plugin, version %s' % plugin_version)
+            sys.exit(0)
+        elif sys.argv[1] == "":
+            # ignore
+            pass
+        else:
+            # unknown argument
+            sys.stderr.write("Unknown argument{eol}".format(eol=LINESEP))
+            sys.exit(1)
+
+    do_fetch()
 
 # final marker for shell / python hybrid script (see "Interpreter Selection")
 EOF = True

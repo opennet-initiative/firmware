@@ -560,19 +560,28 @@ def print_error(message):
     sys.stderr.write(message + linesep)
 
 
+def do_fetch(ath9k):
+    for item in ath9k.get_values(get_scope()):
+        print(item)
+
+
+def do_config(ath9k):
+    for item in ath9k.get_config(get_scope()):
+        print(item)
+
+
 if __name__ == "__main__":
     ath9k = Ath9kDriver(SYS_BASE_DIR, GRAPH_BASE_NAME)
     # parse arguments
     if len(sys.argv) > 1:
         if sys.argv[1] == "config":
-            for item in ath9k.get_config(get_scope()):
-                print(item)
+            do_config(ath9k)
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
             if os.path.exists(SYS_BASE_DIR):
                 print('yes')
             else:
-                print('no')
+                print('no (missing ath9k driver sysfs directory: {})'.format(SYS_BASE_DIR))
             sys.exit(0)
         elif sys.argv[1] == "suggest":
             if ath9k.has_devices():
@@ -592,9 +601,7 @@ if __name__ == "__main__":
             print_error("Unknown argument")
             sys.exit(1)
 
-    # output values
-    for item in ath9k.get_values(get_scope()):
-        print(item)
+    do_fetch(ath9k)
 
 # final marker for shell / python hybrid script (see "Interpreter Selection")
 EOF = True

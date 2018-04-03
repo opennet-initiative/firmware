@@ -62,7 +62,10 @@ get_host_from_host_spec() {
 hosts=$(uci -q get on-monitoring.plugin_multiping.hosts)
 [ -z "$hosts" ] && hosts="downloads.openwrt.org"
 
-if [ "${1:-}" = "config" ]; then
+do_config() {
+	local label
+	local field
+	local host
 	echo graph_title Ping times
 	echo 'graph_args --base 1000 -l 0'
 	echo 'graph_vlabel seconds'
@@ -79,18 +82,32 @@ if [ "${1:-}" = "config" ]; then
 		echo "host_${field}_packetloss.graph no"
 	done
 	exit 0
-fi
+}
 
-for host_spec in $hosts; do
-	label=$(get_label_from_host_spec "$host_spec")
-	field=$(clean_fieldname "$label")
-	host=$(get_host_from_host_spec "$host_spec")
-	ping -c 2 ${host} 2>/dev/null | awk '
-		BEGIN { packetloss_regex="([0-9]+)% packet loss"; }
-		{
-			if ($0 ~ packetloss_regex)
-				{ print("'host_${field}_packetloss.value'", gensub("^.*"packetloss_regex".*$", "\\1", "g")); };
-			if (/min\/avg\/max/)
-				{ split($4, tokens, "/"); print "'host_${field}_rtt.value'", tokens[1]/1000; };
-		}'
-done
+
+do_fetch() {
+	local label
+	local field
+	local host
+	for host_spec in $hosts; do
+		label=$(get_label_from_host_spec "$host_spec")
+		field=$(clean_fieldname "$label")
+		host=$(get_host_from_host_spec "$host_spec")
+		ping -c 2 "$host" 2>/dev/null | awk '
+			BEGIN { packetloss_regex="([0-9]+)% packet loss"; }
+			{
+				if ($0 ~ packetloss_regex)
+					{ print("'"host_${field}_packetloss.value"'", gensub("^.*"packetloss_regex".*$", "\\1", "g")); };
+				if (/min\/avg\/max/)
+					{ split($4, tokens, "/"); print "'"host_${field}_rtt.value"'", tokens[1]/1000; };
+			}'
+	done
+}
+
+
+if [ "${1:-}" = "config" ]; then
+	do_config
+	[ "${MUNIN_CAP_DIRTYCONFIG:-0}" = 1 ] && do_fetch
+else
+	do_fetch
+fi

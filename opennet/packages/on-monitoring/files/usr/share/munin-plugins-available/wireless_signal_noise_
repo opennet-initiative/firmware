@@ -82,7 +82,7 @@ do_config() {
 	echo "noise.label Noise floor"
 	echo "noise.draw LINE"
 	# sub graphs for all peers
-	get_wifi_peers "$wifi" | while read mac signal; do
+	get_wifi_peers "$wifi" | while read -r mac signal; do
 		fieldname=$(clean_fieldname "peer_${mac}")
 		peer=$(get_ip_for_mac "$mac")
 		echo "signal_${fieldname}.label $peer"
@@ -98,7 +98,7 @@ do_fetch() {
 	wifi=$(get_wifi_device_from_suffix)
 	[ -z "$wifi" ] && echo >&2 "Missing wifi: $wifi" && return 1
 	peer_data=$(get_wifi_peers "$wifi")
-	echo "$peer_data" | while read mac signal; do
+	echo "$peer_data" | while read -r mac signal; do
 		# ignore empty datasets
 		[ -z "$signal" ] && continue
 		fieldname=$(clean_fieldname "peer_${mac}")
@@ -123,7 +123,7 @@ case "$ACTION" in
 		fi
 		;;
 	suggest)
-		get_wifi_interfaces | while read ifname; do
+		get_wifi_interfaces | while read -r ifname; do
 			clean_fieldname "$ifname"
 		done
 		;;

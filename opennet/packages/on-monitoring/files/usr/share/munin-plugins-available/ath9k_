@@ -329,7 +329,6 @@ class Station:
             for rate, details in station._rc_stats.items():
                 all_rates[rate] = details
         # return all rates
-        is_first = True
         num_extract = lambda text: int("".join([char for char in text if "0" <= char <= "9"]))
         get_key = lambda rate_name: cls._get_rate_fieldname(all_rates[rate_name]["rate"])
         # add all rates for percent visualization ("MCS7,MCS6,MCS5,MCS4,MCS3,MCS2,MCS1,MCS0,+,+,+,+,+,+,+")
@@ -350,10 +349,9 @@ class Station:
             yield "{key}.min 0".format(key=key)
             if index < len(QUALITY_GRAPH_COLORS_16):
                 yield "{key}.colour {colour}".format(key=key, colour=QUALITY_GRAPH_COLORS_16[index])
-            yield "{key}.draw {draw_type}".format(key=key, draw_type=("AREA" if is_first else "STACK"))
+            yield "{key}.draw AREASTACK".format(key=key)
             # divide the current value by the above sum of all counters and calculate percent
             yield "{key}.cdef 100,{key},sum,/,*".format(key=key, cdef=cdef)
-            is_first = False
         yield ""
 
 

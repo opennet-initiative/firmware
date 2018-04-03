@@ -39,7 +39,6 @@ get_selected_physical_interface() {
 
 do_config() {
 	local phy
-	local draw_type
 	phy=$(get_selected_physical_interface)
 	[ -z "$phy" ] && echo >&2 "Missing wireless PHY: $phy" && return 1
 	echo "graph_title Wireless channel usage - $phy"
@@ -47,14 +46,12 @@ do_config() {
 	echo "graph_vlabel Channel usage by time in percent"
 	echo "graph_category network"
 	echo "graph_info This graph shows the currently used channel of your WiFi device(s)"
-	draw_type="AREA"
 	get_physical_interfaces_channel_descriptions "$phy" | while read -r channel description; do
 		fieldname="channel_${channel}"
 		echo "${fieldname}.label $description"
-		echo "${fieldname}.draw $draw_type"
+		echo "${fieldname}.draw AREASTACK"
 		# percent scaling
 		echo "${fieldname}.cdef 100,${fieldname},*"
-		draw_type="STACK"
 	done
 }
 

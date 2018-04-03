@@ -62,7 +62,6 @@ get_wifi_device_from_suffix() {
 do_config() {
 	local wifi
 	local lower
-	local draw_type
 	wifi=$(get_wifi_device_from_suffix)
 	[ -z "$wifi" ] && echo >&2 "Missing wifi: $wifi" && return 1
 	echo "graph_title Wireless signal quality ranges - $wifi"
@@ -71,12 +70,10 @@ do_config() {
 	echo "graph_category network"
 	echo "graph_info This graph shows numbers of peers with defined wifi signal ranges"
 	lower="noise"
-	draw_type="AREA"
 	for level in $SIGNAL_THRESHOLDS; do
 		fieldname=$(get_level_fieldname "$level")
 		echo "${fieldname}.label $lower...$level"
-		echo "${fieldname}.draw $draw_type"
-		draw_type="STACK"
+		echo "${fieldname}.draw AREASTACK"
 		lower="$level"
 	done
 }

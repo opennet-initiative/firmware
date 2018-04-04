@@ -1,53 +1,74 @@
 #!/bin/sh
 # weird shebang? See below: "interpreter selection"
-#
-# Collect information related to ath9k wireless events and states.
-#   * rate control statistics ("rc_stats")
-#   * events (dropped, transmitted, beacon loss, ...)
-#   * traffic (packets, bytes)
-#   * DFS events (processed patterns, approved signals)
-#
-# All data is collected for each separate station (in case of multiple
-# connected peers). Combined graphs are provided as a summary.
-#
-#
-# This plugin works with the following python interpreters:
-#   * Python 3
-#   * micropython
-#
-#
-# The following graphs are generated for each physical ath9k interface:
-#     phy0_wifi0_traffic
-#       phy0_wifi0_traffic.station0
-#      ...
-#    pyh0_wifi0_events
-#      phy0_wifi0_events.station0
-#      ...
-#    pyh0_wifi0_rc_stats
-#      phy0_wifi0_rc_stats.station0
-#      ...
-#
-#
-# Copyright (C) 2015-2018 Lars Kruse <devel@sumpfralle.de>
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# Magic markers
-#  #%# capabilities=autoconf suggest
-#  #%# family=auto
 
 """true"
+: <<=cut
+
+=head1 NAME
+
+ath9k_ - Collect information related to ath9k wireless events and states
+
+
+=head1 APPLICABLE SYSTEMS
+
+Information is parsed from the sysfs directory.
+
+
+=head1 CONFIGURATION
+
+The plugin is symlink into /etc/munin/plugins with one of the following categories attached:
+
+    * dfs_events: DFS events (processed patterns, approved signals)
+    * events: dropped, transmitted, beacon loss, ...
+    * rcstats: rate control statistics
+    * traffic: packets and bytes
+
+
+=head1 USAGE
+
+All data is collected for each separate station (in case of multiple connected peers).
+Combined graphs are provided as a summary.
+
+The following graphs are generated for each physical ath9k interface:
+
+    phy0_wifi0_traffic
+        phy0_wifi0_traffic.station0
+        ...
+    pyh0_wifi0_events
+        phy0_wifi0_events.station0
+        ...
+    pyh0_wifi0_rc_stats
+        phy0_wifi0_rc_stats.station0
+        ...
+
+This plugin works with the following python interpreters:
+
+    * Python 3
+    * micropython (e.g. OpenWrt)
+
+
+=head1 VERSION
+
+  0.5
+
+
+=head1 AUTHOR
+
+Lars Kruse <devel@sumpfralle.de>
+
+
+=head1 LICENSE
+
+GPLv3 or above
+
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf suggest
+
+=cut
+
 # ****************** Interpreter Selection ***************
 # This unbelievable dirty hack allows to find a suitable python interpreter.
 # This is specifically useful for OpenWRT where typically only micropython is available.
@@ -71,7 +92,7 @@ exit $?
 
 # For shell: ignore everything starting from here until the last line of this file.
 # This is necessary for syntax checkers that try to complain about invalid shell syntax below.
-true <<EOF
+true <<"EOF"
 """
 
 import os

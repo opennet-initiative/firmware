@@ -1,45 +1,68 @@
 #!/bin/sh
 # weird shebang? See below: "interpreter selection"
-#
-# Collect basic information about the neighbours of an OLSR node:
-#   * link quality
-#   * neighbour link quality
-#   * number of nodes reachable behind each neighbour
-#   * ping times of direct neighbours
-#
-# This plugin works with the following python interpreters:
-#   * Python 2
-#   * Python 3
-#   * micropython
-#
-# Environment variables:
-#   * OLSRD_HOST: name or IP of the host running the txtinfo plugin (default: localhost)
-#   * OLSRD_TXTINFO_PORT: the port that the txtinfo plugin is listening to (default: 2006)
-#   * OLSRD_BIN_PATH: name of the olsrd binary (only used for 'autoconf', default: /usr/sbin/olsrd)
-#   * MICROPYTHON_HEAP: adjust this parameter for micropython if your olsr network contains
-#     more than a few thousand nodes (default: 512k)
-#
-#
-# Copyright (C) 2015 Lars Kruse <devel@sumpfralle.de>
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# Magic markers
-#  #%# capabilities=autoconf
-#  #%# family=auto
 
 """true"
+: <<=cut
+
+=head1 NAME
+
+olsrd - Monitor the state of an OLSR-based routing network
+
+
+=head1 APPLICABLE SYSTEMS
+
+Information is parsed from the output of "txtinfo" plugin for olsrd.
+
+
+=head1 CONFIGURATION
+
+Environment variables:
+
+    * OLSRD_HOST: name or IP of the host running the txtinfo plugin (default: localhost)
+    * OLSRD_TXTINFO_PORT: the port that the txtinfo plugin is listening to (default: 2006)
+    * OLSRD_BIN_PATH: name of the olsrd binary (only used for 'autoconf', default: /usr/sbin/olsrd)
+    * MICROPYTHON_HEAP: adjust this parameter for micropython if your olsr network contains
+      more than a few thousand nodes (default: 512k)
+
+=head1 USAGE
+
+Collect basic information about the neighbours of an OLSR node:
+
+    * link quality
+    * neighbour link quality
+    * number of nodes reachable behind each neighbour
+    * ping times of direct neighbours
+
+This plugin works with the following python interpreters:
+
+    * Python 2
+    * Python 3
+    * micropython (e.g. OpenWrt)
+
+
+=head1 VERSION
+
+  0.4
+
+
+=head1 AUTHOR
+
+Lars Kruse <devel@sumpfralle.de>
+
+
+=head1 LICENSE
+
+GPLv3 or above
+
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf
+
+=cut
+
+
 # ****************** Interpreter Selection ***************
 # This unbelievable dirty hack allows to find a suitable python interpreter.
 # This is specifically useful for OpenWRT where typically only micropython is available.

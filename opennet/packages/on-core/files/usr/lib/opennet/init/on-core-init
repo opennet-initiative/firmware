@@ -45,8 +45,8 @@ add_crontab_entries() {
 	local crontab_file=/etc/crontabs/root
 	local cron_prefix="[ -x /usr/bin/on-function ] && /usr/bin/on-function run_with_cron_lock run_parts"
 	local cron_suffix="2>&1 | logger -t cron-error"
-	local random_hourly_minute
-	local random_daily_minute
+	local random_hourly_minute=
+	local random_daily_minute=
 	# Erzeuge unterschiedliche Minuten-Werte (die nicht auf 0 oder 5 enden) für stündliche und
 	# tägliche Cron-Jobs.
 	while [ -z "$random_hourly_minute" ] \

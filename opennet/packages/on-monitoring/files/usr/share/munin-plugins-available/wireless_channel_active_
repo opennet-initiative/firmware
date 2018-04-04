@@ -1,21 +1,47 @@
 #!/bin/sh
-#
-# Show currently used channel of wifi enabled devices.
-# Author: Lars Kruse, devel@sumpfralle.de
-# License: GPL v3 or later
-#
-# Requirements:
-#  * "iwinfo" tool
-#  * root privileges (for "iw" and "iwinfo")
-#
-# Magic markers
-#%# capabilities=autoconf suggest
-#%# family=auto
+
+: << =cut
+
+=head1 NAME
+
+wireless_channel_active - Show currently used channel of wifi enabled devices
+
+=head1 APPLICABLE SYSTEMS
+
+Information is parsed from the output of the tool "iwinfo" (OpenWrt) or "iw" (most systems).
 
 
+=head1 CONFIGURATION
+
+Symlink this plugin with the name of the wifi device added (e.g. "phy0").
+
+Root permissions are probably required for accessing "iw".
+
+  [wireless_channel_active*]
+  user root
 
 
+=head1 VERSION
 
+  1.1
+
+
+=head1 AUTHOR
+
+Lars Kruse <devel@sumpfralle.de>
+
+
+=head1 LICENSE
+
+GPLv3 or above
+
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf suggest
+
+=cut
 
 
 set -eu

@@ -1,19 +1,51 @@
 #!/bin/sh
-#
-# Group and count all connected wifi peers by signal strength ranges.
-# This plugin is suitable for wifi interfaces with a variable selection of peers
-# (e.g. mobile clients).
-# Author: Lars Kruse, devel@sumpfralle.de
-# License: GPL v3 or later
-#
-# Requirements:
-#  * "iwinfo" tool (alternatively: fall back to "iw" - with incomplete data)
-#  * root privileges (for "iw" and "iwinfo")
-#
-# Magic markers
-#%# capabilities=autoconf suggest
-#%# family=auto
 
+: << =cut
+
+=head1 NAME
+
+wireless_signal_ranges_ - Group and count all connected wifi peers by signal strength ranges
+
+
+=head1 APPLICABLE SYSTEMS
+
+Information is parsed from the output of the tool "iwinfo" (OpenWrt) or "iw" (most systems).
+
+This plugin is suitable for wifi interfaces with a variable selection of peers (e.g. mobile
+clients).
+
+
+=head1 CONFIGURATION
+
+Symlink this plugin with the name of the wifi interface added (e.g. "wlan0").
+
+Root permissions are probably required for accessing "iw".
+
+  [wireless_signal_ranges_*]
+  user root
+
+
+=head1 VERSION
+
+  1.1
+
+
+=head1 AUTHOR
+
+Lars Kruse <devel@sumpfralle.de>
+
+
+=head1 LICENSE
+
+GPLv3 or above
+
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf suggest
+
+=cut
 
 set -eu
 

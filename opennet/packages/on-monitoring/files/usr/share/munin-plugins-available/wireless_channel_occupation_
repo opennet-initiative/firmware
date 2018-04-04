@@ -1,28 +1,50 @@
 #!/bin/sh
-#
-# Monitor the wifi channel occupation (taken from "iw dev wlan0 survey dump").
-#
-# Symlink this plugin with the name of the wifi interface added (e.g. "wlan0").
-#
-#
-# Copyright (C) 2015 Lars Kruse <devel@sumpfralle.de>
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# Magic markers
-#%# capabilities=autoconf suggest
-#%# family=auto
+
+: << =cut
+
+=head1 NAME
+
+wireless_channel_occupation_ - Monitor occupation of wireless channels
+
+
+=head1 APPLICABLE SYSTEMS
+
+All systems with at least one wireless interface and the the tool "iw".
+
+The wifi channel occupation is parsed from the output of "iw dev wlan0 survey dump".
+
+
+=head1 CONFIGURATION
+
+Symlink this plugin with the name of the wifi interface added (e.g. "wlan0").
+
+Root permissions are probably required for accessing "iw".
+
+  [wireless_channel_occupation_*]
+  user root
+
+
+=head1 VERSION
+
+  1.1
+
+
+=head1 AUTHOR
+
+Lars Kruse <devel@sumpfralle.de>
+
+
+=head1 LICENSE
+
+GPLv3 or above
+
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf suggest
+
+=cut
 
 set -eu
 

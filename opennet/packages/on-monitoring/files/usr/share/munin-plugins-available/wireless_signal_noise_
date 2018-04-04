@@ -1,18 +1,51 @@
 #!/bin/sh
-#
-# Show current signal strength and noise for all connected peers of wifi devices.
-# This plugin is suitable for wifi interfaces with a stable selection of peers
-# (e.g. infrastructure).
-# Author: Lars Kruse, devel@sumpfralle.de
-# License: GPL v3 or later
-#
-# Requirements:
-#  * "iwinfo" tool (alternatively: fall back to "iw" - with incomplete data)
-#  * root privileges (for "iw" and "iwinfo")
-#
-# Magic markers
-#%# capabilities=autoconf suggest
-#%# family=auto
+
+: << =cut
+
+=head1 NAME
+
+wireless_signal_noise_ - Show signal strength and noise for all connected peers of wifi interface
+
+=head1 APPLICABLE SYSTEMS
+
+This plugin is suitable for wifi interfaces with a stable selection of peers (e.g. infrastructure).
+It is probably not useful for hotspot-like scenarios.
+
+Information is parsed from the output of the tool "iwinfo" (OpenWrt) or "iw" (most systems,
+incomplete information).
+
+
+=head1 CONFIGURATION
+
+Symlink this plugin with the name of the wifi interface added (e.g. "wlan0").
+
+Root permissions are probably required for accessing "iw".
+
+  [wireless_signal_noise_*]
+  user root
+
+
+=head1 VERSION
+
+  1.1
+
+
+=head1 AUTHOR
+
+Lars Kruse <devel@sumpfralle.de>
+
+
+=head1 LICENSE
+
+GPLv3 or above
+
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf suggest
+
+=cut
 
 
 set -eu

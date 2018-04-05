@@ -317,12 +317,13 @@ update_mig_connection_status() {
 ## @brief Trenne alle laufenden oder im Aufbau befindlichen Verbindungen.
 disable_on_openvpn() {
 	local service_name
+	local changed=0
 	# möglicherweise vorhandene Verbindungen trennen und bei Bedarf openvpn neustarten
-	{ get_active_mig_connections; get_starting_mig_connections; } | while read service_name; do
-		disable_openvpn_service "$service_name" && echo "$service_name"
-		true
-	done | grep -q . && apply_changes openvpn
-	true
+	for service_name in $(get_active_mig_connections; get_starting_mig_connections); do
+		disable_openvpn_service "$service_name"
+		changed=1
+	done
+	[ "$changed" = "0" ] || apply_changes "openvpn"
 }
 
 

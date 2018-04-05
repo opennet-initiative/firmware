@@ -966,9 +966,10 @@ run_scheduled_tasks() {
 	trap "error_trap run_scheduled_tasks '$*'" $GUARD_TRAPS
 	local fname
 	local temp_fname
+	local running_tasks
 	[ -d "$SCHEDULING_DIR" ] || return 0
 	# keine Ausführung, falls noch mindestens ein alter Task aktiv ist
-	find "$SCHEDULING_DIR" -type f -name "*.running" | while read -r fname; do
+	running_tasks=$(find "$SCHEDULING_DIR" -type f -name "*.running" | while read -r fname; do
 		# veraltete Dateien werden geloescht und ignoriert
 		# wir müssen uns an dem langsamsten Cron-Job orientieren:
 		#	- MTU-Test für UGWs: ca. 5 Minuten
@@ -977,8 +978,8 @@ run_scheduled_tasks() {
 		# nicht-veraltete Dateien fuehren zum Abbruch der Funktion
 		msg_info "Skipping 'run_scheduled_task' due to an ongoing operation: $(tail -1 "$fname")"
 		echo "$fname"
-		# der Abbruch findet erst ausserhalb der while-Schleife statt, da das return nicht den loop verlaesst
-	done | grep -q . && return 0
+	done)
+	[ -n "$running_tasks" ] && return 0
 	find "$SCHEDULING_DIR" -type f | grep -v "\.running$" | while read -r fname; do
 		temp_fname="${fname}.running"
 		# zuerst schnell wegbewegen, damit wir keine Ereignisse verpassen

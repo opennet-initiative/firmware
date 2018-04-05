@@ -396,15 +396,14 @@ update_mesh_gateway_firewall_rules() {
 ## @brief Alle mesh-Verbindungen trennen.
 disable_on_usergw() {
 	local service_name
-	local service_state
-	get_services "mesh" \
-			| filter_services_by_value "scheme" "openvpn" \
-			| while read service_name; do
-		service_state=$(get_openvpn_service_state "$service_name")
-		[ -n "$service_state" ] && disable_openvpn_service "$service_name" && echo "$service_name"
-		true
-	done | grep -q . && apply_changes openvpn
-	true
+	local changed=0
+	for service_name in $(get_services "mesh" | filter_services_by_value "scheme" "openvpn"); do
+		if [ -n "$(get_openvpn_service_state "$service_name")" ]; then
+			disable_openvpn_service "$service_name"
+			changed=1
+		fi
+	done
+	[ "$changed" = "0" ] || apply_changes "openvpn"
 }
 
 
@@ -434,7 +433,7 @@ is_trusted_service_list_outdated() {
 fix_wan_route_if_missing() {
 	trap "error_trap fix_wan_route_if_missing '$*'" $GUARD_TRAPS
 	# default route exists? Nothing to fix ...
-	ip route show | grep ^default | head -1 | grep -q . && return 0
+	ip route show | grep -q ^default && return 0
 	(
 		# tolerante Shell-Interpretation fuer OpenWrt-Code
 		set +eu

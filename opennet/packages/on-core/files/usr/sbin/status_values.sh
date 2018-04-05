@@ -288,7 +288,7 @@ fi
 
 if is_function_available "get_active_ugw_connections"; then
 	# ist einer mesh-Dienste vollstaendig positiv getestet?
-	on_ugw_possible=$(get_services mesh | pipe_service_attribute "status" | while read status; do uci_is_true "$status" && echo "." || true; done | grep -q . && echo "1" || echo "0")
+	on_ugw_possible=$([ -n "$(get_services mesh | pipe_service_attribute "status" | while read -r status; do uci_is_true "$status" && echo "." || true; done)" ] && echo "1" || echo "0")
 	on_ugw_tunnel="$([ -n "$(get_active_ugw_connections)" ] && echo "1" || echo "0")"
 	# ermittle alle Nachbarn, die via tap-Interface verbunden sind - dies ist etwas ungenau, aber besser geht es wohl nicht
 	on_ugw_connected=$(request_olsrd_txtinfo "nei" | grep "^[0-9]" | awk '{print $1}' | while read neighbor; do ip route get "$neighbor" 2>/dev/null | awk '/dev '$MESH_OPENVPN_DEVICE_PREFIX'/ {print $1}'; done | join)

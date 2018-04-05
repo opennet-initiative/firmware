@@ -157,19 +157,20 @@ disable_unwanted_forward() {
 	trap "error_trap disable_unwanted_forward '$*'" $GUARD_TRAPS
 	local zone_name
 	local forward
-	find_all_uci_sections firewall zone "forward=ACCEPT" | while read uci_prefix; do
+	local changed=0
+	for uci_prefix in $(find_all_uci_sections firewall zone "forward=ACCEPT"); do
 		zone_name=$(uci_get "${uci_prefix}.name")
 		# eventuell ist ZONE_TUNNEL nicht definiert (falls on-openvpn nicht installiert ist)
-		if [ "$zone_name" = "$ZONE_MESH" -o "$zone_name" = "${ZONE_TUNNEL:-on_vpn}" ]; then
-			uci set "${uci_prefix}.forward=REJECT" && echo "$uci_prefix"
-			true
+		if [ "$zone_name" = "$ZONE_MESH" ] || [ "$zone_name" = "${ZONE_TUNNEL:-on_vpn}" ]; then
+			uci set "${uci_prefix}.forward=REJECT"
+			changed=1
 		fi
-	done | grep -q . && {
+	done
+	if [ "$changed" = "1" ]; then
 		# sicherstellen, dass die als Ersatz fuer "forward=ACCEPT" noetige Weiterleitung existiert
 		add_zone_forward "$ZONE_MESH" "$ZONE_MESH"
 		apply_changes "firewall"
-	}
-	true
+	fi
 }
 
 

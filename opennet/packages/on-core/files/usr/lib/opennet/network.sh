@@ -31,7 +31,7 @@ query_dns_reverse() {
 has_opennet_dns() {
 	trap 'error_trap has_opennet_dns "'"$*"'"' $GUARD_TRAPS
 	# timeout ist kein shell-builtin - es benoetigt also ein global ausfuehrbares Kommando
-	timeout "$DNS_TIMEOUT" on-function query_dns "$DNS_SERVICE_REFERENCE" | grep -q . && return 0
+	[ -n "$(timeout "$DNS_TIMEOUT" on-function query_dns "$DNS_SERVICE_REFERENCE")" ] && return 0
 	trap "" $GUARD_TRAPS && return 1
 }
 

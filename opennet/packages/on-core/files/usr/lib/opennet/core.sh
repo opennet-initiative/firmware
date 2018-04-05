@@ -115,7 +115,8 @@ get_custom_log_content() {
 	local log_name="$1"
 	local logfile
 	logfile=$(get_custom_log_filename "$log_name")
-	[ -e "$logfile" ] && cat "$logfile" || true
+	[ -e "$logfile" ] || return 0
+	cat "$logfile"
 }
 
 
@@ -256,17 +257,15 @@ add_banner_event() {
 	local timestamp="${2:-}"
 	[ -z "$timestamp" ] && timestamp=$(date)
 	local line=" - $timestamp - $event -"
-	(
-		# Steht unser Text schon im Banner? Ansonsten hinzufuegen ...
-		# bis einschliesslich Version v0.5.0 war "clean_restart_log" das Schluesselwort
-		# ab v0.5.1 verwenden wir "system events"
-		if ! grep -qE '(clean_restart_log|system events)' /etc/banner; then
-			echo " ------------------- system events -------------------"
-		fi
-		# die Zeile auffuellen
-		while [ "${#line}" -lt 54 ]; do line="$line-"; done
-		echo "$line"
-	) >>/etc/banner
+	# Steht unser Text schon im Banner? Ansonsten hinzufuegen ...
+	# bis einschliesslich Version v0.5.0 war "clean_restart_log" das Schluesselwort
+	# ab v0.5.1 verwenden wir "system events"
+	if ! grep -qE '(clean_restart_log|system events)' /etc/banner; then
+		echo " ------------------- system events -------------------" >>/etc/banner
+	fi
+	# die Zeile auffuellen
+	while [ "${#line}" -lt 54 ]; do line="$line-"; done
+	echo "$line" >>/etc/banner
 	sync
 }
 

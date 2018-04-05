@@ -185,7 +185,7 @@ transfer_vpn_sort_criteria_and_autosearch() {
 	local result
 	sort_criteria=$(uci_get on-openvpn.gateways.vpn_sort_criteria)
 	autosearch=$(uci_get on-openvpn.gateways.autosearch)
-	if [ -z "$autosearch" -a -z "$sort_criteria" ]; then
+	if [ -z "$autosearch" ] && [ -z "$sort_criteria" ]; then
 		# die Einstellungen wurden bereits uebertragen
 		return 0
 	elif [ "$autosearch" = "off" ]; then

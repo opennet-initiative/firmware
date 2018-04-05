@@ -192,7 +192,7 @@ update_olsr2_daemon_state() {
 ## @brief Synchronisiere die olsrd-Routingtabellen-Konfiguration mit den iproute-Routingtabellennummern.
 ## @details Im Konfliktfall wird die olsrd-Konfiguration an die iproute-Konfiguration angepasst.
 olsr2_sync_routing_tables() {
-	trap "error_trap olsr2_sync_routing_tables '$*'" EXIT
+	trap 'error_trap olsr2_sync_routing_tables "$*"' EXIT
 	local olsr2_id
 	local iproute_id
 	local uci_prefix

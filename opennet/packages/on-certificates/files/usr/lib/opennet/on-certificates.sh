@@ -28,7 +28,7 @@ https_request_opennet() {
 ## @todo Umstellung vom Formular auf die zu entwickelnde API
 ## @returns Das Ergebnis ist die html-Ausgabe des Upload-Formulars.
 submit_csr_via_http() {
-	trap "error_trap submit_csr_via_http '$*'" EXIT
+	trap 'error_trap submit_csr_via_http "$*"' EXIT
 	# upload_url: z.B. http://ca.on/csr/csr_upload.php
 	local upload_url="$1"
 	local csr_file="$2"

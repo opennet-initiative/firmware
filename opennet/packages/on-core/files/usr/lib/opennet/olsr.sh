@@ -13,7 +13,7 @@ OLSR_HTTP_PORT=8080
 # Dieses Skript sollte via hotplug bei Aenderungen der Netzwerkkonfiguration ausgefuehrt werden.
 # Fuer jedes Interface wird eine separate UCI-Sektion angelegt.
 update_olsr_interfaces() {
-	trap "error_trap update_olsr_interfaces '$*'" EXIT
+	trap 'error_trap update_olsr_interfaces "$*"' EXIT
 	local uci_prefix
 	local interfaces
 	local current
@@ -44,7 +44,7 @@ update_olsr_interfaces() {
 # Pruefe das angegebene olsrd-Plugin aktiv ist und aktiviere es, falls dies nicht der Fall sein sollte.
 # Das Ergebnis ist die uci-Sektion (z.B. "olsrd.@LoadPlugin[1]") als String.
 get_and_enable_olsrd_library_uci_prefix() {
-	trap "error_trap get_and_enable_olsrd_library_uci_prefix '$*'" EXIT
+	trap 'error_trap get_and_enable_olsrd_library_uci_prefix "$*"' EXIT
 	local lib_file
 	local uci_prefix=
 	local library="olsrd_$1"
@@ -80,7 +80,7 @@ get_and_enable_olsrd_library_uci_prefix() {
 # Quelle 3: die vorkonfigurierte Standard-IP
 # Anschliessend ist "apply_changes olsrd" erforderlich.
 olsr_set_main_ip() {
-	trap "error_trap olsr_set_main_ip '$*'" EXIT
+	trap 'error_trap olsr_set_main_ip "$*"' EXIT
 	# Auslesen der aktuellen, bzw. der Standard-IP
 	local main_ip
 	if [ $# -eq 1 ]; then
@@ -97,7 +97,7 @@ olsr_set_main_ip() {
 # Ermittle welche olsr-Module konfiguriert sind, ohne dass die Library vorhanden ist.
 # Deaktiviere diese Module - fuer ein sauberes boot-Log.
 disable_missing_olsr_modules() {
-	trap "error_trap disable_missing_olsr_modules '$*'" EXIT
+	trap 'error_trap disable_missing_olsr_modules "$*"' EXIT
 	local libpath=/usr/lib
 	local libline
 	local libfile
@@ -120,7 +120,7 @@ disable_missing_olsr_modules() {
 ## @brief Synchronisiere die olsrd-Routingtabellen-Konfiguration mit den iproute-Routingtabellennummern.
 ## @details Im Konfliktfall wird die olsrd-Konfiguration an die iproute-Konfiguration angepasst.
 olsr_sync_routing_tables() {
-	trap "error_trap olsr_sync_routing_tables '$*'" EXIT
+	trap 'error_trap olsr_sync_routing_tables "$*"' EXIT
 	local olsr_name
 	local iproute_name
 	local olsr_id
@@ -160,7 +160,7 @@ parse_olsr_service_descriptions() {
 # Im Fall von "http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108" entspricht dies:
 #   ugw	http   192.168.0.15   8080   tcp   upload:3 download:490 ping:108
 get_olsr_services() {
-	trap "error_trap get_olsr_services '$*'" EXIT
+	trap 'error_trap get_olsr_services "$*"' EXIT
 	local wanted_type="${1:-}"
 	local filter_service
 	[ ! -e "$SERVICES_FILE" ] && msg_debug "no olsr-services file found: $SERVICES_FILE" && return 0
@@ -177,7 +177,7 @@ get_olsr_services() {
 ## @details Veraltete Dienste werden entfernt. Eventuelle Änderungen der DNS- und NTP-Serverliste
 ##   werden angewandt.
 update_olsr_services() {
-	trap "error_trap update_olsr_services '$*'" EXIT
+	trap 'error_trap update_olsr_services "$*"' EXIT
 	local scheme
 	local ip
 	local port

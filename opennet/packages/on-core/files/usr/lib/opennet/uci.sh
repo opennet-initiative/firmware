@@ -27,7 +27,7 @@ uci_is_false() {
 #   uci_get firewall.zone_free.masq 1
 # Der abschließende Standardwert (zweiter Parameter) ist optional.
 uci_get() {
-	trap "error_trap uci_get '$*'" EXIT
+	trap 'error_trap uci_get "$*"' EXIT
 	local key="$1"
 	local default="${2:-}"
 	if uci -q get "$key"; then
@@ -46,7 +46,7 @@ uci_get() {
 ## @details Die Funktion ist vergleichbar mit "uci add_list". Es werden jedoch keine doppelten Einträge erzeugt.
 ##   Somit entfällt die Prüfung auf Vorhandensein des Eintrags.
 uci_add_list() {
-	trap "error_trap uci_add_list '$*'" EXIT
+	trap 'error_trap uci_add_list "$*"' EXIT
 	local uci_path="$1"
 	local new_item="$2"
 	local index
@@ -61,7 +61,7 @@ uci_add_list() {
 ## @param uci_path Der UCI-Pfad eines Elements.
 ## @returns Die Einträge sind zeilenweise voneinander getrennt.
 uci_get_list() {
-	trap "error_trap uci_get_list '$*'" EXIT
+	trap 'error_trap uci_get_list "$*"' EXIT
 	local uci_path="$1"
 	# falls es den Schlüssel nicht gibt, liefert "uci show" eine Fehlermeldung und Müll - das wollen wir abfangen
 	[ -z "$(uci_get "$uci_path")" ] && return 0
@@ -77,7 +77,7 @@ uci_get_list() {
 ## @returns Die ID des Listenelements (beginnend bei Null) wird zurückgeliefert.
 ## @details Falls das Element nicht gefunden wird, ist das Ergebnis leer.
 uci_get_list_index() {
-	trap "error_trap uci_get_list_index '$*'" EXIT
+	trap 'error_trap uci_get_list_index "$*"' EXIT
 	local uci_path="$1"
 	local value="$2"
 	local current
@@ -94,7 +94,7 @@ uci_get_list_index() {
 ## @param item Das zu suchende Element.
 ## @brief Prüfe ob ein Element in einer Liste vorkommt.
 uci_is_in_list() {
-	trap "error_trap uci_is_in_list '$*'" EXIT
+	trap 'error_trap uci_is_in_list "$*"' EXIT
 	local uci_path="$1"
 	local value="$2"
 	[ -n "$(uci_get_list_index "$uci_path" "$value")" ] && return 0
@@ -108,7 +108,7 @@ uci_is_in_list() {
 ## @param value Der Inhalt des zu löschenden Elements. Es findet ein Vergleich auf Identität (kein Muster) statt.
 ## @details Falls das Element nicht existiert, endet die Funktion stillschweigend ohne Fehlermeldung.
 uci_delete_list() {
-	trap "error_trap uci_delete_list '$*'" EXIT
+	trap 'error_trap uci_delete_list "$*"' EXIT
 	local uci_path="$1"
 	local value="$2"
 	local index
@@ -159,7 +159,7 @@ filter_uci_show_value_quotes() {
 # Aus Performance-Gruenden brechen wir frueh ab, falls die gewuenschte Anzahl an Ergebnissen erreicht ist.
 # Die meisten Anfragen suchen nur einen Treffer ("find_first_uci_section") - daher koennen wir hier viel Zeit sparen.
 _find_uci_sections() {
-	trap "error_trap _find_uci_sections '$*'" EXIT
+	trap 'error_trap _find_uci_sections "$*"' EXIT
 	local max_num="$1"
 	local config="$2"
 	local stype="$3"
@@ -188,7 +188,7 @@ _find_uci_sections() {
 # Jede Funktion, die im on-core-Namensraum Einstellungen schreiben moechte, moege diese
 # Funktion zuvor aufrufen.
 prepare_on_uci_settings() {
-	trap "error_trap prepare_on_uci_settings '$*'" EXIT
+	trap 'error_trap prepare_on_uci_settings "$*"' EXIT
 	local section
 	# on-core-Konfiguration erzeugen, falls noetig
 	[ -e /etc/config/on-core ] || touch /etc/config/on-core
@@ -202,7 +202,7 @@ prepare_on_uci_settings() {
 ## @brief Prüfe, ob eine definierte UCI-Sektion existiert und lege sie andernfalls an.
 ## @returns Sektion wurde angelegt (True) oder war bereits vorhanden (false).
 create_uci_section_if_missing() {
-	trap "error_trap create_uci_section_if_missing '$*'" EXIT
+	trap 'error_trap create_uci_section_if_missing "$*"' EXIT
 	local config="$1"
 	local stype="$2"
 	local key_value

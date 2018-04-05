@@ -50,7 +50,7 @@ get_service_name() {
 ## @param details z.B. "via:megumi"
 ## @returns Der Dienstname wird ausgegeben.
 notify_service() {
-	trap "error_trap notify_service '$*'" EXIT
+	trap 'error_trap notify_service "$*"' EXIT
 	# wir erwarten sieben Parameter
 	[ "$#" -eq 7 -o "$#" -eq 8 ]
 	local source="$1"
@@ -64,7 +64,7 @@ notify_service() {
 ## @param source Quelle (z.B. "olsr")
 ## @returns Alle Dienstnamen werden ausgegeben.
 notify_services() {
-	trap "error_trap notify_services '$*'" EXIT
+	trap 'error_trap notify_services "$*"' EXIT
 	local source="$1"
 	local service
 	local scheme
@@ -143,7 +143,7 @@ _get_local_bias_for_service() {
 # Sollte ein Dienst ein "priority"-Attribut tragen, dann wird die uebliche Dienst-Sortierung aufgehoben
 # und lediglich "priority" (und gegebenenfalls separat "offset") beachtet.
 get_service_priority() {
-	trap "error_trap get_service_priority '$*'" EXIT
+	trap 'error_trap get_service_priority "$*"' EXIT
 	local service_name="$1"
 	local sorting="${2:-}"
 	local priority
@@ -177,7 +177,7 @@ get_service_priority() {
 
 
 get_distance_with_offset() {
-	trap "error_trap get_distance_with_offset '$*'" EXIT
+	trap 'error_trap get_distance_with_offset "$*"' EXIT
 	local service_name="$1"
 	local sorting="${2:-}"
 	local distance
@@ -202,7 +202,7 @@ get_distance_with_offset() {
 
 
 set_service_sorting() {
-	trap "error_trap set_service_sorting '$*'" EXIT
+	trap 'error_trap set_service_sorting "$*"' EXIT
 	local new_sorting="$1"
 	local old_sorting
 	old_sorting=$(get_service_sorting)
@@ -219,7 +219,7 @@ set_service_sorting() {
 # Falls eine ungueltige Sortier-Methode gesetzt ist, wird diese auf die Standard-Sortierung zurueckgesetzt.
 # Die Ausgabe dieser Funktion ist also in jedem Fall eine gueltige Sortier-Methode.
 get_service_sorting() {
-	trap "error_trap get_service_sorting '$*'" EXIT
+	trap 'error_trap get_service_sorting "$*"' EXIT
 	local sorting
 	sorting=$(uci_get "on-core.settings.service_sorting")
 	if [ "$sorting" = "manual" -o "$sorting" = "hop" -o "$sorting" = "etx" ]; then
@@ -240,7 +240,7 @@ get_service_sorting() {
 ## @brief Sortiere den eingegebenen Strom von Dienstnamen und gib eine nach der Priorität sortierte Liste.
 ## @details Die Prioritätsinformation wird typischerweise für nicht-mesh-verteilte Dienste verwendet (z.B. den mesh-Tunnel).
 sort_services_by_priority() {
-	trap "error_trap sort_services_by_priority '$*'" EXIT
+	trap 'error_trap sort_services_by_priority "$*"' EXIT
 	local service_name
 	local priority
 	local sorting
@@ -319,7 +319,7 @@ pipe_service_attribute() {
 ## @brief Liefere alle Dienste zurueck, die dem angegebenen Typ zugeordnet sind.
 ##    Falls kein Typ angegben wird, dann werden alle Dienste ungeachtet ihres Typs ausgegeben.
 get_services() {
-	trap "error_trap get_services '$*'" EXIT
+	trap 'error_trap get_services "$*"' EXIT
 	local service_type="${1:-}"
 	local services
 	local fname_persist
@@ -413,7 +413,7 @@ get_service_attributes() {
 ## @param service_type (optional) ein Service-Type
 ## @returns Ausgabe der bekannten Dienste (für Menschen - nicht parsebar)
 print_services() {
-	trap "error_trap print_services '$*'" EXIT
+	trap 'error_trap print_services "$*"' EXIT
 	local service_name
 	local attribute
 	local value
@@ -448,7 +448,7 @@ service_add_file_dependency() {
 # Parameter: Service-Name
 # Parameter: textuelle Darstellung einer Abhaengigkeit (ohne Leerzeichen)
 _add_service_dependency() {
-	trap "error_trap _add_service_dependency '$*'" EXIT
+	trap 'error_trap _add_service_dependency "$*"' EXIT
 	local dependency="$1"
 	local service_name="$2"
 	local token="$3"
@@ -470,7 +470,7 @@ _add_service_dependency() {
 
 # Entferne alle mit diesem Service verbundenen Konfigurationen (inkl. Rekonfiguration von firewall, etc.).
 cleanup_service_dependencies() {
-	trap "error_trap cleanup_service_dependencies '$*'" EXIT
+	trap 'error_trap cleanup_service_dependencies "$*"' EXIT
 	local service_name="$1"
 	local dep
 	local filename
@@ -492,7 +492,7 @@ cleanup_service_dependencies() {
 
 
 delete_service() {
-	trap "error_trap delete_service '$*'" EXIT
+	trap 'error_trap delete_service "$*"' EXIT
 	local service_name="$1"
 	[ -z "$service_name" ] && msg_error "No service given for deletion" && trap "" EXIT && return 1
 	cleanup_service_dependencies "$service_name"
@@ -525,7 +525,7 @@ _distribute_service_ranks() {
 ##   * etx/hop: Reduzierung des Offsets um eins
 ##   Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste nach unten.
 move_service_up() {
-	trap "error_trap move_service_up '$*'" EXIT
+	trap 'error_trap move_service_up "$*"' EXIT
 	local service_name="$1"
 	shift
 	local sorting
@@ -573,7 +573,7 @@ move_service_up() {
 ##   * etx/hop: Erhöhung des Offsets um eins
 ##   Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste nach unten.
 move_service_down() {
-	trap "error_trap move_service_down '$*'" EXIT
+	trap 'error_trap move_service_down "$*"' EXIT
 	local service_name="$1"
 	shift
 	local sorting
@@ -614,7 +614,7 @@ move_service_down() {
 ## @details Der Dienst steht anschließend direkt vor dem bisher führenden Dienst der ausgewählten Typen (falls angegeben).
 ##   Falls keine Dienst-Typen angegeben sind, bewegt der Dienst sich in der globalen Liste an die Spitze.
 move_service_top() {
-	trap "error_trap move_service_top '$*'" EXIT
+	trap 'error_trap move_service_top "$*"' EXIT
 	local service_name="$1"
 	shift
 	local top_service
@@ -750,7 +750,7 @@ get_service_as_csv() {
 ## @param other Eine beliebige Anzahl weiterer Parameter ist erlaubt: diese erweitern den typischen Log-Dateinamen für diesen Dienst.
 ## @details Die Funktion stellt sicher, dass das Verzeichnis der ermittelten Log-Datei anschließend existiert.
 get_service_log_filename() {
-	trap "error_trap get_service_log_filename '$*'" EXIT
+	trap 'error_trap get_service_log_filename "$*"' EXIT
 	local service_name="$1"
 	shift
 	local full_filename
@@ -772,7 +772,7 @@ get_service_log_filename() {
 ## @param other Eine beliebige Anzahl weiterer Parameter ist erlaubt: diese erweitern den typischen Log-Dateinamen für diesen Dienst.
 ## @see get_service_log_filename
 get_service_log_content() {
-	trap "error_trap get_service_log_content '$*'" EXIT
+	trap 'error_trap get_service_log_content "$*"' EXIT
 	local service_name="$1"
 	local max_lines="$2"
 	shift 2
@@ -794,7 +794,7 @@ get_service_log_content() {
 ## @param service_name der Name des Diensts
 ## @returns Exitcode == 0, falls das Routing über das WAN-Interface verläuft.
 is_service_routed_via_wan() {
-	trap "error_trap is_service_routed_via_wan '$*'" EXIT
+	trap 'error_trap is_service_routed_via_wan "$*"' EXIT
 	local service_name="$1"
 	# verwende die übergebene TypeOfService-Angabe oder (falls vorhanden/installiert) den
 	# TOS-Wert, der fuer nicht-Tunnel-Verkehr verwendet wird (typischerweise ist dies die
@@ -862,7 +862,7 @@ _notify_service_failure() {
 ##   Falle einer globalen Nicht-Erreichbarkeit aller Dienstenanbieter ohne auf den Ablauf der Test-Periode warten zu müssen.
 ## @attention Seiteneffekt: die Zustandsinformationen des getesteten Diensts (Status, Test-Zeitstempel) werden verändert.
 run_cyclic_service_tests() {
-	trap "error_trap test_openvpn_service_type '$*'" EXIT
+	trap 'error_trap test_openvpn_service_type "$*"' EXIT
 	local test_function="$1"
 	local test_period_minutes="$2"
 	local max_fail_attempts="$3"

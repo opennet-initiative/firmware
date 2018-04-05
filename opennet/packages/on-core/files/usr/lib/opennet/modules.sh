@@ -23,7 +23,7 @@ _prepare_on_modules() {
 ## @details Die Aktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" geprueft.
 ##   Der Standardwert ist "false" (ausgeschaltet).
 is_on_module_installed_and_enabled() {
-	trap "error_trap is_on_module_installed_and_enabled '$*'" EXIT
+	trap 'error_trap is_on_module_installed_and_enabled "$*"' EXIT
 	local module="$1"
 	_prepare_on_modules
 	is_package_installed "$module" && _is_on_module_enabled "$module" && return 0
@@ -43,7 +43,7 @@ _is_on_module_enabled() {
 ## @brief Aktiviere ein Opennet-Modul
 ## @param module Eins der Opennet-Pakete (siehe 'get_on_modules').
 enable_on_module() {
-	trap "error_trap enable_on_module '$*'" EXIT
+	trap 'error_trap enable_on_module "$*"' EXIT
 	local module="$1"
 	_prepare_on_modules
 	warn_if_unknown_module "$module"
@@ -56,7 +56,7 @@ enable_on_module() {
 ## @brief Deaktiviere ein Opennet-Modul
 ## @param module Eins der Opennet-Pakete (siehe 'get_on_modules').
 disable_on_module() {
-	trap "error_trap disable_on_module '$*'" EXIT
+	trap 'error_trap disable_on_module "$*"' EXIT
 	local module="$1"
 	warn_if_unknown_module "$module"
 	_is_on_module_enabled "$module" || return 0
@@ -129,7 +129,7 @@ get_missing_modules() {
 ##   Die opkg.conf wird im tmpfs erzeugt, falls sie noch nicht vorhanden ist. Eventuelle manuelle Nachkorrekturen
 ##   bleiben also bis zum nächsten Reboot erhalten.
 install_from_opennet_repository() {
-	trap "error_trap install_from_opennet_repository '$*'" EXIT
+	trap 'error_trap install_from_opennet_repository "$*"' EXIT
 	local package
 	local not_installed_packages
 	not_installed_packages=$(get_not_installed_on_modules)
@@ -185,7 +185,7 @@ redirect_to_opkg_opennet_logfile() {
 
 # Ausführung eines opkg-Kommnados mit der opennet-Repository-Konfiguration und minimaler Ausgabe (nur Fehler) auf stdout.
 run_opennet_opkg() {
-	trap "error_trap run_opennet_opkg '$*'" EXIT
+	trap 'error_trap run_opennet_opkg "$*"' EXIT
 	# erzeuge Konfiguration, falls sie noch nicht vorhanden ist
 	[ -e "$ON_OPKG_CONF_PATH" ] || generate_opennet_opkg_config >"$ON_OPKG_CONF_PATH"
 	# Vor der opkg-Ausführung müssen wir das Verzeichnis /etc/opkg verdecken, da opkg fehlerhafterweise
@@ -225,7 +225,7 @@ clear_cache_opennet_opkg() {
 ## @brief Ermittle die automatisch ermittelte URL für die Nachinstallation von Paketen.
 ## @returns Liefert die Basis-URL zurueck. Anzuhängen sind im Anschluss z.B. /packages/${arch_cpu_type} oder /targets/${arch}/generic/packages
 get_default_opennet_opkg_repository_base_url() {
-	trap "error_trap get_default_opennet_opkg_repository_base_url '$*'" EXIT
+	trap 'error_trap get_default_opennet_opkg_repository_base_url "$*"' EXIT
 	# ermittle die Firmware-Repository-URL
 	local firmware_version
 	firmware_version=$(get_on_firmware_version)
@@ -276,7 +276,7 @@ set_configured_opennet_opkg_repository_url() {
 ## @brief Liefere den Inhalt einer opkg.conf für das Opennet-Paket-Repository zurück.
 ## @details Die aktuelle Version wird aus dem openwrt-Versionsstring gelesen.
 generate_opennet_opkg_config() {
-	trap "error_trap generate_opennet_opkg_config '$*'" EXIT
+	trap 'error_trap generate_opennet_opkg_config "$*"' EXIT
 	# schreibe den Inahlt der neuen OPKG-Konfiguration
 	echo "dest root /"
 	echo "dest ram /tmp"
@@ -313,7 +313,7 @@ generate_opennet_opkg_config() {
 ## @brief Prüfe, ob ein opkg-Paket installiert ist.
 ## @param package Name des Pakets
 is_package_installed() {
-	trap "error_trap is_package_installed '$*'" EXIT
+	trap 'error_trap is_package_installed "$*"' EXIT
 	local package="$1"
 	local status
 	# Korrekte Prüfung: via "opkg list-installed" - leider erzeugt sie locking-Fehlermeldung

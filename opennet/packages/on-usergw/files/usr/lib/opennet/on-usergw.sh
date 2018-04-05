@@ -60,7 +60,7 @@ verify_mesh_gateways() {
 ## @brief Prüfe ob der Dienst alle notwendigen Tests besteht.
 ## @details Ein Test dauert bis zu 5 Minuten. Falls bereits eine VPN-Verbindung besteht, wird der MTU-Test übersprungen.
 is_mesh_gateway_usable() {
-	trap "error_trap is_mesh_gateway_usable '$*'" EXIT
+	trap 'error_trap is_mesh_gateway_usable "$*"' EXIT
 	local service_name="$1"
 	local failed=
 	# WAN-Routing
@@ -174,7 +174,7 @@ update_trusted_service_list() {
 ## @param service_name der Name des Diensts
 ## @details Auf der Gegenseite wird die Datei '.big' fuer den Download via http erwartet.
 update_relayed_server_speed_estimation() {
-	trap "error_trap update_relayed_server_speed_estimation '$*'" EXIT
+	trap 'error_trap update_relayed_server_speed_estimation "$*"' EXIT
 	local service_name="$1"
 	local host
 	local download_speed
@@ -203,7 +203,7 @@ update_relayed_server_speed_estimation() {
 ## @returns Es erfolgt keine Ausgabe - als Seiteneffekt wird der MTU-Status des Diensts verändert.
 ## @details Als Eingabestrom wird die Ausgabe von 'openvpn_get_mtu' erwartet.
 update_mesh_gateway_mtu_state() {
-	trap "error_trap update_mesh_gateway_mtu_state '$*'" EXIT
+	trap 'error_trap update_mesh_gateway_mtu_state "$*"' EXIT
 	local service_name="$1"
 	local host
 	local state
@@ -409,7 +409,7 @@ disable_on_usergw() {
 ##   als die vorgegebene Aktualisierungsperiode ist.
 ## @returns Wahr, falls kein Diest mit aktuellem Zeitstempel gefunden wurde.
 is_trusted_service_list_outdated() {
-	trap "error_trap is_trusted_service_list_outdated '$*'" EXIT
+	trap 'error_trap is_trusted_service_list_outdated "$*"' EXIT
 	local most_recent_timestamp
 	most_recent_timestamp=$(get_services \
 		| filter_services_by_value "source" "trusted" \
@@ -428,7 +428,7 @@ is_trusted_service_list_outdated() {
 ##        mit "ifup wan" wieder hinzu.
 ## @details Die Ursache für die fehlende default-Route ist unklar.
 fix_wan_route_if_missing() {
-	trap "error_trap fix_wan_route_if_missing '$*'" EXIT
+	trap 'error_trap fix_wan_route_if_missing "$*"' EXIT
 	# default route exists? Nothing to fix ...
 	ip route show | grep -q ^default && return 0
 	(
@@ -448,7 +448,7 @@ fix_wan_route_if_missing() {
 ## @fn update_on_usergw_status()
 ## @brief Baue Verbindungen auf oder trenne sie - je nach Modul-Status.
 update_on_usergw_status() {
-	trap "error_trap update_on_usergw_status '$*'" EXIT
+	trap 'error_trap update_on_usergw_status "$*"' EXIT
 	if is_on_module_installed_and_enabled "on-usergw"; then
 		fix_wan_route_if_missing
 		is_trusted_service_list_outdated && update_trusted_service_list

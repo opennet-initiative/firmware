@@ -11,7 +11,7 @@
 
 
 configure_olsrd_httpinfo_port() {
-	trap "error_trap configure_olsrd_httpinfo_port '$*'" EXIT
+	trap 'error_trap configure_olsrd_httpinfo_port "$*"' EXIT
 	local port="$1"
 	local uci_prefix
 
@@ -26,7 +26,7 @@ configure_olsrd_httpinfo_port() {
 
 # das txtinfo-Modul ist notwendig fuer die Dienstverwaltung (Routen-Entfernung)
 olsrd_enable_txtinfo() {
-	trap "error_trap olsrd_enable_txtinfo '$*'" EXIT
+	trap 'error_trap olsrd_enable_txtinfo "$*"' EXIT
 	local uci_prefix
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "txtinfo")
 	uci set "${uci_prefix}.ignore=0"
@@ -36,7 +36,7 @@ olsrd_enable_txtinfo() {
 # das jsoninfo-Modul ist notwendig fuer die luci-Integration von olsrd
 # (nett, aber unwichtig)
 olsrd_enable_jsoninfo() {
-	trap "error_trap olsrd_enable_jsoninfo '$*'" EXIT
+	trap 'error_trap olsrd_enable_jsoninfo "$*"' EXIT
 	local uci_prefix
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "jsoninfo")
 	uci set "${uci_prefix}.ignore=0"
@@ -44,7 +44,7 @@ olsrd_enable_jsoninfo() {
 
 
 olsrd_enable_ondataservice() {
-	trap "error_trap enable_ondataservice '$*'" EXIT
+	trap 'error_trap enable_ondataservice "$*"' EXIT
 	local uci_prefix
 
 	# schon vorhanden? Unberuehrt lassen ...
@@ -63,7 +63,7 @@ olsrd_enable_ondataservice() {
 
 
 olsrd_enable_nameservice() {
-	trap "error_trap enable_nameservice '$*'" EXIT
+	trap 'error_trap enable_nameservice "$*"' EXIT
 	local current_trigger
 	local uci_prefix
 
@@ -85,7 +85,7 @@ olsrd_enable_nameservice() {
 
 # disable olsrd6. By default it is enabled. We use olsrd2 for IPv6.
 olsrd6_disable() {
-	trap "error_trap olsrd6_disable '$*'" EXIT
+	trap 'error_trap olsrd6_disable "$*"' EXIT
 	/etc/init.d/olsrd6 disable
 }
 

@@ -117,7 +117,7 @@ move_down()	{ move_service_down	"$1" "gw"; }
 
 add_gw() {
 	# shellcheck disable=SC2086
-	trap 'error_trap add_gw "$*"' $GUARD_TRAPS
+	trap 'error_trap add_gw "$*"' EXIT
 	local ipaddr="$1"
 	local port="${2:-$DEFAULT_MIG_PORT}"
 	notify_service "manual" "gw" "openvpn" "$ipaddr" "$port" "udp" "/" >/dev/null

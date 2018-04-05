@@ -32,7 +32,7 @@ get_on_openvpn_default() {
 ##   falls in irgendeiner Form Unklarheit besteht.
 has_mig_openvpn_credentials() {
 	has_openvpn_credentials_by_template "$MIG_OPENVPN_CONFIG_TEMPLATE_FILE" && return 0
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -53,7 +53,7 @@ verify_mig_gateways() {
 ## @param wanted Name eines Diensts
 ## @attention Seiteneffekt: Beräumung aller herumliegenden Konfigurationen von alten Verbindungen.
 select_mig_connection() {
-	trap "error_trap select_mig_connection '$*'" $GUARD_TRAPS
+	trap "error_trap select_mig_connection '$*'" EXIT
 	local wanted="$1"
 	local found_service=0
 	for one_service in $(get_services "gw"); do
@@ -73,7 +73,7 @@ select_mig_connection() {
 ## @param force_switch_now [optional] erzwinge den Wechsel auf den besten Gateway unabhängig von Wartezeiten (true/false)
 ## @ref mig-switch
 find_and_select_best_gateway() {
-	trap "error_trap find_and_select_best_gateway '$*'" $GUARD_TRAPS
+	trap "error_trap find_and_select_best_gateway '$*'" EXIT
 	local force_switch_now="${1:-false}"
 	local service_name
 	local host
@@ -170,7 +170,7 @@ find_and_select_best_gateway() {
 ## @returns Liste der Namen aller Dienste, die aktuell eine aktive VPN-Verbindung halten.
 ## @attention Diese Funktion braucht recht viel Zeit.
 get_active_mig_connections() {
-	trap "error_trap get_active_mig_connections '$*'" $GUARD_TRAPS
+	trap "error_trap get_active_mig_connections '$*'" EXIT
 	local service_name
 	for service_name in $(get_services "gw"); do
 		[ "$(get_openvpn_service_state "$service_name")" = "active" ] && echo "$service_name" || true
@@ -183,7 +183,7 @@ get_active_mig_connections() {
 ## @returns Liste der Namen aller Dienste, die aktuell beim Verbindungsaufbau sind.
 ## @attention Diese Funktion braucht recht viel Zeit.
 get_starting_mig_connections() {
-	trap "error_trap get_starting_mig_connections '$*'" $GUARD_TRAPS
+	trap "error_trap get_starting_mig_connections '$*'" EXIT
 	local service_name
 	for service_name in $(get_services "gw"); do
 		[ "$(get_openvpn_service_state "$service_name")" = "connecting" ] && echo "$service_name" || true
@@ -245,7 +245,7 @@ get_client_cn() {
 ## @returns zwei Zahlen durch Tabulatoren getrennt / keine Ausgabe, falls keine Main-ID gefunden wurde
 ## @details Jeder AP bekommt einen Bereich von zehn Ports fuer die Port-Weiterleitung zugeteilt.
 get_mig_port_forward_range() {
-	trap "error_trap get_mig_port_forward_range '$*'" $GUARD_TRAPS
+	trap "error_trap get_mig_port_forward_range '$*'" EXIT
 	local client_cn="${1:-}"
 	[ -z "$client_cn" ] && client_cn=$(get_client_cn)
 	local port_count=10
@@ -319,7 +319,7 @@ disable_on_openvpn() {
 ## @params stype Dienst-Typ (z.B. "DNS" oder "NTP") - entspricht den DHCP-Options, die vom OpenVPN-Server gepusht werden.
 ## @details Die Ausgabe ist leer, falls kein Tunnel aufgebaut ist.
 get_mig_tunnel_servers() {
-	trap "error_trap get_mig_tunnel_server '$*'" $GUARD_TRAPS
+	trap "error_trap get_mig_tunnel_server '$*'" EXIT
 	local stype="$1"
 	[ -z "$(get_active_mig_connections)" ] && return 0
 	[ -f "$MIG_PREFERRED_SERVERS_FILE" ] || return 0
@@ -348,7 +348,7 @@ get_traceroute_csv() {
 ## @fn update_traceroute_gw_cache()
 ## @brief Aktualisiere den traceroute zu allen Gateway Servern.
 update_traceroute_gw_cache() {
-	trap "error_trap update_traceroute_gw_cache '$*'" $GUARD_TRAPS
+	trap "error_trap update_traceroute_gw_cache '$*'" EXIT
 	local host
 	local service
 	local traceroute

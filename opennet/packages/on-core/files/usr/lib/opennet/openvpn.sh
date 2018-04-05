@@ -13,12 +13,12 @@ OPENVPN_CONFIG_BASEDIR=/var/etc/openvpn
 ## @details Die Konfigurationsdatei wird erzeugt und eine openvpn-uci-Konfiguration wird angelegt.
 ##   Falls zu diesem openvpn-Dienst kein Zertifikat oder kein Schlüssel gefunden wird, dann passiert nichts.
 enable_openvpn_service() {
-	trap "error_trap enable_openvpn_service '$*'" $GUARD_TRAPS
+	trap "error_trap enable_openvpn_service '$*'" EXIT
 	local service_name="$1"
 	local config_file="$OPENVPN_CONFIG_BASEDIR/${service_name}.conf"
 	if ! openvpn_service_has_certificate_and_key "$service_name"; then
 		msg_info "Refuse to enable openvpn server ('$service_name'): missing key or certificate"
-		trap "" $GUARD_TRAPS && return 1
+		trap "" EXIT && return 1
 	fi
 	local uci_prefix="openvpn.$service_name"
 	# zukuenftige config-Datei referenzieren
@@ -37,7 +37,7 @@ enable_openvpn_service() {
 ## @brief Schreibe eine openvpn-Konfigurationsdatei.
 ## @param service_name Name eines Dienstes
 update_vpn_config() {
-	trap "error_trap update_vpn_config '$*'" $GUARD_TRAPS
+	trap "error_trap update_vpn_config '$*'" EXIT
 	local service_name="$1"
 	local config_file="$2"
 	service_add_file_dependency "$service_name" "$config_file"
@@ -53,7 +53,7 @@ update_vpn_config() {
 ## @details Die UCI-Konfiguration, sowie alle anderen mit der Verbindung verbundenen Elemente werden entfernt.
 ##   Die openvpn-Verbindung bleibt bestehen, bis zum nächsten Aufruf von 'apply_changes openvpn'.
 disable_openvpn_service() {
-	trap "error_trap disable_openvpn_service '$*'" $GUARD_TRAPS
+	trap "error_trap disable_openvpn_service '$*'" EXIT
 	local service_name="$1"
 	# Abbruch, falls es keine openvpn-Instanz gibt
 	[ -z "$(uci_get "openvpn.$service_name")" ] && return 0
@@ -70,7 +70,7 @@ disable_openvpn_service() {
 ## @details Die Prüfung wird anhand der PID-Datei und der Gültigkeit der enthaltenen PID vorgenommen.
 ## @returns "active", "connecting" oder einen leeren String (unbekannt, bzw. keine Verbindung).
 get_openvpn_service_state() {
-	trap "error_trap get_openvpn_service_state '$*'" $GUARD_TRAPS
+	trap "error_trap get_openvpn_service_state '$*'" EXIT
 	local service_name="$1"
 	local pid_file
 	# existiert ein VPN-Eintrag?
@@ -114,7 +114,7 @@ _change_openvpn_config_setting() {
 ## @brief liefere openvpn-Konfiguration eines Dienstes zurück
 ## @param service_name Name eines Dienstes
 get_openvpn_config() {
-	trap "error_trap get_openvpn_config '$*'" $GUARD_TRAPS
+	trap "error_trap get_openvpn_config '$*'" EXIT
 	local service_name="$1"
 	local remote
 	local port
@@ -159,7 +159,7 @@ get_openvpn_config() {
 ## @param cert [optional] Zertifikatsdatei: z.B. $VPN_DIR/on_aps.crt
 ## @returns Exitcode=0 falls die Verbindung aufgebaut werden konnte
 verify_vpn_connection() {
-	trap "error_trap verify_vpn_connection '$*'" $GUARD_TRAPS
+	trap "error_trap verify_vpn_connection '$*'" EXIT
 	local service_name="$1"
 	local key_file="${2:-}"
 	local cert_file="${3:-}"
@@ -248,7 +248,7 @@ verify_vpn_connection() {
 		# und somit den Start von openvpn verhindert.
 		msg_error "openvpn test failed unexpectedly: configuration error?"
 	fi
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -277,7 +277,7 @@ openvpn_service_has_certificate_and_key() {
 	[ -z "$cert_file" -o -z "$key_file" ] && return 0
 	# existiert die Datei?
 	[ -e "$cert_file" -a -e "$key_file" ] && return 0
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -286,7 +286,7 @@ openvpn_service_has_certificate_and_key() {
 ## @param template_file Name einer openvpn-Konfigurationsdatei (oder einer Vorlage). Aus dieser Datei werden "cert"- und "key"-Werte entnommen.
 ## @returns Liefert "wahr", falls Schlüssel und Zertifikat vorhanden sind oder falls in irgendeiner Form Unklarheit besteht.
 has_openvpn_credentials_by_template() {
-	trap "error_trap has_openvpn_credentials_by_template '$*'" $GUARD_TRAPS
+	trap "error_trap has_openvpn_credentials_by_template '$*'" EXIT
 	local template_file="$1"
 	local cert_file
 	local key_file
@@ -301,7 +301,7 @@ has_openvpn_credentials_by_template() {
 	[ -z "$key_file" -o -z "$cert_file" ] && return 0
 	# beide Dateien existieren
 	[ -e "$key_file" -a -e "$cert_file" ] && return 0
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -377,7 +377,7 @@ get_openvpn_service_pid_file() {
 ## @param Name des Diensts
 ## @brief Dateiname der Konfigurationsvorlage dieses Diensts ausgeben.
 get_openvpn_service_template_filename() {
-	trap "error_trap get_openvpn_service_template_filename '$*'" $GUARD_TRAPS
+	trap "error_trap get_openvpn_service_template_filename '$*'" EXIT
 	local service_name="$1"
 	local service_type
 	service_type=$(get_service_value "$service_name" "service")
@@ -392,7 +392,7 @@ get_openvpn_service_template_filename() {
 		echo "$MESH_OPENVPN_CONFIG_TEMPLATE_FILE"
 	else
 		msg_error "unknown service type for openvpn config preparation: $service_type"
-		trap "" $GUARD_TRAPS && return 1
+		trap "" EXIT && return 1
 	fi
 }
 
@@ -402,7 +402,7 @@ get_openvpn_service_template_filename() {
 ## @details The output can be easily parsed via 'cut'. Even the full status output of openvpn is safe for parsing since potential tabulator characters are removed.
 ## @returns One line consisting of five fields separated by tab characters is returned (tried_to_remote real_to_remote tried_from_remote real_from_remote full_status_output). Failed tests are indicated by an empty result.
 openvpn_get_mtu() {
-	trap "error_trap openvpn_get_mtu '$*'" $GUARD_TRAPS
+	trap "error_trap openvpn_get_mtu '$*'" EXIT
 	local service_name="$1"
 	local config_file
 	local pid_file
@@ -484,7 +484,7 @@ openvpn_get_mtu() {
 ##           ebenfalls entfernt. Diese Funktion sollte also nur in ausgewählten Situation
 ##           aufgerufen werden (nach einem Reboot und nach einem Verbindungsabbruch).
 cleanup_stale_openvpn_services() {
-	trap "error_trap cleanup_stale_openvpn_services '$*'" $GUARD_TRAPS
+	trap "error_trap cleanup_stale_openvpn_services '$*'" EXIT
 	local service_name
 	local config_file
 	local pid_file

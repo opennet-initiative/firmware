@@ -135,7 +135,7 @@ update_file_if_changed() {
 	content="$(cat -)"
 	if [ -e "$target_filename" ] && echo "$content" | cmp -s - "$target_filename"; then
 		# the content did not change
-		trap "" $GUARD_TRAPS && return 1
+		trap "" EXIT && return 1
 	else
 		# updated content
 		local dirname
@@ -153,7 +153,7 @@ update_file_if_changed() {
 ##   Die Server-Datei wird nur bei Änderungen neu geschrieben. Dasselbe gilt für den Neustart des Diensts.
 ##   Diese Funktion sollte via olsrd-nameservice-Trigger oder via cron-Job ausgeführt werden.
 update_dns_servers() {
-	trap "error_trap update_dns_servers '$*'" $GUARD_TRAPS
+	trap "error_trap update_dns_servers '$*'" EXIT
 	local host
 	local port
 	local service
@@ -209,7 +209,7 @@ update_dns_servers() {
 ##   Diese Funktion sollte via olsrd-nameservice-Trigger oder via cron-Job ausgeführt werden.
 ## @sa http://wiki.openwrt.org/doc/uci/system#remote_time_ntp
 update_ntp_servers() {
-	trap "error_trap update_ntp_servers '$*'" $GUARD_TRAPS
+	trap "error_trap update_ntp_servers '$*'" EXIT
 	local host
 	local port
 	local service
@@ -251,7 +251,7 @@ update_ntp_servers() {
 ## @brief Füge ein Ereignis zum dauerhaften Ereignisprotokoll (/etc/banner) hinzu.
 ## @details Ein Zeitstempel, sowie hübsche Formatierung wird automatisch hinzugefügt.
 add_banner_event() {
-	trap "error_trap add_banner_event '$*'" $GUARD_TRAPS
+	trap "error_trap add_banner_event '$*'" EXIT
 	local event="$1"
 	# verwende den optionalen zweiten Parameter oder den aktuellen Zeitstempel
 	local timestamp="${2:-}"
@@ -337,7 +337,7 @@ get_on_core_default() {
 ##   Um locking-Probleme zu vermeiden, lesen wir den Wert direkt aus der control-Datei des Pakets.
 ##   Das ist nicht schoen - aber leider ist die lock-Datei nicht konfigurierbar.
 get_on_firmware_version() {
-	trap "error_trap get_on_firmware_version '$*'" $GUARD_TRAPS
+	trap "error_trap get_on_firmware_version '$*'" EXIT
 	local status_file="${IPKG_INSTROOT:-}/usr/lib/opkg/info/on-core.control"
 	[ -e "$status_file" ] || return 0
 	awk '{if (/^Version:/) print $2;}' <"$status_file"
@@ -422,7 +422,7 @@ acquire_lock() {
 	while ! is_lock_available "$lock_file" "$max_age_minutes"; do
 		if [ "$(date +%s)" -ge "$timeout_limit" ]; then
 			msg_info "Failed to acquire lock file: $lock_file"
-			trap "" $GUARD_TRAPS && return 1
+			trap "" EXIT && return 1
 		fi
 		sleep "$(( $(get_random 10) + 1 ))"
 	done
@@ -436,19 +436,19 @@ acquire_lock() {
 # Parameter PID-Datei: vollstaendiger Pfad
 # Parameter Prozess-Name: Dateiname ohne Pfad
 check_pid_file() {
-	trap "error_trap check_pid_file '$*'" $GUARD_TRAPS
+	trap "error_trap check_pid_file '$*'" EXIT
 	local pid_file="$1"
 	local process_name="$2"
 	local pid
 	local current_process
-	[ -z "$pid_file" -o ! -e "$pid_file" ] && trap "" $GUARD_TRAPS && return 1
+	[ -z "$pid_file" -o ! -e "$pid_file" ] && trap "" EXIT && return 1
 	pid=$(sed 's/[^0-9]//g' "$pid_file")
 	# leere/kaputte PID-Datei
-	[ -z "$pid" ] && trap "" $GUARD_TRAPS && return 1
+	[ -z "$pid" ] && trap "" EXIT && return 1
 	# Prozess-Datei ist kein symbolischer Link?
-	[ ! -L "/proc/$pid/exe" ] && trap "" $GUARD_TRAPS && return 1
+	[ ! -L "/proc/$pid/exe" ] && trap "" EXIT && return 1
 	current_process=$(readlink "/proc/$pid/exe")
-	[ "$process_name" != "$(basename "$current_process")" ] && trap "" $GUARD_TRAPS && return 1
+	[ "$process_name" != "$(basename "$current_process")" ] && trap "" EXIT && return 1
 	return 0
 }
 
@@ -487,7 +487,7 @@ apply_changes() {
 # 3) Main-IP in der olsr-Konfiguration setzen
 # 4) IP des Interface "free" setzen
 set_opennet_id() {
-	trap "error_trap set_opennet_id '$*'" $GUARD_TRAPS
+	trap "error_trap set_opennet_id '$*'" EXIT
 	local new_id="$1"
 	local network
 	local uci_prefix
@@ -580,7 +580,7 @@ get_uptime_minutes() {
 ##   als "veraltet" gewertet.
 ## @returns True, falls die Datei existiert und älter als angegeben ist - ansonsten "False"
 is_file_timestamp_older_minutes() {
-	trap "error_trap is_file_timestamp_older_minutes '$*'" $GUARD_TRAPS
+	trap "error_trap is_file_timestamp_older_minutes '$*'" EXIT
 	local filename="$1"
 	local limit_minutes="$2"
 	[ -e "$filename" ] || return 0
@@ -595,7 +595,7 @@ is_file_timestamp_older_minutes() {
 	[ -z "$file_timestamp" -o \
 		"$file_timestamp" -gt "$timestamp_now" -o \
 		"$((file_timestamp + limit_minutes))" -lt "$timestamp_now" ] && return 0
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -617,7 +617,7 @@ is_timestamp_older_minutes() {
 	[ "$now" -lt "$timestamp_minute" ] && \
 		msg_info "WARNING: Timestamp from future found: $timestamp_minute (minutes since epoch)" && \
 		return 0
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -651,7 +651,7 @@ get_filesize() {
 # Bericht erzeugen
 # Der Name der erzeugten tar-Datei wird als Ergebnis ausgegeben.
 generate_report() {
-	trap "error_trap generate_report '$*'" $GUARD_TRAPS
+	trap "error_trap generate_report '$*'" EXIT
 	local fname
 	local pid
 	local reports_dir
@@ -808,7 +808,7 @@ get_potential_error_messages() {
 # Parameter pattern: Suchmuster der zu ersetzenden Zeile
 # Parameter new_line: neue Zeile
 line_in_file() {
-	trap "error_trap line_in_file '$*'" $GUARD_TRAPS
+	trap "error_trap line_in_file '$*'" EXIT
 	local filename="$1"
 	local pattern="$2"
 	local new_line="$3"
@@ -837,7 +837,7 @@ is_in_list() {
 		true
 	done
 	# kein passendes Token gefunden
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -858,7 +858,7 @@ is_function_available() {
 	# Also verwenden wir die Textausgabe von "type".
 	# Die Fehlerausgabe von type wird ignoriert - im Falle der bash gibt es sonst unnoetige Ausgaben.
 	type "$func_name" 2>/dev/null | grep -q "function$" && return 0
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -882,7 +882,7 @@ get_random() {
 ##   UGW-Gegenstellen) benötigen wir ein lokales Salz, um strukturelle
 ##   Bevorzugungen zu vermeiden.
 get_local_bias_number() {
-	trap "error_trap get_local_bias_number '$*'" $GUARD_TRAPS
+	trap "error_trap get_local_bias_number '$*'" EXIT
 	local bias
 	bias=$(uci_get on-core.settings.local_bias_number)
 	# der Bias-Wert ist schon vorhanden - wir liefern ihn aus
@@ -907,7 +907,7 @@ system_service_check() {
 	local result
 	result=$(set +eu; . /lib/functions/service.sh; SERVICE_PID_FILE="$pid_file"; service_check "$executable" && echo "ok"; set -eu)
 	[ -n "$result" ] && return 0
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -946,7 +946,7 @@ _get_parts_dir_files() {
 ## @details Die Namenskonventionen und das Verhalten entspricht dem verbreiteten 'run-parts'-Werkzeug.
 ##     Die Dateien müssen ausführbar sein.
 run_parts() {
-	trap "error_trap run_parts '$*'" $GUARD_TRAPS
+	trap "error_trap run_parts '$*'" EXIT
 	local rundir="$1"
 	shift
 	local fname
@@ -962,7 +962,7 @@ run_parts() {
 ## @brief Führe die zwischenzeitlich für die spätere Ausführung vorgemerkten Aufgaben aus.
 ## @details Unabhängig vom Ausführungsergebnis wird das Skript anschließend gelöscht.
 run_scheduled_tasks() {
-	trap "error_trap run_scheduled_tasks '$*'" $GUARD_TRAPS
+	trap "error_trap run_scheduled_tasks '$*'" EXIT
 	local fname
 	local temp_fname
 	local running_tasks
@@ -995,7 +995,7 @@ run_scheduled_tasks() {
 ## @details Diese Methode sollte für Aufgaben verwendet werden, die nicht unmittelbar ausgeführt
 ##   werden müssen und im Zweifelsfall nicht parallel ablaufen sollen (ressourcenschonend).
 schedule_task() {
-	trap "error_trap schedule_task '$*'" $GUARD_TRAPS
+	trap "error_trap schedule_task '$*'" EXIT
 	local script_content
 	local unique_key
 	script_content=$(cat -)
@@ -1014,7 +1014,7 @@ schedule_task() {
 ## @details Die Namenskonventionen und das Verhalten entspricht dem verbreiteten 'run-parts'-Werkzeug.
 ##     Die Dateien müssen ausführbar sein.
 schedule_parts() {
-	trap "error_trap schedule_parts '$*'" $GUARD_TRAPS
+	trap "error_trap schedule_parts '$*'" EXIT
 	local schedule_dir="$1"
 	local fname
 	_get_parts_dir_files "$schedule_dir" | while read -r fname; do
@@ -1059,7 +1059,7 @@ read_data_bytes() {
 ##     mtd7: 00010000 00010000 "EEPROM"
 ##   Dabei ignorieren wir bei Bedarf "rootfs_data" (beschreibbarer Bereich der Firmware). 
 get_flash_backup() {
-	trap "error_trap get_flash_backup '$*'" $GUARD_TRAPS
+	trap "error_trap get_flash_backup '$*'" EXIT
 	local include_private="${1:-}"
 	local name
 	local size
@@ -1112,11 +1112,11 @@ get_flash_backup() {
 ## @fn has_flash_or_filesystem_error_indicators()
 ## @brief Prüfe ob typische Indikatoren (vor allem im Kernel-Log) vorliegen, die auf einen Flash-Defekt hinweisen.
 has_flash_or_filesystem_error_indicators() {
-	trap "error_trap get_flash_backup '$*'" $GUARD_TRAPS
+	trap "error_trap get_flash_backup '$*'" EXIT
 	dmesg | grep -q "jffs2.*CRC" && return 0
 	dmesg | grep -q "SQUASHFS error" && return 0
 	# keine Hinweise gefunden -> wir liefern "nein"
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 # Ende der Doku-Gruppe

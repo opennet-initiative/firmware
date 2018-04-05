@@ -12,7 +12,7 @@ _is_local_service_relay_port_unused() {
 	local port="$1"
 	local collisions
 	collisions=$(get_services | filter_services_by_value "local_relay_port" "$port")
-	[ -n "$collisions" ] && trap "" $GUARD_TRAPS && return 1
+	[ -n "$collisions" ] && trap "" EXIT && return 1
 	# keine Kollision entdeckt
 	return 0
 }
@@ -22,7 +22,7 @@ _is_local_service_relay_port_unused() {
 # Falls noch kein Port definiert ist, dann waehle einen neuen Port.
 # Parameter: config_name
 pick_local_service_relay_port() {
-	trap "error_trap pick_local_service_relay_port '$*'" $GUARD_TRAPS
+	trap "error_trap pick_local_service_relay_port '$*'" EXIT
 	local service_name="$1"
 	local port
 	port=$(get_service_value "$service_name" "local_relay_port")
@@ -43,7 +43,7 @@ pick_local_service_relay_port() {
 ## @details Diese Funktion wird als Teil des Firewall-Reload-Prozess und nach Service-Relay-Aenderungen
 ##   aufgerufen.
 update_relay_firewall_rules() {
-	trap "error_trap update_relay_firewall_rules '$*'" $GUARD_TRAPS
+	trap "error_trap update_relay_firewall_rules '$*'" EXIT
 	local host
 	local port
 	local protocol
@@ -81,7 +81,7 @@ update_relay_firewall_rules() {
 
 
 _get_service_relay_olsr_announcement_prefix() {
-	trap "error_trap _get_service_relay_olsr_announcement_prefix '$*'" $GUARD_TRAPS
+	trap "error_trap _get_service_relay_olsr_announcement_prefix '$*'" EXIT
 	local service_name="$1"
 	local main_ip
 	local service_type
@@ -105,7 +105,7 @@ _get_service_relay_olsr_announcement_prefix() {
 ## @fn get_service_relay_olsr_announcement()
 ## @brief Ermittle den oder die OLSR-Nameservice-Announcements, die zu dem Dienst gehoeren.
 get_service_relay_olsr_announcement() {
-	trap "error_trap get_service_relay_olsr_announcement '$*'" $GUARD_TRAPS
+	trap "error_trap get_service_relay_olsr_announcement '$*'" EXIT
 	local service_name="$1"
 	local announce_unique
 	local uci_prefix
@@ -120,7 +120,7 @@ get_service_relay_olsr_announcement() {
 ## @param service_name Name des zu veröffentlichenden Diensts
 ## @attention Anschließend muss die uci-Sektion 'olsrd' committed werden.
 announce_olsr_service_relay() {
-	trap "error_trap announce_olsr_service_relay '$*'" $GUARD_TRAPS
+	trap "error_trap announce_olsr_service_relay '$*'" EXIT
 	local service_name="$1"
 	local service_unique
 	local service_details
@@ -159,7 +159,7 @@ EOF
 ## @fn get_olsr_relay_service_name_from_description()
 ## @brief Ermittle den Dienstnamen, der zu einer olsr-Relay-Service-Definition gehoert.
 get_olsr_relay_service_name_from_description() {
-	trap "error_trap get_olsr_relay_service_name_from_description '$*'" $GUARD_TRAPS
+	trap "error_trap get_olsr_relay_service_name_from_description '$*'" EXIT
 	local service_description="$1"
 	local fields
 	local port
@@ -193,14 +193,14 @@ deannounce_unused_olsr_service_relays() {
 ## @fn is_service_relay_possible()
 ## @brief Pruefe ob ein Relay-Dienst aktiviert (nicht "disabled") ist und ob das WAN-Routing korrekt ist.
 is_service_relay_possible() {
-	trap "error_trap is_service_relay_possible '$*'" $GUARD_TRAPS
+	trap "error_trap is_service_relay_possible '$*'" EXIT
 	local service_name="$1"
 	local enabled
 	local wan_routing
 	disabled=$(get_service_value "$service_name" "disabled" "false")
-	uci_is_true "$disabled" && trap "" $GUARD_TRAPS && return 1
+	uci_is_true "$disabled" && trap "" EXIT && return 1
 	wan_routing=$(get_service_value "$service_name" "wan_status" "false")
-	uci_is_false "$wan_routing" && trap "" $GUARD_TRAPS && return 1
+	uci_is_false "$wan_routing" && trap "" EXIT && return 1
 	return 0
 }
 
@@ -209,7 +209,7 @@ is_service_relay_possible() {
 ## @brief Pruefe regelmaessig, ob Weiterleitungen für alle bekannten durchgereichten Diensten existieren.
 ## @details Fehlende Weiterleitungen oder olsr-Announcements werden angelegt.
 update_service_relay_status() {
-	trap "error_trap update_service_relay_status '$*'" $GUARD_TRAPS
+	trap "error_trap update_service_relay_status '$*'" EXIT
 	local service_name
 	local wan_status
 	if is_on_module_installed_and_enabled "on-usergw"; then

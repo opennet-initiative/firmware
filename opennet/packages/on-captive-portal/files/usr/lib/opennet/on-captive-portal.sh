@@ -57,7 +57,7 @@ get_on_captive_portal_default() {
 captive_portal_has_devices() {
 	[ -n "$(get_subdevices_of_interface "$NETWORK_FREE")" ] && return 0
 	[ -n "$(find_all_uci_sections wireless wifi-iface "network=$NETWORK_FREE")" ] && return 0
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -98,7 +98,7 @@ captive_portal_uses_wifi_only_bridge() {
 			fi
 		fi
 	fi
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -122,7 +122,7 @@ change_captive_portal_wireless_disabled_state() {
 
 
 disable_captive_portal() {
-	trap "error_trap disable_captive_portal" $GUARD_TRAPS
+	trap "error_trap disable_captive_portal" EXIT
 	msg_info "on-captive-portal: wifi-Interfaces abschalten"
 	# free-Interface ist aktiv - es gibt jedoch keinen Tunnel
 	change_captive_portal_wireless_disabled_state "1"
@@ -134,7 +134,7 @@ disable_captive_portal() {
 ## @details Diese Funktion wird nach Statusänderungen des VPN-Interface, sowie innerhalb eines
 ##   regelmäßigen cronjobs ausgeführt.
 sync_captive_portal_state_with_mig_connections() {
-	trap "error_trap sync_captive_portal_state_with_mig_connections" $GUARD_TRAPS
+	trap "error_trap sync_captive_portal_state_with_mig_connections" EXIT
 	# eventuelle defekte/verwirrende Netzwerk-Konfiguration korrigieren
 	captive_portal_repair_empty_network_bridge
 	# Abbruch, falls keine Netzwerk-Interfaces zugeordnet wurden
@@ -164,7 +164,7 @@ sync_captive_portal_state_with_mig_connections() {
 ## @brief Prüfe ob das Netzwerk-Interface des Captive-Portal aktiv ist.
 is_captive_portal_running() {
 	is_interface_up "$NETWORK_FREE" && return 0
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 
@@ -207,7 +207,7 @@ get_captive_portal_client_count() {
 ##   * Upload-Verkehrsvolumen (kByte)
 ## Der Einfachheit halber nehmen wir an, dass alle DHCP-Clients auch Captive-Portal-Clients sind.
 get_captive_portal_clients() {
-	trap 'error_trap get_captive_portal_clients "'"$*"'"' $GUARD_TRAPS
+	trap 'error_trap get_captive_portal_clients "'"$*"'"' EXIT
 	local ip_address
 	local mac_address
 	local timestamp

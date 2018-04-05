@@ -13,7 +13,7 @@ ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.
 ## @details Eventuelle SSL-Zertifikate werden gegenueber der Opennet-CA-Liste abgeglichen.
 ##     Zusätzlich zur URL können auch (davor) curl-spezifischen Optionen angebeben werden.
 https_request_opennet() {
-	trap "" $GUARD_TRAPS
+	trap "" EXIT
 	# Diese curl-Operation dauert aus irgendeinem Grund ca. 10s - wir muessen also den timeout hochsetzen.
 	# Auf dem Server sind haeufig 408 (timeout) Fehler sichtbar - also mindestens einmal wiederholen.
 	curl -q --silent --max-time 30 --retry 2 --cacert "$ON_CERT_BUNDLE_PATH" "$@"
@@ -28,7 +28,7 @@ https_request_opennet() {
 ## @todo Umstellung vom Formular auf die zu entwickelnde API
 ## @returns Das Ergebnis ist die html-Ausgabe des Upload-Formulars.
 submit_csr_via_http() {
-	trap "error_trap submit_csr_via_http '$*'" $GUARD_TRAPS
+	trap "error_trap submit_csr_via_http '$*'" EXIT
 	# upload_url: z.B. http://ca.on/csr/csr_upload.php
 	local upload_url="$1"
 	local csr_file="$2"
@@ -42,7 +42,7 @@ submit_csr_via_http() {
 		--form "opt_mail=$helper_email" "$upload_url" && return 0
 	msg_error "Failed to submit CSR to '$upload_url' via curl ($?)"
 	# ein technischer Verbindungsfehler trat auf
-	trap "" $GUARD_TRAPS && return 1
+	trap "" EXIT && return 1
 }
 
 # Ende der certificate-Doku-Gruppe

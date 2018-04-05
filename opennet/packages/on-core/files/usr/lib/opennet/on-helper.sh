@@ -21,19 +21,16 @@ set -eu
 [ "${ON_DEBUG:-}" = "1" ] && set -x
 
 
-# leider, leider unterstuetzt die busybox-ash kein trap "ERR"
-GUARD_TRAPS=EXIT
-
 DEBUG="${DEBUG:-}"
 
 # siehe Entwicklungsdokumentation (Entwicklungshinweise -> Shell-Skripte -> Fehlerbehandlung)
-trap "error_trap __main__ '$*'" $GUARD_TRAPS
+trap "error_trap __main__ '$*'" EXIT
 
 
 # Schreibe eine log-Nachricht bei fehlerhaftem Skript-Abbruch
 # Uebliche Parameter sind der aktuelle Funktionsname, sowie Parameter der aufgerufenen Funktion.
 # Jede nicht-triviale Funktion sollte zu Beginn folgende Zeile enthalten:
-#    trap "error_trap FUNKTIONSNAME_HIER_EINTRAGEN '$*'" $GUARD_TRAPS
+#    trap "error_trap FUNKTIONSNAME_HIER_EINTRAGEN '$*'" EXIT
 error_trap() {
 	# dies ist der Exitcode des Skripts (im Falle der EXIT trap)
 	local exitcode="$?"

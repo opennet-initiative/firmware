@@ -100,7 +100,7 @@ delete_policy_rule() {
 ## @param network logisches Netzwerkinterface
 ## @param more weitere Parameter: Policy-Rule-Spezifikation
 add_network_policy_rule_by_destination() {
-	trap "error_trap add_network_policy_rule_by_destination '$*'" $GUARD_TRAPS
+	trap "error_trap add_network_policy_rule_by_destination '$*'" EXIT
 	local family="$1"
 	local network="$2"
 	shift 2
@@ -121,7 +121,7 @@ add_network_policy_rule_by_destination() {
 ## @param zone Pakete aus allen Interfaces dieser Zone kommend sollen betroffen sein
 ## @param route Spezifikation einer Route (siehe 'ip route add ...')
 add_zone_policy_rules_by_iif() {
-	trap "error_trap add_zone_policy_rules '$*'" $GUARD_TRAPS
+	trap "error_trap add_zone_policy_rules '$*'" EXIT
 	local family="$1"
 	local zone="$2"
 	shift 2
@@ -148,7 +148,7 @@ add_zone_policy_rules_by_iif() {
 ##   * die neuen Policy-Rules für die obigen Tabellen werden an anderer Stelle erzeugt
 ##   Kurz gesagt: alle bisherigen Policy-Rules sind hinterher kaputt
 initialize_olsrd_policy_routing() {
-	trap "error_trap initialize_olsrd_policy_routing '$*'" $GUARD_TRAPS
+	trap "error_trap initialize_olsrd_policy_routing '$*'" EXIT
 	local iface
 	local current
 	local table
@@ -240,7 +240,7 @@ get_routing_table_id() {
 ##    Sollte die Tabelle bereits existieren, dann wird ihre Nummer zurückgeliefert.
 ## @return die neue Routing-Tabellen-Nummer wird zurückgeliefert
 add_routing_table() {
-	trap "error_trap add_routing_table '$*'" $GUARD_TRAPS
+	trap "error_trap add_routing_table '$*'" EXIT
 	local table_name="$1"
 	_prepare_routing_table_file
 	local table_id
@@ -307,7 +307,7 @@ get_traceroute() {
 # Dies ist noetig, um deadlocks bei parallelem Zugriff auf den single-thread olsrd zu verhindern.
 # Symptome eines deadlocks: olsrd ist beendet; viele parallele nc-Instanzen; eine davon ist an den txtinfo-Port gebunden.
 update_olsr_route_cache() {
-	trap "error_trap update_olsr_route_cache '$*'" $GUARD_TRAPS
+	trap "error_trap update_olsr_route_cache '$*'" EXIT
 	# die temporaere Datei soll verhindern, dass es zwischendurch ein Zeitfenster mit unvollstaendigen Informationen gibt
 	local tmpfile="${OLSR_ROUTE_CACHE_FILE}.new"
 	# Bei der Ausfuehrung via cron wird SIGPIPE eventuell behandelt, auf dass die Ausfuehrung

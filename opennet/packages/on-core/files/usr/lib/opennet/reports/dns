@@ -12,7 +12,9 @@ uci -q show dhcp | grep "^dhcp\.@dnsmasq" >dns.uci
 
 # kopiere Config-Dateien (keine dhcp-leases)
 for fname in /etc/resolv.conf /tmp/resolv.conf.auto /var/etc/dnsmasq.conf /var/run/dnsmasq.servers; do
-	[ -e "$fname" ] && cp "$fname" "$(basename "$fname")" || true
+	if [ -e "$fname" ]; then
+		cp "$fname" "$(basename "$fname")"
+	fi
 done
 
 

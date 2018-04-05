@@ -12,7 +12,6 @@
 #
 
 
-# shellcheck disable=SC1090
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 

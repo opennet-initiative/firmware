@@ -5,13 +5,17 @@
 
 MIG_OPENVPN_DIR=/etc/openvpn/opennet_user
 MIG_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
+# shellcheck disable=SC2034
 DEFAULT_MIG_PORT=1600
 # Pakete mit dieser TOS-Markierung duerfen nicht in den Tunnel
+# shellcheck disable=SC2034
 TOS_NON_TUNNEL=8
 ## Quelldatei für Standardwerte des Nutzer-VPN-Pakets
 ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
 MIG_PREFERRED_SERVERS_FILE=/var/run/mig-tunnel-servers.list
+# shellcheck disable=SC2034
 ZONE_TUNNEL=on_vpn
+# shellcheck disable=SC2034
 NETWORK_TUNNEL=on_vpn
 TRACEROUTE_FILENAME="traceroute_gw_cache"
 
@@ -72,6 +76,7 @@ select_mig_connection() {
 ## @brief Ermittle den besten Gateway und prüfe, ob ein Wechsel sinnvoll ist.
 ## @param force_switch_now [optional] erzwinge den Wechsel auf den besten Gateway unabhängig von Wartezeiten (true/false)
 ## @ref mig-switch
+# shellcheck disable=SC2120
 find_and_select_best_gateway() {
 	trap 'error_trap find_and_select_best_gateway "$*"' EXIT
 	local force_switch_now="${1:-false}"
@@ -153,14 +158,18 @@ find_and_select_best_gateway() {
 			return 0
 		else
 			# noch nicht alt genug fuer den Wechsel?
-			is_timestamp_older_minutes "$switch_candidate_timestamp" "$bettergateway_timeout" \
-				|| { msg_debug "Counting down further until we reach $bettergateway_timeout minutes"; return 0; }
+			if ! is_timestamp_older_minutes "$switch_candidate_timestamp" "$bettergateway_timeout"; then
+				msg_debug "Counting down further until we reach $bettergateway_timeout minutes"
+				return 0
+			fi
 		fi
 	fi
 	# eventuell kann hier auch ein leerer String uebergeben werden - dann wird kein Gateway aktiviert (korrekt)
-	[ -n "$best_gateway" ] \
-		&& msg_debug "Switching gateway from $current_gateway to $best_gateway" \
-		|| msg_debug "Disabling $current_gateway without a viable alternative"
+	if [ -n "$best_gateway" ]; then
+		msg_debug "Switching gateway from $current_gateway to $best_gateway"
+	else
+		msg_debug "Disabling $current_gateway without a viable alternative"
+	fi
 	select_mig_connection "$best_gateway"
 }
 
@@ -173,7 +182,7 @@ get_active_mig_connections() {
 	trap 'error_trap get_active_mig_connections "$*"' EXIT
 	local service_name
 	for service_name in $(get_services "gw"); do
-		[ "$(get_openvpn_service_state "$service_name")" = "active" ] && echo "$service_name" || true
+		[ "$(get_openvpn_service_state "$service_name")" != "active" ] || echo "$service_name"
 	done
 }
 
@@ -186,7 +195,7 @@ get_starting_mig_connections() {
 	trap 'error_trap get_starting_mig_connections "$*"' EXIT
 	local service_name
 	for service_name in $(get_services "gw"); do
-		[ "$(get_openvpn_service_state "$service_name")" = "connecting" ] && echo "$service_name" || true
+		[ "$(get_openvpn_service_state "$service_name")" != "connecting" ] || echo "$service_name"
 	done
 }
 
@@ -252,7 +261,6 @@ get_mig_port_forward_range() {
 	local cn_address=
 	local portbase
 	local first_port
-	local last_port
 
 	[ -z "$client_cn" ] && msg_debug "get_mig_port_forward_range: failed to get Common Name - maybe there is no certificate?" && return 0
 
@@ -292,6 +300,7 @@ update_mig_connection_status() {
 		# die Gateway-Tests sind nur moeglich, falls ein Test-Schluessel vorhanden ist
 		if has_mig_openvpn_credentials; then
 			verify_mig_gateways
+			# shellcheck disable=SC2119
 			find_and_select_best_gateway
 		fi
 	else
@@ -350,7 +359,6 @@ get_traceroute_csv() {
 update_traceroute_gw_cache() {
 	trap 'error_trap update_traceroute_gw_cache "$*"' EXIT
 	local host
-	local service
 	local traceroute
 
 	for host in $(get_services "gw" | pipe_service_attribute "host" | cut -f 2- | sort | uniq); do

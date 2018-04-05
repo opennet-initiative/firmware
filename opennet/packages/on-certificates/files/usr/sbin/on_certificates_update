@@ -20,7 +20,8 @@ CURL_OPTIONS="-q --silent --fail --cacert ${CA_DIR}/opennet-server_bundle.pem"
 verify_crl() {
 	local hash="$1"
 	local cert_file
-	cert_file=$(ls "$CA_DIR" | grep "^$hash\.[0-9]$" | sort -n | tail -1)
+	cert_file=$(find "$CA_DIR" -mindepth 1 -maxdepth 1 -name "$hash.*" -print0 \
+		| xargs -0 basename | grep "^$hash\.[0-9]$" | sort -n | tail -1)
 	[ -z "$cert_file" ] && echo >&2 "Failed to find certificate belonging to CRL '$hash'" && return 1
 	# Ausgabe des CRL-Resultats ("verify OK" oder aehnliches) umlenken - bei Erfolg sofort beenden
 	openssl crl -CAfile "$CA_DIR/$cert_file" -noout 2>/dev/null && return 0
@@ -37,7 +38,7 @@ safely_replace_file() {
 	# vorsichtiges Ersetzen: in dasselbe Verzeichnis schreiben und anschließend als atomare Operation umbenennen
 	local tmp_filename="${target_filename}_new"
 	# bei Abbruch die Loeschung der temporaeren Datei sicherstellen
-	trap "rm -f '$tmp_filename'" EXIT
+	trap 'rm -f "$tmp_filename"' EXIT
 	echo "$content" >"$tmp_filename"
 	mv "$tmp_filename" "$target_filename"
 }
@@ -49,6 +50,7 @@ update_crl() {
 	local content=
 	for base_url in $BASE_URLS; do
 		[ -n "$content" ] && break
+		# shellcheck disable=SC2086
 		content=$(curl $CURL_OPTIONS "$base_url/$crl_name")
 	done
 	[ -z "$content" ] && echo >&2 "Failed to download CRL '$crl_name'" && return 1

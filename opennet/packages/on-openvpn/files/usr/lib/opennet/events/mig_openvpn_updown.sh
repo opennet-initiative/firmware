@@ -15,6 +15,12 @@
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
+# die folgenden Variablen stammen aus der OpenVPN-Umgebung
+script_type=${script_type:-}
+route_vpn_gateway=${route_vpn_gateway:-}
+route_network_1=${route_network_1:-}
+trusted_ip=${trusted_ip:-}
+
 
 # parse die foreign-Options, beispielsweise:
 #   foreign_option_4='dhcp-option DNS 10.1.0.1'

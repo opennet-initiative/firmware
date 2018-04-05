@@ -10,9 +10,11 @@ missing=$(get_missing_modules)
 
 # keine fehlenden Pakete? Beenden ohne erneutes Scheduling.
 [ -z "$missing" ] && exit 0
-has_opennet_dns \
-	&& msg_info "Installing missing modules: $missing" \
-	&& redirect_to_opkg_opennet_logfile install_from_opennet_repository $missing
+if has_opennet_dns; then
+	msg_info "Installing missing modules: $missing"
+	# shellcheck disable=SC2086
+	redirect_to_opkg_opennet_logfile install_from_opennet_repository $missing
+fi
 
 # Prüfung, ob wir die Nachinstallation beenden können?
 # Sind weniger mehr als fünfzehn Minuten seit dem Booten vergangen? Dann wünschen wir eine erneut Ausführung.

@@ -6,6 +6,7 @@
 ZONE_LOCAL=lan
 ZONE_WAN=wan
 ZONE_MESH=on_mesh
+# shellcheck disable=SC2034
 NETWORK_LOCAL=lan
 # diese Domain wird testweise abgefragt, um die Verfügbarkeit des on-DNS zu prüfen
 DNS_SERVICE_REFERENCE="opennet-initiative.de"
@@ -218,11 +219,14 @@ _run_system_network_function() {
 	local func="$1"
 	local result
 	shift
-	set +eu
-	. /lib/functions/network.sh
-	"$func" result "$@"
-	[ -n "$result" ] && echo "$result"
-	set -eu
+	(
+		set +eu
+		# shellcheck disable=SC1091
+		. /lib/functions/network.sh
+		"$func" result "$@"
+		[ -n "$result" ] && echo "$result"
+		set -eu
+	)
 }
 
 ## @fn get_subdevices_of_interface()

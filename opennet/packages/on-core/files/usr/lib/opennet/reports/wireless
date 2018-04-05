@@ -11,7 +11,9 @@ iwinfo >iwinfo.log
 
 # wifi-Umgebung
 # auf nicht-wifi-Plattformen (z.B. x86) ist iwlist (wireless-tools) nicht installiert
-which iwlist >/dev/null && iwlist scan >iwlist_scan.log 2>&1 || true
+if which iwlist >/dev/null; then
+	iwlist scan >iwlist_scan.log 2>&1 || true
+fi
 
 # uci-Konfiguration
 # Herausfiltern von privaten Informationen (siehe https://wiki.openwrt.org/doc/uci/wireless)

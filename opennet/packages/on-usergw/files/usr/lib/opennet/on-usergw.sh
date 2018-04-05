@@ -2,6 +2,7 @@
 # Beginn der Doku-Gruppe
 ## @{
 
+# shellcheck disable=SC2034
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 MESH_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-ugw.template
@@ -10,6 +11,7 @@ TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-service
 SPEEDTEST_UPLOAD_PORT=discard
 SPEEDTEST_SECONDS=20
 ## dieser Wert muss mit der VPN-Konfigurationsvorlage synchron gehalten werden
+# shellcheck disable=SC2034
 MESH_OPENVPN_DEVICE_PREFIX=tap
 # Namenspräfix für weiterzuleitende Dienste
 RELAYABLE_SERVICE_PREFIX="proxy-"
@@ -159,9 +161,8 @@ update_trusted_service_list() {
 	if [ "$min_timestamp" -gt 0 ]; then
 		for service_name in $(get_services "mesh" | filter_services_by_value "source" "trusted"); do
 			timestamp=$(get_service_value "$service_name" "timestamp" 0)
-			# der Service ist zu lange nicht aktualisiert worden
-			[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
-			true
+			# Wurde der Service erst vor kurzem aktualisiert? Sonst loeschen ...
+			[ "$timestamp" -ge "$min_timestamp" ] || delete_service "$service_name"
 		done
 	fi
 	# aktualisiere DNS- und NTP-Dienste
@@ -269,10 +270,9 @@ sync_mesh_openvpn_connection_processes() {
 				&& uci_is_true "$(get_service_value "$service_name" "status" "false")" \
 				&& uci_is_false "$(get_service_value "$service_name" "disabled" "false")"; then
 			[ -z "$service_state" ] && enable_openvpn_service "$service_name"
-			: $((conn_count++))
+			conn_count=$((conn_count + 1))
 		else
-			[ -n "$service_state" ] && disable_openvpn_service "$service_name"
-			true
+			[ -z "$service_state" ] || disable_openvpn_service "$service_name"
 		fi
 	done
 	apply_changes openvpn
@@ -299,7 +299,7 @@ _get_device_traffic() {
 		sleep "$seconds"
 		cat "$sys_path/statistics/rx_bytes"
 		cat "$sys_path/statistics/tx_bytes"
-	} | tr '\n' ' ' | awk '{ print int((8 * ($3-$1)) / 1024 / '$seconds' + 0.5) "\t" int((8 * ($4-$2)) / 1024 / '$seconds' + 0.5) }' \
+	} | tr '\n' ' ' | awk '{ print int((8 * ($3-$1)) / 1024 / '"$seconds"' + 0.5) "\t" int((8 * ($4-$2)) / 1024 / '"$seconds"' + 0.5) }' \
 		| sed 's/\(-[[:digit:]]\+\)/0/g'
 }
 
@@ -340,7 +340,7 @@ measure_upload_speed() {
 # Diese Funktion bracht recht viel Zeit.
 get_active_ugw_connections() {
 	for one_service in $(get_services "mesh"); do
-		[ "$(get_openvpn_service_state "$one_service")" = "active" ] && echo "$one_service" || true
+		[ "$(get_openvpn_service_state "$one_service")" != "active" ] || echo "$one_service"
 	done
 }
 
@@ -429,12 +429,15 @@ is_trusted_service_list_outdated() {
 ## @details Die Ursache für die fehlende default-Route ist unklar.
 fix_wan_route_if_missing() {
 	trap 'error_trap fix_wan_route_if_missing "$*"' EXIT
+	local wan_interface
 	# default route exists? Nothing to fix ...
 	ip route show | grep -q ^default && return 0
 	(
 		# tolerante Shell-Interpretation fuer OpenWrt-Code
 		set +eu
+		# shellcheck disable=SC1091
 		. /lib/functions/network.sh
+		wan_interface=
 		network_find_wan wan_interface
 		if [ -n "$wan_interface" ] && network_is_up "$wan_interface"; then
 			add_banner_event "Missing default route - reinitialize '$wan_interface'"

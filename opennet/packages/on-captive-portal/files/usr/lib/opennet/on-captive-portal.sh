@@ -4,6 +4,7 @@
 ## @{
 
 
+# shellcheck disable=SC2034
 ZONE_FREE=on_free
 NETWORK_FREE=on_free
 ## @var Quelldatei für Standardwerte des Hotspot-Pakets
@@ -183,7 +184,7 @@ get_captive_portal_client_count() {
 				this_count=$(echo "$assoclist" | awk '{ if (($1 == "TX:") && ($(NF-1) >= 100)) count++; } END { print count; }')
 			else
 				# determine the number of valid arp cache items for this interface
-				this_count=$(grep "[[:space:]]$device$" /proc/net/arp | grep -vFw "00:00:00:00:00:00" | wc -l)
+				this_count=$(grep "[[:space:]]$device$" /proc/net/arp | grep -cvFw "00:00:00:00:00:00")
 			fi
 			count=$((count + this_count))
 		done
@@ -219,6 +220,7 @@ get_captive_portal_clients() {
 	assoclist=$(for device in $(get_subdevices_of_interface "$NETWORK_FREE"); do \
 		iwinfo wlan0 assoclist 2>/dev/null || true; done)
 	# erzwinge eine leere Zeile am Ende fuer die finale Ausgabe des letzten Clients
+	# shellcheck disable=SC2034
 	while read -r timestamp mac_address ip_address hostname misc; do
 		# eine assoclist-Zeile sieht etwa folgendermassen aus:
 		#    TX: 6.5 MBit/s, MCS 0, 20MHz                     217 Pkts.

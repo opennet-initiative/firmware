@@ -128,7 +128,7 @@ get_openvpn_config() {
 	# Falls es sich um einen relay-Dienst handelt, koennen wir uns leider nicht mit uns selbst verbinden,
 	# da die firewall-redirect-Regeln keine "device"-Quelle kennen (anstelle des ueblichen "on_mesh").
 	# Also ermitteln wir den lokal bekannten proxy-Dienst und verwenden dessen Daten, sofern on-usergw installiert ist.
-	if [ "$remote" = "$(get_main_ip)" -a -n "${RELAYABLE_SERVICE_PREFIX:-}" ]; then
+	if [ "$remote" = "$(get_main_ip)" ] && [ -n "${RELAYABLE_SERVICE_PREFIX:-}" ]; then
 		proxy_service_type="$RELAYABLE_SERVICE_PREFIX$(get_service_value "$service_name" "service")"
 		relayed_service=$(get_services "$proxy_service_type" | filter_services_by_value "local_relay_port" "$port")
 		if [ -n "$relayed_service" ]; then
@@ -166,9 +166,6 @@ verify_vpn_connection() {
 	local config_file
 	local log_file
 	local file_opts
-	local wan_dev
-	local hostname
-	local status_output
 	config_file=$(mktemp -t "VERIFY-${service_name}-XXXXXXX")
 	log_file=$(get_service_log_filename "$service_name" "openvpn" "verify")
 	# wir benoetigen die template-Datei fuer das Erzeugen der Basis-Konfiguration
@@ -224,10 +221,12 @@ verify_vpn_connection() {
 	#   connect-timeout: Dauer eines Versuchs
 	#   connect-retry-max: Anzahl moeglicher Wiederholungen
 	if grep -q "^remote.*tcp" "$config_file"; then
-		echo "connect-retry 1"
-		echo "connect-timeout 15"
-		echo "connect-retry-max 1"
-	fi >>"$config_file"
+		{
+			echo "connect-retry 1"
+			echo "connect-timeout 15"
+			echo "connect-retry-max 1"
+		} >>"$config_file"
+	fi
 
 	# Schluessel und Zertifikate bei Bedarf austauschen
 	[ -n "$key_file" ] && \
@@ -274,10 +273,14 @@ openvpn_service_has_certificate_and_key() {
 		return 0
 	fi
 	# das Zertifikat scheint irgendwie anders konfiguriert zu sein - im Zeifelsfall: OK
-	[ -z "$cert_file" -o -z "$key_file" ] && return 0
-	# existiert die Datei?
-	[ -e "$cert_file" -a -e "$key_file" ] && return 0
-	trap "" EXIT && return 1
+	if [ -z "$cert_file" ] || [ -z "$key_file" ]; then
+		return 0
+	elif [ -e "$cert_file" ] && [ -e "$key_file" ]; then
+		# alle relevanten Dateien existieren
+		return 0
+	else
+		trap "" EXIT && return 1
+	fi
 }
 
 
@@ -295,13 +298,17 @@ has_openvpn_credentials_by_template() {
 	key_file=$(_get_file_dict_value "key" "$template_file")
 	# Pruefe, ob eine "cd"-Direktive enthalten ist - vervollständige damit relative Pfade
 	base_dir=$(_get_file_dict_value "cd" "$template_file")
-	[ -n "$base_dir" -a "${cert_file:0:1}" != "/" ] && cert_file="$base_dir/$cert_file"
-	[ -n "$base_dir" -a "${key_file:0:1}" != "/" ] && key_file="$base_dir/$key_file"
+	[ -n "$base_dir" ] && [ "${cert_file:0:1}" != "/" ] && cert_file="$base_dir/$cert_file"
+	[ -n "$base_dir" ] && [ "${key_file:0:1}" != "/" ] && key_file="$base_dir/$key_file"
 	# im Zweifel: liefere "wahr"
-	[ -z "$key_file" -o -z "$cert_file" ] && return 0
-	# beide Dateien existieren
-	[ -e "$key_file" -a -e "$cert_file" ] && return 0
-	trap "" EXIT && return 1
+	if [ -z "$key_file" ] || [ -z "$cert_file" ]; then
+		return 0
+	elif [ -e "$key_file" ] && [ -e "$cert_file" ]; then
+		# beide Dateien existieren
+		return 0
+	else
+		trap "" EXIT && return 1
+	fi
 }
 
 
@@ -319,10 +326,17 @@ log_openvpn_events_and_disconnect_if_requested() {
 	local service_host
 	local now
 	local same_host_service
+	# die folgenden Variablen stammen aus der OpenVPN-Umgebung
+	config=${config:-}
+	script_type=${script_type:-}
+	remote_1=${remote_1:-}
+	remote_port_1=${remote_port_1:-}
+	daemon_start_time=${daemon_start_time:-}
+	# es geht los ...
 	service_name=$(basename "${config%.conf}")
 	pid_file=$(get_openvpn_service_pid_file "$service_name")
 	established_indicator_file=$(get_service_value "$service_name" "openvpn_established_indicator_file")
-	if [ -z "$established_indicator_file" -a -n "$pid_file" ]; then
+	if [ -z "$established_indicator_file" ] && [ -n "$pid_file" ]; then
 		established_indicator_file="${pid_file}.established"
 		set_service_value "$service_name" "openvpn_established_indicator_file" "$established_indicator_file"
 	fi
@@ -334,7 +348,7 @@ log_openvpn_events_and_disconnect_if_requested() {
 			;;
 		down)
 			# der openwrt-Build von openvpn setzt wohl leider nicht die "time_duration"-Umgebungsvariable
-			[ -z "${time_duration:-}" ] && time_duration=$(($(date +%s) - $daemon_start_time))
+			[ -z "${time_duration:-}" ] && time_duration=$(($(date +%s) - daemon_start_time))
 			# Verbindungsverlust durch fehlende openvpn-Pings?
 			if [ "${signal:-}" = "ping-restart" ]; then
 				service_type=$(get_service_value "$service_name" "service")
@@ -457,12 +471,12 @@ openvpn_get_mtu() {
 			# wir ersetzen alle eventuell vorhandenen Tabulatoren in der Statusausgabe - zur Vereinfachung des Parsers
 			echo -n "$mtu_out" | tr '\t' ' '
 			break
-		elif [ -z "$pid" -o ! -d "/proc/$pid" ]; then
+		elif [ -z "$pid" ] || [ ! -d "/proc/$pid" ]; then
 			msg_info "Failed to verify MTU resctrictions for '$host'"
 			break
 		fi
 		sleep 10
-		: $((wait_loops--))
+		wait_loops=$((wait_loops - 1))
 	done
 	# sicherheitshalber brechen wir den Prozess ab und loeschen alle Dateien
 	kill "$pid" >/dev/null 2>&1 || true
@@ -497,7 +511,7 @@ cleanup_stale_openvpn_services() {
 		# Es scheint sich um eine von uns verwaltete Verbindung zu handeln.
 		pid_file=$(get_openvpn_service_pid_file "$service_name")
 		# Falls die config-Datei oder die pid-Datei fehlt, dann ist es ein reboot-Fragment. Wir löschen die Überreste.
-		if [ ! -e "$config_file" -o ! -e "$pid_file" ]; then
+		if [ ! -e "$config_file" ] || [ ! -e "$pid_file" ]; then
 			msg_info "Removing a reboot-fragment of a previously used openvpn connection: $service_name"
 			disable_openvpn_service "$service_name"
 		elif check_pid_file "$pid_file" "openvpn"; then

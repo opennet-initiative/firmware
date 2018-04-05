@@ -52,7 +52,7 @@ get_service_name() {
 notify_service() {
 	trap 'error_trap notify_service "$*"' EXIT
 	# wir erwarten sieben Parameter
-	[ "$#" -eq 7 -o "$#" -eq 8 ]
+	[ "$#" -eq 7 ] || [ "$#" -eq 8 ]
 	local source="$1"
 	shift
 	echo "$@" | notify_services "$source"
@@ -108,8 +108,11 @@ notify_services() {
 ## @returns exitcode=0 falls der Dienst existiert
 is_existing_service() {
 	local service_name="$1"
-	[ -n "$service_name" -a -e "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" ] && return 0
-	trap "" EXIT && return 1
+	if [ -n "$service_name" ] && [ -e "$PERSISTENT_SERVICE_STATUS_DIR/$service_name" ]; then
+		return 0
+	else
+		trap "" EXIT && return 1
+	fi
 }
 
 
@@ -148,7 +151,6 @@ get_service_priority() {
 	local sorting="${2:-}"
 	local priority
 	priority=$(get_service_value "$service_name" "priority")
-	local rank
 	# priority wird von nicht-olsr-Clients verwendet (z.B. mesh-Gateways mit oeffentlichen IPs)
 	local base_priority
 	base_priority=$(
@@ -161,7 +163,7 @@ get_service_priority() {
 			# wir benoetigen Informationen fuer Ziele mit Routing-Metriken
 			# aus Performance-Gruenden kommt die Sortierung manchmal von aussen
 			[ -z "$sorting" ] && sorting=$(get_service_sorting)
-			if [ "$sorting" = "etx" -o "$sorting" = "hop" ]; then
+			if [ "$sorting" = "etx" ] || [ "$sorting" = "hop" ]; then
 				get_distance_with_offset "$service_name" "$sorting"
 			elif [ "$sorting" = "manual" ]; then
 				get_service_value "$service_name" "rank" "$DEFAULT_SERVICE_RANK"
@@ -172,7 +174,7 @@ get_service_priority() {
 		fi)
 	local service_bias
 	service_bias=$(_get_local_bias_for_service "$service_name")
-	echo "${base_priority:-$DEFAULT_SERVICE_RANK}" | awk '{ print $1 * 1000 + '$service_bias'; }'
+	echo "${base_priority:-$DEFAULT_SERVICE_RANK}" | awk '{ print $1 * 1000 + '"$service_bias"'; }'
 }
 
 
@@ -197,7 +199,6 @@ get_distance_with_offset() {
 		msg_debug "get_distance_with_offset: sorting '$sorting' not implemented"
 	fi
 	[ -n "$base_value" ] && echo "$base_value" "$offset" | awk '{ print $1 + $2 }'
-	return 0
 }
 
 
@@ -207,11 +208,13 @@ set_service_sorting() {
 	local old_sorting
 	old_sorting=$(get_service_sorting)
 	[ "$old_sorting" = "$new_sorting" ] && return 0
-	[ "$new_sorting" != "manual" -a "$new_sorting" != "hop" -a "$new_sorting" != "etx" ] && \
-		msg_error "Ignoring unknown sorting method: $new_sorting" && \
+	if [ "$new_sorting" != "manual" ] && [ "$new_sorting" != "hop" ] && [ "$new_sorting" != "etx" ]; then
+		msg_error "Ignoring unknown sorting method: $new_sorting"
 		trap "" EXIT && return 1
-	uci set "on-core.settings.service_sorting=$new_sorting"
-	apply_changes on-core
+	else
+		uci set "on-core.settings.service_sorting=$new_sorting"
+		apply_changes "on-core"
+	fi
 }
 
 
@@ -222,7 +225,7 @@ get_service_sorting() {
 	trap 'error_trap get_service_sorting "$*"' EXIT
 	local sorting
 	sorting=$(uci_get "on-core.settings.service_sorting")
-	if [ "$sorting" = "manual" -o "$sorting" = "hop" -o "$sorting" = "etx" ]; then
+	if [ "$sorting" = "manual" ] || [ "$sorting" = "hop" ] || [ "$sorting" = "etx" ]; then
 		# zulaessige Sortierung
 		echo -n "$sorting"
 	else
@@ -321,8 +324,6 @@ pipe_service_attribute() {
 get_services() {
 	trap 'error_trap get_services "$*"' EXIT
 	local service_type="${1:-}"
-	local services
-	local fname_persist
 	# alle Dienste ausgeben
 	# kein Dienste-Verzeichnis? Keine Ergebnisse ...
 	[ -e "$PERSISTENT_SERVICE_STATUS_DIR" ] || return 0
@@ -457,7 +458,8 @@ _add_service_dependency() {
 	deps=$(get_service_value "$service_name" "$dependency")
 	for dep in $deps; do
 		# schon vorhanden -> fertig
-		[ "$dep" = "$token" ] && return 0 || true
+		[ "$dep" = "$token" ] && return 0
+		true
 	done
 	if [ -z "$deps" ]; then
 		deps="$token"
@@ -511,7 +513,7 @@ _distribute_service_ranks() {
 	local index=1
 	for service_name in $(get_services | sort_services_by_priority); do
 		set_service_value "$service_name" "rank" "$index"
-		: $((index++))
+		index=$((index + 1))
 	done
 }
 
@@ -533,7 +535,7 @@ move_service_up() {
 	local current_service
 	local temp
 	sorting=$(get_service_sorting)
-	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
+	if [ "$sorting" = "hop" ] || [ "$sorting" = "etx" ]; then
 		# reduziere den Offset um eins
 		temp=$(get_service_value "$service_name" "offset" 0)
 		temp=$(echo "$temp" | awk '{ print $1 - 1 }')
@@ -581,7 +583,7 @@ move_service_down() {
 	local current_service
 	local temp
 	sorting=$(get_service_sorting)
-	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
+	if [ "$sorting" = "hop" ] || [ "$sorting" = "etx" ]; then
 		# reduziere den Offset um eins
 		temp=$(get_service_value "$service_name" "offset" 0)
 		temp=$(echo "$temp" | awk '{ print $1 + 1 }')
@@ -628,8 +630,9 @@ move_service_top() {
 	top_service=$(get_services "$@" | sort_services_by_priority | head -1)
 	sorting=$(get_service_sorting)
 	# kein top-Service oder wir sind bereits ganz oben -> Ende
-	[ -z "$top_service" -o "$top_service" = "$service_name" ] && return 0
-	if [ "$sorting" = "hop" -o "$sorting" = "etx" ]; then
+	if [ -z "$top_service" ] || [ "$top_service" = "$service_name" ]; then
+		true
+	elif [ "$sorting" = "hop" ] || [ "$sorting" = "etx" ]; then
 		top_distance=$(get_distance_with_offset "$top_service" "$sorting")
 		our_distance=$(get_distance_with_offset "$service_name" "$sorting")
 		[ -z "$our_distance" ] && msg_info "Failed to move unreachable service ('$service_name') to top" && return 0
@@ -705,7 +708,6 @@ get_service_as_csv() {
 	local key
 	local default
 	local value
-	local func_call
 	# Abbruch mit Fehler bei unbekanntem Dienst
 	is_existing_service "$service_name" || { trap "" EXIT && return 1; }
 	echo -n "$service_name"
@@ -882,7 +884,7 @@ run_cyclic_service_tests() {
 				# Da "return" aufgrund der Pipe nicht die gesamte Funktion beenden
 				# würde, senden wir stattdessen die Markierung fuer "keine Tests
 				# noetig" und beenden die Schleife.
-				echo "-1 $service_name"
+				printf "%s %s\n" "-1" "$service_name"
 				break
 			else
 				msg_debug "failed to verify $service_name"
@@ -896,7 +898,7 @@ run_cyclic_service_tests() {
 			# funktionsfaehige "alte" Dienste - es gibt nichts fuer sie zu tun
 			# Wir sortieren sie nach ganz oben, um bei Existenz eines lauffaehigen Diensts
 			# keine unnoetigen Tests von nicht-funktionierenden Hosts durchzufuehren.
-			echo "-1 $service_name"
+			printf "%s %s\n" "-1" "$service_name"
 		fi
 	done | sort -n | while read -r timestamp service_name; do
 		# Mit dem Zeitstempel "-1" sind funktionierende Dienste markiert. Wir brauchen also keine
@@ -908,9 +910,11 @@ run_cyclic_service_tests() {
 		# relativ schnell wieder ein funktionierender Gateway gefunden wird, obwohl alle Test-Zeitstempel noch recht
 		# frisch sind.
 		msg_debug "there is no service to be tested - thus we pick the service with the oldest test timestamp: $service_name"
-		"$test_function" "$service_name" \
-			&& _notify_service_success "$service_name" \
-			|| _notify_service_failure "$service_name" "$max_fail_attempts"
+		if "$test_function" "$service_name"; then
+			_notify_service_success "$service_name"
+		else
+			_notify_service_failure "$service_name" "$max_fail_attempts"
+		fi
 		# wir wollen nur genau einen Test durchfuehren
 		break
 	done

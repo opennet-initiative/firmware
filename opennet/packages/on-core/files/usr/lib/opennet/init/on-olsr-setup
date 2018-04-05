@@ -19,8 +19,9 @@ configure_olsrd_httpinfo_port() {
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "httpinfo")
 	# Wir koennen leider nicht zwischen "Nutzer hat 1978 eingestellt" und "Auslieferungszustand" unterscheiden.
 	# Falls der Nutzer also explizit diesen Port will, dann muss er ihn nach einem Upgrade wieder einstellen.
-	[ "$(uci_get "${uci_prefix}.port" "1978")" = "1978" ] && uci set "${uci_prefix}.port=$OLSR_HTTP_PORT"
-	return 0
+	if [ "$(uci_get "${uci_prefix}.port" "1978")" = "1978" ]; then
+		uci set "${uci_prefix}.port=$port"
+	fi
 }
 
 

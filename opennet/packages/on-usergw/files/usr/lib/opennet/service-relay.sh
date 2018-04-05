@@ -30,7 +30,7 @@ pick_local_service_relay_port() {
 	if [ -z "$port" ]; then
 		port="$SERVICE_RELAY_LOCAL_RELAY_PORT_START"
 		until _is_local_service_relay_port_unused "$port"; do
-			: $((port++))
+			port=$((port + 1))
 		done
 	fi
 	set_service_value "$service_name" "local_relay_port" "$port"
@@ -111,7 +111,7 @@ get_service_relay_olsr_announcement() {
 	local uci_prefix
 	announce_unique=$(_get_service_relay_olsr_announcement_prefix "$service_name")
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	uci_get_list "${uci_prefix}.service" | awk '{ if ($1 == "'$announce_unique'") print $0; }'
+	uci_get_list "${uci_prefix}.service" | awk '{ if ($1 == "'"$announce_unique"'") print $0; }'
 }
 
 
@@ -141,6 +141,7 @@ EOF
 	local this_details
 	local uci_prefix
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
+	# shellcheck disable=SC2034
 	get_service_relay_olsr_announcement "$service_name" | while read -r this_unique this_details; do
 		# der Wert ist bereits korrekt - wir koennen abbrechen
 		[ "$this_details" = "$service_details" ] && break
@@ -195,7 +196,7 @@ deannounce_unused_olsr_service_relays() {
 is_service_relay_possible() {
 	trap 'error_trap is_service_relay_possible "$*"' EXIT
 	local service_name="$1"
-	local enabled
+	local disabled
 	local wan_routing
 	disabled=$(get_service_value "$service_name" "disabled" "false")
 	uci_is_true "$disabled" && trap "" EXIT && return 1
@@ -236,8 +237,7 @@ update_service_relay_status() {
 filter_relay_services() {
 	local service_name
 	while read -r service_name; do
-		[ -n "$(get_service_value "$service_name" "local_relay_port")" ] && echo "$service_name"
-		true
+		[ -z "$(get_service_value "$service_name" "local_relay_port")" ] || echo "$service_name"
 	done
 }
 

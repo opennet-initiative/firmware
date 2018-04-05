@@ -10,6 +10,7 @@ OLSR_POLICY_DEFAULT_PRIORITY=20000
 RT_FILE=/etc/iproute2/rt_tables
 RT_START_ID=11
 # Prioritaets-Offset fuer default-Routing-Tabellen (z.B. "default" und "olsrd-default")
+# shellcheck disable=SC2034
 DEFAULT_RULE_PRIO_OFFSET=100
 OLSR_ROUTE_CACHE_FILE=/tmp/olsr_routes.cache
 
@@ -42,7 +43,7 @@ is_ipv6() {
 filter_routable_addresses() {
 	local ip
 	while read -r ip; do
-		[ -n "$(get_target_route_interface "$ip")" ] && echo "$ip" || true
+		[ -z "$(get_target_route_interface "$ip")" ] || echo "$ip"
 	done
 	return 0
 }
@@ -77,6 +78,7 @@ get_target_route_interface() {
 		#    prohibit 2001:67c:1400:2430::1 from :: dev lo  table unspec  proto kernel  src fe80::216:3eff:fe34:2aa5  metric 4294967295  error -13
 		# Wir ignorieren also Zeilen, die auf "error -1" oder "error -13" enden.
 		# Fehlermeldungen (ip: RTNETLINK answers: Network is unreachable) werden ebenfalls ignoriert.
+		# shellcheck disable=SC2086
 		ip route get "$ipaddr" $route_get_args 2>/dev/null \
 			| grep -vE "^(failed_policy|prohibit)" \
 			| grep -vE "error -(1|13)$" \
@@ -134,7 +136,7 @@ add_zone_policy_rules_by_iif() {
 			echo "$device"
 		done
 	done | sort | uniq | while read -r device; do
-		[ -n "$device" -a "$device" != "none" ] && ip -family "$family" rule add iif "$device" "$@"
+		[ -n "$device" ] && [ "$device" != "none" ] && ip -family "$family" rule add iif "$device" "$@"
 		true
 	done
 	return 0
@@ -150,8 +152,6 @@ add_zone_policy_rules_by_iif() {
 initialize_olsrd_policy_routing() {
 	trap 'error_trap initialize_olsrd_policy_routing "$*"' EXIT
 	local iface
-	local current
-	local table
 	local priority="$OLSR_POLICY_DEFAULT_PRIORITY"
 
 	# Sicherstellen, dass die Tabellen existieren und zur olsrd-Konfiguration passen
@@ -167,12 +167,16 @@ initialize_olsrd_policy_routing() {
 	delete_policy_rule inet table default
 
 	# free-Verkehr geht immer in den Tunnel (falls das Paket installiert ist)
-	[ -n "${ZONE_FREE:-}" ] \
-		&& add_zone_policy_rules_by_iif inet "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK" prio "$((priority++))"
+	if [ -n "${ZONE_FREE:-}" ]; then
+		add_zone_policy_rules_by_iif inet "$ZONE_FREE" table "$ROUTING_TABLE_ON_UPLINK" prio "$priority"
+		priority=$((priority + 1))
+	fi
 
 	# sehr wichtig - also zuerst: keine vorbeifliegenden Mesh-Pakete umlenken
-	add_zone_policy_rules_by_iif inet "$ZONE_MESH" table "$ROUTING_TABLE_MESH" prio "$((priority++))"
-	add_zone_policy_rules_by_iif inet "$ZONE_MESH" table "$ROUTING_TABLE_MESH_DEFAULT" prio "$((priority++))"
+	add_zone_policy_rules_by_iif inet "$ZONE_MESH" table "$ROUTING_TABLE_MESH" prio "$priority"
+	priority=$((priority + 1))
+	add_zone_policy_rules_by_iif inet "$ZONE_MESH" table "$ROUTING_TABLE_MESH_DEFAULT" prio "$priority"
+	priority=$((priority + 1))
 
 	# Pakete mit passendem Ziel orientieren sich an der main-Tabelle
 	# Alle Ziele ausserhalb der mesh-Zone sind geeignet (z.B. local, free, ...).
@@ -183,20 +187,25 @@ initialize_olsrd_policy_routing() {
 		is_interface_in_zone "$iface" "$ZONE_MESH" && continue
 		add_network_policy_rule_by_destination inet "$iface" table main prio "$priority"
 	done
-	: $((priority++))
+	priority=$((priority + 1))
 
 	# alle nicht-mesh-Quellen routen auch ins olsr-Netz
 	#TODO: wir sollten nur private Ziel-IP-Bereiche (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) zulassen
 	# spaeter sind konfigurierbar weitere IPs (fuer HNAs oeffentlicher Dienste) moeglich
-	ip rule add table "$ROUTING_TABLE_MESH" prio "$((priority++))"
-	ip rule add table "$ROUTING_TABLE_MESH_DEFAULT" prio "$((priority++))"
+	ip rule add table "$ROUTING_TABLE_MESH" prio "$priority"
+	priority=$((priority + 1))
+	ip rule add table "$ROUTING_TABLE_MESH_DEFAULT" prio "$priority"
+	priority=$((priority + 1))
 
 	# Routen, die nicht den lokalen Netz-Interfaces entsprechen (z.B. default-Routen)
-	ip rule add table main prio "$((priority++))"
+	ip rule add table main prio "$priority"
+	priority=$((priority + 1))
 
 	# die default-Table und VPN-Tunnel fungieren fuer alle anderen Pakete als default-GW
-	ip rule add table default prio "$((priority++))"
-	ip rule add table "$ROUTING_TABLE_ON_UPLINK" prio "$((priority++))"
+	ip rule add table default prio "$priority"
+	priority=$((priority + 1))
+	ip rule add table "$ROUTING_TABLE_ON_UPLINK" prio "$priority"
+	priority=$((priority + 1))
 }
 
 
@@ -250,7 +259,7 @@ add_routing_table() {
 	# wir muessen den Eintrag hinzufuegen
 	table_id="$RT_START_ID"
 	while [ -n "$(_get_file_dict_value "$table_id" "$RT_FILE")" ]; do
-		: $((table_id++))
+		table_id=$((table_id + 1))
 	done
 	echo "$table_id      $table_name" >> "$RT_FILE"
 	echo "$table_id"
@@ -267,12 +276,12 @@ get_hop_count_and_etx() {
 	local result
 	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
 	[ ! -e "$OLSR_ROUTE_CACHE_FILE" ] && return 0
-	result=$(awk '{ if ($1 == "'$target'") { print $3, $4; exit; } }' <"$OLSR_ROUTE_CACHE_FILE")
+	result=$(awk '{ if ($1 == "'"$target"'") { print $3, $4; exit; } }' <"$OLSR_ROUTE_CACHE_FILE")
 	[ -n "$result" ] && echo "$result" && return 0
 	# Überprüfe, ob die IP des Zielhost die eigene IP ist. Dann sollte distance=0 gesetzt werden.
 	if is_ipv4 "$target" || is_ipv6 "$target"; then
 		result=$(ip route get "$target" | grep -w "dev lo")
-		[ -n "$result" ] && echo "0 0" || true
+		[ -z "$result" ] || echo "0 0"
 	fi
 }
 
@@ -323,7 +332,7 @@ get_olsr_route_count_by_device() {
 	local device_regex="$1"
 	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
 	[ -e "$OLSR_ROUTE_CACHE_FILE" ] || return 0
-	awk '{ print $5 }' "$OLSR_ROUTE_CACHE_FILE" | grep "^$device_regex$" | wc -l
+	awk '{ print $5 }' "$OLSR_ROUTE_CACHE_FILE" | grep -c "^$device_regex$"
 }
 
 
@@ -333,7 +342,7 @@ get_olsr_route_count_by_neighbour() {
 	local neighbour_ip="$1"
 	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
 	[ -e "$OLSR_ROUTE_CACHE_FILE" ] || return 0
-	awk 'BEGIN { count=0; } { if ($2 == "'$neighbour_ip'") count++; } END { print count; }' "$OLSR_ROUTE_CACHE_FILE"
+	awk 'BEGIN { count=0; } { if ($2 == "'"$neighbour_ip"'") count++; } END { print count; }' "$OLSR_ROUTE_CACHE_FILE"
 }
 
 
@@ -345,7 +354,6 @@ get_olsr_neighbours() {
 	local lq
 	local nlq
 	local etx
-	local route_count
 	request_olsrd_txtinfo lin | grep "^[0-9]" | awk '{ print $2,$4,$5,$6 }' | while read -r ip lq nlq etx; do
 		echo "$ip $lq $nlq $etx $(get_olsr_route_count_by_neighbour "$ip")"
 	done

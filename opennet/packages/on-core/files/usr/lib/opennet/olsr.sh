@@ -3,8 +3,10 @@
 # Beginn der Doku-Gruppe
 ## @{
 
+# shellcheck disable=SC2034
 OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 SERVICES_FILE=/var/run/services_olsr
+# shellcheck disable=SC2034
 OLSR_HTTP_PORT=8080
 
 
@@ -52,6 +54,7 @@ get_and_enable_olsrd_library_uci_prefix() {
 	current=$(for uci_prefix in $(find_all_uci_sections olsrd LoadPlugin); do
 			# die Bibliothek beginnt mit dem Namen - danach folgt die genaue Versionsnummer
 			uci_get "${uci_prefix}.library" | grep -q "^$library\.so" && echo "$uci_prefix"
+			true
 		done | tail -1)
 	if [ -n "$current" ]; then
 		uci_prefix=$(echo "$current" | cut -f 1 -d = | sed 's/\.library$//')
@@ -99,7 +102,6 @@ olsr_set_main_ip() {
 disable_missing_olsr_modules() {
 	trap 'error_trap disable_missing_olsr_modules "$*"' EXIT
 	local libpath=/usr/lib
-	local libline
 	local libfile
 	local uci_prefix
 	local ignore
@@ -129,11 +131,11 @@ olsr_sync_routing_tables() {
 		olsr_id=$(uci_get "olsrd.@olsrd[0].$olsr_name")
 		iproute_id=$(get_routing_table_id "$iproute_name")
 		# beide sind gesetzt und identisch? Alles ok ...
-		[ -n "$olsr_id" -a "$olsr_id" = "$iproute_id" ] && continue
+		[ -n "$olsr_id" ] && [ "$olsr_id" = "$iproute_id" ] && continue
 		# eventuell Tabelle erzeugen, falls sie noch nicht existiert
 		[ -z "$iproute_id" ] && iproute_id=$(add_routing_table "$iproute_name")
 		# olsr passt sich im Zweifel der iproute-Nummer an
-		[ "$olsr_id" != "$iproute_id" ] && uci set "olsrd.@olsrd[0].$olsr_name=$iproute_id" || true
+		[ "$olsr_id" = "$iproute_id" ] || uci set "olsrd.@olsrd[0].$olsr_name=$iproute_id"
 	done << EOF
 RtTable		$ROUTING_TABLE_MESH
 RtTableDefault	$ROUTING_TABLE_MESH_DEFAULT
@@ -159,6 +161,7 @@ parse_olsr_service_descriptions() {
 #   SERVICE SCHEME IP PORT PATH PROTO DETAILS
 # Im Fall von "http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108" entspricht dies:
 #   ugw	http   192.168.0.15   8080   tcp   upload:3 download:490 ping:108
+# shellcheck disable=SC2120
 get_olsr_services() {
 	trap 'error_trap get_olsr_services "$*"' EXIT
 	local wanted_type="${1:-}"
@@ -167,7 +170,7 @@ get_olsr_services() {
 	sort "$SERVICES_FILE" | uniq | \
 		parse_olsr_service_descriptions | \
 		# filtere die Ergebnisse nach einem Service-Typ, falls selbiger als erster Parameter angegeben wurde
-		awk '{ if (("'$wanted_type'" == "") || ("'$wanted_type'" == $1)) print $0; }'
+		awk '{ if (("'"$wanted_type"'" == "") || ("'"$wanted_type"'" == $1)) print $0; }'
 	return 0
 }
 
@@ -187,6 +190,7 @@ update_olsr_services() {
 	local details
 	local olsr_services
 	# aktuell verbreitete Dienste benachrichtigen
+	# shellcheck disable=SC2119
 	olsr_services=$(get_olsr_services)
 	# leere Liste? Keine Verbindung mit der Wolke? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$olsr_services" ] && return
@@ -209,8 +213,9 @@ remove_old_olsr_services() {
 		get_services | filter_services_by_value "source" "olsr" | pipe_service_attribute "timestamp" "0" \
 				| while read -r service_name timestamp; do
 			# der Service ist zu lange nicht aktualisiert worden
-			[ -z "$timestamp" -o "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
-			true
+			if [ -z "$timestamp" ] || [ "$timestamp" -lt "$min_timestamp" ]; then
+				delete_service "$service_name"
+			fi
 		done
 	fi
 	# aktualisiere DNS- und NTP-Dienste

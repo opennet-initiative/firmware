@@ -26,11 +26,13 @@ print_status() {
 	local format_string
 	format_string="%-6s %-32s %11s %3s %3s %3s\n"
 
+	# shellcheck disable=SC2059
 	printf "$format_string" "active" "Hostname" "Priority" "WAN" "VPN" "MTU"
 	for service_name in $(get_services "mesh" | sort_services_by_priority); do
 		host=$(get_service_value "$service_name" "host")
 		if uci_is_true "$(get_service_value "$service_name" "disabled" "false")"; then
 			# der Dienst wird ignoriert
+			# shellcheck disable=SC2059
 			printf "$format_string" "" "$host" "disabled" "" "" ""
 		else
 			priority=$(get_service_value "$service_name" "priority")
@@ -45,9 +47,10 @@ print_status() {
 			else
 				active=""
 			fi
-			wan_status=$(uci_is_true "$(get_service_value "$service_name" "wan_status" "false")" && echo " y " || true)
-			vpn_status=$(uci_is_true "$(get_service_value "$service_name" "vpn_status" "false")" && echo " y " || true)
-			mtu_status=$(uci_is_true "$(get_service_value "$service_name" "mtu_status" "false")" && echo " y " || true)
+			wan_status=$(if uci_is_true "$(get_service_value "$service_name" "wan_status" "false")"; then echo " y "; fi)
+			vpn_status=$(if uci_is_true "$(get_service_value "$service_name" "vpn_status" "false")"; then echo " y "; fi)
+			mtu_status=$(if uci_is_true "$(get_service_value "$service_name" "mtu_status" "false")"; then echo " y "; fi)
+			# shellcheck disable=SC2059
 			printf "$format_string" "   $active" "$host" "$priority" "$wan_status" "$vpn_status" "$mtu_status"
 		fi
 	done

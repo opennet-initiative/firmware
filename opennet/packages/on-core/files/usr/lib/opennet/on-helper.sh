@@ -50,7 +50,9 @@ error_trap() {
 ON_SHELL_MINIMIZED="${IPKG_INSTROOT:-}/tmp/on_shell_modules.cache"
 ON_SHELL_MODULES_DIR="${IPKG_INSTROOT:-}/usr/lib/opennet"
 ON_SHELL_MODULES=$(find "$ON_SHELL_MODULES_DIR" -maxdepth 1 -type f -name "*.sh")
+# shellcheck disable=SC2086
 ON_SHELL_MODULES_NEWEST=$( (ls -dtr "$ON_SHELL_MODULES_DIR" $ON_SHELL_MODULES "$ON_SHELL_MINIMIZED" 2>/dev/null || true) | tail -1)
+# shellcheck disable=SC2046
 [ "$ON_SHELL_MODULES_NEWEST" != "$ON_SHELL_MINIMIZED" ] && \
 	grep -vh "^[[:space:]]*#" $(echo "$ON_SHELL_MODULES" \
 		| grep -vF "on-helper.sh") \

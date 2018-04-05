@@ -104,7 +104,7 @@ add_monitoring_multiping_host() {
 		# alter Eintrag ist vorhanden und korrekt - es ist nichts zu tun
 		[ "$old_spec" = "$new_spec" ] && return 0
 		# Eintrag mit identischem Label ist vorhanden - Eintrag ersetzen
-		if [ -n "$label" -a "$label" = "$(echo "$old_spec" | cut -f 2- -d "=")" ]; then
+		if [ -n "$label" ] && [ "$label" = "$(echo "$old_spec" | cut -f 2- -d "=")" ]; then
 			uci -q del_list "on-monitoring.plugin_multiping.hosts=$old_spec"
 			break
 		fi

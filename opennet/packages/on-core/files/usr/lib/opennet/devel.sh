@@ -20,7 +20,7 @@ list_installed_packages_by_size() {
 	local fname
 	find /usr/lib/opkg/info/ -type f -name "*.control" | while read -r fname; do
 		grep "Installed-Size:" "$fname" \
-			| awk '{print $2, "\t", "'$(basename "${fname%.control}")'" }'
+			| awk '{print $2, "\t", "'"$(basename "${fname%.control}")"'" }'
 	done | sort -n | awk 'BEGIN { summe=0 } { summe+=$1; print $0 } END { print summe }'
 }
 
@@ -47,6 +47,7 @@ run_httpd_debug() {
 	trap "" INT
 	local uhttpd_args="-f -h /www -x /cgi-bin -u /ubus -t 60 -T 30 -k 20 -A 1 -n 3 -N 100 -R -p 0.0.0.0:80 -s 0.0.0.0:443 -q"
 	[ -e /etc/uhttpd.crt ] && uhttpd_args="$uhttpd_args -C /etc/uhttpd.crt -K /etc/uhttpd.key"
+	# shellcheck disable=SC2086
 	uhttpd $uhttpd_args
 	/etc/init.d/uhttpd start
 }
@@ -92,8 +93,6 @@ enable_profiling() {
 ## @see enable_profiling
 summary_profiling() {
 	local fname
-	local lines
-	local sum
 	# Kopfzeile
 	printf "%16s %16s %16s %s\n" "Duration [ms]" "Call count" "avgDuration [ms]" "Name"
 	find "$PROFILING_DIR" -type f | while read -r fname; do
@@ -101,7 +100,7 @@ summary_profiling() {
 		grep -v "^27[0-9]\{9\}$" "$fname" | awk '
 			BEGIN { summe=0; counter=0 }
 			{ summe+=($1/1000); counter+=1 }
-			END { printf "%16d %16d %16d %s\n", summe, counter, int(summe/counter), "'$(basename "$fname")'"}'
+			END { printf "%16d %16d %16d %s\n", summe, counter, int(summe/counter), "'"$(basename "$fname")"'"}'
 	done | sort -n
 }
 
@@ -118,6 +117,7 @@ apply_repository_patch() {
 	is_package_installed "patch" || { opkg update && opkg install "patch"; }
 	local commit
 	for commit in "$@"; do
+		# shellcheck disable=SC2059,SC2086
 		wget -q -O - "$(printf "$GIT_REPOSITORY_COMMIT_URL_FMT" "$commit")" | patch $patch_args -p4 --directory /
 	done
 	clear_caches

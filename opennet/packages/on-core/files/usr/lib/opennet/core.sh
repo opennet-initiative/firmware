@@ -173,7 +173,7 @@ update_dns_servers() {
 		uci commit "dhcp.@dnsmasq[0]"
 		reload_config
 	fi
-	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "DNS" || true)
+	preferred_servers=$(if is_function_available "get_mig_tunnel_servers"; then get_mig_tunnel_servers "DNS"; fi)
 	# wir sortieren alphabetisch - Naehe ist uns egal
 	server_config=$(
 		get_services "dns" | filter_reachable_services | filter_enabled_services | sort | while read -r service; do
@@ -220,7 +220,7 @@ update_ntp_servers() {
 	use_ntp=$(uci_get "on-core.settings.use_olsrd_ntp")
 	# return if we should not use NTP servers provided via olsrd
 	uci_is_false "$use_ntp" && return
-	preferred_servers=$(is_function_available "get_mig_tunnel_servers" && get_mig_tunnel_servers "NTP" || true)
+	preferred_servers=$(if is_function_available "get_mig_tunnel_servers"; then get_mig_tunnel_servers "NTP"; fi)
 	# schreibe die Liste der NTP-Server neu
 	uci_delete system.ntp.server
 	# wir sortieren alphabetisch - Naehe ist uns egal
@@ -355,12 +355,17 @@ get_on_ip() {
 	local on_id="$1"
 	local on_ipschema="$2"
 	local interface_number="$3"
+	local on_id_1
+	local on_id_2
 	# das "on_ipschema" erwartet die Variable "no"
+	# shellcheck disable=SC2034
 	local no="$interface_number"
 	echo "$on_id" | grep -q "\." || on_id=1.$on_id
+	# shellcheck disable=SC2034
 	on_id_1=$(echo "$on_id" | cut -d . -f 1)
+	# shellcheck disable=SC2034
 	on_id_2=$(echo "$on_id" | cut -d . -f 2)
-	echo $(eval echo $on_ipschema)
+	eval echo "$on_ipschema"
 }
 
 
@@ -441,7 +446,7 @@ check_pid_file() {
 	local process_name="$2"
 	local pid
 	local current_process
-	[ -z "$pid_file" -o ! -e "$pid_file" ] && trap "" EXIT && return 1
+	if [ -z "$pid_file" ] || [ ! -e "$pid_file" ]; then trap "" EXIT && return 1; fi
 	pid=$(sed 's/[^0-9]//g' "$pid_file")
 	# leere/kaputte PID-Datei
 	[ -z "$pid" ] && trap "" EXIT && return 1
@@ -493,7 +498,6 @@ set_opennet_id() {
 	local uci_prefix
 	local ipaddr
 	local main_ipaddr
-	local free_ipaddr
 	local ipschema
 	local netmask
 	local if_counter=0
@@ -518,7 +522,7 @@ set_opennet_id() {
 		ipaddr=$(get_on_ip "$new_id" "$ipschema" "$if_counter")
 		uci set "${uci_prefix}.ipaddr=$ipaddr"
 		uci set "${uci_prefix}.netmask=$netmask"
-		: $((if_counter++))
+		if_counter=$((if_counter + 1))
 	done
 	# OLSR-MainIP konfigurieren
 	olsr_set_main_ip "$main_ipaddr"
@@ -539,7 +543,8 @@ get_from_key_value_list() {
 	local key
 	{ sed 's/[ \t]\+/\n/g'; echo; } | while read -r key_value; do
 		key=$(echo "$key_value" | cut -f 1 -d "$separator")
-		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break || true
+		[ "$key" = "$search_key" ] && echo "$key_value" | cut -f 2- -d "$separator" && break
+		true
 	done
 	return 0
 }
@@ -554,9 +559,9 @@ replace_in_key_value_list() {
 	local search_key="$1"
 	local separator="$2"
 	local value="$3"
-	awk 'BEGIN { found=0; FS="'$separator'"; OFS=":"; RS="[ \t]"; ORS=" "; }
-		{ if ($1 == "'$search_key'") { print "'$search_key'", '$value'; found=1; } else { print $0; } }
-		END { if (found == 0) print "'$search_key'", '$value' };'
+	awk 'BEGIN { found=0; FS="'"$separator"'"; OFS=":"; RS="[ \t]"; ORS=" "; }
+		{ if ($1 == "'"$search_key"'") { print "'"$search_key"'", '"$value"'; found=1; } else { print $0; } }
+		END { if (found == 0) print "'"$search_key"'", '"$value"' };'
 }
 
 
@@ -592,10 +597,13 @@ is_file_timestamp_older_minutes() {
 	#   * kein Zeitstempel
 	#   * Zeitstempel in der Zukunft
 	#   * Zeitstempel älter als erlaubt
-	[ -z "$file_timestamp" -o \
-		"$file_timestamp" -gt "$timestamp_now" -o \
-		"$((file_timestamp + limit_minutes))" -lt "$timestamp_now" ] && return 0
-	trap "" EXIT && return 1
+	if [ -z "$file_timestamp" ] \
+			|| [ "$file_timestamp" -gt "$timestamp_now" ] \
+			|| [ "$((file_timestamp + limit_minutes))" -lt "$timestamp_now" ]; then
+		return 0
+	else
+		trap "" EXIT && return 1
+	fi
 }
 
 
@@ -905,6 +913,7 @@ system_service_check() {
 	local executable="$1"
 	local pid_file="$2"
 	local result
+	# shellcheck disable=SC1091,SC2034
 	result=$(set +eu; . /lib/functions/service.sh; SERVICE_PID_FILE="$pid_file"; service_check "$executable" && echo "ok"; set -eu)
 	[ -n "$result" ] && return 0
 	trap "" EXIT && return 1
@@ -1065,6 +1074,7 @@ get_flash_backup() {
 	local size
 	local blocksize
 	local label
+	# shellcheck disable=SC2034
 	grep "^mtd[0-9]\+:" /proc/mtd | while read -r name size blocksize label; do
 		# abschliessenden Doppelpunkt entfernen
 		name="${name%:}"
@@ -1083,15 +1093,9 @@ get_flash_backup() {
 			read_data_bytes "($((rootfs_full_size - size)))" <"$rootfs_device"
 			if [ -z "$include_private" ]; then
 				echo >&2 "Read: root-zero ($size)"
-				# erzeuge 0xFF auf obskure Weise (fuer maximale Flash-Schreibgeschwindigkeit)
+				# erzeuge 0xFF
 				# siehe http://stackoverflow.com/a/10905109
-				yes $'\xFF' | tr -d '\n' | read_data_bytes "$size"
-				#yes $'\xFF' | tr -d '\n' | dd bs=1 "count=$size"
-				#local count=0
-				#while [ "$count" -lt "$size" ]; do
-					#echo -n $'\xFF'
-					#: $((count++))
-				#done
+				tr '\0' '\377' </dev/zero | read_data_bytes "$size"
 			else
 				echo >&2 "Read: root-RW ($size)"
 				# auch das private rootfs-Dateisystem (inkl. Schluessel, Passworte, usw.) auslesen

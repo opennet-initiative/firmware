@@ -7,6 +7,7 @@
 ON_OPKG_REPOSITORY_URL_PREFIX="http://downloads.opennet-initiative.de/openwrt"
 # temporäre Datei für Installation von Opennet-Paketen
 ON_OPKG_CONF_PATH="${IPKG_INSTROOT:-}/tmp/opkg-opennet.conf"
+# shellcheck disable=SC2034
 DEFAULT_MODULES_ENABLED="on-olsr2"
 
 
@@ -206,9 +207,11 @@ save_on_modules_list() {
 	_prepare_on_modules
 	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
 	for modname in $(get_on_modules); do
-		is_package_installed "$modname" \
-			&& uci_add_list "on-core.modules.installed" "$modname" \
-			|| uci_delete_list "on-core.modules.installed" "$modname"
+		if is_package_installed "$modname"; then
+			uci_add_list "on-core.modules.installed" "$modname"
+		else
+			uci_delete_list "on-core.modules.installed" "$modname"
+		fi
 	done
 	apply_changes on-core
 }
@@ -251,7 +254,11 @@ get_configured_opennet_opkg_repository_base_url() {
 	local url
 	_prepare_on_modules
 	url=$(uci_get "on-core.modules.repository_url")
-	[ -n "$url" ] && echo "$url" || get_default_opennet_opkg_repository_base_url
+	if [ -n "$url" ]; then
+		echo "$url"
+	else
+		get_default_opennet_opkg_repository_base_url
+	fi
 }
 
 
@@ -287,14 +294,11 @@ generate_opennet_opkg_config() {
 	local base_url
 	base_url=$(get_configured_opennet_opkg_repository_base_url)
 	
-	#
 	# Füge non-core package hinzu (z.B. feeds routing,opennet,luci,...)
-	#
 	# Hole Architektur und CPU Type
 	local arch_cpu_type
 	arch_cpu_type=$(opkg status base-files | awk '/Architecture/ {print $2}')
-	local noncore_okgs_url
-	noncore_pkgs_url="$base_url/packages/$arch_cpu_type"
+	local noncore_pkgs_url="$base_url/packages/$arch_cpu_type"
 
 	local feed
 	for feed in base packages routing telephony luci opennet; do
@@ -303,8 +307,9 @@ generate_opennet_opkg_config() {
 
 	# Fuege zusaetzlich eine URL mit core packages hinzu (beinhaltet Kernel Module).
 	local arch_path
+	# shellcheck disable=SC1091
 	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET")
-	core_pkgs_url="$base_url/targets/$arch_path/packages"
+	local core_pkgs_url="$base_url/targets/$arch_path/packages"
 	echo "src/gz on_core $core_pkgs_url"
 }
 

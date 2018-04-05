@@ -25,7 +25,7 @@ get_location_from_api() {
 traceroute "$dst_ip" | tr '*' ' ' | while read -r line; do
 
   #ignore first line "traceroute to ...."
-  tmp=$(echo $line | awk '{print substr($0,0,13)}')
+  tmp=$(echo "$line" | awk '{print substr($0,0,13)}')
   if [ "$tmp" = "traceroute to" ]; then
     continue
   fi

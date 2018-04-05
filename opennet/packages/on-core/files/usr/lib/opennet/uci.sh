@@ -13,8 +13,12 @@ uci_is_true() {
 uci_is_false() {
 	local token="$1"
 	# synchron halten mit "uci_to_bool" (lua-Module)
-	[ "$token" = "0" -o "$token" = "no" -o "$token" = "n" -o "$token" = "off" -o "$token" = "false" ] && return 0
-	trap "" EXIT && return 1
+	if [ "$token" = "0" ] || [ "$token" = "no" ] || [ "$token" = "n" ] \
+			|| [ "$token" = "off" ] || [ "$token" = "false" ]; then
+		return 0
+	else
+		trap "" EXIT && return 1
+	fi
 }
 
 
@@ -192,6 +196,7 @@ prepare_on_uci_settings() {
 	local section
 	# on-core-Konfiguration erzeugen, falls noetig
 	[ -e /etc/config/on-core ] || touch /etc/config/on-core
+	# shellcheck disable=SC2043
 	for section in settings; do
 		uci show | grep -q "^on-core\.${section}\." || uci set "on-core.${section}=$section"
 	done

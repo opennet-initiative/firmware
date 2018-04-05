@@ -14,7 +14,8 @@ process_captive_portal_triggers() {
 	fi
 }
 
-on-function is_on_module_installed_and_enabled "on-captive-portal" \
-	&& [ "$ACTION" = "ifup" -o "$ACTION" = "ifdown" ] \
-	&& process_captive_portal_triggers
-true
+if [ "$ACTION" = "ifup" ] || [ "$ACTION" = "ifdown" ]; then
+	if on-function is_on_module_installed_and_enabled "on-captive-portal"; then
+		process_captive_portal_triggers
+	fi
+fi

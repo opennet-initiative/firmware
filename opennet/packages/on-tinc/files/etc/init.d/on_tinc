@@ -2,6 +2,7 @@
 
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
+# shellcheck disable=SC2034
 START=42
 on_id=$(uci_get on-core.settings.on_id)
 
@@ -65,8 +66,14 @@ EOF
 start() {
 	local on_id_preset
 	on_id_preset=$(get_on_core_default on_id_preset)
-	[ -z "$on_id" -o "$on_id" = "$on_id_preset" ] && msg_info "not starting, on_id not configured" && return
-	[ -z "$TINC_ADDRESS" ] && msg_info "not starting, TINC_ADDRESS in /etc/init.d/on_tinc not configured" && return
+	if [ -z "$on_id" ] || [ "$on_id" = "$on_id_preset" ]; then
+		msg_info "not starting, on_id not configured"
+		return
+	fi
+	if [ -z "$TINC_ADDRESS" ]; then
+		msg_info "not starting, TINC_ADDRESS in /etc/init.d/on_tinc not configured"
+		return
+	fi
 	[ ! -d "/etc/tinc/$NETWORK_NAME" ] && create_tinc_config
 	tincd -n "$NETWORK_NAME"
 }

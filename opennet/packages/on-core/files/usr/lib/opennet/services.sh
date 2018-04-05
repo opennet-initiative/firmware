@@ -77,7 +77,7 @@ notify_services() {
 	local service_name
 	local etx
 	local hop
-	while read service scheme host port protocol path details; do
+	while read -r service scheme host port protocol path details; do
 		service_name=$(get_service_name "$service" "$scheme" "$host" "$port" "$protocol" "$path")
 		# Diese Attribute duerften sich nicht aendern, aber wir wollen sicherheitshalber lieber kaputten
 		# Werten vorbeugen.
@@ -92,7 +92,7 @@ notify_services() {
 			"details" "$details" \
 			"timestamp" "$(get_uptime_minutes)" \
 			"source" "$source"
-		get_hop_count_and_etx "$host" | while read hop etx; do
+		get_hop_count_and_etx "$host" | while read -r hop etx; do
 			set_service_value "$service_name" \
 				"distance" "$etx" \
 				"hop_count" "$hop"
@@ -245,7 +245,7 @@ sort_services_by_priority() {
 	local priority
 	local sorting
 	sorting=$(get_service_sorting)
-	while read service_name; do
+	while read -r service_name; do
 		priority=$(get_service_priority "$service_name" "$sorting")
 		# keine Entfernung (nicht erreichbar) -> ganz nach hinten sortieren (schmutzig, aber wohl ausreichend)
 		[ -z "$priority" ] && priority=999999999999999
@@ -262,7 +262,7 @@ sort_services_by_priority() {
 ##   oder wenn er manuell hinzugefügt wurde.
 filter_reachable_services() {
 	local service_name
-	while read service_name; do
+	while read -r service_name; do
 		{ [ -n "$(get_service_value "$service_name" "distance")" ] \
 			|| [ -n "$(get_service_value "$service_name" "priority")" ] \
 			|| [ "$(get_service_value "$service_name" "source")" = "manual" ]
@@ -279,7 +279,7 @@ filter_reachable_services() {
 filter_enabled_services() {
 	local service_name
 	local disabled
-	while read service_name; do
+	while read -r service_name; do
 		disabled=$(get_service_value "$service_name" "disabled")
 		[ -n "$disabled" ] && uci_is_true "$disabled" && continue
 		echo "$service_name"
@@ -305,7 +305,7 @@ pipe_service_attribute() {
 	local default="${2:-}"
 	local service_name
 	local value
-	while read service_name; do
+	while read -r service_name; do
 		value=$(get_service_value "$service_name" "$key")
 		[ -z "$value" ] && value="$default"
 		[ -n "$value" ] && printf "%s\t%s\n" "$service_name" "$value"
@@ -345,7 +345,7 @@ filter_services_by_value() {
 	local key="$1"
 	local value="$2"
 	local service_name
-	while read service_name; do
+	while read -r service_name; do
 		[ "$value" != "$(get_service_value "$service_name" "$key")" ] || echo "$service_name"
 	done
 }
@@ -417,9 +417,9 @@ print_services() {
 	local service_name
 	local attribute
 	local value
-	get_services "$@" | while read service_name; do
+	for service_name in $(get_services "$@"); do
 		echo "$service_name"
-		get_service_attributes "$service_name" | while read attribute; do
+		for attribute in $(get_service_attributes "$service_name"); do
 			value=$(get_service_value "$service_name" "$attribute")
 			echo -e "\t$attribute=$value"
 		done
@@ -484,7 +484,7 @@ cleanup_service_dependencies() {
 		uci_delete "$dep"
 		# gib die oberste config-Ebene aus - fuer spaeteres "apply_changes"
 		echo "$dep" | cut -f 1 -d .
-	done | sort | uniq | while read branch; do
+	done | sort | uniq | while read -r branch; do
 		apply_changes "$branch"
 	done
 	set_service_value "$service_name" "uci_dependency" ""
@@ -509,7 +509,7 @@ delete_service() {
 _distribute_service_ranks() {
 	local service_name
 	local index=1
-	get_services | sort_services_by_priority | while read service_name; do
+	for service_name in $(get_services | sort_services_by_priority); do
 		set_service_value "$service_name" "rank" "$index"
 		: $((index++))
 	done
@@ -539,7 +539,7 @@ move_service_up() {
 		temp=$(echo "$temp" | awk '{ print $1 - 1 }')
 		set_service_value "$service_name" "offset" "$temp"
 	elif [ "$sorting" = "manual" ]; then
-		get_services "$@" | sort_services_by_priority | while read current_service; do
+		for current_service in $(get_services "$@" | sort_services_by_priority); do
 			if [ "$current_service" = "$service_name" ]; then
 				if [ -z "$prev_service" ]; then
 					# es gibt keinen Dienst oberhalb des zu verschiebenden
@@ -587,7 +587,7 @@ move_service_down() {
 		temp=$(echo "$temp" | awk '{ print $1 + 1 }')
 		set_service_value "$service_name" "offset" "$temp"
 	elif [ "$sorting" = "manual" ]; then
-		get_services "$@" | sort_services_by_priority | while read current_service; do
+		for current_service in $(get_services "$@" | sort_services_by_priority); do
 			if [ "$prev_service" = "$service_name" ]; then
 				# wir verschieben den Dienst hinter den danach liegenden
 				temp=$(get_service_value "$current_service" "rank" "$DEFAULT_SERVICE_RANK")
@@ -869,10 +869,9 @@ run_cyclic_service_tests() {
 	local service_name
 	local timestamp
 	local status
-	filter_reachable_services \
+	for service_name in $(filter_reachable_services \
 			| filter_enabled_services \
-			| sort_services_by_priority \
-			| while read service_name; do
+			| sort_services_by_priority); do
 		timestamp=$(get_service_value "$service_name" "status_timestamp" "0")
 		status=$(get_service_value "$service_name" "status")
 		if [ -z "$status" ] || is_timestamp_older_minutes "$timestamp" "$test_period_minutes"; then
@@ -899,7 +898,7 @@ run_cyclic_service_tests() {
 			# keine unnoetigen Tests von nicht-funktionierenden Hosts durchzufuehren.
 			echo "-1 $service_name"
 		fi
-	done | sort -n | while read timestamp service_name; do
+	done | sort -n | while read -r timestamp service_name; do
 		# Mit dem Zeitstempel "-1" sind funktionierende Dienste markiert. Wir brauchen also keine
 		# weiteren Tests.
 		[ "$timestamp" = "-1" ] && return 0

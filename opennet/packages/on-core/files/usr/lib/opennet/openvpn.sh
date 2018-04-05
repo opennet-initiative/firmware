@@ -343,9 +343,8 @@ log_openvpn_events_and_disconnect_if_requested() {
 				append_to_custom_log "$log_target" "down" \
 					"Lost connection with ${remote_1}:${remote_port_1} after ${time_duration}s"
 				# alle Verbindungen derselben Art zu diesem Host als unklar definieren
-				get_services "$service_type" \
-						| filter_services_by_value "host" "$service_host" \
-						| while read same_host_service; do
+				for same_host_service in $(get_services "$service_type" \
+						| filter_services_by_value "host" "$service_host"); do
 					set_service_value "$same_host_service" "status" ""
 					set_service_value "$same_host_service" "status_timestamp" "$now"
 				done
@@ -490,7 +489,7 @@ cleanup_stale_openvpn_services() {
 	local config_file
 	local pid_file
 	local uci_prefix
-	find_all_uci_sections openvpn openvpn | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections "openvpn" "openvpn"); do
 		config_file=$(uci_get "${uci_prefix}.config")
 		# Keine config-Datei? Keine von uns verwaltete Konfiguration ...
 		[ -z "$config_file" ] && continue

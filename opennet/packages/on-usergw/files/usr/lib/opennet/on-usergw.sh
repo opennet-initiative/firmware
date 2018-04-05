@@ -130,7 +130,7 @@ update_trusted_service_list() {
 	url_list=$(https_request_opennet "$TRUSTED_SERVICES_URL" || msg_info "Failed to retrieve list of trusted services from $TRUSTED_SERVICES_URL")
 	# leeres Ergebnis? Noch keine Internet-Verbindung? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$url_list" ] && return
-	echo "$url_list" | grep -v "^#" | sed 's/\t\+/\t/g' | while read line; do
+	echo "$url_list" | grep -v "^#" | sed 's/\t\+/\t/g' | while read -r line; do
 		service_type=$(echo "$line" | cut -f 1)
 		# falls der Dienst-Typ mit "proxy-" beginnt, soll er weitergeleitet werden
 		if [ "${service_type#$RELAYABLE_SERVICE_PREFIX}" = "$service_type" ]; then
@@ -157,9 +157,7 @@ update_trusted_service_list() {
 	min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "trusted_service_expire_minutes")))
 	# falls die uptime kleiner ist als die Verfallszeit, dann ist ein Test sinnfrei
 	if [ "$min_timestamp" -gt 0 ]; then
-		get_services "mesh" \
-				| filter_services_by_value "source" "trusted" \
-				| while read service_name; do
+		for service_name in $(get_services "mesh" | filter_services_by_value "source" "trusted"); do
 			timestamp=$(get_service_value "$service_name" "timestamp" 0)
 			# der Service ist zu lange nicht aktualisiert worden
 			[ "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
@@ -263,10 +261,9 @@ sync_mesh_openvpn_connection_processes() {
 	local service_state
 	# diese Festlegung ist recht willkürlich: auf Geräten mit nur 32 MB scheinen wir jedenfalls nahe der Speichergrenze zu arbeiten
 	[ "$(get_memory_size)" -gt 32 ] && max_connections=5 || max_connections=1
-	get_services "mesh" \
+	for service_name in $(get_services "mesh" \
 			| filter_services_by_value "scheme" "openvpn" \
-			| sort_services_by_priority \
-			| while read service_name; do
+			| sort_services_by_priority); do
 		service_state=$(get_openvpn_service_state "$service_name")
 		if [ "$conn_count" -lt "$max_connections" ] \
 				&& uci_is_true "$(get_service_value "$service_name" "status" "false")" \
@@ -342,7 +339,7 @@ measure_upload_speed() {
 # Liefere die aktiven VPN-Verbindungen (mit Mesh-Hubs) zurueck.
 # Diese Funktion bracht recht viel Zeit.
 get_active_ugw_connections() {
-	get_services "mesh" | while read one_service; do
+	for one_service in $(get_services "mesh"); do
 		[ "$(get_openvpn_service_state "$one_service")" = "active" ] && echo "$one_service" || true
 	done
 }
@@ -377,11 +374,11 @@ update_mesh_gateway_firewall_rules() {
 	# falls es keinen Tunnel-Anbieter gibt, ist nichts zu tun
 	[ -z "${TOS_NON_TUNNEL:-}" ] && return 0
 	# Regeln fuer jeden mesh-Gateway aufstellen
-	get_services "mesh" | while read service; do
+	for service in $(get_services "mesh"); do
 		host=$(get_service_value "$service" "host")
 		port=$(get_service_value "$service" "port")
 		protocol=$(get_service_value "$service" "protocol")
-		query_dns "$host" | filter_routable_addresses | while read target_ip; do
+		for target_ip in $(query_dns "$host" | filter_routable_addresses); do
 			# unaufloesbare Hostnamen ignorieren
 			[ -z "$target_ip" ] && continue
 			iptables_by_target_family "$target_ip" -t mangle --insert "$chain" \

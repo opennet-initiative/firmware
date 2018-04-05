@@ -6,10 +6,9 @@ is_on_module_installed_and_enabled "on-usergw" || exit 0
 
 # Jeder AP hat seine eigenen cron-Job-Zeitpunkte - daher müssen wir uns nicht um die Vermeidung
 # von Parallelität kümmern.
-get_services "${RELAYABLE_SERVICE_PREFIX}gw" \
+for service_name in $(get_services "${RELAYABLE_SERVICE_PREFIX}gw" \
 		| filter_reachable_services \
-		| filter_enabled_services \
-		| while read service_name; do
+		| filter_enabled_services); do
 	update_relayed_server_speed_estimation "$service_name"
 done
 # veröffentliche die neuen Werte

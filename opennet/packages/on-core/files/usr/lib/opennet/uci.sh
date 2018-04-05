@@ -82,13 +82,10 @@ uci_get_list_index() {
 	local value="$2"
 	local current
 	local index=0
-	# "head -1" statt "break" in der Schleife, um Broken-Pipe-Fehler zu vermeiden
-	uci_get_list "$uci_path" | while read current; do
-		[ "$current" = "$value" ] && echo "$index"
-		: $((index++))
-		true
-	done | head -1
-	return 0
+	for current in $(uci_get_list "$uci_path"); do
+		[ "$current" = "$value" ] && echo "$index" && break
+		index=$((index + 1))
+	done
 }
 
 
@@ -172,7 +169,7 @@ _find_uci_sections() {
 	local condition
 	# Der Cache beschleunigt den Vorgang wesentlich.
 	uci_cache=$(uci -X -q show "$config" | filter_uci_show_value_quotes)
-	echo "$uci_cache" | grep "^$config\.[^.]\+=$stype$" | cut -f 1 -d = | cut -f 2 -d . | while read section; do
+	for section in $(echo "$uci_cache" | grep "^$config\.[^.]\+=$stype$" | cut -f 1 -d = | cut -f 2 -d .); do
 		for condition in "$@"; do
 			# diese Sektion ueberspringen, falls eine der Bedingungen fehlschlaegt
 			echo "$uci_cache" | grep -q "^$config\.$section\.$condition$" || continue 2

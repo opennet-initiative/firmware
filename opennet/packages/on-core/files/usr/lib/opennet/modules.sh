@@ -90,7 +90,7 @@ get_on_modules() {
 ## @brief Ermittle diejenigen Module, die aktuell nicht installiert sind.
 get_not_installed_on_modules() {
 	local module
-	get_on_modules | while read module; do
+	for module in $(get_on_modules); do
 		is_package_installed "$module" || echo "$module"
 	done
 }
@@ -110,7 +110,7 @@ was_on_module_installed_before() {
 ## @brief Collect the names of modules that were probably installed before the last upgrade.
 get_missing_modules() {
 	local module
-	get_on_modules | while read module; do
+	for module in $(get_on_modules); do
 		is_on_module_installed_and_enabled "$module" && continue
 		is_package_installed "$module" && continue
 		was_on_module_installed_before "$module" && echo "$module"
@@ -147,7 +147,7 @@ install_from_opennet_repository() {
 		fi
 	done
 	# wir wollen auch indirekt installierte Pakete aktivieren (z.B. on-openvpn via on-captive-portal)
-	echo "$not_installed_packages" | while read package; do
+	for package in $not_installed_packages; do
 		# unveraendert nicht installiert? Ignorieren ...
 		is_package_installed "$package" || continue
 		on-function enable_on_module "$package"
@@ -205,7 +205,7 @@ save_on_modules_list() {
 	local modname
 	_prepare_on_modules
 	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
-	get_on_modules | while read modname; do
+	for modname in $(get_on_modules); do
 		is_package_installed "$modname" \
 			&& uci_add_list "on-core.modules.installed" "$modname" \
 			|| uci_delete_list "on-core.modules.installed" "$modname"

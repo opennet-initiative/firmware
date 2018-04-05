@@ -52,7 +52,7 @@ enable_suggested_munin_plugin_names() {
 	capabilities=$(grep "#%#[[:space:]]\+capabilities[[:space:]]*=" "$plugin_file" | cut -f 2 -d "=")
 	# keine Ausfuehrung ohne "suggest"-Faehigkeit
 	echo "$capabilities" | grep -qw "suggest" || return 0
-	"$plugin_file" suggest | while read scope; do
+	"$plugin_file" suggest | while read -r scope; do
 		[ -z "$scope" ] && continue
 		[ -e "$target_dir/${base_plugin}${scope}" ] && continue
 		ln -s "$source_dir/$base_plugin" "$target_dir/${base_plugin}${scope}"
@@ -74,7 +74,7 @@ remove_suggested_munin_plugin_names() {
 	local base_plugin="$1"
 	local target_dir="${IPKG_INSTROOT:-}/usr/sbin/munin-node-plugin.d"
 	local target
-	"${IPKG_INSTROOT:-}/usr/share/munin-plugins-available/$base_plugin" suggest | while read scope; do
+	"${IPKG_INSTROOT:-}/usr/share/munin-plugins-available/$base_plugin" suggest | while read -r scope; do
 		target="$target_dir/${base_plugin}${scope}"
 		[ -h "$target" ] && rm "$target"
 		true

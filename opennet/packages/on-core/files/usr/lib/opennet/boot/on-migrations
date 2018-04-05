@@ -28,7 +28,7 @@ coerce_openvpn_comp_lzo() {
 	local new_value
 	local key
 	# wir wissen nicht genau, ob on-usergw und openvpn existiert - also lieber vorsichtig fragen
-	(uci -q show openvpn; uci -q show on-usergw) | grep "\.comp_lzo=[01]$" | while read line; do
+	(uci -q show openvpn; uci -q show on-usergw) | grep "\.comp_lzo=[01]$" | while read -r line; do
 		new_value=no
 		echo "$line" | grep -q "1$" && new_value=yes
 		key=$(echo "$line" | cut -f 1 -d =)
@@ -137,7 +137,7 @@ fix_firewall_reload() {
 	trap "error_trap fix_firewall_reload '$*'" $GUARD_TRAPS
 	local filename=/etc/firewall.opennet
 	local uci_prefix
-	find_all_uci_sections "firewall" "include" | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections "firewall" "include"); do
 		[ "$(uci_get "${uci_prefix}.path")" != "$filename" ] && continue
 		# gesamte "include"-Abzweigung loeschen
 		uci_delete "$uci_prefix"
@@ -218,7 +218,7 @@ remove_tunnel_openvpn_settings() {
 remove_usergw_openvpn_configs() {
 	trap "error_trap remove_usergw_openvpn_configs '$*'" $GUARD_TRAPS
 	local uci_prefix
-	find_all_uci_sections "openvpn" "openvpn" | grep "^openvpn\.opennet_ugw_" | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections "openvpn" "openvpn" | grep "^openvpn\.opennet_ugw_"); do
 		uci delete "$uci_prefix"
 	done
 	return 0
@@ -277,12 +277,12 @@ transfer_gateway_uci_settings() {
 	local offset
 	local rank
 	local service_name
-	find_all_uci_sections on-openvpn gateway | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections "on-openvpn" "gateway"); do
 		host=$(uci_get "${uci_prefix}.ipaddr")
 		offset=$(uci_get "${uci_prefix}.etx_offset")
 		rank="${uci_prefix#on-openvpn.gate_}"
 		# ermittle alle passenden Dienste dieses Hosts (es koennen mehrere Dienste pro Host vorhanden sein)
-		get_services "gw" | filter_services_by_value "host" "$host" | while read service_name; do
+		for service_name in $(get_services "gw" | filter_services_by_value "host" "$host"); do
 			# Offset fuer automatische Sortierung uebertragen
 			[ -n "$offset" ] && set_service_value "$service_name" "offset" "$offset"
 			# Rang fuer manuelle Sortierung uebertragen
@@ -315,7 +315,7 @@ rename_olsrd_port_to_port() {
 	trap "error_trap rename_olsrd_port_to_port '$*'" $GUARD_TRAPS
 	local uci_prefix
 	local library
-	find_all_uci_sections olsrd LoadPlugin | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections "olsrd" "LoadPlugin"); do
 		library="$(uci_get "${uci_prefix}.library")"
 		# falsche Bibliothek?
 		[ "$library" != "${library#olsrd_httpinfo}" ] || continue
@@ -337,7 +337,7 @@ move_mtu_fix_to_target_zone() {
 	local mtu_value
 	local target_zone
 	local zone_uci_prefix
-	find_all_uci_sections firewall forwarding | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections firewall forwarding); do
 		mtu_value=$(uci_get "${uci_prefix}.mtu_fix")
 		# leer? Es gibt nichts zu uebertragen ...
 		[ -z "$mtu_value" ] && continue
@@ -386,7 +386,7 @@ rename_firewall_zone() {
 	# aktualisiere alle Forwardings, Redirects und Regeln
 	for section in "forwarding" "redirect" "rule"; do
 		for key in "src" "dest"; do
-			find_all_uci_sections firewall "$section" "${key}=$old_zone" | while read uci_prefix; do
+			for uci_prefix in $(find_all_uci_sections firewall "$section" "${key}=$old_zone"); do
 				uci set "${uci_prefix}.${key}=$new_zone"
 			done
 		done
@@ -416,7 +416,7 @@ move_wifidog_networks_to_captive_portal() {
 	# das Interface muss immer angegeben sein (oder "none")
 	uci set "network.${new_name}.ifname=${old_interfaces:-none}"
 	# alle wifi-Interfaces verschieben
-	find_all_uci_sections "wireless" "wifi-iface" "network=$old_name" | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections "wireless" "wifi-iface" "network=$old_name"); do
 		uci set "${uci_prefix}.network=$new_name"
 	done
 	# fertig: wir ignorieren das Bridge-Attribute - es ist nicht mehr erforderlich (und selten noetig)
@@ -432,7 +432,7 @@ move_wifidog_networks_to_captive_portal() {
 remove_wifidog_alias_interface() {
 	trap "error_trap remove_wifidog_alias_interface '$*'" $GUARD_TRAPS
 	local uci_prefix
-	find_all_uci_sections "network" "alias" "interface=free" | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections "network" "alias" "interface=free"); do
 		uci_delete "$uci_prefix"
 	done
 	apply_changes network

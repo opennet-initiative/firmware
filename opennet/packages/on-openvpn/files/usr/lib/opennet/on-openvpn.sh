@@ -55,16 +55,16 @@ verify_mig_gateways() {
 select_mig_connection() {
 	trap "error_trap select_mig_connection '$*'" $GUARD_TRAPS
 	local wanted="$1"
-	local one_service
-	get_services "gw" | while read one_service; do
+	local found_service=0
+	for one_service in $(get_services "gw"); do
 		# loesche Flags fuer die Vorselektion
 		set_service_value "$one_service" "switch_candidate_timestamp" ""
-		# erst nach der Abschaltung der alten Dienste wollen wir den/die neuen Dienste anschalten (also nur Ausgabe)
-		[ "$one_service" = "$wanted" ] && echo "$one_service" && continue
+		# erst nach der Abschaltung der alten Dienste wollen wir den neuen Dienst anschalten
+		[ "$one_service" = "$wanted" ] && found_service=1 && continue
+		# alle unerwuenschten Dienste abschalten
 		disable_openvpn_service "$one_service" || true
-	done | while read one_service; do
-		enable_openvpn_service "$wanted" "host"
 	done
+	[ "$found_service" = "0" ] || enable_openvpn_service "$wanted" "host"
 }
 
 
@@ -79,7 +79,6 @@ find_and_select_best_gateway() {
 	local host
 	local best_gateway=
 	local current_gateway=
-	local result
 	local current_priority
 	local best_priority
 	local switch_candidate_timestamp
@@ -90,30 +89,18 @@ find_and_select_best_gateway() {
 	msg_debug "Trying to find a better gateway"
 	# suche nach dem besten und dem bisher verwendeten Gateway
 	# Ignoriere dabei alle nicht-verwendbaren Gateways.
-	result=$(get_services "gw" \
+	for service_name in $(get_services "gw" \
 			| filter_reachable_services \
 			| filter_enabled_services \
-			| sort_services_by_priority \
-			| while read service_name; do
-		# Ist der beste und der aktive Gateway bereits gefunden? Dann einfach weiterspringen ...
-		# (kein Abbruch der Schleife - siehe weiter unten - Stichwort SIGPIPE)
-		[ -n "$current_gateway" ] && continue
+			| sort_services_by_priority); do
 		host=$(get_service_value "$service_name" "host")
 		uci_is_false "$(get_service_value "$service_name" "status" "false")" && \
 			msg_debug "$host did not pass the last test" && \
 			continue
-		# der Gateway ist ein valider Kandidat
-		# Achtung: Variablen innerhalb einer "while"-Sub-Shell wirken sich nicht auf den Elternprozess aus
-		# Daher wollen wir nur ein bis zwei Zeilen:
-		#   den besten
-		#   [den aktiven] (falls vorhanden)
-		# Wir brechen die Ausgabe jedoch nicht nach den ersten beiden Zeilen ab. Andernfalls muessten wir
-		# uns um das SIGPIPE-Signal kuemmern (vor allem in cron-Jobs).
-		[ -z "$best_gateway" ] && best_gateway="$service_name" && echo "$best_gateway"
-		[ -n "$(get_openvpn_service_state "$service_name")" ] && current_gateway="$service_name" && echo "$service_name" || true
-	done)
-	best_gateway=$(echo "$result" | sed -n 1p)
-	current_gateway=$(echo "$result" | sed -n 2p)
+		# dieser Gateway ist ein valider Kandidat
+		[ -z "$best_gateway" ] && best_gateway="$service_name" && continue
+		[ -n "$(get_openvpn_service_state "$service_name")" ] && current_gateway="$service_name" && break
+	done
 	if [ "$current_gateway" = "$best_gateway" ]; then
 		if [ -z "$current_gateway" ]; then
 			msg_debug "There is still no usable gateway around"
@@ -185,7 +172,7 @@ find_and_select_best_gateway() {
 get_active_mig_connections() {
 	trap "error_trap get_active_mig_connections '$*'" $GUARD_TRAPS
 	local service_name
-	get_services "gw" | while read service_name; do
+	for service_name in $(get_services "gw"); do
 		[ "$(get_openvpn_service_state "$service_name")" = "active" ] && echo "$service_name" || true
 	done
 }
@@ -198,7 +185,7 @@ get_active_mig_connections() {
 get_starting_mig_connections() {
 	trap "error_trap get_starting_mig_connections '$*'" $GUARD_TRAPS
 	local service_name
-	get_services "gw" | while read service_name; do
+	for service_name in $(get_services "gw"); do
 		[ "$(get_openvpn_service_state "$service_name")" = "connecting" ] && echo "$service_name" || true
 	done
 }
@@ -220,7 +207,7 @@ reset_mig_connection_test_timestamp() {
 ## @sa reset_mig_connection_test_timestamp
 reset_all_mig_connection_test_timestamps() {
 	local service_name
-	get_services "gw" | while read service_name; do
+	for service_name in $(get_services "gw"); do
 		reset_mig_connection_test_timestamp "$service_name"
 	done
 }
@@ -366,7 +353,7 @@ update_traceroute_gw_cache() {
 	local service
 	local traceroute
 
-	get_services "gw" | pipe_service_attribute "host" | cut -f 2- | sort | uniq | while read host; do
+	for host in $(get_services "gw" | pipe_service_attribute "host" | cut -f 2- | sort | uniq); do
 		# do traceroute and get result as csv back
 		traceroute=$(get_traceroute "$host")
 		# update cache file

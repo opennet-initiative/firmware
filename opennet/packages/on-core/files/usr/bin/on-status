@@ -51,7 +51,7 @@ if is_on_module_installed_and_enabled on-openvpn; then
 	if [ -z "$current_connections" ]; then
 		echo "no internet connection"
 	else
-		echo "$current_connections" | while read service; do
+		for service in $current_connections; do
 			printf "%s:%s via %s\n" \
 				"$(get_service_value "$service" host)" \
 				"$(get_service_value "$service" port)" \
@@ -69,7 +69,7 @@ if is_on_module_installed_and_enabled on-usergw; then
 	if [ -z "$current_connections" ]; then
 		echo "no user gateway connections"
 	else
-		echo "$current_connections" | while read service; do
+		for service in $current_connections; do
 			printf "%s:%s\n" \
 				"$(get_service_value "$service" host)" \
 				"$(get_service_value "$service" port)"

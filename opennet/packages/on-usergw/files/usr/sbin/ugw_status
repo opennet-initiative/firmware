@@ -27,7 +27,7 @@ print_status() {
 	format_string="%-6s %-32s %11s %3s %3s %3s\n"
 
 	printf "$format_string" "active" "Hostname" "Priority" "WAN" "VPN" "MTU"
-	get_services "mesh" | sort_services_by_priority | while read service_name; do
+	for service_name in $(get_services "mesh" | sort_services_by_priority); do
 		host=$(get_service_value "$service_name" "host")
 		if uci_is_true "$(get_service_value "$service_name" "disabled" "false")"; then
 			# der Dienst wird ignoriert
@@ -72,7 +72,7 @@ ACTION=help
 case "$ACTION" in
 	check_gateway)
 		[ $# -gt 2 ] && echo >&2 "ERROR: '$ACTION' requires one more parameter" && exit 1
-		get_services "mesh" | filter_services_by_value "host" "$2" | while read service_name; do
+		for service_name in $(get_services "mesh" | filter_services_by_value "host" "$2"); do
 			echo "$service_name" | run_cyclic_service_tests "is_mesh_gateway_usable" "0" "0"
 			for key in wan vpn mtu; do
 				printf "%s: %s\n" "$key" "$(get_service_value "$service_name" "${key}_status")"

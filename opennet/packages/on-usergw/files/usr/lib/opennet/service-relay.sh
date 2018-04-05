@@ -63,7 +63,7 @@ update_relay_firewall_rules() {
 	iptables -t mangle --check "$parent_tos_chain" -j "$tos_chain" 2>/dev/null \
 		|| iptables -t mangle --insert "$parent_tos_chain" -j "$tos_chain"
 	# DNAT- und TOS-Chain fuellen
-	get_services | filter_relay_services | while read service; do
+	for service in $(get_services | filter_relay_services); do
 		is_service_relay_possible "$service" || continue
 		host=$(get_service_value "$service" "host")
 		port=$(get_service_value "$service" "port")
@@ -127,7 +127,7 @@ announce_olsr_service_relay() {
 	service_unique=$(_get_service_relay_olsr_announcement_prefix "$service_name")
 	# das 'service_name'-Detail wird fuer die anschliessende Beraeumung (firewall-Regeln usw.) verwendet
 	# nur nicht-leere Attribute werden geschrieben
-	service_details=$(while read key value; do [ -z "$value" ] && continue; echo "$key:$value"; done <<EOF
+	service_details=$(while read -r key value; do [ -z "$value" ] && continue; echo "$key:$value"; done <<EOF
 		public_host $(get_service_value "$service_name" "host")
 		upload $(get_service_value "$service_name" "wan_speed_upload")
 		download $(get_service_value "$service_name" "wan_speed_download")
@@ -141,7 +141,7 @@ EOF
 	local this_details
 	local uci_prefix
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	get_service_relay_olsr_announcement "$service_name" | while read this_unique this_details; do
+	get_service_relay_olsr_announcement "$service_name" | while read -r this_unique this_details; do
 		# der Wert ist bereits korrekt - wir koennen abbrechen
 		[ "$this_details" = "$service_details" ] && break
 		# der Wert ist falsch: loeschen und am Ende neu hinzufuegen
@@ -179,7 +179,7 @@ deannounce_unused_olsr_service_relays() {
 	local service_name
 	local uci_prefix
 	uci_prefix=$(get_and_enable_olsrd_library_uci_prefix "nameservice")
-	uci_get_list "${uci_prefix}.service" | while read service_description; do
+	uci_get_list "${uci_prefix}.service" | while read -r service_description; do
 		# unbenutzte Eintraege entfernen
 		service_name=$(get_olsr_relay_service_name_from_description "$service_description")
 		# falls es den Dienst noch gibt: ist er immer noch aktiv?
@@ -213,7 +213,7 @@ update_service_relay_status() {
 	local service_name
 	local wan_status
 	if is_on_module_installed_and_enabled "on-usergw"; then
-		get_services | filter_relay_services | while read service_name; do
+		for service_name in $(get_services | filter_relay_services); do
 			# WAN-Routing pruefen und aktualisieren
 			is_service_routed_via_wan "$service_name" && wan_status="true" || wan_status="false"
 			set_service_value "$service_name" "wan_status" "$wan_status"
@@ -235,7 +235,7 @@ update_service_relay_status() {
 ##   weitergeleitet, falls es sich um einen Relay-Dienst handelt.
 filter_relay_services() {
 	local service_name
-	while read service_name; do
+	while read -r service_name; do
 		[ -n "$(get_service_value "$service_name" "local_relay_port")" ] && echo "$service_name"
 		true
 	done

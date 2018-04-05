@@ -264,7 +264,7 @@ if is_function_available "get_active_mig_connections"; then
 	on_vpn_autosearch="$([ "$(uci_get on-core.settings.service_sorting)" = "manual" ] && echo "0" || echo "1")"
 	on_vpn_sort="$(uci_get on-core.settings.service_sorting)"
 
-	on_vpn_gws=$(get_services "gw" | while read service_name; do
+	on_vpn_gws=$(for service_name in $(get_services "gw"); do
 			gw_ipaddr=$(get_service_value "$service_name" "host")
 			age=$(get_mig_connection_test_age "$service_name")
 			status=$(get_service_value "$service_name" "status")
@@ -272,7 +272,7 @@ if is_function_available "get_active_mig_connections"; then
 		done | join)
 
 	# liste alle deaktivierten Dienste auf
-	on_vpn_blist=$(get_services "gw" | while read service_name; do
+	on_vpn_blist=$(for service_name in $(get_services "gw"); do
 			uci_is_true "$(get_service_value "$service_name" "disabled" "false")" && echo "$service_name" || true
 		done | pipe_service_attribute "host" | cut -f 2- | join)
 else
@@ -291,11 +291,11 @@ if is_function_available "get_active_ugw_connections"; then
 	on_ugw_possible=$([ -n "$(get_services mesh | pipe_service_attribute "status" | while read -r status; do uci_is_true "$status" && echo "." || true; done)" ] && echo "1" || echo "0")
 	on_ugw_tunnel="$([ -n "$(get_active_ugw_connections)" ] && echo "1" || echo "0")"
 	# ermittle alle Nachbarn, die via tap-Interface verbunden sind - dies ist etwas ungenau, aber besser geht es wohl nicht
-	on_ugw_connected=$(request_olsrd_txtinfo "nei" | grep "^[0-9]" | awk '{print $1}' | while read neighbor; do ip route get "$neighbor" 2>/dev/null | awk '/dev '$MESH_OPENVPN_DEVICE_PREFIX'/ {print $1}'; done | join)
+	on_ugw_connected=$(request_olsrd_txtinfo "nei" | grep "^[0-9]" | awk '{print $1}' | while read -r neighbor; do ip route get "$neighbor" 2>/dev/null | awk '/dev '$MESH_OPENVPN_DEVICE_PREFIX'/ {print $1}'; done | join)
 	_on_ugw_services=$(get_services mesh | filter_enabled_services | sort_services_by_priority)
 	on_ugw_presetnames=$(echo "$_on_ugw_services" | pipe_service_attribute "host")
 	# wir nehmen jeweils die erste IP der Namensaufloesung (typischer IPv4)
-	on_ugw_presetips=$(echo "$_on_ugw_services" | pipe_service_attribute "host" | while read host; do query_dns "$host" | head -1; done)
+	on_ugw_presetips=$(echo "$_on_ugw_services" | pipe_service_attribute "host" | while read -r host; do query_dns "$host" | head -1; done)
 	on_ugw_status="$([ -n "$on_ugw_connected" ] && echo "1" || echo "0")"
 	on_ugw_enabled="$(is_on_module_installed_and_enabled "on-usergw" && echo "1" || echo "0")"
 else

@@ -18,7 +18,7 @@ update_olsr_interfaces() {
 	local interfaces
 	local current
 	interfaces="$(get_zone_interfaces "$ZONE_MESH") $(get_zone_raw_devices "$ZONE_MESH")"
-	find_all_uci_sections "olsrd" "Interface" | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections "olsrd" "Interface"); do
 		current=$(uci_get "${uci_prefix}.interface")
 		if echo "$interfaces" | grep -qFw "$current"; then
 			# OLSR fuer das Interface aktivieren
@@ -49,7 +49,7 @@ get_and_enable_olsrd_library_uci_prefix() {
 	local uci_prefix=
 	local library="olsrd_$1"
 	local current
-	current=$(find_all_uci_sections olsrd LoadPlugin | while read uci_prefix; do
+	current=$(for uci_prefix in $(find_all_uci_sections olsrd LoadPlugin); do
 			# die Bibliothek beginnt mit dem Namen - danach folgt die genaue Versionsnummer
 			uci_get "${uci_prefix}.library" | grep -q "^$library\.so" && echo "$uci_prefix"
 		done | tail -1)
@@ -103,7 +103,7 @@ disable_missing_olsr_modules() {
 	local libfile
 	local uci_prefix
 	local ignore
-	find_all_uci_sections "olsrd" "LoadPlugin" | while read uci_prefix; do
+	for uci_prefix in $(find_all_uci_sections "olsrd" "LoadPlugin"); do
 		libfile=$(uci_get "${uci_prefix}.library")
 		ignore=$(uci_get "${uci_prefix}.ignore")
 		[ -n "$ignore" ] && uci_is_true "$ignore" && continue
@@ -125,7 +125,7 @@ olsr_sync_routing_tables() {
 	local iproute_name
 	local olsr_id
 	local iproute_id
-	while read olsr_name iproute_name; do
+	while read -r olsr_name iproute_name; do
 		olsr_id=$(uci_get "olsrd.@olsrd[0].$olsr_name")
 		iproute_id=$(get_routing_table_id "$iproute_name")
 		# beide sind gesetzt und identisch? Alles ok ...
@@ -207,7 +207,7 @@ remove_old_olsr_services() {
 	# veraltete Dienste entfernen (nur falls die uptime groesser ist als die Verfallszeit)
 	if [ "$min_timestamp" -gt 0 ]; then
 		get_services | filter_services_by_value "source" "olsr" | pipe_service_attribute "timestamp" "0" \
-				| while read service_name timestamp; do
+				| while read -r service_name timestamp; do
 			# der Service ist zu lange nicht aktualisiert worden
 			[ -z "$timestamp" -o "$timestamp" -lt "$min_timestamp" ] && delete_service "$service_name"
 			true

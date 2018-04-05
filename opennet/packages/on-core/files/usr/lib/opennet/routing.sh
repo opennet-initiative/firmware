@@ -41,7 +41,7 @@ is_ipv6() {
 ## @return zeilenweise Ausgabe der route-baren Ziel-IPs:w
 filter_routable_addresses() {
 	local ip
-	while read ip; do
+	while read -r ip; do
 		[ -n "$(get_target_route_interface "$ip")" ] && echo "$ip" || true
 	done
 	return 0
@@ -57,14 +57,16 @@ filter_routable_addresses() {
 get_target_route_interface() {
 	local target="$1"
 	local tos_field="${2:-}"
+	local all_addresses
 	local ipaddr
 	local route_get_args=
 	[ -n "$tos_field" ] && route_get_args="tos $tos_field"
 	if is_ipv4 "$target" || is_ipv6 "$target"; then
-		echo "$target"
+		all_addresses=$target
 	else
-		query_dns "$target"
-	fi | while read ipaddr; do
+		all_addresses=$(query_dns "$target")
+	fi
+	for ipaddr in $all_addresses; do
 		# "failed_policy" wird von ipv6 fuer nicht-zustellbare Adressen zurueckgeliefert
 		# Falls ein Hostname mehrere IP-Adressen ergibt (z.B. ipv4 und ipv6), dann werden beide geprüft.
 		# Die Ergebnis der Interface-Ermittlung für eine IPv6-Adresse bei fehlendem IPv6-Gateway sieht folgendermaßen aus:
@@ -131,7 +133,7 @@ add_zone_policy_rules_by_iif() {
 		for device in $(get_subdevices_of_interface "$interface"); do
 			echo "$device"
 		done
-	done | sort | uniq | while read device; do
+	done | sort | uniq | while read -r device; do
 		[ -n "$device" -a "$device" != "none" ] && ip -family "$family" rule add iif "$device" "$@"
 		true
 	done
@@ -177,7 +179,7 @@ initialize_olsrd_policy_routing() {
 	# Wir wollen dadurch explizit keine potentielle default-Route verwenden.
 	# Aufgrund der "while"-Sub-Shell (mit separatem Variablenraum) belassen wir die Regeln
 	# einfach bei gleicher Prioritaet und erhoehen diese erst anschliessend.
-	get_all_network_interfaces | while read iface; do
+	for iface in $(get_all_network_interfaces); do
 		is_interface_in_zone "$iface" "$ZONE_MESH" && continue
 		add_network_policy_rule_by_destination inet "$iface" table main prio "$priority"
 	done
@@ -344,7 +346,7 @@ get_olsr_neighbours() {
 	local nlq
 	local etx
 	local route_count
-	request_olsrd_txtinfo lin | grep "^[0-9]" | awk '{ print $2,$4,$5,$6 }' | while read ip lq nlq etx; do
+	request_olsrd_txtinfo lin | grep "^[0-9]" | awk '{ print $2,$4,$5,$6 }' | while read -r ip lq nlq etx; do
 		echo "$ip $lq $nlq $etx $(get_olsr_route_count_by_neighbour "$ip")"
 	done
 }

@@ -18,7 +18,7 @@ mkdir -p "$PROFILING_DIR"
 ## @details Dies erlaubt die Analyse des Flash-Bedarfs.
 list_installed_packages_by_size() {
 	local fname
-	find /usr/lib/opkg/info/ -type f -name "*.control" | while read fname; do
+	find /usr/lib/opkg/info/ -type f -name "*.control" | while read -r fname; do
 		grep "Installed-Size:" "$fname" \
 			| awk '{print $2, "\t", "'$(basename "${fname%.control}")'" }'
 	done | sort -n | awk 'BEGIN { summe=0 } { summe+=$1; print $0 } END { print summe }'
@@ -72,7 +72,7 @@ enable_profiling() {
 		# ersetze das shebang in allen Opennet-Skripten
 		# eventuell fehlen ein paar Dateien (Umbennungen usw. im Vergleich zum installierten Paket) -> überspringen
 		cat /usr/lib/opkg/info/on-*.list | grep -E "(bin/|\.sh$|etc/cron\.|/etc/hotplug\.d/|lib/opennet)" \
-			| while read fname; do [ -e "$fname" ] && echo "$fname"; true; done \
+			| while read -r fname; do [ -e "$fname" ] && echo "$fname"; true; done \
 			| xargs -n 200 -r sed -i -f "${IPKG_INSTROOT:-}/usr/lib/opennet/profiling.sed"
 		clear_caches
 	else
@@ -96,7 +96,7 @@ summary_profiling() {
 	local sum
 	# Kopfzeile
 	printf "%16s %16s %16s %s\n" "Duration [ms]" "Call count" "avgDuration [ms]" "Name"
-	find "$PROFILING_DIR" -type f | while read fname; do
+	find "$PROFILING_DIR" -type f | while read -r fname; do
 		# filtere Fehlmessungen (irgendwie tauchen dort Zahlen wie "27323677987" auf)
 		grep -v "^27[0-9]\{9\}$" "$fname" | awk '
 			BEGIN { summe=0; counter=0 }

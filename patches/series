@@ -1,4 +1,3 @@
-poe_passthrough_ubnt_edgerouter.patch
 oni-feeds.patch
 makefile_include_opennet_packages.patch
 hostapd_option_chanlist.patch
@@ -12,16 +11,8 @@ olsrd2_enable_plugin_ethernet_listener.patch
 always-enable-dfs.patch
 #radar_pulse_debug.patch
 horst_compile_error.patch
-
-# nur fuer Builds basierend auf LEDE 17.01 notwendig
-# Ursache: https://github.com/curl/curl/issues/1268
-# Test des Fehlers (sollte nur mit curl 7.52 auftreten):
-#   $ curl --form "foo=bar" http://on-i.de/
-#   curl: (27) PRNG seeding failed
-lede-17.01-curl-upgrade.patch
-
 hostapd_switch_to_DFS.patch
-curl-fix-7.53-upgrade.patch
 muninlite_swap.patch
 muninlite_makefile.patch
-regdb_channels.patch
+# TODO: entfernen, falls wir den Patch mit OpenWrt 18.05 nicht mehr brauchen sollten
+#regdb_channels.patch

@@ -8,7 +8,8 @@ import os
 import sys
 
 
-# dieser Port auf dem externen UGW-Server wird als Erkennungsmerkmal fuer Nutzertunnel-Verbindungen verwendet
+# Dieser Port auf dem externen UGW-Server wird als Erkennungsmerkmal fuer Nutzertunnel-Verbindungen
+# verwendet.
 UGW_SERVER_PORT = 1600
 UGW_SERVER_PROTOCOL = "udp"
 # minimale Anzahl von Paketen, um eine Test-Verbindung von einer echten Verbindung zu unterschieden
@@ -43,8 +44,8 @@ def get_connections_by_target():
             """ example lines (splitted):
                 Linux 3.18:
                     ipv4     2 udp      17 176
-                    src=192.168.2.155 dst=192.168.2.254 sport=53231 dport=5100 packets=16613 bytes=1876140
-                    src=62.141.37.125 dst=172.16.241.254 sport=1600 dport=53231 packets=26214 bytes=3956803
+                    src=192.168.2.155 dst=192.168.2.254 sport=53231 dport=5100 packets=16613 bytes=1876140   # noqa: E501
+                    src=62.141.37.125 dst=172.16.241.254 sport=1600 dport=53231 packets=26214 bytes=3956803  # noqa: E501
                     [ASSURED] use=2
                 Linux 3.2:
                     ipv4     2 udp      17 179
@@ -107,7 +108,7 @@ if __name__ == "__main__":
             is_first = True
             for target in connections:
                 print("{fieldname}.label {label}".format(**target))
-                print("{0}.draw {1}".format(target["fieldname"], ("AREA" if is_first else "STACK")))
+                print("{0}.draw AREASTACK".format(target["fieldname"]))
                 is_first = False
             sys.exit(0)
         elif sys.argv[1] == "":

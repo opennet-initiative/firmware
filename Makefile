@@ -40,7 +40,7 @@ $(ARCHS): feeds translate
 	$(MAKE) -C "$(OPENWRT_DIR)"
 
 config-%:
-	@test -f $(OPENWRT_DIR)/feeds.conf || echo "**** FEHLER! DATEI feeds.conf FEHLT. Fuehre bitte 'make feeds' aus. ****"
+	@[ -f "$(OPENWRT_DIR)/feeds.conf" ] || echo "**** FEHLER! DATEI feeds.conf FEHLT. Fuehre bitte 'make feeds' aus. ****"
 	$(MAKE) -C "$(CONFIG_DIR)/" "$(patsubst config-%,%,$@)"
 
 menuconfig:
@@ -54,7 +54,7 @@ git-init:
 	@# update submodules if necessary
 	git submodule init --quiet
 	git submodule update
-	@test -z "$$QUILT_DIFF_ARGS" -a ! -e ~/.quiltrc && echo >&2 "HINWEIS: falls du Patches aendern moechtest, dann lies bitte doc/Entwicklung.md (Stichwort: 'quilt-Konfiguration')" || true
+	@[ -z "$$QUILT_DIFF_ARGS" ] && [ ! -e ~/.quiltrc ] && echo >&2 "HINWEIS: falls du Patches aendern moechtest, dann lies bitte doc/Entwicklung.md (Stichwort: 'quilt-Konfiguration')" || true
 
 init: git-init feeds translate
 
@@ -75,7 +75,7 @@ translate:
 	 done | while read dname pot_filename; do \
 		"$(LUCI_DIR)/build/i18n-scan.pl" "$$dname" >"$$pot_filename"; \
 		false COMMENT: remove zero-sized pot files; \
-		(test -e "$$pot_filename" -a ! -s "$$pot_filename" && rm "$$pot_filename") || true; \
+		([ -e "$$pot_filename" ] && [ ! -s "$$pot_filename" ] && rm "$$pot_filename") || true; \
 	 done
 	@"$(LUCI_DIR)/build/i18n-update.pl" "$(CUSTOM_PO_DIR)"
 

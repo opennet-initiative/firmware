@@ -447,6 +447,12 @@ Falls auf dem Ziel-AP *rsync* installiert ist, wird die Übertragung deutlich be
   opennet/tools/copy-package-files-to-AP.sh 172.16.0.1
 
 
+Tests {#tests}
+--------------
+
+Derzeit existieren lediglich Code-Stil-Prüfungen. Funktionale Tests sind nicht vorhanden.
+
+
 Debugging {#debugging}
 ----------------------
 

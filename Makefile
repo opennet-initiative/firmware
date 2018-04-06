@@ -10,7 +10,7 @@ CONFIG_DIR = opennet/config
 ARCHS = $(shell ls "$(CONFIG_DIR)/" | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
 QUILT_BIN ?= $(shell which quilt)
 
-.PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs doc quilt-check
+.PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs doc quilt-check lint test
 
 all: $(ARCHS)
 
@@ -102,6 +102,15 @@ pull-submodules: unpatch
 	@# 1. use 'git submodule update --remote --checkout'
 	@# 2. go into every submodules directory, find out which remote branch it relies on, checkout this branch. 
 	git submodule update --remote --checkout
+
+# style checks
+lint:
+	find opennet/packages -type f | opennet/tools/style-check.sh check-python
+	find opennet/packages -type f | opennet/tools/style-check.sh check-shell
+	# any unknown/unchecked files?
+	! find opennet/packages -type f | opennet/tools/style-check.sh list-unknown | sed 's/^/UNKNOWN: /' | grep .
+
+test: lint
 
 clean: unpatch
 	$(MAKE) -C $(CUSTOM_DOC_DIR) clean

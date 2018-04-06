@@ -321,6 +321,12 @@ msgstr ""
 msgid "Network"
 msgstr ""
 
+msgid "Network Graph (OLSRv2)"
+msgstr ""
+
+msgid "Network Graph Visualization"
+msgstr ""
+
 msgid "Networks"
 msgstr ""
 

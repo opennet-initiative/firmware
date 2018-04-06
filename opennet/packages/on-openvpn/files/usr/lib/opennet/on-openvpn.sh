@@ -232,9 +232,7 @@ get_mig_connection_test_age() {
 	timestamp=$(get_service_value "$service_name" "status_timestamp")
 	# noch keine Tests durchgefuehrt?
 	[ -z "$timestamp" ] && return 0
-	local now
-	now=$(get_uptime_minutes)
-	echo "$timestamp" "$now" | awk '{ print $2 - $1 }'
+	echo "$timestamp" "$(get_uptime_minutes)" | awk '{ print $2 - $1 }'
 }
 
 
@@ -285,8 +283,8 @@ get_mig_port_forward_range() {
 		msg_info "$(basename "$0"): invalidate certificate Common Name ($client_cn)"
 	else
 		first_port=$((portbase + (cn_address-1) * port_count))
-		last_port=$((first_port + port_count - 1))
-		echo -e "$first_port\t$last_port"
+		# output first port and last port
+		printf "%s\t%s\n" "$first_port" "$((first_port + port_count - 1))"
 	fi
 }
 

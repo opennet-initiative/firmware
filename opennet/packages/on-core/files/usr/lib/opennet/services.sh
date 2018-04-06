@@ -421,8 +421,7 @@ print_services() {
 	for service_name in $(get_services "$@"); do
 		echo "$service_name"
 		for attribute in $(get_service_attributes "$service_name"); do
-			value=$(get_service_value "$service_name" "$attribute")
-			echo -e "\t$attribute=$value"
+			printf "\t%s=%s\n" "$attribute" "$(get_service_value "$service_name" "$attribute")"
 		done
 	done
 	return 0

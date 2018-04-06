@@ -180,11 +180,10 @@ _find_uci_sections() {
 		done
 		# alle Bedingungen trafen zu
 		echo "$config.$section"
-		: $((counter++))
-		[ "$max_num" = 0 ] && continue
-		[ "$counter" -ge "$max_num" ] && break
+		counter=$((counter + 1))
+		[ "$max_num" != 0 ] && [ "$counter" -ge "$max_num" ] && break
+		true
 	done | sort
-	return 0
 }
 
 

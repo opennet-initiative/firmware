@@ -12,13 +12,13 @@ if [ "$#" -lt 1 ] || [ -z "$1" ]; then
    exit 1
 fi >&2
 
+
 get_location_from_api() {
   local ip="$1"
   #extract value of post_address
   # sample input:   "post_address":"xyz"
   # sample output:  xyz
-  location=$(wget -q -O - http://api.on/api/v1/accesspoint/$ip | awk 'BEGIN { FS = "post_address\":\"" } ; { print $2 }' | cut -d"\"" -f1)
-  echo -n "$location"
+  wget -q -O - "http://api.on/api/v1/accesspoint/$ip" | awk 'BEGIN { FS = "post_address\":\"" } ; { print $2 }' | cut -d '"' -f 1
 }
 
 
@@ -36,13 +36,10 @@ traceroute "$dst_ip" | tr '*' ' ' | while read -r line; do
   ip=${ip%)} #delete last ")"
   ip=${ip#(} #delete first "("
 
-  first_num=$(echo $ip | cut -d"." -f1 )
-  if [ "$first_num" = "192" -o "$first_num" = "10" ]; then # "-o" means "or" here
-    #only process 10.x.y.z and 192.168.x.y.z IPs. Ignore 172.x.y.z and lines with "*" symbol
+  # handle only Opennet IPs (10.0.0.0/8 or 192.168.0.0/16)
+  if echo "$ip" | grep -qE "^(10|192\.168)\."; then
     # fetch location name
-    echo -n " $num - IP: $ip - Location: "
-    get_location_from_api $ip
-    echo " - DNS: $dns"
+    printf " %s - IP: %s - Location: %s - DNS: %s\n" \
+        "$num" "$ip" "$(get_location_from_api "$ip")" "$dns"
   fi
 done
-

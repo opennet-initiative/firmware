@@ -138,12 +138,13 @@ fix_firewall_reload() {
 	local filename=/etc/firewall.opennet
 	local uci_prefix
 	for uci_prefix in $(find_all_uci_sections "firewall" "include"); do
-		[ "$(uci_get "${uci_prefix}.path")" != "$filename" ] && continue
-		# gesamte "include"-Abzweigung loeschen
-		uci_delete "$uci_prefix"
-		apply_changes "firewall"
-		rm -f "$filename"
-		break
+		if [ "$(uci_get "${uci_prefix}.path")" = "$filename" ]; then
+			# gesamte "include"-Abzweigung loeschen
+			uci_delete "$uci_prefix"
+			apply_changes "firewall"
+			rm -f "$filename"
+			break
+		fi
 	done
 	return 0
 }

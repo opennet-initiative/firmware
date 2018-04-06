@@ -74,13 +74,13 @@ create_database() {
 print_interfaces_2_6() {
   olsr_interfaces=$(request_olsrd_txtinfo "int")
   dhcp_fwd=
-  for if_name in $(ls /sys/class/net/ | grep -v "^lo$"); do
+  for if_name in $(find /sys/class/net/ -mindepth 1 -maxdepth 1 -print0 | xargs -0 -n 1 basename | grep -v "^lo$"); do
     iface_up=$(cat "/sys/class/net/${if_name}/operstate")
     # sometimes the up-state is not recognized by /sys, than check with 'ip link'
     if [ "$iface_up" = "unknown" ] && [ -n "$(ip link show "$if_name" | awk '{if ($2 == "'"$if_name"':" && $3 ~ "UP") print $0}')" ]; then
         iface_up="up"
     fi
-    if_type_bridge=$(ls "/sys/class/net/${if_name}/brif" 2>/dev/null | awk '{print $1}' | join)
+    if_type_bridge=$(find "/sys/class/net/$if_name/brif" -mindepth 1 -maxdepth 1 -print0 2>/dev/null | xargs -0 -n 1 basename | join)
     ip_addr=$(ip address show "$if_name" | awk '/inet6? / {print $2}' | join)
     if_type_bridgedif=$([ -e "/sys/class/net/${if_name}/brport/bridge" ] && echo "1" || echo "0")
 

@@ -800,7 +800,7 @@ get_potential_error_messages() {
 	# durch frühe Auswahl einer neuen URL).
 	prefilter="uhttpd.*: sh: write error: Broken pipe"
 	# "sed /FOO/{N;d;}" löscht die Muster-Zeile, sowie die direkt nachfolgende
-	logread | sed "/$prefilter/{N;d;}" | grep -i error | grep -vE "(${filters#|})" | if [ -z "$max_lines" ]; then
+	logread | sed "/$prefilter/{N;d;}" | grep -iE "(error|crash)" | grep -vE "(${filters#|})" | if [ -z "$max_lines" ]; then
 		# alle Einträge ausgeben
 		cat -
 	else

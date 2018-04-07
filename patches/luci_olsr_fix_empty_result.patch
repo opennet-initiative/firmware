@@ -1,5 +1,7 @@
 Handle empty json request result gracefully.
 
+Upstream Request: https://github.com/openwrt/luci/pull/1735
+
 Signed-off-by: Lars Kruse <devel@sumpfralle.de>
 
 --- a/luci/applications/luci-app-olsr/luasrc/controller/olsr.lua

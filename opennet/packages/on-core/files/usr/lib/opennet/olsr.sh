@@ -238,8 +238,12 @@ request_olsrd_txtinfo() {
 		# die Konfiguration und "all" sind ein unklares Format (fuer Menschen)
 		cat
 	else
-		# alle nicht-Daten-Zeilen entfernen
-		sed '1,/^Table: /d' | sed '1d; /^$/d'
+		# alle nicht-Daten-Zeilen entfernen:
+		#   * loesche alle Zeilen, bis die erste Zeile beginnend mit "Table: " erkannt wird
+		#   * loesche die darauffolgende Zeile, sowie alle leeren Zeilen
+		awk 'BEGIN { in_body=0;}
+			{ if (/^Table: /) { in_body=1; } else if (in_body == 1) { print; }}' \
+			| sed '1d; /^$/d'
 	fi
 }
 

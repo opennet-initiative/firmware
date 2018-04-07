@@ -41,6 +41,7 @@ safely_replace_file() {
 	trap 'rm -f "$tmp_filename"' EXIT
 	echo "$content" >"$tmp_filename"
 	mv "$tmp_filename" "$target_filename"
+	trap "" EXIT
 }
 
 

@@ -449,31 +449,6 @@ get_potential_opennet_scan_results_for_device() {
 	local device="$1"
 	local result
 	local delay
-	# Leider funktioniert der Scan mit aktivierter "chanlist"-Option nicht (der Prozess hängt).
-	# Also speichern wir den aktuellen Konfigurationsstand, deaktivieren die chanlist vor dem
-	# Scan und stellen den vorherigen Zustand anschließend wieder her.
-	local old_config
-	local uci_prefix
-	# Keine Konfiguration?  Nichts zu tun ...
-	[ -s /etc/config/wireless ] || return 0
-	old_config=$(cat /etc/config/wireless)
-	# Ändere Konfigurationen, um einen erfolgreichen scan sicherzustellen.
-	find_all_uci_sections wireless wifi-device | while read -r uci_prefix; do
-		uci_delete "${uci_prefix}.chanlist"
-		uci set "${uci_prefix}.channel=auto"
-	done
-	find_all_uci_sections wireless wifi-iface | while read -r uci_prefix; do
-		uci set "${uci_prefix}.mode=ap"
-		uci set "${uci_prefix}.ssid=on-temporary-scanning"
-	done
-	# neu konfigurieren
-	uci commit wireless
-	wifi || true
-	# Originale Konfigurationsdatei schnell wiederherstellen, um das Zeitfenster für Fehler
-	# durch parallele Operationen klein zu halten.
-	echo "$old_config" >/etc/config/wireless
-	# kurz auf angewandte Konfiguration warten
-	sleep 1
 	# wiederhole den Scan mehrmals, falls das Ergebnis leer ist
 	for delay in 1 2 3; do
 		# unter bestimmten Umständen kann der Scan hängenbleiben
@@ -482,9 +457,6 @@ get_potential_opennet_scan_results_for_device() {
 		[ -n "$result" ] && break
 		sleep "$delay"
 	done
-	# die wiederhergestellte originale Konfiguration wiederherstellen
-	uci commit wireless
-	wifi || true
 	echo "$result"
 }
 

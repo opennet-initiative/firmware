@@ -4,7 +4,6 @@ hostapd_option_chanlist.patch
 luci_olsr_fix_empty_result.patch
 olsrd_add_ondataservice.patch
 improved_dfs_detection.patch
-#cpe-rx.patch
 #cpe510-tx.patch
 olsrd2_enable_plugin_ethernet_listener.patch
 always-enable-dfs.patch

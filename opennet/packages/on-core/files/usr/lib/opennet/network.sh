@@ -452,12 +452,14 @@ get_potential_opennet_scan_results_for_device() {
 	# wiederhole den Scan mehrmals, falls das Ergebnis leer ist
 	for delay in 1 2 3; do
 		# unter bestimmten Umständen kann der Scan hängenbleiben
-		result=$(timeout 10 iwinfo "$device" scan | filter_potential_opennet_scan_results || true)
-		# keine weitere Wiederholung, falls es eine Ausgabe gab
-		[ -n "$result" ] && break
-		sleep "$delay"
+		if result=$(timeout 10 iwinfo "$device" scan); then
+			# keine weitere Wiederholung, falls es eine Ausgabe gab
+			break
+		else
+			sleep "$delay"
+		fi
 	done
-	echo "$result"
+	echo "$result" | filter_potential_opennet_scan_results
 }
 
 # Ende der Doku-Gruppe

@@ -525,6 +525,9 @@ msgid ""
 "for this device."
 msgstr ""
 
+msgid "The Opennet ID of your Accesspoint was changed successfully."
+msgstr ""
+
 msgid ""
 "The WAN Interface is used for your local Internet-Connection (for instance "
 "DSL). It will be used for your local traffic and to map Usergateways into "

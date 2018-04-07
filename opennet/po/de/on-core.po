@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2018-04-07 01:35+0200\n"
+"PO-Revision-Date: 2018-04-07 15:32+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -584,6 +584,9 @@ msgstr ""
 "Die Opennet-Firmware besteht aus mehreren Modulen für unterschiedliche "
 "Funktionen. Bitte wähle diejenigen Funktionen, die auf diesem Gerät "
 "verwendet werden sollen."
+
+msgid "The Opennet ID of your Accesspoint was changed successfully."
+msgstr "Die Opennet-ID des Accesspoints wurde erfolgreich geändert."
 
 msgid ""
 "The WAN Interface is used for your local Internet-Connection (for instance "

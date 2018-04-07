@@ -193,11 +193,78 @@ function action_network()
 	local uci = require "luci.model.uci"
 	local cursor = uci.cursor()
 	local on_errors = {}
+	local on_hints = {}
 	local page_data = {}
+	local new_opennet_id = luci.http.formvalue("new_opennet_id")
 
 	page_data["on_errors"] = on_errors
+	page_data["on_hints"] = on_hints
 	page_data["mesh_interfaces"] = get_network_zone_interfaces(on_function("get_variable", {"ZONE_MESH"}))
 	page_data["opennet_id"] = cursor:get("on-core", "settings", "on_id")
+
+	if (new_opennet_id) then
+		function split_numbers(str)
+			local t = { }
+			str:gsub("%d+", function (w) table.insert(t, tonumber(w)) end)
+			return t
+		end
+		local numbers = split_numbers(new_opennet_id)
+
+		local new_id_string
+		local new_id_is_valid = false
+		-- Zuerst die regulaeren Ausdruecke pruefen, da die Ziffernextraktion auch
+		-- unzulaessige Zeichen toleriert.
+		if (string.find(new_opennet_id, "^%d+$")
+				or string.find(new_opennet_id, "^%d+\.%d+$")
+				or string.find(new_opennet_id, "^192\.168\.%d+\.%d+$")) then
+			local major
+			local minor
+			if #numbers == 1 then
+				-- nur eine Zahl: Netzgruppe "1"
+				major = 1
+				minor = numbers[1]
+				new_id_is_valid = true
+			elseif #numbers == 2 then
+				-- zwei Zahlen: beide verwenden
+				major = numbers[1]
+				minor = numbers[2]
+				new_id_is_valid = true
+			elseif #numbers == 4 then
+				-- vier Zahlen (192.168.x.y): die letzten beiden verwenden
+				major = numbers[3]
+				minor = numbers[4]
+				new_id_is_valid = true
+			end
+			if new_id_is_valid and not ((1 <= major) and (major <= 255)
+					and (1 <= minor) and (minor <= 255)) then
+				new_id_is_valid = false
+			end
+			new_id_string = major .. "." .. minor
+		end
+
+		-- Sende einen Redirect, falls der Client die aktuelle Opennet-IP fuer den Request
+		-- verwendet hat.
+		local redirect_detect_prefix = "192.168."
+
+		if new_id_is_valid then
+			if (luci.http.getenv("HTTP_HOST") == redirect_detect_prefix .. page_data["opennet_id"]) then
+				-- Wir aendern die Opennet-ID, waehrend wir mit dieser IP auf das
+				-- Web-Interface zugreifen.
+				-- Fuehre die Aktion leicht verzoegert aus, damit die Antwort vor
+				-- der Netzwerk-Rekonfiguration ankommt.
+				on_function("run_delayed_in_background", {"1", "set_opennet_id", new_id_string})
+				luci.http.redirect("https://" .. redirect_detect_prefix
+					.. new_id_string .. luci.http.getenv("REQUEST_URI"))
+				return
+			else
+				-- wir befinden uns im lokalen Netzwerk - es gib nichts zu beachten
+				on_function("set_opennet_id", {new_id_string})
+				table.insert(on_hints, luci.i18n.translate("The Opennet ID of your Accesspoint was changed successfully."))
+			end
+		else
+			table.insert(on_errors, luci.i18n.translate("The specified opennet ID is invalid. Please try again (input format: 'X.YYY')."))
+		end
+	end
 	luci.template.render("opennet/on_network", page_data)
 end
 

@@ -13,59 +13,12 @@ You may obtain a copy of the License at
 -%>
 <%+header%>
 <h2><a id="content" name="content"><%:Opennet ID%></a></h2>
+<%= html_display_message_list(on_errors, "error") %>
+<%= html_display_message_list(on_hints, "info") %>
 <%+cbi/apply_xhr%>
-
-<%
-local new_opennet_id = luci.http.formvalue("new_opennet_id")
-local show_invalid_id_warning = false
-
-
-if (new_opennet_id) then
-	function split_numbers(str)
-		local t = { }
-		str:gsub("%d+", function (w) table.insert(t, tonumber(w)) end)
-		return t
-	end
-	local numbers = split_numbers(new_opennet_id)
-
-	local major
-	local minor
-	local replace_id = true
-	if #numbers == 1 then
-		-- nur eine Zahl: Netzgruppe "1"
-		major = 1
-		minor = numbers[1]
-	elseif #numbers == 2 then
-		-- zwei Zahlen: beide verwenden
-		major = numbers[1]
-		minor = numbers[2]
-	elseif #numbers == 4 then
-		-- vier Zahlen (192.168.x.y): die letzten beiden verwenden
-		major = numbers[3]
-		minor = numbers[4]
-	else
-		replace_id = false
-	end
-
-	if replace_id then
-		if (0 <= major) and (major <= 255) and (1 <= minor) and (minor <= 255) then
-			local id_string = major .. "." .. minor
-			on_function("set_opennet_id", {id_string})
-			luci.sys.call("sleep 3")
-		else
-			show_invalid_id_warning = true
-		end
-	end
-end
-%>
 
 <h3><%:Opennet-ID / Network ID%></h3>
 	<div class="cbi-map">
-		<% if show_invalid_id_warning then %>
-			<fieldset class="cbi-section"><div class="cbi-section-comment"><div class="alert-message warning">
-				<p><%:The specified opennet ID is invalid. Please try again (input format: 'X.YYY').%></p>
-			</div></div></fieldset>
-		<% end %>
 		<fieldset class="cbi-section">
 			<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
 				<p><%=luci.i18n.translatef('Great that you decided to take part in Opennet. Register the IP of your Access-Point in the %sOpennet-Wiki%s and acquire a free IP-Address. Please read the information %sin the wiki%s for further details.', '<a href="https://wiki.opennet-initiative.de/wiki/Opennet_Nodes">', '</a>', '<a href="https://wiki.opennet-initiative.de/wiki/Mitmachen">', '</a>')%></p>

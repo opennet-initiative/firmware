@@ -1,15 +1,20 @@
 Entfernt Kanäle > 140 aus regdb.txt bzw. Liste der erlaubten Kanäle (Ticket #202). 
 
---- a/openwrt/package/kernel/mac80211/files/regdb.txt
-+++ b/openwrt/package/kernel/mac80211/files/regdb.txt
-@@ -364,10 +364,6 @@
- 	(5150 - 5250 @ 80), (100 mW), NO-OUTDOOR, AUTO-BW
- 	(5250 - 5350 @ 80), (100 mW), NO-OUTDOOR, DFS, AUTO-BW
- 	(5470 - 5725 @ 160), (500 mW), DFS
--	# short range devices (ETSI EN 300 440-1)
--	(5725 - 5875 @ 80), (25 mW)
--	# 60 GHz band channels 1-4 (ETSI EN 302 567)
--	(57000 - 66000 @ 2160), (40)
- 
- country DK: DFS-ETSI
- 	(2402 - 2482 @ 40), (20)
+--- a/openwrt/package/firmware/wireless-regdb/patches/500-world-regd-5GHz.patch
++++ b/openwrt/package/firmware/wireless-regdb/patches/500-world-regd-5GHz.patch
+@@ -14,3 +14,15 @@
+  	# Channel 52 - 64
+  	(5250 - 5330 @ 80), (20), NO-IR, DFS, AUTO-BW
+  	# Channel 100 - 144
++@@ -367,9 +367,9 @@
++ 	(5250 - 5350 @ 80), (100 mW), NO-OUTDOOR, DFS, AUTO-BW
++ 	(5470 - 5725 @ 160), (500 mW), DFS
++ 	# short range devices (ETSI EN 300 440-1)
++-	(5725 - 5875 @ 80), (25 mW)
+++	#(5725 - 5875 @ 80), (25 mW)
++ 	# 60 GHz band channels 1-4 (ETSI EN 302 567)
++-	(57000 - 66000 @ 2160), (40)
+++	#(57000 - 66000 @ 2160), (40)
++ 
++ country DK: DFS-ETSI
++ 	(2402 - 2482 @ 40), (20)

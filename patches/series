@@ -11,5 +11,4 @@ always-enable-dfs.patch
 hostapd_switch_to_DFS.patch
 muninlite_swap.patch
 muninlite_makefile.patch
-# TODO: entfernen, falls wir den Patch mit OpenWrt 18.05 nicht mehr brauchen sollten
-#regdb_channels.patch
+regdb_channels.patch

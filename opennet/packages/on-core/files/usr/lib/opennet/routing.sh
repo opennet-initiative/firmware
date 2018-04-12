@@ -350,12 +350,19 @@ get_olsr_route_count_by_neighbour() {
 ## @brief Ermittle die direkten olsr-Nachbarn und liefere ihre IPs und interessante Kennzahlen zurück.
 ## details Ergebnisformat: NEIGHBOUR_IP LINK_QUALITY NEIGHBOUR_LINK_QUALITY ETX ROUTE_COUNT
 get_olsr_neighbours() {
-	local ip
+	local local_ip
+	local neighbour_ip
 	local lq
 	local nlq
 	local etx
-	request_olsrd_txtinfo lin | grep "^[0-9]" | awk '{ print $2,$4,$5,$6 }' | while read -r ip lq nlq etx; do
-		echo "$ip $lq $nlq $etx $(get_olsr_route_count_by_neighbour "$ip")"
+	local ip_interface_map
+	local interface
+	ip_interface_map=$(request_olsrd_txtinfo "int" | awk '{print($5, $1);}')
+	request_olsrd_txtinfo "lin" | grep "^[0-9]" | awk '{ print $1,$2,$4,$5,$6 }' | sort -n \
+			| while read -r local_ip neighbour_ip lq nlq etx; do
+		interface=$(echo "$ip_interface_map" | grep -wF "$local_ip" | awk '{print $2}')
+		[ -z "$interface" ] && interface="unknown"
+		echo "$neighbour_ip $interface $lq $nlq $etx $(get_olsr_route_count_by_neighbour "$neighbour_ip")"
 	done
 }
 

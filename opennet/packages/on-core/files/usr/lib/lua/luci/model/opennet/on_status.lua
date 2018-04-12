@@ -135,6 +135,7 @@ function status_neighbors()
 		response = response .. '<table border="0"><tr><td>'
 		response = response .. '<table class="status_page_table"><tr>' ..
 			'<th>' ..  luci.i18n.translate("IP Address") .. "</th>" ..
+			'<th><abbr title="' .. luci.i18n.translate("Network Interface: the neighbour's packets arrive here") .. '">Interface</abbr></th>' ..
 			'<th><abbr title="' .. luci.i18n.translate("Link-Quality: how many of your packets were received by your neighbor") .. '">LQ</abbr></th>' ..
 			'<th><abbr title="' .. luci.i18n.translate("Neighbor-Link-Quality: how many of your test-packets did reach your neighbor") .. '">NLQ</abbr></th>' ..
 			'<th><abbr title="' .. luci.i18n.translate("Expected Transmission Count: Quality of the Connection to the Gateway reagrding OLSR") .. '">ETX</abbr></th>' ..
@@ -144,13 +145,14 @@ function status_neighbors()
 			local info = space_split(line)
 			-- keine Ausgabe, falls nicht mindestens fuenf Felder geparst wurden
 			-- (die Ursache fuer weniger als fuenf Felder ist unklar - aber es kam schon vor)
-			if info[5] then
+			if info[6] then
 				response = response .. '<tr>' ..
 					'<td><a href="http://' .. info[1] .. '/">' .. info[1] .. '</a></td>' ..
 					'<td>' .. info[2] .. '</td>' ..
 					'<td>' .. info[3] .. '</td>' ..
 					'<td>' .. info[4] .. '</td>' ..
-					'<td style="text-align:right">' .. info[5] .. '</td>' ..
+					'<td>' .. info[5] .. '</td>' ..
+					'<td style="text-align:right">' .. info[6] .. '</td>' ..
 					'</tr>'
 			end
 		end

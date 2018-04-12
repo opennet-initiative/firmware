@@ -244,16 +244,15 @@ function action_network()
 
 		-- Sende einen Redirect, falls der Client die aktuelle Opennet-IP fuer den Request
 		-- verwendet hat.
-		local redirect_detect_prefix = "192.168."
-
 		if new_id_is_valid then
-			if (luci.http.getenv("HTTP_HOST") == redirect_detect_prefix .. page_data["opennet_id"]) then
+			local opennet_prefix = "192.168."
+			if luci.http.getenv("HTTP_HOST") == on_function("get_main_ip") then
 				-- Wir aendern die Opennet-ID, waehrend wir mit dieser IP auf das
 				-- Web-Interface zugreifen.
 				-- Fuehre die Aktion leicht verzoegert aus, damit die Antwort vor
 				-- der Netzwerk-Rekonfiguration ankommt.
 				on_function("run_delayed_in_background", {"1", "set_opennet_id", new_id_string})
-				luci.http.redirect("https://" .. redirect_detect_prefix
+				luci.http.redirect("https://" .. opennet_prefix
 					.. new_id_string .. luci.http.getenv("REQUEST_URI"))
 				return
 			else

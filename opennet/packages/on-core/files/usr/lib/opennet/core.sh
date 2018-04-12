@@ -591,7 +591,9 @@ is_file_timestamp_older_minutes() {
 	[ -e "$filename" ] || return 0
 	local file_timestamp
 	local timestamp_now
-	file_timestamp=$(date --reference "$filename" +%s | awk '{ print int($1/60) }')
+	file_timestamp=$(date --reference "$filename" +%s 2>/dev/null | awk '{ print int($1/60) }')
+	# Falls die Datei zwischendurch geloescht wurde, ist das Lock nun frei.
+	[ -z "$file_timestamp" ] && return 0
 	timestamp_now=$(date +%s | awk '{ print int($1/60) }')
 	# veraltet, falls:
 	#   * kein Zeitstempel

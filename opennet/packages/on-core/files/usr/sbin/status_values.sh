@@ -224,7 +224,7 @@ SQL_STRING="$SQL_STRING
 print_interfaces_2_6
 
 sys_ver=$(uname -sr)
-sys_board=$(cat /proc/diag/model 2>/dev/null || awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine|Model|system type|Hardware/ {print $2;}' /proc/cpuinfo | join)
+sys_board=$(cat /proc/diag/model 2>/dev/null || awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine|Model|model name|system type|Hardware/ {print $2;}' /proc/cpuinfo | join)
 sys_cpu=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /Processor|cpu model|vendor_id/ {print $2;}' /proc/cpuinfo | join)
 sys_mem=$(awk '{if ($1 == "MemTotal:") {print $2}}' /proc/meminfo)
 sys_uptime=$(awk '{print $1}' /proc/uptime)

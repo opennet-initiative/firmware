@@ -7,8 +7,7 @@ improved_dfs_detection.patch
 #cpe510-tx.patch
 olsrd2_enable_plugin_ethernet_listener.patch
 always-enable-dfs.patch
-#radar_pulse_debug.patch
-hostapd_switch_to_DFS.patch
+radar_pulse_debug.patch
 muninlite_swap.patch
 muninlite_makefile.patch
 regdb_channels.patch

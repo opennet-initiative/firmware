@@ -2,19 +2,22 @@
 
 set -eu
 
+
 case "$1" in
 	network|wireless|firewall)
+		. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 		# Zonen- und IP-Aenderungen koennen Policy-Routing-Aenderungen erfordern
-		on-function init_policy_routing_ipv6
+		init_policy_routing_ipv6
 		# eventuelle Zonen-Zuordnungen zu olsrd2 uebertragen
-		on-function update_olsr2_interfaces
+		update_olsr2_interfaces
 		;;
 	olsrd2)
 		/etc/init.d/olsrd2 reload >/dev/null || true
 		;;
 	on-olsr2)
-		on-function init_policy_routing_ipv6
-		on-function update_olsr2_interfaces
-		on-function update_olsr2_daemon_state
+		. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+		init_policy_routing_ipv6
+		update_olsr2_interfaces
+		update_olsr2_daemon_state
 		;;
 esac

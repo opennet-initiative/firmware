@@ -1,0 +1,22 @@
+Enable core dump on SIGSEGV. How to use:
+
+# ulimit -c unlimited
+# sysctl -w kernel.core_pattern=/tmp/%e.core
+# touch /.init_enable_core
+
+and wait for core dump of olsrd in /tmp/olsrd.core (920 KB) or use kill -11 on olsrd pid to test.
+
+--- /dev/null
++++ b/routing/olsrd/patches/024-debug-sigsegv.patch
+@@ -0,0 +1,11 @@
++--- a/src/main.c
+++++ b/src/main.c
++@@ -761,7 +761,7 @@
++   signal(SIGQUIT, olsr_shutdown);
++   signal(SIGILL, olsr_shutdown);
++   signal(SIGABRT, olsr_shutdown);
++-#if defined(__linux__) && !defined(__ANDROID__)
+++#ifdef OLSR_HAVE_EXECINFO_H
++   signal(SIGSEGV, olsr_segv_handler);
++ #endif  /* defined(__linux__) && !defined(__ANDROID__) */
++   signal(SIGTERM, olsr_shutdown);

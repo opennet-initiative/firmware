@@ -1,0 +1,52 @@
+Backport upstream commit https://github.com/OLSR/olsrd/commit/6d7b04b71c6854bb01ba97d318a4d7ba639fa705 "info: do not block when sending data"
+
+--- /dev/null
++++ b/routing/olsrd/patches/025-dont-block.patch
+@@ -0,0 +1,47 @@
++--- a/lib/info/olsrd_info.c
+++++ b/lib/info/olsrd_info.c
++@@ -324,7 +324,13 @@
++     }
++   }
++ 
++-  (void) send(the_socket, abuf.buf, abuf.len, 0);
+++  (void) send(the_socket, abuf.buf, abuf.len,
+++#ifdef _WIN32
+++    0
+++#else
+++    MSG_DONTWAIT
+++#endif
+++  );
++   close(the_socket);
++   abuf_free(&abuf);
++ }
++@@ -368,7 +374,13 @@
++       continue;
++     }
++ 
++-    result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i], 0);
+++    result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i], 
+++#ifdef _WIN32
+++    0
+++#else
+++    MSG_DONTWAIT
+++#endif
+++    );
++     if (result > 0) {
++       outbuffer.written[i] += result;
++     }
++@@ -761,6 +773,14 @@
++     return;
++   }
++ 
+++#ifdef _WIN32
+++  /* set the connection socket to non-blocking */
+++  {
+++    u_long iMode = 1;
+++    ioctlsocket(ipc_connection, FIONBIO, &iMode);
+++  }
+++#endif
+++
++   /* Wait at most this much time for the request to arrive on the connection */
++   timeout.tv_sec = (outbuffer.count >= MAX_CLIENTS) ? 0 : config->request_timeout_sec;
++   timeout.tv_usec = (outbuffer.count >= MAX_CLIENTS) ? 0 : config->request_timeout_usec;

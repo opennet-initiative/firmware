@@ -158,9 +158,9 @@ parse_olsr_service_descriptions() {
 #   dns://192.168.10.4:53|udp|dns                                           #192.168.10.4
 # Parameter: service-Type (z.B. "gw", "dns", "ntp", "mesh")
 # Ergebnis (tab-separiert):
-#   SERVICE SCHEME IP PORT PATH PROTO DETAILS
+#   SERVICE SCHEME IP PORT PROTO PATH DETAILS
 # Im Fall von "http://192.168.0.15:8080|tcp|ugw upload:3 download:490 ping:108" entspricht dies:
-#   ugw	http   192.168.0.15   8080   tcp   upload:3 download:490 ping:108
+#   ugw	http   192.168.0.15   8080   tcp   /	upload:3 download:490 ping:108
 # shellcheck disable=SC2120
 get_olsr_services() {
 	trap 'error_trap get_olsr_services "$*"' EXIT

@@ -26,8 +26,9 @@ CONFIG_KERNEL_ELF_CORE=y
 CONFIG_BUSYBOX_CONFIG_FEATURE_BUFFERS_USE_MALLOC=y
 CONFIG_BUSYBOX_DEFAULT_FEATURE_INIT_COREDUMPS=y
 
-# komprimierten Swap erlauben
-CONFIG_PACKAGE_zram-swap=y
+# komprimierter Swap kann bei Bedarf aktiviert werden
+# (dies erhoeht die Last auf dem System)
+CONFIG_PACKAGE_zram-swap=m
 
 # unnoetiges optional machen
 CONFIG_PACKAGE_block-mount=m

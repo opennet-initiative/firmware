@@ -88,7 +88,9 @@ update_relay_firewall_rules() {
 		[ -z "${TOS_NON_TUNNEL:-}" ] || iptables -t mangle -A "$tos_chain" --destination "$main_ip" \
 			--protocol "$protocol" --dport "$local_port" -j TOS --set-tos "$TOS_NON_TUNNEL"
 	done
-
+	# Connection-Tracking-Tabelle flushen
+	# Sonst werden Aenderungen fuer bestehende Verbindungen nicht wirksam.
+	echo f >/proc/net/nf_conntrack
 }
 
 

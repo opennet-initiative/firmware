@@ -53,7 +53,25 @@ update_relay_firewall_rules() {
 	local parent_dnat_chain="prerouting_${ZONE_MESH}_rule"
 	local tos_chain="on_service_relay_tos"
 	local parent_tos_chain="PREROUTING"
+	local new_rules
 	main_ip=$(get_main_ip)
+	# calculate the entries for the new rules
+	# We need to do this in advance - otherwise it could happen, that DNS problems could cause
+	# invalid (i.e. missing) firewall rules. Only if at least one valid rule is calculated,
+	# the rules are updated.
+	new_rules=$(for service in $(get_services | filter_relay_services); do
+		is_service_relay_possible "$service" || continue
+		host=$(get_service_value "$service" "host")
+		port=$(get_service_value "$service" "port")
+		protocol=$(get_service_value "$service" "protocol")
+		local_port=$(get_service_value "$service" "local_relay_port")
+		target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
+		# skip entries in case of broken DNS resolution
+		[ -z "$target_ip" ] && continue
+		echo "$host $port $protocol $local_port $target_ip"
+	done)
+	# do not apply changes, if there are no valid rules
+	[ -z "$new_rules" ] && return 0
 	# neue Chains erzeugen
 	iptables -t nat --new-chain "$dnat_chain" 2>/dev/null || iptables -t nat --flush "$dnat_chain"
 	iptables -t mangle --new-chain "$tos_chain" 2>/dev/null || iptables -t mangle --flush "$tos_chain"
@@ -63,13 +81,7 @@ update_relay_firewall_rules() {
 	iptables -t mangle --check "$parent_tos_chain" -j "$tos_chain" 2>/dev/null \
 		|| iptables -t mangle --insert "$parent_tos_chain" -j "$tos_chain"
 	# DNAT- und TOS-Chain fuellen
-	for service in $(get_services | filter_relay_services); do
-		is_service_relay_possible "$service" || continue
-		host=$(get_service_value "$service" "host")
-		port=$(get_service_value "$service" "port")
-		protocol=$(get_service_value "$service" "protocol")
-		local_port=$(get_service_value "$service" "local_relay_port")
-		target_ip=$(query_dns "$host" | filter_routable_addresses | tail -n 1)
+	echo "$new_rules" | while read -r host port protocol local_port target_ip; do
 		iptables -t nat -A "$dnat_chain" --destination "$main_ip" --protocol "$protocol" --dport "$local_port" \
 			-j DNAT --to-destination "${target_ip}:${port}"
 		# falls on-openvpn vorhanden ist, wollen wir vermeiden, dass mesh-Tunnel ueber den Internet-Tunnel laufen

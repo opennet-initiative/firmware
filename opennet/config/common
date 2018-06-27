@@ -93,7 +93,6 @@ CONFIG_PACKAGE_olsrd-mod-txtinfo=y
 CONFIG_PACKAGE_on-core=y
 CONFIG_PACKAGE_on-openvpn=y
 CONFIG_PACKAGE_on-usergw=m
-CONFIG_PACKAGE_on-tinc=m
 CONFIG_PACKAGE_on-captive-portal=m
 CONFIG_PACKAGE_on-monitoring=m
 CONFIG_PACKAGE_on-goodies=m

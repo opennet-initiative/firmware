@@ -28,12 +28,12 @@ end
 -- cert_type is user or mesh
 function upload_file(cert_type)
 	local cert_info = get_ssl_cert_info(cert_type)
-	local upload_value = luci.http.formvalue("opensslfile")
 	if not file_exists(upload_file_location) then return end
 	if not file_exists(cert_info.cert_dir) then nixio.fs.mkdirr(cert_info.cert_dir) end
-	if string.find(upload_value, ".key") then
+	local upload_filename = luci.http.formvalue("opensslfile")["file"]
+	if string.find(upload_filename, ".key") then
 		replace_file(upload_file_location, cert_info.filename_prefix .. ".key")
-	elseif string.find(upload_value, ".crt") then
+	elseif string.find(upload_filename, ".crt") then
 		replace_file(upload_file_location, cert_info.filename_prefix .. ".crt")
 	else
 		-- unbekannter Datentyp? Wir muessen die Datei loeschen - sonst wird sie beim naechsten Upload wiederverwendet.

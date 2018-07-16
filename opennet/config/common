@@ -136,6 +136,11 @@ CONFIG_PACKAGE_kmod-usb-core=m
 CONFIG_PACKAGE_kmod-usb-storage=m
 CONFIG_PACKAGE_kmod-usb2=m
 CONFIG_PACKAGE_kmod-usb3=m
+# ein paar serielle Schnittstellen (fuer Fernwartung nahegelegener Hosts)
+CONFIG_PACKAGE_kmod-usb-serial-cp210x=m
+CONFIG_PACKAGE_kmod-usb-serial-ftdi=m
+CONFIG_PACKAGE_kmod-usb-serial-pl2303=m
+CONFIG_PACKAGE_kmod-usb-serial-ti-usb=m
 CONFIG_PACKAGE_kmod-usbip=m
 # optional: RAM-Kompression fuer Speicherknappheit
 CONFIG_PACKAGE_kmod-zram=m

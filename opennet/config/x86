@@ -40,16 +40,15 @@ CONFIG_PACKAGE_kmod-usb3=y
 CONFIG_PACKAGE_kmod-usb-storage=y
 
 # Module für APU2
-CONFIG_PACKAGE_kmod-crypto-hw-ccp=m
-CONFIG_PACKAGE_kmod-gpio-nct5104d=m
-CONFIG_PACKAGE_kmod-gpio-button-hotplug=m
-CONFIG_PACKAGE_kmod-leds-apu2=m
-CONFIG_PACKAGE_kmod-leds-gpio=m
-CONFIG_PACKAGE_kmod-pcspkr=m
-CONFIG_PACKAGE_kmod-sound-core=m
-CONFIG_PACKAGE_kmod-sp5100_tco=m
-CONFIG_PACKAGE_kmod-usb-core=m
-CONFIG_PACKAGE_kmod-usb-ohci=m
+CONFIG_PACKAGE_kmod-crypto-hw-ccp=y
+CONFIG_PACKAGE_kmod-gpio-button-hotplug=y
+CONFIG_PACKAGE_kmod-gpio-nct5104d=y
+CONFIG_PACKAGE_kmod-leds-apu2=y
+CONFIG_PACKAGE_kmod-leds-gpio=y
+CONFIG_PACKAGE_kmod-pcspkr=y
+CONFIG_PACKAGE_kmod-sound-core=y
+CONFIG_PACKAGE_kmod-sp5100_tco=y
+CONFIG_PACKAGE_kmod-usb-ohci=y
 
 # support for triggered shutdown of virtual machines
 CONFIG_PACKAGE_acpid=y

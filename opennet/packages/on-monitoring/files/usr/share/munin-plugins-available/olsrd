@@ -182,8 +182,12 @@ def query_olsrd_txtservice(section=""):
     for line in fconn.readlines():
         if in_header:
             if not line.strip():
-                # the empty line marks the end of the header
+                # the empty line marks the end of the http-like header
                 in_header = False
+            elif line.startswith("Table:"):
+                # since olsr v0.9.6 there is no http-like header anymore
+                in_header = False
+                in_body_count = 1
             # ignore header lines (nothing to be done)
         else:
             # skip the first two body lines - they are table headers

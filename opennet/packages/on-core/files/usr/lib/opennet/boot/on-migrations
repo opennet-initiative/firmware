@@ -623,6 +623,25 @@ EOF
 }
 
 
+## @fn update_uhttpd_configuration()
+## @brief Setze fehlende Einstellungen in /etc/config/uhttpd.
+## @details Seit v0.5.5 sind in der Upstream-Konfiguration die beiden Einstellungen
+##     "uhttpd.main.lua_prefix" und "uhttpd.main.lua_handler" gesetzt. Bei der Aktualisierung von
+##     einer älteren Firmware fehlen diese Einstellungen naturgemäß.
+##     Ohne diese Einstellungen wird ein HTTP-Request des root-Pfads ("/") mit einer Umleitung nach
+##     /luci beantwortet, obwohl uhttpd (per default) auf /cgi-bin/luci lauscht.
+update_uhttpd_configuration() {
+	trap 'error_trap update_uhttpd_configuration "$*"' EXIT
+	[ -e "/etc/config/uhttpd" ] || return 0
+	[ -z "$(uci_get "uhttpd.main.lua_prefix")" ] || return 0
+	[ -z "$(uci_get "uhttpd.main.lua_handler")" ] || return 0
+	uci set "uhttpd.main.lua_prefix=/luci"
+	uci set "uhttpd.main.lua_handler=/usr/lib/lua/luci/sgi/uhttpd.lua"
+	uci commit uhttpd
+	reload_config
+}
+
+
 coerce_openvpn_comp_lzo
 fix_passwd_broken_symlink
 fix_rclocal_broken_symlink
@@ -679,3 +698,4 @@ auto_enable_on_free_network
 rename_gpio_switch_poe_passthrough
 rename_tun_to_tun_on_user
 update_olsrd_plugin_versions
+update_uhttpd_configuration

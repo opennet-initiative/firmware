@@ -13,3 +13,4 @@ radar_pulse_debug.patch
 muninlite_swap.patch
 muninlite_makefile.patch
 regdb_channels.patch
+olsrd2_update_to_0.15.1.patch

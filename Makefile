@@ -102,6 +102,8 @@ pull-submodules: unpatch
 	@# 1. use 'git submodule update --remote --checkout'
 	@# 2. go into every submodules directory, find out which remote branch it relies on, checkout this branch. 
 	git submodule update --remote --checkout
+	git submodule foreach git checkout openwrt-18.06
+	git submodule foreach git pull
 
 # style checks
 lint:

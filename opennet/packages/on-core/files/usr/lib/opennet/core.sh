@@ -472,7 +472,7 @@ apply_changes() {
 		if echo "$config" | grep -q "^on-"; then
 			uci -q commit "$config" || true
 			echo "$config"
-		elif [ -z "$(uci changes "$config")" ]; then
+		elif [ -z "$(uci -q changes "$config")" ]; then
 			# keine Aenderungen?
 			true
 		else

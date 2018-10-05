@@ -27,7 +27,7 @@ is_on_module_installed_and_enabled() {
 	trap 'error_trap is_on_module_installed_and_enabled "$*"' EXIT
 	local module="$1"
 	_prepare_on_modules
-	is_package_installed "$module" && _is_on_module_enabled "$module" && return 0
+	is_on_module_installed "$module" && _is_on_module_enabled "$module" && return 0
 	trap "" EXIT && return 1
 }
 
@@ -40,6 +40,14 @@ _is_on_module_enabled() {
 }
 
 
+is_on_module_installed() {
+	local module="$1"
+	_prepare_on_modules
+	is_package_installed "$module" && retun 0
+	trap "" EXIT && return 1
+}
+
+
 ## @fn enable_on_module()
 ## @brief Aktiviere ein Opennet-Modul
 ## @param module Eins der Opennet-Pakete (siehe 'get_on_modules').
@@ -48,6 +56,7 @@ enable_on_module() {
 	local module="$1"
 	_prepare_on_modules
 	warn_if_unknown_module "$module"
+	warn_if_not_installed_module "$module"
 	uci_add_list "on-core.modules.enabled" "$module"
 	apply_changes "on-core" "$module"
 }
@@ -75,6 +84,13 @@ warn_if_unknown_module() {
 	get_on_modules | grep -qwF "$module" && return 0
 	echo >&2 "The opennet module name '$module' is unknown - probably misspelled?"
 	echo >&2 "The following module names are known: $(get_on_modules | xargs echo)"
+}
+
+
+warn_if_not_installed_module() {
+	local module="$1"
+	is_on_module_installed "$module" && return 0
+	echo >&2 "The opennet module name '$module' is not installed - maybe you want to install it?"
 }
 
 

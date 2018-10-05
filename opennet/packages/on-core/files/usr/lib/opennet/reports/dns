@@ -7,7 +7,7 @@ set -eu
 
 
 # uci-basierte Konfiguration extrahieren
-uci -q show dhcp | grep "^dhcp\.@dnsmasq" >dns.uci
+uci -q show dhcp | grep '^dhcp\.@dnsmasq' >dns.uci
 
 
 # kopiere Config-Dateien (keine dhcp-leases)

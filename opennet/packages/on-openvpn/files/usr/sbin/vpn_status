@@ -31,7 +31,7 @@ print_status() {
 	local format_string
 	now=$(get_uptime_minutes)
 	sorting=$(get_service_sorting)
-	format_string="%6s %-16s %18s %7s %4s\n"
+	format_string='%6s %-16s %18s %7s %4s\n'
 
 	# shellcheck disable=SC2059
 	printf "$format_string" "active" "IP" "Quality" "VPN" "Age"

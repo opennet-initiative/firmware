@@ -360,7 +360,7 @@ get_on_ip() {
 	# das "on_ipschema" erwartet die Variable "no"
 	# shellcheck disable=SC2034
 	local no="$interface_number"
-	echo "$on_id" | grep -q "\." || on_id=1.$on_id
+	echo "$on_id" | grep -q '\.' || on_id=1.$on_id
 	# shellcheck disable=SC2034
 	on_id_1=$(echo "$on_id" | cut -d . -f 1)
 	# shellcheck disable=SC2034
@@ -502,7 +502,7 @@ set_opennet_id() {
 	local netmask
 	local if_counter=0
 	# ID normalisieren (AP7 -> AP1.7)
-	echo "$new_id" | grep -q "\." || new_id=1.$new_id
+	echo "$new_id" | grep -q '\.' || new_id=1.$new_id
 	# ON_ID in on-core-Settings setzen
 	prepare_on_uci_settings
 	uci set "on-core.settings.on_id=$new_id"
@@ -795,7 +795,7 @@ get_potential_error_messages() {
 	# 27) OLSRd2[...]: WARN(os_interface) ...: WARNING! Could not disable the IP spoof filter
 	#    Im Anschluss an den obigen (26) Fehlversuch, fuer ein logisches Netzwerk-Interface den
 	#    rp_filter zu deaktivieren, wird diese Warnung ausgegeben. Sie ist nicht relevant.
-	filters="${filters}|WARN\(os_interface\).*Could not disable (the IP spoof filter|ICMP redirects)"
+	filters="${filters}"'|WARN\(os_interface\).*Could not disable (the IP spoof filter|ICMP redirects)'
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.
@@ -940,7 +940,7 @@ _get_parts_dir_files() {
 	# Abbruch, falls es das Verzeichnis nicht gibt
 	[ -e "$parts_dir" ] || return 0
 	# ignoriere Dateinamen mit ungueltigen Zeichen (siehe 'man run-parts')
-	find "$parts_dir" -maxdepth 1 | grep "/[a-zA-Z0-9_-]\+$" | while read -r fname; do
+	find "$parts_dir" -maxdepth 1 | grep '/[a-zA-Z0-9_-]\+$' | while read -r fname; do
 		# ignoriere verwaiste symlinks
 		[ -f "$fname" ] || continue
 		# ignoriere Dateien ohne Ausführungsrechte
@@ -990,7 +990,7 @@ run_scheduled_tasks() {
 		echo "$fname"
 	done)
 	[ -n "$running_tasks" ] && return 0
-	find "$SCHEDULING_DIR" -type f | grep -v "\.running$" | while read -r fname; do
+	find "$SCHEDULING_DIR" -type f | grep -v '\.running$' | while read -r fname; do
 		temp_fname="${fname}.running"
 		# zuerst schnell wegbewegen, damit wir keine Ereignisse verpassen
 		# Im Fehlerfall (eine race condition) einfach beim naechsten Eintrag weitermachen.
@@ -1077,7 +1077,7 @@ get_flash_backup() {
 	local blocksize
 	local label
 	# shellcheck disable=SC2034
-	grep "^mtd[0-9]\+:" /proc/mtd | while read -r name size blocksize label; do
+	grep '^mtd[0-9]\+:' /proc/mtd | while read -r name size blocksize label; do
 		# abschliessenden Doppelpunkt entfernen
 		name="${name%:}"
 		# hexadezimal-Zahl umrechnen

@@ -49,7 +49,7 @@ enable_suggested_munin_plugin_names() {
 	local source_dir="../../share/munin-plugins-available"
 	# wird der "suggest"-Mechanismus unterstuetzt?
 	local capabilities
-	capabilities=$(grep "#%#[[:space:]]\+capabilities[[:space:]]*=" "$plugin_file" | cut -f 2 -d "=")
+	capabilities=$(grep '#%#[[:space:]]\+capabilities[[:space:]]*=' "$plugin_file" | cut -f 2 -d "=")
 	# keine Ausfuehrung ohne "suggest"-Faehigkeit
 	echo "$capabilities" | grep -qw "suggest" || return 0
 	"$plugin_file" suggest | while read -r scope; do

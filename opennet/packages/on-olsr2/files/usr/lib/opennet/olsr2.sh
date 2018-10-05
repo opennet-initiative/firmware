@@ -98,7 +98,7 @@ IPV6_HOSTNAME_MAP="fd00::245 HOST-GAI"
 ## @fn get_mac_address()
 ## @brief Ermittle die erste nicht-Null MAC-Adresse eines echten Interfaces.
 get_mac_address() {
-	ip link | grep -A 1 "^[0-9]\+: \(eth\|wlan\)" | grep "link/ether" \
+	ip link | grep -A 1 '^[0-9]\+: \(eth\|wlan\)' | grep "link/ether" \
 		| awk '{print $2}' | grep -v "^00:00:00:00:00:00$" | sort | head -1
 }
 
@@ -331,7 +331,7 @@ get_olsr2_neighbours() {
 debug_ping_all_olsr2_hosts() {
 	local a
 	ip -6 route show table olsrd2 | awk '{print $1}' | while read -r a; do
-		ping6 -w 1 -c 1 "$a" >/dev/null 2>&1 && printf "OK\t%s\n" "$a" || printf "FAIL\t%s\n" "$a"
+		ping6 -w 1 -c 1 "$a" >/dev/null 2>&1 && printf 'OK\t%s\n' "$a" || printf 'FAIL\t%s\n' "$a"
 	done
 }
 
@@ -355,7 +355,7 @@ debug_translate_macs() {
 			printf 's/"label":"%s"/"label":"%s"/g;\n' "$(convert_mac_to_eui64_address "fe80:" "$mac" "0x020000010000")" "$name"
 		done)
 	sed_script_ip=$(echo "$IPV6_HOSTNAME_MAP" | while read -r ip name; do
-			printf "s/%s/%s/g;\n" "$ip" "$name"
+			printf 's/%s/%s/g;\n' "$ip" "$name"
 		done)
 	sed -e "$sed_script_mac" -e "$sed_script_ip"
 }

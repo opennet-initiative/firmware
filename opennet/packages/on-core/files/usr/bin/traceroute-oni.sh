@@ -37,9 +37,9 @@ traceroute "$dst_ip" | tr '*' ' ' | while read -r line; do
   ip=${ip#(} #delete first "("
 
   # handle only Opennet IPs (10.0.0.0/8 or 192.168.0.0/16)
-  if echo "$ip" | grep -qE "^(10|192\.168)\."; then
+  if echo "$ip" | grep -qE '^(10|192\.168)\.'; then
     # fetch location name
-    printf " %s - IP: %s - Location: %s - DNS: %s\n" \
+    printf ' %s - IP: %s - Location: %s - DNS: %s\n' \
         "$num" "$ip" "$(get_location_from_api "$ip")" "$dns"
   fi
 done

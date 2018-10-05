@@ -57,13 +57,13 @@ add_crontab_entries() {
 			|| echo "$random_daily_minute" | grep -q "[05]$"; do
 		random_daily_minute=$(get_random 60)
 	done
-	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.minutely" \
+	line_in_file "$crontab_file" '^[^#].*run_parts.*/etc/cron\.minutely' \
 		"* * * * *		$cron_prefix /etc/cron.minutely $cron_suffix"
-	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.5mins" \
+	line_in_file "$crontab_file" '^[^#].*run_parts.*/etc/cron\.5mins' \
 		"*/5 * * * *		$cron_prefix /etc/cron.5mins $cron_suffix"
-	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.hourly" \
+	line_in_file "$crontab_file" '^[^#].*run_parts.*/etc/cron\.hourly' \
 		"$random_hourly_minute * * * *		$cron_prefix /etc/cron.hourly $cron_suffix"
-	line_in_file "$crontab_file" "^[^#].*run_parts.*/etc/cron\.daily" \
+	line_in_file "$crontab_file" '^[^#].*run_parts.*/etc/cron\.daily' \
 		"$random_daily_minute $(( $(get_random 3) + 3)) * * *		$cron_prefix /etc/cron.daily $cron_suffix"
 	# es ist schwer zu pruefen, ob die Datei sich geaendert hat - also einfach neustarten
 	/etc/init.d/cron restart

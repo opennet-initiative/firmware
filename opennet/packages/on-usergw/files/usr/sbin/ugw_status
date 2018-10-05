@@ -24,7 +24,7 @@ print_status() {
 	local offset
 	local active
 	local format_string
-	format_string="%-6s %-32s %11s %3s %3s %3s\n"
+	format_string='%-6s %-32s %11s %3s %3s %3s\n'
 
 	# shellcheck disable=SC2059
 	printf "$format_string" "active" "Hostname" "Priority" "WAN" "VPN" "MTU"
@@ -78,9 +78,9 @@ case "$ACTION" in
 		for service_name in $(get_services "mesh" | filter_services_by_value "host" "$2"); do
 			echo "$service_name" | run_cyclic_service_tests "is_mesh_gateway_usable" "0" "0"
 			for key in wan vpn mtu; do
-				printf "%s: %s\n" "$key" "$(get_service_value "$service_name" "${key}_status")"
+				printf '%s: %s\n' "$key" "$(get_service_value "$service_name" "${key}_status")"
 			done
-			printf "%s: %s\n" "result" "$(get_service_value "$service_name" "status")"
+			printf '%s: %s\n' "result" "$(get_service_value "$service_name" "status")"
 		done
 	;;
 	status)

@@ -20,7 +20,7 @@ if [ "${1:-}" = "config" ]; then
 
 else
 	for device in $(get_subdevices_of_interface "$NETWORK_FREE"); do
-		printf "%d %d\n" "$(cat "/sys/class/net/$device/statistics/rx_bytes")" "$(cat "/sys/class/net/$device/statistics/tx_bytes")"
+		printf '%d %d\n' "$(cat "/sys/class/net/$device/statistics/rx_bytes")" "$(cat "/sys/class/net/$device/statistics/tx_bytes")"
 	done | awk '{
 		rx+=$1; tx+=$2; }
 		END {

@@ -21,7 +21,7 @@ OLSR_ROUTE_CACHE_FILE=/tmp/olsr_routes.cache
 ## @details Die IP-Adresse darf mit einem Netzwerkpraefix enden.
 is_ipv4() {
 	local target="$1"
-	echo "$target" | grep -q -E "^[0-9]+(\.[0-9]+){3}(/[0-9]+)?$"
+	echo "$target" | grep -q -E '^[0-9]+(\.[0-9]+){3}(/[0-9]+)?$'
 }
 
 
@@ -237,7 +237,7 @@ get_routing_table_id() {
 	local table_name="$1"
 	_prepare_routing_table_file
 	# Tabellennummer ausgeben, falls sie vorhanden ist
-	grep "^[0-9]\+[ \t]\+$table_name$" "$RT_FILE" | awk '{print $1}'
+	grep '^[0-9]\+[ \t]\+'"$table_name$" "$RT_FILE" | awk '{print $1}'
 	return 0
 }
 

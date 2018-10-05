@@ -53,7 +53,7 @@ get_and_enable_olsrd_library_uci_prefix() {
 	local current
 	current=$(for uci_prefix in $(find_all_uci_sections olsrd LoadPlugin); do
 			# die Bibliothek beginnt mit dem Namen - danach folgt die genaue Versionsnummer
-			uci_get "${uci_prefix}.library" | grep -q "^$library\.so" && echo "$uci_prefix"
+			uci_get "${uci_prefix}.library" | grep -q "^$library"'\.so' && echo "$uci_prefix"
 			true
 		done | tail -1)
 	if [ -n "$current" ]; then

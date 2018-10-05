@@ -87,7 +87,7 @@ update_opennet_zone_masquerading() {
 		done
 	done
 	# leider ist masq_src im Zweifelfall nicht "leer", sondern enthaelt ein Leerzeichen
-	if uci_get "${uci_prefix}.masq_src" | grep -q "[^ \t]"; then
+	if uci_get "${uci_prefix}.masq_src" | grep -q '[^ \t]'; then
 		# masquerading aktiveren (nur fuer die obigen Quell-Adressen)
 		uci set "${uci_prefix}.masq=1"
 	else
@@ -412,11 +412,11 @@ is_interface_up() {
 		# das Bridge-Interface existiert nicht (d.h. es ist down)
 		[ -z "$(ip link show dev "br-${interface}" 2>/dev/null || true)" ] && trap "" EXIT && return 1
 		# Bridge ist aus? Damit ist das befragte Interface ebenfalls aus ...
-		ip link show dev "br-${interface}" | grep -q "[\t ]state DOWN[\ ]" && trap "" EXIT && return 1
+		ip link show dev "br-${interface}" | grep -q '[\t ]state DOWN[\ ]' && trap "" EXIT && return 1
 	fi
 	local device
 	for device in $(get_subdevices_of_interface "$interface"); do
-		ip link show dev "$device" | grep -q "[\t ]state UP[\ ]" && return 0
+		ip link show dev "$device" | grep -q '[\t ]state UP[\ ]' && return 0
 		true
 	done
 	trap "" EXIT && return 1

@@ -284,7 +284,7 @@ get_mig_port_forward_range() {
 	else
 		first_port=$((portbase + (cn_address-1) * port_count))
 		# output first port and last port
-		printf "%s\t%s\n" "$first_port" "$((first_port + port_count - 1))"
+		printf '%s\t%s\n' "$first_port" "$((first_port + port_count - 1))"
 	fi
 }
 

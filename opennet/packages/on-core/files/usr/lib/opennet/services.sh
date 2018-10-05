@@ -311,7 +311,7 @@ pipe_service_attribute() {
 	while read -r service_name; do
 		value=$(get_service_value "$service_name" "$key")
 		[ -z "$value" ] && value="$default"
-		[ -n "$value" ] && printf "%s\t%s\n" "$service_name" "$value"
+		[ -n "$value" ] && printf '%s\t%s\n' "$service_name" "$value"
 		true
 	done
 }
@@ -421,7 +421,7 @@ print_services() {
 	for service_name in $(get_services "$@"); do
 		echo "$service_name"
 		for attribute in $(get_service_attributes "$service_name"); do
-			printf "\t%s=%s\n" "$attribute" "$(get_service_value "$service_name" "$attribute")"
+			printf '\t%s=%s\n' "$attribute" "$(get_service_value "$service_name" "$attribute")"
 		done
 	done
 	return 0
@@ -883,7 +883,7 @@ run_cyclic_service_tests() {
 				# Da "return" aufgrund der Pipe nicht die gesamte Funktion beenden
 				# würde, senden wir stattdessen die Markierung fuer "keine Tests
 				# noetig" und beenden die Schleife.
-				printf "%s %s\n" "-1" "$service_name"
+				printf '%s %s\n' "-1" "$service_name"
 				break
 			else
 				msg_debug "failed to verify $service_name"
@@ -897,7 +897,7 @@ run_cyclic_service_tests() {
 			# funktionsfaehige "alte" Dienste - es gibt nichts fuer sie zu tun
 			# Wir sortieren sie nach ganz oben, um bei Existenz eines lauffaehigen Diensts
 			# keine unnoetigen Tests von nicht-funktionierenden Hosts durchzufuehren.
-			printf "%s %s\n" "-1" "$service_name"
+			printf '%s %s\n' "-1" "$service_name"
 		fi
 	done | sort -n | while read -r timestamp service_name; do
 		# Mit dem Zeitstempel "-1" sind funktionierende Dienste markiert. Wir brauchen also keine

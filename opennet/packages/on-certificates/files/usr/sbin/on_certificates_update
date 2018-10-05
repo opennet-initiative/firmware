@@ -21,7 +21,7 @@ verify_crl() {
 	local hash="$1"
 	local cert_file
 	cert_file=$(find "$CA_DIR" -mindepth 1 -maxdepth 1 -name "$hash.*" -print0 \
-		| xargs -0 basename | grep "^$hash\.[0-9]$" | sort -n | tail -1)
+		| xargs -0 basename | grep "^$hash"'\.[0-9]$' | sort -n | tail -1)
 	[ -z "$cert_file" ] && echo >&2 "Failed to find certificate belonging to CRL '$hash'" && return 1
 	# Ausgabe des CRL-Resultats ("verify OK" oder aehnliches) umlenken - bei Erfolg sofort beenden
 	openssl crl -CAfile "$CA_DIR/$cert_file" -noout 2>/dev/null && return 0

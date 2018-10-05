@@ -104,7 +104,7 @@ _change_openvpn_config_setting() {
 	local config_file="$1"
 	local config_key="$2"
 	local config_value="${3:-}"
-	sed -i "/^$config_key[\t ]/d" "$config_file"
+	sed -i "/^$config_key"'[\t ]/d' "$config_file"
 	[ -n "$config_value" ] && echo "$config_key $config_value" >>"$config_file"
 	return 0
 }

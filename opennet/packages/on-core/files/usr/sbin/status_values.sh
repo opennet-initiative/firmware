@@ -194,11 +194,11 @@ print_interfaces_2_6() {
 "ifstat_rx_missed_errors":"%s","ifstat_tx_aborted_errors":"%s","ifstat_tx_compressed":"%s","ifstat_tx_fifo_errors":"%s","ifstat_tx_window_errors":"%s",\
 "ifstat_rx_bytes":"%s","ifstat_rx_dropped":"%s","ifstat_rx_frame_errors":"%s","ifstat_rx_over_errors":"%s","ifstat_tx_bytes":"%s","ifstat_tx_dropped":"%s",\
 "ifstat_tx_heartbeat_errors":"%s","wlan_essid":"%s","wlan_apmac":"%s","wlan_type":"%s","wlan_hwmode":"%s","wlan_mode":"%s","wlan_channel":"%s","wlan_freq":"%s",\
-"wlan_txpower":"%s","wlan_signal":"%s","wlan_noise":"%s","wlan_bitrate":"%s","wlan_crypt":"%s","wlan_vaps":"%s","db_ver":"%s","db_update":"%s"}}\n
+"wlan_txpower":"%s","wlan_signal":"%s","wlan_noise":"%s","wlan_bitrate":"%s","wlan_crypt":"%s","wlan_vaps":"%s","db_ver":"%s","db_update":"%s"}}
 EOF
 )
         # shellcheck disable=SC2059
-        printf "$JSON" "" "$on_olsr_mainip" "$if_name" "$if_type_bridge" "$if_type_bridgedif" "$if_hwaddr" "$ip_label" "$ip_addr" "$ip_broadcast" \
+        printf "$JSON"'\n' "" "$on_olsr_mainip" "$if_name" "$if_type_bridge" "$if_type_bridgedif" "$if_hwaddr" "$ip_label" "$ip_addr" "$ip_broadcast" \
 		"$on_networks" "$on_zones" "$on_olsr" "$dhcp_start" "$dhcp_limit" "$dhcp_leasetime" "$dhcp_fwd" "$ifstat_collisions" "$ifstat_rx_compressed" "$ifstat_rx_errors" \
 		"$ifstat_rx_length_errors" "$ifstat_rx_packets" "$ifstat_tx_carrier_errors" "$ifstat_tx_errors" "$ifstat_tx_packets" "$ifstat_multicast" "$ifstat_rx_crc_errors" \
 		"$ifstat_rx_fifo_errors" "$ifstat_rx_missed_errors" "$ifstat_tx_aborted_errors" "$ifstat_tx_compressed" "$ifstat_tx_fifo_errors" "$ifstat_tx_window_errors" \
@@ -321,11 +321,11 @@ if [ "$EXPORT_JSON" = "1" ];then
 "on_core_ver":"%s","on_core_insttime":"%s","on_packages":"%s","on_id":"%s","on_olsrd_status":"%s","on_olsr_mainip":"%s","on_wifidog_status":"%s",\
 "on_wifidog_id":"%s","on_vpn_cn":"%s","on_vpn_status":"%s","on_vpn_gw":"%s","on_vpn_autosearch":"%s","on_vpn_sort":"%s","on_vpn_gws":"%s","on_vpn_blist":"%s",\
 "on_ugw_status":"%s","on_ugw_enabled":"%s","on_ugw_possible":"%s","on_ugw_tunnel":"%s","on_ugw_connected":"%s","on_ugw_presetips":"%s","on_ugw_presetnames":"%s",\
-"on_old_autoadapttxpwr":"%s","on_old_remoteconf":"%s","db_time":"%s","db_epoch":"%s","db_ver":"%s","db_update":"%s"}}\n
+"on_old_autoadapttxpwr":"%s","on_old_remoteconf":"%s","db_time":"%s","db_epoch":"%s","db_ver":"%s","db_update":"%s"}}
 EOF
 )
     # shellcheck disable=SC2059
-    printf "$JSON" "" "$on_olsr_mainip" "$sys_ver" "$sys_board" "$sys_cpu" "$sys_mem" "$sys_uptime" "$sys_load" "$sys_free" "$sys_watchdog" "$sys_os_type" \
+    printf "$JSON"'\n' "" "$on_olsr_mainip" "$sys_ver" "$sys_board" "$sys_cpu" "$sys_mem" "$sys_uptime" "$sys_load" "$sys_free" "$sys_watchdog" "$sys_os_type" \
 	"$sys_os_name" "$sys_os_rel" "$sys_os_ver" "$sys_os_arc" "$sys_os_insttime" "$on_core_ver" "$on_core_insttime" "$on_packages" "$on_id" "$on_olsrd_status" \
 	"$on_olsr_mainip" "$on_wifidog_status" "$on_wifidog_id" "$on_vpn_cn" "$on_vpn_status" "$on_vpn_gw" "$on_vpn_autosearch" "$on_vpn_sort" "$on_vpn_gws" \
 	"$on_vpn_blist" "$on_ugw_status" "$on_ugw_enabled" "$on_ugw_possible" "$on_ugw_tunnel" "$on_ugw_connected" "$on_ugw_presetips" "$on_ugw_presetnames" "" "" \

@@ -18,5 +18,5 @@ fi
 # uci-Konfiguration
 # Herausfiltern von privaten Informationen (siehe https://wiki.openwrt.org/doc/uci/wireless)
 uci -q show "wireless" \
-	| grep -vE "\.(macaddr|key|key[1234]|maclist|[^=]*_secret|password|priv_key_pwd)=" \
+	| grep -vE '\.(macaddr|key|key[1234]|maclist|[^=]*_secret|password|priv_key_pwd)=' \
 	| cat >uci_wireless || true

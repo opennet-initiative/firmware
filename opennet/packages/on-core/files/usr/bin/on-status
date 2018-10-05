@@ -6,7 +6,7 @@ set -eu
 
 
 echo "****** System ******"
-printf "Uptime and Load: %s\n" "$(uptime)"
+printf 'Uptime and Load: %s\n' "$(uptime)"
 error_messages=$(get_potential_error_messages)
 if [ -n "$error_messages" ]; then
 	echo "Potential error messages:"
@@ -23,7 +23,7 @@ if is_on_module_installed_and_enabled on-olsr2; then
 	echo "****** OLSRv2 Links ******"
 	echo /nhdpinfo neighbor | nc localhost 2009 \
 		| cut -f 1,3,4,7,9 \
-		| xargs -r printf "%s\tsymmetric=%s\tlinkcount=%s\tmetric_in=%s\tmetric_out=%s\n"
+		| xargs -r printf '%s\tsymmetric=%s\tlinkcount=%s\tmetric_in=%s\tmetric_out=%s\n'
 	echo
 fi
 
@@ -52,7 +52,7 @@ if is_on_module_installed_and_enabled on-openvpn; then
 		echo "no internet connection"
 	else
 		for service in $current_connections; do
-			printf "%s:%s via %s\n" \
+			printf '%s:%s via %s\n' \
 				"$(get_service_value "$service" host)" \
 				"$(get_service_value "$service" port)" \
 				"$(get_service_detail "$service" public_host | grep . || echo 'unknown')"
@@ -70,7 +70,7 @@ if is_on_module_installed_and_enabled on-usergw; then
 		echo "no user gateway connections"
 	else
 		for service in $current_connections; do
-			printf "%s:%s\n" \
+			printf '%s:%s\n' \
 				"$(get_service_value "$service" host)" \
 				"$(get_service_value "$service" port)"
 		done

@@ -72,7 +72,7 @@ enable_profiling() {
 	if [ -z "$message" ]; then
 		# ersetze das shebang in allen Opennet-Skripten
 		# eventuell fehlen ein paar Dateien (Umbennungen usw. im Vergleich zum installierten Paket) -> überspringen
-		cat /usr/lib/opkg/info/on-*.list | grep -E "(bin/|\.sh$|etc/cron\.|/etc/hotplug\.d/|lib/opennet)" \
+		cat /usr/lib/opkg/info/on-*.list | grep -E '(bin/|\.sh$|etc/cron\.|/etc/hotplug\.d/|lib/opennet)' \
 			| while read -r fname; do [ -e "$fname" ] && echo "$fname"; true; done \
 			| xargs -n 200 -r sed -i -f "${IPKG_INSTROOT:-}/usr/lib/opennet/profiling.sed"
 		clear_caches
@@ -94,10 +94,10 @@ enable_profiling() {
 summary_profiling() {
 	local fname
 	# Kopfzeile
-	printf "%16s %16s %16s %s\n" "Duration [ms]" "Call count" "avgDuration [ms]" "Name"
+	printf '%16s %16s %16s %s\n' "Duration [ms]" "Call count" "avgDuration [ms]" "Name"
 	find "$PROFILING_DIR" -type f | while read -r fname; do
 		# filtere Fehlmessungen (irgendwie tauchen dort Zahlen wie "27323677987" auf)
-		grep -v "^27[0-9]\{9\}$" "$fname" | awk '
+		grep -v '^27[0-9]\{9\}$' "$fname" | awk '
 			BEGIN { summe=0; counter=0 }
 			{ summe+=($1/1000); counter+=1 }
 			END { printf "%16d %16d %16d %s\n", summe, counter, int(summe/counter), "'"$(basename "$fname")"'"}'

@@ -232,7 +232,7 @@ get_captive_portal_clients() {
 				if (($1 == "TX:") && (my_mac == current_mac)) my_tx=$(NF-1);
 			}
 			END { OFS="\t"; print(my_rx, my_tx); }')
-		printf "%s\t%s\t%s\t%s\n" "$ip_address" "$mac_address" "$timestamp" "$packets_rxtx"
+		printf '%s\t%s\t%s\t%s\n' "$ip_address" "$mac_address" "$timestamp" "$packets_rxtx"
 	done </var/dhcp.leases
 }
 

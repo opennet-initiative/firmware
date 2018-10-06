@@ -12,7 +12,8 @@ OLSR2_POLICY_DEFAULT_PRIORITY=20000
 # interne Zahl fuer die "Domain" in olsr2
 OLSR2_DOMAIN=0
 
-MAC_HOSTNAME_MAP="	50:54:00:a0:31:00 H-GAI
+MAC_HOSTNAME_MAP="	12:98:36:b2:52:71 H-AQUA
+			50:54:00:a0:31:00 H-GAI
 			52:9a:4c:6d:13:e8 H-RYOKO
 			52:9a:4c:6d:12:85 H-TAMAGO
 			dc:9f:db:02:35:1a AP1-3
@@ -30,6 +31,8 @@ MAC_HOSTNAME_MAP="	50:54:00:a0:31:00 H-GAI
 			00:27:22:44:c1:aa AP1-110
 			68:72:51:0a:45:0c AP1-117
 			00:15:6d:c5:c2:b2 AP1-120
+			00:15:6d:8a:38:f4 AP1-136
+			44:d9:e7:54:ee:b3 AP1-161
 			00:27:22:1a:78:65 AP1-187
 			80:2a:a8:7a:19:0a AP1-189
 			dc:9f:db:f4:36:d6 AP1-196
@@ -42,12 +45,13 @@ MAC_HOSTNAME_MAP="	50:54:00:a0:31:00 H-GAI
 			44:d9:e7:54:ee:a9 AP1-251
 			c4:e9:84:7d:e4:48 AP2-1
 			00:27:22:44:c2:a6 AP2-3
-			44:d9:e7:72:e9:f2 AP2-4
+			24:a4:3c:6c:f9:26 AP2-4
 			24:a4:3c:86:3a:59 AP2-5
 			00:15:6d:80:09:7b AP2-6
 			00:15:6d:80:09:31 AP2-8
 			44:d9:e7:6a:9f:a2 AP2-11
 			24:a4:3c:44:c9:2a AP2-14
+			24:a4:3c:86:38:4c AP2-24
 			c0:4a:00:40:ad:c2 AP2-30
 			00:15:6d:8a:be:f6 AP2-31
 			44:d9:e7:54:ee:d2 AP2-50

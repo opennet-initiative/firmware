@@ -2,5 +2,8 @@
 
 set -eu
 
-echo /netjsoninfo graph | nc localhost 2009 | on-function debug_translate_macs >/tmp/olsr2.json.tmp
-mv /tmp/olsr2.json.tmp /tmp/olsr2.json
+tmpfile=$(mktemp)
+trap "rm -f '$tmpfile'" EXIT
+
+echo /netjsoninfo graph | nc localhost 2009 | on-function debug_translate_macs >"$tmpfile"
+mv "$tmpfile" /tmp/olsr2.json

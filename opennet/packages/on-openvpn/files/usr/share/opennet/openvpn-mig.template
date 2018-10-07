@@ -7,7 +7,9 @@ key on_aps.key
 
 client
 nobind
-comp-lzo yes
+# Die "lzo"-Kompression ist rueckwaerts kompatibel mit openvpn < 2.4 (auf der Server-Seite).
+# Zukuenftig wollen wir diese Einstellung via "push" vom Server setzen lassen.
+compress lzo
 
 # keine sanfte Abmeldung vom Server - sonst ueberschreibt dieses Signal das "ping-restart"-Signal bei einem Verbindungsabbruch
 #explicit-exit-notify 1

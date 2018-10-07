@@ -198,9 +198,9 @@ verify_vpn_connection() {
 
 		# prevent a real connection (otherwise we may break our current vpn tunnel):
 		#   tls-exit: stop immediately after tls handshake failure
-		#   ns-cert-type: enforce a connection against a server certificate (instead of peer-to-peer)
+		#   remote-cert-tls: enforce a connection against a server certificate (instead of peer-to-peer)
 		echo "tls-exit"
-		echo "ns-cert-type server"
+		echo "remote-cert-tls server"
 
 	) >"$config_file"
 

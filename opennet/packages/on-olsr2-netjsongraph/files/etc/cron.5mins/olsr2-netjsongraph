@@ -6,4 +6,5 @@ tmpfile=$(mktemp)
 trap "rm -f '$tmpfile'" EXIT
 
 echo /netjsoninfo graph | nc localhost 2009 | on-function debug_translate_macs >"$tmpfile"
+chmod 644 "$tmpfile"
 mv "$tmpfile" /tmp/olsr2.json

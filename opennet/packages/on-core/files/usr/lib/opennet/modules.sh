@@ -43,7 +43,7 @@ _is_on_module_enabled() {
 is_on_module_installed() {
 	local module="$1"
 	_prepare_on_modules
-	is_package_installed "$module" && retun 0
+	is_package_installed "$module" && return 0
 	trap "" EXIT && return 1
 }
 

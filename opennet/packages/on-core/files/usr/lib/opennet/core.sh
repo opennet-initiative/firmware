@@ -1010,7 +1010,8 @@ run_scheduled_tasks() {
 		echo "$fname"
 	done)
 	[ -n "$running_tasks" ] && return 0
-	find "$SCHEDULING_DIR" -type f | grep -v '\.running$' | while read -r fname; do
+	# die ältesten Dateien zuerst ausführen
+	find "$SCHEDULING_DIR" -type f | grep -v '\.running$' | xargs -r ls -tr | while read -r fname; do
 		temp_fname="${fname}.running"
 		# zuerst schnell wegbewegen, damit wir keine Ereignisse verpassen
 		# Im Fehlerfall (eine race condition) einfach beim naechsten Eintrag weitermachen.

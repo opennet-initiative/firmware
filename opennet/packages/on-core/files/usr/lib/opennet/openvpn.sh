@@ -416,6 +416,11 @@ get_openvpn_service_template_filename() {
 ## @details The output can be easily parsed via 'cut'. Even the full status output of openvpn is safe for parsing since potential tabulator characters are removed.
 ## @returns One line consisting of five fields separated by tab characters is returned (tried_to_remote real_to_remote tried_from_remote real_from_remote full_status_output). Failed tests are indicated by an empty result.
 openvpn_get_mtu() {
+	# TODO: dies ist ein (schlechter) Workaround für einen Fehler der MTU-Prüfung seit OpenVPN v2.4
+	# siehe https://dev.opennet-initiative.de/ticket/210 und https://community.openvpn.net/openvpn/ticket/1103
+	printf '%d\t%d\t%d\t%d\t%s' 1520 1520 1493 1494 "Empirical MTU test completed [Tried,Actual] local->remote=[1520,1520] remote->local=[1493,1493]"
+	return
+
 	trap 'error_trap openvpn_get_mtu "$*"' EXIT
 	local service_name="$1"
 	local config_file

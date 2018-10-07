@@ -1,3 +1,0 @@
-#!/bin/sh
-
-on-function run_scheduled_tasks

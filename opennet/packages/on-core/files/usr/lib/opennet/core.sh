@@ -969,6 +969,26 @@ run_parts() {
 }
 
 
+## @fn schedule_parts()
+## @brief Plant die Ausführung aller Skripte, die in einem bestimmten Verzeichnis liegen und gewissen Konventionen genügen.
+## @param rundir Verzeichnis, das die auszuführenden Skripte enthält
+## @param suffix optionaler Suffix wird ungefiltert an jeden auszufühenden Dateinamen gehängt (z.B. '2>&1 | logger -t cron-error')
+## @details Die Namenskonventionen und das Verhalten entspricht dem verbreiteten 'run-parts'-Werkzeug.
+##     Die Dateien müssen ausführbar sein.
+schedule_parts() {
+	trap 'error_trap schedule_parts "$*"' EXIT
+	local rundir="$1"
+	local suffix="${2:-}"
+	_get_parts_dir_files "$rundir" | while read -r fname; do
+		if [ -n "$suffix" ]; then
+			echo "$fname $suffix"
+		else
+			echo "$fname"
+		fi | schedule_task
+	done
+}
+
+
 ## @fn run_scheduled_tasks()
 ## @brief Führe die zwischenzeitlich für die spätere Ausführung vorgemerkten Aufgaben aus.
 ## @details Unabhängig vom Ausführungsergebnis wird das Skript anschließend gelöscht.

@@ -12,8 +12,9 @@ import sys
 # verwendet.
 UGW_SERVER_PORT = 1600
 UGW_SERVER_PROTOCOL = "udp"
-# minimale Anzahl von Paketen, um eine Test-Verbindung von einer echten Verbindung zu unterschieden
-UGW_CONNECTION_MIN_PACKETS = 100
+# Minimale Anzahl von Paketen, um eine Test-Verbindung von einer echten Verbindung zu
+# unterschieden. Eine Test-Verbindung scheint nur aus etwa 37 Paketen zu bestehen.
+UGW_CONNECTION_MIN_PACKETS = 50
 
 
 def get_fieldname(text):
@@ -83,8 +84,9 @@ def get_connections_by_target():
                 # Der expire-Timer ist die einzige halbwegs brauchbare Alternative, um zumindest
                 # nur die frischen Tests fehlzuerkennen.
                 # Der Schwellwert ergibt sich aus dem nf-conntrack-Standard-Verfall (180) und
-                # dem konfigurierten keepalive (10) von openvpn.
-                if expire_timer < (180 - 10):
+                # dem konfigurierten keepalive (10) von openvpn (wobei wir ein verlorenes Paket
+                # tolerieren).
+                if expire_timer < (180 - 2 * 10):
                     continue
             # es ist eine echte Nutzertunnel-Verbindung
             if not backward["src"] in target_connections:

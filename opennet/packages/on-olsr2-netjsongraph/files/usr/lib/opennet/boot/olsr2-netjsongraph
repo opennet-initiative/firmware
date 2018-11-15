@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Die Javascript-Dateien fuer netgraphjson sind unkomprimiert ca. 150k groß.
+# Da das Paket typischerweise nachträglich installiert wird, ist die squashfs-Kompression
+# nicht wirksam. Durch die Kompression (und nachträgliches Entpacken beim Booten) sind ca.
+# 90k im Flash einzusparen.
+
+set -eu
+
+ARCHIVE=/www/netjsongraph.js.tar.bz2
+TMP_TARGET=/tmp/netjsongraph.js
+WWW_DIR=/www/netjsongraph.js
+
+mkdir -p "$TMP_TARGET"
+bzcat "$ARCHIVE" | tar -x -C "$TMP_TARGET"
+[ -e "$WWW_DIR" ] || ln -sfn "$TMP_TARGET" "$WWW_DIR"

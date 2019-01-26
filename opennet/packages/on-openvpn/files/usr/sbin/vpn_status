@@ -31,7 +31,7 @@ print_status() {
 	local format_string
 	now=$(get_uptime_minutes)
 	sorting=$(get_service_sorting)
-	format_string='%6s %-16s %18s %7s %4s\n'
+	format_string='%6s %-34s %18s %7s %4s\n'
 
 	# shellcheck disable=SC2059
 	printf "$format_string" "active" "IP" "Quality" "VPN" "Age"
@@ -60,7 +60,11 @@ print_status() {
 			if [ "$sorting" = "hop" ] || [ "$sorting" = "etx" ]; then
 				offset=$(get_service_value "$service_name" "offset")
 				quality=$(get_distance_with_offset "$service_name")
-				quality=$(printf "%.1f" "$quality")
+				if echo "$quality" | grep -q "^0"; then
+					quality=$(printf "%.6f" "$quality")
+				else
+					quality=$(printf "%.1f" "$quality")
+				fi
 				[ -z "$offset" ] && offset=0
 				[ "$offset" -gt 0 ] && offset="+$offset"
 				[ "$offset" -ne 0 ] && quality="($offset) $quality"

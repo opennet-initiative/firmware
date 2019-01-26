@@ -172,3 +172,6 @@ CONFIG_PACKAGE_wireguard-tools=y
 CONFIG_PACKAGE_kmod-wireguard=y
 CONFIG_PACKAGE_luci-app-wireguard=y
 CONFIG_PACKAGE_luci-proto-wireguard=y
+
+# Pakete mit Kernel-Abhängigkeiten (diese koennen nicht via OpenWrt-Feed installiert werden)
+CONFIG_PACKAGE_ipset=m

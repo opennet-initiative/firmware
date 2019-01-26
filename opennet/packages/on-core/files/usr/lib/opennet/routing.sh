@@ -280,8 +280,14 @@ get_hop_count_and_etx() {
 	[ -n "$result" ] && echo "$result" && return 0
 	# Überprüfe, ob die IP des Zielhost die eigene IP ist. Dann sollte distance=0 gesetzt werden.
 	if is_ipv4 "$target" || is_ipv6 "$target"; then
-		result=$(ip route get "$target" | grep -w "dev lo")
-		[ -z "$result" ] || echo "0 0"
+		result=$(ip route get "$target" | grep -w "dev lo" || true)
+		[ -n "$result" ] && echo "0 0" && return 0
+		true
+	fi
+	# Hole Daten von OLSR2
+	if is_ipv6 "$target" && is_function_available "request_olsrd2_txtinfo"; then
+		request_olsrd2_txtinfo "olsrv2info" "route" \
+			| awk '{ if ($1 == "'"$target"'") { cost=$(NF-1); hops=$NF; print(hops, 1 / cost) }}'
 	fi
 }
 

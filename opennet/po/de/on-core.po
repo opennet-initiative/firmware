@@ -1,8 +1,8 @@
-# Lars Kruse <devel@sumpfralle.de>, 2014, 2015, 2016, 2017, 2018.
+# Lars Kruse <devel@sumpfralle.de>, 2014, 2015, 2016, 2017, 2018, 2019.
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2018-04-07 15:32+0200\n"
+"PO-Revision-Date: 2019-01-29 01:55+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -358,6 +358,9 @@ msgstr "Netzwerk-Graph (OLSRv2)"
 
 msgid "Network Graph Visualization"
 msgstr "Netzwerk-Graph-Visualisierung"
+
+msgid "Network Interface: the neighbour's packets arrive here"
+msgstr "Netzwerkschnittstelle: die Pakete der Nachbarn kommen hier an"
 
 msgid "Networks"
 msgstr "Netzwerke"

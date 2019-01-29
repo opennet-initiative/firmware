@@ -327,6 +327,9 @@ msgstr ""
 msgid "Network Graph Visualization"
 msgstr ""
 
+msgid "Network Interface: the neighbour's packets arrive here"
+msgstr ""
+
 msgid "Networks"
 msgstr ""
 

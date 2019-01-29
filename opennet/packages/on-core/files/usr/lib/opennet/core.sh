@@ -828,7 +828,13 @@ line_in_file() {
 	# Datei einlesen - zum Muster passende Zeilen austauschen - notfalls neue Zeile anfuegen
 	(
 		while read -r line; do
-			echo "$line" | grep -q "$pattern" && echo "$new_line" || echo "$line"
+			if echo "$line" | grep -q "$pattern"; then
+				[ -n "$new_line" ] && echo "$new_line"
+				# die Zeile nicht erneut schreiben - alle zukuenftigen Vorkommen loeschen
+				new_line=
+			else
+				echo "$line"
+			fi
 		done <"$filename"
 		# die neue Zeile hinzufuegen, falls das Muster in der alten Datei nicht vorhanden war
 		grep -q "$pattern" "$filename" || echo "$new_line"

@@ -23,6 +23,7 @@ MAC_HOSTNAME_MAP="	12:98:36:b2:52:71 H-AQUA
 			62:66:b3:16:3c:f1 AP1-31
 			30:b5:c2:6e:8c:77 AP1-50
 			24:a4:3c:0a:3d:44 AP1-54
+			00:27:22:44:c2:45 AP1-59
 			24:a4:3c:44:cb:81 AP1-85
 			04:18:d6:38:f6:75 AP1-93
 			30:b5:c2:bd:77:4c AP1-94
@@ -88,15 +89,17 @@ MAC_HOSTNAME_MAP="	12:98:36:b2:52:71 H-AQUA
 			04:18:d6:94:da:4a AP3-9
 			44:d9:e7:42:7f:76 AP3-17
 			04:18:d6:ec:cd:ca AP3-18
+			78:8a:20:bd:ca:82 AP3-21
 			18:a6:f7:eb:3f:24 AP3-30
 			80:2a:a8:7e:36:e2 AP3-32
+			78:8a:20:30:b2:83 AP3-46
 			78:8a:20:30:b3:36 AP3-47
 			78:8a:20:30:b4:9e AP3-49
 			80:2a:a8:bc:18:c1 AP3-53
 			44:d9:e7:d8:d1:6f AP3-67
 			80:2a:a8:30:a2:83 AP3-70
 			44:d9:e7:72:e0:b0 AP3-79"
-IPV6_HOSTNAME_MAP="fd00::245 HOST-GAI"
+IPV6_HOSTNAME_MAP="fd32:d8d3:87da::245 HOST-GAI"
 
 
 ## @fn get_mac_address()

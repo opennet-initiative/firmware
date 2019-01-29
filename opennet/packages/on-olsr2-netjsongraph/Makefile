@@ -30,6 +30,8 @@ define Package/on-olsr2-netjsongraph/postinst
 #!/bin/sh
 [ -n "$${IPKG_INSTROOT:-}" ] && exit 0
 on-function on_opkg_postinst_default
+# extract the compressed js/css assets (usually done during boot)
+/usr/lib/opennet/boot/olsr2-netjsongraph
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

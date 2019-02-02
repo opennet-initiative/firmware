@@ -4,7 +4,7 @@ Signed-off-by: Lars Kruse <devel@sumpfralle.de>
 
 --- a/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
 +++ b/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -20,6 +20,7 @@ drv_mac80211_init_device_config() {
+@@ -24,6 +24,7 @@ drv_mac80211_init_device_config() {
  	config_add_string path phy 'macaddr:macaddr'
  	config_add_string hwmode
  	config_add_int beacon_int chanbw frag rts

@@ -167,11 +167,8 @@ CONFIG_PKG_FORTIFY_SOURCE_2=y
 CONFIG_PKG_RELRO_PARTIAL=y
 
 # Wireguard
-CONFIG_PACKAGE_wireguard=y
-CONFIG_PACKAGE_wireguard-tools=y
-CONFIG_PACKAGE_kmod-wireguard=y
-CONFIG_PACKAGE_luci-app-wireguard=y
-CONFIG_PACKAGE_luci-proto-wireguard=y
+CONFIG_PACKAGE_wireguard=m
+CONFIG_PACKAGE_luci-app-wireguard=m
 
 # Pakete mit Kernel-Abhängigkeiten (diese koennen nicht via OpenWrt-Feed installiert werden)
 CONFIG_PACKAGE_ipset=m

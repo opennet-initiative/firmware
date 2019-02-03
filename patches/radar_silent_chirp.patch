@@ -1,0 +1,18 @@
+Deactivate messages "not enough packets for chirp".
+
+Author: Kai-Uwe
+
+--- /dev/null
++++ b/openwrt/package/kernel/mac80211/patches/495_silent_chirp.patch
+@@ -0,0 +1,11 @@
++--- a/drivers/net/wireless/ath/ath9k/dfs.c
+++++ b/drivers/net/wireless/ath/ath9k/dfs.c
++@@ -139,7 +139,7 @@
++ 		ath_dbg(common, DFS, "HT20: datalen=%d, num_fft_packets=%d\n",
++ 			datalen, num_fft_packets);
++ 		if (num_fft_packets < (FFT_NUM_SAMPLES)) {
++-			ath_dbg(common, DFS, "not enough packets for chirp\n");
+++			// ath_dbg(common, DFS, "not enough packets for chirp\n");
++ 			return false;
++ 		}
++ 		/* in ht20, this is a 6-bit signed number => shift it to 0 */

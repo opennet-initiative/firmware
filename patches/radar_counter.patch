@@ -1,0 +1,26 @@
+--- /dev/null
++++ b/openwrt/package/kernel/mac80211/patches/496_radar_counter.patch
+@@ -0,0 +1,23 @@
++--- a/drivers/net/wireless/ath/dfs_pattern_detector.c.orig
+++++ b/drivers/net/wireless/ath/dfs_pattern_detector.c
++@@ -131,6 +131,8 @@
++ 	&jp_radar_types,
++ };
++ 
+++static int radar_found_counter = 0;
+++
++ /**
++  * get_dfs_domain_radar_types() - get radar types for a given DFS domain
++  * @param domain DFS domain
++@@ -294,6 +296,11 @@
++ 		struct pri_detector *pd = cd->detectors[i];
++ 		struct pri_sequence *ps = pd->add_pulse(pd, event);
++ 		if (ps != NULL) {
+++			if (radar_found_counter < 2) {
+++				radar_found_counter++;
+++				return false;
+++			}
+++ 			radar_found_counter = 0;
++ 			ath_dbg(dpd->common, DFS,
++ 				"DFS: radar found on freq=%d: id=%d, pri=%d, "
++ 				"count=%d, count_false=%d\n",

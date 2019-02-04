@@ -366,3 +366,26 @@ debug_translate_macs() {
 		done)
 	sed -e "$sed_script_mac" -e "$sed_script_ip"
 }
+
+# manuelles Zuordnen von IPv6 Adressen zu IPv4 fuer AccessPoints (bis wir API hierfuer haben)     
+debug_fetch_ipv4_from_ipv6_for_ap() {                                                             
+        local ipv6                                                                                
+        ipv6="$1"                                                                                 
+                                                                                                  
+        echo "$MAC_HOSTNAME_MAP" | while read -r mac name; do                                     
+                if [ "$ipv6" = "$(convert_mac_to_eui64_address "$IP6_PREFIX_PERM" "$mac")" ]; then
+                        #generate IPv4                                                      
+                        if [ "${name:0:2}" = "AP" ]; then                                   
+                                #extract from first number to end                           
+                                num1="${name:2}"                                            
+                                #replace '-' with '.'                                       
+                                num2="${num1/-/.}"                                          
+                                #add suffix '192.168.'                                      
+                                echo "192.168.$num2"                                        
+                        else                                                                
+                                #it is no known AP therefore echo only name and not location
+                                echo $name                     
+                        fi                                     
+                fi                                             
+        done                                                   
+}  

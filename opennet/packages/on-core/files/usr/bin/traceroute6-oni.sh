@@ -1,16 +1,16 @@
 #!/bin/sh
 
-. ./olsr2.sh
-
 set -eu
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/olsr2.sh"
 
 if [ "$#" -lt 1 ] || [ -z "$1" ]; then
    echo "Bad parameter! IP as parameter is needed."
    echo "e.g."
    echo "      traceroute6-oni.sh fd32:d8d3:87da::245"
    echo
-   exit 1
-fi >&2
+   exit
+fi
 
 dst_ip=$1
 

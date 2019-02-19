@@ -235,7 +235,9 @@ verify_vpn_connection() {
 		_change_openvpn_config_setting "$config_file" "cert" "$cert_file"
 
 	# Aufbau der VPN-Verbindung bis zum Timeout oder bis zum Verbindungsabbruch via "tls-exit" (/bin/false)
-	openvpn --config "$config_file" || true
+	# Die Begrenzung durch "timeout" scheint für "unreachable" IPv6-Ziele notwendig zu sein.
+	# Andernfalls wartet der Prozess ewig.
+	timeout 45s openvpn --config "$config_file" || true
 	# read the additional options from the config file (for debug purposes)
 	file_opts=$(grep -v "^$" "$config_file" | grep -v "^#" | sed 's/^/--/' | tr '\n' ' ')
 	rm -f "$config_file"

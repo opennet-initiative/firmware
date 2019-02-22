@@ -21,6 +21,11 @@ DEFAULT_SERVICE_SORTING=etx
 PERSISTENT_SERVICE_ATTRIBUTES="${PERSISTENT_SERVICE_ATTRIBUTES:-} service scheme host port protocol path uci_dependency file_dependency priority rank offset disabled source"
 LOCAL_BIAS_MODULO=10
 SERVICES_LOG_BASE=/var/log/on-services
+UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES=360
+USER_SERVICES_URL=https://service-discovery.opennet-initiative.de/user-services.csv
+
+# andere Module fügen eventuell weitere URLs hinzu
+SERVICES_LIST_URLS="${SERVICES_LIST_URLS:-} $USER_SERVICES_URL"
 
 
 ## @fn get_service_name()
@@ -847,6 +852,90 @@ _notify_service_failure() {
 		true
 	fi
 	set_service_value "$service_name" "status_timestamp" "$(get_uptime_minutes)"
+}
+
+
+## @fn is_trusted_service_list_outdated()
+## @brief Ermittle ob mindestens ein Zeitstempel für einen "trusted" Dienst vorhanden ist, der nicht älter
+##   als die vorgegebene Aktualisierungsperiode ist.
+## @returns Wahr, falls kein Diest mit aktuellem Zeitstempel gefunden wurde.
+is_trusted_service_list_outdated() {
+	trap 'error_trap is_trusted_service_list_outdated "$*"' EXIT
+	local most_recent_timestamp
+	most_recent_timestamp=$(get_services \
+		| filter_services_by_value "source" "trusted" \
+		| pipe_service_attribute "timestamp" | cut -f 2- \
+		| sort -n | tail -1)
+	# kein Zeitstempel -> dies gilt als "veraltet"
+	[ -z "$most_recent_timestamp" ] && return 0
+	# der aktuellste Zeitstempel ist zu alt
+	is_timestamp_older_minutes "$most_recent_timestamp" "$UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES" && return 0
+	trap "" EXIT && return 1
+}
+
+
+## @fn update_trusted_services_list()
+## @brief Hole die vertrauenswürdigen Dienste von signierten Opennet-Quellen.
+## @details Diese Dienste führen beispielsweise auf UGW-APs zur Konfiguration von Portweiterleitungen
+##   ins Internet. Daher sind sie nur aus vertrauenswürdiger Quelle zu akzeptieren (oder manuell).
+update_trusted_services_list() {
+	local source_url="$1"
+	local one_url
+	local line
+	local service_type
+	local scheme
+	local host
+	local port
+	local protocol
+	local priority
+	local details
+	local service_name
+	local is_proxy
+	local service_list
+	service_list=$(for one_url in $SERVICES_LIST_URLS; do
+			https_request_opennet "$one_url" || msg_info "Failed to retrieve list of services from $one_url"
+		done)
+	# leeres Ergebnis? Noch keine Internet-Verbindung? Keine Aktualisierung, keine Beraeumung ...
+	[ -z "$service_list" ] && return
+	echo "$service_list" | grep -v "^#" | sed 's/\t\+/\t/g' | while read -r line; do
+		service_type=$(echo "$line" | cut -f 1)
+		# falls der Dienst-Typ mit "proxy-" beginnt, soll er weitergeleitet werden
+		if [ "${service_type#$RELAYABLE_SERVICE_PREFIX}" = "$service_type" ]; then
+			# kein Proxy-Dienst
+			is_proxy=
+		else
+			# ein Proxy-Dienst
+			is_proxy=1
+			# entferne das Praefix
+		fi
+		scheme=$(echo "$line" | cut -f 2)
+		host=$(echo "$line" | cut -f 3)
+		port=$(echo "$line" | cut -f 4)
+		protocol=$(echo "$line" | cut -f 5)
+		priority=$(echo "$line" | cut -f 6)
+		details=$(echo "$line" | cut -f 7-)
+		service_name=$(notify_service "trusted" "$service_type" "$scheme" "$host" "$port" "$protocol" "/" "$details")
+		set_service_value "$service_name" "priority" "$priority"
+		if [ -n "$is_proxy" ]; then
+			if is_function_available "$pick_local_service_relay_port"; then
+				pick_local_service_relay_port "$service_name" >/dev/null
+			fi
+		fi
+		true
+	done
+	# veraltete Dienste entfernen
+	local min_timestamp
+	min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "trusted_service_expire_minutes")))
+	# falls die uptime kleiner ist als die Verfallszeit, dann ist ein Test sinnfrei
+	if [ "$min_timestamp" -gt 0 ]; then
+		for service_name in $(get_services "mesh" | filter_services_by_value "source" "trusted"); do
+			timestamp=$(get_service_value "$service_name" "timestamp" 0)
+			# Wurde der Service erst vor kurzem aktualisiert? Sonst loeschen ...
+			[ "$timestamp" -ge "$min_timestamp" ] || delete_service "$service_name"
+		done
+	fi
+	# aktualisiere DNS- und NTP-Dienste
+	apply_changes on-core
 }
 
 

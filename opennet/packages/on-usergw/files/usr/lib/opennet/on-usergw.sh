@@ -6,7 +6,7 @@
 UGW_STATUS_FILE=/tmp/on-ugw_gateways.status
 ON_USERGW_DEFAULTS_FILE=/usr/share/opennet/usergw.defaults
 MESH_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-ugw.template
-TRUSTED_SERVICES_URL=https://service-discovery.opennet-initiative.de/ugw-services.csv
+UGW_SERVICES_LIST_URL=https://service-discovery.opennet-initiative.de/ugw-services.csv
 ## auf den UGW-Servern ist via inetd der Dienst "discard" erreichbar
 SPEEDTEST_UPLOAD_PORT=discard
 SPEEDTEST_SECONDS=20
@@ -15,7 +15,6 @@ SPEEDTEST_SECONDS=20
 MESH_OPENVPN_DEVICE_PREFIX=tap
 # Namenspräfix für weiterzuleitende Dienste
 RELAYABLE_SERVICE_PREFIX="proxy-"
-UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES=360
 # Die folgenden Attribute werden dauerhaft (im Flash) gespeichert. Häufige Änderungen sind also eher unerwünscht.
 # Gruende fuer ausgefallene/unintuitive Attribute:
 #   local_relay_port: der lokale Port, der für eine Dienst-Weiterleitung verwendet wird - er sollte über reboots hinweg stabil sein
@@ -23,6 +22,8 @@ UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES=360
 # Wir beachten den vorherigen Zustand der Variable, damit andere Module (z.B. on-usergw) diese
 # ebenfalls beeinflussen können.
 PERSISTENT_SERVICE_ATTRIBUTES="${PERSISTENT_SERVICE_ATTRIBUTES:-} local_relay_port status vpn_status wan_status mtu_status"
+
+SERVICES_LIST_URLS="${SERVICES_LIST_URLS:-} $UGW_SERVICES_LIST_URL"
 
 
 ## @fn get_on_usergw_default()
@@ -110,63 +111,6 @@ is_mesh_gateway_usable() {
 	fi
 	[ -z "$failed" ] && return 0
 	trap "" EXIT && return 1
-}
-
-
-## @fn update_trusted_service_list()
-## @brief Hole die vertrauenswürdigen Dienste von signierten Opennet-Quellen.
-## @details Diese Dienste führen beispielsweise auf UGW-APs zur Konfiguration von Portweiterleitungen
-##   ins Internet. Daher sind sie nur aus vertrauenswürdiger Quelle zu akzeptieren (oder manuell).
-update_trusted_service_list() {
-	local line
-	local service_type
-	local scheme
-	local host
-	local port
-	local protocol
-	local priority
-	local details
-	local service_name
-	local is_proxy
-	local url_list
-	url_list=$(https_request_opennet "$TRUSTED_SERVICES_URL" || msg_info "Failed to retrieve list of trusted services from $TRUSTED_SERVICES_URL")
-	# leeres Ergebnis? Noch keine Internet-Verbindung? Keine Aktualisierung, keine Beraeumung ...
-	[ -z "$url_list" ] && return
-	echo "$url_list" | grep -v "^#" | sed 's/\t\+/\t/g' | while read -r line; do
-		service_type=$(echo "$line" | cut -f 1)
-		# falls der Dienst-Typ mit "proxy-" beginnt, soll er weitergeleitet werden
-		if [ "${service_type#$RELAYABLE_SERVICE_PREFIX}" = "$service_type" ]; then
-			# kein Proxy-Dienst
-			is_proxy=
-		else
-			# ein Proxy-Dienst
-			is_proxy=1
-			# entferne das Praefix
-		fi
-		scheme=$(echo "$line" | cut -f 2)
-		host=$(echo "$line" | cut -f 3)
-		port=$(echo "$line" | cut -f 4)
-		protocol=$(echo "$line" | cut -f 5)
-		priority=$(echo "$line" | cut -f 6)
-		details=$(echo "$line" | cut -f 7-)
-		service_name=$(notify_service "trusted" "$service_type" "$scheme" "$host" "$port" "$protocol" "/" "$details")
-		set_service_value "$service_name" "priority" "$priority"
-		[ -n "$is_proxy" ] && pick_local_service_relay_port "$service_name" >/dev/null
-		true
-	done
-	# veraltete Dienste entfernen
-	local min_timestamp
-	min_timestamp=$(($(get_uptime_minutes) - $(get_on_core_default "trusted_service_expire_minutes")))
-	# falls die uptime kleiner ist als die Verfallszeit, dann ist ein Test sinnfrei
-	if [ "$min_timestamp" -gt 0 ]; then
-		for service_name in $(get_services "mesh" | filter_services_by_value "source" "trusted"); do
-			timestamp=$(get_service_value "$service_name" "timestamp" 0)
-			# Wurde der Service erst vor kurzem aktualisiert? Sonst loeschen ...
-			[ "$timestamp" -ge "$min_timestamp" ] || delete_service "$service_name"
-		done
-	fi
-	# aktualisiere DNS- und NTP-Dienste
-	apply_changes on-core
 }
 
 
@@ -404,25 +348,6 @@ disable_on_usergw() {
 }
 
 
-## @fn is_trusted_service_list_outdated()
-## @brief Ermittle ob mindestens ein Zeitstempel für einen "trusted" Dienst vorhanden ist, der nicht älter
-##   als die vorgegebene Aktualisierungsperiode ist.
-## @returns Wahr, falls kein Diest mit aktuellem Zeitstempel gefunden wurde.
-is_trusted_service_list_outdated() {
-	trap 'error_trap is_trusted_service_list_outdated "$*"' EXIT
-	local most_recent_timestamp
-	most_recent_timestamp=$(get_services \
-		| filter_services_by_value "source" "trusted" \
-		| pipe_service_attribute "timestamp" | cut -f 2- \
-		| sort -n | tail -1)
-	# kein Zeitstempel -> dies gilt als "veraltet"
-	[ -z "$most_recent_timestamp" ] && return 0
-	# der aktuellste Zeitstempel ist zu alt
-	is_timestamp_older_minutes "$most_recent_timestamp" "$UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES" && return 0
-	trap "" EXIT && return 1
-}
-
-
 ## @fn fix_wan_route_if_missing()
 ## @brief Prüfe, ob die default-Route trotz aktivem WAN-Interface fehlt. In diesem Fall füge sie
 ##        mit "ifup wan" wieder hinzu.
@@ -454,7 +379,6 @@ update_on_usergw_status() {
 	trap 'error_trap update_on_usergw_status "$*"' EXIT
 	if is_on_module_installed_and_enabled "on-usergw"; then
 		fix_wan_route_if_missing
-		is_trusted_service_list_outdated && update_trusted_service_list
 		update_mesh_gateway_firewall_rules
 		# ohne Zertifikat ist nicht mehr zu tun
 		if has_mesh_openvpn_credentials; then

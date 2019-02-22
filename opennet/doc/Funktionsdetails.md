@@ -6,14 +6,9 @@ Firmware 0.5 {#firmware05}
 Datenbank der Dienste {#services}
 ---------------------
 
-Auf jedem AP wird eine Datenbank von Diensten gepflegt. Die typische Quelle fuer diese Datenbank ist der olsrd-Nameservice.
+Auf jedem AP wird eine Datenbank von Diensten gepflegt.
 
-Die Dienste werden mittels eines olsrd-nameservice-Trigger-Skripts aktualisiert (`/etc/olsrd/nameservice.d/on_update_services`).
-Dieses Trigger-Skript setzt eine Markierungsdatei, deren Existenz durch einen minütlichen cronjob geprüft wird. Sofern die Datei existiert, wird einmalig die Service-Aktualisierung durchgeführt.
-
-Die Aktion des Trigger-Skripts lässt sich manuell auslösen:
-
-    on-function update_olsr_services
+Die zwei typischen Quelle fuer diese Datenbank sind der olsrd-Nameservice (nur OLSR v1), sowie der http-basierte Download einer zentral gepflegten Liste.
 
 Die Ergebnisse der Dienst-Suche werden im Dateisystem gespeichert. Langfristig unveraenderliche Attribute eines Dienstes (z.B. der Host und der Port) werden persistent gespeichert - die übrigen Informationen (z.B. die Routing-Entfernung) liegen lediglich im tmpfs und werden bei jedem Neustart erneut gesammelt.
 
@@ -24,6 +19,45 @@ Die menschenfreundliche Zusammenfassung aller Dienst-Informationen ist recht üb
     on-function print_services
 
 Dienste werden durch einen eindeutigen Namen (zusammengesetzt aus URL, Schema, Hostname, Port, usw.) referenziert. Dieser eindeutige Namen wird von allen Dienst-relevanten Funktionen verwendet.
+
+
+### Empfang von Dienst-Listen via olsr-Nameservice {#services-olsr-nameservices}
+
+Die Dienste werden mittels eines olsrd-nameservice-Trigger-Skripts aktualisiert (`/etc/olsrd/nameservice.d/on_update_services`).
+Dieses Trigger-Skript setzt eine Markierungsdatei, deren Existenz durch einen minütlichen cronjob geprüft wird. Sofern die Datei existiert, wird einmalig die Service-Aktualisierung durchgeführt.
+
+Die Aktion des Trigger-Skripts lässt sich manuell auslösen:
+
+    on-function update_olsr_services
+
+
+### Abfruf zentraler Dienst-Listen {#services-list-download}
+
+Einige Dienste werden nicht via olsr-nameservice, sondern via HTTP-Request ermittelt.
+
+Folgende URLs enthalten Dienste, die von APs verwendet werden:
+* [https://service-discovery.opennet-initiative.de/ugw-services.csv](): Auflistung aller Gateway- und Mesh-Server
+* [https://service-discovery.opennet-initiative.de/user-services.csv](): Auflistung von Nutzer-VPN-Tunnel-Server
+
+Die Spalten werden durch Tabulatoren getrennt (keine Leerzeichen).
+
+Die erste Spalte enthält den Dienst-Typ (z.B. "mesh", "dns" oder "gw"). Falls der Dienst-Type mit dem Präfix "proxy-" beginnt, gilt er als weiterleitungsfähig. Er soll also nicht direkt verwendet, sondern lediglich weitergeleitet werden.
+
+Die zweite Spalte enthält das Dienst-Protokoll / die Anwendung (z.B. "openvpn").
+
+Die dritte Spalte enthält den öffentlich erreichbaren DNS-Namen oder die IP des Hosts.
+
+Die vierte Spalte enthält die Port-Nummer des Diensts.
+
+Die fünfte Spalte enthält das Übertragungsprotokoll (udp/tcp - je nach Dienst).
+
+Die sechste Spalte enthält die Priorität dieses Dienste-Anbieters (5 = üblich; kleinere Werte werden bevorzugt). Ungwöhnliche Dienste oder Dienste mit überraschenden Eigenschaften (z.B. Exit-Knoten im Ausland) sollten eine höhrere Zahl verwenden, damit sie nur durch bewusste Auswahl aktiviert werden können.
+
+Die siebente und die folgenden Spalten können zusätliche Dienst-Informationen enthalten (z.B. "location").
+
+Dabei wird die Priorität (1. Spalte des Ergebnis) für die Vorauswahl der automatisch zu nutzenden Anbietern beachtet.
+
+Die ermittelten Dienst-Anbieter werden durch die Dienste-Verwaltung gespeichert. Darin werden alle für den Verbindungsaufbau notwendigen Daten abgelegt.
 
 
 ### Prioritisierung der Dienste {#service-priority}
@@ -228,30 +262,7 @@ Die UGW-Server bieten üblicherweise zwei Dienste an:
 * Zugang zum Internet aus dem mesh-Netzwerk heraus
 
 Beide Dienste sind über ihre öffentlichen IPs erreichbar. Daher ist eine Announcierung via olsrd-nameservice nicht umsetzbar.
-Somit verwenden wir stattdessen die in Form einer csv-Datei, die via HTTP von einem Opennet-Server bereitgestellt wird:
-
-[https://service-discovery.opennet-initiative.de/ugw-services.csv](Auflistung aller Gateway- und Mesh-Server)
-
-Die Spalten werden durch Tabulatoren getrennt (keine Leerzeichen).
-
-Die erste Spalte enthält den Dienst-Typ (z.B. "mesh" oder "dns"). Falls der Dienst-Type mit dem Präfix "proxy-" beginnt, gilt er als weiterleitungsfähig. Er soll also nicht direkt verwendet, sondern lediglich weitergeleitet werden.
-
-Die zweite Spalte enthält das Dienst-Protokoll / die Anwendung (z.B. "openvpn").
-
-Die dritte Spalte enthält den öffentlich erreichbaren DNS-Namen oder die IP des Hosts.
-
-Die vierte Spalte enthält die Port-Nummer des Diensts.
-
-Die fünfte Spalte enthält das Übertragungsprotokoll (udp/tcp - je nach Dienst).
-
-Die sechste Spalte enthält die Priorität dieses Dienste-Anbieters (5 = üblich; kleinere Werte werden bevorzugt). Ungwöhnliche Dienste oder Dienste mit überraschenden Eigenschaften (z.B. Exit-Knoten im Ausland) sollten eine höhrere Zahl verwenden, damit sie nur durch bewusste Auswahl aktiviert werden können.
-
-Die siebente und die folgenden Spalten können zusätliche Dienst-Informationen enthalten (z.B. "location").
-
-Dabei wird die Priorität (1. Spalte des Ergebnis) für die Vorauswahl der automatisch zu nutzenden Anbietern beachtet.
-
-Die ermittelten Dienst-Anbieter werden durch die Dienste-Verwaltung gespeichert. Darin werden alle für den Verbindungsaufbau notwendigen Daten abgelegt.
-
+Diese werden daher von einer zentralen Stelle via http heruntergeladen (siehe "Abruf zentraler Dienste-Listen").
 
 ### Dienst-Weiterleitung: Service-Relay {#service-relay}
 

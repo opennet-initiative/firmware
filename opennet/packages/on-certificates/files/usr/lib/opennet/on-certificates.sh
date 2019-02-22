@@ -16,7 +16,7 @@ https_request_opennet() {
 	trap "" EXIT
 	# Diese curl-Operation dauert aus irgendeinem Grund ca. 10s - wir muessen also den timeout hochsetzen.
 	# Auf dem Server sind haeufig 408 (timeout) Fehler sichtbar - also mindestens einmal wiederholen.
-	curl -q --silent --max-time 30 --retry 2 --cacert "$ON_CERT_BUNDLE_PATH" "$@"
+	curl -q --silent --location --max-time 30 --retry 2 --cacert "$ON_CERT_BUNDLE_PATH" "$@"
 }
 
 

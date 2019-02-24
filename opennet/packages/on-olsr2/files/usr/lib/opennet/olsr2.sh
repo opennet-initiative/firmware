@@ -283,25 +283,58 @@ debug_translate_macs() {
 	sed -e "$sed_script_mac" -e "$sed_script_ip"
 }
 
-# manuelles Zuordnen von IPv6 Adressen zu IPv4 fuer AccessPoints (bis wir API hierfuer haben)     
-debug_fetch_ipv4_from_ipv6_for_ap() {                                                             
-        local ipv6                                                                                
-        ipv6="$1"                                                                                 
-                                                                                                  
-        echo "$MAC_HOSTNAME_MAP" | while read -r mac name; do                                     
-                if [ "$ipv6" = "$(convert_mac_to_eui64_address "$IP6_PREFIX_PERM" "$mac")" ]; then
-                        #generate IPv4                                                      
-                        if [ "${name:0:2}" = "AP" ]; then                                   
-                                #extract from first number to end                           
-                                num1="${name:2}"                                            
-                                #replace '-' with '.'                                       
-                                num2="${num1/-/.}"                                          
-                                #add suffix '192.168.'                                      
-                                echo "192.168.$num2"                                        
-                        else                                                                
-                                #it is no known AP therefore echo only name and not location
-                                echo $name                     
-                        fi                                     
-                fi                                             
-        done                                                   
-}  
+# extrahiere MAC Adresse aus IPv6 EUI64 Adresse
+#  Bei Fehler leerer String zurück
+debug_fetch_mac_from_ipv6_eui() {
+	local ipv6
+	local mac
+	local prefix
+	local tmp
+	local p	
+	ipv6="$1"
+
+	#check whether we have EUI64 address
+	if [ "$ipv6" != "${ipv6/ff:fe/}" ]; then
+		#prepare prefix to not end on 0
+		prefix=${IP6_PREFIX_PERM%0}
+		#if EUI64 then extract MAC address
+		tmp="${ipv6/$prefix:/}"
+		tmp="${tmp/ff:fe/}"
+		#add colons
+		# example. in: 15:6d80:97b -> out: 0:15:6d:80:9:7b
+		# extrahier hex Blöcke und normalisiere
+		mac=""
+		for i in 1 2 3; do
+			p=$(echo "$tmp" | cut -d":" -f $i) #erste Block
+			while [ "${#p}" != "4" ]; do 
+				p="0$p"    #fülle Nullen auf
+			done
+			p="${p:0:2}:${p:2:2}"             #Doppelpunkt in Mitte einfügen
+			if [ "$mac" = "" ]; then
+				mac="$p"
+			else
+				mac="$mac:$p"
+			fi
+		done
+		echo "$mac"
+	else
+		#no EUI64
+		echo 
+	fi
+}
+
+# manuelles Zuordnen von IPv6 Adressen zu IPv4 fuer AccessPoints (bis wir API hierfuer haben)
+debug_fetch_ipv4_from_ipv6_for_ap() {
+	local ipv6
+	local mac
+	local json
+	local ipv4
+	ipv6="$1"
+	
+	mac="$(debug_fetch_mac_from_ipv6_eui "$ipv6")"
+
+	if [ "$mac" != "" ]; then
+		ipv4=$(wget -q -O - "https://api.opennet-initiative.de/api/v1/interface/?if_hwaddress=$mac" | jsonfilter -e '$[0].addresses[0].address')
+		echo "$ipv4"
+	fi
+}

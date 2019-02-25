@@ -19,7 +19,8 @@
 script_type=${script_type:-}
 route_vpn_gateway=${route_vpn_gateway:-}
 route_network_1=${route_network_1:-}
-trusted_ip=${trusted_ip:-}
+# use either IPv4 or IPv6 Address of peer/server
+trusted_ip=${trusted_ip:-${trusted_ip6:-}}
 
 
 # parse die foreign-Options, beispielsweise:

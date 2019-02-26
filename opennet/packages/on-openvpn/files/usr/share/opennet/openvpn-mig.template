@@ -18,6 +18,9 @@ compress lzo
 
 persist-key
 
+# prevent warnings regarding in-memory secrets
+auth-nocache
+
 # bei einem Verbindungsfehler sollten wir schnell einen Abbruch signalisieren
 # (anstelle unendlich vieler Verbindungsversuche)
 tls-exit

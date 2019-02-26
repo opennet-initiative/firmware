@@ -10,7 +10,7 @@ case "$1" in
 		;;
 	olsrd2)
 		if on-function is_on_module_installed_and_enabled "on-olsr2"; then
-			/etc/init.d/olsrd2 reload >/dev/null || true
+			update_olsr2_daemon_state
 		fi
 		;;
 	on-olsr2)

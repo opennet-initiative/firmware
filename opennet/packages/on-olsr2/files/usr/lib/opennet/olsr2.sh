@@ -132,8 +132,12 @@ update_olsr2_interfaces() {
 update_olsr2_daemon_state() {
 	if is_on_module_installed_and_enabled "on-olsr2"; then
 		/etc/init.d/olsrd2 enable || true
-		[ -z "$(pgrep olsrd2)" ] && /etc/init.d/olsrd2 start
-		/etc/init.d/olsrd2 reload >/dev/null || true
+		if [ -z "$(pgrep olsrd2)" ]; then
+			/etc/init.d/olsrd2 start
+		else
+			# "reload" does not seem to be sufficient after interface changes
+			/etc/init.d/olsrd2 restart >/dev/null || true
+		fi
 	else
 		/etc/init.d/olsrd2 disable || true
 		[ -n "$(pgrep olsrd2)" ] && /etc/init.d/olsrd2 stop

@@ -1,11 +1,13 @@
 #!/bin/sh
 
-set -eu
+
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
 
 # die Service-Aktualisierung braucht viel Zeit - wir reduzieren daher die Haeufigkeit der Ausfuehrung
 # aktualisiere die Dienste zu Beginn jeder Viertelstunde
 if date +%M | grep -qE "([03][0-4]|[14][5-9])"; then
-	echo "on-function update_olsr_services" | on-function schedule_task
+	echo "on-function update_olsr_services" | schedule_task
 fi
 
 if is_trusted_service_list_outdated; then

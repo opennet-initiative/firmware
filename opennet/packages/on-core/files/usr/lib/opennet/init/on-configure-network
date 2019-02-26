@@ -39,7 +39,6 @@ configure_opennet_zone() {
 	uci set "$uci_prefix.forward=REJECT"
 	# via "masq_src" ersetzen wir die ehemalige "/etc/firewall.opennet" fuer Quell-basiertes Masquerading
 	add_zone_forward "$ZONE_LOCAL" "$ZONE_MESH"
-	update_opennet_zone_masquerading
 	# intra-Zone-Verkehr muss explizit erlaubt werden
 	add_zone_forward "$ZONE_MESH" "$ZONE_MESH"
 }

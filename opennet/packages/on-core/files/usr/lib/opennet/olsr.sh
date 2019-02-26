@@ -39,6 +39,8 @@ update_olsr_interfaces() {
 		uci set "${uci_prefix}.interface=$current"
 		uci set "${uci_prefix}.ignore=0"
 	done
+	initialize_olsrd_policy_routing
+	update_opennet_zone_masquerading
 	apply_changes olsrd
 }
 

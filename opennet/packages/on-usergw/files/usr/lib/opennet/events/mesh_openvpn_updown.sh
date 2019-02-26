@@ -46,7 +46,7 @@ setup_mesh_interface() {
 	# ohne dieses explizite reload reagiert die firewall seltsamerweise nicht auf die neuen Interfaces
 	/etc/init.d/firewall reload
 	# iu Kuerze moege die olsr-Interface-Liste neu erstellt werden (inkl. des neuen Interface)
-	echo "on-function update_olsr_interfaces" | schedule_task
+	echo "on-function update_mesh_interfaces" | schedule_task
 }
 
 

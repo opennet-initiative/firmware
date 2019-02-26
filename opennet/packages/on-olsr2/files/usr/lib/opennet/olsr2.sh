@@ -121,6 +121,8 @@ update_olsr2_interfaces() {
 			uci_add_list "${uci_prefix}.originator" "$token"
 		done
 	}
+	# routing tables depend on the list of mesh interfaces
+	init_policy_routing_ipv6
 	apply_changes "olsrd2"
 }
 

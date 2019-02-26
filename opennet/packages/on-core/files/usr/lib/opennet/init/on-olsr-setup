@@ -102,6 +102,4 @@ olsrd_enable_txtinfo
 olsrd_enable_jsoninfo
 olsrd6_disable
 
-# Neuinitialisierung des Policy-Routing - auch nach einer Paket-Installation hilfreich
-initialize_olsrd_policy_routing
 apply_changes olsrd

@@ -4,8 +4,6 @@ set -eu
 
 case "$1" in
 	network|wireless|firewall)
-		# Zonen- und IP-Aenderungen koennen Policy-Routing-Aenderungen erfordern
-		on-function initialize_olsrd_policy_routing
 		# eventuelle Zonen-Zuordnungen zu olsr uebertragen
 		on-function update_olsr_interfaces
 		;;

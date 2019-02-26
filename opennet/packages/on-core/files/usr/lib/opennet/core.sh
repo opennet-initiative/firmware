@@ -270,6 +270,17 @@ add_banner_event() {
 }
 
 
+## @fn update_mesh_interfaces()
+## @brief Update mesh interfaces, routing daemons and policy routing
+## @details This function should be called whenever the list of interfaces changes.
+update_mesh_interfaces() {
+	update_olsr_interfaces
+	if is_function_available update_olsr2_interfaces; then
+		update_olsr2_interfaces
+	fi
+}
+
+
 ## @fn clean_restart_log()
 ## @brief Alle Log-Einträge aus der banner-Datei entfernen.
 clean_restart_log() {

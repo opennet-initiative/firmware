@@ -13,8 +13,6 @@ SPEEDTEST_SECONDS=20
 ## dieser Wert muss mit der VPN-Konfigurationsvorlage synchron gehalten werden
 # shellcheck disable=SC2034
 MESH_OPENVPN_DEVICE_PREFIX=tap
-# Namenspräfix für weiterzuleitende Dienste
-RELAYABLE_SERVICE_PREFIX="proxy-"
 # Die folgenden Attribute werden dauerhaft (im Flash) gespeichert. Häufige Änderungen sind also eher unerwünscht.
 # Gruende fuer ausgefallene/unintuitive Attribute:
 #   local_relay_port: der lokale Port, der für eine Dienst-Weiterleitung verwendet wird - er sollte über reboots hinweg stabil sein

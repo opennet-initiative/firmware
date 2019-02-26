@@ -127,8 +127,7 @@ get_openvpn_config() {
 	port=$(get_service_value "$service_name" "port")
 	# Falls es sich um einen relay-Dienst handelt, koennen wir uns leider nicht mit uns selbst verbinden,
 	# da die firewall-redirect-Regeln keine "device"-Quelle kennen (anstelle des ueblichen "on_mesh").
-	# Also ermitteln wir den lokal bekannten proxy-Dienst und verwenden dessen Daten, sofern on-usergw installiert ist.
-	if [ "$remote" = "$(get_main_ip)" ] && [ -n "${RELAYABLE_SERVICE_PREFIX:-}" ]; then
+	if [ "$remote" = "$(get_main_ip)" ]; then
 		proxy_service_type="$RELAYABLE_SERVICE_PREFIX$(get_service_value "$service_name" "service")"
 		relayed_service=$(get_services "$proxy_service_type" | filter_services_by_value "local_relay_port" "$port")
 		if [ -n "$relayed_service" ]; then

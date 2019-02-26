@@ -21,6 +21,8 @@ DEFAULT_SERVICE_SORTING=etx
 PERSISTENT_SERVICE_ATTRIBUTES="${PERSISTENT_SERVICE_ATTRIBUTES:-} service scheme host port protocol path uci_dependency file_dependency priority rank offset disabled source"
 LOCAL_BIAS_MODULO=10
 SERVICES_LOG_BASE=/var/log/on-services
+# Namenspräfix für weiterzuleitende Dienste
+RELAYABLE_SERVICE_PREFIX="proxy-"
 UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES=360
 USER_SERVICES_URL=https://service-discovery.opennet-initiative.de/user-services.csv
 
@@ -879,7 +881,6 @@ is_trusted_service_list_outdated() {
 ## @details Diese Dienste führen beispielsweise auf UGW-APs zur Konfiguration von Portweiterleitungen
 ##   ins Internet. Daher sind sie nur aus vertrauenswürdiger Quelle zu akzeptieren (oder manuell).
 update_trusted_services_list() {
-	local source_url="$1"
 	local one_url
 	local line
 	local service_type

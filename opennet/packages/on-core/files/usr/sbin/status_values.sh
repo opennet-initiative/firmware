@@ -234,7 +234,8 @@ sys_watchdog=$(pidof watchdog >/dev/null && echo "1" || echo "0")
 
 . /etc/openwrt_release
 sys_os_type="$DISTRIB_ID"
-sys_os_name="$DISTRIB_CODENAME"
+# the old "DISTRIB_CODENAME" is not available anymore since 18.06
+sys_os_name="$DISTRIB_ID"
 sys_os_rel="$DISTRIB_RELEASE"
 sys_os_ver=$(opkg status base-files | awk '{if (/Version/) printf $2;}')
 sys_os_arc=$(opkg status base-files | awk '{if (/Architecture/) printf $2;}')

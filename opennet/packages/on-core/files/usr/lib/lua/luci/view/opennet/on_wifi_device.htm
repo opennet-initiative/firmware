@@ -11,6 +11,7 @@ You may obtain a copy of the License at
 
 -%>
 <%+header%>
+<% require("luci.i18n") %>
 <h2><a id="content" name="content"><%:Wireless Interface%>: <%= wifi_device_name %></a></h2>
 <%= html_display_message_list(on_hints, "info") %>
 
@@ -34,28 +35,45 @@ You may obtain a copy of the License at
 
 <h2 name="content"><%:Join Network: Wireless Scan%></h2>
 
-<%-
-
-
--%>
-
 <div class="cbi-map">
 <fieldset class="cbi-section">
-<table class="cbi-section-table" style="empty-cells:hide">
-	<%- for _, peer in ipairs(wifi_scan_result) do %>
-		<tr class="cbi-section-table-row">
-			<td class="cbi-value-field" style="width:16px; padding:3px">
-				<abbr title="<%:Signal%>: <%= peer["signal"] %> <%:dB%>"><%= peer["signal"] %></abbr>
-			</td>
-			<td class="cbi-value-field" style="text-align:left; padding:3px">
-				<form method="post" action="<%= REQUEST_URI %>" enctype="multipart/form-data">
-					<input type="hidden" name="new_client_ssid" value="<%= peer["ssid"] %>" />
-					<input class="cbi-button cbi-button-apply" type="submit" value="<%= peer["ssid"] %>" />
-				</form>
-			</td>
+<% if wifi_scan_result == nil then %>
+	<%= html_box(luci.i18n.translate("Failed to scan for networks. Try again later or reboot the device."), "error") %>
+<% elseif #wifi_scan_result > 0 then %>
+	<table class="cbi-section-table" style="empty-cells:hide">
+		<tr>
+			<th class="cbi-section-table-cell"><%:Signal%></th>
+			<th class="cbi-section-table-cell"><%:Name%></th>
 		</tr>
-	<%- end -%>
-</table>
+		<%- for _, peer in ipairs(wifi_scan_result) do %>
+			<tr class="cbi-section-table-row">
+				<%
+					-- use red / orange / green colors based on the signal strength
+					if -83 > peer.signal then
+						quality_style = "background-color:#F70D1A"
+					elseif -77 > peer.signal then
+						quality_style = "background-color:#F88017"
+					else
+						quality_style = "background-color:#00FF00"
+					end
+				%>
+				<td class="cbi-value-field" style="width:8px; padding:3px; text-align:center">
+					<abbr title="<%:Signal%>: <%= peer.signal %> <%:dB%>" style="padding:3px; <%= quality_style %>">
+						<%= peer.signal %>
+					</abbr>
+				</td>
+				<td class="cbi-value-field" style="text-align:left; padding:3px">
+					<form method="post" action="<%= REQUEST_URI %>" enctype="multipart/form-data">
+						<input type="hidden" name="new_client_ssid" value="<%= peer.ssid %>" />
+						<input class="cbi-button cbi-button-apply" type="submit" value="<%= peer.ssid %>" />
+					</form>
+				</td>
+			</tr>
+		<%- end -%>
+	</table>
+<% else %>
+	<%= html_box(luci.i18n.translate("No wireless networks were found"), "info") %>
+<% end %>
 </fieldset>
 </div>
 <div class="cbi-page-actions right">

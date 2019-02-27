@@ -431,36 +431,5 @@ get_ipv4_of_mac() {
 	awk '{ if ($4 == "'"$ip"'") print $1; }' /proc/net/arp | sort | head -1
 }
 
-
-filter_potential_opennet_scan_results() {
-	awk '{
-			if ($1 == "ESSID:") essid=$2;
-			if ($1 == "Signal:") signal=$2;
-			if (($1 == "Encryption:") && ($2 == "none")) print(signal, essid); }' \
-		| sort -rn | sed 's/\"//g' \
-		| grep -v "Telekom_FON" \
-		| grep -v "Vodafone" \
-		| grep -vF "join.opennet-initiative.de" \
-		| grep -iE "(on|opennet)"
-}
-
-
-get_potential_opennet_scan_results_for_device() {
-	local device="$1"
-	local result
-	local delay
-	# wiederhole den Scan mehrmals, falls das Ergebnis leer ist
-	for delay in 1 2 3; do
-		# unter bestimmten Umständen kann der Scan hängenbleiben
-		if result=$(timeout 10 iwinfo "$device" scan); then
-			# keine weitere Wiederholung, falls es eine Ausgabe gab
-			break
-		else
-			sleep "$delay"
-		fi
-	done
-	echo "$result" | filter_potential_opennet_scan_results
-}
-
 # Ende der Doku-Gruppe
 ## @}

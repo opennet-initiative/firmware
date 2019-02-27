@@ -314,14 +314,9 @@ function action_wifi_device(wifi_device_name)
 	-- Den Scan nicht ausfuehren, falls wir gerade das Interface neu konfiguriert haben.
 	-- Dies reduziert die Wahrscheinlichkeit von Problemen durch die invasive Scan-Operation.
 	if not has_configured then
-		for _, line in ipairs(line_split(on_function(
-				"get_potential_opennet_scan_results_for_device", {wifi_device_name}))) do
-			local details = space_split(line)
-			table.insert(page_data["wifi_scan_result"], {signal=details[1], ssid=details[2]})
+		for _, cell in ipairs(get_potential_opennet_scan_results_for_device(wifi_device_name)) do
+			table.insert(page_data["wifi_scan_result"], cell)
 		end
-		-- Warte ein wenig, damit olsrd (er wurde indirekt automatisch neugestartet) Zeit
-		-- hat, die Route wiederaufzubauen, damit das Antwortpaket zugestellt werden kann.
-		luci.sys.exec("sleep 5")
 	end
 	luci.template.render("opennet/on_wifi_device", page_data)
 end

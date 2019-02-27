@@ -199,6 +199,7 @@ function get_potential_opennet_scan_results_for_device(wifi_device_name)
 	if no_output then
 		return nil
 	else
+		table.sort(result, function(a, b) return a.quality > b.quality end)
 		return result
 	end
 end

@@ -45,7 +45,7 @@ run_httpd_debug() {
 	rm -rf /var/luci-*
 	# ignoriere CTRL-C (wir ueberlassen das INT-Signal dem uhttpd-Prozess)
 	trap "" INT
-	local uhttpd_args="-f -h /www -x /cgi-bin -u /ubus -t 60 -T 30 -k 20 -A 1 -n 3 -N 100 -R -p 0.0.0.0:80 -s 0.0.0.0:443 -q"
+	local uhttpd_args="-f -h /www -x /cgi-bin -t 60 -T 30 -k 20 -A 1 -n 3 -N 100 -R -p 0.0.0.0:80 -s 0.0.0.0:443 -q"
 	[ -e /etc/uhttpd.crt ] && uhttpd_args="$uhttpd_args -C /etc/uhttpd.crt -K /etc/uhttpd.key"
 	# shellcheck disable=SC2086
 	uhttpd $uhttpd_args

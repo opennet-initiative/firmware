@@ -310,13 +310,12 @@ function action_wifi_device(wifi_device_name)
 	else
 		page_data["wifi_current_ssids"] = get_wifi_device_ssids(wifi_device_name)
 	end
-	page_data["wifi_scan_result"] = {}
 	-- Den Scan nicht ausfuehren, falls wir gerade das Interface neu konfiguriert haben.
 	-- Dies reduziert die Wahrscheinlichkeit von Problemen durch die invasive Scan-Operation.
 	if not has_configured then
-		for _, cell in ipairs(get_potential_opennet_scan_results_for_device(wifi_device_name)) do
-			table.insert(page_data["wifi_scan_result"], cell)
-		end
+		page_data["wifi_scan_result"] = get_potential_opennet_scan_results_for_device(wifi_device_name)
+	else
+		page_data["wifi_scan_result"] = {}
 	end
 	luci.template.render("opennet/on_wifi_device", page_data)
 end

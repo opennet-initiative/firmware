@@ -174,11 +174,17 @@ function get_wifi_device_ssids(wifi_device_name)
 end
 
 
+--- @fn get_potential_opennet_scan_results_for_device()
+--- @brief Determine the list of suitable neighbouring networks
+--- @param wifi_device_name Name of the target radio device.
+--- @details The result is either 'nil' (scan failure) or a list of cells.
 function get_potential_opennet_scan_results_for_device(wifi_device_name)
 	local iw = luci.sys.wifi.getiwinfo(wifi_device_name)
 	local bss
 	local result = {}
+	local no_output = true
 	for _, bss in ipairs(iw.scanlist or { }) do
+		no_output = false
 		if bss.ssid and not bss.encryption.enabled then
 			local lower_ssid = string.lower(bss.ssid)
 			if not string.find(bss.ssid, "Telekom_FON") and not string.find(bss.ssid, "Vodafone") then
@@ -190,7 +196,11 @@ function get_potential_opennet_scan_results_for_device(wifi_device_name)
 			end
 		end
 	end
-	return result
+	if no_output then
+		return nil
+	else
+		return result
+	end
 end
 
 

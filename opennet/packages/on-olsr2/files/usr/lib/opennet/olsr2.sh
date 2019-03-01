@@ -11,7 +11,7 @@ ROUTING_TABLE_MESH_OLSR2=olsrd2
 OLSR2_POLICY_DEFAULT_PRIORITY=20000
 # interne Zahl fuer die "Domain" in olsr2
 OLSR2_DOMAIN=0
-OLSR2_UPDATE_LOCK_FILE=/var/run/on-cron.lock
+OLSR2_UPDATE_LOCK_FILE=/var/run/on-update-olsr2-interfaces.lock
 
 #declare $MAC_HOSTNAME_MAP and $IPV6_HOSTNAME_MAP
 # in external file because it is easier to update.

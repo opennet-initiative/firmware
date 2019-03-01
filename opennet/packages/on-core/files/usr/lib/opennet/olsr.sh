@@ -8,7 +8,7 @@ OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 SERVICES_FILE=/var/run/services_olsr
 # shellcheck disable=SC2034
 OLSR_HTTP_PORT=8080
-OLSR_UPDATE_LOCK_FILE=/var/run/on-cron.lock
+OLSR_UPDATE_LOCK_FILE=/var/run/on-update-olsr-interfaces.lock
 
 
 # uebertrage die Netzwerke, die derzeit der Zone "opennet" zugeordnet sind, in die olsr-Konfiguration

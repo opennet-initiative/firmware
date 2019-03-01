@@ -11,6 +11,7 @@ ROUTING_TABLE_MESH_OLSR2=olsrd2
 OLSR2_POLICY_DEFAULT_PRIORITY=20000
 # interne Zahl fuer die "Domain" in olsr2
 OLSR2_DOMAIN=0
+OLSR2_UPDATE_LOCK_FILE=/var/run/on-cron.lock
 
 #declare $MAC_HOSTNAME_MAP and $IPV6_HOSTNAME_MAP
 # in external file because it is easier to update.
@@ -121,9 +122,12 @@ update_olsr2_interfaces() {
 			uci_add_list "${uci_prefix}.originator" "$token"
 		done
 	}
-	# routing tables depend on the list of mesh interfaces
-	init_policy_routing_ipv6
-	apply_changes "olsrd2"
+	# prevent recursive trigger chaining
+	if acquire_lock "$OLSR2_UPDATE_LOCK_FILE" 5 5; then
+		# routing tables depend on the list of mesh interfaces
+		init_policy_routing_ipv6
+		apply_changes "olsrd2"
+	fi
 }
 
 

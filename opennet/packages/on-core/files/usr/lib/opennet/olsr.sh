@@ -8,6 +8,7 @@ OLSR_NAMESERVICE_SERVICE_TRIGGER=/usr/sbin/on_nameservice_trigger
 SERVICES_FILE=/var/run/services_olsr
 # shellcheck disable=SC2034
 OLSR_HTTP_PORT=8080
+OLSR_UPDATE_LOCK_FILE=/var/run/on-cron.lock
 
 
 # uebertrage die Netzwerke, die derzeit der Zone "opennet" zugeordnet sind, in die olsr-Konfiguration
@@ -39,9 +40,12 @@ update_olsr_interfaces() {
 		uci set "${uci_prefix}.interface=$current"
 		uci set "${uci_prefix}.ignore=0"
 	done
-	initialize_olsrd_policy_routing
-	update_opennet_zone_masquerading
-	apply_changes olsrd
+	# prevent recursive trigger chaining
+	if acquire_lock "$OLSR_UPDATE_LOCK_FILE" 5 5; then
+		initialize_olsrd_policy_routing
+		update_opennet_zone_masquerading
+		apply_changes olsrd
+	fi
 }
 
 

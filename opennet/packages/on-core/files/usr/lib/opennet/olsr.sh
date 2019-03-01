@@ -45,6 +45,7 @@ update_olsr_interfaces() {
 		initialize_olsrd_policy_routing
 		update_opennet_zone_masquerading
 		apply_changes olsrd
+		rm -f "$OLSR_UPDATE_LOCK_FILE"
 	fi
 }
 

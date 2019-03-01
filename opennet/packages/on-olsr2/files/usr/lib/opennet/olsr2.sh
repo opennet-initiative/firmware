@@ -127,6 +127,7 @@ update_olsr2_interfaces() {
 		# routing tables depend on the list of mesh interfaces
 		init_policy_routing_ipv6
 		apply_changes "olsrd2"
+		rm -f "$OLSR2_UPDATE_LOCK_FILE"
 	fi
 }
 

@@ -100,7 +100,7 @@ update_opennet_zone_masquerading() {
 	# Seit April 2017 (commit e751cde8) verwirft fw3 "INVALID"-Pakete (also beispielsweise
 	# asymmetrische Antworten), sofern Masquerading aktiv ist. Dies schalten wir ab.
 	uci set "${uci_prefix}.masq_allow_invalid=1"
-	apply_changes firewall
+	# the "firewall" settings are applied by our caller ("update_olsr_interfaces")
 }
 
 

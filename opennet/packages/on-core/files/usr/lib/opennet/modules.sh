@@ -4,7 +4,7 @@
 ## @{
 
 # Basis-URL für Opennet-Paketinstallationen
-ON_OPKG_REPOSITORY_URL_PREFIX="http://downloads.opennet-initiative.de/openwrt"
+ON_OPKG_REPOSITORY_URL_PREFIX="https://downloads.opennet-initiative.de/openwrt"
 # temporäre Datei für Installation von Opennet-Paketen
 ON_OPKG_CONF_PATH="${IPKG_INSTROOT:-}/tmp/opkg-opennet.conf"
 # shellcheck disable=SC2034

@@ -23,6 +23,8 @@ CONFIG_KERNEL_COREDUMP=y
 CONFIG_KERNEL_ELF_CORE=y
 CONFIG_BUSYBOX_CONFIG_FEATURE_BUFFERS_USE_MALLOC=y
 CONFIG_BUSYBOX_DEFAULT_FEATURE_INIT_COREDUMPS=y
+# erlaube detaillierte Ueberwachung der System-Nutzung (Load, Prozesse, IRQs, ...) bei Bedarf
+CONFIG_BUSYBOX_CONFIG_NMETER=y
 
 # komprimierter Swap kann bei Bedarf aktiviert werden
 # (dies erhoeht die Last auf dem System)

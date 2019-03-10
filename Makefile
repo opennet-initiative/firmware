@@ -9,6 +9,8 @@ CONFIG_DIR = opennet/config
 # list all files except Makefile, common file and hidden files
 ARCHS = $(shell ls "$(CONFIG_DIR)/" | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
 QUILT_BIN ?= $(shell which quilt)
+PULL_SUBMODULES_BRANCH ?= master
+
 
 .PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs doc quilt-check lint test
 
@@ -102,7 +104,7 @@ pull-submodules: unpatch
 	@# 1. use 'git submodule update --remote --checkout'
 	@# 2. go into every submodules directory, find out which remote branch it relies on, checkout this branch. 
 	git submodule update --remote --checkout
-	git submodule foreach git checkout openwrt-18.06
+	git submodule foreach git checkout "$(PULL_SUBMODULES_BRANCH)"
 	git submodule foreach git pull
 
 # style checks

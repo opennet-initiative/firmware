@@ -86,8 +86,7 @@ update_opennet_zone_masquerading() {
 			uci_add_list "${uci_prefix}.masq_src" "$network_with_prefix"
 		done
 	done
-	# leider ist masq_src im Zweifelfall nicht "leer", sondern enthaelt ein Leerzeichen
-	if uci_get "${uci_prefix}.masq_src" | grep -q '[^ \t]'; then
+	if [ -n "$(uci_get "${uci_prefix}.masq_src")" ]; then
 		# masquerading aktiveren (nur fuer die obigen Quell-Adressen)
 		uci set "${uci_prefix}.masq=1"
 	else
@@ -114,7 +113,7 @@ get_current_addresses_of_network() {
 	{
 		_run_system_network_function "network_get_subnets" "$network"
 		_run_system_network_function "network_get_subnets6" "$network"
-	} | xargs echo
+	} | xargs -r -n 1 echo
 }
 
 

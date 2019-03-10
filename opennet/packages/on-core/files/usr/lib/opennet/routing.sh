@@ -108,7 +108,6 @@ add_network_policy_rule_by_destination() {
 	shift 2
 	local network_with_prefix
 	for network_with_prefix in $(get_current_addresses_of_network "$network"); do
-		[ -z "$network_with_prefix" ] && continue
 		is_ipv4 "$network_with_prefix" && [ "$family" != "inet" ] && continue
 		is_ipv6 "$network_with_prefix" && [ "$family" != "inet6" ] && continue
 		ip -family "$family" rule add to "$network_with_prefix" "$@" || true

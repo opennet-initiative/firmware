@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2019-01-29 01:55+0200\n"
+"PO-Revision-Date: 2019-03-10 17:57+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -170,6 +170,11 @@ msgstr "Experimentelle Unterstützung für OLSRv2 und IPv6"
 
 msgid "FREE"
 msgstr "FREE"
+
+msgid "Failed to scan for networks. Try again later or reboot the device."
+msgstr ""
+"Der Netzwerk-Scan schlug fehl. Versuch es später erneut oder starte das "
+"Gerät neu."
 
 msgid ""
 "Failed to send Certificate Signing Request. You may want to use a manual "
@@ -373,6 +378,9 @@ msgstr "Keine Zusammenfassung verfügbar"
 
 msgid "No response"
 msgstr "Keine Antwort"
+
+msgid "No wireless networks were found"
+msgstr "Es wurden keine Drahtlosnetzwerke gefunden."
 
 msgid ""
 "Nodes in the Opennet can announce various services. These services can be "

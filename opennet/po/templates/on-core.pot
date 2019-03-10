@@ -148,6 +148,9 @@ msgstr ""
 msgid "FREE"
 msgstr ""
 
+msgid "Failed to scan for networks. Try again later or reboot the device."
+msgstr ""
+
 msgid ""
 "Failed to send Certificate Signing Request. You may want to use a manual "
 "approach instead. Sorry!"
@@ -340,6 +343,9 @@ msgid "No report available"
 msgstr ""
 
 msgid "No response"
+msgstr ""
+
+msgid "No wireless networks were found"
 msgstr ""
 
 msgid ""

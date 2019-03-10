@@ -222,20 +222,19 @@ update_ntp_servers() {
 	uci_is_false "$use_ntp" && return
 	preferred_servers=$(if is_function_available "get_mig_tunnel_servers"; then get_mig_tunnel_servers "NTP"; fi)
 	# schreibe die Liste der NTP-Server neu
-	uci_delete system.ntp.server
 	# wir sortieren alphabetisch - Naehe ist uns egal
 	if [ -n "$preferred_servers" ]; then
 		for host in $preferred_servers; do
-			uci_add_list "system.ntp.server" "$host"
+			echo "$host"
 		done
 	else
 		get_services "ntp" | filter_reachable_services | filter_enabled_services | sort | while read -r service; do
 			host=$(get_service_value "$service" "host")
 			port=$(get_service_value "$service" "port")
 			[ -n "$port" ] && [ "$port" != "123" ] && host="$host:$port"
-			uci_add_list "system.ntp.server" "$host"
+			echo "$host"
 		done
-	fi
+	fi | uci_replace_list "system.ntp.server"
 	# Wir wollen keine leere Liste zurücklassen (z.B. bei einem UGW ohne Mesh-Anbindung).
 	# Also alte Werte wiederherstellen, sowie zusaetzlich die default-Server.
 	# Vor allem fuer den https-Download der UGW-Server-Liste benoetigen wir eine korrekte Uhrzeit.

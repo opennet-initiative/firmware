@@ -224,11 +224,9 @@ save_on_modules_list() {
 	[ -z "$(uci_get "on-core.modules")" ] && uci set "on-core.modules=modules"
 	for modname in $(get_on_modules); do
 		if is_package_installed "$modname"; then
-			uci_add_list "on-core.modules.installed" "$modname"
-		else
-			uci_delete_list "on-core.modules.installed" "$modname"
+			echo "$modname"
 		fi
-	done
+	done | uci_replace_list "on-core.modules.installed"
 	apply_changes on-core
 }
 

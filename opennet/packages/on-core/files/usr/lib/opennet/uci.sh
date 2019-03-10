@@ -122,6 +122,28 @@ uci_delete_list() {
 }
 
 
+## @fn uci_replace_list()
+## @brief Replace the items in a list. Wanted items are expected via stdin (one per line).
+## @param uci_path The path of the UCI list.
+## @details This function is idempotent. Thus it takes care to avoid unnecessary changes (e.g. an
+##    existing list being replaced with all of its current members).  This works around UCI's
+##    behaviour of not detecting (and discarding) no-change-operations.  The list is removed if no
+##    items were supplied.  Some processes may rely on the avoidance of unnecessary changes.
+uci_replace_list() {
+	local uci_path="$1"
+	local current_list_items
+	local wanted_list_items
+	current_list_items=$(uci_get_list "$uci_path" | sort)
+	wanted_list_items=$(sort)
+	if [ "$current_list_items" != "$wanted_list_items" ]; then
+		uci_delete "$uci_path"
+		echo "$wanted_list_items" | while read -r item; do
+			uci_add_list "$uci_path" "$item"
+		done
+	fi
+}
+
+
 ## @fn uci_delete()
 ## @brief Lösche ein UCI-Element.
 ## @param uci_path Der UCI-Pfad des Elements.

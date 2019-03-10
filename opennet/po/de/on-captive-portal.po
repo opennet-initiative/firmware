@@ -10,15 +10,19 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:42
 msgid "Client MAC Address"
 msgstr "MAC-Adresse des Geräts"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/model/opennet/on_captive_portal.lua:41
 msgid "Connected clients: %s"
 msgstr "Verbundene Geräte: %s"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:43
 msgid "Connected since"
 msgstr "Verbunden seit"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:28
 msgid ""
 "Disable the Hotspot feature by removing the physical device from the 'free' "
 "network interface."
@@ -26,45 +30,60 @@ msgstr ""
 "Die offener-Zugangspunkt-Funktion kann durch Entfernen des physischen "
 "Netzwerk-Gerät von der Schnittstelle 'free' abgeschaltet werden."
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/model/opennet/on_captive_portal.lua:49
 msgid "Disabled: failed to enable the '%s' network interface."
 msgstr "Inaktiv: die Netzwerkschnittstelle '%s' konnte nicht aktivert werden."
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/model/opennet/on_captive_portal.lua:52
 msgid "Disabled: no network device is assigned to the '%s' zone."
 msgstr "Inaktiv: der '%s'-Zone wurde kein Netzwerk-Gerät zugewiesen."
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/model/opennet/on_captive_portal.lua:47
 msgid "Disabled: the VPN tunnel is not running."
 msgstr "Inaktiv: der VPN-Tunnel ist nicht aufgebaut."
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:44
 msgid "Download (Packets)"
 msgstr "Heruntergeladen (Pakete)"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:34
 msgid "Hotspot Clients"
 msgstr "Hotspot-Nutzende"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:41
 msgid "Local IP Address"
 msgstr "Lokale IP-Adresse"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:40
 msgid "Number"
 msgstr "Nummer"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/controller/opennet/on_captive_portal.lua:23
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:19
 msgid "Public Hotspot"
 msgstr "Offener Zugangspunkt"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:36
 msgid "The hotspot client list is only available locally."
 msgstr "Die Hotspot-Geräteliste ist nur lokal verfügbar."
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:26
 msgid "This requires a working VPN connection:"
 msgstr "Dies erfordert eine funktionierende VPN Verbindung:"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:45
 msgid "Upload (Packets)"
 msgstr "Hochgeladen (Pakete)"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:29
 msgid "Users do not need to authenticate themselves."
 msgstr "Nutzende müssen sich nicht authentifizieren."
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:27
 msgid "VPN Tunnel"
 msgstr "VPN-Tunnel"
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/model/opennet/on_captive_portal.lua:44
 msgid ""
 "Warning: the Captive Portal interface (%s) seems to be a bridge containing "
 "only wifi devices. This setup is known to cause problems: you should add a "
@@ -75,6 +94,7 @@ msgstr ""
 "Konfiguration ist als problematisch bekannt. Du solltest ein nicht-WLAN-"
 "Interface zur Brücke hinzufügen oder die Brücke entfernen."
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/model/opennet/on_captive_portal.lua:29
 msgid ""
 "You may want to <a href=\"%s\">reconfigure</a> the '%s' interface. Currently "
 "a bridge consisting of multiple wifi interfaces (and nothing else) is "
@@ -86,11 +106,13 @@ msgstr ""
 "anderem) konfiguriert. Diese Konfiguration ist als problematisch bekannt. "
 "Bitte füge ein nicht-WLAN-Interface hinzu oder entferne die Brücke."
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:25
 msgid "You may want to run a public hotspot in your area."
 msgstr ""
 "Eventuell möchtest du einen offenen Zugangspunkt für deine Umgebung "
 "betreiben."
 
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/model/opennet/on_captive_portal.lua:24
 msgid ""
 "You need to <a href=\"%s\">attach a physical network device</a> to the '%s' "
 "interface in order to enable the Hotspot feature."

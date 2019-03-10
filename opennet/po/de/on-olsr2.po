@@ -14,29 +14,37 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
 
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:32
 msgid "Currently there are no known routing neighbours."
 msgstr "Derzeit sind keine Routing-Nachbarn bekannt."
 
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:8
 msgid "IP-Address"
 msgstr "IP-Adresse"
 
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:9
 msgid "Interface"
 msgstr "Schnittstelle"
 
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:33
 msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
 msgstr ""
 "Vielleicht möchtest Du Deinen AP mit einem benachbarten AP <a href=\"%s"
 "\">via WLAN verbinden</a>."
 
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:7
 msgid "Name"
 msgstr "Name"
 
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:12
 msgid "Number of routes via this neighbour"
 msgstr "Anzahl der Routen über diesen Nachbarn"
 
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:11
 msgid "Potential incoming rate: estimated by our neighbour"
 msgstr "Potentielle Empfangsbandbreite: geschätzt von unserem Nachbarn"
 
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:10
 msgid "Potential outgoing rate: estimated by this host"
 msgstr "Potentielle Sendegeschwindigkeit: geschätzt von diesem Host"
 

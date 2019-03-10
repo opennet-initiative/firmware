@@ -103,7 +103,7 @@ function get_interfaces_info_table(networks, zoneName)
 	for _, ifname in pairs(ifaces) do
 		local ip4_address = string_join(get_interface_addresses(ifname, "inet"), [[<br/>]])
 		local ip6_address = string_join(get_interface_addresses(ifname, "inet6"), [[<br/>]])
-		local mac_address = string_join(get_interface_addresses(ifname, "link/ether"), [[<br/>]])
+		local mac_address = string_join(get_interface_addresses(ifname, "mac"), [[<br/>]])
 		content = content .. [[<tr><td>]] .. ifname .. [[</td>]]
 			.. [[<td>]] .. (ip4_address or "") .. [[</td>]]
 			.. [[<td>]] .. (ip6_address or "") .. [[</td>]]
@@ -118,10 +118,16 @@ function get_interfaces_info_table(networks, zoneName)
 end
 
 
--- address_type: inet, inet6, link/ether (siehe "ip address")
+-- address_type: inet, inet6, mac
 function get_interface_addresses(network_interface, address_type)
-	local output = luci.sys.exec([[ip address show label ']] .. network_interface .. [[']]
-		.. [[ | awk '{ if ($1 == "]] .. address_type .. [[") print $2; }']])
+	local output
+	if address_type == "mac" then
+		output = luci.sys.exec([[ip -json address show dev ']] .. network_interface .. [[']]
+			.. [[ | jsonfilter -e '@[*].address']])
+	else
+		output = luci.sys.exec([[ip -json address show dev ']] .. network_interface .. [[']]
+			.. [[ | jsonfilter -e '@[*].addr_info[@.family="]] .. address_type .. [["].local']])
+	end
 	return line_split(trim_string(output))
 end
 

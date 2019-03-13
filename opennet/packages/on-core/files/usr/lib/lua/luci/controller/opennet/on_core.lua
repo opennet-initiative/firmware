@@ -15,10 +15,8 @@ module("luci.controller.opennet.on_core", package.seeall)
 
 
 function index()
-	local page
 	local i18n = luci.i18n.translate
 	require("luci.model.opennet.urls")
-	luci.i18n.loadc("on-core")
 
 	-- Umleitung der top-level Node (die Startseite) zur Node "opennet"
 	local page = node()

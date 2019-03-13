@@ -20,7 +20,6 @@ function index()
 	require("luci.model.opennet.funcs")
 	require("luci.model.opennet.urls")
 	local i18n = luci.i18n.translate
-	luci.i18n.loadc("on-openvpn")
 
 	local page = on_entry({"mig_openvpn"}, nil, i18n("VPN Tunnel"), 40, "on-openvpn")
 	page.target = on_alias("mig_openvpn", "zertifikat")

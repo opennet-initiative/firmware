@@ -17,7 +17,6 @@ function index()
 	require("luci.i18n")
 	require("luci.model.opennet.urls")
 	local i18n = luci.i18n.translate
-	luci.i18n.loadc("on-captive-portal")
 
 	require("luci.model.opennet.on_captive_portal")
 	on_entry({"zugangspunkt"}, call("action_on_captive_portal"), i18n("Public Hotspot"), 80, "on_captive_portal").leaf = 1

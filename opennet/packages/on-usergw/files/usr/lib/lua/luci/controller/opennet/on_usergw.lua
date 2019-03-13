@@ -21,7 +21,6 @@ function index()
 	require("luci.model.opennet.funcs")
 	require("luci.model.opennet.urls")
 	local i18n = luci.i18n.translate
-	luci.i18n.loadc("on-usergw")
 
 	require("luci.model.opennet.on_usergw")
 	on_entry({"mesh_tunnel"}, call("action_on_openvpn_mesh_overview"), i18n("Internet Sharing"), 60, "on_usergw")

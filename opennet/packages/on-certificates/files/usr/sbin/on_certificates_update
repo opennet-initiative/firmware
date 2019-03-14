@@ -11,7 +11,7 @@ set -eu
 
 
 CRL_LIST="root.crl vpnugw.crl vpnuser.crl client.crl server.crl"
-BASE_URLS="https://ca.on https://ca.opennet-initiative.de"
+BASE_URLS="https://ca.opennet-initiative.de"
 CA_DIR=/etc/ssl/certs/opennet-initiative.de
 # wir verwenden "cacert" anstelle von "capath", da wir den Opennet-Client-Zertifikaten nicht vertrauen wollen
 CURL_OPTIONS="-q --silent --fail --cacert ${CA_DIR}/opennet-server_bundle.pem"

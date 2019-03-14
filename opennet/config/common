@@ -28,7 +28,6 @@ CONFIG_BUSYBOX_CONFIG_IFCONFIG
 CONFIG_BUSYBOX_CONFIG_IP=n
 # erlaube detaillierte Ueberwachung der System-Nutzung (Load, Prozesse, IRQs, ...) bei Bedarf
 CONFIG_BUSYBOX_CONFIG_NMETER=y
-CONFIG_BUSYBOX_CONFIG_START_STOP_DAEMON=n
 CONFIG_BUSYBOX_CONFIG_WATCH=y
 
 # komprimierter Swap kann bei Bedarf aktiviert werden

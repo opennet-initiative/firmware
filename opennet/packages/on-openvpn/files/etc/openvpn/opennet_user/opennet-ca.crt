@@ -1,36 +1,7 @@
 # Kommentare (alles zwischen "END" und "BEGIN") sollten ignoriert werden:
 #   http://www.rfc-editor.org/internet-drafts/draft-josefsson-pkix-textual-10.txt (Abschnitt 2: General Considerations)
 #
-# CA (2005)
-# C=DE, ST=Mecklenburg-Vorpommern, L=Rostock, O=OpenNet, CN=OpenNet-CA/emailAddress=info@opennet-forum.de
------BEGIN CERTIFICATE-----
-MIIEhTCCA22gAwIBAgIBADANBgkqhkiG9w0BAQQFADCBjTELMAkGA1UEBhMCREUx
-HzAdBgNVBAgTFk1lY2tsZW5idXJnLVZvcnBvbW1lcm4xEDAOBgNVBAcTB1Jvc3Rv
-Y2sxEDAOBgNVBAoTB09wZW5OZXQxEzARBgNVBAMTCk9wZW5OZXQtQ0ExJDAiBgkq
-hkiG9w0BCQEWFWluZm9Ab3Blbm5ldC1mb3J1bS5kZTAeFw0wNTA0MTQxNTI3NDBa
-Fw0xNTA0MTIxNTI3NDBaMIGNMQswCQYDVQQGEwJERTEfMB0GA1UECBMWTWVja2xl
-bmJ1cmctVm9ycG9tbWVybjEQMA4GA1UEBxMHUm9zdG9jazEQMA4GA1UEChMHT3Bl
-bk5ldDETMBEGA1UEAxMKT3Blbk5ldC1DQTEkMCIGCSqGSIb3DQEJARYVaW5mb0Bv
-cGVubmV0LWZvcnVtLmRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
-u1L/yTFYcGQiDe/Bgadlz3eYyz0zZthejP8VRdQIsqXS2Ho2OjMsMxCQOppaST7l
-D1lWliG2YDPCKSCmKWXCY572XgUZ98QqYT1wfjN8hAwDa974y5S/JX7D4cYc3DZC
-h0jIE6gEu72bB3cRSaOA4i5czHRXsWxkfdF19BsPgMMp3wCx/IjNj1KU/AfVATU4
-iBdHe74fzuifeJsCx9UbBOugP3TU3lTNmpORAJIP4wGYwPryP+05k2RcEdOvolKP
-qZzi2hi7aaDe3jb6buzjlQJXZNwDStFjnlqYe4ofddOCEUvQV6aBkLJXe8LXPVjk
-cb4sE9RAqnuTS6pj/B63nwIDAQABo4HtMIHqMB0GA1UdDgQWBBQqhv8v5THmbBIi
-Fb+WnFaBcuu4MjCBugYDVR0jBIGyMIGvgBQqhv8v5THmbBIiFb+WnFaBcuu4MqGB
-k6SBkDCBjTELMAkGA1UEBhMCREUxHzAdBgNVBAgTFk1lY2tsZW5idXJnLVZvcnBv
-bW1lcm4xEDAOBgNVBAcTB1Jvc3RvY2sxEDAOBgNVBAoTB09wZW5OZXQxEzARBgNV
-BAMTCk9wZW5OZXQtQ0ExJDAiBgkqhkiG9w0BCQEWFWluZm9Ab3Blbm5ldC1mb3J1
-bS5kZYIBADAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBAUAA4IBAQAt1uF9TFgx
-39ZZpwIU9WRQk+Nvv8vXM3z6xAOnC1R0lDrmEv7kxJFGBRQXPv8HUD15biZQeQ00
-QIUNMEd8s92v9jdrc52DZ8ivva8eiefUfPJbPJtdsKWpCqQLQIpCmew3deOtfMN8
-ZMq7boUQ1dgniJl8nmUJzJdSgpWY9MMElVBNmJ08++WI7JegNpd+O7j7aL+YXtWc
-+epfbKqCyjQiGjBYQxzgH477UjW/RjnJY3v8wAfXrYGCfZvJYIA8Amwq7SeMVHuA
-eq6+u5HhCtlkmsXogpuw4KW7VFTCQJ9vUiS7MIgw1oohmDXd18yRpw4+4GshzeaE
-RN2EbaPHFlUX
------END CERTIFICATE-----
-# Server-CA (2014)
+# Server-CA (2013)
 # C=DE, ST=Mecklenburg-Vorpommern, O=Opennet Initiative e.V., OU=Opennet CA, CN=opennet-server.ca.on/emailAddress=admin@opennet-initiative.de
 -----BEGIN CERTIFICATE-----
 MIIGZjCCBE6gAwIBAgIJAJ52z3EPcf7xMA0GCSqGSIb3DQEBCwUAMIGuMQswCQYD
@@ -69,7 +40,7 @@ IbJt9VihxA3X+SfnlhG+8okhdy44qJ0Y9aP2hTCPWtXjO8ZVmfVtS8WxdcjcoA29
 ycrJDxyhdB74mhLojjYLwErf2r1FF/nGivasUyzxPsC8WvUB0ADQKwrHt2TDmz/S
 Dzw47o27ziWuGw==
 -----END CERTIFICATE-----
-# Root-CA (2014)
+# Root-CA (2013)
 # C=DE, ST=Mecklenburg-Vorpommern, O=Opennet Initiative e.V., OU=Opennet CA, CN=opennet-root.ca.on/emailAddress=admin@opennet-initiative.de
 -----BEGIN CERTIFICATE-----
 MIIHZjCCBU6gAwIBAgIJANCUEcpFurXxMA0GCSqGSIb3DQEBDQUAMIGuMQswCQYD

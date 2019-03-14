@@ -22,9 +22,9 @@ done
 (
 	timeout 5 nslookup localhost || true
 	echo
-	timeout 5 nslookup ca.on || true
+	timeout 5 nslookup ns.on || true
 	echo
-	timeout 5 nslookup ca.opennet-initiative.de || true
+	timeout 5 nslookup ns.opennet-initiative.de || true
 	echo
 	timeout 5 nslookup fsf.org || true
 ) >dns_tests.log 2>&1

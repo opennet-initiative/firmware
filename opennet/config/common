@@ -19,16 +19,23 @@ CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=128
 CONFIG_KERNEL_CRASHLOG=n
 CONFIG_KERNEL_KALLSYMS=n
 CONFIG_KERNEL_MAGIC_SYSRQ=n
-CONFIG_KERNEL_COREDUMP=y
-CONFIG_KERNEL_ELF_CORE=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_BUFFERS_USE_MALLOC=y
-CONFIG_BUSYBOX_DEFAULT_FEATURE_INIT_COREDUMPS=y
+CONFIG_KERNEL_COREDUMP=n
+CONFIG_KERNEL_ELF_CORE=n
+
+# busybox-Konfiguration
+CONFIG_BUSYBOX_CONFIG_IFCONFIG
+# "ip-tiny" wird separat installiert
+CONFIG_BUSYBOX_CONFIG_IP=n
 # erlaube detaillierte Ueberwachung der System-Nutzung (Load, Prozesse, IRQs, ...) bei Bedarf
 CONFIG_BUSYBOX_CONFIG_NMETER=y
+CONFIG_BUSYBOX_CONFIG_START_STOP_DAEMON=n
+CONFIG_BUSYBOX_CONFIG_WATCH=y
 
 # komprimierter Swap kann bei Bedarf aktiviert werden
 # (dies erhoeht die Last auf dem System)
 CONFIG_PACKAGE_zram-swap=m
+# optional (falls der RAM wirklich knapp wird): komprimiertes tmpfs als /tmp mounten
+#CONFIG_PROCD_ZRAM_TMPFS=y
 
 # unnoetiges optional machen
 CONFIG_PACKAGE_block-mount=m
@@ -98,6 +105,15 @@ CONFIG_PACKAGE_on-monitoring=m
 CONFIG_PACKAGE_on-goodies=m
 CONFIG_PACKAGE_on-olsr2=y
 CONFIG_PACKAGE_on-olsr2-netjsongraph=m
+
+# OpenSSL - möglichst minimaler Feature-Umfang
+CONFIG_OPENSSL_WITH_CMS=n
+CONFIG_OPENSSL_WITH_DEPRECATED=n
+CONFIG_OPENSSL_WITH_DTLS=n
+CONFIG_OPENSSL_WITH_ERROR_MESSAGES=n
+CONFIG_OPENSSL_WITH_NPN=n
+CONFIG_OPENSSL_WITH_SRP=n
+# TODO: CONFIG_OPENSSL_OPTIMIZE_SPEED
 
 # openvpn - moeglichst wenig Features
 CONFIG_OPENVPN_openssl_ENABLE_SERVER=n

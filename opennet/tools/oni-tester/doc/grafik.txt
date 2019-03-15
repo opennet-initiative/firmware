@@ -1,2 +1,0 @@
-Diese Grafik wurde mittels www.draw.io erstellt.
-Um die Datei weiter zu bearbeiten, muss die xml Datei einfach dort importiert werden.

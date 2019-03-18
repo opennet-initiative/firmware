@@ -46,9 +46,6 @@ update_olsr_interfaces() {
 		update_opennet_zone_masquerading
 		apply_changes olsrd
 		rm -f "$OLSR_UPDATE_LOCK_FILE"
-		# The "network" hook may cause another call of this function.  This is acceptable,
-		# since it will only happen once.
-		apply_changes firewall
 	fi
 }
 

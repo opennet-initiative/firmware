@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Periodically reconnect to the user VPN server.
+# This workaround should be configured for daily execution on _very_ busy clients with an OpenVPN
+# version before 2.4.  This helps to keep the dead time of the OpenVPN server low during the
+# frequent key renegotiations.
+# See https://community.openvpn.net/openvpn/ticket/1166
+
+set -eu
+
+if pid=$(pgrep -f openvpn.gw_openvpn); then
+    kill -USR1 "$pid"
+fi

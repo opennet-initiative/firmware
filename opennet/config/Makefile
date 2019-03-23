@@ -3,6 +3,7 @@ CURRENT_CONFIG = $(BUILD_DIR)/.config
 PREVIOUS_CONFIG = $(BUILD_DIR)/.config.oni
 COMMON_CONFIG = common
 GIT_COMMIT_COUNT = $(shell git log --oneline | wc -l)
+GIT_COMMIT_HASH = $(shell git show --format="format:%h" --no-patch)
 # ermittle die Release-Version (falls die aktuelle Version getaggt wurde) - entferne dabei das fuehrende "v" von "v0.5.0"
 GIT_CURRENT_RELEASE_TAG = $(shell git tag -l --points-at HEAD | sed 's/^v//g')
 NEXT_VERSION = $(shell grep "^CONFIG_VERSION_NUMBER=" "$(COMMON_CONFIG)" | cut -f 2 -d '"')
@@ -44,7 +45,7 @@ $(BIGCONFIG) $(SMALLCONFIG):
 	@if [ -n "$(GIT_CURRENT_RELEASE_TAG)" ]; then \
 		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(GIT_CURRENT_RELEASE_TAG)-$(GIT_COMMIT_COUNT)"/' "$(CURRENT_CONFIG)"; \
 	else \
-		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(NEXT_VERSION)-unstable-$(GIT_COMMIT_COUNT)"/' "$(CURRENT_CONFIG)"; \
+		sed -i '/^CONFIG_VERSION_NUMBER=/s/=.*$$/="$(NEXT_VERSION)-unstable-$(GIT_COMMIT_COUNT)-$(GIT_COMMIT_HASH)"/' "$(CURRENT_CONFIG)"; \
 	fi
 	@$(MAKE) check-old-config
 

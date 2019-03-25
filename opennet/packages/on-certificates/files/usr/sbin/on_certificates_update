@@ -12,6 +12,7 @@ set -eu
 
 CRL_LIST="opennet-root.crl opennet-vpn-ugw.crl opennet-vpn-user.crl opennet-client.crl opennet-server.crl"
 BASE_URLS="https://ca.opennet-initiative.de"
+CA_DIR=/etc/ssl/certs/opennet-initiative.de
 CURL_OPTIONS="-q --silent --fail"
 
 

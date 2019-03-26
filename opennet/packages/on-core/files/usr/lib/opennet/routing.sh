@@ -306,7 +306,8 @@ get_traceroute() {
 	#  - erste Zeile auslassen (traceroute-Header)
 	#  - unbekannte Hops ignorieren ("*" oder "???")
 	#  - Einträge durch Kommata separieren
-	timeout 20 traceroute -w 1 -q 1 -n "$target" | awk '
+	#  - unterdrücke Fehler (z.B. keine Route zum Host)
+	timeout 20 traceroute -w 1 -q 1 -n "$target" 2>/dev/null | awk '
 		{ if ((NR > 1) && ($2 != "*") && ($2 != "???") && $2) {
 			if (NR == 2) {
 				printf($2);

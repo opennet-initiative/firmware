@@ -15,6 +15,9 @@ CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=128
 # blocksize=16 reduziert den RAM-Bedarf um ca. 2 MB - dagegen steigt der Flash-Bedarf um 800 kB.
 #CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=16
 
+# optimize kernel for size instead of speed
+CONFIG_KERNEL_CC_OPTIMIZE_FOR_SIZE=y
+
 # Platzreduktion
 CONFIG_KERNEL_CRASHLOG=n
 CONFIG_KERNEL_KALLSYMS=n

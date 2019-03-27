@@ -26,7 +26,7 @@ CONFIG_KERNEL_COREDUMP=n
 CONFIG_KERNEL_ELF_CORE=n
 
 # busybox-Konfiguration
-CONFIG_BUSYBOX_CONFIG_IFCONFIG
+CONFIG_BUSYBOX_CONFIG_IFCONFIG=n
 # "ip-tiny" wird separat installiert
 CONFIG_BUSYBOX_CONFIG_IP=n
 # erlaube detaillierte Ueberwachung der System-Nutzung (Load, Prozesse, IRQs, ...) bei Bedarf

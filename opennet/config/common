@@ -131,7 +131,6 @@ CONFIG_OPENVPN_openssl_ENABLE_SMALL=n
 
 # Kernel-Module (entweder Minimierung oder zusaetzliche Funktionen)
 CONFIG_PACKAGE_kmod-ath5k=m
-CONFIG_PACKAGE_kmod-ath10k=m
 CONFIG_PACKAGE_kmod-button-hotplug=m
 CONFIG_PACKAGE_kmod-gpio-button-hotplug=m
 CONFIG_PACKAGE_kmod-hwmon-vid=m

@@ -483,7 +483,7 @@ function html_box(text, class)
 	local prefix
 	local css_class
 	if class == "error" then
-		prefix = luci.i18n.translate("Error: ")
+		prefix = luci.i18n.translate("Error:") .. " "
 		css_class = "errorbox"
 	else
 		prefix = ""

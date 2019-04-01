@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2019-03-10 17:57+0200\n"
+"PO-Revision-Date: 2019-04-01 02:09+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -245,10 +245,6 @@ msgstr "Weiterleitung aus dem Opennet"
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_portmapping.htm:64
 msgid "Forwarding from the Internet through your OpenVPN tunnel"
 msgstr "Weiterleitung aus dem Internet über den OpenVPN-Tunnel"
-
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:80
-msgid "Free space"
-msgstr "Freier Speicher"
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_vpn_key_generation.htm:60
 msgid "Full Member Name"
@@ -875,6 +871,18 @@ msgstr ""
 "Auf diesem Access-Point läuft die Opennet-Firmware, eine Anpassung von "
 "OpenWrt auf die Bedürfnisse des Opennet Initiative e.V."
 
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:56
+msgid ""
+"This router offers 32 Megabyte RAM (or less). Only firmware versions up to "
+"v0.5.3 are known to run stable on such limited hardware. You should "
+"seriously consider downgrading the firmware to v0.5.3 in order to avoid "
+"frustrating instability issues."
+msgstr ""
+"Dieser Router bietet 32 MB RAM (oder weniger). Nur Firmware-Versionen bis "
+"v0.5.3 funktionieren mit derart begrenzter Hardware stabil. Du solltest "
+"wahrscheinlich die Firmware auf v0.5.3 de-aktualisieren, um frustrierende "
+"Stabilitätsprobleme zu vermeiden."
+
 #: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:548
 msgid "Unknown protocol"
 msgstr "Unbekanntes Protokoll"
@@ -973,10 +981,9 @@ msgstr "hochgeladen oder erzeugt an diesem Tag"
 msgid "use"
 msgstr "übernehmen"
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:66
-msgid "very small memory: only suitable for simple (backbone) installations"
-msgstr ""
-"sehr kleiner Speicher: nur verwendbar für einfache (Backbone) Installationen"
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:69
+msgid "waiting"
+msgstr "wartend"
 
 #~ msgid "Member Name"
 #~ msgstr "Dein Name"

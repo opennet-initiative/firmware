@@ -33,7 +33,7 @@ msgstr ""
 msgid "Announced Upload / Download Speed."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:29
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:28
 msgid "Certificate"
 msgstr ""
 
@@ -45,7 +45,7 @@ msgstr ""
 msgid "Check the <a href=\"%s\">System Log</a> for details."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:31
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:30
 msgid "Connection Log"
 msgstr ""
 
@@ -79,7 +79,7 @@ msgstr ""
 msgid "Gateway-List"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:30
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:29
 msgid "Gateways"
 msgstr ""
 
@@ -183,7 +183,7 @@ msgstr ""
 msgid "VPN Certificate and Internet Access"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:25
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:24
 msgid "VPN Tunnel"
 msgstr ""
 

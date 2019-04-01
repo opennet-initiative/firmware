@@ -76,7 +76,7 @@ msgstr ""
 msgid "Host"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:27
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:26
 msgid "Internet Sharing"
 msgstr ""
 
@@ -84,7 +84,7 @@ msgstr ""
 msgid "Internet Sharing Status"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:30
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:29
 msgid "Key Management"
 msgstr ""
 
@@ -108,7 +108,7 @@ msgstr ""
 msgid "Manually add a Service Relay"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:32
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:31
 msgid "Mesh Connections"
 msgstr ""
 
@@ -172,7 +172,7 @@ msgstr ""
 msgid "Routeable addresses via Mesh VPN"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:34
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:33
 msgid "Service Relay"
 msgstr ""
 

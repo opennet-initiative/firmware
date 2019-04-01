@@ -95,7 +95,7 @@ msgstr "Gateway"
 msgid "Host"
 msgstr "Hostname"
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:27
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:26
 msgid "Internet Sharing"
 msgstr "Internet Freigabe"
 
@@ -103,7 +103,7 @@ msgstr "Internet Freigabe"
 msgid "Internet Sharing Status"
 msgstr "Internet-Freigabe Status"
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:30
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:29
 msgid "Key Management"
 msgstr "Schlüsselverwaltung"
 
@@ -127,7 +127,7 @@ msgstr "Mesh-Gateway manuell hinzufügen"
 msgid "Manually add a Service Relay"
 msgstr "Eine Dienst-Weiterleitung manuell anlegen"
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:32
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:31
 msgid "Mesh Connections"
 msgstr "Mesh-Verbindungen"
 
@@ -197,7 +197,7 @@ msgstr "Weiterleitung externer Dienste für das Opennet-Mesh-Netzwerk"
 msgid "Routeable addresses via Mesh VPN"
 msgstr "Routebare Adressen über das Mesh-VPN"
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:34
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:33
 msgid "Service Relay"
 msgstr "Dienstweiterleitung"
 

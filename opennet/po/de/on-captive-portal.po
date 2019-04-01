@@ -58,7 +58,7 @@ msgstr "Lokale IP-Adresse"
 msgid "Number"
 msgstr "Nummer"
 
-#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/controller/opennet/on_captive_portal.lua:23
+#: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/controller/opennet/on_captive_portal.lua:22
 #: opennet/packages/on-captive-portal/files/usr/lib/lua/luci/view/opennet/on_captive_portal.htm:19
 msgid "Public Hotspot"
 msgstr "Offener Zugangspunkt"

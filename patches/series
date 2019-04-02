@@ -15,3 +15,4 @@ regdb_channels.patch
 olsrd2_update_to_0.15.1.patch
 radar_silent_chirp.patch
 radar_counter.patch
+ag71xx_phy.patch

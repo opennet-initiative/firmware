@@ -1,0 +1,24 @@
+--- /dev/null
++++ b/openwrt/target/linux/ar71xx/patches-4.14/990-ag71xx_phy.patch
+@@ -0,0 +1,21 @@
++--- a/drivers/net/ethernet/atheros/ag71xx/ag71xx_phy.c
+++++ b/drivers/net/ethernet/atheros/ag71xx/ag71xx_phy.c
++@@ -127,12 +127,13 @@
++ 		if (ag->mii_bus->mdio_map[phy_addr] == NULL)
++ 			continue;
++ 
++-		phydev = mdiobus_get_phy(ag->mii_bus, phy_addr);
++-
++ 		DBG("%s: PHY found at %s, uid=%08x\n",
++-		dev_name(dev),
++-		dev_name(&ag->mii_bus->mdio_map[phy_addr]->dev),
++-		(phydev) ? phydev->phy_id : 0);
+++			dev_name(dev),
+++			dev_name(&ag->mii_bus->mdio_map[phy_addr]->dev),
+++			ag->mii_bus->mdio_map[phy_addr]->phy_id);
+++
+++		if (phydev == NULL)
+++			phydev = mdiobus_get_phy(ag->mii_bus, phy_addr);
++ #endif
++ 	}
++ 

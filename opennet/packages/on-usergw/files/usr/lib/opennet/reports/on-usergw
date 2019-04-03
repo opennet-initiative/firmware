@@ -10,7 +10,11 @@ set -eu
 ugw_status status >ugw_status.txt || true
 
 # Verbindungs-Log kopieren
-cp /var/log/mesh-openvpn-connections.log . || true
+if [ -e /var/log/mesh-openvpn-connections.log ]; then
+    cp /var/log/mesh-openvpn-connections.log .
+fi
 
 # Logs der Verbindungsversuche kopieren
-cp /var/log/on-services/mesh_openvpn_* . || true
+if [ -d /var/log/on-services ]; then
+    find /var/log/on-services -type f -name "mesh_openvpn_*" -print0 | xargs -r -0 cp .
+fi

@@ -11,8 +11,10 @@ echo 0 > /sys/module/ath9k_hw/parameters/always_dfs
 
 Credits: Till und Kai-Uwe
 
+Index: on_firmware/openwrt/package/kernel/mac80211/patches/498_always_enable_dfs.patch
+===================================================================
 --- /dev/null
-+++ b/openwrt/package/kernel/mac80211/patches/498_always_enable_dfs.patch
++++ on_firmware/openwrt/package/kernel/mac80211/patches/498_always_enable_dfs.patch
 @@ -0,0 +1,96 @@
 +--- a/drivers/net/wireless/ath/ath9k/channel.c	2016-01-15 13:00:08.000000000 +0100
 ++++ b/drivers/net/wireless/ath/ath9k/channel.c	2017-01-02 00:29:17.023553203 +0100
@@ -24,7 +26,7 @@ Credits: Till und Kai-Uwe
 ++	if (hw->conf.radar_enabled || (ath9k_always_dfs == 1)) {
 ++		ath_dbg(common, DFS, "RADAR detection enabled (" __FILE__ ", l. %d)\n", __LINE__);
 + 		u32 rxfilter;
-+ 
++
 + 		rxfilter = ath9k_hw_getrxfilter(ah);
 +--- a/drivers/net/wireless/ath/ath9k/dfs.c	2016-01-15 13:00:08.000000000 +0100
 ++++ b/drivers/net/wireless/ath/ath9k/dfs.c	2017-01-02 00:30:52.159530173 +0100
@@ -48,14 +50,14 @@ Credits: Till und Kai-Uwe
 ++	ath_dbg(common, DFS, "RADAR detection enabled, radar_detected suppressed (" __FILE__ ", l. %d)\n", __LINE__);
 ++}
 + }
-+ 
++
 + /*
 +--- a/drivers/net/wireless/ath/ath9k/hw.c	2017-01-10 17:13:57.801668156 +0100
 ++++ b/drivers/net/wireless/ath/ath9k/hw.c	2017-01-10 17:15:50.755896588 +0100
 +@@ -37,6 +37,11 @@
 + MODULE_SUPPORTED_DEVICE("Atheros 802.11n WLAN cards");
 + MODULE_LICENSE("Dual BSD/GPL");
-+ 
++
 ++static int ath9k_hw_always_dfs = 0;
 ++module_param_named(always_dfs, ath9k_hw_always_dfs, int, 0644);
 ++MODULE_PARM_DESC(always_dfs, "Enable DFS messages in all modes");
@@ -67,7 +69,7 @@ Credits: Till und Kai-Uwe
 +@@ -2071,7 +2076,8 @@
 + 	if (AR_SREV_9565(ah) && common->bt_ant_diversity)
 + 		REG_SET_BIT(ah, AR_BTCOEX_WL_LNADIV, AR_BTCOEX_WL_LNADIV_FORCE_ON);
-+ 
++
 +-	if (ah->hw->conf.radar_enabled) {
 ++	if (ah->hw->conf.radar_enabled || (ath9k_hw_always_dfs == 1)) {
 ++		ath_dbg(common, DFS, "RADAR detection enabled (" __FILE__ ", l. %d)\n", __LINE__);
@@ -78,22 +80,22 @@ Credits: Till und Kai-Uwe
 ++++ b/drivers/net/wireless/ath/ath9k/recv.c	2017-01-02 00:32:21.347509158 +0100
 +@@ -384,8 +384,10 @@
 + 		| ATH9K_RX_FILTER_MCAST;
-+ 
++
 + 	/* if operating on a DFS channel, enable radar pulse detection */
 +-	if (sc->hw->conf.radar_enabled)
 ++	if (sc->hw->conf.radar_enabled || (ath9k_always_dfs == 1)) {
 ++		ath_dbg(common, DFS, "RADAR detection enabled (" __FILE__ ", l. %d)\n", __LINE__);
 + 		rfilt |= ATH9K_RX_FILTER_PHYRADAR | ATH9K_RX_FILTER_PHYERR;
 ++	}
-+ 
++
 + 	spin_lock_bh(&sc->chan_lock);
-+ 
++
 +--- a/drivers/net/wireless/ath/ath9k/init.c	2017-01-06 22:11:58.251673645 +0100
 ++++ b/drivers/net/wireless/ath/ath9k/init.c	2017-01-06 22:36:34.600625015 +0100
 +@@ -45,6 +45,10 @@
 + module_param_named(nohwcrypt, ath9k_modparam_nohwcrypt, int, 0444);
 + MODULE_PARM_DESC(nohwcrypt, "Disable hardware encryption");
-+ 
++
 ++int ath9k_always_dfs = 0;
 ++module_param_named(always_dfs, ath9k_always_dfs, int, 0644);
 ++MODULE_PARM_DESC(always_dfs, "Enforce RADAR detection on all channels, disrupt DFS");
@@ -108,6 +110,5 @@ Credits: Till und Kai-Uwe
 + extern bool is_ath9k_unloaded;
 + extern int ath9k_use_chanctx;
 ++extern int ath9k_always_dfs;
-+ 
++
 + /*************************/
-+ /* Descriptor Management */

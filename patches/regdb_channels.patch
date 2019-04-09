@@ -1,8 +1,10 @@
 Entfernt Kanäle > 140 aus regdb.txt bzw. Liste der erlaubten Kanäle (Ticket #202). 
 
---- a/openwrt/package/firmware/wireless-regdb/patches/500-world-regd-5GHz.patch
-+++ b/openwrt/package/firmware/wireless-regdb/patches/500-world-regd-5GHz.patch
-@@ -14,3 +14,15 @@
+Index: on_firmware/openwrt/package/firmware/wireless-regdb/patches/500-world-regd-5GHz.patch
+===================================================================
+--- on_firmware.orig/openwrt/package/firmware/wireless-regdb/patches/500-world-regd-5GHz.patch
++++ on_firmware/openwrt/package/firmware/wireless-regdb/patches/500-world-regd-5GHz.patch
+@@ -14,3 +14,15 @@ Signed-off-by: Felix Fietkau <nbd@nbd.na
   	# Channel 52 - 64
   	(5250 - 5330 @ 80), (20), NO-IR, DFS, AUTO-BW
   	# Channel 100 - 144
@@ -15,6 +17,6 @@ Entfernt Kanäle > 140 aus regdb.txt bzw. Liste der erlaubten Kanäle (Ticket #2
 + 	# 60 GHz band channels 1-4 (ETSI EN 302 567)
 +-	(57000 - 66000 @ 2160), (40)
 ++	#(57000 - 66000 @ 2160), (40)
-+ 
++
 + country DK: DFS-ETSI
 + 	(2402 - 2482 @ 40), (20)

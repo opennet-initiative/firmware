@@ -1,7 +1,9 @@
 Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
---- a/routing/olsrd/Makefile
-+++ b/routing/olsrd/Makefile
-@@ -105,6 +105,18 @@ define Package/olsrd-mod-nameservice
+Index: on_firmware/routing/olsrd/Makefile
+===================================================================
+--- on_firmware.orig/routing/olsrd/Makefile
++++ on_firmware/routing/olsrd/Makefile
+@@ -104,6 +104,18 @@ define Package/olsrd-mod-nameservice
    TITLE:=Lightweight hostname resolver plugin
  endef
  
@@ -20,7 +22,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  define Package/olsrd-mod-p2pd
    $(call Package/olsrd/template)
    DEPENDS:=olsrd
-@@ -172,7 +184,7 @@ MAKE_FLAGS+= \
+@@ -170,7 +182,7 @@ MAKE_FLAGS+= \
  	DESTDIR="$(PKG_INSTALL_DIR)" \
  	STRIP="true" \
  	INSTALL_LIB="true" \
@@ -29,7 +31,7 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  
  define Build/Compile
  	$(call Build/Compile/Default,all)
-@@ -239,6 +251,16 @@ define Package/olsrd-mod-nameservice/ins
+@@ -242,6 +254,16 @@ define Package/olsrd-mod-nameservice/ins
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/nameservice/olsrd_nameservice.so.* $(1)/usr/lib/
  endef
  
@@ -46,8 +48,8 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  define Package/olsrd-mod-p2pd/install
  	$(INSTALL_DIR) $(1)/usr/lib
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/p2pd/olsrd_p2pd.so.* $(1)/usr/lib/
-@@ -297,6 +319,8 @@ $(eval $(call BuildPackage,olsrd-mod-htt
- $(eval $(call BuildPackage,olsrd-mod-jsoninfo))
+@@ -301,6 +323,8 @@ $(eval $(call BuildPackage,olsrd-mod-jso
+ $(eval $(call BuildPackage,olsrd-mod-netjson))
  $(eval $(call BuildPackage,olsrd-mod-mdns))
  $(eval $(call BuildPackage,olsrd-mod-nameservice))
 +$(eval $(call BuildPackage,olsrd-mod-ondataservice))
@@ -55,8 +57,10 @@ Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
  $(eval $(call BuildPackage,olsrd-mod-p2pd))
  $(eval $(call BuildPackage,olsrd-mod-pgraph))
  $(eval $(call BuildPackage,olsrd-mod-pud))
+Index: on_firmware/routing/olsrd/patches/023-ondataservice.patch
+===================================================================
 --- /dev/null
-+++ b/routing/olsrd/patches/023-ondataservice.patch
++++ on_firmware/routing/olsrd/patches/023-ondataservice.patch
 @@ -0,0 +1,2897 @@
 +diff --git a/Makefile b/Makefile
 +index 8ce6dc5..cf3b410 100644

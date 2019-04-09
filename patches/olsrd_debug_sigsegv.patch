@@ -6,8 +6,10 @@ Enable core dump on SIGSEGV. How to use:
 
 and wait for core dump of olsrd in /tmp/olsrd.core (920 KB) or use kill -11 on olsrd pid to test.
 
+Index: on_firmware/routing/olsrd/patches/024-debug-sigsegv.patch
+===================================================================
 --- /dev/null
-+++ b/routing/olsrd/patches/024-debug-sigsegv.patch
++++ on_firmware/routing/olsrd/patches/024-debug-sigsegv.patch
 @@ -0,0 +1,11 @@
 +--- a/src/main.c
 ++++ b/src/main.c

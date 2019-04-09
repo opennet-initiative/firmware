@@ -1,6 +1,8 @@
 Switch to newer v0.15.1 release of olsrd2
---- a/routing/oonf-olsrd2/Makefile
-+++ b/routing/oonf-olsrd2/Makefile
+Index: on_firmware/routing/oonf-olsrd2/Makefile
+===================================================================
+--- on_firmware.orig/routing/oonf-olsrd2/Makefile
++++ on_firmware/routing/oonf-olsrd2/Makefile
 @@ -1,8 +1,8 @@
  include $(TOPDIR)/rules.mk
  

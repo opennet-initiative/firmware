@@ -4,14 +4,16 @@ This breaks a few special characters in some plugins:
 * dh: '\1' (breaks mountpoint parsing)
 * if: '\t' (breaks removal of tab characters - probably irrelevant)
 * memory: '\n' (breaks label string with linebreak - probably ignored by 'echo' anyway)
+Index: on_firmware/packages/admin/muninlite/patches/300-fix-munin-node-assembly.patch
+===================================================================
 --- /dev/null
-+++ b/packages/admin/muninlite/patches/300-fix-munin-node-assembly.patch
++++ on_firmware/packages/admin/muninlite/patches/300-fix-munin-node-assembly.patch
 @@ -0,0 +1,34 @@
 +--- a/Makefile
 ++++ b/Makefile
 +@@ -4,20 +4,21 @@
 + #PLUGINS=cpu if_ if_err_ load memory processes netstat uptime interrupts irqstats
-+ 
++
 + munin-node: plugins/* munin-node.conf
 +-	@VERSION=$$(cat VERSION); \
 +-	CONF=$$(grep -v '^#' munin-node.conf); \
@@ -40,4 +42,4 @@ This breaks a few special characters in some plugins:
 ++	    s/\@\@PLSTR\@\@/$$ENV{"PLSTR"}/;' \
 + 	  munin-node.in > munin-node
 + 	@chmod +x munin-node
-+ 
++

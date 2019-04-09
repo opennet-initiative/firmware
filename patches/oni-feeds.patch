@@ -1,6 +1,8 @@
 Paket-Quellen fuer die Opennet-Firmware (fuer den Bau erforderlich)
+Index: on_firmware/openwrt/feeds.conf
+===================================================================
 --- /dev/null
-+++ b/openwrt/feeds.conf
++++ on_firmware/openwrt/feeds.conf
 @@ -0,0 +1,5 @@
 +src-link	opennet		../../opennet/packages
 +src-link	packages	../../packages

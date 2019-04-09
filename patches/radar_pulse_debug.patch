@@ -14,8 +14,10 @@ echo 0x10010400 > /sys/kernel/debug/ieee80211/phy0/ath9k/debug (alle Meldungen, 
 
 Autor: Till
 
+Index: on_firmware/openwrt/package/kernel/mac80211/patches/499_radar_pulse_debug.patch
+===================================================================
 --- /dev/null
-+++ b/openwrt/package/kernel/mac80211/patches/499_radar_pulse_debug.patch
++++ on_firmware/openwrt/package/kernel/mac80211/patches/499_radar_pulse_debug.patch
 @@ -0,0 +1,37 @@
 +--- a/drivers/net/wireless/ath/ath9k/dfs.c
 ++++ b/drivers/net/wireless/ath/ath9k/dfs.c
@@ -31,7 +33,7 @@ Autor: Till
 +@@ -345,7 +345,7 @@
 + 		pe.chirp = false;
 + 	}
-+ 
++
 +-	ath_dbg(common, DFS,
 ++	ath_dbg(common, DFS_PULSE,
 + 		"ath9k_dfs_process_phyerr: type=%d, freq=%d, ts=%llu, "
@@ -54,4 +56,3 @@ Autor: Till
 ++	ATH_DBG_DFS_PULSE	= 0x10000000,
 + 	ATH_DBG_ANY		= 0xffffffff
 + };
-+ 

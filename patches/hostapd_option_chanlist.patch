@@ -2,8 +2,10 @@ Allow optional 'chanlist' restriction for hostapd.
 
 Signed-off-by: Lars Kruse <devel@sumpfralle.de>
 
---- a/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-+++ b/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+Index: on_firmware/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+===================================================================
+--- on_firmware.orig/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
++++ on_firmware/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
 @@ -24,6 +24,7 @@ drv_mac80211_init_device_config() {
  	config_add_string path phy 'macaddr:macaddr'
  	config_add_string hwmode
@@ -12,7 +14,7 @@ Signed-off-by: Lars Kruse <devel@sumpfralle.de>
  	config_add_int rxantenna txantenna antenna_gain txpower distance
  	config_add_boolean noscan ht_coex
  	config_add_array ht_capab
-@@ -298,6 +299,10 @@ mac80211_hostapd_setup_base() {
+@@ -303,6 +304,10 @@ mac80211_hostapd_setup_base() {
  		[ -n "$vht_capab" ] && append base_cfg "vht_capab=$vht_capab" "$N"
  	fi
  

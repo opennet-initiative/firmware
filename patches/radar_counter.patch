@@ -1,12 +1,14 @@
+Index: on_firmware/openwrt/package/kernel/mac80211/patches/496_radar_counter.patch
+===================================================================
 --- /dev/null
-+++ b/openwrt/package/kernel/mac80211/patches/496_radar_counter.patch
++++ on_firmware/openwrt/package/kernel/mac80211/patches/496_radar_counter.patch
 @@ -0,0 +1,23 @@
 +--- a/drivers/net/wireless/ath/dfs_pattern_detector.c.orig
 ++++ b/drivers/net/wireless/ath/dfs_pattern_detector.c
 +@@ -131,6 +131,8 @@
 + 	&jp_radar_types,
 + };
-+ 
++
 ++static int radar_found_counter = 0;
 ++
 + /**

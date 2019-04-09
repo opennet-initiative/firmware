@@ -1,8 +1,10 @@
 the swap plugin should return "U" if no value was found
 
 The value can be missing if the respective kernel module is not available.
+Index: on_firmware/packages/admin/muninlite/patches/310-fix-swap-output.patch
+===================================================================
 --- /dev/null
-+++ b/packages/admin/muninlite/patches/310-fix-swap-output.patch
++++ on_firmware/packages/admin/muninlite/patches/310-fix-swap-output.patch
 @@ -0,0 +1,13 @@
 +--- a/plugins/swap
 ++++ b/plugins/swap

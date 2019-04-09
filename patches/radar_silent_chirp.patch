@@ -2,15 +2,17 @@ Deactivate messages "not enough packets for chirp".
 
 Author: Kai-Uwe
 
+Index: on_firmware/openwrt/package/kernel/mac80211/patches/495_silent_chirp.patch
+===================================================================
 --- /dev/null
-+++ b/openwrt/package/kernel/mac80211/patches/495_silent_chirp.patch
++++ on_firmware/openwrt/package/kernel/mac80211/patches/495_silent_chirp.patch
 @@ -0,0 +1,68 @@
 +--- a/drivers/net/wireless/ath/ath9k/dfs.c
 ++++ b/drivers/net/wireless/ath/ath9k/dfs.c
 +@@ -112,16 +112,16 @@
 + 		if (num_fft_packets == 0)
 + 			return false;
-+ 
++
 +-		ath_dbg(common, DFS, "HT40: datalen=%d, num_fft_packets=%d\n",
 +-			datalen, num_fft_packets);
 ++		//ath_dbg(common, DFS, "HT40: datalen=%d, num_fft_packets=%d\n",
@@ -49,11 +51,11 @@ Author: Kai-Uwe
 +-		max_bin[0], max_bin[1], max_bin[2], max_bin[3]);
 ++	//ath_dbg(common, DFS, "bin_max = [%d, %d, %d, %d]\n",
 ++	//	max_bin[0], max_bin[1], max_bin[2], max_bin[3]);
-+ 
++
 + 	/* Check for chirp attributes within specs
 + 	 * a) delta of adjacent max_bins is within range
 +@@ -160,16 +160,16 @@
-+ 
++
 + 		/* ensure gradient is within valid range */
 + 		if (abs(delta) < BIN_DELTA_MIN || abs(delta) > BIN_DELTA_MAX) {
 +-			ath_dbg(common, DFS, "CHIRP: invalid delta %d "

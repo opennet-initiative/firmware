@@ -14,3 +14,6 @@
 	path = openwrt
 	url = https://git.openwrt.org/openwrt/openwrt.git
         branch = master
+[submodule "packages-gluon"]
+	path = packages-gluon
+	url = https://github.com/freifunk-gluon/packages.git

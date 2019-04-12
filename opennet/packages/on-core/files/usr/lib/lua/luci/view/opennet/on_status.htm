@@ -56,6 +56,10 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 		local message = luci.i18n.translate("This router offers 32 Megabyte RAM (or less). Only firmware versions up to v0.5.3 are known to run stable on such limited hardware. You should seriously consider downgrading the firmware to v0.5.3 in order to avoid frustrating instability issues.")
 		table.insert(on_hints, message)
 	end
+
+	if on_bool_function("check_new_on_firmware_version_new") then
+		local new_firmware = luci.i18n.translatef('Neue Firmware vorhanden: <a href=https://downloads.opennet-initiative.de/openwrt/testing/latest/targets/%s/>%s</a>', on_function("get_openwrt_arch"), on_function("get_on_firmware_version_new"))
+	end
 %>
 
 <h2><a id="content" name="content"><%=get_firmware_title() %></a></h2>

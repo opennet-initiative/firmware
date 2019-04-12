@@ -30,6 +30,7 @@ help:
 	$(info - patch			die opennet-Patches via quilt anwenden (siehe ./patches/*.patch))
 	$(info - unpatch		die opennet-Patches zurücknehmen (empfehlenswert vor jedem "git pull"))
 	$(info - pull-submodules	eingebundene git-submodules via 'git pull' aktualisieren)
+	$(info - commit-submodules	aktualisierte git-submodules committen)
 
 list-archs:
 	$(info $(ARCHS))
@@ -104,6 +105,12 @@ pull-submodules: unpatch
 	git submodule update --remote --checkout
 	git submodule foreach git checkout "$(PULL_SUBMODULES_BRANCH)"
 	git submodule foreach git pull
+
+commit-submodules: unpatch
+	detailed_diff=$$(git diff --submodule=short | awk '{ if ($$1 == "---") module=substr($$2, 3); if ($$1 == "-Subproject") old_commit=$$3; if ($$1 == "+Subproject") {new_commit=$$3; print(module":"); system("cd "module"; git --no-pager log --oneline "old_commit".."new_commit); print("")}}'); \
+		modules=$$(git submodule status | awk '{print $$2}'); \
+		[ -n "$$modules" ] \
+		&& git commit --edit -m "Update upstream sources" -m "$$detailed_diff" -- $$modules
 
 # style checks
 lint:

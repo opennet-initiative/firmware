@@ -353,33 +353,40 @@ get_on_firmware_version() {
 	awk '{if (/^Version:/) print $2;}' <"$status_file"
 }
 
+
 ## @fn get_on_firmware_version_new()
 get_on_firmware_version_new() {
 	trap 'error_trap get_on_firmware_version_new "$*"' EXIT
 
-	local config_seed=$(https_request_opennet https://downloads.opennet-initiative.de/openwrt/testing/latest/targets/ar71xx/generic/config.seed)
+	local config_seed
+	config_seed=$(https_request_opennet https://downloads.opennet-initiative.de/openwrt/testing/latest/targets/ar71xx/generic/config.seed)
 	echo "$config_seed" | grep ^CONFIG_VERSION_NUMBER | sed 's/CONFIG_VERSION_NUMBER="\(.*\)".*/\1/'
 }
+
 
 ## @fn check_new_on_firmware_version_new()
 check_new_on_firmware_version_new() {
 	trap 'error_trap check_new_on_firmware_version_new "$*"' EXIT
 
-	local old_version=$(get_on_firmware_version | cut -d'-' -f3)
-	local new_version=$(get_on_firmware_version_new | cut -d'-' -f3)
+	local old_version
+	local new_version
+	old_version=$(get_on_firmware_version | cut -d '-' -f 3)
+	new_version=$(get_on_firmware_version_new | cut -d '-' -f 3)
 
 	if [ "$old_version" != "$new_version" ]; then
-		trap "" EXIT && return 0
+		return 0
+	else
+		trap "" EXIT && return 1
 	fi
-
-	trap "" EXIT && return 1
 }
+
 
 get_openwrt_arch() {
 	trap 'error_trap get_openwrt_arch "$*"' EXIT
 
-	echo $(. /etc/openwrt_release; echo "$DISTRIB_TARGET")
+	(. /etc/openwrt_release; echo "$DISTRIB_TARGET")
 }
+
 
 ## @fn get_on_ip()
 ## @param on_id die ID des AP - z.B. "1.96" oder "2.54"

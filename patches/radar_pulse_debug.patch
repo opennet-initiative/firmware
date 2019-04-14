@@ -14,10 +14,10 @@ echo 0x10010400 > /sys/kernel/debug/ieee80211/phy0/ath9k/debug (alle Meldungen, 
 
 Autor: Till
 
-Index: on_firmware/openwrt/package/kernel/mac80211/patches/499_radar_pulse_debug.patch
+Index: on_firmware/openwrt/package/kernel/mac80211/patches/ath/499_radar_pulse_debug.patch
 ===================================================================
 --- /dev/null
-+++ on_firmware/openwrt/package/kernel/mac80211/patches/499_radar_pulse_debug.patch
++++ on_firmware/openwrt/package/kernel/mac80211/patches/ath/499_radar_pulse_debug.patch
 @@ -0,0 +1,37 @@
 +--- a/drivers/net/wireless/ath/ath9k/dfs.c
 ++++ b/drivers/net/wireless/ath/ath9k/dfs.c

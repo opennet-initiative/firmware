@@ -1,7 +1,7 @@
-Index: on_firmware/openwrt/package/kernel/mac80211/patches/497_ath_PRI_TOLERANCE.patch
+Index: on_firmware/openwrt/package/kernel/mac80211/patches/ath/497_ath_PRI_TOLERANCE.patch
 ===================================================================
 --- /dev/null
-+++ on_firmware/openwrt/package/kernel/mac80211/patches/497_ath_PRI_TOLERANCE.patch
++++ on_firmware/openwrt/package/kernel/mac80211/patches/ath/497_ath_PRI_TOLERANCE.patch
 @@ -0,0 +1,11 @@
 +--- a/drivers/net/wireless/ath/dfs_pattern_detector.h.orig 2016-04-02 20:53:19.001867244 +0200
 ++++ b/drivers/net/wireless/ath/dfs_pattern_detector.h 2016-04-02 20:53:36.254148861 +0200

@@ -275,10 +275,17 @@ get_olsr2_neighbours() {
 
 
 debug_ping_all_olsr2_hosts() {
-	local a
-	ip -6 route show table olsrd2 | awk '{print $1}' | while read -r a; do
-		ping6 -w 1 -c 1 "$a" >/dev/null 2>&1 && printf 'OK\t%s\n' "$a" || printf 'FAIL\t%s\n' "$a"
-	done
+	local ipv6
+	local status
+	ip -6 route show table olsrd2 | awk '{print $1}' | while read -r ipv6; do
+		local
+		if ping6 -w 1 -c 1 "$ipv6" >/dev/null 2>&1; then
+			status="OK"
+		else
+			status="FAIL"
+		fi
+		printf '%-8s%-48s%-48s\n' "$status" "--${ipv6}--" "__${ipv6}__"
+	done | shorten_ipv6_address_in_stream | debug_translate_macs "__" | sed 's/__//g; s/--//g'
 }
 
 

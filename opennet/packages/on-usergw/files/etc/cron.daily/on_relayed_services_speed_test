@@ -9,7 +9,13 @@ is_on_module_installed_and_enabled "on-usergw" || exit 0
 for service_name in $(get_services "${RELAYABLE_SERVICE_PREFIX}gw" \
 		| filter_reachable_services \
 		| filter_enabled_services); do
-	update_relayed_server_speed_estimation "$service_name"
+	# Aktualisiere die Geschwindigkeit nur, falls noch kein Wert erfasst wurde oder an jedem
+	# 13. Tag im Monat.  Häufige Aktualisierungen erzeugen viele neue
+	# olsrd-nameservice-Einträge, welche leider (by design) nicht automatisch von olsrd
+	# beräumt werden.  Somit aktualisieren wir den Wert nur selten.
+	if [ -z "$(get_service_value "$service_name" "wan_speed_timestamp")" ] || [ "$(date +%d)" = "13" ]; then
+		update_relayed_server_speed_estimation "$service_name"
+	fi
 done
 # veröffentliche die neuen Werte
 apply_changes "olsrd"

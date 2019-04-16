@@ -57,8 +57,8 @@ convert_mac_to_eui64_address() {
 	local mac_offset="${3:-0}"
 	local combined_mac
 	combined_mac=$(echo "$mac" | cut -c 1-2,4-5,7-8,10-11,13-14,16-17)
-	# MAC-Offset hinzuaddieren
-	combined_mac=$(printf "%012x" "$(( 0x$combined_mac + mac_offset ))")
+	# MAC-Offset mit XOR verknüpfen
+	combined_mac=$(printf "%012x" "$(( 0x$combined_mac ^ mac_offset ))")
 	printf "%s:%s:%sff:fe%s:%s" "$prefix" "${combined_mac:0:4}" "${combined_mac:4:2}" \
 		"${combined_mac:6:2}" "${combined_mac:8:4}" | shorten_ipv6_address
 }

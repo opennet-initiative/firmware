@@ -63,9 +63,9 @@ You may obtain a copy of the License at
 		if (!target_table) return;
 		// Tabellenzeilen erzeugen
 		for (var index = 0; index < services.length; index++) {
-			result += String.format('<tr id="%s" class="cbi-section-table-row cbi-opennet-gateways" disabled="n">', services[index]);
-			result += String.format('<td class="cbi-value-field"><div id="cbi-opennet-gateways-count">%d</div></td>', index + 1);
-			result += '</tr>';
+			result += String.format('<div id="%s" class="tr cbi-rowstyle-1 cbi-opennet-gateways" disabled="n">', services[index]);
+			result += String.format('<div class="td col-1 left"><div id="cbi-opennet-gateways-count">%d</div></div>', index + 1);
+			result += '</div>';
 			service_dict[services[index]] = index;
 		}
 		target_table.innerHTML += result;
@@ -137,21 +137,21 @@ You may obtain a copy of the License at
 			best_gateway = gateway.id;
 			update_gateway_change_indicator();
 		}
-		result += String.format('<td class="cbi-value-field"><div id="cbi-opennet-gateways-active" active="%s">&nbsp;</div>', active);
-		result += String.format('<td><strong>%s</strong></td>', remote);
+		result += String.format('<div class="col-1 left td"><div id="cbi-opennet-gateways-active" active="%s">&nbsp;</div></div>', active);
+		result += String.format('<div class="col-1 left td"><strong>%s</strong></div>', remote);
 		if (gateway.public_ugw_server) {
-			result += String.format('<td>%s</td>', gateway.public_ugw_server.split(".")[0]);
+			result += String.format('<div class="col-1 left td">%s</div>', gateway.public_ugw_server.split(".")[0]);
 		} else {
-			result += "</td><td>"
+			result += '<div class="col-1 left td"></div>';
 		}
 		if (unreachable) {
 			// unerreichbare Knoten werden als solche markiert
-			result += '<td class="cbi-value-field"><%:unreachable%></td>';
+			result += '<div class="col-1 left td"><%:unreachable%></div>';
 		} else if (sorting == "manual") {
 			// im manuellen Modus ist die Entfernung egal - also ignorieren wir den Offset
-			result += String.format('<td class="cbi-value-field">%.2f</td>', gateway.distance);
+			result += String.format('<div class="col-1 left td">%.2f</div>', gateway.distance);
 		} else {
-			result += '<td class="cbi-value-field">';
+			result += '<div class="col-1 left td">';
 			if (gateway.offset != 0) {
 				result += String.format('(%d)<input class="cbi-button cbi-button-clear cbi-button-small" type="submit" value="%s" title="<%:reset offset%>" name="reset_service_offset" />&nbsp;', gateway.offset, gateway.id, gateway);
 			}
@@ -167,17 +167,17 @@ You may obtain a copy of the License at
 			} else {
 				result += String.format('%.2f', distance + gateway.offset);
 			}
-			result += "</a></td>";
+			result += "</a></div>";
 		}
-		result += '<td>';
+		result += '<div class="col-1 left td">';
 		if (gateway.wan_speed_upload || gateway.wan_speed_download) {
 			speed = String.format('%s kbps / %s kbps', gateway.wan_speed_upload || "?", gateway.wan_speed_download || "?");
 			speed_abbr = String.format('<%:upload to Internet %s kbit/s; download from Internet %s kbit/s%>', gateway.wan_speed_upload || "?", gateway.wan_speed_download || "?");
 			result += String.format('<div class="vpn-wan-speed" name="speed" id="cbi-opennet-gateways-speed" ><abbr title="%s">%s</abbr></div>', speed_abbr, speed);
 		}
-		result += '</td>';
-		result += String.format('<td class="cbi-value-field" title="<%:tested %d minutes ago%>"><div id="cbi-opennet-gateways-status" status="%s">&nbsp;</div></td>', gateway.age, uci_to_yn(gateway.status));
-		result += '<td class="cbi-value-field"><div id="cbi-opennet-gateways-actions">';
+		result += '</div>';
+		result += String.format('<div class="col-1 left td" title="<%:tested %d minutes ago%>"><div id="cbi-opennet-gateways-status" status="%s">&nbsp;</div></div>', gateway.age, uci_to_yn(gateway.status));
+		result += '<div class="col-1 left td"><div id="cbi-opennet-gateways-actions">';
 		if (gateway.disabled) {
 			result += String.format('<input class="cbi-button cbi-button-enable cbi-button-small" type="submit" value="%s" title="<%:enable%>" name="enable_service" />', gateway.id);
 		} else {
@@ -197,7 +197,8 @@ You may obtain a copy of the License at
 			}
 			result += String.format('<input class="cbi-button cbi-button-disable cbi-button-small" type="submit" value="%s" title="<%:disable%>" name="disable_service" />', gateway.id);
 		}
-		result += '</div></tr>';
+		result += '</div>';
+		result += '</div>'; //tr
 		target_row.innerHTML += result;
 		// loese die naechste Anfrage aus (falls weitere vorhanden sind)
 		// Wir sollten diese Anfrage nicht frueher ausloesen, weil beispielsweise die
@@ -310,15 +311,15 @@ e "offset/distance" column for this purpose.%></p>
 		<div class="cbi-section-comment"><%=luci.i18n.translatef('You can change the sorting mechanism of gateways in the <a href="%s">Service Settings section</a>.', on_url("basis", "einstellungen"))%></div>
 		<fieldset class="cbi-section-node">
 			<form name="gateways" method="post" action="<%=REQUEST_URI%>">
-			<table class="cbi-section-table" id="on-gateway-list">
-			<tr class="cbi-section-table-titles">
-					<th colspan = "1" />
-					<th class="cbi-section-table-cell"><%:active%></th>
-					<th class="cbi-section-table-cell"><%:IP-Address%></th>
-					<th class="cbi-section-table-cell">
+			<div class="table" id="on-gateway-list">
+			<div class="tr cbi-section_table_titles">
+					<div class="th col-1 left"></div>
+					<div class="th col-1 center"><%:active%></div>
+					<div class="th col-1 left"><%:IP-Address%></div>
+					<div class="th col-1 left">
 						<abbr title="<%:Short name of the public gateway server (if known)%>">
-							<%:Gateway Server%></abbr></th>
-					<th class="cbi-section-table-cell">
+							<%:Gateway Server%></abbr></div>
+					<div class="th col-1 left">
 						<% if sorting ~= "manual" then %>
 							<%# es gibt keinen Offset im manual Modus %>
 							<abbr title="<%:This offset is added to the values before use/display%>">Offset</abbr> /
@@ -329,16 +330,15 @@ e "offset/distance" column for this purpose.%></p>
 							<%# im manual und etx Modus zeigen wir den ETX-Wert an %>
 							<abbr title="<%:Expected Transmission Count - Quality of the Connection to the Gateway regarding OLSR%>"><%:ETX%></abbr>
 						<% end %>
-					</th>
+					</div>
 
-					<th class="cbi-section-table-cell"><abbr title="<%:Announced Upload / Download Speed.%>"><%:Speed%></abbr></th>
+					<div class="th col-1 left"><abbr title="<%:Announced Upload / Download Speed.%>"><%:Speed%></abbr></div>
 
-					<th class="cbi-section-table-cell"><%:VPN-Status%></th>
-					<th class="cbi-section-table-cell"><%:Actions%></th>
-					<th />
-			</tr>
+					<div class="th col-1 left"><%:VPN-Status%></div>
+					<div class="th col-1 left"><%:Actions%></div>
+			</div> <%# tr %>
 
-			</table>
+			</div> <%# table %>
 			</form>
 			<center><%= get_html_loading_spinner('gateway-list-spinner', 'vertical-align:middle;') %></center>
 			<p id="on-waiting-for-gateway-change" style="display:none">

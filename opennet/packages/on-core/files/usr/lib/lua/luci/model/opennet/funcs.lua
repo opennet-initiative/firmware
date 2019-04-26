@@ -484,7 +484,7 @@ function html_box(text, class)
 	local css_class
 	if class == "error" then
 		prefix = luci.i18n.translate("Error:") .. " "
-		css_class = "errorbox"
+		css_class = "alert-message"
 	else
 		prefix = ""
 		-- "infobox" ist eine opennet-spezifische css-Klasse

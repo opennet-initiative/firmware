@@ -28,7 +28,7 @@ function status_neighbors_olsr2()
 		end
 		response = response .. '</table>'
 	else
-		response = response .. '<div class="errorbox">' ..
+		response = response .. '<div class="alert-message">' ..
 			luci.i18n.translate("Currently there are no known routing neighbours.") .. " " ..
 			luci.i18n.translatef('Maybe you want to connect to a local <a href="%s">wifi peer</a>.',
 				get_wifi_setup_link()) ..

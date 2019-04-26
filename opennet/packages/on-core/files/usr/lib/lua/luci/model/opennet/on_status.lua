@@ -168,7 +168,7 @@ function status_neighbors()
 		                '<iframe scrolling="no" width="400px" height="250px" src="https://map.opennet-initiative.de/?ip=' ..
 				on_function("get_main_ip") .. '"></iframe></td></tr></table>'
 	else
-		response = response .. '<div class="errorbox">' ..
+		response = response .. '<div class="alert-message">' ..
 			luci.i18n.translate("Currently there are no known routing neighbours.") .. " " ..
 			luci.i18n.translatef('Maybe you want to connect to a local <a href="%s">wifi peer</a>.',
 				get_wifi_setup_link()) ..
@@ -223,7 +223,7 @@ function status_modules()
 		result = result .. luci.i18n.translatef("Disabled: %s", string_join(disabled, ", ")) .. "<br/>"
 	end
 	if not table_is_empty(missing) then
-		result = result .. '<div class="errorbox">'
+		result = result .. '<div class="alert-message">'
 			.. luci.i18n.translatef("Previously installed modules: %s", string_join(missing, ", ")) .. '<br/>'
 			.. luci.i18n.translate("Recommended action") .. ': '
 			.. '<a href="' .. on_url("basis", "module") .. '?install=' .. string_join(missing, ",") .. '">'

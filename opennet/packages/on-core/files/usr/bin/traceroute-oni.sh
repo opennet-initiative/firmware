@@ -18,7 +18,7 @@ get_location_from_api() {
   #extract value of post_address
   # sample input:   "post_address":"xyz"
   # sample output:  xyz
-  wget -q -O - "http://api.on/api/v1/accesspoint/$ip" | awk 'BEGIN { FS = "post_address\":\"" } ; { print $2 }' | cut -d '"' -f 1
+  wget -q -O - "http://api.opennet-initiative.de/api/v1/accesspoint/$ip" | awk 'BEGIN { FS = "post_address\":\"" } ; { print $2 }' | cut -d '"' -f 1
 }
 
 

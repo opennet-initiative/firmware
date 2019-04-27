@@ -1,0 +1,17 @@
+Remove excessive warnings about timer scheduling.
+
+Index: on_firmware/routing/oonf-olsrd2/patches/101_remove_timer_warning.patch
+--- /dev/null
++++ on_firmware/routing/oonf-olsrd2/patches/101_remove_timer_warning.patch
+@@ -0,0 +1,11 @@
++--- a/src-plugins/subsystems/oonf_timer.c
+++++ b/src-plugins/subsystems/oonf_timer.c
++@@ -280,7 +280,7 @@
++     os_clock_gettime64(&end_time);
++ 
++     if (end_time - start_time > OONF_TIMER_SLICE) {
++-      OONF_WARN(LOG_TIMER, "Timer %s scheduling took %" PRIu64 " ms", timer->class->name, end_time - start_time);
+++      OONF_DEBUG(LOG_TIMER, "Timer %s scheduling took %" PRIu64 " ms", timer->class->name, end_time - start_time);
++       info->_stat_long++;
++     }
++ 

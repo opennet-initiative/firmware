@@ -7,7 +7,7 @@ include $(INCLUDE_DIR)/opennet.mk
 define Package/on-usergw
   SECTION:=opennet
   CATEGORY:=Opennet
-  URL:=http://www.opennet-initiative.de/
+  URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=Usergateway extensions
   # iptables-mod-ipopt ist fuer das iptables-Modul "tos" erforderlich

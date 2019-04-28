@@ -7,7 +7,7 @@ include $(INCLUDE_DIR)/opennet.mk
 define Package/on-olsr2-netjsongraph
   SECTION:=opennet
   CATEGORY:=Opennet
-  URL:=http://www.opennet-initiative.de/
+  URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <dev@opennet-initiative.de>
   TITLE:=OLSRv2-Visualisierung
   DEPENDS+=+on-olsr2

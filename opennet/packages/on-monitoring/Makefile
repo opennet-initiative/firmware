@@ -7,7 +7,7 @@ include $(INCLUDE_DIR)/opennet.mk
 define Package/on-monitoring
   SECTION:=opennet
   CATEGORY:=Opennet
-  URL:=http://www.opennet-initiative.de/
+  URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=Monitoring of Opennet services and network properties
   DEPENDS:=+on-core +muninlite +micropython +micropython-lib

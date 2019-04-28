@@ -7,7 +7,7 @@ include $(INCLUDE_DIR)/opennet.mk
 define Package/on-goodies
   SECTION:=opennet
   CATEGORY:=Opennet
-  URL:=http://www.opennet-initiative.de/
+  URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=Useful tools for network and system analysis and development
   DEPENDS:=+bwm-ng +iperf +less +mtr +screen +tcpdump-mini +iftop

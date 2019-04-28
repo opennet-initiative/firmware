@@ -7,7 +7,7 @@ include $(INCLUDE_DIR)/opennet.mk
 define Package/on-core
   SECTION:=opennet
   CATEGORY:=Opennet
-  URL:=http://www.opennet-initiative.de/
+  URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=System and Webinterface
   DEPENDS+=+olsrd +olsrd-mod-httpinfo +olsrd-mod-txtinfo +olsrd-mod-nameservice +olsrd-mod-jsoninfo +ip +coreutils +coreutils-timeout

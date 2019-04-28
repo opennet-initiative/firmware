@@ -313,41 +313,19 @@ debug_translate_macs() {
 # extrahiere MAC Adresse aus IPv6 EUI64 Adresse
 #  Bei Fehler leerer String zurück
 debug_fetch_mac_from_ipv6_eui() {
-	local ipv6
-	local mac
-	local prefix
-	local tmp
-	local p	
-	ipv6="$1"
+	local ipv6="$1"
+	local xor_highest_byte=${2:-0}
+	local line_split_bytes
 
 	#check whether we have EUI64 address
-	if [ "$ipv6" != "${ipv6/ff:fe/}" ]; then
-		#prepare prefix to not end on 0
-		prefix=${IP6_PREFIX_PERM%0}
-		#if EUI64 then extract MAC address
-		tmp="${ipv6/$prefix:/}"
-		tmp="${tmp/ff:fe/}"
-		#add colons
-		# example. in: 15:6d80:97b -> out: 0:15:6d:80:9:7b
-		# extrahier hex Blöcke und normalisiere
-		mac=""
-		for i in 1 2 3; do
-			p=$(echo "$tmp" | cut -d":" -f $i) #erste Block
-			while [ "${#p}" != "4" ]; do 
-				p="0$p"    #fülle Nullen auf
-			done
-			p="${p:0:2}:${p:2:2}"             #Doppelpunkt in Mitte einfügen
-			if [ "$mac" = "" ]; then
-				mac="$p"
-			else
-				mac="$mac:$p"
-			fi
-		done
-		echo "$mac"
-	else
-		#no EUI64
-		echo 
-	fi
+	line_split_bytes=$(echo "$ipv6" | tr ':' '\n' | tail -4 | while read -r part; do
+			printf '%d\n%d\n' "$((0x$part / 0x100))" "$((0x$part % 0x100))"
+		done)
+	echo "$line_split_bytes" \
+		| sed '4d; 5d' \
+		| awk '{ if (NR == 1) { printf("%02x\n", xor($1, '"$xor_highest_byte"')); } else { printf("%02x\n", $0); }; }' \
+		| tr '\n' ':' \
+		| sed 's/:$//'
 }
 
 # manuelles Zuordnen von IPv6 Adressen zu IPv4 fuer AccessPoints (bis wir API hierfuer haben)

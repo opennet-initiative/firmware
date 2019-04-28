@@ -330,16 +330,21 @@ debug_fetch_mac_from_ipv6_eui() {
 
 # manuelles Zuordnen von IPv6 Adressen zu IPv4 fuer AccessPoints (bis wir API hierfuer haben)
 debug_fetch_ipv4_from_ipv6_for_ap() {
-	local ipv6
-	local mac
-	local json
+	local ipv6="$1"
 	local ipv4
-	ipv6="$1"
-	
-	mac="$(debug_fetch_mac_from_ipv6_eui "$ipv6")"
+	local mac mac1 mac2
 
-	if [ "$mac" != "" ]; then
-		ipv4=$(wget -q -O - "https://api.opennet-initiative.de/api/v1/interface/?if_hwaddress=$mac" | jsonfilter -e '$[0].addresses[0].address')
-		echo "$ipv4"
+	# We forgot to toggle the "universal/local" bit while generating the EUI64 address for the
+	# main IPv6 address. Thus we need to try both.
+	mac1="$(debug_fetch_mac_from_ipv6_eui "$ipv6" 0)"
+	mac2="$(debug_fetch_mac_from_ipv6_eui "$ipv6" 2)"
+
+	for mac in "$mac1" "$mac2"; do
+		ipv4=$(wget -q -O - "https://api.opennet-initiative.de/api/v1/interface/?if_hwaddress=$mac" | jsonfilter -e '$[0].addresses[0].address') || continue
+		[ -z "$ipv4" ] && continue
+		break
+	done
+	if [ -n "$ipv4" ]; then
+		wget -q -O - "https://api.opennet-initiative.de/api/v1/interface/$ipv4" | jsonfilter -e '@.accesspoint'
 	fi
 }

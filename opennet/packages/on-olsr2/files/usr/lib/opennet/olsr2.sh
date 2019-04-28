@@ -329,7 +329,7 @@ debug_fetch_mac_from_ipv6_eui() {
 }
 
 # manuelles Zuordnen von IPv6 Adressen zu IPv4 fuer AccessPoints (bis wir API hierfuer haben)
-debug_fetch_ipv4_from_ipv6_for_ap() {
+debug_ipv4_main_ip_from_ipv6_for_ap() {
 	local ipv6="$1"
 	local ipv4
 	local mac mac1 mac2

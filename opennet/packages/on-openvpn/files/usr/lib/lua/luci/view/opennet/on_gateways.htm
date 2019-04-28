@@ -160,7 +160,7 @@ You may obtain a copy of the License at
 			<% elseif sorting == "hop" then %>
 				distance = gateway.hop_count;
 			<% end %>
-			result += "<a href=\"http://map.opennet-initiative.de/?route=<%=on_function("get_main_ip")%>," + filter_traceroute_for_api( gateway.traceroute ) + "\" target=\"_blank\">";
+			result += "<a href=\"https://map.opennet-initiative.de/?route=<%=on_function("get_main_ip")%>," + filter_traceroute_for_api( gateway.traceroute ) + "\" target=\"_blank\">";
 			if (distance < 1) {
 				// die olsrd2-Peers haben eine Entfernung zwischen Null und Eins - stelle sie genauer dar
 				result += String.format('%.6f', distance + gateway.offset);

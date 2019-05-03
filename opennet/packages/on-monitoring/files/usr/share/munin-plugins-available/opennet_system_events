@@ -12,9 +12,9 @@ event_count=$(grep "^ - " /etc/banner | cut -d - -f 3- | sed 's/^ *//; s/ *-*$//
 
 
 if [ "${1:-}" = "config" ]; then
-    echo "graph_title System Events"
+    echo "graph_title Opennet System Events"
     echo "graph_vlabel Number of events"
-    echo "graph_category system"
+    echo "graph_category opennet"
     echo "$event_count" | while read -r count label; do
         fieldname=$(clean_fieldname "$label")
         echo "$fieldname.label $label"

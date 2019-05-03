@@ -184,7 +184,7 @@ get_captive_portal_client_count() {
 				this_count=$(echo "$assoclist" | awk '{ if (($1 == "TX:") && ($(NF-1) >= 100)) count++; } END { print count; }')
 			else
 				# determine the number of valid arp cache items for this interface
-				this_count=$(grep "[[:space:]]$device$" /proc/net/arp | grep -cvFw "00:00:00:00:00:00")
+				this_count=$(ip neighbor list dev "$device" | grep -c 'REACHABLE$')
 			fi
 			count=$((count + this_count))
 		done

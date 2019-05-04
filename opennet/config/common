@@ -45,6 +45,10 @@ CONFIG_PACKAGE_libstdcpp=m
 CONFIG_PACKAGE_glib2=m
 CONFIG_PACKAGE_libffi=m
 
+# Debugging via "perf" (siehe https://dev.opennet-initiative.de/ticket/187)
+CONFIG_KERNEL_PERF_EVENTS=y
+CONFIG_PACKAGE_perf=m
+
 # wireless-Dinge
 CONFIG_PACKAGE_hostapd=m
 CONFIG_PACKAGE_hostapd-utils=y

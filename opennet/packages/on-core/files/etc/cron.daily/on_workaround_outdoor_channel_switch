@@ -10,10 +10,7 @@
 #    (ansonsten wird die Verbindung stoerend oft neu aufgebaut)
 # Zwischen zwei Reset-Vorgaengen wird eine minimale definierte Wartezeit eingehalten.
 #
-# Dieser Workaround sollte im Minutentakt angewandt werden.
-#
-# Anwendung:
-#   scp on_workaround_outdoor_channel_switch root@192.168.x.y:/etc/cron.minutely/
+# Dieser Workaround sollte täglich angewandt werden.
 
 set -eu
 

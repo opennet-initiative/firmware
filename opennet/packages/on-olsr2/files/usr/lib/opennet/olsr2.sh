@@ -54,7 +54,8 @@ shorten_ipv6_address_in_stream() {
 convert_mac_to_eui64_address() {
 	local prefix="$1"
 	local mac="$2"
-	local mac_offset="${3:-0}"
+	# by default EUI64 conversion toggles the 7th most significant bit
+	local mac_offset="${3:-0x020000000000}"
 	local combined_mac
 	combined_mac=$(echo "$mac" | cut -c 1-2,4-5,7-8,10-11,13-14,16-17)
 	# MAC-Offset mit XOR verknüpfen
@@ -76,15 +77,9 @@ get_main_ipv6_address() {
 configure_ipv6_address() {
 	local uci_prefix
 	uci_prefix="network.$NETWORK_LOOPBACK"
-	# schon konfiguriert?
-	[ -n "$(uci_get "$uci_prefix")" ] && return
 	uci set "$uci_prefix=interface"
 	uci set "${uci_prefix}.proto=static"
 	uci set "${uci_prefix}.ifname=lo"
-	# Leider funktioniert dies noch nicht (Februar 2016) - wohl nur fuer "delegated networks".
-	# Also wollen wir es erstmal nur manuell ermitteln.
-	#uci set "${uci_prefix}.ip6ifaceid=eui64"
-	#uci set "${uci_prefix}.ip6prefix=${IP6_PREFIX}::/$IP6_PREFIX_LENGTH"
 	uci_add_list "${uci_prefix}.ip6addr" "$(get_main_ipv6_address)"
 	apply_changes network
 }

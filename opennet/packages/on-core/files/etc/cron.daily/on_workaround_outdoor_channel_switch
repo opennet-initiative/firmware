@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+# Pruefe in regelmaessigen Abstaenden, ob der AP aufgrund von DFS auf einen indoor-Kanal gewechselt ist.
+# Falls ja, dann wird ein Wechsel auf den konfigurierten Outdoor-Kanal versucht.
+#
+# Bedingungen fuer Einsatz dieses Workarounds:
+#  * das WLAN-Interface ist auf einen outdoor-Kanal eingestellt
+#  * das WLAN-Interface ist ein 5-GHz-Interface (sonst schlaegt die Kanelerkennung fehl)
+#  * der AP ist aufgrund seiner Lage keiner exzessiven radar-aehnlichen Impulsflut ausgesetzt
+#    (ansonsten wird die Verbindung stoerend oft neu aufgebaut)
+# Zwischen zwei Reset-Vorgaengen wird eine minimale definierte Wartezeit eingehalten.
+#
+# Dieser Workaround sollte im Minutentakt angewandt werden.
+#
+# Anwendung:
+#   scp on_workaround_outdoor_channel_switch root@192.168.x.y:/etc/cron.minutely/
+
+set -eu
+
+WIFI_DEVICE="wlan0"
+RESET_TIMESTAMP_FILE="/tmp/$(basename "$0").timestamp"
+MINIMUM_RESET_PERIOD_SECONDS=900
+
+
+is_wifi_master() {
+	iwinfo "$WIFI_DEVICE" info | grep -qw "Mode: Master"
+}
+
+
+# ist die Kanalnummer groesser als 48 oder ist es "auto"?
+# ansonsten: false
+is_dfs_channel() {
+	local channel="$1"
+	# "auto" wird wohl ein DFS-Kanal sein
+	[ "$channel" = "auto" ] && return 0
+	# ist es eine Zahl?
+	echo "$channel" | grep -q "^[0-9]\+$" || return 1
+	[ "$channel" -gt 48 ] && return 0
+	return 1
+}
+
+
+# ist aktuell ein Indoor-Channel aktiv?
+# Im Zweifel: nein
+is_dfs_channel_active() {
+	local channel
+	channel=$(iwinfo "$WIFI_DEVICE" info | grep -w Channel: | awk '{ print $4 }')
+	is_dfs_channel "$channel" && return 0
+	return 1
+}
+
+
+# Diese Funktion erkennt leider auch ein 2.4GHz-Interface mit "auto"-Kanal als "DFS".
+is_dfs_channel_configured() {
+	local channel
+	for channel in $(uci show wireless | grep "\.channel=" | cut -f 2 -d "'"); do
+		# workaround fuer alte uci-Version (z.B. Firmware v0.5.1) ohne Single-Quotes
+		echo "$channel" | grep -q "=" && channel=$(echo "$channel" | sed 's/^.*=//')
+		is_dfs_channel "$channel" && return 0
+		true
+	done
+	return 1
+}
+
+
+is_reset_period_elapsed() {
+	# keine Datei? Reset ist erlaubt ...
+	[ -e "$RESET_TIMESTAMP_FILE" ] || return 0
+	local timestamp
+	local now
+	timestamp=$(cat "$RESET_TIMESTAMP_FILE")
+	now=$(date +%s)
+	# schon abgelaufen?
+	[ "$((timestamp + MINIMUM_RESET_PERIOD_SECONDS))" -lt "$now" ] && return 0
+	return 1
+}
+
+
+# Abbruchbedingungen?
+is_wifi_master || exit 0
+is_dfs_channel_configured || exit 0
+is_dfs_channel_active && exit 0
+is_reset_period_elapsed || exit 0
+
+# indoor-Kanal und Periode ist abgelaufen - also reset des wifi-Interface
+on-function add_banner_event "wifi outdoor channel workaround"
+date +%s >"$RESET_TIMESTAMP_FILE"
+wifi

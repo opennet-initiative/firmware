@@ -990,7 +990,7 @@ _get_parts_dir_files() {
 	# Abbruch, falls es das Verzeichnis nicht gibt
 	[ -e "$parts_dir" ] || return 0
 	# ignoriere Dateinamen mit ungueltigen Zeichen (siehe 'man run-parts')
-	find "$parts_dir" -maxdepth 1 | grep '/[a-zA-Z0-9_-]\+$' | while read -r fname; do
+	find "$parts_dir" -maxdepth 1 | grep '/[a-zA-Z0-9_-]\+$' | sort | while read -r fname; do
 		# ignoriere verwaiste symlinks
 		[ -f "$fname" ] || continue
 		# ignoriere Dateien ohne Ausführungsrechte

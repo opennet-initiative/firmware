@@ -1,0 +1,56 @@
+Prevent the "network" attribute of a firewall zone to be turned into a string
+
+The UCI documentation of the firewall zones [1] specifies the "network"
+attribute to be a list. Thus the previous handling of setting a space
+concatenated string (instead of a list) broke this documented property.
+
+[1] https://openwrt.org/docs/guide-user/firewall/firewall_configuration#zones
+--- a/luci/modules/luci-base/luasrc/model/firewall.lua
++++ b/luci/modules/luci-base/luasrc/model/firewall.lua
+@@ -30,6 +30,13 @@ function _set(c, s, o, v)
+ 	end
+ end
+ 
++function _set_list(c, s, o, v)
++	if v ~= nil and #v > 0 then
++		return uci_r:set_list(c, s, o, v)
++	else
++		return uci_r:delete(c, s, o)
++	end
++end
+ 
+ function init(cursor)
+ 	uci_r = cursor or uci_r or uci.cursor()
+@@ -303,6 +310,10 @@ function zone.set(self, opt, val)
+ 	return _set("firewall", self.sid, opt, val)
+ end
+ 
++function zone.set_list(self, opt, val)
++	return _set_list("firewall", self.sid, opt, val)
++end
++
+ function zone.masq(self)
+ 	return (self:get("masq") == "1")
+ end
+@@ -341,7 +352,7 @@ function zone.add_network(self, net)
+ 		nets[#nets+1] = net
+ 
+ 		_M:del_network(net)
+-		self:set("network", table.concat(nets, " "))
++		self:set_list("network", nets)
+ 	end
+ end
+ 
+@@ -355,11 +366,7 @@ function zone.del_network(self, net)
+ 		end
+ 	end
+ 
+-	if #nets > 0 then
+-		self:set("network", table.concat(nets, " "))
+-	else
+-		self:set("network", " ")
+-	end
++	self:set_list("network", nets)
+ end
+ 
+ function zone.get_networks(self)

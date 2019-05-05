@@ -18,6 +18,12 @@ get_list_installed() {
 }
 
 
+download_raw() {
+	local relative_name="$1"
+	wget -q -O - "$WORKAROUND_URL/$relative_name?format=raw"
+}
+
+
 do_install() {
 	local name="$1"
 	local cron_target="$2"
@@ -29,8 +35,17 @@ do_install() {
 		exit 1
 	}
 	cron_dir="/etc/cron.$cron_target"
-	content=$(wget -q -O - "$WORKAROUND_URL/$name?format=raw")
+	content=$(download_raw "$name")
 	[ -z "$content" ] && echo >&2 "Failed to download workaround: $WORKAROUND_URL/$name" && exit 1
+	# Prüfe ob die Datei ein Symlink ist (nur eine Zeile, beginnend mit "../") und folge ihm.
+	if [ "$(echo "$content" | wc -l)" -eq 1 ] && echo "$content" | grep -q '^\.\./'; then
+		local new_name="$content"
+		content=$(download_raw "$new_name")
+		if [ -z "$content" ]; then
+			echo >&2 "Failed to download symlinked workaround: $WORKAROUND_URL/$new_name"
+			exit 1
+		fi
+	fi
 	mkdir -p "$cron_dir"
 	echo "$content" >"$cron_dir/$name"
 	chmod +x "$cron_dir/$name"

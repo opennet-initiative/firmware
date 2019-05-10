@@ -216,6 +216,7 @@ create_database
 
 on_id="$(uci_get on-core.settings.on_id)"
 on_olsr_mainip="$(get_main_ip)"
+on_ipv6_mainip=$(if is_on_module_installed_and_enabled "on-olsr2"; then get_main_ipv6_address | cut -f 1 -d /; fi)
 db_epoch="$(date +%s)"
 
 SQL_STRING="$SQL_STRING
@@ -317,7 +318,7 @@ db_time="$(date)"
 
 if [ "$EXPORT_JSON" = "1" ];then
 	JSON=$(cat <<EOF
-{"nodes":{"originator":"%s","on_olsr_mainip":"%s","sys_ver":"%s","sys_board":"%s","sys_cpu":"%s","sys_mem":"%s","sys_uptime":"%s","sys_load":"%s",\
+{"nodes":{"originator":"%s","on_olsr_mainip":"%s","on_ipv6_mainip":"%s", "sys_ver":"%s","sys_board":"%s","sys_cpu":"%s","sys_mem":"%s","sys_uptime":"%s","sys_load":"%s",\
 "sys_free":"%s","sys_watchdog":"%s","sys_os_type":"%s","sys_os_name":"%s","sys_os_rel":"%s","sys_os_ver":"%s","sys_os_arc":"%s","sys_os_insttime":"%s",\
 "on_core_ver":"%s","on_core_insttime":"%s","on_packages":"%s","on_id":"%s","on_olsrd_status":"%s","on_olsr_mainip":"%s","on_wifidog_status":"%s",\
 "on_wifidog_id":"%s","on_vpn_cn":"%s","on_vpn_status":"%s","on_vpn_gw":"%s","on_vpn_autosearch":"%s","on_vpn_sort":"%s","on_vpn_gws":"%s","on_vpn_blist":"%s",\
@@ -326,7 +327,7 @@ if [ "$EXPORT_JSON" = "1" ];then
 EOF
 )
     # shellcheck disable=SC2059
-    printf "$JSON"'\n' "" "$on_olsr_mainip" "$sys_ver" "$sys_board" "$sys_cpu" "$sys_mem" "$sys_uptime" "$sys_load" "$sys_free" "$sys_watchdog" "$sys_os_type" \
+    printf "$JSON"'\n' "" "$on_olsr_mainip" "$on_ipv6_mainip" "$sys_ver" "$sys_board" "$sys_cpu" "$sys_mem" "$sys_uptime" "$sys_load" "$sys_free" "$sys_watchdog" "$sys_os_type" \
 	"$sys_os_name" "$sys_os_rel" "$sys_os_ver" "$sys_os_arc" "$sys_os_insttime" "$on_core_ver" "$on_core_insttime" "$on_packages" "$on_id" "$on_olsrd_status" \
 	"$on_olsr_mainip" "$on_wifidog_status" "$on_wifidog_id" "$on_vpn_cn" "$on_vpn_status" "$on_vpn_gw" "$on_vpn_autosearch" "$on_vpn_sort" "$on_vpn_gws" \
 	"$on_vpn_blist" "$on_ugw_status" "$on_ugw_enabled" "$on_ugw_possible" "$on_ugw_tunnel" "$on_ugw_connected" "$on_ugw_presetips" "$on_ugw_presetnames" "" "" \

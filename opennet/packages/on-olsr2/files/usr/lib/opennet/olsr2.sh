@@ -290,14 +290,14 @@ debug_ping_all_olsr2_hosts() {
 			status="FAIL"
 		fi
 		printf '%-8s%-48s%-48s\n' "$status" "--${ipv6}--" "__${ipv6}__"
-	done | shorten_ipv6_address_in_stream | debug_translate_macs "__" | sed 's/__//g; s/--//g'
+	done | shorten_ipv6_address_in_stream | replace_ipv6_addresses_with_names "__" | sed 's/__//g; s/--//g'
 }
 
 
 # manuelle Host-Liste (bis wir richtiges Reverse-DNS haben)
 # Falls der optionale Parameter "original_prefix" gesetzt ist, werden nur diejenigen IPv6-Adressen
 # ersetzt, die direkt auf dieses Präfix folgen.
-debug_translate_macs() {
+replace_ipv6_addresses_with_names() {
 	local original_prefix="${1:-}"
 	local token
 	local mac

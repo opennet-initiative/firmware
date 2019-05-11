@@ -30,7 +30,7 @@ get_ap_name_from_main_ip() {
 get_location_from_api() {
     local main_ip="$1"
     # extract value of "post_address" via API
-    wget -q -O - "https://api.opennet-initiative.de/api/v1/accesspoint/$main_ip" | jsonfilter -e '@.post_address'
+    wget -q -O - "$OPENNET_API_URL/accesspoint/$main_ip" | jsonfilter -e '@.post_address'
 }
 
 
@@ -47,7 +47,7 @@ position=1
         main_ip="$(debug_ipv4_main_ip_from_ipv6_for_ap "$ip")"
     elif echo "$ip" | grep -qE '^(10|192\.168)\.'; then
         # Opennet IPv4 addresses (10.0.0.0/8 or 192.168.0.0/16)
-        main_ip=$(wget -q -O - "https://api.opennet-initiative.de/api/v1/interface/$ip" | jsonfilter -e '@.accesspoint')
+        main_ip=$(wget -q -O - "$OPENNET_API_URL/interface/$ip" | jsonfilter -e '@.accesspoint')
     else
         continue
     fi

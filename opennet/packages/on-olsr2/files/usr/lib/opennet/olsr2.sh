@@ -334,11 +334,11 @@ debug_ipv4_main_ip_from_ipv6_for_ap() {
 	mac2="$(debug_fetch_mac_from_ipv6_eui "$ipv6" 2)"
 
 	for mac in "$mac1" "$mac2"; do
-		ipv4=$(wget -q -O - "https://api.opennet-initiative.de/api/v1/interface/?if_hwaddress=$mac" | jsonfilter -e '$[0].addresses[0].address') || continue
+		ipv4=$(wget -q -O - "$OPENNET_API_URL/interface/?if_hwaddress=$mac" | jsonfilter -e '$[0].addresses[0].address') || continue
 		[ -z "$ipv4" ] && continue
 		break
 	done
 	if [ -n "$ipv4" ]; then
-		wget -q -O - "https://api.opennet-initiative.de/api/v1/interface/$ipv4" | jsonfilter -e '@.accesspoint'
+		wget -q -O - "$OPENNET_API_URL/interface/$ipv4" | jsonfilter -e '@.accesspoint'
 	fi
 }

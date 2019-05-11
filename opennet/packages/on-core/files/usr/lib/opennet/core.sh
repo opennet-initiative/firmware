@@ -29,6 +29,7 @@ FALLBACK_NTP_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 0.openwrt.pool.n
 CRON_LOCK_FILE=/var/run/on-cron.lock
 CRON_LOCK_MAX_AGE_MINUTES=15
 CRON_LOCK_WAIT_TIMEOUT_SECONDS=30
+OPENNET_API_URL="https://api.opennet-initiative.de/api/v1"
 
 
 # Aufteilung ueberlanger Zeilen

@@ -8,7 +8,7 @@ set -eu
 
 ping_neighbour() {
 	echo -n "ping $1 - "
-	ping -W 2 -c 3 "$1" >/dev/null && echo "OK" || echo "Error"
+	ping -W 2 -c 3 "$1" >/dev/null 2>&1 && echo "OK" || echo "Error"
 }
 
 

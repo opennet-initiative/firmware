@@ -8,23 +8,23 @@ set -eu
 
 ping_host() {
 	echo -n "ping $1 - "
-	ping -W 2 -c 3 "$1" >/dev/null && echo "OK" || echo "Error"
+	ping -W 2 -c 3 "$1" >/dev/null 2>&1 && echo "OK" || echo "Error"
 }
 
 
 ping6_host() {
 	echo -n "ping6 $1 - "
-	ping6 -W 2 -c 3 "$1" >/dev/null && echo "OK" || echo "Error"
+	ping6 -W 2 -c 3 "$1" >/dev/null 2>&1 && echo "OK" || echo "Error"
 }
 
 
 traceroute_target() {
-	traceroute -n -w 1 -m 16 "$1"
+	traceroute -n -w 1 -m 16 "$1" 2>&1
 }
 
 
 traceroute6_target() {
-	traceroute6 -n -w 1 -m 16 "$1"
+	traceroute6 -n -w 1 -m 16 "$1" 2>&1
 }
 
 

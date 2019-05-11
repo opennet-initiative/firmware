@@ -181,14 +181,6 @@ msgid ""
 "reagrding OLSR"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:51
-msgid "Experimental Visualization for OLSRv2"
-msgstr ""
-
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:50
-msgid "Experimental support for OLSRv2 and IPv6"
-msgstr ""
-
 #: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:73
 msgid "FREE"
 msgstr ""
@@ -670,6 +662,10 @@ msgstr ""
 msgid "Submit certificate request"
 msgstr ""
 
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:50
+msgid "Support for OLSRv2 and IPv6"
+msgstr ""
+
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:99
 msgid "System"
 msgstr ""
@@ -808,6 +804,10 @@ msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_vpn_key_management.htm:99
 msgid "UserGateway (type user gateway)"
+msgstr ""
+
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:51
+msgid "Visualization for OLSRv2"
 msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:70

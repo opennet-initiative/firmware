@@ -204,14 +204,6 @@ msgstr ""
 "Erwartete Anzahl von Übertragungen: die Qualität der Verbindung zum Gateway "
 "aus der Sicht von OLSR"
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:51
-msgid "Experimental Visualization for OLSRv2"
-msgstr "Experimentelle Visualisierung für OLSRv2"
-
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:50
-msgid "Experimental support for OLSRv2 and IPv6"
-msgstr "Experimentelle Unterstützung für OLSRv2 und IPv6"
-
 #: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:73
 msgid "FREE"
 msgstr "FREE"
@@ -725,6 +717,10 @@ msgstr "Status der Module"
 msgid "Submit certificate request"
 msgstr "Sende deine Zertifikatsanfrage"
 
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:50
+msgid "Support for OLSRv2 and IPv6"
+msgstr "Unterstützung für OLSRv2 und IPv6"
+
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:99
 msgid "System"
 msgstr "System"
@@ -902,6 +898,10 @@ msgstr "Nützliche Werkzeuge für die Netzwerk- und System-Analyse"
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_vpn_key_management.htm:99
 msgid "UserGateway (type user gateway)"
 msgstr "Usergateway (Internet-Freigabe)"
+
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:51
+msgid "Visualization for OLSRv2"
+msgstr "Visualisierung für OLSRv2"
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:70
 msgid "WAN"

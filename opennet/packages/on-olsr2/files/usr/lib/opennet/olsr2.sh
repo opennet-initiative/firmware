@@ -8,11 +8,7 @@ OLSR2_POLICY_DEFAULT_PRIORITY=20000
 # interne Zahl fuer die "Domain" in olsr2
 OLSR2_DOMAIN=0
 OLSR2_UPDATE_LOCK_FILE=/var/run/on-update-olsr2-interfaces.lock
-
-#declare $MAC_HOSTNAME_MAP and $IPV6_HOSTNAME_MAP
-# in external file because it is easier to update.
-# Workaround until we have IPv6 reverse DNS.
-. "${IPKG_INSTROOT:-}/usr/lib/opennet/olsr2-mac2name-map.sh"
+IPV6_NAME_MAP=/var/run/on-ipv6-name.map
 
 
 ## @fn get_mac_address()
@@ -268,6 +264,21 @@ get_olsr2_neighbours() {
 }
 
 
+update_ipv6_name_map_if_outdated() {
+	local name_map
+	# keep the cache for a while
+	[ -e "$IPV6_NAME_MAP" ] && ! is_file_timestamp_older_minutes "$IPV6_NAME_MAP" 360 && return
+	name_map=$(wget -q -O - "$OPENNET_API_URL/accesspoint/" \
+		| jsonfilter -e '@[*]["main_ip","main_ipv6"]' \
+		| awk '{if ($1 ~ ":") { print(main_ip, $1) } else { main_ip=$1 }}' \
+		| sed -E 's/^192\.168\.(\d+)\.(\d+) /AP\1-\2 /')
+	if [ -n "$name_map" ]; then
+		echo "$name_map" >"${IPV6_NAME_MAP}.new"
+		mv "${IPV6_NAME_MAP}.new" "$IPV6_NAME_MAP"
+	fi
+}
+
+
 debug_ping_all_olsr2_hosts() {
 	local ipv6
 	local status
@@ -290,18 +301,11 @@ debug_translate_macs() {
 	local original_prefix="${1:-}"
 	local token
 	local mac
-	local ip
 	local name
-	local sed_script_mac
-	local sed_script_ip
-	sed_script_mac=$(echo "$MAC_HOSTNAME_MAP" | while read -r mac name; do
-			# Main-IP (loopback-Interface)
-			printf 's/%s/%s/g;\n' "$original_prefix$(convert_mac_to_eui64_address "$IP6_PREFIX_PERM" "$mac")" "$original_prefix$name"
-		done)
-	sed_script_ip=$(echo "$IPV6_HOSTNAME_MAP" | while read -r ip name; do
-			printf 's/%s/%s/g;\n' "$original_prefix$ip" "$original_prefix$name"
-		done)
-	sed -e "$sed_script_mac" -e "$sed_script_ip"
+	update_ipv6_name_map_if_outdated
+	local sed_script
+	sed -e "$(cat "$IPV6_NAME_MAP" | while read -r name ipv6; do
+		printf 's|\\b%s\\b|%s|g;\n' "$original_prefix$ipv6" "$original_prefix$name"; done)"
 }
 
 # extrahiere MAC Adresse aus IPv6 EUI64 Adresse

@@ -256,6 +256,7 @@ update_ipv6_name_map_if_outdated() {
 	local name_map
 	# keep the cache for a while
 	[ -e "$IPV6_NAME_MAP" ] && ! is_file_timestamp_older_minutes "$IPV6_NAME_MAP" 360 && return
+	# We need to use a pipe instead of "request_field_from_api", since the response is too big.
 	name_map=$(wget -q -O - "$OPENNET_API_URL/accesspoint/" \
 		| jsonfilter -e '@[*]["main_ip","main_ipv6"]' \
 		| awk '{if ($1 ~ ":") { print(main_ip, $1) } else { main_ip=$1 }}' \

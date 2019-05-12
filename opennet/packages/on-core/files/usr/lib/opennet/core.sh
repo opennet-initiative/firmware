@@ -1198,9 +1198,39 @@ has_flash_or_filesystem_error_indicators() {
 }
 
 
-get_ap_name_for_ip() {
+## @fn request_field_from_api()
+## @brief Request the content of a field from an API endpoint.
+## @details The response is stored in memory - thus this function should not be used for huge
+##     amounts of data.
+request_field_from_api() {
+	local path="$1"
+	local json_query="$2"
+	local data
+	# wget returns a non-zero exitcode in case of an HTTP error status
+	data=$(wget -q -O - "$OPENNET_API_URL/$path" || true)
+	[ -z "$data" ] && return
+	# the "jsonfilter" call returns with an error, if the wanted field does not exist
+	echo "$data" | jsonfilter -e "$json_query" || true
+}
+
+
+get_main_ip_for_ip() {
 	local ip="$1"
-	nslookup "$ip" | grep -F ".arpa" | grep -v "NXDOMAIN$" | awk '{print $4}' | sed -E 's/^(\d+)\.(\d+)(-if\d+)?\.aps\.on/AP\1-\2/'
+	result=$(request_field_from_api "/accesspoint/$ip" "@.main_ip")
+	[ -z "$result" ] && result=$(request_field_from_api "/interface/$ip/accesspoint/" "@.main_ip")
+	echo "$result"
+}
+
+
+get_name_for_main_ip() {
+	local main_ip="$1"
+	echo "$main_ip" | sed -E 's/^192\.168\.(\d+)\.(\d+)$/AP\1-\2/'
+}
+
+
+get_location_for_main_ip() {
+	local main_ip="$1"
+	request_field_from_api "/accesspoint/$main_ip" "@.post_address"
 }
 
 # Ende der Doku-Gruppe

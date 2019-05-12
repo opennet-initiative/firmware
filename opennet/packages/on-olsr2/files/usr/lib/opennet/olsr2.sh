@@ -24,8 +24,8 @@ get_mac_address() {
 ## Die Funktion ist kaum getestet - sie erzeugt sicherlich falsche Adressen (mehr als ein
 ## Doppel-Doppelpunkt, usw.).
 shorten_ipv6_address() {
-	# entferne alle führenden Nullen; ersetze die erste Gruppe von Nullen durch "::"
-	sed -E 's/:0+([1-9a-f])/:\1/g; s/(:0+)+:/::/'
+	# entferne alle führenden Nullen; ersetze die erste Gruppe von doppelten Nullen durch "::"
+	sed -E 's/:0+([1-9a-f])/:\1/g; s/:0(:0)+:/::/'
 }
 
 

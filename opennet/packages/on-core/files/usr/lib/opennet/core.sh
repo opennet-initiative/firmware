@@ -1197,5 +1197,11 @@ has_flash_or_filesystem_error_indicators() {
 	trap "" EXIT && return 1
 }
 
+
+get_ap_name_for_ip() {
+	local ip="$1"
+	nslookup "$ip" | grep -F ".arpa" | grep -v "NXDOMAIN$" | awk '{print $4}' | sed -E 's/^(\d+)\.(\d+)(-if\d+)?\.aps\.on/AP\1-\2/'
+}
+
 # Ende der Doku-Gruppe
 ## @}

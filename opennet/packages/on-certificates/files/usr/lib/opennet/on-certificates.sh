@@ -4,15 +4,18 @@
 ## @{
 
 
-## @fn https_request_opennet()
+ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem"
+
+
+## @fn https_request_opennet_or_public()
 ## @brief Rufe den Inhalt ab, auf den eine URL verweist.
 ## @param URL die Quell-Adresse
 ## @returns Exitcode=0 falls kein Fehler auftrat. Andernfalls: curl-Exitcodes
-https_request_opennet() {
-	trap "" EXIT
-	# Diese curl-Operation dauert aus irgendeinem Grund ca. 10s - wir muessen also den timeout hochsetzen.
-	# Auf dem Server sind haeufig 408 (timeout) Fehler sichtbar - also mindestens einmal wiederholen.
-	curl -q --silent --location --max-time 30 --retry 2 "$@"
+## @details Sowohl Opennet-Zertifikaten als auch öffentlichen Zertifikaten (durch OpenWrt gepflegt)
+##     wird vertraut.
+https_request_opennet_or_public() {
+	curl -sS --fail -q --silent --location --max-time 30 --retry 2 \
+		--capath /etc/ssl/certs/ --cacert "$ON_CERT_BUNDLE_PATH" "$@"
 }
 
 
@@ -30,7 +33,7 @@ submit_csr_via_http() {
 	local csr_file="$2"
 	local helper="${3:-}"
 	local helper_email="${4:-}"
-	https_request_opennet \
+	https_request_opennet_or_public \
 		--form "file=@$csr_file" \
 		--form "opt_name=$helper" \
 		--form "opt_mail=$helper_email" "$upload_url" && return 0

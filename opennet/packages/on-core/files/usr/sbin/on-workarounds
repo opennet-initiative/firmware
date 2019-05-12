@@ -3,13 +3,12 @@
 set -eu
 
 
-# die https-URL wuerde curl (oder wget+openssl) erfordern
 WORKAROUND_URL="https://dev.opennet-initiative.de/browser/on_firmware/opennet/workarounds"
 NAME_PREFIX="on_workaround"
 
 
 get_list() {
-	wget -q -O - "$WORKAROUND_URL" | grep 'title="View File"' | cut -f 2 -d ">" | cut -f 1 -d "<"
+	https_request_opennet_or_public "$WORKAROUND_URL" | grep 'title="View File"' | cut -f 2 -d ">" | cut -f 1 -d "<"
 }
 
 
@@ -20,7 +19,8 @@ get_list_installed() {
 
 download_raw() {
 	local relative_name="$1"
-	wget -q -O - "$WORKAROUND_URL/$relative_name?format=raw"
+	# Currently the git repository server uses the Opennet CA for its webserver certificate.
+	https_request_opennet_or_public "$WORKAROUND_URL/$relative_name?format=raw"
 }
 
 

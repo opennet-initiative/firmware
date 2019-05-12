@@ -6,7 +6,6 @@
 
 # Ablage fuer profiling-Ergebnisse
 PROFILING_DIR=/var/run/on-profiling
-# die https-URL wuerde curl (oder wget+openssl) erfordern
 GIT_REPOSITORY_COMMIT_URL_FMT="https://dev.opennet-initiative.de/changeset/%s/on_firmware?format=diff"
 
 # erzeuge das Profiling-Verzeichnis (vorsorglich - es wird wohl unbenutzt bleiben)
@@ -117,8 +116,10 @@ apply_repository_patch() {
 	is_package_installed "patch" || { opkg update && opkg install "patch"; }
 	local commit
 	for commit in "$@"; do
+		# Currently the git repository server uses the Opennet CA for its webserver
+		# certificate.
 		# shellcheck disable=SC2059,SC2086
-		wget -q -O - "$(printf "$GIT_REPOSITORY_COMMIT_URL_FMT" "$commit")" | patch $patch_args -p4 --directory /
+		https_request_opennet_or_public "$(printf "$GIT_REPOSITORY_COMMIT_URL_FMT" "$commit")" | patch $patch_args -p4 --directory /
 	done
 	clear_caches
 	clean_luci_restart

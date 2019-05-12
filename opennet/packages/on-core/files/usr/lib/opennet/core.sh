@@ -360,7 +360,7 @@ get_on_firmware_version_new() {
 	trap 'error_trap get_on_firmware_version_new "$*"' EXIT
 
 	local config_seed
-	config_seed=$(https_request_opennet https://downloads.opennet-initiative.de/openwrt/testing/latest/targets/ar71xx/generic/config.seed)
+	config_seed=$(http_request https://downloads.opennet-initiative.de/openwrt/testing/latest/targets/ar71xx/generic/config.seed)
 	echo "$config_seed" | grep ^CONFIG_VERSION_NUMBER | sed 's/CONFIG_VERSION_NUMBER="\(.*\)".*/\1/'
 }
 
@@ -1231,6 +1231,12 @@ get_name_for_main_ip() {
 get_location_for_main_ip() {
 	local main_ip="$1"
 	request_field_from_api "/accesspoint/$main_ip" "@.post_address"
+}
+
+
+# Request a resource via HTTP. In case of HTTPS only public certificates are trusted.
+http_request() {
+	wget -q -O - "$@"
 }
 
 # Ende der Doku-Gruppe

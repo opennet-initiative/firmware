@@ -10,7 +10,7 @@ define Package/on-certificates
   URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=CA Certificates for OpenVPN and http clients
-  DEPENDS:=+on-core +curl +openssl-util
+  DEPENDS:=+curl +openssl-util
 endef
 
 define Package/on-certificates/description

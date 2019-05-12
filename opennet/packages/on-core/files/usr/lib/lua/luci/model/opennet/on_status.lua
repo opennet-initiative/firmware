@@ -138,7 +138,7 @@ function status_neighbors()
 	local response = ""
 	if not is_string_empty(neighbour_info) then
 		-- Tabelle in Tabelle (aussen: Details + Karte, innen: Details)
-		response = response .. '<table border="0"><tr><td>'
+		response = response .. '<table border="0"><tr height="100%"><td>'
 		response = response .. '<table class="status_page_table"><tr>' ..
 			'<th>' ..  luci.i18n.translate("IP Address") .. "</th>" ..
 			'<th><abbr title="' .. luci.i18n.translate("Network Interface: the neighbour's packets arrive here") .. '">Interface</abbr></th>' ..
@@ -164,8 +164,8 @@ function status_neighbors()
 		end
 		response = response .. '</table>'
 		-- Karte einblenden
-		response = response .. '</td><td>' ..
-		                '<iframe scrolling="no" width="400px" height="250px" src="https://map.opennet-initiative.de/?ip=' ..
+		response = response .. '</td><td width="100%" height="100%">' ..
+		                '<iframe scrolling="no" width="100%" height="100%" style="min-height:450px; min-width:500px" src="https://map.opennet-initiative.de/?ip=' ..
 				on_function("get_main_ip") .. '"></iframe></td></tr></table>'
 	else
 		response = response .. '<div class="alert-message">' ..

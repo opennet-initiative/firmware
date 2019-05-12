@@ -291,6 +291,7 @@ replace_ipv6_addresses_with_names() {
 	local mac
 	local name
 	update_ipv6_name_map_if_outdated
-	sed -e "$(cat "$IPV6_NAME_MAP" | while read -r name ipv6; do
-		printf 's|\\b%s\\b|%s|g;\n' "$original_prefix$ipv6" "$original_prefix$name"; done)"
+	sed -e "$(while read -r name ipv6; do
+			printf 's|%s\\b|%s|g;\n' "${original_prefix:-\\b}$ipv6" "$original_prefix$name"
+		done <"$IPV6_NAME_MAP")"
 }

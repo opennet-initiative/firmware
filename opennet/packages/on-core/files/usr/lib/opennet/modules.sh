@@ -315,7 +315,7 @@ generate_opennet_opkg_config() {
 	local noncore_pkgs_url="$base_url/packages/$arch_cpu_type"
 
 	local feed
-	for feed in base packages routing telephony luci opennet; do
+	for feed in base packages routing luci opennet; do
 		echo "src/gz on_$feed $noncore_pkgs_url/$feed"
 	done
 

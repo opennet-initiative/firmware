@@ -29,18 +29,6 @@ shorten_ipv6_address() {
 }
 
 
-## @fn shorten_ipv6_address_in_stream()
-## @brief Ersetze alle Vorkommen von IPv6-Adressen mit unnötigen Nullen ("...:0:...") durch einen
-##   doppelten Doppelpunkt.  Diese Form von nicht-regulären IPv6-Adressen wird von OLSR2
-##   als Teil des "/netjsoninfo graph"-Requests ausgegeben.
-shorten_ipv6_address_in_stream() {
-	# ersetze "1:2:3:4:0:6:7:8" durch "1:2:3:4::6:7:8"
-	# Beachte: die Ersetzung wirkt nur, wenn vor und nach der IP-Adresse ein
-	# nicht-Adress-Zeichen steht (z.B. Anführungsstriche oder ein Leerzeichen).
-	sed -E 's/([^a-f0-9:]([a-f0-9]{1,4}:){1,6})0((:[a-f0-9]{1,4}){1,6}[^a-f0-9:])/\1\3/g'
-}
-
-
 ## @fn convert_mac_to_eui64_address()
 ## @brief Wandle eine MAC-Adresse in ein IPv6-Suffix (64 bit) um.
 convert_mac_to_eui64_address() {

@@ -9,7 +9,6 @@ trap "rm -f '$tmpfile'" EXIT
 
 echo /netjsoninfo graph \
 	| nc localhost 2009 \
-	| shorten_ipv6_address_in_stream \
 	| replace_ipv6_addresses_with_names "id_" \
 	| replace_ipv6_addresses_with_names '"label":"' \
 	>"$tmpfile"

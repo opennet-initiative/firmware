@@ -921,7 +921,7 @@ update_trusted_services_list() {
 		service_name=$(notify_service "trusted" "$service_type" "$scheme" "$host" "$port" "$protocol" "/" "$details")
 		set_service_value "$service_name" "priority" "$priority"
 		if [ -n "$is_proxy" ]; then
-			if is_function_available "$pick_local_service_relay_port"; then
+			if is_function_available "pick_local_service_relay_port"; then
 				pick_local_service_relay_port "$service_name" >/dev/null
 			fi
 		fi

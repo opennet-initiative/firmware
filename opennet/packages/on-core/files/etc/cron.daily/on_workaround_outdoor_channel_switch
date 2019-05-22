@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+# NOTE: keep in sync with opennet/workarounds/on_workaround_outdoor_channel_switch
+#
 # Pruefe in regelmaessigen Abstaenden, ob der AP aufgrund von DFS auf einen indoor-Kanal gewechselt ist.
 # Falls ja, dann wird ein Wechsel auf den konfigurierten Outdoor-Kanal versucht.
 #

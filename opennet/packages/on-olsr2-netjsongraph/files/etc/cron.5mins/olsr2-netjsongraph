@@ -5,7 +5,7 @@ set -eu
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 tmpfile=$(mktemp)
-trap "rm -f '$tmpfile'" EXIT
+trap 'rm -f "'"$tmpfile"'"' EXIT
 
 echo /netjsoninfo graph \
 	| nc localhost 2009 \

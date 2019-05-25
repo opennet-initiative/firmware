@@ -33,7 +33,7 @@ is_dfs_channel() {
 	# "auto" wird wohl ein DFS-Kanal sein
 	[ "$channel" = "auto" ] && return 0
 	# ist es eine Zahl?
-	echo "$channel" | grep -q "^[0-9]\+$" || return 1
+	echo "$channel" | grep -q '^[0-9]\+$' || return 1
 	[ "$channel" -gt 48 ] && return 0
 	return 1
 }
@@ -52,7 +52,7 @@ is_dfs_channel_active() {
 # Diese Funktion erkennt leider auch ein 2.4GHz-Interface mit "auto"-Kanal als "DFS".
 is_dfs_channel_configured() {
 	local channel
-	for channel in $(uci show wireless | grep "\.channel=" | cut -f 2 -d "'"); do
+	for channel in $(uci show wireless | grep '\.channel=' | cut -f 2 -d "'"); do
 		# workaround fuer alte uci-Version (z.B. Firmware v0.5.1) ohne Single-Quotes
 		echo "$channel" | grep -q "=" && channel=$(echo "$channel" | sed 's/^.*=//')
 		is_dfs_channel "$channel" && return 0

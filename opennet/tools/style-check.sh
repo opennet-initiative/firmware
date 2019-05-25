@@ -5,7 +5,7 @@
 
 set -eu
 
-IGNORED_EXTENSIONS="awk lua sed pem crt template defaults conf cnf css htm html js png"
+IGNORED_EXTENSIONS="awk bz2 lua sed pem crt template defaults conf cnf css htm html js png"
 IGNORED_PATTERNS="/Makefile \.ipk /keep\.d/ ~$ /\.[^/]\+\.sw[po]$"
 
 

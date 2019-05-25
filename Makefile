@@ -31,6 +31,7 @@ help:
 	$(info - unpatch		die opennet-Patches zurücknehmen (empfehlenswert vor jedem "git pull"))
 	$(info - pull-submodules	eingebundene git-submodules via 'git pull' aktualisieren)
 	$(info - commit-submodules	aktualisierte git-submodules committen)
+	$(info - lint			Code-Stil-Prüfungen durchführen)
 
 list-archs:
 	$(info $(ARCHS))

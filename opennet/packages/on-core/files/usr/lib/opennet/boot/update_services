@@ -6,6 +6,7 @@
 # Falls die uptime weniger als sieben Minuten beträgt, wird eine erneute
 # Ausführung via 'schedule_task' veranlasst.
 
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 

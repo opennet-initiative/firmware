@@ -218,7 +218,7 @@ _run_system_network_function() {
 	shift
 	(
 		set +eu
-		# shellcheck disable=SC1091
+		# shellcheck source=openwrt/package/base-files/files/lib/functions/network.sh
 		. /lib/functions/network.sh
 		"$func" result "$@"
 		[ -n "$result" ] && echo "$result"

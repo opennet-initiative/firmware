@@ -385,7 +385,7 @@ check_new_on_firmware_version_new() {
 get_openwrt_arch() {
 	trap 'error_trap get_openwrt_arch "$*"' EXIT
 
-	# shellcheck disable=SC1091
+	# shellcheck source=openwrt/package/base-files/files/etc/openwrt_release
 	(. /etc/openwrt_release; echo "$DISTRIB_TARGET")
 }
 
@@ -967,7 +967,7 @@ system_service_check() {
 	local executable="$1"
 	local pid_file="$2"
 	local result
-	# shellcheck disable=SC1091,SC2034
+	# shellcheck disable=SC2034 source=openwrt/package/base-files/files/lib/functions/network.sh
 	result=$(set +eu; . /lib/functions/service.sh; SERVICE_PID_FILE="$pid_file"; service_check "$executable" && echo "ok"; set -eu)
 	[ -n "$result" ] && return 0
 	trap "" EXIT && return 1

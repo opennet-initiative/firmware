@@ -4,6 +4,7 @@
 OLSRD_READY_DELAY=5
 
 
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 

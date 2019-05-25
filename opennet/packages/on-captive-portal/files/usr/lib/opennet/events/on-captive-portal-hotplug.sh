@@ -5,6 +5,7 @@
 
 # wir verwenden explizit eine sub-Shell um Seiteneffekte für andere hotplug-Skripte zu vermeiden
 process_captive_portal_triggers() {
+	# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
 	. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 	# das Opennet-VPN-Interface triggert die Aktivierung/Deaktivierung des hotspot-Interface

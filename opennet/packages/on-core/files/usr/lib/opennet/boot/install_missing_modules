@@ -4,6 +4,7 @@
 # fehlender Module (nach einem Upgrade) auszuführen.
 # Dies ermöglicht die interaktionsfreie Aktualisierung eines AP.
 
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 missing=$(get_missing_modules)

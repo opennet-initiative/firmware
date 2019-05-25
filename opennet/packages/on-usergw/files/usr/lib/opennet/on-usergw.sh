@@ -358,7 +358,7 @@ fix_wan_route_if_missing() {
 	(
 		# tolerante Shell-Interpretation fuer OpenWrt-Code
 		set +eu
-		# shellcheck disable=SC1091
+		# shellcheck source=openwrt/package/base-files/files/lib/functions/network.sh
 		. /lib/functions/network.sh
 		wan_interface=
 		network_find_wan wan_interface

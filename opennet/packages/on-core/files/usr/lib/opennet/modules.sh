@@ -321,7 +321,7 @@ generate_opennet_opkg_config() {
 
 	# Fuege zusaetzlich eine URL mit core packages hinzu (beinhaltet Kernel Module).
 	local arch_path
-	# shellcheck disable=SC1091
+	# shellcheck source=openwrt/package/base-files/files/etc/openwrt_release
 	arch_path=$(. /etc/openwrt_release; echo "$DISTRIB_TARGET")
 	local core_pkgs_url="$base_url/targets/$arch_path/packages"
 	echo "src/gz on_core $core_pkgs_url"
@@ -363,6 +363,7 @@ on_opkg_postinst_default() {
 		(
 			# der Rest sollte ohne Vorsicht stattfinden
 			set +eu
+			# shellcheck source=openwrt/package/base-files/files/etc/init.d/boot
 			. "${IPKG_INSTROOT:-}/etc/init.d/boot"
 			uci_apply_defaults
 			# Boot-Skript aktivieren und ausführen (falls noch nicht geschehen)

@@ -59,6 +59,7 @@ ON_SHELL_MODULES_NEWEST=$( (ls -dtr "$ON_SHELL_MODULES_DIR" $ON_SHELL_MODULES "$
 		| sed 's/^[[:space:]]\+//' \
 		| grep -v "^$" \
 		>"${ON_SHELL_MINIMIZED}.$$" && mv "${ON_SHELL_MINIMIZED}.$$" "$ON_SHELL_MINIMIZED"
+# shellcheck disable=SC1090
 . "$ON_SHELL_MINIMIZED"
 
 

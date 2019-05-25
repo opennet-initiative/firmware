@@ -14,6 +14,7 @@ case "$1" in
 		fi
 		;;
 	on-olsr2)
+		# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
 		. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 		update_olsr2_interfaces
 		update_olsr2_daemon_state

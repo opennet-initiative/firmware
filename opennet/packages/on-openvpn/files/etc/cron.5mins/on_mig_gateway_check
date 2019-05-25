@@ -3,6 +3,7 @@
 # Durchlaufe alle Gateways bis mindestens ein Gateway-Test erfolgreich war (oder die Liste durchlaufen wurde).
 #
 
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 is_on_module_installed_and_enabled "on-openvpn" || exit 0

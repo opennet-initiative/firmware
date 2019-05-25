@@ -4,6 +4,7 @@
 # Andernfalls verpassen wir eventuell einen Zustandswechsel (z.B. beim Booten).
 #
 
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 is_on_module_installed_and_enabled "on-captive-portal" || exit 0

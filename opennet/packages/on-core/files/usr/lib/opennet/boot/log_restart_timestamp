@@ -11,6 +11,7 @@
 # Falls die maximal zulässige Zeit noch nicht abgelaufen ist, wird eine erneute
 # Ausführung via 'schedule_task' veranlasst.
 
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 

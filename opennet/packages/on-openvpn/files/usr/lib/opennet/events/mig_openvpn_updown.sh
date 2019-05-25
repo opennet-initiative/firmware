@@ -13,6 +13,7 @@
 #
 
 
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 # die folgenden Variablen stammen aus der OpenVPN-Umgebung

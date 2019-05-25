@@ -37,13 +37,13 @@ get_servers_from_dhcp_options() {
 		option=$(eval echo "\${foreign_option_$index:-}")
 		[ -z "$option" ] && break
 		echo "$option"
-		: $((index++))
+		index=$((index + 1))
 	done | awk '{ if ($1 == "dhcp-option") print $2,$3 }'
 }
 
 
 # die PATH-Umgebungsvariable beim Ausfuehren des openvpn-Skripts beinhaltet leider nicht die sbin-Verzeichnisse
-IP_BIN=$(PATH=$PATH:/sbin:/usr/sbin which ip)
+IP_BIN=$(PATH=$PATH:/sbin:/usr/sbin command -v ip)
 
 
 # Allgemeine openvpn-Ereignisbehandlung

@@ -55,7 +55,7 @@ SCRIPT_PREFIX="wireless_signal_noise_"
 
 
 # prefer "iwinfo" for information retrieval, if it is available
-if which iwinfo >/dev/null; then
+if command -v iwinfo >/dev/null; then
 	# "iwinfo" has a stable output format but is only available on openwrt
 	get_wifi_interfaces() { iwinfo | grep "^[a-zA-Z]" | awk '{print $1}'; }
 	# return MAC of peer and the signal strength
@@ -70,7 +70,7 @@ else
 	# TODO: there seems to be no way to retrieve the noise level via "iw"
 	get_wifi_noise() { echo; }
 fi
-if which arp >/dev/null; then
+if command -v arp >/dev/null; then
 	# openwrt does not provide 'arp' by default
 	get_arp() { arp -n; }
 else

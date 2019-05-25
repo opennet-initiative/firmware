@@ -11,7 +11,7 @@ iwinfo >iwinfo.log
 
 # wifi-Umgebung
 # auf nicht-wifi-Plattformen (z.B. x86) ist iwlist (wireless-tools) nicht installiert
-if which iwlist >/dev/null; then
+if command -v iwlist >/dev/null; then
 	iwlist scan >iwlist_scan.log 2>&1 || true
 fi
 

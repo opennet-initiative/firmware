@@ -66,7 +66,7 @@ get_function_names() {
 ## @see summary_profiling
 enable_profiling() {
 	local message=
-	which bash >/dev/null || message="Failed to enable profiling - due to missing bash"
+	command -v bash >/dev/null || message="Failed to enable profiling - due to missing bash"
 	[ -e /usr/bin/date ] || message="Failed to enable profiling - due to missing coreutils-date"
 	if [ -z "$message" ]; then
 		# ersetze das shebang in allen Opennet-Skripten

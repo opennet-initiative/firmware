@@ -46,7 +46,7 @@ GPLv3 or above
 
 set -eu
 
-if which iwinfo >/dev/null; then
+if command -v iwinfo >/dev/null; then
 	# "iwinfo" has a stable output format but is only available on OpenWrt
 	get_physical_interfaces() { iwinfo | sed -n 's/^.*PHY name: \+\(.*\)$/\1/p'; }
 	get_physical_interface_current_channel() { iwinfo "$1" info \

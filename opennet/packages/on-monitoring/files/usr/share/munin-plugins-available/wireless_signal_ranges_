@@ -57,7 +57,7 @@ SIGNAL_THRESHOLDS="-88 -80 -60 0"
 
 
 # prefer "iwinfo" for information retrieval, if it is available
-if which iwinfo >/dev/null; then
+if command -v iwinfo >/dev/null; then
 	# "iwinfo" has a stable output format but is only available on openwrt
 	get_wifi_interfaces() { iwinfo | grep "^[a-zA-Z]" | awk '{print $1}'; }
 	# return MAC of peer and the signal strength

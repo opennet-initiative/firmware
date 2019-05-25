@@ -120,7 +120,7 @@ do_fetch() {
 
 
 if [ "${1:-}" = "autoconf" ]; then
-	if which iw >/dev/null; then
+	if command -v iw >/dev/null; then
 		if [ -n "$(get_wifi_interfaces)" ]; then
 			echo "yes"
 		else

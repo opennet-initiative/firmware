@@ -1,1 +1,4 @@
 CONFIG_TARGET_brcm2708=y
+
+# the perf module seems to cause a build failure
+CONFIG_KERNEL_PERF_EVENTS=n

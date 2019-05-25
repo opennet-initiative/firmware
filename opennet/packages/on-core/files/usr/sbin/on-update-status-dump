@@ -233,6 +233,7 @@ sys_load=$(awk '{print $1" "$2" "$3}' /proc/loadavg)
 sys_free=$(awk '{if ($1 == "MemFree:") {print $2}}' /proc/meminfo)
 sys_watchdog=$(pidof watchdog >/dev/null && echo "1" || echo "0")
 
+# shellcheck disable=SC1091
 . /etc/openwrt_release
 sys_os_type="$DISTRIB_ID"
 # the old "DISTRIB_CODENAME" is not available anymore since 18.06

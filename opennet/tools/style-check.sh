@@ -55,7 +55,9 @@ case "$ACTION" in
 			is_ignored "$fname" && continue
 			is_shell "$fname" && echo "$fname"
 			true
-		done | xargs shellcheck -e SC1090,SC1091,SC2169 -s dash
+		# SC1090: keine Dateien via include nachladen
+		# SC2169: String-Indizierung und --/++ fehlt in dash, wird jedoch von busybox unterstützt
+		done | xargs shellcheck --exclude SC1090,SC2169 --shell dash
 		;;
 	list-unknown)
 		while read -r fname; do

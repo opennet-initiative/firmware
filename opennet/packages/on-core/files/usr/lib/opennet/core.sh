@@ -385,6 +385,7 @@ check_new_on_firmware_version_new() {
 get_openwrt_arch() {
 	trap 'error_trap get_openwrt_arch "$*"' EXIT
 
+	# shellcheck disable=SC1091
 	(. /etc/openwrt_release; echo "$DISTRIB_TARGET")
 }
 

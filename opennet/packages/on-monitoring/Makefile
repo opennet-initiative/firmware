@@ -56,6 +56,9 @@ on-function schedule_task <<-EOF
 	on-function is_on_module_installed_and_enabled on-captive-portal || \
 		on-function enable_suggested_munin_plugin_names "wireless_signal_noise_"
 
+	on-function is_on_module_installed_and_enabled on-olsr2 && \
+		ln -sfn ../../share/munin-plugins-available/olsr2 /usr/sbin/munin-node-plugin.d/
+
 	# Patch auf /usr/sbin/munin-node anwenden, um die Verwendung von Modulen zu ermöglichen
 	on-function enable_munin_plugins
 EOF

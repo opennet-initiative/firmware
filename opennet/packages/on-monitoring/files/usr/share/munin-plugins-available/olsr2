@@ -1,0 +1,412 @@
+#!/bin/sh
+# weird shebang? See below: "interpreter selection"
+
+"""true"
+: <<=cut
+
+=head1 NAME
+
+olsr2 - Monitor the state of an OLSR2-based routing network
+
+
+=head1 APPLICABLE SYSTEMS
+
+Information is parsed from the output of "telnet" plugin for OONF.
+
+
+=head1 CONFIGURATION
+
+Environment variables:
+
+    * TELNET_HOST: name or IP of the host running the telnet plugin (default: localhost)
+    * TELNET_PORT: the port that the txtinfo plugin is listening to (default: 2009)
+    * OLSRD2_BIN_PATH: name of the olsrd binary (only used for 'autoconf', default: /usr/sbin/olsrd2)
+    * MICROPYTHON_HEAP: adjust this parameter for micropython if your olsr network contains
+      more than a few thousand nodes (default: 512k)
+
+=head1 USAGE
+
+Collect basic information about the neighbours of an OLSR2 node:
+
+    * transmit rate to neighbour
+    * receive rate from neighbour
+    * number of nodes reachable behind each neighbour
+    * ping times of direct neighbours
+
+This plugin works with the following python interpreters:
+
+    * Python 2
+    * Python 3
+    * micropython (e.g. OpenWrt)
+
+
+=head1 VERSION
+
+  0.1
+
+
+=head1 AUTHOR
+
+Lars Kruse <devel@sumpfralle.de>
+
+
+=head1 LICENSE
+
+GPLv3 or above
+
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf
+
+=cut
+
+
+# ****************** Interpreter Selection ***************
+# This unbelievable dirty hack allows to find a suitable python interpreter.
+# This is specifically useful for OpenWRT where typically only micropython is available.
+#
+# Additionally we need to run micropython with additional startup options.
+# This is necessary due to our demand for more than 128k heap (this default is sufficient for only
+# 400 olsr nodes).
+#
+# This "execution hack" works as follows:
+#   * the script is executed by busybox ash or another shell
+#   * the above line (three quotes before and one quote after 'true') evaluates differently for
+#     shell and python:
+#       * shell: run "true" (i.e. nothing happens)
+#       * python: ignore everything up to the next three consecutive quotes
+# Thus we may place shell code here that will take care for selecting an interpreter.
+
+# prefer micropython if it is available - otherwise fall back to any python (2 or 3)
+MICROPYTHON_BIN=$(which micropython || true)
+if [ -n "$MICROPYTHON_BIN" ]; then
+    "$MICROPYTHON_BIN" -X "heapsize=${MICROPYTHON_HEAP:-512k}" "$0" "$@"
+else
+    python "$0" "$@"
+fi
+exit $?
+
+# For shell: ignore everything starting from here until the last line of this file.
+# This is necessary for syntax checkers that try to complain about invalid shell syntax below.
+true <<EOF
+"""
+
+
+import os
+import os.path
+import socket
+import sys
+
+
+plugin_version = "0.1"
+
+NEIGHBOUR_GRAPH_CONFIG = """
+graph_title     {title}
+graph_vlabel    Receive Bitrate (-) / Transmit Bitrate (+)
+graph_category  network
+graph_args      --base 1024
+graph_info      OLSR2 estimates the quality of a connection based on the transmission speed \
+estimation of both sides.
+""".strip()
+
+NEIGHBOUR_VALUES_CONFIG = """
+tx{suffix}.label none
+tx{suffix}.type GAUGE
+tx{suffix}.graph no
+tx{suffix}.draw {draw_type}
+tx{suffix}.min 0
+rx{suffix}.label {label}
+rx{suffix}.type GAUGE
+rx{suffix}.draw {draw_type}
+rx{suffix}.negative tx{suffix}
+rx{suffix}.min 0
+""".strip()
+
+NEIGHBOUR_COUNT_CONFIG = """
+graph_title     Reachable nodes via OLSR2 neighbours
+graph_vlabel    Number of Nodes
+graph_category  network
+graph_info      Count the number of locally known routes passing through each direct neighbour. \
+This number is a good approximation for the number of mesh nodes reachable via this specific \
+neighbour. MIDs (alternative addresses of an OLSR node) and HNAs (host network announcements) are \
+ignored.
+""".strip()
+
+NEIGHBOUR_COUNT_VALUE = """
+neighbour_{host_fieldname}.label {host}
+neighbour_{host_fieldname}.type GAUGE
+neighbour_{host_fieldname}.draw {draw_type}
+neighbour_{host_fieldname}.min 0
+""".strip()
+
+NEIGHBOUR_PING_CONFIG = """
+graph_title     {title}
+graph_vlabel    roundtrip time (ms)
+graph_category  network
+graph_info      This graph shows ping RTT statistics.
+graph_args      --base 1000 --lower-limit 0
+graph_scale     no
+""".strip()
+
+NEIGHBOUR_PING_VALUE = """neighbour_{host_fieldname}.label {host}"""
+
+# micropython (as of 2015) does not contain "os.linesep"
+LINESEP = getattr(os, "linesep", "\n")
+
+
+def get_clean_fieldname(name):
+    chars = []
+    for index, char in enumerate(name):
+        if ("a" <= char.lower() <= "z") or ((index == 0) or ("0" <= char <= "9")):
+            chars.append(char)
+        else:
+            chars.append("_")
+    return "".join(chars)
+
+
+def query_olsr2_telnet(*args):
+    host = os.getenv("TELNET_HOST", "localhost")
+    port = os.getenv("TELNET_PORT", "2009")
+    conn = socket.create_connection((host, port), 1.0)
+    try:
+        # Python3
+        request = bytes("/{}{}".format(" ".join(args), LINESEP), "ascii")
+    except TypeError:
+        # Python2
+        request = bytes("/{}{}".format(" ".join(args), LINESEP))
+    conn.sendall(request)
+    fconn = conn.makefile()
+    for line in fconn.readlines():
+        line = line.strip()
+        if line:
+            yield line
+    fconn.close()
+    conn.close()
+
+
+def count_routes_by_neighbour():
+    node_count = {}
+    for line in query_olsr2_telnet("olsrv2info", "route"):
+        # example line content:
+        #    2001:67c:1400:2432:27:22ff:fe1a:788a    fe80::dc9f:dbff:fef5:34a9       -       ::/0    2       14      100     eth0    2       fd32:d8d3:87da:0:418:d6ff:fe92:2883     0       ff_dat_metric   8.159kbit/s (8 hops)    2105607 8
+        tokens = line.split()
+        target = tokens[0]
+        via = tokens[1]
+        # we care only about single-host routes
+        if "/" not in target:
+            node_count[via] = node_count.get(via, 0) + 1
+    return node_count
+
+
+def convert_bitrate_string(text):
+    for suffix, factor in (
+            ("Tbit/s", 1000 ** 4),
+            ("Gbit/s", 1000 ** 3),
+            ("Mbit/s", 1000 ** 2),
+            ("Kbit/s", 1000 ** 1),
+            ("bit/s", 1000 ** 0)):
+        if text.lower().endswith(suffix.lower()):
+            try:
+                value = float(text[:-len(suffix)])
+            except ValueError:
+                sys.stderr.write("Failed to parse invalid bitrate string: {bitrate}{eol}"
+                                 .format(bitrate=text, eol=LINESEP))
+                value = 0
+            return int(factor * value)
+    return 0
+
+
+def get_node_name(address, api_base="https://api.opennet-initiative.de/api/v1/accesspoint"):
+    try:
+        from urllib.request import urlopen
+    except ImportError:
+        from urllib.urequest import urlopen
+    try:
+        conn = urlopen("{}/{}".format(api_base, address))
+        data = conn.read()
+        conn.close()
+        position = data.find(b'"main_ip":')
+        if position >= 0:
+            return data[position + 10:].split(b'"')[1].decode()
+    except OSError:
+        pass
+    return address
+
+
+def get_olsr2_neighbours():
+    route_count = count_routes_by_neighbour()
+    result = []
+    for line in query_olsr2_telnet("nhdpinfo", "link"):
+        tokens = line.split()
+        link = {}
+        link["interface"] = tokens[0]
+        link_local_address = tokens[1]
+        link["remote_address"] = tokens[13]
+        link["tx_bitrate"] = convert_bitrate_string(tokens[17])
+        link["rx_bitrate"] = convert_bitrate_string(tokens[19])
+        link["route_count"] = route_count.get(link_local_address, 0)
+        link["remote_name"] = get_node_name(link["remote_address"])
+        link["remote_fieldname"] = get_clean_fieldname(link["remote_address"]).replace("_", "")
+        result.append(link)
+    result.sort(key=lambda link: link["remote_name"])
+    return result
+
+
+def _read_file(filename):
+    try:
+        return open(filename, "r").read().split(LINESEP)
+    except OSError:
+        return []
+
+
+def get_ping_times(hosts):
+    tempfile = "/tmp/munin-olsrd-{pid}.tmp".format(pid=os.getpid())
+    command = ('for host in {hosts}; do echo -n "$host "; '
+               'ping -c 1 -w 1 "$host" | grep /avg/ || echo; done >{tempfile}'
+               .format(hosts=" ".join(hosts), tempfile=tempfile))
+    # micropython supports only "os.system" (as of 2015) - thus we need to stick with it for
+    # OpenWrt.
+    returncode = os.system(command)
+    if returncode != 0:
+        return {}
+    lines = _read_file(tempfile)
+    os.unlink(tempfile)
+    # example output for one host:
+    #   192.168.2.41 round-trip min/avg/max = 4.226/4.226/4.226 ms
+    result = {}
+    for line in lines:
+        tokens = line.split(None)
+        if len(tokens) > 1:
+            host = tokens[0]
+            avg_ping = tokens[-2].split("/")[1]
+            result[host] = float(avg_ping)
+    return result
+
+
+def do_config():
+    links = list(get_olsr2_neighbours())
+
+    # link quality with regard to neighbours
+    print("multigraph olsr2_links")
+    print(NEIGHBOUR_GRAPH_CONFIG.format(title="OLSR2 Neighbour connections"))
+    for index, link in enumerate(links):
+        print(NEIGHBOUR_VALUES_CONFIG.format(
+              label=link["remote_name"],
+              suffix="_{host}".format(host=link["remote_fieldname"]),
+              draw_type=("AREA" if index == 0 else "AREASTACK")))
+    print()
+    for link in links:
+        print("multigraph olsr2_links.host_{remote}".format(remote=link["remote_fieldname"]))
+        title = "Bitrate towards {host}".format(host=link["remote_name"])
+        print(NEIGHBOUR_GRAPH_CONFIG.format(title=title))
+        print(NEIGHBOUR_VALUES_CONFIG
+              .format(label="Bitrate", suffix="", draw_type="AREA"))
+        print()
+
+    # link count ("number of nodes behind each neighbour")
+    print("multigraph olsr2_neighbour_link_count")
+    print(NEIGHBOUR_COUNT_CONFIG)
+    for link in links:
+        print(NEIGHBOUR_COUNT_VALUE
+              .format(host=link["remote_name"],
+                      host_fieldname=link["remote_fieldname"],
+                      draw_type="AREASTACK"))
+
+    print()
+    # neighbour ping
+    print("multigraph olsr2_neighbour_ping")
+    print(NEIGHBOUR_PING_CONFIG.format(title="Ping time of OLSR2 neighbours"))
+    for link in links:
+        print(NEIGHBOUR_PING_VALUE
+              .format(host=link["remote_name"], host_fieldname=link["remote_fieldname"]))
+    print()
+    # neighbour pings - single subgraphs
+    for link in links:
+        print("multigraph olsr2_neighbour_ping.host_{remote}"
+              .format(remote=link["remote_fieldname"]))
+        title = "Ping time of {remote}".format(remote=link["remote_name"])
+        print(NEIGHBOUR_PING_CONFIG.format(title=title))
+        print(NEIGHBOUR_PING_VALUE
+              .format(host=link["remote_name"], host_fieldname=link["remote_fieldname"]))
+        print()
+
+
+def do_fetch():
+    # output values
+    links = list(get_olsr2_neighbours())
+
+    # overview graph for the link quality (ETX) of all neighbours
+    print("multigraph olsr2_links")
+    for link in links:
+        print("rx_{remote}.value {rx_bitrate}"
+              .format(rx_bitrate=link["rx_bitrate"], remote=link["remote_fieldname"]))
+        print("tx_{remote}.value {tx_bitrate}"
+              .format(tx_bitrate=link["tx_bitrate"], remote=link["remote_fieldname"]))
+    print()
+    # detailed graph for each single neighbour link
+    for link in links:
+        print("multigraph olsr2_links.host_{remote}".format(remote=link["remote_fieldname"]))
+        print("rx.value {rx_bitrate}".format(rx_bitrate=link["rx_bitrate"]))
+        print("tx.value {tx_bitrate}".format(tx_bitrate=link["tx_bitrate"]))
+        print()
+
+    # count the links/nodes behind each neighbour node
+    print("multigraph olsr2_neighbour_link_count")
+    for link in links:
+        print("neighbour_{host_fieldname}.value {value}"
+              .format(value=link["route_count"],
+                      host_fieldname=link["remote_fieldname"]))
+    print()
+
+    # overview of ping roundtrip times
+    print("multigraph olsr2_neighbour_ping")
+    ping_times = get_ping_times([link["remote_address"] for link in links])
+    for link in links:
+        ping_time = ping_times.get(link["remote_address"], None)
+        value = "{:.4f}".format(ping_time) if ping_time is not None else "U"
+        print("neighbour_{remote}.value {value}"
+              .format(value=value, remote=link["remote_fieldname"]))
+    print()
+    # single detailed graphs for the ping time of each link
+    for link in links:
+        ping_time = ping_times.get(link["remote_address"], None)
+        value = "{:.4f}".format(ping_time) if ping_time is not None else "U"
+        print("multigraph olsr2_neighbour_ping.host_{remote}"
+              .format(remote=link["remote_fieldname"]))
+        print("neighbour_{remote}.value {value}"
+              .format(remote=link["remote_fieldname"], value=value))
+        print()
+
+
+if __name__ == "__main__":
+    # parse arguments
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "config":
+            do_config()
+            if os.getenv("MUNIN_CAP_DIRTYCONFIG") == "1":
+                do_fetch()
+            sys.exit(0)
+        elif sys.argv[1] == "autoconf":
+            if os.path.exists(os.getenv('OLSRD_BIN_PATH', '/usr/sbin/olsrd')):
+                print('yes')
+            else:
+                print('no')
+            sys.exit(0)
+        elif sys.argv[1] == "version":
+            print('olsrd Munin plugin, version %s' % plugin_version)
+            sys.exit(0)
+        elif sys.argv[1] == "":
+            # ignore
+            pass
+        else:
+            # unknown argument
+            sys.stderr.write("Unknown argument{eol}".format(eol=LINESEP))
+            sys.exit(1)
+
+    do_fetch()
+
+# final marker for shell / python hybrid script (see "Interpreter Selection")
+EOF = True
+EOF

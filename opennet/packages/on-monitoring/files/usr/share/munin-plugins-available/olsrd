@@ -297,11 +297,11 @@ def do_config():
     # link quality with regard to neighbours
     print("multigraph olsr_link_quality")
     print(LQ_GRAPH_CONFIG.format(title="OLSR Link Quality"))
-    for link in links:
+    for index, link in enumerate(links):
         print(LQ_VALUES_CONFIG.format(
             label=link["remote"],
             suffix="_{host}".format(host=get_clean_fieldname(link["remote"])),
-            draw_type="AREASTACK"))
+            draw_type=("AREA" if index == 0 else "AREASTACK")))
     for link in links:
         print("multigraph olsr_link_quality.host_{remote}"
               .format(remote=get_clean_fieldname(link["remote"])))

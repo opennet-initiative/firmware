@@ -124,7 +124,7 @@ lq{suffix}.min 0
 """
 
 NEIGHBOUR_COUNT_CONFIG = """
-graph_title     Reachable nodes via neighbours
+graph_title     Reachable nodes via OLSR neighbours
 graph_vlabel    Number of Nodes
 graph_category  network
 graph_info      Count the number of locally known routes passing through each direct neighbour. \
@@ -319,7 +319,7 @@ def do_config():
 
     # neighbour ping
     print("multigraph olsr_neighbour_ping")
-    print(NEIGHBOUR_PING_CONFIG.format(title="Ping time of neighbours"))
+    print(NEIGHBOUR_PING_CONFIG.format(title="Ping time of OLSR neighbours"))
     for link in links:
         print(NEIGHBOUR_PING_VALUE
               .format(host=link["remote"], host_fieldname=get_clean_fieldname(link["remote"])))

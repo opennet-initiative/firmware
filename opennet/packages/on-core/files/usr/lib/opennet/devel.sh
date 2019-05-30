@@ -115,11 +115,14 @@ apply_repository_patch() {
 	# wir benötigen das Paket "patch"
 	is_package_installed "patch" || { opkg update && opkg install "patch"; }
 	local commit
+	local patch
 	for commit in "$@"; do
 		# Currently the git repository server uses the Opennet CA for its webserver
 		# certificate.
 		# shellcheck disable=SC2059,SC2086
-		https_request_opennet_or_public "$(printf "$GIT_REPOSITORY_COMMIT_URL_FMT" "$commit")" | patch $patch_args -p4 --directory /
+		patch=$(https_request_opennet_or_public "$(printf "$GIT_REPOSITORY_COMMIT_URL_FMT" "$commit")")
+		echo "$patch" | patch $patch_args -p4 --directory --dry-run /
+		echo "$patch" | patch $patch_args -p4 --directory /
 	done
 	clear_caches
 	clean_luci_restart

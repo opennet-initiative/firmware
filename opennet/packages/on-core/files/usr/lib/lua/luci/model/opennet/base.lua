@@ -272,8 +272,10 @@ function action_wifi_device(wifi_device_name)
 	local uci = require "luci.model.uci"
 	local cursor = uci.cursor()
 	local on_errors = {}
+	local on_hints = {}
 	local page_data = {}
-	page_data["on_hints"] = {}
+	page_data["on_errors"] = on_errors
+	page_data["on_hints"] = on_hints
 	local has_configured = false
 
 	local new_client_ssid = luci.http.formvalue("new_client_ssid")
@@ -298,7 +300,7 @@ function action_wifi_device(wifi_device_name)
 			cursor:commit("wireless")
 			-- Quelle: luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
 			luci.sys.call("(env -i /bin/ubus call network reload) >/dev/null 2>/dev/null")
-			table.insert(page_data["on_hints"], luci.i18n.translatef(
+			table.insert(on_hints, luci.i18n.translatef(
 				"Configured new wireless network (SSID): %s", new_client_ssid))
 		end
 	end

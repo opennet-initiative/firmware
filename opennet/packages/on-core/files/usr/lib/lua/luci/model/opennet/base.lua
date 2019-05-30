@@ -280,7 +280,7 @@ function action_wifi_device(wifi_device_name)
 
 	local new_client_ssid = luci.http.formvalue("new_client_ssid")
 	if new_client_ssid then
-		cursor.foreach("wireless", "wifi-iface", function(iface)
+		cursor:foreach("wireless", "wifi-iface", function(iface)
 			if iface.device == wifi_device_name then
 				if not has_configured then
 					cursor:set("wireless", wifi_device_name, "channel", "auto")

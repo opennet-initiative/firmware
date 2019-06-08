@@ -338,7 +338,7 @@ get_olsr_route_count_by_device() {
 	local device_regex="$1"
 	# kein Ergebnis, falls noch kein Routen-Cache vorliegt (minuetlicher cronjob)
 	[ -e "$OLSR_ROUTE_CACHE_FILE" ] || return 0
-	awk '{ print $5 }' "$OLSR_ROUTE_CACHE_FILE" | grep -c "^$device_regex$"
+	awk '{ print $5 }' "$OLSR_ROUTE_CACHE_FILE" | grep -c "^$device_regex$" || true
 }
 
 

@@ -324,7 +324,7 @@ _set_file_dict_value() {
 	# Die Sortierung sorgt fuer gute Vergleichbarkeit, um die Anzahl der
 	# Schreibvorgaenge (=Wahrscheinlichkeit von gleichzeitigem Zugriff) zu reduzieren.
 	(
-		grep -v -w -s "$field" "$status_file"
+		grep -v -w -s "$field" "$status_file" || true
 		echo "$field $new_value"
 	) | sort | update_file_if_changed "$status_file" || true
 }

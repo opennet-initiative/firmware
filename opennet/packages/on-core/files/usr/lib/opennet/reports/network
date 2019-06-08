@@ -7,7 +7,7 @@ set -eu
 
 
 # Netzwerkadressen ohne MAC-Identifikation
-ip a | grep -v "link/" >network_addresses.txt
+ip a | grep -v "link/" >network_addresses.txt || true
 
 # uci-Konfiguration
 uci -q show "network" >uci_network || true

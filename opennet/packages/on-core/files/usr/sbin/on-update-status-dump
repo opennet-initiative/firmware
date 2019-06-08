@@ -75,7 +75,7 @@ create_database() {
 print_interfaces_2_6() {
   olsr_interfaces=$(request_olsrd_txtinfo "int")
   dhcp_fwd=
-  for if_name in $(find /sys/class/net/ -mindepth 1 -maxdepth 1 -print0 | xargs -0 -r -n 1 basename | grep -v "^lo$"); do
+  for if_name in $(find /sys/class/net/ -mindepth 1 -maxdepth 1 -print0 | xargs -0 -r -n 1 basename | grep -v "^lo$" || true); do
     iface_up=$(cat "/sys/class/net/${if_name}/operstate")
     # sometimes the up-state is not recognized by /sys, than check with 'ip link'
     if [ "$iface_up" = "unknown" ] && [ -n "$(ip link show "$if_name" | awk '{if ($2 == "'"$if_name"':" && $3 ~ "UP") print $0}')" ]; then

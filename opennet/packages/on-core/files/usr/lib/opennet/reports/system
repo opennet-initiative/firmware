@@ -20,7 +20,7 @@ dmesg >"dmesg"
 
 # Wir entfernen dhcp-relevante Informationen (z.B. DHCPOFFER), um die private MAC-Adressen zu schuetzen.
 # Ansonsten duerften keine privaten Informationen enthalten sein.
-logread | grep -v DHCP >"logread"
+logread | grep -v DHCP >"logread" || true
 
 # installierte Pakete
 opkg list-installed >opkg_installed.txt

@@ -99,7 +99,7 @@ warn_if_not_installed_module() {
 ## @details Die Liste kann in der Datei ON_CORE_DEFAULTS_FILE angepasst werden.
 get_on_modules() {
 	# zeilenweise splitten (wir erwarten nur kleine Buchstaben und Zahlen im Namen)
-	get_on_core_default "on_modules" | sed 's/[^a-z0-9-]/\n/g' | grep -v "^$"
+	get_on_core_default "on_modules" | sed 's/[^a-z0-9-]/\n/g' | grep -v "^$" || true
 }
 
 

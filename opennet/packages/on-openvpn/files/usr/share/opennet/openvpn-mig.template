@@ -35,6 +35,7 @@ mute-replay-warnings
 
 dev tun-on-user
 dev-type tun
+txqueuelen 1000
 
 script-security 2
 

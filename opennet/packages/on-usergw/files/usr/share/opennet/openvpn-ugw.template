@@ -22,6 +22,7 @@ mute-replay-warnings
 # mit der Variable "MESH_OPENVPN_DEVICE_PREFIX" synchron halten
 dev tap
 dev-type tap
+txqueuelen 1000
 
 script-security 2
 

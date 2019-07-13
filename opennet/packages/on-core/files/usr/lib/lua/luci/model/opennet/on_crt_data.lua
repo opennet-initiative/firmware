@@ -15,51 +15,37 @@ $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 require("luci.sys")
 require("luci.http")
 require("luci.i18n")
+require("luci.model.opennet.funcs")
 
-function split(str, pat)
-	local t = {}  -- NOTE: use {n = 0} in Lua-5.0
-	local fpat = "(.-)" .. pat
-	local last_end = 1
-	local s, e, cap = str:find(fpat, 1)
-	while s do
-		if s ~= 1 or cap ~= "" then
-		table.insert(t,cap)
-		end
-		last_end = e+1
-		s, e, cap = str:find(fpat, last_end)
+
+function split_lines_into_table_rows(lines)
+	for _, line in ipairs(lines) do
+		local key = space_split(line)[1]
+		local value = trim_string(string.sub(line, string.len(key) + 1))
+		luci.http.write("<tr><td>" .. key .. "</td><td>" .. value .. "</td></tr>")
 	end
-	if last_end <= #str then
-		cap = str:sub(last_end)
-		table.insert(t, cap)
-	end
-	return t
 end
 
-function write_infotable(data)
-	luci.http.write("<table class='status_page_table' >")
-	local count = 1
-	while count < table.getn(data) do
-		if data[count] ~= "subject" then
-			luci.http.write("<tr><td>" .. data[count] .. "</td><td>" .. data[count+1] .. "</td></tr>")
-			count = count + 1
-		end
-		count = count + 1
-	end
-	luci.http.write("</table></div>")
-end
 
 function display_csr_infotable(cert_type)
 	local cert_info = get_ssl_cert_info(cert_type)
 	local filename = cert_info.filename_prefix .. ".csr"
-	local on_csr_data = split(luci.sys.exec("openssl req -in " .. filename .. " -nameopt sep_comma_plus,lname -subject -noout"), '[,=\n]')
 	luci.http.write("<div><h4>" .. luci.i18n.translate("Certificate Request contents") .. "</h4>")
-	write_infotable(on_csr_data)
+	luci.http.write('<table class="status_page_table" >')
+	split_lines_into_table_rows(line_split(on_function("get_ssl_csr_subject_components", {filename})))
+	luci.http.write("</table>")
+	luci.http.write("</div>")
 end
+
 
 function display_crt_infotable(cert_type)
 	local cert_info = get_ssl_cert_info(cert_type)
 	local filename = cert_info.filename_prefix .. ".crt"
-	local on_crt_data = split(luci.sys.exec("openssl x509 -in " .. filename .. " -nameopt sep_comma_plus,lname -subject -enddate -noout"), '[,=\n]')
 	luci.http.write("<div><h4>" .. luci.i18n.translate("Certificate contents") .. "</h4>")
-	write_infotable(on_crt_data)
+	luci.http.write('<table class="status_page_table" >')
+	split_lines_into_table_rows(line_split(on_function("get_ssl_certificate_subject_components", {filename})))
+	luci.http.write("<tr><td>" .. luci.i18n.translate("Expiry date") .. "</td><td>"
+		.. trim_string(on_function("get_ssl_certificate_enddate")) .. "</td></tr>")
+	luci.http.write("</table>")
+	luci.http.write("</div>")
 end

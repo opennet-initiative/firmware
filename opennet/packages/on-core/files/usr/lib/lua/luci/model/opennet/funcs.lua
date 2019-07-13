@@ -362,31 +362,22 @@ function generate_csr(cert_type, openssl)
 	local cert_info = get_ssl_cert_info(cert_type)
 	if openssl.organizationName and openssl.commonName and openssl.EmailAddress then
 		nixio.fs.mkdirr(cert_info.cert_dir)
-		local command = "export openssl_countryName='"..openssl.countryName.."'; "..
-						"export openssl_provinceName='"..openssl.provinceName.."'; "..
-						"export openssl_localityName='"..openssl.localityName.."'; "..
-						"export openssl_organizationalUnitName='"..openssl.organizationalUnitName.."'; "..
-						"export openssl_organizationName='"..openssl.organizationName.."'; "..
-						"export openssl_commonName='"..openssl.commonName.."'; "..
-						"export openssl_EmailAddress='"..openssl.EmailAddress.."'; "..
-						"openssl req -config /etc/ssl/on_openssl.cnf -batch -nodes -new -days "..openssl.days..
-							" -keyout ".. cert_info.filename_prefix .. ".key"..
-							" -out ".. cert_info.filename_prefix .. ".csr >/tmp/ssl.out"
-		os.execute(command)
-		nixio.fs.chmod(cert_info.filename_prefix .. ".key", 600)
-		nixio.fs.chmod(cert_info.filename_prefix .. ".csr", 600)
-	end
-end
-
-
-function get_private_key_id(cert_type)
-	local cert_info = get_ssl_cert_info(cert_type)
-	local filename = cert_info.filename_prefix .. ".key"
-	if nixio.fs.stat(filename) then
-		local id_output = trim_string(luci.sys.exec("openssl rsa -modulus -noout <'" .. filename .. "'"))
-		return generic_split(id_output, "[^=]+")[2]
-	else
-		return nil
+		local key_filename = cert_info.filename_prefix .. ".key"
+		local csr_filename = cert_info.filename_prefix .. ".csr"
+		on_function("generate_ssl_key", {key_filename})
+		on_function("generate_ssl_certificate_request", {
+			csr_filename,
+			key_filename,
+			openssl.countryName,
+			openssl.provinceName,
+			openssl.localityName,
+			openssl.organizationalUnitName,
+			openssl.organizationName,
+			openssl.EmailAddress,
+			openssl.days,
+		})
+		nixio.fs.chmod(key_filename, 600)
+		nixio.fs.chmod(csr_filename, 600)
 	end
 end
 

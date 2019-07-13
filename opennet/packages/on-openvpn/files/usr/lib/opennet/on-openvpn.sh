@@ -241,8 +241,7 @@ get_mig_connection_test_age() {
 ## @details Liefere eine leere Zeichenkette zurück, falls kein Zertifikat vorhanden ist.
 get_client_cn() {
 	[ -e "$MIG_OPENVPN_DIR/on_aps.crt" ] || return 0
-	openssl x509 -in "$MIG_OPENVPN_DIR/on_aps.crt" \
-		-subject -nameopt multiline -noout 2>/dev/null | awk '/commonName/ {print $3}'
+	get_ssl_certificate_cn "$MIG_OPENVPN_DIR/on_aps.crt"
 }
 
 

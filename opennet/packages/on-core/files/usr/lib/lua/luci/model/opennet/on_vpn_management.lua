@@ -69,13 +69,11 @@ function check_cert_status(cert_type)
 	local csr_filename = cert_info.filename_prefix .. ".csr"
 	local key_filename = cert_info.filename_prefix .. ".key"
 	local crt_filename = cert_info.filename_prefix .. ".crt"
-	local post_processing = "2>/dev/null | md5sum"
 	local certstatus = {}
 	certstatus.on_csr_exists = file_exists(csr_filename)
 	if certstatus.on_csr_exists then
 		certstatus.on_csr_date = nixio.fs.stat(csr_filename, "mtime")
-		certstatus.on_csr_modulus = space_split(trim_string(
-		        luci.sys.exec("openssl req -noout -modulus -in '" .. csr_filename .. "' " .. post_processing)))[1]
+		certstatus.on_csr_modulus = trim_string(on_function("get_ssl_object_hash", {csr_filename, "req"}))
 	else
 		certstatus.on_csr_date = ""
 		certstatus.on_csr_modulus = ""
@@ -83,8 +81,7 @@ function check_cert_status(cert_type)
 	certstatus.on_key_exists = file_exists(key_filename)
 	if certstatus.on_key_exists then
 		certstatus.on_key_date = nixio.fs.stat(key_filename, "mtime")
-		certstatus.on_key_modulus = space_split(trim_string(
-		        luci.sys.exec("openssl rsa -noout -modulus -in '" .. key_filename .. "' " .. post_processing)))[1]
+		certstatus.on_key_modulus = trim_string(on_function("get_ssl_object_hash", {key_filename, "rsa"}))
 	else
 		certstatus.on_key_date = ""
 		certstatus.on_key_modulus = ""
@@ -92,8 +89,7 @@ function check_cert_status(cert_type)
 	certstatus.on_crt_exists = file_exists(crt_filename)
 	if certstatus.on_crt_exists then
 		certstatus.on_crt_date = nixio.fs.stat(crt_filename, "mtime")
-		certstatus.on_crt_modulus = space_split(trim_string(
-		        luci.sys.exec("openssl x509 -noout -modulus -in '" .. crt_filename .. "' " .. post_processing)))[1]
+		certstatus.on_crt_modulus = trim_string(on_function("get_ssl_object_hash", {crt_filename, "x509"}))
 	else
 		certstatus.on_crt_date = ""
 		certstatus.on_crt_modulus = ""

@@ -310,7 +310,7 @@ function trim_string(s)
 	if not s then
 		return s
 	else
-		return (s:gsub("^%s*(%S+)%s*$", "%1"))
+		return (s:gsub("^%s*(.-)%s*$", "%1"))
 	end
 end
 

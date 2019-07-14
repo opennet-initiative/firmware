@@ -842,6 +842,10 @@ get_potential_error_messages() {
 	#    Im Anschluss an den obigen (26) Fehlversuch, fuer ein logisches Netzwerk-Interface den
 	#    rp_filter zu deaktivieren, wird diese Warnung ausgegeben. Sie ist nicht relevant.
 	filters="${filters}"'|WARN\(os_interface\).*Could not disable (the IP spoof filter|ICMP redirects)'
+	# 28) MediaTek Nand driver init, version v2.1 Fix AHB virt2phys error
+	#    Im Boot-Log des EdgeRouter (ERX) taucht diese informative Meldung auf, die leider das
+	#    Wort "error" enthält.
+	filters="${filters}"'|MediaTek Nand driver init, version v.* Fix AHB virt2phys error'
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.

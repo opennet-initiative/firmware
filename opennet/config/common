@@ -25,6 +25,9 @@ CONFIG_KERNEL_MAGIC_SYSRQ=n
 CONFIG_KERNEL_COREDUMP=n
 CONFIG_KERNEL_ELF_CORE=n
 
+# Fuer wifi und debugging
+CONFIG_KERNEL_RELAY=y
+
 # busybox-Konfiguration
 CONFIG_BUSYBOX_CONFIG_IFCONFIG=n
 # "ip-tiny" wird separat installiert

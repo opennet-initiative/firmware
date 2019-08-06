@@ -95,7 +95,6 @@ get_ssl_csr_subject_components() {
 
 get_ssl_certificate_enddate() {
 	local filename="$1"
-	local attribute="$2"
 	[ -e "$filename" ] || return 0
 	case "$SSL_LIBRARY" in
 		openssl)

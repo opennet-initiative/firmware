@@ -45,7 +45,7 @@ function display_crt_infotable(cert_type)
 	luci.http.write('<table class="status_page_table" >')
 	split_lines_into_table_rows(line_split(on_function("get_ssl_certificate_subject_components", {filename})))
 	luci.http.write("<tr><td>" .. luci.i18n.translate("Expiry date") .. "</td><td>"
-		.. trim_string(on_function("get_ssl_certificate_enddate")) .. "</td></tr>")
+		.. trim_string(on_function("get_ssl_certificate_enddate", {filename})) .. "</td></tr>")
 	luci.http.write("</table>")
 	luci.http.write("</div>")
 end

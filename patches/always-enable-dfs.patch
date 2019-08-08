@@ -1,3 +1,4 @@
+Fix für defektes DFS von https://patchwork.kernel.org/patch/10986957/
 Ermögliche selektiv das Aktivieren von DFS auch im Monitor Mode.
 
 Aktivieren
@@ -15,7 +16,7 @@ Index: on_firmware/openwrt/package/kernel/mac80211/patches/ath/498_always_enable
 ===================================================================
 --- /dev/null
 +++ on_firmware/openwrt/package/kernel/mac80211/patches/ath/498_always_enable_dfs.patch
-@@ -0,0 +1,96 @@
+@@ -0,0 +1,116 @@
 +--- a/drivers/net/wireless/ath/ath9k/channel.c	2016-01-15 13:00:08.000000000 +0100
 ++++ b/drivers/net/wireless/ath/ath9k/channel.c	2017-01-02 00:29:17.023553203 +0100
 +@@ -80,7 +80,8 @@
@@ -90,6 +91,27 @@ Index: on_firmware/openwrt/package/kernel/mac80211/patches/ath/498_always_enable
 +
 + 	spin_lock_bh(&sc->chan_lock);
 +
++@@ -815,6 +817,7 @@
++ 	struct ath_common *common = ath9k_hw_common(ah);
++ 	struct ieee80211_hdr *hdr;
++ 	bool discard_current = sc->rx.discard_next;
+++	bool is_phyerr;
++ 
++ 	/*
++ 	 * Discard corrupt descriptors which are marked in
++@@ -827,8 +830,11 @@
++ 
++ 	/*
++ 	 * Discard zero-length packets and packets smaller than an ACK
+++	 * which are not PHY_ERROR (short radar pulses have a length of 3)
++ 	 */
++-	if (rx_stats->rs_datalen < 10) {
+++	is_phyerr = rx_stats->rs_status & ATH9K_RXERR_PHY;
+++	if (!rx_stats->rs_datalen ||
+++	    (rx_stats->rs_datalen < 10 && !is_phyerr)) {
++ 		RX_STAT_INC(rx_len_err);
++ 		goto corrupt;
++ 	}
 +--- a/drivers/net/wireless/ath/ath9k/init.c	2017-01-06 22:11:58.251673645 +0100
 ++++ b/drivers/net/wireless/ath/ath9k/init.c	2017-01-06 22:36:34.600625015 +0100
 +@@ -45,6 +45,10 @@

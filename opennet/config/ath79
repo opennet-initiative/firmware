@@ -11,5 +11,6 @@ CONFIG_PACKAGE_ATH_DYNACK=y
 
 # Add options for Nanostation AC and AC loco
 CONFIG_PACKAGE_kmod-ath10k-ct=m
+CONFIG_PACKAGE_ATH10K_SPECTRAL=y
 CONFIG_ATH10K-CT_LEDS=m
 CONFIG_PACKAGE_ath10k-firmware-qca988x-ct=m

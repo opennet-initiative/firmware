@@ -16,7 +16,24 @@ Index: on_firmware/openwrt/package/kernel/mac80211/patches/ath/496_radar_counter
 + /**
 +  * get_dfs_domain_radar_types() - get radar types for a given DFS domain
 +  * @param domain DFS domain
-+@@ -294,8 +297,13 @@
++@@ -292,6 +292,15 @@
++ 		dpd_reset(dpd);
++ 	dpd->last_pulse_ts = event->ts;
++ 
+++
+++	/* Apply radar threshold according to ETSI EN 301893 V2.1.1, D2.
+++	 * Only signals stronger than -64 dBm (at 0 dBi) have to be detected. 
+++	 * To be safe we use a very conservative threshold of rssi 10.
+++	 */
+++
+++	if (11 > event->rssi) 
+++		return false;
+++
++ 	/* do type individual pattern matching */
++ 	for (i = 0; i < dpd->num_radar_types; i++) {
++ 		struct pri_detector *pd = cd->detectors[i];
++
++@@ -299,8 +302,13 @@
 + 		if (ps != NULL) {
 + 			if (rs != NULL)
 + 				memcpy(rs, pd->rs, sizeof(*rs));
@@ -32,3 +49,5 @@ Index: on_firmware/openwrt/package/kernel/mac80211/patches/ath/496_radar_counter
 + 				"count=%d, count_false=%d\n",
 +				event->freq, pd->rs->type_id,
 +				ps->pri, ps->count, ps->count_falses);
+--- dfs_pattern_detector.c.orig	2019-09-12 09:28:52.726941580 +0200
++++ dfs_pattern_detector.c	2019-09-12 09:11:27.800035106 +0200

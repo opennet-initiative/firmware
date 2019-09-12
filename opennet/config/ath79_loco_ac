@@ -1,0 +1,23 @@
+#generate ubnt loco ac image including all needed drivers
+#general ath79 image needs loading of drivers afterwards
+
+#options taken from ath79 file
+CONFIG_TARGET_ROOTFS_JFFS2=n
+
+CONFIG_ATH_USER_REGD=y
+CONFIG_PACKAGE_ATH_DFS=y
+CONFIG_PACKAGE_ATH_DEBUG=y
+CONFIG_PACKAGE_ATH_SPECTRAL=y
+CONFIG_PACKAGE_ATH_DYNACK=y
+
+# Add more options for ath10k
+CONFIG_PACKAGE_ATH10K_SPECTRAL=y
+CONFIG_ATH10K-CT_LEDS=m
+
+#option for loco ac
+CONFIG_TARGET_ath79_generic_DEVICE_ubnt_nanostation-ac-loco=y
+CONFIG_TARGET_PROFILE="DEVICE_ubnt_nanostation-ac-loco"
+CONFIG_DEFAULT_ath10k-firmware-qca988x-ct=y
+CONFIG_DEFAULT_kmod-ath10k-ct=y
+CONFIG_DEFAULT_kmod-usb-core=y
+CONFIG_DEFAULT_kmod-usb2=y

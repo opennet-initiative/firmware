@@ -21,3 +21,9 @@ CONFIG_DEFAULT_ath10k-firmware-qca988x-ct=y
 CONFIG_DEFAULT_kmod-ath10k-ct=y
 CONFIG_DEFAULT_kmod-usb-core=y
 CONFIG_DEFAULT_kmod-usb2=y
+
+#make 2.4GHz interface via module only because we do not need it
+CONFIG_PACKAGE_kmod-ath5k=m
+CONFIG_PACKAGE_kmod-ath9k=m
+CONFIG_PACKAGE_kmod-ath9k-common=m
+

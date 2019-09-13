@@ -23,10 +23,10 @@ Index: on_firmware/openwrt/package/kernel/mac80211/patches/ath/496_radar_counter
 ++
 ++	/* Apply radar threshold according to ETSI EN 301893 V2.1.1, D2.
 ++	 * Only signals stronger than -64 dBm (at 0 dBi) have to be detected. 
-++	 * To be safe we use a very conservative threshold of rssi 10.
+++	 * To be safe we use a very conservative threshold of rssi 20.
 ++	 */
 ++
-++	if (11 > event->rssi) 
+++	if (20 > event->rssi) 
 ++		return false;
 ++
 + 	/* do type individual pattern matching */

@@ -19,9 +19,6 @@ help:
 	$(info - list-subarchs	alle Sub-Architekturen der aktuellen Architektur anzeigen (via 'SUBARCH=foo make ar71xx' compilieren))
 	$(info - ARCH		eine Architektur compilieren (inkl. aller standardmaessig aktiven Sub-Architekturen))
 
-list-archs:
-	$(info $(ARCHS))
-
 list:
 	@echo $(SMALLCONFIG) $(BIGCONFIG) | tr " " "\n"
 

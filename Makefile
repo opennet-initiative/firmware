@@ -42,6 +42,12 @@ $(ARCHS): feeds translate
 	@# alte Build-Images erzeugen (seit Chaos Calmer enthalten die Namen die Release-Nummer - er ist also veraenderlich)
 	@[ -d "$(OPENWRT_DIR)/bin/$@" ] && find "$(OPENWRT_DIR)/bin/$@" -maxdepth 1 -type f -name "openwrt-*" -delete || true
 	$(MAKE) -C "$(OPENWRT_DIR)"
+	@#if ath79 then build ubnt-loco-ac afterwards with special build config. Needed to have ath10k statically included.
+	@if [ "$@" = "ath79" ]; then \
+		echo "Building additional target architecture: ath79_loco_ac"; \
+		$(MAKE) "config-ath79_loco_ac"; \
+		$(MAKE) -C "$(OPENWRT_DIR)"; \
+	fi
 
 config-%:
 	@[ -f "$(OPENWRT_DIR)/feeds.conf" ] || echo "**** FEHLER! DATEI feeds.conf FEHLT. Fuehre bitte 'make feeds' aus. ****"

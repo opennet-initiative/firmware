@@ -8,10 +8,9 @@ GIT_COMMIT_HASH = $(shell git show --format="format:%h" --no-patch)
 GIT_CURRENT_RELEASE_TAG = $(shell git tag -l --points-at HEAD | sed 's/^v//g')
 NEXT_VERSION = $(shell grep "^CONFIG_VERSION_NUMBER=" "$(COMMON_CONFIG)" | cut -f 2 -d '"')
 
-SMALLCONFIG = bcm47xx
-BIGCONFIG = ar71xx ath79 ixp4xx ramips ramips7620 raspberry sunxi uml x86 ath79_loco_ac
+ARCHITECTURES = ar71xx ath79 bcm47xx ixp4xx ramips ramips7620 raspberry sunxi uml x86 ath79_loco_ac
 
-.PHONY: all list $(SMALLCONFIG) $(BIGCONFIG) save-config check-old-config list-subarch help
+.PHONY: all list $(ARCHITECTURES) save-config check-old-config list-subarch help
 
 help:
 	$(info Die folgenden Ziele sind verfügbar:)
@@ -20,20 +19,17 @@ help:
 	$(info - ARCH		eine Architektur compilieren (inkl. aller standardmaessig aktiven Sub-Architekturen))
 
 list:
-	@echo $(SMALLCONFIG) $(BIGCONFIG) | tr " " "\n"
+	@printf '%s\n' $(ARCHITECTURES)
 
 ARCH_PREFIX=$(shell grep "^CONFIG_TARGET_" "$(CURRENT_CONFIG)" | head -1 | cut -f 1 -d =)
 list-subarchs:
 	@grep "$(ARCH_PREFIX)_" "$(CURRENT_CONFIG)" | sed 's/^.*$(ARCH_PREFIX)_//' | cut -f 1 -d " " | cut -f 1 -d "="
 
-$(BIGCONFIG) $(SMALLCONFIG):
+$(ARCHITECTURES):
 	@$(MAKE) save-config
 	@# The order of settings is important: earlier settings ("common") are overwritten by
 	@# target-specific ("$@") options.
 	@cat "$(COMMON_CONFIG)" "$@" > "$(CURRENT_CONFIG)"
-	@# replace modules with builtins ('=m' -> '=y') for big devices
-	@# TODO: pruefen, wie/ob wir zukuenftig small/big (4/8 MB) erzeugen wollen; das Aktivieren aller "m"-Pakete ist keine Option
-	@#echo " $(BIGCONFIG) " | grep -q " $@ " && sed -i 's/=m$$/=y/i' "$(CURRENT_CONFIG)"
 	@# Optionally an environment variable 'SUBARCH' may be given.
 	@# Add something like "CONFIG_TARGET_ar71xx_generic_TLWR1043=y" to
 	@# the config file if the environment variable SUBARCH is given.
@@ -57,4 +53,3 @@ check-old-config:
 	@if test -e "$(PREVIOUS_CONFIG)" && diff -q "$(CURRENT_CONFIG)" "$(PREVIOUS_CONFIG)" >/dev/null; then \
 			mv "$(PREVIOUS_CONFIG)" "$(CURRENT_CONFIG)"; \
 		else	rm -f "$(PREVIOUS_CONFIG)"; fi
-

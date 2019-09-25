@@ -8,7 +8,7 @@ GIT_COMMIT_HASH = $(shell git show --format="format:%h" --no-patch)
 GIT_CURRENT_RELEASE_TAG = $(shell git tag -l --points-at HEAD | sed 's/^v//g')
 NEXT_VERSION = $(shell grep "^CONFIG_VERSION_NUMBER=" "$(COMMON_CONFIG)" | cut -f 2 -d '"')
 
-ARCHITECTURES = ar71xx ath79 bcm47xx ixp4xx ramips ramips7620 raspberry sunxi uml x86 ath79_loco_ac
+ARCHITECTURES = ar71xx ath79 bcm47xx ixp4xx ramips ramips7620 raspberry sunxi uml x86
 
 .PHONY: all list $(ARCHITECTURES) save-config check-old-config list-subarch help
 

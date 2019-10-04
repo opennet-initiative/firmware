@@ -35,6 +35,7 @@ function index()
 	on_entry_no_auth({"status", "network"}, call("status_network")).leaf = true
 	on_entry_no_auth({"status", "modules"}, call("status_modules")).leaf = true
 	on_entry_no_auth({"status", "issues"}, call("status_issues")).leaf = true
+	on_entry_no_auth({"status", "firmware_update_info"}, call("status_firmware_update_info")).leaf = true
 
 
 	-- Grundlegende Einstellungen (/basis)

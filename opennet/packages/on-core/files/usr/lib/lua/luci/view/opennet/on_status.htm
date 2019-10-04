@@ -95,6 +95,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 				  {"modules_section", i18n("Opennet Modules"), url="modules"},
 				  {"issues_section", i18n("Issue Indicators"), url="issues"},
 				  {"hardware_section", i18n("Hardware Information"), rawcontent=hardare_info},
+				  {"latest_firmware", i18n("Firmware Update"), url="firmware_update_info"},
 				  {"uptime_section", i18n("Uptime"), content=luci.sys.exec("uptime")},
 				  {"system_section", i18n("System"), content=luci.sys.exec("uname -a")},
 			  }) do

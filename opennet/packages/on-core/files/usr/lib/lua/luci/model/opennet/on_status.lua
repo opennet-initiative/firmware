@@ -236,3 +236,14 @@ function status_modules()
 	end
 	luci.http.write(result)
 end
+
+
+function status_firmware_update_info()
+	local newer_available_version = on_function("get_on_firmware_version_latest_stable_if_outdated")
+	if is_string_empty(newer_available_version) then
+		result = luci.i18n.translate("The firmware seems to be up-to-date.")
+	else
+		result = luci.i18n.translatef("A newer firmware version is available: %s", newer_available_version)
+	end
+	luci.http.write(result)
+end

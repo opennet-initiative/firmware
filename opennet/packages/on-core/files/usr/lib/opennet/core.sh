@@ -852,6 +852,10 @@ get_potential_error_messages() {
 	#    Im Boot-Log des EdgeRouter (ERX) taucht diese informative Meldung auf, die leider das
 	#    Wort "error" enthält.
 	filters="${filters}"'|MediaTek Nand driver init, version v.* Fix AHB virt2phys error'
+	# 29) ath10k_pci 0000:00:00.0: Direct firmware load for ath10k/pre-cal-pci-0000:00:00.0.bin failed with error -2
+	#    Die Nanostation AC loco schreibt folgende Fehlermeldung ins Kernel-Log.
+	#    Das WLAN-Interface funktioniert jedoch scheinbar problemlos.
+	filters="${filters}"'|ath10k_pci 0000:00:00.0: Direct firmware load for ath10k/pre-cal-pci-0000:00:00.0.bin failed with error -2'
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.

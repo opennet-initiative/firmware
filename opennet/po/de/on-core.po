@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2019-10-04 06:29+0200\n"
+"PO-Revision-Date: 2019-10-04 22:31+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -482,9 +482,9 @@ msgstr "Keine Zusammenfassung verfügbar"
 msgid "No response"
 msgstr "Keine Antwort"
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:75
-msgid "No wireless networks were found"
-msgstr "Es wurden keine Drahtlosnetzwerke gefunden."
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:73
+msgid "No wireless Opennet networks were found"
+msgstr "Es wurden keine Opennet-WLAN-Netze gefunden"
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_settings.htm:48
 msgid ""

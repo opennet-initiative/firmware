@@ -1,19 +1,19 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:720
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:705
 msgid "%Y/%m/%d - %H:%M"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:722
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:707
 msgid "%d days and %d hours"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:724
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:709
 msgid "%d hours and %d minutes"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:726
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:711
 msgid "%d minutes and %d seconds"
 msgstr ""
 
@@ -175,7 +175,7 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:477
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:462
 msgid "Error:"
 msgstr ""
 
@@ -193,11 +193,7 @@ msgstr ""
 msgid "FREE"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:41
-msgid "Failed to scan for networks. Try again later or reboot the device."
-msgstr ""
-
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:702
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:687
 msgid ""
 "Failed to send Certificate Signing Request. You may want to use a manual "
 "approach instead. Sorry!"
@@ -300,27 +296,27 @@ msgstr ""
 msgid "Internet Sharing"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:534
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:519
 msgid "Invalid host"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:546
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:531
 msgid "Invalid path"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:536
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:521
 msgid "Invalid port"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:548
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:533
 msgid "Invalid service details"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:542
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:527
 msgid "Invalid service scheme"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:544
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:529
 msgid "Invalid service type"
 msgstr ""
 
@@ -405,7 +401,7 @@ msgid "NTP (Time synchronization)"
 msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:75
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:46
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:44
 msgid "Name"
 msgstr ""
 
@@ -454,8 +450,8 @@ msgstr ""
 msgid "No response"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:75
-msgid "No wireless networks were found"
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:73
+msgid "No wireless Opennet networks were found"
 msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_settings.htm:48
@@ -596,7 +592,7 @@ msgstr ""
 msgid "Removing modules in background."
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:81
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:79
 msgid "Repeat scan"
 msgstr ""
 
@@ -621,11 +617,11 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:592
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:577
 msgid "Service Action: Invalid service name"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:598
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:583
 msgid "Service Action: missing 'service_type' for 'move' action"
 msgstr ""
 
@@ -645,8 +641,8 @@ msgstr ""
 msgid "Share your local internet connection with other members"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:45
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:61
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:43
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:59
 msgid "Signal"
 msgstr ""
 
@@ -750,7 +746,7 @@ msgid ""
 "directly reachable from the outside."
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:216
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:201
 msgid ""
 "The module '%s' is currently disabled (see 'Opennet -> Base -> Modules')."
 msgstr ""
@@ -802,7 +798,7 @@ msgid ""
 "frustrating instability issues."
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:539
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:524
 msgid "Unknown protocol"
 msgstr ""
 
@@ -849,7 +845,7 @@ msgstr ""
 msgid "and"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:61
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:59
 msgid "dB"
 msgstr ""
 

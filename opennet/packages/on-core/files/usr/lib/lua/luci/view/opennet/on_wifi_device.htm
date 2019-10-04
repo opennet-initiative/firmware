@@ -37,9 +37,7 @@ You may obtain a copy of the License at
 
 <div class="cbi-map">
 <fieldset class="cbi-section">
-<% if wifi_scan_result == nil then %>
-	<%= html_box(luci.i18n.translate("Failed to scan for networks. Try again later or reboot the device."), "error") %>
-<% elseif #wifi_scan_result > 0 then %>
+<% if #wifi_scan_result > 0 then %>
 	<table class="cbi-section-table" style="empty-cells:hide">
 		<tr>
 			<th class="cbi-section-table-cell"><%:Signal%></th>

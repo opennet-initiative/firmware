@@ -1,0 +1,20 @@
+diff --git a/routing/olsrd/Makefile b/routing/olsrd/Makefile
+index 85f2a75..5f4e1e3 100644
+--- a/routing/olsrd/Makefile
++++ b/routing/olsrd/Makefile
+@@ -8,13 +8,13 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=olsrd
+-PKG_VERSION:=0.9.7
++PKG_VERSION:=0.9.8
+ PKG_RELEASE=$(PKG_SOURCE_VERSION)
+ 
+ PKG_SOURCE_PROTO:=git
+ PKG_SOURCE_URL:=https://github.com/OLSR/olsrd.git
+ PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+-PKG_SOURCE_VERSION:=v0.9.7
++PKG_SOURCE_VERSION:=v0.9.8
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
+ 
+ PKG_BUILD_PARALLEL:=0

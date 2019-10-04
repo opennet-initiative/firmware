@@ -1,25 +1,29 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:729
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:720
 msgid "%Y/%m/%d - %H:%M"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:731
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:722
 msgid "%d days and %d hours"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:733
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:724
 msgid "%d hours and %d minutes"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:735
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:726
 msgid "%d minutes and %d seconds"
 msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_vpn_key_generation.htm:19
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_vpn_key_management.htm:131
 msgid "...show..."
+msgstr ""
+
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:246
+msgid "A newer firmware version is available: %s"
 msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:32
@@ -50,7 +54,7 @@ msgstr ""
 msgid "Available Report"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:43
+#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:44
 msgid "Base"
 msgstr ""
 
@@ -77,11 +81,11 @@ msgstr ""
 msgid "Certificate Request (.csr)"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_crt_data.lua:55
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_crt_data.lua:33
 msgid "Certificate Request contents"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_crt_data.lua:63
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_crt_data.lua:44
 msgid "Certificate contents"
 msgstr ""
 
@@ -101,7 +105,7 @@ msgstr ""
 msgid "Configured Mesh Wifi"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/base.lua:301
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/base.lua:303
 msgid "Configured new wireless network (SSID): %s"
 msgstr ""
 
@@ -171,7 +175,7 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:486
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:477
 msgid "Error:"
 msgstr ""
 
@@ -179,6 +183,10 @@ msgstr ""
 msgid ""
 "Expected Transmission Count: Quality of the Connection to the Gateway "
 "reagrding OLSR"
+msgstr ""
+
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_crt_data.lua:47
+msgid "Expiry date"
 msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:73
@@ -189,10 +197,14 @@ msgstr ""
 msgid "Failed to scan for networks. Try again later or reboot the device."
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:711
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:702
 msgid ""
 "Failed to send Certificate Signing Request. You may want to use a manual "
 "approach instead. Sorry!"
+msgstr ""
+
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:98
+msgid "Firmware Update"
 msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_portmapping.htm:87
@@ -288,27 +300,27 @@ msgstr ""
 msgid "Internet Sharing"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:543
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:534
 msgid "Invalid host"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:555
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:546
 msgid "Invalid path"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:545
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:536
 msgid "Invalid port"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:557
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:548
 msgid "Invalid service details"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:551
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:542
 msgid "Invalid service scheme"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:553
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:544
 msgid "Invalid service type"
 msgstr ""
 
@@ -380,7 +392,7 @@ msgstr ""
 msgid "Model: %s"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:55
+#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:56
 msgid "Modules"
 msgstr ""
 
@@ -410,7 +422,7 @@ msgstr ""
 msgid "Neighbors (OLSRv2)"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:46
+#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:47
 msgid "Network"
 msgstr ""
 
@@ -473,7 +485,7 @@ msgstr ""
 msgid "Opennet Firmware version %s"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:48
+#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:49
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_network.htm:15
 msgid "Opennet ID"
 msgstr ""
@@ -532,7 +544,7 @@ msgstr ""
 msgid "Please wait a minute before reloading this page for an updated status."
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:57
+#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:58
 msgid "Port-Mapping"
 msgstr ""
 
@@ -588,7 +600,7 @@ msgstr ""
 msgid "Repeat scan"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:58
+#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:59
 msgid "Report"
 msgstr ""
 
@@ -609,11 +621,11 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:601
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:592
 msgid "Service Action: Invalid service name"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:607
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:598
 msgid "Service Action: missing 'service_type' for 'move' action"
 msgstr ""
 
@@ -625,7 +637,7 @@ msgstr ""
 msgid "Services in the Opennet"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:56
+#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:57
 msgid "Settings"
 msgstr ""
 
@@ -666,7 +678,7 @@ msgstr ""
 msgid "Support for OLSRv2 and IPv6"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:99
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:100
 msgid "System"
 msgstr ""
 
@@ -704,6 +716,10 @@ msgid ""
 "The WAN Interface is used for your local Internet-Connection (for instance "
 "DSL). It will be used for your local traffic and to map Usergateways into "
 "Opennet = Share your Internet Connection if you choose to."
+msgstr ""
+
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:244
+msgid "The firmware seems to be up-to-date."
 msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_vpn_key_generation.htm:25
@@ -786,7 +802,7 @@ msgid ""
 "frustrating instability issues."
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:548
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/funcs.lua:539
 msgid "Unknown protocol"
 msgstr ""
 
@@ -794,7 +810,7 @@ msgstr ""
 msgid "Upload your request"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:98
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:99
 msgid "Uptime"
 msgstr ""
 
@@ -818,7 +834,7 @@ msgstr ""
 msgid "Wireless"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:52
+#: opennet/packages/on-core/files/usr/lib/lua/luci/controller/opennet/on_core.lua:53
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_wifi_device.htm:15
 msgid "Wireless Interface"
 msgstr ""
@@ -841,7 +857,7 @@ msgstr ""
 msgid "device"
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:107
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_status.htm:108
 msgid "disabled (see <a href=\"%s\">Modules</a>)"
 msgstr ""
 

@@ -26,6 +26,7 @@ FALLBACK_DNS_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 85.214.20.141"
 # fuer Insel-UGWs benoetigen wir immer einen korrekten NTP-Server, sonst schlaegt die mesh-Verbindung fehl
 # aktuelle UGW-Server, sowie der openwrt-Pool
 FALLBACK_NTP_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 0.openwrt.pool.ntp.org"
+LATEST_STABLE_FIRMWARE_VERSION_INFO_URL="https://downloads.opennet-initiative.de/openwrt/stable/latest/version.txt"
 CRON_LOCK_FILE=/var/run/on-cron.lock
 CRON_LOCK_MAX_AGE_MINUTES=15
 CRON_LOCK_WAIT_TIMEOUT_SECONDS=30
@@ -355,29 +356,34 @@ get_on_firmware_version() {
 }
 
 
-## @fn get_on_firmware_version_new()
-get_on_firmware_version_new() {
-	trap 'error_trap get_on_firmware_version_new "$*"' EXIT
-
-	local config_seed
-	config_seed=$(http_request https://downloads.opennet-initiative.de/openwrt/testing/latest/targets/ar71xx/generic/config.seed)
-	echo "$config_seed" | grep ^CONFIG_VERSION_NUMBER | sed 's/CONFIG_VERSION_NUMBER="\(.*\)".*/\1/'
+## @fn get_on_firmware_version_latest_stable()
+## @brief Liefere die aktuellste bekannte stabile Firmware-Version zurück.
+get_on_firmware_version_latest_stable() {
+	trap 'error_trap get_on_firmware_version_latest "$*"' EXIT
+	local version
+	if version=$(http_request "$LATEST_STABLE_FIRMWARE_VERSION_INFO_URL"); then
+		echo "$version"
+	else
+		# In den ersten Minuten nach dem Anschalten ist typischerweise noch keine
+		# Netzwerkverbindung verfügbar - also melden wir keine Fehler.
+		if [ "$(get_uptime_minutes)" -gt 10 ]; then
+			msg_error "Failed to retrieve firmware version. Maybe there is no network connection."
+		fi
+	fi
 }
 
 
-## @fn check_new_on_firmware_version_new()
-check_new_on_firmware_version_new() {
-	trap 'error_trap check_new_on_firmware_version_new "$*"' EXIT
-
-	local old_version
-	local new_version
-	old_version=$(get_on_firmware_version | cut -d '-' -f 3)
-	new_version=$(get_on_firmware_version_new | cut -d '-' -f 3)
-
-	if [ "$old_version" != "$new_version" ]; then
-		return 0
-	else
-		trap "" EXIT && return 1
+get_on_firmware_version_latest_stable_if_outdated() {
+	trap 'error_trap get_on_firmware_version_latest_stable_if_outdated "$*"' EXIT
+	local latest_stable_version
+	local current_numeric_version
+	local most_recent_version
+	latest_stable_version=$(get_on_firmware_version_latest_stable)
+	[ -z "$latest_stable_version" ] && return 0
+	current_numeric_version=$(get_on_firmware_version | sed 's/-unstable-/-/')
+	most_recent_version=$(printf '%s\n' "$latest_stable_version" "$current_numeric_version" | sort -V | tail -1)
+	if [ "$most_recent_version" != "$current_numeric_version" ]; then
+		echo "$most_recent_version"
 	fi
 }
 

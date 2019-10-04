@@ -52,6 +52,10 @@ build_platform() {
 	# set version number in export directories
 	get_commit_info > "$dest_dir/__${snapshot_name}__"
 
+	# allow retrieval of "latest" version by clients
+	# URL: https://downloads.opennet-initiative.de/openwrt/stable/latest/version.txt
+	echo "$snapshot_name" >"$dest_dir/version.txt"
+
 	# Update the (probably outdated) timestamp of the unrelated parent directory.
 	# (the "get_commit_info" line above is not sufficient - since the file may exist before)
 	touch "$dest_dir"

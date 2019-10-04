@@ -179,29 +179,14 @@ end
 --- @param wifi_device_name Name of the target radio device.
 --- @details The result is either 'nil' (scan failure) or a list of cells.
 function get_potential_opennet_scan_results_for_device(wifi_device_name)
-	local iw = luci.sys.wifi.getiwinfo(wifi_device_name)
-	local bss
 	local result = {}
-	local no_output = true
-	for _, bss in ipairs(iw.scanlist or { }) do
-		no_output = false
-		if bss.ssid and not bss.encryption.enabled then
-			local lower_ssid = string.lower(bss.ssid)
-			if not string.find(bss.ssid, "Telekom_FON") and not string.find(bss.ssid, "Vodafone") then
-				if bss.ssid ~= "join.opennet-initiative.de" then
-					if string.find(lower_ssid, "on") or string.find(lower_ssid, "opennet") then
-						table.insert(result, {quality=bss.quality, signal=bss.signal, ssid=bss.ssid})
-					end
-				end
-			end
-		end
+	local ssid_info_lines = on_function("get_potential_opennet_scan_results_for_device", {wifi_device_name})
+	for _, ssid_info_line in ipairs(line_split(ssid_info_lines)) do
+		local ssid_info = tab_split(ssid_info_line)
+		table.insert(result, {quality=tonumber(ssid_info[3]), signal=tonumber(ssid_info[1]), ssid=ssid_info[4]})
 	end
-	if no_output then
-		return nil
-	else
-		table.sort(result, function(a, b) return a.quality > b.quality end)
-		return result
-	end
+	table.sort(result, function(a, b) return a.quality > b.quality end)
+	return result
 end
 
 

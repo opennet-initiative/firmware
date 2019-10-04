@@ -9,17 +9,6 @@ set -eu
 ACTION=${1:-help}
 
 
-get_all_wireless_networks() {
-    local device="$1"
-    iwinfo "$device" scan \
-        | awk '{
-            if ($1 == "ESSID:") { if (name != "") print(signal"\t"channel"\t"name); split($0, tokens, /"/); name=tokens[2]; };
-            if ($1 == "Signal:") signal=$2;
-            if ($3 == "Channel:") channel=$4;
-        }' | sort -n
-}
-
-
 case "$ACTION" in
     quality)
         echo >&2 "Cancel with CTRL-C"
@@ -29,28 +18,13 @@ case "$ACTION" in
         done
         ;;
     list-networks)
-        device=${2:-wlan0}
-        scope=${3:-opennet}
-        all_networks=$(get_all_wireless_networks "$device")
-        case "$scope" in
-            all)
-                echo "$all_networks"
-                ;;
-            opennet)
-                echo "$all_networks" \
-                    | grep -E "(opennet|\bon\b)" \
-                    | grep -vF "join.opennet-initiative.de"
-                ;;
-            *)
-                echo >&2 "Invalid scope ($scope): expected one of 'all / opennet'"
-                exit 1
-                ;;
-        esac
+        device=${2:-radio0}
+        on-function get_potential_opennet_scan_results_for_device "$device"
         ;;
     help|--help)
         echo "Syntax:"
         echo "    $(basename "$0") quality [DEVICE]"
-        echo "    $(basename "$0") list-networks [DEVICE [SCOPE]]"
+        echo "    $(basename "$0") list-networks [RADIO_DEVICE"
         echo "    $(basename "$0") help"
         echo
         ;;

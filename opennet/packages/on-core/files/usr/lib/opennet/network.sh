@@ -428,5 +428,27 @@ get_ipv4_of_mac() {
 	awk '{ if ($4 == "'"$ip"'") print $1; }' /proc/net/arp | sort | head -1
 }
 
+
+get_potential_opennet_scan_results_for_device() {
+	local phy_device="$1"
+	local wlan_uci
+	local wlan_device=
+	wlan_uci=$(find_first_uci_section "wireless" "wifi-iface" "device=$phy_device")
+	[ -n "$wlan_uci" ] && wlan_device=$(uci_get "$wlan_uci.ifname")
+	# the field "ifname" is not strictly specified - thus fall back to a sane default
+	[ -z "$wlan_device" ] && wlan_device="wlan0"
+	iwinfo "$wlan_device" scan \
+		| awk '{
+			if ($1 == "ESSID:") { if ((name != "") && (encryption == "none")) print(signal"\t"channel"\t"quality"\t"name); split($0, tokens, /"/); name=tokens[2]; };
+			if ($1 == "Signal:") signal=$2;
+			if ($4 == "Quality:") quality=substr($5, 0, index($5, "/") - 1);
+			if ($3 == "Channel:") channel=$4;
+			if ($1 == "Encryption:") encryption=$2;
+		}' \
+		| sort -n \
+		| grep -E "(opennet|\bon\b)" \
+		| grep -vF "join.opennet-initiative.de" || true
+}
+
 # Ende der Doku-Gruppe
 ## @}

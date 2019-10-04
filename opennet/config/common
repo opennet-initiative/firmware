@@ -6,6 +6,10 @@ CONFIG_VERSION_NUMBER="0.5.5"
 # "VERSION_CODE" (z.B. "r2993+573-b9a408c2b4") soll nicht Teil des Image-Dateinamens sein
 CONFIG_VERSION_CODE_FILENAMES=n
 
+CONFIG_TARGET_MULTI_PROFILE=y
+CONFIG_TARGET_ALL_PROFILES=y
+CONFIG_TARGET_PER_DEVICE_ROOTFS=y
+
 # setze OpenWRT Downloadpfad+Versionsnummer explizit weil wir die OpenWRT Versionsnummer mit unserer Versionsnummer ueberschreiben.
 # TODO: diesen Wert wollen wir automatisch ermitteln lassen, um ihn nicht manuell pflegen zu muessen
 CONFIG_VERSION_REPO="http://downloads.openwrt.org/releases/18.06.2"

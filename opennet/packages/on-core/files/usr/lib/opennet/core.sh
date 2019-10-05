@@ -26,7 +26,9 @@ FALLBACK_DNS_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 85.214.20.141"
 # fuer Insel-UGWs benoetigen wir immer einen korrekten NTP-Server, sonst schlaegt die mesh-Verbindung fehl
 # aktuelle UGW-Server, sowie der openwrt-Pool
 FALLBACK_NTP_SERVERS="192.168.0.246 192.168.0.247 192.168.0.248 0.openwrt.pool.ntp.org"
-LATEST_STABLE_FIRMWARE_VERSION_INFO_URL="https://downloads.opennet-initiative.de/openwrt/stable/latest/version.txt"
+LATEST_STABLE_FIRMWARE_BASE_URL="https://downloads.opennet-initiative.de/openwrt/stable/latest"
+LATEST_STABLE_FIRMWARE_VERSION_INFO_URL="$LATEST_STABLE_FIRMWARE_BASE_URL/version.txt"
+LATEST_STABLE_FIRMWARE_UPGRADE_MAP_URL="$LATEST_STABLE_FIRMWARE_BASE_URL/device-upgrade-map.csv"
 CRON_LOCK_FILE=/var/run/on-cron.lock
 CRON_LOCK_MAX_AGE_MINUTES=15
 CRON_LOCK_WAIT_TIMEOUT_SECONDS=30
@@ -384,6 +386,27 @@ get_on_firmware_version_latest_stable_if_outdated() {
 	most_recent_version=$(printf '%s\n' "$latest_stable_version" "$current_numeric_version" | sort -V | tail -1)
 	if [ "$most_recent_version" != "$current_numeric_version" ]; then
 		echo "$most_recent_version"
+	fi
+}
+
+
+## @fn get_on_firmware_upgrade_image_url()
+## @brief Versuche die URL eines Aktualisierungs-Image zu ermitteln.
+## @details Die Ausgabe ist leer, falls keine neuere stabile Version bekannt ist oder falls die
+##    Device-Image-Map keinen Eintrag für das Geräte-Modell enthält.
+get_on_firmware_upgrade_image_url() {
+	trap 'error_trap get_on_firmware_upgrade_image_url "$*"' EXIT
+	local upgrade_map
+	local device_model_id
+	local upgrade_image_path
+	if upgrade_map=$(http_request "$LATEST_STABLE_FIRMWARE_UPGRADE_MAP_URL"); then
+		device_model_id=$(get_device_model_id)
+		if [ -n "$device_model_id" ]; then
+			upgrade_image_path=$(echo "$upgrade_map" | awk '{ if ($1 == "'"$device_model_id"'") print $2; }')
+			if [ -n "$upgrade_image_path" ]; then
+				echo "$LATEST_STABLE_FIRMWARE_BASE_URL/$upgrade_image_path"
+			fi
+		fi
 	fi
 }
 

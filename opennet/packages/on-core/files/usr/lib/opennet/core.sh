@@ -388,11 +388,18 @@ get_on_firmware_version_latest_stable_if_outdated() {
 }
 
 
-get_openwrt_arch() {
-	trap 'error_trap get_openwrt_arch "$*"' EXIT
-
-	# shellcheck source=openwrt/package/base-files/files/etc/openwrt_release
-	(. /etc/openwrt_release; echo "$DISTRIB_TARGET")
+## @fn get_device_model_id()
+## @brief Ermittle die OpenWrt-Bezeichnung des Gerätemodells
+get_device_model_id() {
+	trap 'error_trap get_device_model_id "$*"' EXIT
+	# siehe /etc/board.json: model->id
+	sh <<EOF
+		. /usr/share/libubox/jshn.sh
+		$(jshn -R /etc/board.json)
+		json_select model
+		json_get_vars id
+		echo "\$id"
+EOF
 }
 
 

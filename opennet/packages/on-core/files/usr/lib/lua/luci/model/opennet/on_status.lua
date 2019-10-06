@@ -243,7 +243,11 @@ function status_firmware_update_info()
 	if is_string_empty(newer_available_version) then
 		result = luci.i18n.translate("The firmware seems to be up-to-date.")
 	else
+		local upgrade_image_url = on_function("get_on_firmware_upgrade_image_url")
 		result = luci.i18n.translatef("A newer firmware version is available: %s", newer_available_version)
+		if not is_string_empty(upgrade_image_url) then
+			result = result .. ' (<a href="' .. upgrade_image_url .. '">' .. luci.i18n.translate("Download Image") .. '</a>)'
+		end
 	end
 	luci.http.write(result)
 end

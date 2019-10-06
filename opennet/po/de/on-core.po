@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2010-05-18 19:45+0200\n"
-"PO-Revision-Date: 2019-10-04 22:31+0200\n"
+"PO-Revision-Date: 2019-10-06 15:18+0200\n"
 "Last-Translator: Lars Kruse <devel@sumpfralle.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -33,7 +33,7 @@ msgstr "%d Minuten und %d Sekunden"
 msgid "...show..."
 msgstr "...anzeigen..."
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:246
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:247
 msgid "A newer firmware version is available: %s"
 msgstr "Eine neuere Firmware-Version ist verfügbar: %s"
 
@@ -179,6 +179,10 @@ msgstr ""
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_report.htm:31
 msgid "Download"
 msgstr "Herunterladen"
+
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:249
+msgid "Download Image"
+msgstr "Image herunterladen"
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_vpn_key_management.htm:120
 msgid "Download the CSR file"

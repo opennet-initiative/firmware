@@ -22,7 +22,7 @@ msgstr ""
 msgid "...show..."
 msgstr ""
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:246
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:247
 msgid "A newer firmware version is available: %s"
 msgstr ""
 
@@ -157,6 +157,10 @@ msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_report.htm:31
 msgid "Download"
+msgstr ""
+
+#: opennet/packages/on-core/files/usr/lib/lua/luci/model/opennet/on_status.lua:249
+msgid "Download Image"
 msgstr ""
 
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_vpn_key_management.htm:120

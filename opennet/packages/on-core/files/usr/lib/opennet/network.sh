@@ -429,15 +429,61 @@ get_ipv4_of_mac() {
 }
 
 
-get_potential_opennet_scan_results_for_device() {
+is_current_wifi_interface_channel_with_dfs() {
+	local wifi_interface="$1"
+	local channel
+	channel=$(iwinfo "$wifi_interface" info | awk '{ if ($3 == "Channel:") print $4 }')
+	echo "$channel" | grep -q "^[0-9]\+$" || return 1
+	[ "$channel" -gt 48 ]
+}
+
+
+run_iwinfo_scan() {
+	trap 'error_trap run_iwinfo_scan "'"$*"'"' EXIT
 	local phy_device="$1"
-	local wlan_uci
-	local wlan_device=
-	wlan_uci=$(find_first_uci_section "wireless" "wifi-iface" "device=$phy_device")
-	[ -n "$wlan_uci" ] && wlan_device=$(uci_get "$wlan_uci.ifname")
+	local wifi_interface_uci
+	local wifi_interface
+	local original_channel
+	local needs_auto_channel
+	wifi_interface_uci=$(find_first_uci_section "wireless" "wifi-iface" "device=$phy_device")
+	[ -z "$wifi_interface_uci" ] && return 0
 	# the field "ifname" is not strictly specified - thus fall back to a sane default
-	[ -z "$wlan_device" ] && wlan_device="wlan0"
-	iwinfo "$wlan_device" scan \
+	wifi_interface=$(uci_get "$wifi_interface_uci.ifname" "wlan0")
+	# try whether it works without any changes and exit early in case of success
+	iwinfo "$wifi_interface" scan 2>/dev/null && return 0
+	# Possible reason for failure: "scan" does not seem to work for a master on a DFS channel:
+	#   https://forum.openwrt.org/t/cannot-scan-on-5g-on-tl-wr902ac/42863/2
+	# (but sometimes it indeed works - thus we tried it in advance before, anyway)
+	# Try hard to prepare a situation where it is possible to scan the channels.
+	# Sadly this may break the HTTP connection (e.g. when accessing the wireless scan via the
+	# web interface) if the user accessed the IP of the wireless interface.
+	if [ "$(uci_get "$wifi_interface_uci.mode")" = "ap" ] && is_current_wifi_interface_channel_with_dfs "$wifi_interface"; then
+		original_channel=$(uci_get "wireless.$phy_device.channel")
+		needs_auto_channel="true"
+	else
+		needs_auto_channel="false"
+	fi
+	if [ "$needs_auto_channel" = "true" ]; then
+		# switch to a non-DFS channel
+		uci set "wireless.$phy_device.channel=48"
+		uci commit "wireless.$phy_device"
+		reload_config
+		sleep 5
+	fi
+	iwinfo "$wifi_interface" scan
+	# revert to the original setup
+	if [ "$needs_auto_channel" = "true" ]; then
+		uci set "wireless.$phy_device.channel=$original_channel"
+		uci commit "wireless.$phy_device"
+		reload_config
+	fi
+}
+
+
+get_potential_opennet_scan_results_for_device() {
+	trap 'error_trap get_potential_opennet_scan_results_for_device "'"$*"'"' EXIT
+	local phy_device="$1"
+	run_iwinfo_scan "$phy_device" \
 		| awk '{
 			if ($1 == "ESSID:") { if ((name != "") && (encryption == "none")) print(signal"\t"channel"\t"quality"\t"name); split($0, tokens, /"/); name=tokens[2]; };
 			if ($1 == "Signal:") signal=$2;

@@ -254,7 +254,7 @@ diff --git a/openwrt/target/linux/ath79/image/generic-tp-link.mk b/openwrt/targe
 index f1424d02ee..312ce78f22 100644
 --- a/openwrt/target/linux/ath79/image/generic-tp-link.mk
 +++ b/openwrt/target/linux/ath79/image/generic-tp-link.mk
-@@ -146,6 +146,40 @@ define Device/tplink_cpe210-v3
+@@ -146,6 +146,38 @@ define Device/tplink_cpe210-v3
  endef
  TARGET_DEVICES += tplink_cpe210-v3
  
@@ -262,8 +262,7 @@ index f1424d02ee..312ce78f22 100644
 +  $(Device/tplink-safeloader)
 +  ATH_SOC := ar9344
 +  IMAGE_SIZE := 7680k
-+  DEVICE_MODEL := CPE510
-+  DEVICE_VARIANT := v2
++  DEVICE_TITLE := TP-Link CPE510 v2
 +  DEVICE_PACKAGES := rssileds
 +  TPLINK_BOARD_ID := CPE510V2
 +  LOADER_TYPE := elf
@@ -279,8 +278,7 @@ index f1424d02ee..312ce78f22 100644
 +  $(Device/tplink-safeloader)
 +  ATH_SOC := ar9344
 +  IMAGE_SIZE := 7680k
-+  DEVICE_MODEL := CPE510
-+  DEVICE_VARIANT := v3
++  DEVICE_TITLE := TP-Link CPE510 v3
 +  DEVICE_PACKAGES := rssileds
 +  TPLINK_BOARD_ID := CPE510V3
 +  LOADER_TYPE := elf

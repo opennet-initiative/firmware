@@ -138,11 +138,6 @@ on_module_descriptions["on-olsr2-netjsongraph"] = luci.i18n.translate("Visualiza
 			</td>
 		</tr>
 	</table>
-	<div class="cbi-page-actions">
-		<div style="text-align:right">
-			<input class="cbi-button cbi-button-save" type="submit" name="save" value="<%:Save%>" />
-		</div>
-	</div>
 </fieldset></div>
 
 <% if not is_string_empty(modules_log) then %>
@@ -157,6 +152,9 @@ on_module_descriptions["on-olsr2-netjsongraph"] = luci.i18n.translate("Visualiza
 <% end %>
 </form>
 
+<div class="cbi-page-actions">
+	<input class="cbi-button cbi-button-save" type="submit" name="save" value="<%:Save%>" />
+</div>
 
 <script type="text/javascript">
 <%# Quelle: /www/luci-static/resources/view/opkg.js %>

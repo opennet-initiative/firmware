@@ -358,6 +358,7 @@ function generate_csr(cert_type, openssl)
 			openssl.localityName,
 			openssl.organizationalUnitName,
 			openssl.organizationName,
+			openssl.commonName,
 			openssl.EmailAddress,
 			openssl.days,
 		})

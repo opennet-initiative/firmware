@@ -181,7 +181,7 @@ generate_ssl_certificate_request() {
 	local duration_days="$10"
 	local tmp_filename
 	tmp_filename=$(mktemp)
-	if [ -e "$existing_key_filename" ]; then
+	if [ ! -e "$existing_key_filename" ]; then
 		msg_info "Failed to create certificate request due to missing key file: $existing_key_filename"
 		trap "" EXIT && return 1
 	else

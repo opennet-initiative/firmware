@@ -360,7 +360,6 @@ function generate_csr(cert_type, openssl)
 			openssl.organizationName,
 			openssl.commonName,
 			openssl.EmailAddress,
-			openssl.days,
 		})
 		nixio.fs.chmod(key_filename, 600)
 		nixio.fs.chmod(csr_filename, 600)

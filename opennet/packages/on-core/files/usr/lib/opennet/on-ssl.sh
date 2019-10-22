@@ -178,7 +178,6 @@ generate_ssl_certificate_request() {
 	local attribute_organization_name="$7"
 	local attribute_cn="$8"
 	local attribute_email="$9"
-	local duration_days="$10"
 	local tmp_filename
 	tmp_filename=$(mktemp)
 	if [ ! -e "$existing_key_filename" ]; then
@@ -195,7 +194,6 @@ generate_ssl_certificate_request() {
 					openssl_commonName="$attribute_cn" \
 					openssl_EmailAddress="$attribute_email" \
 					openssl req -config /etc/ssl/on_openssl.cnf -batch -nodes -new \
-						-days "$duration_days" \
 						-key "$existing_key_filename" \
 						-out "$tmp_filename"
 				;;

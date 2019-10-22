@@ -558,7 +558,7 @@ msgstr "Organisations-Einheit"
 msgid "POE Passthrough"
 msgstr "POE-Durchleitung"
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:150
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:145
 msgid "Package Installation Protocol"
 msgstr "Modul-Installationsprotokoll"
 
@@ -661,7 +661,7 @@ msgstr "Zusammenfassung"
 msgid "Report Generator"
 msgstr "Zusammenfassungsgenerator"
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:151
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:146
 msgid "Review the details of installations and removals."
 msgstr "Prüfe die Details von Installationsvorgängen."
 
@@ -669,7 +669,7 @@ msgstr "Prüfe die Details von Installationsvorgängen."
 msgid "Router summary"
 msgstr "Router-Überblick"
 
-#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:143
+#: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_modules.htm:155
 #: opennet/packages/on-core/files/usr/lib/lua/luci/view/opennet/on_settings.htm:86
 msgid "Save"
 msgstr "Speichern"

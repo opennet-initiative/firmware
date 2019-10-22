@@ -4,21 +4,6 @@
 ## @{
 
 
-ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem"
-
-
-## @fn https_request_opennet_or_public()
-## @brief Rufe den Inhalt ab, auf den eine URL verweist.
-## @param URL die Quell-Adresse
-## @returns Exitcode=0 falls kein Fehler auftrat. Andernfalls: curl-Exitcodes
-## @details Sowohl Opennet-Zertifikaten als auch öffentlichen Zertifikaten (durch OpenWrt gepflegt)
-##     wird vertraut.
-https_request_opennet_or_public() {
-	curl -sS --fail -q --silent --location --max-time 30 --retry 2 \
-		--capath /etc/ssl/certs/ --cacert "$ON_CERT_BUNDLE_PATH" "$@"
-}
-
-
 ## @fn submit_csr_via_http()
 ## @param upload_url URL des Upload-Formulars
 ## @param csr_file Dateiname einer Zertifikatsanfrage
@@ -33,7 +18,7 @@ submit_csr_via_http() {
 	local csr_file="$2"
 	local helper="${3:-}"
 	local helper_email="${4:-}"
-	https_request_opennet_or_public \
+	curl -sS --fail -q --silent --location --max-time 30 --retry 2 \
 		--form "file=@$csr_file" \
 		--form "opt_name=$helper" \
 		--form "opt_mail=$helper_email" "$upload_url" && return 0

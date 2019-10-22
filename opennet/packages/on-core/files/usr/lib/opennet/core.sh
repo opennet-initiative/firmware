@@ -1280,7 +1280,6 @@ get_location_for_main_ip() {
 
 
 # Request a resource via HTTP. In case of HTTPS only public certificates are trusted.
-# Use "https_request_opennet_or_public" if the webserver may use an Opennet-CA certificate.
 http_request() {
 	wget -q -O - "$@"
 }

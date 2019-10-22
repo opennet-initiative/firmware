@@ -893,11 +893,8 @@ update_trusted_services_list() {
 	local service_name
 	local is_proxy
 	local service_list
-	# The service discovery webserver currently uses a certificate signed by the Opennet CA.
-	# Thus for now we need to accept the Opennet CA. In the future we may want to switch to a
-	# publicly signed webserver certificate. Thus we tolerate both options for now.
 	service_list=$(for one_url in $SERVICES_LIST_URLS; do
-			https_request_opennet_or_public "$one_url" || msg_info "Failed to retrieve list of services from $one_url"
+			http_request "$one_url" || msg_info "Failed to retrieve list of services from $one_url"
 		done)
 	# leeres Ergebnis? Noch keine Internet-Verbindung? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$service_list" ] && return

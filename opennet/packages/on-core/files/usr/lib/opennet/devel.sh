@@ -120,7 +120,7 @@ apply_repository_patch() {
 		# Currently the git repository server uses the Opennet CA for its webserver
 		# certificate.
 		# shellcheck disable=SC2059,SC2086
-		patch=$(https_request_opennet_or_public "$(printf "$GIT_REPOSITORY_COMMIT_URL_FMT" "$commit")")
+		patch=$(http_request "$(printf "$GIT_REPOSITORY_COMMIT_URL_FMT" "$commit")")
 		echo "$patch" | patch $patch_args -p4 --directory --dry-run /
 		echo "$patch" | patch $patch_args -p4 --directory /
 	done

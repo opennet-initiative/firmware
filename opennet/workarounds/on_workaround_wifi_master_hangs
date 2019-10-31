@@ -2,19 +2,27 @@
 #
 # In der ath9k-Version der Firmware v0.5.1 bleibt der Master einer Verbindung manchmal haengen.
 # Symptome: alle Clients trennen sich nach einer Weile. Zuvor bleibt der TX-Zaehler auf der Master-Seite stehen.
-# Loesung: "wifi" fuer neue Initialisierung des Masters
-# Anwendung: scp on_workaround_wifi_master_hangs root@192.168.X.Y:/etc/cron.minutely/
+# Lösung: "wifi" für neue Initialisierung des Masters ausführen
 #
-# VORSICHT: das WLAN-Interface _muss_ OLSR-Verkehr fuehren - ansonsten wird das Interface im Minutentakt neugestartet
+# Dieses Skript darf häufig ausgeführt werden (z.B. im Minuten- oder Viertelstundentakt).
 #
-# Dieses Skript sollte im Minuten-Takt ausgefuehrt werden.
+# Das Skript prüft folgende Voraussetzungen:
+#    - das Interface ist als master konfiguriert
+#    - das Interface wird für OLSR-Routing verwendet (um regelmäßigen Verkehr sicherzustellen)
+#    - das Interface war irgendwann (seit dem letzten Booten) mit Clients verbunden
+#
+# Ein Reset wird ausgelöst, falls:
+#    - seit dem letzten Aufruf kein Verkehr über das Interface floss
+#    - seit dem letzten Reset genügend Zeit vergangen ist
+#      (abhängig vom Zeitpunkt der letzten Verbindung eines Clients)
+#
 
 set -eu
 
 WIFI_DEVICE="wlan0"
 LAST_RX_COUNTER_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.cache"
-RESET_TIMESTAMP_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.timestamp"
-MINIMUM_RESET_PERIOD_SECONDS=900
+RESET_TIMESTAMP_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.timestamp_last_reset"
+SEEN_CLIENTS_TIMESTAMP_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.timestamp_seen_clients"
 
 
 is_wifi_master() {
@@ -22,16 +30,46 @@ is_wifi_master() {
 }
 
 
-is_reset_period_elapsed() {
-	# keine Datei? Reset ist erlaubt ...
-	[ -e "$RESET_TIMESTAMP_FILE" ] || return 0
-	local timestamp
+is_olsr_interface() {
+	grep -wqs "$WIFI_DEVICE" /var/etc/olsrd.conf
+}
+
+
+update_file_timestamp() {
+	local filename="$1"
+	cut -f 1 -d . /proc/uptime >"$filename"
+}
+
+
+update_seen_clients_timestamp_if_stations_are_connected() {
+	if iwinfo "$WIFI_DEVICE" assoc | grep -q dBm; then
+		update_file_timestamp "$SEEN_CLIENTS_TIMESTAMP_FILE"
+	fi
+}
+
+
+# Basierend auf dem Alter der "es gab Verbindungen"-Datei verwenden wir verschiedene
+# Reset-Perioden.  Somit können wir schnell auf ein Hängenbleiben reagieren, ohne im Fall eines
+# dauerhaften Fehlers allzu häufig den Reset auszuführen.
+get_reset_period_seconds() {
+	if [ ! -e "$SEEN_CLIENTS_TIMESTAMP_FILE" ]; then
+		echo 1
+	else
+		awk '{print $1/60}' "$RESET_TIMESTAMP_FILE"
+	fi
+}
+
+
+get_file_timestamp_age_minutes() {
+	local period_seconds="$1"
+	local stored_timestamp
 	local now
-	timestamp=$(cat "$RESET_TIMESTAMP_FILE")
-	now=$(date +%s)
-	# schon abgelaufen?
-	[ "$((timestamp + MINIMUM_RESET_PERIOD_SECONDS))" -lt "$now" ] && return 0
-	return 1
+	if [ -e "$RESET_TIMESTAMP_FILE" ]; then
+		stored_timestamp=$(cat "$RESET_TIMESTAMP_FILE")
+		now=$(cut -f 1 -d . /proc/uptime)
+		# schon abgelaufen?
+		echo "$(( (stored_timestamp + period_seconds - now) / 60 ))"
+	fi
 }
 
 
@@ -40,20 +78,77 @@ get_rx_counters() {
 }
 
 
-# Abbruchbedingungen?
-is_wifi_master || exit 0
-is_reset_period_elapsed || exit 0
+is_reset_allowed() {
+	local last_seen_clients_timestamp_age_hours reset_timestamp_age_minutes
+	last_seen_clients_timestamp_age_hours=$(get_file_timestamp_age_minutes "$SEEN_CLIENTS_TIMESTAMP_FILE" | awk '{print $1/60}')
+	# there was never a successful connection: reset is now allowed
+	[ -z "$last_seen_clients_timestamp_age_hours" ] && exit 1
+	# the minimum reset period depends on the age of the "last client seen" timestamp
+	if [ "$last_seen_clients_timestamp_age_hours" -lt 1 ]; then
+		minimum_reset_period_minutes=15
+	elif [ "$last_seen_clients_timestamp_age_hours" -lt 3 ]; then
+		minimum_reset_period_minutes=30
+	elif [ "$last_seen_clients_timestamp_age_hours" -lt 6 ]; then
+		minimum_reset_period_minutes=60
+	elif [ "$last_seen_clients_timestamp_age_hours" -lt 24 ]; then
+		minimum_reset_period_minutes=180
+	elif [ "$last_seen_clients_timestamp_age_hours" -lt 168 ]; then
+		minimum_reset_period_minutes=1440
+	else
+		# we did not see successful connections for quite some time - no more resets ...
+		return 1
+	fi
+	# exit if there was a reset before and the reset timeout is not expired, yet
+	reset_timestamp_age_minutes=$(get_file_timestamp_age_minutes "$MINIMUM_RESET_PERIOD_SECONDS")
+	# there was no reset before: reset is allowed
+	[ -z "$reset_timestamp_age_minutes" ] && return 0
+	# a reset is allowed, if the reset timeout is expired
+	[ "$reset_timestamp_age_minutes" -ge "$minimum_reset_period_minutes" ]
+}
 
 
-if [ -e "$LAST_RX_COUNTER_FILE" ] && get_rx_counters | cmp -s "$LAST_RX_COUNTER_FILE"; then
-	# die Zaehler sind stehengeblieben
+reset_wireless_interfaces() {
+	# reset the wireless interface
 	on-function add_banner_event "wifi master hangs"
-	date +%s >"$RESET_TIMESTAMP_FILE"
+	update_file_timestamp "$RESET_TIMESTAMP_FILE"
 	# es scheint Situationen zu geben, in denen hostapd sich selbst blockiert
 	# siehe https://dev.opennet-initiative.de/ticket/184
 	killall -q -TERM hostapd || true
 	wifi
+}
+
+
+# check conditions for this workaround
+is_wifi_master || exit 0
+# We do not want to reset interfaces due to the lack of traffic (e.g. local wifi interfaces).
+# Thus we insist on OLSR being used on this interface.  This guarantees permanent traffic flow.
+is_olsr_interface || exit 0
+
+update_seen_clients_timestamp_if_stations_are_connected
+
+# no action is required, if we never saw any connection
+[ -e "$SEEN_CLIENTS_TIMESTAMP_FILE" ] || exit 0
+
+# collect status data
+if [ -e "$LAST_RX_COUNTER_FILE" ]; then
+	last_rx_counters=$(cat "$LAST_RX_COUNTER_FILE")
+	rx_cache_was_missing=0
 else
-	# neue Zaehler speichern
-	get_rx_counters >"$LAST_RX_COUNTER_FILE"
+	last_rx_counters=
+	rx_cache_was_missing=1
 fi
+current_rx_counters=$(get_rx_counters)
+
+# update caches and timestamps
+echo "$current_rx_counters" >"$LAST_RX_COUNTER_FILE"
+
+# no reset during the first run
+[ "$rx_cache_was_missing" = "1" ] && exit 0
+
+# no reset if there was a change of wireless activity
+[ "$last_rx_counters" != "$current_rx_counters" ] && exit 0
+
+# exit if there was no previous connection or if the reset timestamp is not expired
+is_reset_allowed || exit 0
+
+reset_wireless_interfaces

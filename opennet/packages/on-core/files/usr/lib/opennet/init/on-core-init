@@ -9,6 +9,10 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 
+# packages that should be enabled by default (applied only during the first initialization)
+DEFAULT_ENABLED_PACKAGES="on-olsr2"
+
+
 # Die Einstellungen "use_olsrd_dns" und "use_olsrd_ntp" sind mit v0.5 hinzugekommen.
 add_default_settings() {
 	prepare_on_uci_settings
@@ -82,9 +86,20 @@ set_timezone_berlin() {
 
 
 enable_firewall_reload_trigger() {
-	script_path="/usr/lib/opennet/events/on-firewall-reload"
+	local script_path="/usr/lib/opennet/events/on-firewall-reload"
 	create_uci_section_if_missing "firewall" "include" "path=$script_path" "reload=1" || return 0
 	apply_changes firewall
+}
+
+
+enable_default_modules() {
+	local module
+	[ -n "$(uci_get "on-core.modules")" ] && return 0
+	# prepare the uci settings for modules
+	save_on_modules_list
+	for module in $DEFAULT_ENABLED_PACKAGES; do
+		enable_on_module "$module"
+	done
 }
 
 
@@ -94,3 +109,4 @@ configure_dnsmasq
 add_crontab_entries
 set_timezone_berlin
 enable_firewall_reload_trigger
+enable_default_modules

@@ -1,7 +1,6 @@
 #!/bin/sh
 #
-# NOTE: keep in sync with opennet/packages/on-core/files/etc/cron.5mins/on_workaround_wifi_master_hangs
-# TODO: dieses Skript entfernen, sobald es keine alten Clients ohne den integrierten Workaround mehr gibt
+# NOTE: keep in sync with opennet/workarounds/on_workaround_wifi_master_hangs
 #
 # In der ath9k-Version der Firmware v0.5.1 bleibt der Master einer Verbindung manchmal haengen.
 # Symptome: alle Clients trennen sich nach einer Weile. Zuvor bleibt der TX-Zaehler auf der Master-Seite stehen.

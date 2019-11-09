@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# bei ath10k stellt der Client den Empfang ein, sobald ein Kanalwechsel
+# des Masters durch DFS auftritt. Symptom: in iwinfo wlan0 assoc tritt
+# RX: unknown auf. Ein wifi stellt den Konatkt wieder her.
+
+set -eu
+
+WIFI_DEVICE="wlan0"
+
+
+is_wifi_client() {
+	iwinfo "$WIFI_DEVICE" info | grep -qw "Mode: Client"
+}
+
+
+
+is_rx_unknown() {
+	iwinfo "$WIFI_DEVICE" assoc | grep -q "RX: unknown"
+}
+
+
+# Abbruchbedingungen?
+is_wifi_client || exit 0
+
+
+if is_rx_unknown ; then
+	# connection to master lost
+	on-function msg_info "client RX hangs"
+	wifi
+fi

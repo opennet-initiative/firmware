@@ -2,7 +2,7 @@
 #
 # bei ath10k stellt der Client den Empfang ein, sobald ein Kanalwechsel
 # des Masters durch DFS auftritt. Symptom: in iwinfo wlan0 assoc tritt
-# RX: unknown auf. Ein wifi stellt den Konatkt wieder her.
+# RX: unknown auf. Ein wifi stellt den Kontakt wieder her.
 
 set -eu
 

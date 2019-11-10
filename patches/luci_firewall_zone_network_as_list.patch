@@ -5,8 +5,8 @@ attribute to be a list. Thus the previous handling of setting a space
 concatenated string (instead of a list) broke this documented property.
 
 [1] https://openwrt.org/docs/guide-user/firewall/firewall_configuration#zones
---- a/luci/modules/luci-base/luasrc/model/firewall.lua
-+++ b/luci/modules/luci-base/luasrc/model/firewall.lua
+--- a/luci/modules/luci-compat/luasrc/model/firewall.lua
++++ b/luci/modules/luci-compat/luasrc/model/firewall.lua
 @@ -30,6 +30,13 @@ function _set(c, s, o, v)
  	end
  end

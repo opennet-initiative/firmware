@@ -2,7 +2,6 @@ luci_firewall_zone_network_as_list.patch
 oni-feeds.patch
 makefile_include_opennet_packages.patch
 hostapd_option_chanlist.patch
-luci_olsr_fix_empty_result.patch
 olsrd_update_to_0.9.8.patch
 olsrd_add_ondataservice.patch
 olsrd_debug_sigsegv.patch

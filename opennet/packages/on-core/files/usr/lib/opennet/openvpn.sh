@@ -217,15 +217,17 @@ verify_vpn_connection() {
 
 	# nur fuer tcp-Verbindungen (ipv4/ipv6)
 	#   connect-retry: Sekunden Wartezeit zwischen Versuchen
-	#   connect-timeout: Dauer eines Versuchs
 	#   connect-retry-max: Anzahl moeglicher Wiederholungen
 	if grep -q "^remote.*tcp" "$config_file"; then
 		{
 			echo "connect-retry 1"
-			echo "connect-timeout 15"
 			echo "connect-retry-max 1"
 		} >>"$config_file"
 	fi
+
+	# Short timeout for connections (default: 120s) - otherwise the 45s timeout below allows
+	# only _one_ attempt. But we need at least two in order to try IPv4 and IPv6 connections.
+	echo "connect-timeout 15" >>"$config_file"
 
 	# Schluessel und Zertifikate bei Bedarf austauschen
 	[ -n "$key_file" ] && \

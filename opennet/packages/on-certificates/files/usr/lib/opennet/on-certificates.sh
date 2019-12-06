@@ -4,6 +4,20 @@
 ## @{
 
 
+ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem"
+
+
+## @fn https_request_opennet()
+## @brief Rufe den Inhalt ab, auf den eine URL verweist.
+## @param URL die Quell-Adresse
+## @returns Exitcode=0 falls kein Fehler auftrat. Andernfalls: curl-Exitcodes
+## @details Es wird ausschließlich Opennet-Zertifikaten vertraut.
+https_request_opennet() {
+       curl -sS --fail -q --silent --location --max-time 30 --retry 2 \
+               --cacert "$ON_CERT_BUNDLE_PATH" "$@"
+}
+
+
 ## @fn submit_csr_via_http()
 ## @param upload_url URL des Upload-Formulars
 ## @param csr_file Dateiname einer Zertifikatsanfrage

@@ -894,7 +894,9 @@ update_trusted_services_list() {
 	local is_proxy
 	local service_list
 	service_list=$(for one_url in $SERVICES_LIST_URLS; do
-			http_request "$one_url" || msg_info "Failed to retrieve list of services from $one_url"
+			https_request_opennet "$one_url" \
+				|| http_request "$one_url" \
+				|| msg_info "Failed to retrieve list of services from $one_url"
 		done)
 	# leeres Ergebnis? Noch keine Internet-Verbindung? Keine Aktualisierung, keine Beraeumung ...
 	[ -z "$service_list" ] && return

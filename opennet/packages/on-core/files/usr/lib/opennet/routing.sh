@@ -279,7 +279,7 @@ get_hop_count_and_etx() {
 	[ -n "$result" ] && echo "$result" && return 0
 	# Überprüfe, ob die IP des Zielhost die eigene IP ist. Dann sollte distance=0 gesetzt werden.
 	if is_ipv4 "$target" || is_ipv6 "$target"; then
-		result=$(ip route get "$target" | grep -w "dev lo" || true)
+		result=$(ip route get "$target" 2>/dev/null | grep -w "dev lo" || true)
 		[ -n "$result" ] && echo "$result" | grep -vq "^unreachable" && echo "0 0" && return 0
 		true
 	fi

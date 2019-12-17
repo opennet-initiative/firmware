@@ -1,6 +1,9 @@
 CONFIG_TARGET_ar71xx=y
 CONFIG_TARGET_ar71xx_mikrotik=y
 CONFIG_TARGET_ar71xx_mikrotik_Default=y
+CONFIG_PACKAGE_ath10k-firmware-qca9887-ct=m
+CONFIG_PACKAGE_ath10k-firmware-qca988x-ct=m
+CONFIG_PACKAGE_kmod-ath10k-ct=m
 
 CONFIG_TARGET_ROOTFS_JFFS2=n
 

@@ -27,6 +27,11 @@ RESET_TIMESTAMP_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.timestamp_last_reset"
 SEEN_CLIENTS_TIMESTAMP_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.timestamp_seen_clients"
 
 
+is_wifi_device() {
+	iwinfo "$WIFI_DEVICE" info 2>/dev/null >&1
+}
+
+
 is_wifi_master() {
 	iwinfo "$WIFI_DEVICE" info | grep -qw "Mode: Master"
 }
@@ -121,6 +126,7 @@ reset_wireless_interfaces() {
 
 
 # check conditions for this workaround
+is_wifi_device || exit 0
 is_wifi_master || exit 0
 # We do not want to reset interfaces due to the lack of traffic (e.g. local wifi interfaces).
 # Thus we insist on OLSR being used on this interface.  This guarantees permanent traffic flow.

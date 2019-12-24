@@ -1,0 +1,392 @@
+diff --git a/openwrt/target/linux/ramips/files-4.14/drivers/net/ethernet/mediatek/gsw_mt7620.h b/target/linux/ramips/files-4.14/drivers/net/ethernet/mediatek/gsw_mt7620.h
+index ae0b6de024..0eb8597b73 100644
+--- a/openwrt/target/linux/ramips/files-4.14/drivers/net/ethernet/mediatek/gsw_mt7620.h
++++ b/openwrt/target/linux/ramips/files-4.14/drivers/net/ethernet/mediatek/gsw_mt7620.h
+@@ -84,6 +84,26 @@
+ #define PHY_PRE_EN		BIT(30)
+ #define PMY_MDC_CONF(_x)	((_x & 0x3f) << 24)
+ 
++/* Register for hw trap modification */
++#define MT7530_MHWTRAP			0x7804
++#define  MHWTRAP_PHY0_SEL		BIT(20)
++#define  MHWTRAP_MANUAL			BIT(16)
++#define  MHWTRAP_P5_MAC_SEL		BIT(13)
++#define  MHWTRAP_P6_DIS			BIT(8)
++#define  MHWTRAP_P5_RGMII_MODE		BIT(7)
++#define  MHWTRAP_P5_DIS			BIT(6)
++#define  MHWTRAP_PHY_ACCESS		BIT(5)
++
++#define MT7530_IO_DRV_CR		0x7810
++#define  P5_IO_CLK_DRV(x)		((x) & 0x3)
++#define  P5_IO_DATA_DRV(x)		(((x) & 0x3) << 4)
++
++#define MT7530_P5RGMIIRXCR		0x7b00
++#define  CSR_RGMII_EDGE_ALIGN		BIT(8)
++#define  CSR_RGMII_RXC_0DEG_CFG(x)	((x) & 0xf)
++
++#define MT7530_P5RGMIITXCR		0x7b04
++#define  CSR_RGMII_TXC_CFG(x)		((x) & 0x1f)
+ 
+ enum {
+ 	/* Global attributes. */
+@@ -96,6 +116,29 @@ enum {
+ 	PORT4_EPHY = 0,
+ 	PORT4_EXT,
+ };
++/* Port 5 interface select definitions */
++enum p5_interface_select {
++	P5_DISABLED = 0,
++	P5_INTF_SEL_PHY_P0,
++	P5_INTF_SEL_PHY_P4,
++	P5_INTF_SEL_GMAC5,
++};
++
++static const char *p5_intf_modes(unsigned int p5_interface)
++{
++	switch (p5_interface) {
++	case P5_DISABLED:
++		return "DISABLED";
++	case P5_INTF_SEL_PHY_P0:
++		return "PHY P0";
++	case P5_INTF_SEL_PHY_P4:
++		return "PHY P4";
++	case P5_INTF_SEL_GMAC5:
++		return "GMAC5";
++	default:
++		return "unknown";
++	}
++}
+ 
+ struct mt7620_gsw {
+ 	struct device		*dev;
+@@ -103,6 +146,8 @@ struct mt7620_gsw {
+ 	int			irq;
+ 	int			port4;
+ 	unsigned long int	autopoll;
++	phy_interface_t		p5_interface;
++	unsigned int		p5_intf_sel;
+ };
+ 
+ void mtk_switch_w32(struct mt7620_gsw *gsw, u32 val, unsigned reg);
+diff --git a/openwrt/target/linux/ramips/files-4.14/drivers/net/ethernet/mediatek/gsw_mt7621.c b/target/linux/ramips/files-4.14/drivers/net/ethernet/mediatek/gsw_mt7621.c
+index 89be239007..1fc63590fd 100644
+--- a/openwrt/target/linux/ramips/files-4.14/drivers/net/ethernet/mediatek/gsw_mt7621.c
++++ b/openwrt/target/linux/ramips/files-4.14/drivers/net/ethernet/mediatek/gsw_mt7621.c
+@@ -16,6 +16,8 @@
+ #include <linux/kernel.h>
+ #include <linux/types.h>
+ #include <linux/platform_device.h>
++#include <linux/of_mdio.h>
++#include <linux/of_net.h>
+ #include <linux/of_device.h>
+ #include <linux/of_irq.h>
+ 
+@@ -43,7 +45,11 @@ static irqreturn_t gsw_interrupt_mt7621(int irq, void *_priv)
+ 	reg = mt7530_mdio_r32(gsw, 0x700c);
+ 	mt7530_mdio_w32(gsw, 0x700c, reg);
+ 
+-	for (i = 0; i < 5; i++)
++	for (i = 0; i < 6; i++) {
++		if (i == 5 && gsw->p5_intf_sel != P5_INTF_SEL_GMAC5)
++			continue;
++
++	
+ 		if (reg & BIT(i)) {
+ 			unsigned int link;
+ 
+@@ -60,12 +66,152 @@ static irqreturn_t gsw_interrupt_mt7621(int irq, void *_priv)
+ 						    "port %d link down\n", i);
+ 			}
+ 		}
++	}
+ 
+ 	mt7620_handle_carrier(priv);
+ 
+ 	return IRQ_HANDLED;
+ }
+ 
++static void mt7530_parse_ports(struct mt7620_gsw *gsw, struct device_node *np)
++{
++	struct device_node *phy_node, *ports, *port;
++	u32 reg, id;
++	int err;
++
++	gsw->p5_interface = PHY_INTERFACE_MODE_NA;
++	gsw->p5_intf_sel = P5_DISABLED;
++
++	ports = of_get_child_by_name(np, "ports");
++	if (!ports)
++		return;
++
++	for_each_available_child_of_node(ports, port) {
++		err = of_property_read_u32(port, "reg", &reg);
++		if (err)
++			continue;
++
++		if (reg != 5)
++			break;
++
++		phy_node = of_parse_phandle(port, "phy-handle", 0);
++		if (phy_node) {
++			gsw->p5_interface = of_get_phy_mode(port);
++			gsw->p5_intf_sel = P5_INTF_SEL_GMAC5;
++
++			id = of_mdio_parse_addr(gsw->dev, phy_node);
++			if (id == 0)
++				gsw->p5_intf_sel = P5_INTF_SEL_PHY_P0;
++			if (id == 4)
++				gsw->p5_intf_sel = P5_INTF_SEL_PHY_P4;
++		}
++		of_node_put(phy_node);
++		break;
++	}
++}
++
++static void mt7530_setup_port5(struct mt7620_gsw *gsw, struct device_node *np)
++{
++	u8 tx_delay = 0;
++	int val;
++
++	mt7530_parse_ports(gsw, np);
++
++	val = mt7530_mdio_r32(gsw, MT7530_MHWTRAP);
++
++	val |= MHWTRAP_MANUAL | MHWTRAP_P5_MAC_SEL | MHWTRAP_P5_DIS;
++	val &= ~MHWTRAP_P5_RGMII_MODE & ~MHWTRAP_PHY0_SEL;
++
++	switch (gsw->p5_intf_sel) {
++	case P5_INTF_SEL_PHY_P0:
++		/* MT7530_P5_MODE_GPHY_P0: 2nd GMAC -> P5 -> P0 */
++		val |= MHWTRAP_PHY0_SEL;
++		/* fall through */
++	case P5_INTF_SEL_PHY_P4:
++		/* MT7530_P5_MODE_GPHY_P4: 2nd GMAC -> P5 -> P4 */
++		val &= ~MHWTRAP_P5_MAC_SEL & ~MHWTRAP_P5_DIS;
++
++		/* Setup the MAC by default for the cpu port */
++		mt7530_mdio_w32(gsw, GSW_REG_PORT_PMCR(5), 0x56300);
++		break;
++	case P5_INTF_SEL_GMAC5:
++		/* MT7530_P5_MODE_GMAC: P5 -> External phy or 2nd GMAC */
++		val &= ~MHWTRAP_P5_DIS;
++		mt7530_mdio_w32(gsw, GSW_REG_PORT_PMCR(5), 0x56300);
++		break;
++	case P5_DISABLED:
++		gsw->p5_interface = PHY_INTERFACE_MODE_NA;
++		break;
++	default:
++		dev_err(gsw->dev, "Unsupported p5_intf_sel %d\n",
++			gsw->p5_intf_sel);
++		goto unlock_exit;
++	}
++
++	/* Setup RGMII settings */
++	if (phy_interface_mode_is_rgmii(gsw->p5_interface)) {
++		val |= MHWTRAP_P5_RGMII_MODE;
++
++		/* P5 RGMII RX Clock Control: delay setting for 1000M */
++		mt7530_mdio_w32(gsw, MT7530_P5RGMIIRXCR, CSR_RGMII_EDGE_ALIGN);
++
++		/* Don't set delay in DSA mode */
++		if ((gsw->p5_intf_sel == P5_INTF_SEL_PHY_P0 ||
++		     gsw->p5_intf_sel == P5_INTF_SEL_PHY_P4) &&
++		    (gsw->p5_interface == PHY_INTERFACE_MODE_RGMII_TXID ||
++		     gsw->p5_interface == PHY_INTERFACE_MODE_RGMII_ID))
++			tx_delay = 4; /* n * 0.5 ns */
++
++		/* P5 RGMII TX Clock Control: delay x */
++		mt7530_mdio_w32(gsw, MT7530_P5RGMIITXCR,
++				CSR_RGMII_TXC_CFG(0x10 + tx_delay));
++
++		/* reduce P5 RGMII Tx driving, 8mA */
++		mt7530_mdio_w32(gsw, MT7530_IO_DRV_CR,
++				P5_IO_CLK_DRV(1) | P5_IO_DATA_DRV(1));
++	}
++
++	mt7530_mdio_w32(gsw, MT7530_MHWTRAP, val);
++
++	dev_info(gsw->dev, "Setup P5, HWTRAP=0x%x, intf_sel=%s, phy-mode=%s\n",
++		 val, p5_intf_modes(gsw->p5_intf_sel), phy_modes(gsw->p5_interface));
++
++unlock_exit:
++	return;
++}
++
++
++/* HACK: detect at803x and force at8033 at 1gbit full-duplex */
++static void mt7530_detect_at8033(struct mt7620_gsw *gsw)
++{
++	u32 reg;
++
++	if (gsw->p5_intf_sel == P5_INTF_SEL_GMAC5) {
++		/* read phy identifier 1 */
++		reg = _mt7620_mii_read(gsw, 7, 0x02);
++		if (reg < 0 || reg != 0x004d)
++			return;
++
++		/* read phy identifier 2 */
++		reg = _mt7620_mii_read(gsw, 7, 0x03);
++		if (reg < 0 || reg != 0xd074)
++			return;
++
++		/* read chip configure register */
++		reg = _mt7620_mii_read(gsw, 7, 0x1f);
++		if ((reg & 0x000f) == 0x0002)
++			dev_info(gsw->dev,"phy 7 at803x mode BX1000, 1Gbit\n");
++		else
++			dev_info(gsw->dev,
++				 "phy 7 at803x mode unknown: 0x1F=0x%x\n", reg);
++
++		/* force PHY and port 5 MAC 1gbit, full-duplex */
++		_mt7620_mii_write(gsw, 7, 0x00, 0x0140);
++		mt7530_mdio_w32(gsw, 0x3500, 0x7e33b);
++	}
++}
++
++
+ static void mt7621_hw_init(struct mt7620_gsw *gsw, struct device_node *np)
+ {
+ 	u32 i;
+@@ -174,10 +320,6 @@ static void mt7621_hw_init(struct mt7620_gsw *gsw, struct device_node *np)
+ 	mt7530_mdio_w32(gsw, 0x7a40, val);
+ 	mt7530_mdio_w32(gsw, 0x7a78, 0x855);
+ 
+-	/* delay setting for 10/1000M */
+-	mt7530_mdio_w32(gsw, 0x7b00, 0x102);
+-	mt7530_mdio_w32(gsw, 0x7b04, 0x14);
+-
+ 	/* lower Tx Driving*/
+ 	mt7530_mdio_w32(gsw, 0x7a54, 0x44);
+ 	mt7530_mdio_w32(gsw, 0x7a5c, 0x44);
+@@ -186,6 +328,12 @@ static void mt7621_hw_init(struct mt7620_gsw *gsw, struct device_node *np)
+ 	mt7530_mdio_w32(gsw, 0x7a74, 0x44);
+ 	mt7530_mdio_w32(gsw, 0x7a7c, 0x44);
+ 
++	/* Setup port 5 */
++	mt7530_setup_port5(gsw, np);
++
++	/* HACK: Detect at8033 phy on ubnt erx-sfp */
++	mt7530_detect_at8033(gsw);
++
+ 	/* turn on all PHYs */
+ 	for (i = 0; i <= 4; i++) {
+ 		val = _mt7620_mii_read(gsw, i, 0);
+diff --git a/openwrt/target/linux/ramips/dts/mt7621.dtsi b/target/linux/ramips/dts/mt7621.dtsi
+index 4f69e0902e..0fab3fbca8 100644
+--- a/openwrt/target/linux/ramips/dts/mt7621.dtsi
++++ b/openwrt/target/linux/ramips/dts/mt7621.dtsi
+@@ -460,7 +460,7 @@
+ 
+ 		mediatek,switch = <&gsw>;
+ 
+-		mdio-bus {
++		mdio: mdio-bus {
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+ 
+diff --git a/openwrt/target/linux/ramips/base-files/etc/board.d/02_network b/target/linux/ramips/base-files/etc/board.d/02_network
+index 0ffd5d6560..e3c0d1067d 100755
+--- a/openwrt/target/linux/ramips/base-files/etc/board.d/02_network
++++ b/openwrt/target/linux/ramips/base-files/etc/board.d/02_network
+@@ -263,6 +263,10 @@ ramips_setup_interfaces()
+ 		ucidef_add_switch "switch0" \
+ 			"1:lan" "2:lan" "3:lan" "4:lan" "0:wan" "6@eth0"
+ 		;;
++	ubiquiti,edgerouterx-sfp)
++		ucidef_add_switch "switch0" \
++			"0:lan" "1:lan" "2:lan" "3:lan" "4:lan" "5:wan" "6@eth0"
++		;;	
+ 	c50|\
+ 	tplink,c20-v1)
+ 		ucidef_add_switch "switch0" \
+diff --git a/openwrt/target/linux/ramips/dts/UBNT-ERX-SFP.dts b/target/linux/ramips/dts/UBNT-ERX-SFP.dts
+index 7de37804a5..a208f62794 100644
+--- a/openwrt/target/linux/ramips/dts/UBNT-ERX-SFP.dts
++++ b/openwrt/target/linux/ramips/dts/UBNT-ERX-SFP.dts
+@@ -21,4 +21,33 @@
+ 			reg = <0x25>;
+ 		};
+ 	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		/* Fixme: Currently a hack to enable SFP clk gate. */
++		sfp {
++			label = "sfp:i2c";
++			gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++			linux,default-trigger = "default-on";
++		};
++	};
++};
++
++&mdio {
++	ephy5: ethernet-phy@7 {
++		reg = <7>;
++	};
++};
++
++&gsw {
++	ports {
++		lan5: port@5 {
++			reg = <5>;
++			label = "lan5";
++			phy-handle = <&ephy5>;
++			phy-mode = "rgmii-rxid";
++		};
++	};
+ };
+diff --git a/openwrt/package/network/utils/phytool/Makefile b/openwrt/package/network/utils/phytool/Makefile
+new file mode 100644
+index 00000000..e385d5eb
+--- /dev/null
++++ b/openwrt/package/network/utils/phytool/Makefile
+@@ -0,0 +1,47 @@
++include $(TOPDIR)/rules.mk
++
++PKG_NAME:=phytool
++PKG_RELEASE:=1
++
++PKG_RELEASE=$(PKG_SOURCE_VERSION)
++
++PKG_SOURCE_PROTO:=git
++PKG_SOURCE_URL:=https://github.com/wkz/phytool.git
++PKG_SOURCE_DATE:=2017-09-12
++PKG_SOURCE_VERSION:=8882328c08ba2efb13c049812098f1d0cb8adf0c
++PKG_MIRROR_HASH:=11d406bfe5e4e8372e7e7fed05440e28d6567918910e8cc3671ff3c51dbd165f
++
++PKG_LICENSE:=GPL-2.0
++PKG_LICENSE_FILES:=COPYING
++
++PKG_MAINTAINER:=Christian Lamparter <chunkeey@googlemail.com>
++
++include $(INCLUDE_DIR)/package.mk
++
++define Package/phytool
++  SECTION:=net
++  CATEGORY:=Network
++  TITLE:=phytool Linux MDIO register access
++  URL:=https://github.com/wkz/phytool.git
++endef
++
++define Package/phytool/description
++   Linux MDIO register access
++endef
++
++define Build/Configure
++endef
++
++define Build/Compile
++	$(MAKE) -C $(PKG_BUILD_DIR) \
++		CC="$(TARGET_CC)" \
++		CFLAGS="$(TARGET_CFLAGS) -Wall" \
++		LDFLAGS="$(TARGET_LDFLAGS)"
++endef
++
++define Package/phytool/install
++	$(INSTALL_DIR) $(1)/usr/bin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/phytool $(1)/usr/bin/
++endef
++
++$(eval $(call BuildPackage,phytool))

@@ -288,7 +288,7 @@ diff --git a/openwrt/target/linux/ramips/base-files/etc/board.d/02_network b/tar
 index 0ffd5d6560..e3c0d1067d 100755
 --- a/openwrt/target/linux/ramips/base-files/etc/board.d/02_network
 +++ b/openwrt/target/linux/ramips/base-files/etc/board.d/02_network
-@@ -252,7 +252,6 @@
+@@ -250,7 +250,6 @@
  	tl-wr841n-v13|\
  	u7628-01-128M-16M|\
  	ubnt-erx|\
@@ -296,7 +296,7 @@ index 0ffd5d6560..e3c0d1067d 100755
  	ur-326n4g|\
  	wrtnode|\
  	wrtnode2p | \
-@@ -263,6 +263,10 @@ ramips_setup_interfaces()
+@@ -261,6 +261,10 @@ ramips_setup_interfaces()
  		ucidef_add_switch "switch0" \
  			"1:lan" "2:lan" "3:lan" "4:lan" "0:wan" "6@eth0"
  		;;
@@ -304,9 +304,9 @@ index 0ffd5d6560..e3c0d1067d 100755
 +		ucidef_add_switch "switch0" \
 +			"0:lan" "1:lan" "2:lan" "3:lan" "4:lan" "5:wan" "6@eth0"
 +		;;	
- 	c50|\
- 	tplink,c20-v1)
- 		ucidef_add_switch "switch0" \
+	mikrotik,rbm33g)
+		ucidef_add_switch "switch0" \
+			"1:lan" "2:lan" "0:wan" "6@eth0"
 diff --git a/openwrt/target/linux/ramips/dts/UBNT-ERX-SFP.dts b/target/linux/ramips/dts/UBNT-ERX-SFP.dts
 index 7de37804a5..a208f62794 100644
 --- a/openwrt/target/linux/ramips/dts/UBNT-ERX-SFP.dts

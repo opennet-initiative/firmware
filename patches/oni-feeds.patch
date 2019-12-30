@@ -3,9 +3,8 @@ Index: on_firmware/openwrt/feeds.conf
 ===================================================================
 --- /dev/null
 +++ on_firmware/openwrt/feeds.conf
-@@ -0,0 +1,5 @@
+@@ -0,0 +1,4 @@
 +src-link	opennet		../../opennet/packages
 +src-link	packages	../../packages
-+src-link	packages_gluon	../../packages-gluon
 +src-link	routing		../../routing
 +src-link	luci		../../luci

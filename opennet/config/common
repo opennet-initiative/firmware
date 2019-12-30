@@ -209,6 +209,3 @@ CONFIG_PACKAGE_luci-app-wireguard=m
 # Pakete mit Kernel-Abhängigkeiten (diese koennen nicht via OpenWrt-Feed installiert werden)
 CONFIG_PACKAGE_ipset=m
 CONFIG_PACKAGE_mwan3=m
-
-# der autoupdater
-CONFIG_PACKAGE_autoupdater=m

@@ -7,7 +7,7 @@ GIT_COMMIT_HASH = $(shell git show --format="format:%h" --no-patch)
 # ermittle die Release-Version (falls die aktuelle Version getaggt wurde) - entferne dabei das fuehrende "v" von "v0.5.0"
 GIT_CURRENT_RELEASE_TAG = $(shell git tag -l --points-at HEAD | sed 's/^v//g')
 NEXT_VERSION = $(shell grep "^CONFIG_VERSION_NUMBER=" "$(COMMON_CONFIG)" | cut -f 2 -d '"')
-OPENWRT_VERSION = $(shell cd ../../openwrt && git describe --abbrev=0)
+OPENWRT_VERSION = $(shell cd ../../openwrt && git describe --abbrev=0 | cut -c2-)
 
 ARCHITECTURES = ar71xx ath79 bcm47xx ixp4xx mikrotik ramips ramips7620 raspberry sunxi uml x86
 

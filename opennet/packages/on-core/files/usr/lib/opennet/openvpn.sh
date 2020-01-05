@@ -227,7 +227,7 @@ verify_vpn_connection() {
 
 	# Short timeout for connections (default: 120s) - otherwise the 45s timeout below allows
 	# only _one_ attempt. But we need at least two in order to try IPv4 and IPv6 connections.
-	echo "connect-timeout 15" >>"$config_file"
+	echo "connect-timeout 12" >>"$config_file"
 
 	# Schluessel und Zertifikate bei Bedarf austauschen
 	[ -n "$key_file" ] && \

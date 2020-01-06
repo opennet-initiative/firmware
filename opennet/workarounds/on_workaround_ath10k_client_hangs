@@ -27,5 +27,5 @@ is_wifi_client || exit 0
 if is_rx_unknown ; then
 	# connection to master lost
 	on-function msg_info "client RX hangs"
-	wifi
+	wifi; sleep 3; /etc/init.d/olsrd restart
 fi

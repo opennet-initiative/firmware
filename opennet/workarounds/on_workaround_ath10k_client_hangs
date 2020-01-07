@@ -1,13 +1,16 @@
 #!/bin/sh
 #
-# bei ath10k stellt der Client den Empfang ein, sobald ein Kanalwechsel
+# bei ath10k stellt der Client oft den Empfang ein, sobald ein Kanalwechsel
 # des Masters durch DFS auftritt. Symptom: in iwinfo wlan0 assoc tritt
-# RX: unknown auf. Ein wifi stellt den Kontakt wieder her.
+# RX: unknown auf. Ein wifi stellt meistens den Kontakt wieder her, alle 
+# paar Tage ist aber auch ein Neustart von olsrd notwendig. 
+# Den workaround nach /etc/cron.minutely oder cron.5mins kopieren.
 
 set -eu
 
 WIFI_DEVICE="wlan0"
 
+logger "start ath10k workaround"
 
 is_wifi_client() {
 	iwinfo "$WIFI_DEVICE" info | grep -qw "Mode: Client"
@@ -24,8 +27,11 @@ is_rx_unknown() {
 is_wifi_client || exit 0
 
 
-if is_rx_unknown ; then
-	# connection to master lost
-	on-function msg_info "client RX hangs"
-	wifi; sleep 3; /etc/init.d/olsrd restart
-fi
+is_rx_unknown || exit 0
+
+# connection to master lost
+logger "client RX hangs"
+wifi; sleep 3
+/etc/init.d/olsrd restart
+
+exit 0

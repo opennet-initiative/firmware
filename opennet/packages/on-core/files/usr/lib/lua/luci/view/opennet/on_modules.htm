@@ -122,7 +122,7 @@ on_module_descriptions["on-olsr2-netjsongraph"] = luci.i18n.translate("Visualiza
 					value="<%= repo_url %>" <%= checked_if_true(repo_url == configured_repo_url) %> />
 			</td>
 			<td class="cbi-section-table-cell">
-				<label class="cbi-value-title">(<%= default_repo_url %>)</label>
+				<label><a href="<%= default_repo_url %>"><%= default_repo_url %></a></label>
 			</td>
 		</tr>
 		<tr class="cbi-section-table-row">

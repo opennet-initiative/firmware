@@ -2,28 +2,10 @@
 
 @media all {
 
-	/*
-	dark blue	#0a51a1
-	bright blue	#819cc9
-	opennet-logo	/luci-static/opennet/on_logo.png
-	*/
-
-body {
-    background-color: #fff;
-}
-
 #status_table td {
     padding: 0.5em;
     text-align: left;
     border: 1px solid #040;
-}
-
-.status_page_table {
-	margin: 0.5em;
-}
-
-.right-border {
-	border-right: 1px dotted gray;
 }
 
 .status_page_table th, .status_page_table td {
@@ -41,8 +23,8 @@ body {
 	margin-bottom: 5px;
 }
 
-table {
-	border-collapse: collapse;
+th, td {
+       padding: 0.2em;
 }
 
 tr[disabled="y"] {
@@ -53,14 +35,6 @@ tr[disabled="y"] #cbi-opennet-gateways-status, tr[disabled="y"] #cbi-opennet-gat
 	display: none;
 }
 
-a:link, a:visited {
-	text-decoration:underline;
-}
-
-a:hover {
-	color:red;
-}
-
 #maincontent {
 	background: rgba(245, 245, 245, 0.8);
 	background-image:url("/luci-static/opennet/on_logo.png");
@@ -69,93 +43,10 @@ a:hover {
 	padding-left: 10px;
 }
 
-#maincontent h2 {
-	color: #0a51a1;
-	margin-right: 90px;
-}
-
-#maincontent h3 {
-	color: #0a51a1;
-}
-
-#maincontent p {
-	margin-bottom: 1em;
-}
-
-img.loading_img_small {
-	height: 1.5em;
-}
-
-
-code {
-	font-family: monospace;
-	white-space: pre;
-}
-
-#maincontent ul {
-	margin-left: 2em;
-}
-
-.hidden {
-	display:none;
-}
-
-.error {
-	color:#FF0000;
-}
-
 .warning {
 	color: red;
 	background-color: white;
 	font-weight: bold;
-}
-
-.clear {
-	clear: both;
-}
-
-.cbi-section {
-	border:1px solid #555555;
-	margin-bottom:2em;
-	padding:1em;
-}
-
-.cbi-section-node {
-	border: none;
-}
-
-div.cbi-map {
-	margin-left:2em;
-	margin-right:2em;
-}
-
-div.cbi-value {
-	border: none;
-}
-
-.cbi-value-title {
-	float:left;
-	line-height:1.5em;
-	width:40%;
-}
-
-div.cbi-value-field {
-	margin-left:40%;
-	padding: 0;
-	width:58%;
-	line-height:1.5em;
-}
-
-div.cbi-value-description {
-	font-size:90%;
-	font-style: italic;
-	padding: 1em;
-}
-
-.cbi-button-plain {
-	border: none;
-	background-color: transparent;
-	font-style: italic;
 }
 
 input.cbi-input-del, input.cbi-button-del, input.cbi-button-top,
@@ -185,11 +76,6 @@ input.cbi-input-del, input.cbi-button-del {
 #cbi-opennet-gateways-active[active="y"], #cbi-opennet-gateways-status[status="y"], .opennet-bool[status="y"], .ugw-wan-route[status="ok"], .ugw-wan-ping[status="ok"], .ugw-mtu[status="ok"], .ugw-centralip[status="ok"], .ugw-tunnel_active[status="ok"], .cert_available[status="ok"] {
 	background:transparent url(../../luci-static/opennet/emblem-default.png) no-repeat scroll center;
 	min-height: 24px;
-}
-
-input.cbi-button {
-	background-color: white;
-	background-size: auto;
 }
 
 input.cbi-button-top {
@@ -233,33 +119,6 @@ input.cbi-button-toggle {
 
 input.cbi-button-add {
 	background:transparent url(../../luci-static/opennet/gtk-add.png) no-repeat scroll 1px center;
-}
-
-/* modifiers to make menu left-right style */
-ul.dropdowns li {
-	float:none;
-}
-
-ul.dropdowns ul li ul {
-	top:none;
-}
-
-ul.dropdowns li.over ul, ul.dropdowns li.focus ul, ul.dropdowns li:hover ul {
-	left:100%;
-	top:0;
-}
-
-/* hide dropbear configuration in password dialog field */
-#cbi-dropbear {
-	display: none;
-}
-
-.cbi-value-ugwstatus {
-	font-size: 90%;
-}
-
-table.usergw-status, table.cert-status {
-	width: 90%;
 }
 
 td.cert_infotable {

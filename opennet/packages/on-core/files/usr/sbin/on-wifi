@@ -24,7 +24,7 @@ case "$ACTION" in
     help|--help)
         echo "Syntax:"
         echo "    $(basename "$0") quality [DEVICE]"
-        echo "    $(basename "$0") list-networks [RADIO_DEVICE"
+        echo "    $(basename "$0") list-networks [RADIO_DEVICE]"
         echo "    $(basename "$0") help"
         echo
         ;;

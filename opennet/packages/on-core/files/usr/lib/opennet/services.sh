@@ -876,12 +876,32 @@ is_trusted_service_list_outdated() {
 }
 
 
+retrieve_service_list_url() {
+	local url="$1"
+	if is_function_available "https_request_opennet"; then
+		https_request_opennet "$url" \
+			|| http_request "$url" \
+			|| msg_info "Failed to retrieve list of services from $url"
+	else
+		if ! http_request "$url"; then
+			if echo "$url" | grep -q '^https://'; then
+				# The URL probably uses a certificate signed by the Opennet CA,
+				# while "on-certificate" is not installed.
+				# Thus we do not emit any warnings.
+				true
+			else
+				msg_info "Failed to retrieve list of services from $url"
+			fi
+		fi
+	fi
+}
+
+
 ## @fn update_trusted_services_list()
 ## @brief Hole die vertrauenswürdigen Dienste von signierten Opennet-Quellen.
 ## @details Diese Dienste führen beispielsweise auf UGW-APs zur Konfiguration von Portweiterleitungen
 ##   ins Internet. Daher sind sie nur aus vertrauenswürdiger Quelle zu akzeptieren (oder manuell).
 update_trusted_services_list() {
-	local one_url
 	local line
 	local service_type
 	local scheme
@@ -893,13 +913,9 @@ update_trusted_services_list() {
 	local service_name
 	local is_proxy
 	local service_list
-	service_list=$(for one_url in $SERVICES_LIST_URLS; do
-			https_request_opennet "$one_url" \
-				|| http_request "$one_url" \
-				|| msg_info "Failed to retrieve list of services from $one_url"
-		done)
+	service_list=$(for url in $SERVICES_LIST_URLS; do retrieve_service_list_url "$url"; done)
 	# leeres Ergebnis? Noch keine Internet-Verbindung? Keine Aktualisierung, keine Beraeumung ...
-	[ -z "$service_list" ] && return
+	[ -z "$service_list" ] && msg_info "No trusted services discovered: skipping update." && return
 	echo "$service_list" | grep -v "^#" | sed 's/\t\+/\t/g' | while read -r line; do
 		service_type=$(echo "$line" | cut -f 1)
 		# falls der Dienst-Typ mit "proxy-" beginnt, soll er weitergeleitet werden

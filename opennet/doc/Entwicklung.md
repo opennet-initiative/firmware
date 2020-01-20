@@ -202,10 +202,8 @@ Die verwendeten Basis-Repositories (OpenWRT), Pakete, Routing und Luci sind als 
 Neue Commits in dem zugrundeliegenden Branch werden von uns also nicht automatisch verwendet. Daher sollten wir gelegentlich zum aktuellen HEAD des Basis-Brach (z.B. "lede-17.01") wechseln.
 
     make pull-submodules
-    # die geänderten Submodule-Commit-IDs akzeptieren (hier: interaktiv)
-    git add -p
     # die geänderten Submodule-Commit-IDs für zukünftige Builds festlegen
-    git commit
+    git commit -m "Update upstream sources" luci openwrt packages routing
 
 
 Einen neuen Paket-Feed einbinden {#feed-add}

@@ -3,7 +3,7 @@
 Überblick {#ueberblick-entwicklung}
 =========
 
-Die Opennet-Firmware basiert auf den Komponenten *git*, *quilt* und der *openwrt*-Entwicklungsumgebung.
+Die Opennet-Firmware basiert auf den Komponenten *git*, *quilt* und der *OpenWrt*-Entwicklungsumgebung.
 Links zur Dokumentation dieser Komponenten findest du am Ende dieses Dokuments.
 
 Die grundlegende Struktur der Entwicklungsumgebung ist in der [Struktur-Dokumentation] (Struktur.md) beschrieben.
@@ -41,7 +41,7 @@ Die lokale Arbeitsumgebung wird mit folgenden Kommandos abgeschlossen:
     cd on_firmware
     make init
 
-Die obige Aktion wird eine Weile dauern, da die openwrt-Repositories heruntergeladen werden.
+Die obige Aktion wird eine Weile dauern, da die OpenWrt Repositories heruntergeladen werden.
 
 
 quilt-Konfiguration {#quilt-setup}
@@ -121,10 +121,10 @@ Daher wird anstelle des üblichen `git pull` folgende Abfolge empfohlen:
 **Achtung**: `git pull --rebase` manipuliert deine lokale git-History. Falls du frische lokale Commits also bereits zu einem anderen Server übertragen haben solltest, dann führt dies zu unüberschaubaren Chaos. Verzichte in diesem Fall auf `--rebase`.
 
 
-Eine Datei im openwrt-Repository ändern {#patching}
+Eine Datei im OpenWrt Repository ändern {#patching}
 ---------------------------------------
 
-Im openwrt-Repository befindet sich das Basissystem und openwrt-spezifischer Code. Externe Pakete befinden sich (in Form von Makefiles, die auf upstream-Quellen verweisen) in den separaten Paket-Repositories.
+Im OpenWrt Repository befindet sich das Basissystem und OpenWrt-spezifischer Code. Externe Pakete befinden sich (in Form von Makefiles, die auf upstream-Quellen verweisen) in den separaten Paket-Repositories.
 
     # alle Patches anwenden (falls der neue Patch am Ende angehängt werden soll)
     quilt push -a
@@ -144,7 +144,7 @@ Im openwrt-Repository befindet sich das Basissystem und openwrt-spezifischer Cod
 Eine Datei in einem Paket-Repository ändern {#patching-package}
 -------------------------------------------
 
-Im Gegensatz zum openwrt-Repository befinden sich in den Paket-Repositories lediglich Makefiles (Rezepte für den Paketbau) und openwrt-spezifische Patches. Unsere Änderungen sind üblicherweise ebenfalls Patches, die zu den openwrt-Patches hinzukommen.
+Im Gegensatz zum OpenWrt Repository befinden sich in den Paket-Repositories lediglich Makefiles (Rezepte für den Paketbau) und OpenWrt-spezifische Patches. Unsere Änderungen sind üblicherweise ebenfalls Patches, die zu den OpenWrt Patches hinzukommen.
 
 1. einen neuen Patch anlegen:
 
@@ -154,7 +154,7 @@ Im Gegensatz zum openwrt-Repository befinden sich in den Paket-Repositories ledi
 
         quilt add packages/net/openssh/patches/042-FOO.patch
 
-3. die openwrt-spezifische Dokumentation zum Erstellen von Patches lesen und anwenden:
+3. die OpenWrt-spezifische Dokumentation zum Erstellen von Patches lesen und anwenden:
 
         http://wiki.openwrt.org/doc/devel/patches
 
@@ -195,11 +195,11 @@ Einen bestehenden Patch verändern {#patch-change}
         quilt header -e
 
 
-Paket-Repositories oder das openwrt-Repository aktualisieren {#update-repo}
+Paket-Repositories oder das OpenWrt Repository aktualisieren {#update-repo}
 ------------------------------------------------------------
 
-Die verwendeten Basis-Repositories (OpenWRT), Pakete, Routing und Luci sind als git-submodules in das opennet-Firmware-Repository eingebunden. Somit sind sie auf spezifische Commits (mittels ihrer Hash-ID) festgelegt.
-Neue Commits in dem zugrundeliegenden Branch werden von uns also nicht automatisch verwendet. Daher sollten wir gelegentlich zum aktuellen HEAD des Basis-Brach (z.B. "lede-17.01") wechseln.
+Die verwendeten Basis-Repositories (OpenWrt), Pakete, Routing und Luci sind als git-submodules in das opennet-Firmware-Repository eingebunden. Somit sind sie auf spezifische Commits (mittels ihrer Hash-ID) festgelegt.
+Neue Commits in dem zugrundeliegenden Branch werden von uns also nicht automatisch verwendet. Daher sollten wir gelegentlich zum aktuellen HEAD des Basis-Branch (z.B. "openwrt-19.07") wechseln.
 
     make pull-submodules
     # die geänderten Submodule-Commit-IDs für zukünftige Builds festlegen
@@ -236,7 +236,7 @@ Für die schnelle Lösung von Build-Problemen ist es oft sinnvoll, nur das eine 
 Neue Pakete oder Paketoptionen einbinden {#config-change}
 ----------------------------------------
 
-Die Liste vorhandener Pakete und ihrer Einstellungen wird mit dem *feeds*-Skript von openwrt verwaltet. Die Feeds werden mittels des meta-Makefile vor jedem Build und vor jedem Aufruf von `make menuconfig` aktualisiert. Du kannst dies jedoch auch manuell auslösen:
+Die Liste vorhandener Pakete und ihrer Einstellungen wird mit dem *feeds*-Skript von OpenWrt verwaltet. Die Feeds werden mittels des meta-Makefile vor jedem Build und vor jedem Aufruf von `make menuconfig` aktualisiert. Du kannst dies jedoch auch manuell auslösen:
 
     make feeds
 
@@ -264,7 +264,7 @@ In den ersten 20 Zeilen der Build-Ausgabe wirst du ein paar Fehlermeldung bezüg
 Build-Konfiguration (menuconfig) {#menuconfig}
 ================================
 
-Die opennet-Entwicklungsumgebung verwendet grundlegend die Abläufe der openwrt-Buildumgebung. Es gibt jedoch ein paar Besonderheiten, bzw. Komfortfunktionen.
+Die opennet-Entwicklungsumgebung verwendet grundlegend die Abläufe der OpenWrt Buildumgebung. Es gibt jedoch ein paar Besonderheiten, bzw. Komfortfunktionen.
 
 
 Zusammensetzung einer config-Datei {#config-assemble}
@@ -280,7 +280,7 @@ Die plattform-spezifische config-Datei wird durch *opennet/config/Makefile* mit 
 Konfiguration für eine Plattform erstellen {#platform-config}
 ------------------------------------------
 
-Die finale openwrt-Konfiguration wird aus der Ziel-Plattform-Konfiguration und der allgemeinen Konfiguration erstellt und anschließend mittels `make defconfig` durch openwrt auf Aufabhängigkeiten zu prüfen und mit den Standardwerten aufzufüllen.
+Die finale OpenWrt Konfiguration wird aus der Ziel-Plattform-Konfiguration und der allgemeinen Konfiguration erstellt und anschließend mittels `make defconfig` durch OpenWrt auf Aufabhängigkeiten zu prüfen und mit den Standardwerten aufzufüllen.
 
 Diese Konfiguration für eine Plattform kann beispielsweise mittels `make config-arx71xx` erstellt werden. Das Ergebnis ist anschließend als *openwrt/.config* verfügbar.
 
@@ -380,7 +380,7 @@ Dies listet alle Commit mit entsprechender ONI Versionsnummer auf und einem Abst
 lua-Skripte {#lua}
 -----------
 
-Das openwrt-Web-Interface basiert auf lua-Skripten. Der grundlegende Code sollte in den shell-Bibliotheken untergebracht werden - lediglich die für die Darstellung notwendige Logik gehört in die lua-Skripte.
+Das OpenWrt Webinterface basiert auf lua-Skripten. Der grundlegende Code sollte in den shell-Bibliotheken untergebracht werden - lediglich die für die Darstellung notwendige Logik gehört in die lua-Skripte.
 
 
 ### Funktionen {#lua-functions}
@@ -420,7 +420,7 @@ Denselben Effekt erreichst du mit der Funktion *run_httpd_debug* (blockierend - 
 Hotplug-System {#hotplug}
 --------------
 
-openwrt verwendet ``procd`` für die Behandlung von hotplug-Ereignissen.
+OpenWrt verwendet ``procd`` für die Behandlung von hotplug-Ereignissen.
 Skripte liegen unter ``/etc/hotplug.d/``. Für unsere netzwerkbasierten Ereignisse (z.B. Hinzufügen neuer olsrd-Interfaces) verwenden wir den hotplug-Typ ``ifcace``.
 
 Der Aufruf von hotplug-Skripten lässt sich folgendermaßen emulieren:
@@ -600,8 +600,8 @@ Wir verwenden das Patch-Verwaltungssystem *quilt*. Dies erleichtert die Erstellu
 Das Howto von *quilt* ist hier zu finden: http://repo.or.cz/w/guilt.git/blob/HEAD:/Documentation/HOWTO
 
 
-openwrt {#doc-openwrt}
+OpenWrt {#doc-openwrt}
 -------
 
-Die Entwicklungsdokumentation von *openwrt* ist hier zu finden: http://wiki.openwrt.org/doc/devel/start
+Die Entwicklungsdokumentation von *OpenWrt* ist hier zu finden: http://wiki.openwrt.org/doc/devel/start
 

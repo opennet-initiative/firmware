@@ -28,7 +28,7 @@ SEEN_CLIENTS_TIMESTAMP_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.timestamp_seen
 
 
 is_wifi_device() {
-	iwinfo "$WIFI_DEVICE" info 2>/dev/null >&1
+	iwinfo "$WIFI_DEVICE" info >/dev/null 2>&1
 }
 
 

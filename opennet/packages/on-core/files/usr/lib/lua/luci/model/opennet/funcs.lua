@@ -131,7 +131,14 @@ function get_network_zone_interfaces(zone_name)
 	local result = {}
 	cursor:foreach("firewall", "zone", function(zone)
 		if (zone.name == zone_name) and zone.network then
-			for _, net_name in ipairs(zone.network) do
+			local networks = zone.network
+			-- Ensure that even a non-list (space separated interface names in a single
+			-- entry) is handled properly. Some luci functions still seem to create
+			-- such mistyped "network" entries in firewall zones.
+			if type(networks) == "string" then
+				networks = space_split(networks)
+			end
+			for _, net_name in ipairs(networks) do
 				cursor:foreach("network", "interface", function(net)
 					if net_name == net[".name"] then
 						result[net_name] = net

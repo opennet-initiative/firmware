@@ -33,6 +33,8 @@ define Package/on-usergw/postinst
 [ -n "$${IPKG_INSTROOT:-}" ] && exit 0
 on-function on_opkg_postinst_default
 on-function apply_changes "$(PKG_NAME)"
+# existing "trusted" gateway services may delay the "is_trusted_service_list_outdated" test - thus force an update immediately
+on-function update_trusted_services_list
 endef
 
 define Package/on-usergw/prerm

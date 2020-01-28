@@ -316,6 +316,7 @@ pipe_service_attribute() {
 	local service_name
 	local value
 	while read -r service_name; do
+		[ -z "$service_name" ] && continue
 		value=$(get_service_value "$service_name" "$key")
 		[ -z "$value" ] && value="$default"
 		[ -n "$value" ] && printf '%s\t%s\n' "$service_name" "$value"

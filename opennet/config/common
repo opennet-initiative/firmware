@@ -11,6 +11,8 @@ CONFIG_TARGET_MULTI_PROFILE=y
 CONFIG_TARGET_ALL_PROFILES=y
 CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 
+CONFIG_ATH_USER_REGD=y
+
 # Setze OpenWRT Downloadpfad+Versionsnummer explizit weil wir die OpenWRT Versionsnummer mit
 # unserer Versionsnummer ueberschreiben.  Der Platzhalter "__OPENWRT_VERSION__" wird durch
 # opennet/config/Makefile ersetzt.

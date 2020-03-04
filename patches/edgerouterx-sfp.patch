@@ -90,7 +90,7 @@ index 89be239007..1fc63590fd 100644
 +		if (i == 5 && gsw->p5_intf_sel != P5_INTF_SEL_GMAC5)
 +			continue;
 +
-+	
++
  		if (reg & BIT(i)) {
  			unsigned int link;
  
@@ -303,7 +303,7 @@ index 0ffd5d6560..e3c0d1067d 100755
 +	ubnt-erx-sfp)
 +		ucidef_add_switch "switch0" \
 +			"0:lan" "1:lan" "2:lan" "3:lan" "4:lan" "5:wan" "6@eth0"
-+		;;	
++		;;
 	mikrotik,rbm33g)
 		ucidef_add_switch "switch0" \
 			"1:lan" "2:lan" "0:wan" "6@eth0"

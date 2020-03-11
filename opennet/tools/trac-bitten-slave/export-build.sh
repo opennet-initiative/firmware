@@ -56,6 +56,10 @@ build_platform() {
 	# URL: https://downloads.opennet-initiative.de/openwrt/stable/latest/version.txt
 	echo "$snapshot_name" >"$dest_dir/version.txt"
 
+	# generate a map between devices and upgrade firmware download paths
+	"$HOME/$BUILD_DIR/opennet/tools/device-upgrade-mapper" generate \
+		>"$dest_dir/device-upgrade-map.csv"
+
 	# Update the (probably outdated) timestamp of the unrelated parent directory.
 	# (the "get_commit_info" line above is not sufficient - since the file may exist before)
 	touch "$dest_dir"

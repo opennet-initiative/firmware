@@ -1,0 +1,83 @@
+#!/bin/sh
+#
+# Generate a mapping between devices and upgrade firmware download paths.
+#
+# The firmware requests the content of such a file from the base download server in order to
+# discover potential upgrade image URLs.
+#
+
+set -eu
+
+
+DEVICE_MAP="
+	# Ubiquiti
+	bullet-m                ar71xx/generic ubnt-bullet-m
+	loco-m-xw               ar71xx/generic ubnt-loco-m-xw
+	nanostation-m           ar71xx/generic ubnt-nano-m
+	nanostation-m-xw        ar71xx/generic ubnt-nano-m-xw
+	rocket-m                ar71xx/generic ubnt-rocket-m
+	rocket-m-xw             ar71xx/generic ubnt-rocket-m-xw
+
+	# TP-Link
+	cpe210                  ar71xx/generic cpe210-220-v1
+	cpe510                  ar71xx/generic cpe510-520-v1
+	tl-wdr3500              ar71xx/generic tl-wdr3500-v1
+	tl-wdr4300              ar71xx/generic tl-wdr4300-v1
+	tl-wr1043nd             ar71xx/generic tl-wr1043nd-v1
+	tl-wr1043nd-v2          ar71xx/generic tl-wr1043nd-v2
+	tplink,cpe510-v3        ath79/generic  tplink_cpe510-v3
+"
+
+BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)
+OPENWRT_CONFIG="$BASE_DIR/openwrt/.config"
+BASE_DOWNLOAD_URL="https://downloads.on-i.de/openwrt/testing/latest"
+
+
+get_local_build_release() {
+	local dist number
+	dist=$(grep "^CONFIG_VERSION_DIST=" "$OPENWRT_CONFIG" | cut -f 2 -d '"' | tr '[:upper:]' '[:lower:]')
+	number=$(grep "^CONFIG_VERSION_NUMBER=" "$OPENWRT_CONFIG" | cut -f 2 -d '"')
+	printf '%s-%s' "$dist" "$number"
+}
+
+
+if [ $# -gt 0 ]; then
+	ACTION=$1
+	shift
+else
+	ACTION="help"
+fi
+
+
+case "$ACTION" in
+	generate)
+		if [ $# -lt 1 ]; then
+			RELEASE=$(get_local_build_release)
+		else
+			RELEASE=$1
+		fi
+		echo "$DEVICE_MAP" | grep '^\s*[a-z]' | while read -r device arch suffix; do
+			printf '%s	targets/%s/%s-%s-%s-squashfs-sysupgrade.bin\n' \
+				"$device" "$arch" "$RELEASE" "$(echo "$arch" | tr "/" "-")" "$suffix"
+			done | sort -n
+		;;
+	verify)
+		"$0" generate "$@" | while read -r device path; do
+			url="${BASE_DOWNLOAD_URL%/}/$path"
+			if ! curl -I -s --fail "$url" >/dev/null; then
+				echo >&2 "Failed: $url"
+				exit 1
+			fi
+		done
+		;;
+	help|--help)
+		echo "Syntax:  $(basename "$0")  { generate | verify }  [VERSION]"
+		echo
+		echo "VERSION is automatically determined (from build local environment), if missing"
+		echo
+		;;
+	*)
+		"$0" help >&2
+		exit 1
+		;;
+esac

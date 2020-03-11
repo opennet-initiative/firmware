@@ -20,7 +20,8 @@ Environment variables:
 
     * TELNET_HOST: name or IP of the host running the telnet plugin (default: localhost)
     * TELNET_PORT: the port that the txtinfo plugin is listening to (default: 2009)
-    * OLSRD2_BIN_PATH: name of the olsrd binary (only used for 'autoconf', default: /usr/sbin/olsrd2)
+    * OLSRD2_BIN_PATH: name of the olsrd binary
+      (only used for 'autoconf', default: /usr/sbin/olsrd2)
     * MICROPYTHON_HEAP: adjust this parameter for micropython if your olsr network contains
       more than a few thousand nodes (default: 512k)
 
@@ -190,7 +191,9 @@ def count_routes_by_neighbour():
     node_count = {}
     for line in query_olsr2_telnet("olsrv2info", "route"):
         # example line content:
-        #    2001:67c:1400:2432:27:22ff:fe1a:788a    fe80::dc9f:dbff:fef5:34a9       -       ::/0    2       14      100     eth0    2       fd32:d8d3:87da:0:418:d6ff:fe92:2883     0       ff_dat_metric   8.159kbit/s (8 hops)    2105607 8
+        #    2001:67c:1400:2432:27:22ff:fe1a:788a    fe80::dc9f:dbff:fef5:34a9       -       ::/0 \
+        #        2       14      100     eth0    2      fd32:d8d3:87da:0:418:d6ff:fe92:2883     0 \
+        #        ff_dat_metric   8.159kbit/s (8 hops)    2105607 8
         tokens = line.split()
         target = tokens[0]
         via = tokens[1]

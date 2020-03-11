@@ -126,6 +126,7 @@ get_ssl_object_hash() {
 			esac
 			;;
 		gnutls)
+			# shellcheck disable=SC2018,SC2019
 			case "$object_type" in
 				rsa)
 					certtool --key-info \

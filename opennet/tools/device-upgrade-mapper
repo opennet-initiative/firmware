@@ -30,7 +30,7 @@ DEVICE_MAP="
 
 BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)
 OPENWRT_CONFIG="$BASE_DIR/openwrt/.config"
-BASE_DOWNLOAD_URL="https://downloads.on-i.de/openwrt/testing/latest"
+BASE_DOWNLOAD_URL="https://downloads.opennet-initiative.de/openwrt/testing/latest"
 
 
 get_local_build_release() {

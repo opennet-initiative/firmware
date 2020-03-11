@@ -81,7 +81,10 @@ get_file_timestamp_age_minutes() {
 
 
 get_rx_counters() {
-	iwinfo "$WIFI_DEVICE" assoclist | grep -w "RX:"
+	iwinfo "$WIFI_DEVICE" assoclist \
+		| grep -w "RX:" \
+		| sed 's/^.*\s\([0-9]\+\) Pkts.*$/\1/' \
+		| sort -n
 }
 
 

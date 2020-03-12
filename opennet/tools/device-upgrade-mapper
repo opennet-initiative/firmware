@@ -11,21 +11,23 @@ set -eu
 
 DEVICE_MAP="
 	# Ubiquiti
-	bullet-m                ar71xx/generic ubnt-bullet-m
-	loco-m-xw               ar71xx/generic ubnt-loco-m-xw
-	nanostation-m           ar71xx/generic ubnt-nano-m
-	nanostation-m-xw        ar71xx/generic ubnt-nano-m-xw
-	rocket-m                ar71xx/generic ubnt-rocket-m
-	rocket-m-xw             ar71xx/generic ubnt-rocket-m-xw
+	bullet-m                	ar71xx/generic ubnt-bullet-m
+	loco-m-xw               	ar71xx/generic ubnt-loco-m-xw
+	nanostation-m           	ar71xx/generic ubnt-nano-m
+	nanostation-m-xw        	ar71xx/generic ubnt-nano-m-xw
+	rocket-m                	ar71xx/generic ubnt-rocket-m
+	rocket-m-xw             	ar71xx/generic ubnt-rocket-m-xw
+  ubnt,nanostation-ac				ath79/generic  ubnt_nanostation-ac
+  ubnt,nanostation-ac-loco	ath79/generic  ubnt_nanostation-ac-loco
 
 	# TP-Link
-	cpe210                  ar71xx/generic cpe210-220-v1
-	cpe510                  ar71xx/generic cpe510-520-v1
-	tl-wdr3500              ar71xx/generic tl-wdr3500-v1
-	tl-wdr4300              ar71xx/generic tl-wdr4300-v1
-	tl-wr1043nd             ar71xx/generic tl-wr1043nd-v1
-	tl-wr1043nd-v2          ar71xx/generic tl-wr1043nd-v2
-	tplink,cpe510-v3        ath79/generic  tplink_cpe510-v3
+	cpe210                  	ar71xx/generic cpe210-220-v1
+	cpe510                  	ar71xx/generic cpe510-520-v1
+	tl-wdr3500              	ar71xx/generic tl-wdr3500-v1
+	tl-wdr4300              	ar71xx/generic tl-wdr4300-v1
+	tl-wr1043nd             	ar71xx/generic tl-wr1043nd-v1
+	tl-wr1043nd-v2          	ar71xx/generic tl-wr1043nd-v2
+	tplink,cpe510-v3        	ath79/generic  tplink_cpe510-v3
 "
 
 BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)

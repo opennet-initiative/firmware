@@ -5,44 +5,56 @@
 # The firmware requests the content of such a file from the base download server in order to
 # discover potential upgrade image URLs.
 #
+# Run this script with the "verify" argument in order to test the URLs:
+#    # local build version
+#    device-upgrade-mapper verify
+#    # latest stable release
+#    device-upgrade-mapper verify stable
+#    # latest testing release
+#    device-upgrade-mapper verify testing
+#    # a specific testing release
+#    device-upgrade-mapper verify 0.5.6-unstable-2754-695e5ff8
+#
 
 set -eu
 
 
 DEVICE_MAP="
 	# Ubiquiti
-	bullet-m                	ar71xx/generic ubnt-bullet-m
-	loco-m-xw               	ar71xx/generic ubnt-loco-m-xw
-	nanostation-m           	ar71xx/generic ubnt-nano-m
-	nanostation-m-xw        	ar71xx/generic ubnt-nano-m-xw
-	rocket-m                	ar71xx/generic ubnt-rocket-m
-	rocket-m-xw             	ar71xx/generic ubnt-rocket-m-xw
-  ubnt,nanostation-ac				ath79/generic  ubnt_nanostation-ac
-  ubnt,nanostation-ac-loco	ath79/generic  ubnt_nanostation-ac-loco
+	bullet-m                ar71xx/generic ubnt-bullet-m-squashfs-sysupgrade.bin
+	loco-m-xw               ar71xx/generic ubnt-loco-m-xw-squashfs-sysupgrade.bin
+	nanostation-m           ar71xx/generic ubnt-nano-m-squashfs-sysupgrade.bin
+	nanostation-m-xw        ar71xx/generic ubnt-nano-m-xw-squashfs-sysupgrade.bin
+	rocket-m                ar71xx/generic ubnt-rocket-m-squashfs-sysupgrade.bin
+	rocket-m-xw             ar71xx/generic ubnt-rocket-m-xw-squashfs-sysupgrade.bin
+	ubnt,nanostation-ac     ath79/generic  ubnt_nanostation-ac-squashfs-sysupgrade.bin
+	ubnt,nanostation-ac-loco ath79/generic ubnt_nanostation-ac-loco-squashfs-sysupgrade.bin
+
+	# MikroTik
+	rb-921gs-5hpacd-r2      ar71xx/mikrotik nand-large-ac-squashfs-sysupgrade.bin
 
 	# TP-Link
-	cpe210                  	ar71xx/generic cpe210-220-v1
-	cpe510                  	ar71xx/generic cpe510-520-v1
-	tl-wdr3500              	ar71xx/generic tl-wdr3500-v1
-	tl-wdr4300              	ar71xx/generic tl-wdr4300-v1
-	tl-wr1043nd             	ar71xx/generic tl-wr1043nd-v1
-	tl-wr1043nd-v2          	ar71xx/generic tl-wr1043nd-v2
-	tplink,cpe510-v3        	ath79/generic  tplink_cpe510-v3
+	cpe210                  ar71xx/generic cpe210-220-v1-squashfs-sysupgrade.bin
+	cpe510                  ar71xx/generic cpe510-520-v1-squashfs-sysupgrade.bin
+	tl-wdr3500              ar71xx/generic tl-wdr3500-v1-squashfs-sysupgrade.bin
+	tl-wdr4300              ar71xx/generic tl-wdr4300-v1-squashfs-sysupgrade.bin
+	tl-wr1043nd             ar71xx/generic tl-wr1043nd-v1-squashfs-sysupgrade.bin
+	tl-wr1043nd-v2          ar71xx/generic tl-wr1043nd-v2-squashfs-sysupgrade.bin
+	tplink,cpe510-v3        ath79/generic  tplink_cpe510-v3-squashfs-sysupgrade.bin
 
-  # MikroTik
-  rb-921gs-5hpacd-r2				ar71xx/mikrotik mikrotik-nand-large-ac
+	# other
+	bochs-bochs             x86/generic    combined-squashfs.img.gz
+	pc-engines-apu          x86/generic    combined-squashfs.img.gz
 "
 
 BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)
 OPENWRT_CONFIG="$BASE_DIR/openwrt/.config"
-BASE_DOWNLOAD_URL="https://downloads.opennet-initiative.de/openwrt/testing/latest"
+BASE_DOWNLOAD_URL="https://downloads.opennet-initiative.de/openwrt"
 
 
 get_local_build_release() {
 	local dist number
-	dist=$(grep "^CONFIG_VERSION_DIST=" "$OPENWRT_CONFIG" | cut -f 2 -d '"' | tr '[:upper:]' '[:lower:]')
-	number=$(grep "^CONFIG_VERSION_NUMBER=" "$OPENWRT_CONFIG" | cut -f 2 -d '"')
-	printf '%s-%s' "$dist" "$number"
+	grep "^CONFIG_VERSION_NUMBER=" "$OPENWRT_CONFIG" | cut -f 2 -d '"'
 }
 
 
@@ -58,17 +70,30 @@ case "$ACTION" in
 	generate)
 		if [ $# -lt 1 ]; then
 			RELEASE=$(get_local_build_release)
+		elif [ "$1" = "stable" ]; then
+			RELEASE=$(curl -sS --fail "$BASE_DOWNLOAD_URL/stable/latest/version.txt")
+		elif [ "$1" = "testing" ]; then
+			RELEASE=$(curl -sS --fail "$BASE_DOWNLOAD_URL/testing/latest/version.txt")
 		else
 			RELEASE=$1
 		fi
 		echo "$DEVICE_MAP" | grep '^\s*[a-z]' | while read -r device arch suffix; do
-			printf '%s	targets/%s/%s-%s-%s-squashfs-sysupgrade.bin\n' \
+			printf '%s	targets/%s/openwrt-%s-%s-%s\n' \
 				"$device" "$arch" "$RELEASE" "$(echo "$arch" | tr "/" "-")" "$suffix"
 			done | sort -n
 		;;
 	verify)
+		if [ $# -lt 1 ]; then
+			PATH_PREFIX="testing/$(get_local_build_release)"
+		elif [ "$1" = "stable" ]; then
+			PATH_PREFIX="stable/latest"
+		elif [ "$1" = "testing" ]; then
+			PATH_PREFIX="testing/latest"
+		else
+			PATH_PREFIX="testing/$1"
+		fi
 		"$0" generate "$@" | while read -r device path; do
-			url="${BASE_DOWNLOAD_URL%/}/$path"
+			url="${BASE_DOWNLOAD_URL%/}/$PATH_PREFIX/$path"
 			if ! curl -I -s --fail "$url" >/dev/null; then
 				echo >&2 "Failed: $url"
 				exit 1

@@ -20,31 +20,31 @@ set -eu
 
 
 DEVICE_MAP="
-	# Ubiquiti
-	bullet-m                ar71xx/generic ubnt-bullet-m-squashfs-sysupgrade.bin
-	loco-m-xw               ar71xx/generic ubnt-loco-m-xw-squashfs-sysupgrade.bin
-	nanostation-m           ar71xx/generic ubnt-nano-m-squashfs-sysupgrade.bin
-	nanostation-m-xw        ar71xx/generic ubnt-nano-m-xw-squashfs-sysupgrade.bin
-	rocket-m                ar71xx/generic ubnt-rocket-m-squashfs-sysupgrade.bin
-	rocket-m-xw             ar71xx/generic ubnt-rocket-m-xw-squashfs-sysupgrade.bin
-	ubnt,nanostation-ac     ath79/generic  ubnt_nanostation-ac-squashfs-sysupgrade.bin
-	ubnt,nanostation-ac-loco ath79/generic ubnt_nanostation-ac-loco-squashfs-sysupgrade.bin
+    # Ubiquiti
+    bullet-m                    ar71xx/generic  ubnt-bullet-m-squashfs-sysupgrade.bin
+    loco-m-xw                   ar71xx/generic  ubnt-loco-m-xw-squashfs-sysupgrade.bin
+    nanostation-m               ar71xx/generic  ubnt-nano-m-squashfs-sysupgrade.bin
+    nanostation-m-xw            ar71xx/generic  ubnt-nano-m-xw-squashfs-sysupgrade.bin
+    rocket-m                    ar71xx/generic  ubnt-rocket-m-squashfs-sysupgrade.bin
+    rocket-m-xw                 ar71xx/generic  ubnt-rocket-m-xw-squashfs-sysupgrade.bin
+    ubnt,nanostation-ac         ath79/generic   ubnt_nanostation-ac-squashfs-sysupgrade.bin
+    ubnt,nanostation-ac-loco    ath79/generic   ubnt_nanostation-ac-loco-squashfs-sysupgrade.bin
 
-	# MikroTik
-	rb-921gs-5hpacd-r2      ar71xx/mikrotik nand-large-ac-squashfs-sysupgrade.bin
+    # MikroTik
+    rb-921gs-5hpacd-r2          ar71xx/mikrotik nand-large-ac-squashfs-sysupgrade.bin
 
-	# TP-Link
-	cpe210                  ar71xx/generic cpe210-220-v1-squashfs-sysupgrade.bin
-	cpe510                  ar71xx/generic cpe510-520-v1-squashfs-sysupgrade.bin
-	tl-wdr3500              ar71xx/generic tl-wdr3500-v1-squashfs-sysupgrade.bin
-	tl-wdr4300              ar71xx/generic tl-wdr4300-v1-squashfs-sysupgrade.bin
-	tl-wr1043nd             ar71xx/generic tl-wr1043nd-v1-squashfs-sysupgrade.bin
-	tl-wr1043nd-v2          ar71xx/generic tl-wr1043nd-v2-squashfs-sysupgrade.bin
-	tplink,cpe510-v3        ath79/generic  tplink_cpe510-v3-squashfs-sysupgrade.bin
+    # TP-Link
+    cpe210                      ar71xx/generic  cpe210-220-v1-squashfs-sysupgrade.bin
+    cpe510                      ar71xx/generic  cpe510-520-v1-squashfs-sysupgrade.bin
+    tl-wdr3500                  ar71xx/generic  tl-wdr3500-v1-squashfs-sysupgrade.bin
+    tl-wdr4300                  ar71xx/generic  tl-wdr4300-v1-squashfs-sysupgrade.bin
+    tl-wr1043nd                 ar71xx/generic  tl-wr1043nd-v1-squashfs-sysupgrade.bin
+    tl-wr1043nd-v2              ar71xx/generic  tl-wr1043nd-v2-squashfs-sysupgrade.bin
+    tplink,cpe510-v3            ath79/generic   tplink_cpe510-v3-squashfs-sysupgrade.bin
 
-	# other
-	bochs-bochs             x86/generic    combined-squashfs.img.gz
-	pc-engines-apu          x86/generic    combined-squashfs.img.gz
+    # other
+    bochs-bochs                 x86/generic     combined-squashfs.img.gz
+    pc-engines-apu              x86/generic     combined-squashfs.img.gz
 "
 
 BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)

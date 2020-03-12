@@ -28,6 +28,9 @@ DEVICE_MAP="
 	tl-wr1043nd             	ar71xx/generic tl-wr1043nd-v1
 	tl-wr1043nd-v2          	ar71xx/generic tl-wr1043nd-v2
 	tplink,cpe510-v3        	ath79/generic  tplink_cpe510-v3
+
+  # MikroTik
+  rb-921gs-5hpacd-r2				ar71xx/mikrotik mikrotik-nand-large-ac
 "
 
 BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)

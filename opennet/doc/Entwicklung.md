@@ -581,6 +581,8 @@ Für ein Release sind folgende Schritte durchzuführen:
     * https://opennet-initiative.de/wiki/Opennet_Firmware_Versionen
     * https://opennet-initiative.de/wiki/Opennet_Firmware/Download
     * https://opennet-initiative.de/wiki/Firmware-Aktualisierung
+* Anpassung des Download-Links in ``roles/virtualization-server/templates/vhost-admin.sh`` im ansible-Repository
+* Informationsmail an die crew- oder die Mitgliederliste schicken
 
 
 Externe Dokumentationen {#doc-external}

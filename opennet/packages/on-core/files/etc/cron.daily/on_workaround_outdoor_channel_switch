@@ -22,7 +22,7 @@ MINIMUM_RESET_PERIOD_SECONDS=900
 
 
 is_wifi_master() {
-	iwinfo "$WIFI_DEVICE" info | grep -qw "Mode: Master"
+	iwinfo "$WIFI_DEVICE" info 2>/dev/null | grep -qw "Mode: Master"
 }
 
 

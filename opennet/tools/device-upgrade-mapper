@@ -2,8 +2,8 @@
 #
 # Generate a mapping between devices and upgrade firmware download paths.
 #
-# The firmware requests the content of such a file from the base download server in order to
-# discover potential upgrade image URLs.
+# The firmware requests the content of such a file from the base download 
+# server in order to discover potential upgrade image URLs.
 #
 # Run this script with the "verify" argument in order to test the URLs:
 #    # local build version
@@ -29,17 +29,23 @@ DEVICE_MAP="
     ubnt-erx                    ramips/mt7621   ubnt-erx-squashfs-sysupgrade.bin
     ubnt-erx-sfp                ramips/mt7621   ubnt-erx-sfp-squashfs-sysupgrade.bin
 
-    # MikroTik
-    rb-921gs-5hpacd-r2          ar71xx/mikrotik nand-large-ac-squashfs-sysupgrade.bin
-
     # TP-Link
-    cpe210                      ar71xx/generic  cpe210-220-v1-squashfs-sysupgrade.bin
-    cpe510                      ar71xx/generic  cpe510-520-v1-squashfs-sysupgrade.bin
-    tl-wdr3500                  ar71xx/generic  tl-wdr3500-v1-squashfs-sysupgrade.bin
-    tl-wdr4300                  ar71xx/generic  tl-wdr4300-v1-squashfs-sysupgrade.bin
     tl-wr1043nd                 ar71xx/generic  tl-wr1043nd-v1-squashfs-sysupgrade.bin
     tl-wr1043nd-v2              ar71xx/generic  tl-wr1043nd-v2-squashfs-sysupgrade.bin
+    tl-wr1043nd-v3              ar71xx/generic  tl-wr1043nd-v3-squashfs-sysupgrade.bin
+    tplink,tl-wr1043nd-v4       ath79/generic   tplink_tl-wr1043nd-v4-squashfs-sysupgrade.bin
+    tplink,tl-wr1043n-v5        ath79/generic   tplink_tl-wr1043n-v5-squashfs-sysupgrade.bin
+    tl-wdr3500                  ar71xx/generic  tl-wdr3500-v1-squashfs-sysupgrade.bin
+    tl-wdr4300                  ar71xx/generic  tl-wdr4300-v1-squashfs-sysupgrade.bin
+    cpe210                      ar71xx/generic  cpe210-220-v1-squashfs-sysupgrade.bin
+    tplink,cpe210-v2            ath79/generic   tplink_cpe210-v2-squashfs-sysupgrade.bin
+    tplink,cpe210-v3            ath79/generic   tplink_cpe210-v3-squashfs-sysupgrade.bin
+    cpe510                      ar71xx/generic  cpe510-520-v1-squashfs-sysupgrade.bin
+    cpe510-v2                   ar71xx/generic  cpe510-v2-squashfs-sysupgrade.bin
     tplink,cpe510-v3            ath79/generic   tplink_cpe510-v3-squashfs-sysupgrade.bin
+
+    # MikroTik
+    rb-921gs-5hpacd-r2          ar71xx/mikrotik nand-large-ac-squashfs-sysupgrade.bin
 
     # other
     bochs-bochs                 x86/generic     combined-squashfs.img.gz

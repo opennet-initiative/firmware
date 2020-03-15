@@ -886,6 +886,10 @@ get_potential_error_messages() {
 	#    Die Nanostation AC loco schreibt folgende Fehlermeldung ins Kernel-Log.
 	#    Das WLAN-Interface funktioniert jedoch scheinbar problemlos.
 	filters="${filters}"'|ath10k_pci 0000:00:00.0: Direct firmware load for ath10k/pre-cal-pci-0000:00:00.0.bin failed with error -2'
+	# 30) kern.err kernel: [..] print_req_error: I/O error, dev loop0, sector 490
+	#    Beim Booten eines APU-Geräts tritt wohl die obige Fehlermeldung auf. Sie ist
+	#    sicherlich irrelevant. Siehe https://dev.opennet-initiative.de/ticket/246.
+	filters="${filters}"'|kern.err kernel:.*print_req_error: I/O error, dev loop0, sector '
 	# System-Fehlermeldungen (inkl. "trapped")
 	# Frühzeitig Broken-Pipe-Fehler ("uhttpd[...]: sh: write error: Broken pipe") sowie die darauffolgende
 	# Zeile entfernen. Diese Fehler treten auf, wenn der Nutzer das Laden der Webseite unterbricht (z.B.

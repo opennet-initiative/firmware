@@ -43,6 +43,10 @@ DEVICE_MAP="
     cpe510                      ar71xx/generic  cpe510-520-v1-squashfs-sysupgrade.bin
     cpe510-v2                   ar71xx/generic  cpe510-v2-squashfs-sysupgrade.bin
     tplink,cpe510-v3            ath79/generic   tplink_cpe510-v3-squashfs-sysupgrade.bin
+    tplink,archer-c7-v1         ath79/generic   tplink_archer-c7-v1-squashfs-factory.bin
+    tplink,archer-c7-v2         ath79/generic   tplink_archer-c7-v2-squashfs-factory.bin
+    tplink,archer-c7-v4         ath79/generic   tplink_archer-c7-v4-squashfs-factory.bin
+    tplink,archer-c7-v5         ath79/generic   tplink_archer-c7-v5-squashfs-factory.bin
 
     # MikroTik
     rb-921gs-5hpacd-r2          ar71xx/mikrotik nand-large-ac-squashfs-sysupgrade.bin

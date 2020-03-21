@@ -1,4 +1,8 @@
 CONFIG_TARGET_brcm2708=y
+CONFIG_TARGET_brcm2708_bcm2708=y
+CONFIG_TARGET_brcm2708_bcm2709=y
+CONFIG_TARGET_brcm2708_bcm2710=y
 
 # the perf module seems to cause a build failure
-CONFIG_KERNEL_PERF_EVENTS=n
+# FIXME: still needed? deactivated 2020/03/21
+#CONFIG_KERNEL_PERF_EVENTS=n

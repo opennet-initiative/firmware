@@ -280,7 +280,7 @@ Die plattform-spezifische config-Datei wird durch *opennet/config/Makefile* mit 
 Konfiguration für eine Plattform erstellen {#platform-config}
 ------------------------------------------
 
-Die finale OpenWrt Konfiguration wird aus der Ziel-Plattform-Konfiguration und der allgemeinen Konfiguration erstellt und anschließend mittels `make defconfig` durch OpenWrt auf Aufabhängigkeiten zu prüfen und mit den Standardwerten aufzufüllen.
+Die finale OpenWrt Konfiguration wird aus der Ziel-Plattform-Konfiguration und der allgemeinen Konfiguration erstellt und anschließend mittels `make -C openwrt defconfig` durch OpenWrt auf Abhängigkeiten zu prüfen und mit den Standardwerten aufzufüllen.
 
 Diese Konfiguration für eine Plattform kann beispielsweise mittels `make config-arx71xx` erstellt werden. Das Ergebnis ist anschließend als *openwrt/.config* verfügbar.
 

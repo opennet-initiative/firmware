@@ -54,9 +54,15 @@ DEVICE_MAP="
     # MikroTik
     rb-921gs-5hpacd-r2          ar71xx/mikrotik nand-large-ac-squashfs-sysupgrade.bin
 
-    # other
+    # X86
     bochs-bochs                 x86/generic     combined-squashfs.img.gz
     pc-engines-apu              x86/generic     combined-squashfs.img.gz
+
+    # Raspberry
+    raspberrypi,model-b         brcm2708/bcm2708 rpi-squashfs-sysupgrade.img.gz
+    raspberrypi,model-b-plus    brcm2708/bcm2708 rpi-squashfs-sysupgrade.img.gz
+    raspberrypi,model-b-rev2    brcm2708/bcm2708 rpi-squashfs-sysupgrade.img.gz
+    raspberrypi,model-zero-w    brcm2708/bcm2708 rpi-squashfs-sysupgrade.img.gz
 "
 
 BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)

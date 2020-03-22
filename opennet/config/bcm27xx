@@ -1,7 +1,13 @@
 CONFIG_TARGET_brcm2708=y
+
 CONFIG_TARGET_brcm2708_bcm2708=y
+CONFIG_TARGET_DEVICE_brcm2708_bcm2708_DEVICE_rpi=y
+
 CONFIG_TARGET_brcm2708_bcm2709=y
+CONFIG_TARGET_DEVICE_brcm2708_bcm2709_DEVICE_rpi-2=y
+
 CONFIG_TARGET_brcm2708_bcm2710=y
+CONFIG_TARGET_DEVICE_brcm2708_bcm2710_DEVICE_rpi-3=y
 
 # the perf module seems to cause a build failure
 # FIXME: still needed? deactivated 2020/03/21

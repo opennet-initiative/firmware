@@ -76,15 +76,20 @@ get_file_timestamp_age_minutes() {
 		now=$(cut -f 1 -d . /proc/uptime)
 		# schon abgelaufen?
 		echo "$(( (stored_timestamp + period_seconds - now) / 60 ))"
+	else
+		echo 0
 	fi
 }
 
 
 get_rx_counters() {
-	iwinfo "$WIFI_DEVICE" assoclist \
+	local rx_count
+	rx_count=$(iwinfo "$WIFI_DEVICE" assoclist \
 		| grep -w "RX:" \
 		| sed 's/^.*\s\([0-9]\+\) Pkts.*$/\1/' \
 		| sort -n
+	)
+	echo "${rx_count:-0}"
 }
 
 

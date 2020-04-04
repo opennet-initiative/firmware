@@ -1,0 +1,52 @@
+remote fd32:d8d3:87da::245 1700
+proto udp6
+writepid /var/run/gw_openvpn_v6_fd32_d8d3_87da__245_1700_udp.pid
+
+dev tap-on-user-v6
+dev-type tap
+
+ca /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem
+remote-cert-tls server
+
+cert /etc/openvpn/opennet_user/on_aps.crt
+key /etc/openvpn/opennet_user/on_aps.key
+
+client
+nobind
+
+# Die "lzo"-Kompression ist rueckwaerts kompatibel mit openvpn < 2.4 (auf der Server-Seite).
+# Zukuenftig wollen wir diese Einstellung via "push" vom Server setzen lassen.
+compress lzo
+
+# keine sanfte Abmeldung vom Server - sonst ueberschreibt dieses Signal das "ping-restart"-Signal bei einem Verbindungsabbruch
+#explicit-exit-notify 1
+# explizit kein "persist-tun" - damit wir Verbindungsabbrueche via down-Skript erkennen koennen
+#persist-tun
+
+persist-key
+
+# prevent warnings regarding in-memory secrets
+auth-nocache
+
+# bei einem Verbindungsfehler sollten wir schnell einen Abbruch signalisieren
+# (anstelle unendlich vieler Verbindungsversuche)
+#TODO ist folgendes noetig? Testen und ggf. aktivieren
+#tls-exit
+
+# nur ein Verbindungsversuch
+single-session
+# begrenze den Timeout fuer das TLS-Handshake auf 30s - dies ermoeglicht einen Verbindungsabbruch innerhalb von einer Minute
+hand-window 30
+
+# keine Fehlermeldungen bei scheinbaren "replay"-Angriffen
+# man openvpn: Silence the output of replay warnings, which are a common false alarm on WiFi networks.
+mute-replay-warnings
+
+txqueuelen 1000
+
+verb 3
+
+script-security 2
+
+up /usr/lib/opennet/events/mig_openvpn_v6_updown.sh
+down /usr/lib/opennet/events/mig_openvpn_v6_updown.sh

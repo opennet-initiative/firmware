@@ -1,0 +1,13 @@
+#!/bin/sh
+
+
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+#debug, include file
+#../on-openvpn-v6.sh
+
+configure_tunnel_v6_network
+configure_tunnel_v6_firewall
+update_vpn_v6_config
+enable_openvpn_v6_service

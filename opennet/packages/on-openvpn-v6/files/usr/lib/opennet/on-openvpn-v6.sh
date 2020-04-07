@@ -10,9 +10,8 @@ REMOTE_PORT=1700
 
 MIG_OPENVPN_V6_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-v6-mig.template
 PID_FILE=/var/run/${SERVICE_NAME}.pid
-#wir duerfen die .conf Datei nicht im gleichen Verzeichnis wie $OPENVPN_V6_CONFIG_BASEDIR ablegen
-# weil die Datei sonst von mig_connect_quickly() gelöscht wird, sobald kein zugeörige .pid Datei gefunden wird
-OPENVPN_V6_CONFIG_BASEDIR=/var/etc/openvpn-v6/
+#wir legen die Datei direkt auf dem Flash Speicher ab damit sie nach dem Reboot weiter vorhanden ist
+OPENVPN_V6_CONFIG_BASEDIR=/etc/openvpn
 
 
 configure_tunnel_v6_network() {

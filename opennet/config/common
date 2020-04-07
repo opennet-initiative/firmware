@@ -56,10 +56,6 @@ CONFIG_PACKAGE_libstdcpp=m
 CONFIG_PACKAGE_glib2=m
 CONFIG_PACKAGE_libffi=m
 
-# Debugging via "perf" (siehe https://dev.opennet-initiative.de/ticket/187)
-#CONFIG_KERNEL_PERF_EVENTS=y   #dieser Parameter ist auskommentiert weil ansonsten bcm2708 nicht gebaut werden kann
-CONFIG_PACKAGE_perf=m
-
 # wireless-Dinge
 CONFIG_PACKAGE_hostapd=m
 CONFIG_PACKAGE_hostapd-utils=y

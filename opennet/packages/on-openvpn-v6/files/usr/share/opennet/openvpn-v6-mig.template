@@ -1,5 +1,3 @@
-remote fd32:d8d3:87da::245 1700
-proto udp6
 writepid /var/run/gw_openvpn_v6_fd32_d8d3_87da__245_1700_udp.pid
 
 dev tap-on-user-v6

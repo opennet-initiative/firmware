@@ -5,10 +5,13 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
-*
+* OpenVPN IPv6 Adresszuweisung (neues Paket)
+* Plattform sunxi (Banana Pi) wird nicht mehr gebaut
+* Unterstützung für brcm2709/10 (Rasperry Pi 2 / 3) hinzu gefügt
+* Unterstützung für ipq40xx (u.a. Fritz!Box 4040) hinzu gefügt
 
 = Interne Änderungen =
-*
+* Kernel PERF Unterstützung deaktiviert, Einfluss auf brcm2709/10 Bauvorgang und möglicherweise die 32 MB RAM Geräte (Lastprobleme)
 
 = Bemerkenswertes / Fehler / Mängel =
 *

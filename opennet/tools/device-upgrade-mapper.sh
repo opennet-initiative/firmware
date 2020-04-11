@@ -7,13 +7,13 @@
 #
 # Run this script with the "verify" argument in order to test the URLs:
 #    # local build version
-#    device-upgrade-mapper verify
+#    device-upgrade-mapper.sh verify
 #    # latest stable release
-#    device-upgrade-mapper verify stable
+#    device-upgrade-mapper.sh verify stable
 #    # latest testing release
-#    device-upgrade-mapper verify testing
+#    device-upgrade-mapper.sh verify testing
 #    # a specific testing release
-#    device-upgrade-mapper verify 0.5.6-unstable-2754-695e5ff8
+#    device-upgrade-mapper.sh verify 0.5.6-unstable-2754-695e5ff8
 #
 
 set -eu
@@ -63,6 +63,11 @@ DEVICE_MAP="
     raspberrypi,model-b-plus    brcm2708/bcm2708 rpi-squashfs-sysupgrade.img.gz
     raspberrypi,model-b-rev2    brcm2708/bcm2708 rpi-squashfs-sysupgrade.img.gz
     raspberrypi,model-zero-w    brcm2708/bcm2708 rpi-squashfs-sysupgrade.img.gz
+    raspberrypi,2-model-b       brcm2708/bcm2709 rpi-2-squashfs-sysupgrade.img.gz
+    raspberrypi,2-model-b-rev2  brcm2708/bcm2709 rpi-2-squashfs-sysupgrade.img.gz
+    raspberrypi,3-model-b       brcm2708/bcm2710 rpi-3-squashfs-sysupgrade.img.gz
+    raspberrypi,3-model-b-plus  brcm2708/bcm2710 rpi-3-squashfs-sysupgrade.img.gz
+    #raspberrypi,4-model-b      #not supported yet
 "
 
 BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)

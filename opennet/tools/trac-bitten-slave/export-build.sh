@@ -57,7 +57,7 @@ build_platform() {
 	echo "$snapshot_name" >"$dest_dir/version.txt"
 
 	# generate a map between devices and upgrade firmware download paths
-	"$HOME/$BUILD_DIR/opennet/tools/device-upgrade-mapper" generate \
+	"$HOME/$BUILD_DIR/opennet/tools/device-upgrade-mapper.sh" generate \
 		>"$dest_dir/device-upgrade-map.csv"
 
 	# Update the (probably outdated) timestamp of the unrelated parent directory.

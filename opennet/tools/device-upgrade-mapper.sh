@@ -68,6 +68,10 @@ DEVICE_MAP="
     raspberrypi,3-model-b       brcm2708/bcm2710 rpi-3-squashfs-sysupgrade.img.gz
     raspberrypi,3-model-b-plus  brcm2708/bcm2710 rpi-3-squashfs-sysupgrade.img.gz
     #raspberrypi,4-model-b      #not supported yet
+
+    # AVM
+    avm,fritzbox-4040           ipq40xx/generic  avm_fritzbox-4040-squashfs-sysupgrade.bin
+
 "
 
 BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)

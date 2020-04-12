@@ -13,6 +13,7 @@ always-enable-dfs.patch
 radar_pulse_debug.patch
 muninlite_swap.patch
 muninlite_makefile.patch
+muninlite_fix_v6_slash.patch
 regdb_channels.patch
 olsrd2_update_to_0.15.1.patch
 radar_silent_chirp.patch

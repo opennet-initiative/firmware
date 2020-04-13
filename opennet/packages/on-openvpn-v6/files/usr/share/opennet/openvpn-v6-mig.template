@@ -43,8 +43,3 @@ mute-replay-warnings
 txqueuelen 1000
 
 verb 3
-
-script-security 2
-
-up /usr/lib/opennet/events/mig_openvpn_v6_updown.sh
-down /usr/lib/opennet/events/mig_openvpn_v6_updown.sh

@@ -10,7 +10,7 @@ define Package/on-openvpn-v6
   URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=VPN IPv6 extensions
-  DEPENDS+=+on-openvpn +ndppd
+  DEPENDS+=+on-openvpn
 endef
 
 define Package/on-openvpn-v6/description

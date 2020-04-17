@@ -16,6 +16,8 @@ OPENVPN_V6_CONFIG_BASEDIR=/etc/openvpn
 
 configure_tunnel_v6_network() {
 	local uci_prefix=network.$NETWORK_TUNNEL_V6
+	#wir benoetigen feste clientid damit der DHCPv6 Server uns wieder erkennt nach Reboot und altes Prefix liefert
+	local clientid_rand=$(</dev/urandom tr -dc a-f0-9 | head -c 20)
 
 	# Abbruch falls das Netzwerk schon vorhanden ist
 	[ -n "$(uci_get "$uci_prefix")" ] && return
@@ -26,6 +28,7 @@ configure_tunnel_v6_network() {
 	uci set "${uci_prefix}.ifname=on_tap_user6"
 	uci set "${uci_prefix}.reqprefix=auto"
 	uci set "${uci_prefix}.reqaddress=try"
+	uci set "${uci_prefix}.clientid=$clientid_rand"
 
 	apply_changes network
 }

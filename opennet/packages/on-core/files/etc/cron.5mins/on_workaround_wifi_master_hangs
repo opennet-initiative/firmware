@@ -59,7 +59,7 @@ get_file_timestamp_age_minutes() {
 	local filename="$1"
 	local stored_timestamp
 	local now
-	if [ -e "$filename" ]; then
+	if [ -s "$filename" ]; then
 		stored_timestamp=$(cat "$filename")
 		now=$(cut -f 1 -d . /proc/uptime)
 		# schon abgelaufen?

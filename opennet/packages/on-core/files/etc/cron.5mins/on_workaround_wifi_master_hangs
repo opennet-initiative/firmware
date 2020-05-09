@@ -64,8 +64,6 @@ get_file_timestamp_age_minutes() {
 		now=$(cut -f 1 -d . /proc/uptime)
 		# schon abgelaufen?
 		echo "$(( (stored_timestamp - now) / 60 ))"
-	else
-		echo 0
 	fi
 }
 

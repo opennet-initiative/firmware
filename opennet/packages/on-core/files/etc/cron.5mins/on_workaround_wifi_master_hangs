@@ -55,27 +55,15 @@ update_seen_clients_timestamp_if_stations_are_connected() {
 }
 
 
-# Basierend auf dem Alter der "es gab Verbindungen"-Datei verwenden wir verschiedene
-# Reset-Perioden.  Somit können wir schnell auf ein Hängenbleiben reagieren, ohne im Fall eines
-# dauerhaften Fehlers allzu häufig den Reset auszuführen.
-get_reset_period_seconds() {
-	if [ ! -e "$SEEN_CLIENTS_TIMESTAMP_FILE" ]; then
-		echo 1
-	else
-		awk '{print $1/60}' "$RESET_TIMESTAMP_FILE"
-	fi
-}
-
-
 get_file_timestamp_age_minutes() {
-	local period_seconds="$1"
+	local filename="$1"
 	local stored_timestamp
 	local now
-	if [ -e "$RESET_TIMESTAMP_FILE" ]; then
-		stored_timestamp=$(cat "$RESET_TIMESTAMP_FILE")
+	if [ -e "$filename" ]; then
+		stored_timestamp=$(cat "$filename")
 		now=$(cut -f 1 -d . /proc/uptime)
 		# schon abgelaufen?
-		echo "$(( (stored_timestamp + period_seconds - now) / 60 ))"
+		echo "$(( (stored_timestamp - now) / 60 ))"
 	else
 		echo 0
 	fi
@@ -96,7 +84,7 @@ get_rx_counters() {
 is_reset_allowed() {
 	local last_seen_clients_timestamp_age_hours reset_timestamp_age_minutes
 	last_seen_clients_timestamp_age_hours=$(get_file_timestamp_age_minutes "$SEEN_CLIENTS_TIMESTAMP_FILE" | awk '{print $1/60}')
-	# there was never a successful connection: reset is now allowed
+	# there was never a successful connection: reset is not allowed
 	[ -z "$last_seen_clients_timestamp_age_hours" ] && exit 1
 	# the minimum reset period depends on the age of the "last client seen" timestamp
 	if [ "$last_seen_clients_timestamp_age_hours" -lt 1 ]; then

@@ -24,8 +24,9 @@
 set -eu
 
 WIFI_DEVICE="wlan0"
-LAST_RX_COUNTER_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.cache"
+LAST_PEER_TRAFFIC_COUNTER_FILENAME_PATTERN="/tmp/$(basename "$0")-${WIFI_DEVICE}-%s.cache"
 RESET_TIMESTAMP_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.timestamp_last_reset"
+MINIMUM_RESET_PERIOD_SECONDS=900
 SEEN_CLIENTS_TIMESTAMP_FILE="/tmp/$(basename "$0")-${WIFI_DEVICE}.timestamp_seen_clients"
 
 
@@ -70,14 +71,39 @@ get_file_timestamp_age_minutes() {
 }
 
 
-get_rx_counters() {
+get_peer_traffic_counts() {
+	# direction should be "RX" or "TX"
+	local direction="$1"
 	local rx_count
 	rx_count=$(iwinfo "$WIFI_DEVICE" assoclist \
-		| grep -w "RX:" \
+		| grep -w "$direction:" \
 		| sed 's/^.*\s\([0-9]\+\) Pkts.*$/\1/' \
 		| sort -n
 	)
 	echo "${rx_count:-0}"
+}
+
+
+is_peer_traffic_count_for_direction_stale() {
+	# direction should be "RX" or "TX"
+	local direction="$1"
+	local cache_filename last_counts current_counts cache_was_missing
+	# shellcheck disable=SC2059
+	cache_filename=$(printf "$LAST_PEER_TRAFFIC_COUNTER_FILENAME_PATTERN" "$direction")
+	if [ -e "$cache_filename" ]; then
+		last_counts=$(cat "$cache_filename")
+		cache_was_missing=0
+	else
+		last_counts=
+		cache_was_missing=1
+	fi
+	current_counts=$(get_peer_traffic_counts "$direction")
+	# update caches and timestamps
+	echo "$current_counts" >"$cache_filename"
+	# the first run should not be considered "stale"
+	[ "$cache_was_missing" = "1" ] && return 1
+	# no change -> the peer traffic seems to be stale
+	[ "$last_counts" = "$current_counts" ]
 }
 
 
@@ -133,26 +159,11 @@ update_seen_clients_timestamp_if_stations_are_connected
 # no action is required, if we never saw any connection
 [ -e "$SEEN_CLIENTS_TIMESTAMP_FILE" ] || exit 0
 
-# collect status data
-if [ -e "$LAST_RX_COUNTER_FILE" ]; then
-	last_rx_counters=$(cat "$LAST_RX_COUNTER_FILE")
-	rx_cache_was_missing=0
-else
-	last_rx_counters=
-	rx_cache_was_missing=1
+# one symptom of the problem is a stuck RX or TX queue (visible in the peer-based packet counters)
+# Up to 2020 we encountered only the symptom of the RX queue being stuck.
+# In 2020 we also noticed a stuck TX queue on AP1.52.
+if is_peer_traffic_count_for_direction_stale "RX" || is_peer_traffic_count_for_direction_stale "TX"; then
+	if is_reset_allowed; then
+		reset_wireless_interfaces
+	fi
 fi
-current_rx_counters=$(get_rx_counters)
-
-# update caches and timestamps
-echo "$current_rx_counters" >"$LAST_RX_COUNTER_FILE"
-
-# no reset during the first run
-[ "$rx_cache_was_missing" = "1" ] && exit 0
-
-# no reset if there was a change of wireless activity
-[ "$last_rx_counters" != "$current_rx_counters" ] && exit 0
-
-# exit if there was no previous connection or if the reset timestamp is not expired
-is_reset_allowed || exit 0
-
-reset_wireless_interfaces

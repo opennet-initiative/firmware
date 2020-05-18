@@ -1,5 +1,7 @@
 Add new device Ubiquiti Litebeam AC Gen2 from openwrt staging/stintel.git and use the same for Litebeam AC Gen1 (LBE-AC5-23).
 
+Additional changes:
+* use "kmod-ath10k-ct-smallbuffers" instead of "kmod-ath10k-ct"
 
 --- on_firmware.orig/openwrt/target/linux/ath79/base-files/etc/board.d/02_network
 +++ on_firmware/openwrt/target/linux/ath79/base-files/etc/board.d/02_network
@@ -34,7 +36,7 @@ Add new device Ubiquiti Litebeam AC Gen2 from openwrt staging/stintel.git and us
 +define Device/ubnt_litebeam-ac-gen1
 +  $(Device/ubnt-wa)
 +  DEVICE_TITLE := Ubiquiti Litebeam AC Gen1
-+  DEVICE_PACKAGES += kmod-ath10k-ct ath10k-firmware-qca988x-ct
++  DEVICE_PACKAGES += kmod-ath10k-ct-smallbuffers ath10k-firmware-qca988x-ct
 +  IMAGE_SIZE := 15744k
 +  IMAGE/factory.bin := $$(IMAGE/sysupgrade.bin) | mkubntimage-split
 +endef
@@ -43,7 +45,7 @@ Add new device Ubiquiti Litebeam AC Gen2 from openwrt staging/stintel.git and us
 +define Device/ubnt_litebeam-ac-gen2
 +  $(Device/ubnt-wa)
 +  DEVICE_TITLE := Ubiquiti Litebeam AC Gen2
-+  DEVICE_PACKAGES += kmod-ath10k-ct ath10k-firmware-qca988x-ct
++  DEVICE_PACKAGES += kmod-ath10k-ct-smallbuffers ath10k-firmware-qca988x-ct
 +  IMAGE_SIZE := 15744k
 +  IMAGE/factory.bin := $$(IMAGE/sysupgrade.bin) | mkubntimage-split
 +endef

@@ -1,0 +1,14 @@
+Do not compile pud plugin because it uses gpsd and there are often compiling errors. We never need this plugin.
+Index: on_firmware/routing/olsrd/Makefile
+===================================================================
+--- on_firmware.orig/routing/olsrd/Makefile
++++ on_firmware/routing/olsrd/Makefile
+@@ -182,7 +182,7 @@ MAKE_FLAGS+= \
+ 	DESTDIR="$(PKG_INSTALL_DIR)" \
+ 	STRIP="true" \
+ 	INSTALL_LIB="true" \
+-	SUBDIRS="arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo netjson mdns nameservice ondataservice_light p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog"
++	SUBDIRS="arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo netjson mdns nameservice ondataservice_light p2pd pgraph quagga secure sgwdynspeed txtinfo watchdog"
+ 
+ define Build/Compile
+ 	$(call Build/Compile/Default,all)

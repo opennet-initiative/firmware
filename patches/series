@@ -21,3 +21,4 @@ radar_counter.patch
 olsrd2_remove_timer_warning.patch
 cpe510v3-backport.patch
 edgerouterx-sfp.patch
+olsrd_del_pud.patch

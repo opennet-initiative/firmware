@@ -109,7 +109,7 @@ is_peer_traffic_count_for_direction_stale() {
 
 is_reset_allowed() {
 	local last_seen_clients_timestamp_age_hours reset_timestamp_age_minutes
-	last_seen_clients_timestamp_age_hours=$(get_file_timestamp_age_minutes "$SEEN_CLIENTS_TIMESTAMP_FILE" | awk '{print $1/60}')
+	last_seen_clients_timestamp_age_hours=$(get_file_timestamp_age_minutes "$SEEN_CLIENTS_TIMESTAMP_FILE" | awk '{print int($1/60)}')
 	# there was never a successful connection: reset is not allowed
 	[ -z "$last_seen_clients_timestamp_age_hours" ] && exit 1
 	# the minimum reset period depends on the age of the "last client seen" timestamp

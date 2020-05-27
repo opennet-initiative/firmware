@@ -11,7 +11,9 @@ ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.
 ## @brief Rufe den Inhalt ab, auf den eine URL verweist.
 ## @param URL die Quell-Adresse
 ## @returns Exitcode=0 falls kein Fehler auftrat. Andernfalls: curl-Exitcodes
-## @details Es wird ausschließlich Opennet-Zertifikaten vertraut.
+## @details Es wird ausschließlich Opennet-Zertifikaten vertraut. Diese Funktion wird von
+##     "http_request" für den ersten Versuch eines Downloads verwendet, falls das
+##     on-certificates-Modul installiert ist.
 https_request_opennet() {
        curl -sS --fail -q --silent --location --max-time 30 --retry 2 \
                --cacert "$ON_CERT_BUNDLE_PATH" "$@"

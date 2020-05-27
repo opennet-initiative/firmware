@@ -879,20 +879,14 @@ is_trusted_service_list_outdated() {
 
 retrieve_service_list_url() {
 	local url="$1"
-	if is_function_available "https_request_opennet"; then
-		https_request_opennet "$url" \
-			|| http_request "$url" \
-			|| msg_info "Failed to retrieve list of services from $url"
-	else
-		if ! http_request "$url"; then
-			if echo "$url" | grep -q '^https://'; then
-				# The URL probably uses a certificate signed by the Opennet CA,
-				# while "on-certificate" is not installed.
-				# Thus we do not emit any warnings.
-				true
-			else
-				msg_info "Failed to retrieve list of services from $url"
-			fi
+	if ! http_request "$url"; then
+		if echo "$url" | grep -q '^https://'; then
+			# The URL probably uses a certificate signed by the Opennet CA,
+			# while "on-certificate" is not installed.
+			# Thus we do not emit any warnings.
+			true
+		else
+			msg_info "Failed to retrieve list of services from $url"
 		fi
 	fi
 }

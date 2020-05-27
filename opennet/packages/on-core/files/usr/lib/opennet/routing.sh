@@ -362,13 +362,14 @@ get_olsr_neighbours() {
 	local nlq
 	local etx
 	local ip_interface_map
-	local interface
+	local interface_description
 	ip_interface_map=$(request_olsrd_txtinfo "int" | awk '{print($5, $1);}')
 	request_olsrd_txtinfo "lin" | grep "^[0-9]" | awk '{ print $1,$2,$4,$5,$6 }' | sort -n \
 			| while read -r local_ip neighbour_ip lq nlq etx; do
-		interface=$(echo "$ip_interface_map" | grep -wF "$local_ip" | awk '{print $2}')
-		[ -z "$interface" ] && interface="unknown"
-		echo "$neighbour_ip $interface $lq $nlq $etx $(get_olsr_route_count_by_neighbour "$neighbour_ip")"
+		# there may be one or more interfaces (e.g. multiple TAP tunnels for UGW APs)
+		interface_description=$(echo "$ip_interface_map" | grep -wF "$local_ip" | awk '{print $2}' | tr '\n' '/' | sed 's#/$##')
+		[ -z "$interface_description" ] && interface_description="unknown"
+		echo "$neighbour_ip $interface_description $lq $nlq $etx $(get_olsr_route_count_by_neighbour "$neighbour_ip")"
 	done
 }
 

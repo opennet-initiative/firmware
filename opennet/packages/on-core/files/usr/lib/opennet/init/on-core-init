@@ -103,6 +103,15 @@ enable_default_modules() {
 }
 
 
+reduce_uhttpd_requests() {
+	if uci show uhttpd >/dev/null 2>&1 && [ "$(get_memory_size)" -le 32 ]; then
+		uci set "uhttpd.main.max_requests=1"
+		uci commit uhttpd
+		reload_config
+	fi
+}
+
+
 add_default_settings
 disable_cron_logging
 configure_dnsmasq
@@ -110,3 +119,4 @@ add_crontab_entries
 set_timezone_berlin
 enable_firewall_reload_trigger
 enable_default_modules
+reduce_uhttpd_requests

@@ -1,0 +1,156 @@
+{
+	"opennet": {
+		"title": "Opennet",
+		"order": 10,
+		"action": {
+			"type": "firstchild",
+			"recurse": true
+		},
+		"auth": {
+			"methods": [ "cookie:sysauth" ],
+			"login": true
+		}
+	},
+
+	"opennet/status": {
+		"title": "Status",
+		"order": 10,
+		"action": {
+			"type": "firstchild",
+			"preferred": "overview",
+			"recurse": true
+		}
+	},
+	"opennet/basis": {
+		"title": "Basis",
+		"order": 20,
+		"action": {
+			"type": "firstchild",
+			"preferred": "system",
+			"recurse": true
+		}
+	},
+
+
+        "opennet/status/overview": {
+                "title": "Status",
+                "order": 1,
+                "action": {
+                        "type": "template",
+                        "path": "opennet/on_status"
+                }
+        },
+        "opennet/status/neighbors/*": {
+		"action": {
+                        "type": "call",
+                        "module": "luci.model.opennet.on_status",
+                        "function": "status_neighbors"
+                }
+        },
+	"opennet/status/network/*": {
+                "action": {
+                        "type": "call",
+                        "module": "luci.model.opennet.on_status",
+                        "function": "status_network"
+                }
+        },
+        "opennet/status/modules/*": {
+                "action": {
+                        "type": "call",
+                        "module": "luci.model.opennet.on_status",
+                        "function": "status_modules"
+                }
+        },
+        "opennet/status/issues/*": {
+                "action": {
+                        "type": "call",
+                        "module": "luci.model.opennet.on_status",
+                        "function": "status_issues"
+                }
+        },
+        "opennet/status/firmware_update_info/*": {
+                "action": {
+                        "type": "call",
+                        "module": "luci.model.opennet.on_status",
+                        "function": "status_firmware_update_info"
+                }
+        },
+	
+
+        "opennet/basis/network": {                               
+                "title": "Network",                              
+                "order": 1,                                     
+                "action": {                                      
+                        "type": "alias",                         
+                        "path": "opennet/basis/network/opennet_id"
+                }                                                 
+	},
+        "opennet/basis/network/opennet_id": {                     
+                "title": "Opennet ID",                            
+                "action": {                                       
+                	"type": "call",                           
+	                "module": "luci.model.opennet.base",      
+        	        "function": "action_network"              
+                }                                                 
+        },                                                        
+        "opennet/basis/network/wireless_ifaces": {
+                "title": "WirelessInterfaces",
+                "action": {
+                	"type": "call",                           
+	                "module": "luci.model.opennet.base",      
+        	        "function": "action_network"              
+                }
+        },
+        "opennet/basis/admin": {
+                "title": "Administrationi111",
+                "order": 2,
+                "action": {
+                        "type": "firstchild"
+                }
+        },
+
+        "opennet/basis/module/*": {                               
+                "title": "Modules",                               
+                "order": 3,                                      
+                "action": {                                       
+                        "type": "call",                           
+                        "module": "luci.model.opennet.base",      
+                        "function": "action_modules"              
+                }                                                 
+        },                                                        
+        "opennet/basis/einstellungen/*": {                        
+                "title": "Settings",                              
+                "order": 4,                                      
+                "action": {                                       
+                        "type": "call",                           
+                        "module": "luci.model.opennet.base",      
+                        "function": "action_settings"             
+                }                                                 
+        },                                                        
+        "opennet/basis/portweiterleitung/*": {                        
+                "title": "Port-Mapping",                              
+                "order": 60,          
+                "action": {                                       
+                        "type": "call",                           
+                        "module": "luci.model.opennet.base",      
+                        "function": "action_portmapping"             
+                }                                                 
+	},
+        "opennet/basis/bericht": {                                
+                "title": "Report",                                
+                "order": 80,                                      
+                "action": {                                       
+                        "type": "call",                           
+                        "module": "luci.model.opennet.base",      
+                        "function": "action_report"               
+                }                                                 
+        },                                                        
+        "opennet/basis/bericht/zeitstempel/*": {                  
+                "action": {                                 
+                        "type": "call",                     
+                        "module": "luci.model.opennet.base",
+                        "function": "get_report_timestamp"  
+                }                                           
+        },                                    
+}
+

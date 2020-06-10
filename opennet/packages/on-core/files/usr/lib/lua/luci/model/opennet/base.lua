@@ -11,6 +11,8 @@ You may obtain a copy of the License at
 
 ]]--
 
+module("luci.model.opennet.base", package.seeall)
+
 require("luci.model.opennet.funcs")
 require("nixio.fs")
 local report_filename = "/tmp/on_report.tar.gz"

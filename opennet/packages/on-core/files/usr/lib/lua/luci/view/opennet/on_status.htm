@@ -12,14 +12,14 @@ You may obtain a copy of the License at
 $Id: index.htm 5448 2009-10-31 15:54:11Z jow $
 
 -%>
-<%
-require ("luci.model.opennet.on_status")
-require("luci.model.opennet.urls")
-local i18n = luci.i18n.translate
-%>
 
 <%+header%>
 
+<%
+local onstatus=require "luci.model.opennet.on_status"
+local onurls=require "luci.model.opennet.urls"
+local i18n = luci.i18n.translate
+%>
 
 <script type="text/javascript">//<![CDATA[
 
@@ -58,7 +58,7 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 	end
 %>
 
-<h2><a id="content" name="content"><%=get_firmware_title() %></a></h2>
+<h2><a id="content" name="content"><%=onstatus.get_firmware_title() %></a></h2>
 <div class="cbi-map">
 	<h3 class="on_title"><%:This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to the requirements of the Opennet Initiative e.V.%></h3>
 	<div id="status_opennet_logo" /><div id="status_openwrt_logo" />

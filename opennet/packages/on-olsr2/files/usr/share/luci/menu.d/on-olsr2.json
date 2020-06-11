@@ -1,0 +1,10 @@
+{
+	"opennet/status/neighbors_olsr2/*": {
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_olsr2",
+			"function": "status_neighbors_olsr2"
+		}
+	},
+
+}

@@ -1,4 +1,7 @@
+module("luci.model.opennet.on_olsr2", package.seeall)
+
 function status_neighbors_olsr2()
+	require("luci.model.opennet.funcs")
 	luci.http.prepare_content("text/plain")
 	local neighbour_info = on_function("get_olsr2_neighbours")
 	local response = ""

@@ -12,6 +12,7 @@ You may obtain a copy of the License at
 $Id: opennet.lua 5485 2009-11-01 14:24:04Z jow $
 ]]--
 
+module("luci.model.opennet.on_mig_openvpn", package.seeall)
 
 local uci = require "luci.model.uci"
 local cursor = uci.cursor()
@@ -20,6 +21,7 @@ require("luci.model.opennet.urls")
 
 
 function action_on_openvpn()
+	require("luci.model.opennet.funcs")
 	if luci.http.formvalue("restartvpn") then os.execute("vpn_status restart opennet_user") end
 	
 	local on_errors = {}
@@ -43,6 +45,8 @@ end
 
 
 function action_vpn_gateways()
+	require("luci.model.opennet.funcs")
+
 	local reset_connection_test_timestamps = luci.http.formvalue("reset_connection_test_timestamps")
 	local on_errors = {}
 	
@@ -74,6 +78,7 @@ end
 
 
 function action_vpn_connection_log()
+	require("luci.model.opennet.funcs") 
 	local gateway_log = get_custom_log_reversed("mig-openvpn-connections", 30)
 	luci.template.render("opennet/on_gateway_connection_log", { gateway_log=gateway_log })
 end

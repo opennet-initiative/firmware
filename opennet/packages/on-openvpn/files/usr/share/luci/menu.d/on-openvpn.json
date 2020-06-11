@@ -1,0 +1,92 @@
+{
+	"opennet/mig_openvpn": {
+                "title": "VPN Tunnel",
+                "order": 30,
+                "action": {
+                        "type": "firstchild",
+                        "preferred": "zertifikat",
+                        "recurse": true
+                }
+        },
+
+
+	"opennet/mig_openvpn/zertifikat/*": {
+		"title": "Certificate",
+		"order": 1,
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_mig_openvpn",
+			"function": "action_on_openvpn"
+		}
+	},
+	"opennet/mig_openvpn/gateways/*": {
+		"title": "Gateways",
+		"order": 2,
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_mig_openvpn",
+			"function": "action_vpn_gateways"
+		}
+	},
+	"opennet/mig_openvpn/log/*": {
+		"title": "Connection Log",
+		"order": 3,
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_mig_openvpn",
+			"function": "action_vpn_connection_log"
+		}
+	},
+	"opennet/mig_openvpn/log/*": {
+		"title": "Connection Log",
+		"order": 3,
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_mig_openvpn",
+			"function": "action_vpn_connection_log"
+		}
+	},
+
+
+	"opennet/mig_openvpn/vpn_status_label/*": {
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_mig_openvpn",
+			"function": "action_vpn_connection_log"
+		}
+	},
+	"opennet/mig_openvpn/vpn_status_form/*": {
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_mig_openvpn",
+			"function": "action_vpn_connection_form"
+		}
+	},
+
+
+	"opennet/mig_openvpn/status/vpn_gateway_info/*": {
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_mig_openvpn",
+			"function": "gateway_info"
+		}
+	},
+	"opennet/mig_openvpn/status/vpn_gateway_list/*": {
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_mig_openvpn",
+			"function": "gateway_list"
+		}
+	},
+
+
+	"opennet/status/mig_openvpn/*": {
+		"__comment": "wir ver..ffentlichen unseren Status unterhalb der core-Seite, um die URL-Erstellung dort zu erleichtern",
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_mig_openvpn",
+			"function": "status_mig_openvpn"
+		}
+	},
+
+}

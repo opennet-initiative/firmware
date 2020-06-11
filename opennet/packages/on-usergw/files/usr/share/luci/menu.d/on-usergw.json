@@ -1,0 +1,60 @@
+{
+	"opennet/mesh_tunnel": {
+                "title": "Internet Sharing",
+                "order": 40,
+                "action": {
+                        "type": "firstchild",
+                        "preferred": "overview",
+                        "recurse": true
+                }
+        },
+
+
+	"opennet/mesh_tunnel/overview": {
+		"title": "Overview",
+		"order": 1,
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_usergw",
+			"function": "action_on_openvpn_mesh_overview"
+		}
+	},
+	"opennet/mesh_tunnel/zertifikat/*": {
+		"title": "Key Management",
+		"order": 2,
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_usergw",
+			"function": "action_on_openvpn_mesh_keys"
+		}
+	},
+	"opennet/mesh_tunnel/verbindungen/*": {
+		"title": "Mesh Connections",
+		"order": 3,
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_usergw",
+			"function": "action_on_mesh_connections"
+		}
+	},
+	"opennet/mesh_tunnel/dienst_weiterleitung/*": {
+		"title": "Service Relay",
+		"order": 4,
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_usergw",
+			"function": "action_on_service_relay"
+		}
+	},
+
+
+	"opennet/status/mesh_verbindungen/*": {
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_usergw",
+			"function": "status_ugw_connection"
+		}
+	},
+
+
+}

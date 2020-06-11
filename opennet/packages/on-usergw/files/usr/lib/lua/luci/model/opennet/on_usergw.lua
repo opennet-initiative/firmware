@@ -11,6 +11,8 @@ You may obtain a copy of the License at
 
 ]]--
 
+module("luci.model.opennet.on_usergw", package.seeall)
+
 require("luci.model.opennet.funcs")
 
 
@@ -82,6 +84,7 @@ end
 
 
 function status_ugw_connection()
+    require("luci.model.opennet.funcs") 
     local status_lines = {}
     if on_bool_function("has_mesh_openvpn_credentials") then
         -- Zertifikat und Schluessel sind vorhanden

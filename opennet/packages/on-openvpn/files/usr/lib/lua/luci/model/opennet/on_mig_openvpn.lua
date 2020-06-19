@@ -117,12 +117,14 @@ end
 
 -- eine Tunnel-VPN-Verbindung scheint aufgebaut zu sein
 function is_tunnel_active()
+	require("luci.model.opennet.funcs")
 	return not is_string_empty(on_function("get_active_mig_connections"))
 end
 
 
 -- ein Tunnel-VPN-Prozess laeuft (eventuell steht die Verbindung noch nicht)
 function is_tunnel_starting()
+	require("luci.model.opennet.funcs")
 	return not is_string_empty(on_function("get_starting_mig_connections"))
 end
 

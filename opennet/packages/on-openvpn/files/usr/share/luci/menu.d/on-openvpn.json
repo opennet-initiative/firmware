@@ -37,15 +37,6 @@
 			"function": "action_vpn_connection_log"
 		}
 	},
-	"opennet/mig_openvpn/log/*": {
-		"title": "Connection Log",
-		"order": 3,
-		"action": {
-			"type": "call",
-			"module": "luci.model.opennet.on_mig_openvpn",
-			"function": "action_vpn_connection_log"
-		}
-	},
 
 
 	"opennet/mig_openvpn/vpn_status_label/*": {
@@ -64,6 +55,11 @@
 	},
 
 
+	"opennet/mig_openvpn/status": {
+		"action": {
+			"type": "fistchild"
+		}
+	},
 	"opennet/mig_openvpn/status/vpn_gateway_info/*": {
 		"action": {
 			"type": "call",

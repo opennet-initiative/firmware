@@ -87,6 +87,7 @@ end
 -- URL zum Testen: http://172.16.0.1/cgi-bin/luci/opennet/mig_openvpn/status/vpn_gateway_info/gw_openvpn_192_168_2_254_1600_udp
 -- das Resultat ist ein json-formatierter Datensatz mit den Informationen eines Gateways
 function gateway_info(service_name)
+	require("luci.model.opennet.funcs")
 	-- wir lesen "status" als string ein, um die drei moeglichen Werte (y/n/leer) zu unterscheiden
 	local info = parse_csv_service(service_name, {host="string|value|host", port="number|value|port",
 			status="string|value|status", connection_state="string|function|get_openvpn_service_state",

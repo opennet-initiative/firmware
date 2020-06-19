@@ -180,6 +180,7 @@ end
 
 
 function status_issues()
+	require "luci.model.opennet.urls"
 	luci.http.prepare_content("text/plain")
 	local result = ""
 	local warnings = on_function("get_potential_error_messages", {"30"})

@@ -45,14 +45,16 @@
                         "type": "call",
                         "module": "luci.model.opennet.on_status",
                         "function": "status_neighbors"
-                }
+               	},
+		"auth": {}
         },
 	"opennet/status/network/*": {
                 "action": {
                         "type": "call",
                         "module": "luci.model.opennet.on_status",
                         "function": "status_network"
-                }
+                },
+		"auth": {}
         },
         "opennet/status/modules/*": {
                 "action": {
@@ -66,7 +68,8 @@
                         "type": "call",
                         "module": "luci.model.opennet.on_status",
                         "function": "status_issues"
-                }
+                },
+		"auth": {}
         },
         "opennet/status/firmware_update_info/*": {
                 "action": {

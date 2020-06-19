@@ -12,6 +12,7 @@ You may obtain a copy of the License at
 
 ]]--
 
+module("luci.model.opennet.on_status", package.seeall)
 
 local uci = require "luci.model.uci"
 local cursor = uci.cursor()

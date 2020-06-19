@@ -108,6 +108,7 @@ end
 
 -- URL zum Testen: http://172.16.0.1/cgi-bin/luci/opennet/mig_openvpn/status/vpn_gateway_list
 function gateway_list()
+	require("luci.model.opennet.funcs")
 	sys = require("luci.sys")
 	local services = sys.exec("on-function get_services gw | on-function sort_services_by_priority")
 	local result = line_split(services)
@@ -131,6 +132,7 @@ end
 
 
 function on_vpn_status_label()
+	require("luci.model.opennet.funcs")
 	local tunnel_active = is_tunnel_active()
 	luci.http.prepare_content("text/plain")
 
@@ -149,6 +151,7 @@ end
 
 
 function on_vpn_status_form()
+	require("luci.model.opennet.funcs")
 	luci.http.prepare_content("text/plain")
 	luci.http.write('<input class="cbi-button" type="submit" name="openvpn_restart" title="')
 	if is_tunnel_active() or is_tunnel_starting() then

@@ -52,14 +52,14 @@
 		"action": {
 			"type": "call",
 			"module": "luci.model.opennet.on_mig_openvpn",
-			"function": "action_vpn_connection_log"
+			"function": "on_vpn_status_label"
 		}
 	},
 	"opennet/mig_openvpn/vpn_status_form/*": {
 		"action": {
 			"type": "call",
 			"module": "luci.model.opennet.on_mig_openvpn",
-			"function": "action_vpn_connection_form"
+			"function": "on_vpn_status_form"
 		}
 	},
 

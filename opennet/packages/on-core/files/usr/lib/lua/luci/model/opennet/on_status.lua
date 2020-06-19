@@ -75,7 +75,7 @@ function print_zone_info(zone_variable_name)
 		end
 		local zone_info = get_interfaces_info_table(network_interfaces, zone_name)
 		if not is_string_empty(zone_info) then
-			luci.http.write('<h3><abbr title="' .. title .. '">' .. interface_name .. '</abbr>&nbsp;'
+			luci.http.write('<h3><abbr title="' .. title .. '">' .. interface_name .. '</abbr> '
 				.. luci.i18n.translate('IP Address(es):') .. '</h3>')
 			luci.http.write(zone_info)
 		end

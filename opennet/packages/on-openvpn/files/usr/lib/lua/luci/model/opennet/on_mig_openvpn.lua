@@ -158,6 +158,7 @@ end
 
 
 function status_mig_openvpn()
+	require("luci.model.opennet.funcs")
 	luci.http.prepare_content("text/plain")
 	local services = line_split(on_function("get_active_mig_connections"))
 	local result

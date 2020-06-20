@@ -58,15 +58,20 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 	end
 %>
 
-<h2><a id="content" name="content"><%=onstatus.get_firmware_title() %></a></h2>
-<div class="cbi-map">
-	<h3 class="on_title"><%:This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to the requirements of the Opennet Initiative e.V.%></h3>
+<h2 id="content" name="content"><%=onstatus.get_firmware_title() %></h2>
+<div class="cbi-map-descr">
+	<p><%:This is an Access-Point with Opennet-Firmware, a modification of OpenWrt to the requirements of the Opennet Initiative e.V.%></p>
 	<div id="status_opennet_logo" /><div id="status_openwrt_logo" />
 </div>
-<h3><%:Status Information%></h3>
-<div class="cbi-map"><fieldset class="cbi-section">
-	<%= html_display_message_list(on_hints, "info") %>
-	<table class="cbi-section-table" id="status_table">
+
+<%= html_display_message_list(on_hints, "info") %>
+
+<div id="view">
+ <div class="cbi-section fade-in" style="">
+  <h3><%:Status Information%></h3>
+  <div>
+   <div class="table">
+
 		<%
 		local boardinfo = luci.util.ubus("system", "board") or { }
 		local boardinfo_formatted = pcdata(boardinfo.model or boardinfo.system or "?")
@@ -101,9 +106,9 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 			  }) do
 			-- skip missing modules (test only if they are installed - ignore "enabled")
 			if not item.mod_name or on_bool_function("is_package_installed", {item.mod_name}) then %>
-				<tr class="cbi-section-table-titles">
-					<td class="cbi-section-table-cell"><%=item[2]%>:</td>
-					<td class="cbi-section-table-cell" id="<%=item[1]%>">
+				<div class="tr">
+					<div class="td left"><%=item[2]%>:</div>
+					<div class="td left" id="<%=item[1]%>">
 					<% if item.mod_name and not on_bool_function("is_on_module_installed_and_enabled", {item.mod_name}) then %>
 						<%= luci.i18n.translatef('disabled (see <a href="%s">Modules</a>)', on_url("basis", "module")) %>
 					<% elseif item.url then %>
@@ -116,10 +121,14 @@ function fill_result_row(table_cell_name, request_url_suffix) {
 					<% else %>
 						<%=luci.util.pcdata(item.content)%>
 					<% end %>
-					</td>
-				</tr>
+					</div>
+				</div>
 			<% end %>
 		<% end %>
-	</table>
-</fieldset></div>
+
+   </div> <!--table-->
+  </div>
+ </div> <!--cbi-section fade-in-->
+</div> <!--view-->
+
 <%+footer%>

@@ -84,12 +84,12 @@ end
 
 
 function get_interfaces_info_table(networks, zoneName)
-	local header = [[<table id="network_table_]] .. zoneName.. [[" class="status_page_table"><tr>]]
-	        .. [[<th>]] ..  luci.i18n.translate("Interface") .. [[</th>]]
-		.. [[<th>]] .. luci.i18n.translate("IP") .. [[</th>]]
-		.. [[<th>]] .. luci.i18n.translate("IPv6") .. [[</th>]]
-		.. [[<th>]] .. luci.i18n.translate("MAC") ..  [[</th>]]
-	        .. [[</tr>]]
+	local header = [[<div class="table" id="network_table_]] .. zoneName.. [[" ><div class="tr table-titles">]]
+	        .. [[<div class="th left">]] ..  luci.i18n.translate("Interface") .. [[</div>]]
+		.. [[<div class="th left">]] .. luci.i18n.translate("IP") .. [[</div>]]
+		.. [[<div class="th left">]] .. luci.i18n.translate("IPv6") .. [[</div>]]
+		.. [[<div class="th left">]] .. luci.i18n.translate("MAC") ..  [[</div>]]
+	        .. [[</div>]]
 	local ifaces = {}
 	local ifname
 	-- erzeuge eine Liste ohne Dopplungen (z.B. fuer wan/wan6)
@@ -105,16 +105,16 @@ function get_interfaces_info_table(networks, zoneName)
 		local ip4_address = string_join(get_interface_addresses(ifname, "inet"), [[<br/>]])
 		local ip6_address = string_join(get_interface_addresses(ifname, "inet6"), [[<br/>]])
 		local mac_address = string_join(get_interface_addresses(ifname, "mac"), [[<br/>]])
-		content = content .. [[<tr><td>]] .. ifname .. [[</td>]]
-			.. [[<td>]] .. (ip4_address or "") .. [[</td>]]
-			.. [[<td>]] .. (ip6_address or "") .. [[</td>]]
-			.. [[<td>]] .. mac_address .. [[</td></tr>]]
+		content = content .. [[<div class="tr"><div class="td left">]] .. ifname .. [[</div>]]
+			.. [[<div class="td left">]] .. (ip4_address or "") .. [[</div>]]
+			.. [[<div class="td left">]] .. (ip6_address or "") .. [[</div>]]
+			.. [[<div class="td left">]] .. mac_address .. [[</div></div>]]
 	end
 	if is_string_empty(content) then
 		-- keine Tabelle im Fall von fehlenden Interfaces
 		return ""
 	else
-		return header .. content .. [[</table>]]
+		return header .. content .. [[</div><!--close table-->]]
 	end
 end
 
@@ -139,35 +139,35 @@ function status_neighbors()
 	local response = ""
 	if not is_string_empty(neighbour_info) then
 		-- Tabelle in Tabelle (aussen: Details + Karte, innen: Details)
-		response = response .. '<table border="0"><tr height="100%"><td>'
-		response = response .. '<table class="status_page_table"><tr>' ..
-			'<th>' ..  luci.i18n.translate("IP Address") .. "</th>" ..
-			'<th><abbr title="' .. luci.i18n.translate("Network Interface: the neighbour's packets arrive here") .. '">Interface</abbr></th>' ..
-			'<th><abbr title="' .. luci.i18n.translate("Link-Quality: how many of your packets were received by your neighbor") .. '">LQ</abbr></th>' ..
-			'<th><abbr title="' .. luci.i18n.translate("Neighbor-Link-Quality: how many of your test-packets did reach your neighbor") .. '">NLQ</abbr></th>' ..
-			'<th><abbr title="' .. luci.i18n.translate("Expected Transmission Count: Quality of the Connection to the Gateway reagrding OLSR") .. '">ETX</abbr></th>' ..
-			'<th><abbr title="' .. luci.i18n.translate("Number of routes via this neighbour") .. '">Routes</abbr></th>' ..
-			'</tr>'
+		response = response .. '<div class="table"><div class="tr"><div class="td">'
+		response = response .. '<div class="table"><div class="tr table-titles">' ..
+			'<div class="th">' ..  luci.i18n.translate("IP Address") .. "</div>" ..
+			'<div class="th"><abbr title="' .. luci.i18n.translate("Network Interface: the neighbour's packets arrive here") .. '">Interface</abbr></div>' ..
+			'<div class="th"><abbr title="' .. luci.i18n.translate("Link-Quality: how many of your packets were received by your neighbor") .. '">LQ</abbr></div>' ..
+			'<div class="th"><abbr title="' .. luci.i18n.translate("Neighbor-Link-Quality: how many of your test-packets did reach your neighbor") .. '">NLQ</abbr></div>' ..
+			'<div class="th"><abbr title="' .. luci.i18n.translate("Expected Transmission Count: Quality of the Connection to the Gateway reagrding OLSR") .. '">ETX</abbr></div>' ..
+			'<div class="th"><abbr title="' .. luci.i18n.translate("Number of routes via this neighbour") .. '">Routes</abbr></div>' ..
+			'</div>'
 		for _, line in pairs(line_split(neighbour_info)) do
 			local info = space_split(line)
 			-- keine Ausgabe, falls nicht mindestens fuenf Felder geparst wurden
 			-- (die Ursache fuer weniger als fuenf Felder ist unklar - aber es kam schon vor)
 			if info[6] then
-				response = response .. '<tr>' ..
-					'<td><a href="http://' .. info[1] .. '/">' .. info[1] .. '</a></td>' ..
-					'<td>' .. info[2] .. '</td>' ..
-					'<td>' .. info[3] .. '</td>' ..
-					'<td>' .. info[4] .. '</td>' ..
-					'<td>' .. info[5] .. '</td>' ..
-					'<td style="text-align:right">' .. info[6] .. '</td>' ..
-					'</tr>'
+				response = response .. '<div class="tr">' ..
+					'<div class="td"><a href="http://' .. info[1] .. '/">' .. info[1] .. '</a></div>' ..
+					'<div class="td">' .. info[2] .. '</div>' ..
+					'<div class="td">' .. info[3] .. '</div>' ..
+					'<div class="td">' .. info[4] .. '</div>' ..
+					'<div class="td">' .. info[5] .. '</div>' ..
+					'<div class="td right">' .. info[6] .. '</div>' ..
+					'</div>'
 			end
 		end
-		response = response .. '</table>'
+		response = response .. '</div><!--close table-->'
 		-- Karte einblenden
-		response = response .. '</td><td width="100%" height="100%">' ..
+		response = response .. '</div><!--close td--><div class="td">' ..
 		                '<iframe scrolling="no" width="100%" height="100%" style="min-height:450px; min-width:500px" src="https://map.opennet-initiative.de/?ip=' ..
-				on_function("get_main_ip") .. '"></iframe></td></tr></table>'
+				on_function("get_main_ip") .. '"></iframe></div></div>  </div><!--close table-->'
 	else
 		response = response .. '<div class="alert-message">' ..
 			luci.i18n.translate("Currently there are no known routing neighbours.") .. " " ..

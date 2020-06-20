@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Dieses Skript wird nur ein einziges Mal nach einem Upgrade oder der Erstinstallation ausgefuehrt:
+#   http://wiki.openwrt.org/doc/uci#defaults
+#
+
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+#Wir nutzen Style von Bootstrap. Bootstrap wird auch als Zukunft angesehen.
+#OpenWRT wird wahrscheinlich auch auf Bootstrap per default umstellen. Wenn dies geschehen ist, dann kann dieses Datei hier gelöscht werden.
+uci set luci.main.mediaurlbase='/luci-static/bootstrap'
+uci commit luci.main.mediaurlbase

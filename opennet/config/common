@@ -13,7 +13,7 @@ CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 
 CONFIG_ATH_USER_REGD=y
 
-# Setze OpenWRT Downloadpfad+Versionsnummer explizit weil wir die OpenWRT Versionsnummer mit
+# Setze OpenWrt Downloadpfad+Versionsnummer explizit weil wir die OpenWrt Versionsnummer mit
 # unserer Versionsnummer ueberschreiben.  Der Platzhalter "__OPENWRT_VERSION__" wird durch
 # opennet/config/Makefile ersetzt.
 CONFIG_VERSION_REPO="http://downloads.openwrt.org/releases/__OPENWRT_VERSION__"
@@ -87,7 +87,6 @@ CONFIG_PACKAGE_luci-sgi-cgi=y
 CONFIG_PACKAGE_luci-sgi-uhttpd=y
 CONFIG_PACKAGE_luci-theme-base=y
 CONFIG_PACKAGE_luci-theme-bootstrap=y
-CONFIG_PACKAGE_luci-theme-openwrt=y
 CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_uhttpd=y
 CONFIG_PACKAGE_uhttpd-mod-lua=y

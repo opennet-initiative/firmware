@@ -72,6 +72,9 @@ DEVICE_MAP="
     # AVM
     avm,fritzbox-4040           ipq40xx/generic  avm_fritzbox-4040-squashfs-sysupgrade.bin
 
+    # Comfast
+    comfast,cf-ew72             ath79/generic    comfast_cf-ew72-squashfs-sysupgrade.bin
+
 "
 
 BASE_DIR=$(cd "$(dirname "$0")/../.."; pwd)

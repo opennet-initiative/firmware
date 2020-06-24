@@ -152,22 +152,6 @@ index 058ab006e5..de0e6da854 100755
  dlink,dir-859-a1)
  	ucidef_set_led_switch "internet" "WAN" "$boardname:green:internet" "switch0" "0x20"
  	;;
-diff --git a/openwrt/target/linux/ath79/base-files/etc/hotplug.d/firmware/11-ath10k-caldata b/openwrt/target/linux/ath79/base-files/etc/hotplug.d/firmware/11-ath10k-caldata
-index d93e6dcd71..f489a4ff6b 100644
---- a/openwrt/target/linux/ath79/base-files/etc/hotplug.d/firmware/11-ath10k-caldata
-+++ b/openwrt/target/linux/ath79/base-files/etc/hotplug.d/firmware/11-ath10k-caldata
-@@ -181,6 +183,10 @@ case "$FIRMWARE" in
- 	;;
- "ath10k/pre-cal-pci-0000:00:00.0.bin")
- 	case $board in
-+	comfast,cf-ew72)
-+	ucidef_set_led_switch "lan" "LAN" "$boardname:blue:lan" "switch0" "0x02"
-+	ucidef_set_led_netdev "wan" "WAN" "$boardname:blue:wan" "eth1"
-+	;;
- 	nec,wg1200cr)
- 		ath10kcal_extract "art" 20480 12064
- 		ath10kcal_patch_mac_crc $(mtd_get_mac_ascii devdata wlan5mac)
- 	;;
 diff --git a/openwrt/target/linux/ath79/image/generic.mk b/openwrt/target/linux/ath79/image/generic.mk
 index 55053be34f..c843e22e8a 100644
 --- a/openwrt/target/linux/ath79/image/generic.mk
@@ -189,3 +173,19 @@ index 55053be34f..c843e22e8a 100644
  define Device/devolo_dvl1200e
    ATH_SOC := qca9558
    DEVICE_TITLE := devolo WiFi pro 1200e
+--- a/openwrt/target/linux/ath79/base-files/etc/hotplug.d/firmware/11-ath10k-caldata
++++ b/openwrt/target/linux/ath79/base-files/etc/hotplug.d/firmware/11-ath10k-caldata
+@@ -183,6 +183,13 @@
+ 	;;
+ "ath10k/pre-cal-pci-0000:00:00.0.bin")
+ 	case $board in
++	comfast,cf-ew72)
++		ath10kcal_extract "art" 20480 12064
++		ath10k_patch_mac $(macaddr_add $(mtd_get_mac_binary art 0x0) +2)
++		ln -sf /lib/firmware/ath10k/pre-cal-pci-0000\:00\:00.0.bin \
++			/lib/firmware/ath10k/QCA9888/hw2.0/board.bin
++		rm /lib/firmware/ath10k/QCA9888/hw2.0/board-2.bin
++		;;
+ 	nec,wg1200cr)
+ 		ath10kcal_extract "art" 20480 12064
+ 		ath10kcal_patch_mac_crc $(mtd_get_mac_ascii devdata wlan5mac)

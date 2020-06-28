@@ -1,0 +1,204 @@
+--- a/openwrt/target/linux/ath79/base-files/etc/board.d/01_leds
++++ b/openwrt/target/linux/ath79/base-files/etc/board.d/01_leds
+@@ -51,6 +51,15 @@
+ 	ucidef_set_led_rssi "rssimediumhigh" "RSSIMEDIUMHIGH" "$boardname:green:rssimediumhigh" "wlan0" "51" "100"
+ 	ucidef_set_led_rssi "rssihigh" "RSSIHIGH" "$boardname:green:rssihigh" "wlan0" "76" "100"
+ 	;;
++comfast,cf-e313ac)
++	ucidef_set_led_switch "lan" "LAN" "$boardname:green:lan" "switch0" "0x02"
++	ucidef_set_led_netdev "wan" "WAN" "$boardname:green:wan" "eth1"
++	ucidef_set_rssimon "wlan0" "200000" "1"
++	ucidef_set_led_rssi "rssilow" "RSSILOW" "$boardname:red:rssilow" "wlan0" "1" "100"
++	ucidef_set_led_rssi "rssimediumlow" "RSSIMEDIUMLOW" "$boardname:red:rssimediumlow" "wlan0" "26" "100"
++	ucidef_set_led_rssi "rssimediumhigh" "RSSIMEDIUMHIGH" "$boardname:green:rssimediumhigh" "wlan0" "51" "100"
++	ucidef_set_led_rssi "rssihigh" "RSSIHIGH" "$boardname:green:rssihigh" "wlan0" "76" "100"
++	;;
+ comfast,cf-e5)
+ 	ucidef_set_led_switch "lan" "LAN" "$boardname:blue:lan" "switch0" "0x02"
+ 	ucidef_set_led_netdev "wan" "WAN" "$boardname:blue:wan" "eth1"
+--- a/openwrt/target/linux/ath79/base-files/etc/hotplug.d/firmware/11-ath10k-caldata.orig
++++ b/openwrt/target/linux/ath79/base-files/etc/hotplug.d/firmware/11-ath10k-caldata
+@@ -190,6 +190,13 @@
+ 			/lib/firmware/ath10k/QCA9888/hw2.0/board.bin
+ 		rm /lib/firmware/ath10k/QCA9888/hw2.0/board-2.bin
+ 		;;
++	comfast,cf-e313ac)
++		ath10kcal_extract "art" 20480 12064
++		ath10k_patch_mac_crc $(mtd_get_mac_binary art 0x6)
++		ln -sf /lib/firmware/ath10k/pre-cal-pci-0000\:00\:00.0.bin \
++			/lib/firmware/ath10k/QCA9888/hw2.0/board.bin
++		rm /lib/firmware/ath10k/QCA9888/hw2.0/board-2.bin
++		;;
+ 	nec,wg1200cr)
+ 		ath10kcal_extract "art" 20480 12064
+ 		ath10kcal_patch_mac_crc $(mtd_get_mac_ascii devdata wlan5mac)
+--- a/openwrt/target/linux/ath79/image/generic.mk
++++ b/openwrt/target/linux/ath79/image/generic.mk
+@@ -215,6 +215,16 @@
+ 
+ TARGET_DEVICES += comfast_cf-ew72
+ 
++define Device/comfast_cf-e313ac
++  ATH_SOC := qca9531
++  DEVICE_TITLE:= COMFAST CF-E313AC
++  DEVICE_PACKAGES := rssileds kmod-leds-gpio kmod-ath10k-ct ath10k-firmware-qca9888-ct \
++	-swconfig -uboot-envtools
++  IMAGE_SIZE := 7936k
++endef
++TARGET_DEVICES += comfast_cf-e313ac
++
++
+ define Device/devolo_dvl1200e
+   ATH_SOC := qca9558
+   DEVICE_TITLE := devolo WiFi pro 1200e
+--- /dev/null
++++ b/openwrt/target/linux/ath79/dts/qca9531_comfast_cf-e313ac.dts
+@@ -0,0 +1,148 @@
++// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
++/dts-v1/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++
++#include "qca953x.dtsi"
++
++/ {
++	compatible = "comfast,cf-e313ac", "qca,qca9531";
++	model = "COMFAST CF-E313AC";
++
++	aliases {
++		serial0 = &uart;
++		led-boot = &rssihigh;
++		led-failsafe = &rssihigh;
++		led-upgrade = &rssihigh;
++		label-mac-device = &eth1;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++		pinctrl-names = "default";
++
++		wlan {
++			label = "cf-e313ac:green:wlan";
++			gpios = <&gpio 0 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "phy0tpt";
++		};
++
++		lan {
++			label = "cf-e313ac:green:lan";
++			gpios = <&gpio 2 GPIO_ACTIVE_LOW>;
++		};
++
++		wan {
++			label = "cf-e313ac:green:wan";
++			gpios = <&gpio 3 GPIO_ACTIVE_LOW>;
++		};
++
++		rssilow {
++			label = "cf-e313ac:red:rssilow";
++			gpios = <&gpio 11 GPIO_ACTIVE_LOW>;
++		};
++
++		rssimediumlow {
++			label = "cf-e313ac:red:rssimediumlow";
++			gpios = <&gpio 12 GPIO_ACTIVE_LOW>;
++		};
++
++		rssimediumhigh {
++			label = "cf-e313ac:green:rssimediumhigh";
++			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
++		};
++
++		rssihigh: rssihigh {
++			label = "cf-e313ac:green:rssihigh";
++			gpios = <&gpio 16 GPIO_ACTIVE_LOW>;
++		};
++	};
++
++	keys {
++		compatible = "gpio-keys";
++
++		reset {
++			label = "reset";
++			linux,code = <KEY_RESTART>;
++			gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
++			debounce-interval = <60>;
++		};
++	};
++};
++
++&spi {
++	status = "okay";
++	num-cs = <1>;
++
++	flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <25000000>;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			partition@0 {
++				label = "u-boot";
++				reg = <0x000000 0x010000>;
++				read-only;
++			};
++
++			art: partition@10000 {
++				label = "art";
++				reg = <0x010000 0x010000>;
++				read-only;
++			};
++
++			partition@20000 {
++				compatible = "denx,uimage";
++				label = "firmware";
++				reg = <0x020000 0x7c0000>;
++			};
++
++			partition@7e0000 {
++				label = "config";
++				reg = <0x7e0000 0x010000>;
++				read-only;
++			};
++
++			partition@7f0000 {
++				label = "nvram";
++				reg = <0x7f0000 0x010000>;
++				read-only;
++			};
++		};
++	};
++};
++
++&uart {
++	status = "okay";
++};
++
++&eth0 {
++	status = "okay";
++	phy-handle = <&swphy0>;
++	mtd-mac-address = <&art 0x1002>;
++
++	gmac-config {
++		device = <&gmac>;
++		switch-phy-swap = <1>;
++	};
++};
++
++&eth1 {
++	status = "okay";
++	mtd-mac-address = <&art 0x0>;
++};
++
++&pcie0 {
++	status = "okay";
++
++	wifi@0,0 {
++		compatible = "qcom,ath10k";
++		reg = <0 0 0 0 0>;
++	};
++};

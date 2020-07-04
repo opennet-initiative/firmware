@@ -10,7 +10,7 @@ define Package/on-goodies
   URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=Useful tools for network and system analysis and development
-  DEPENDS:=+bwm-ng +iperf +less +mtr +screen +tcpdump-mini +iftop +phytool +i2c-tools
+  DEPENDS:=+bwm-ng +iperf +mtr +screen +tcpdump-mini +iftop +phytool +i2c-tools
 endef
 
 define Package/on-goodies/description

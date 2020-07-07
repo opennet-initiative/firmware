@@ -163,7 +163,7 @@ index 55053be34f..c843e22e8a 100644
 +define Device/comfast_cf-ew72
 +  ATH_SOC := qca9531
 +  DEVICE_TITLE := COMFAST CF-EW72
-+  DEVICE_PACKAGES := kmod-usb2 kmod-ath10k-ct ath10k-firmware-qca9888-ct \
++  DEVICE_PACKAGES := kmod-usb2 kmod-ath10k-ct-smallbuffers ath10k-firmware-qca9888-ct \
 +	-uboot-envtools -swconfig
 +  IMAGE_SIZE := 16192k
 +endef

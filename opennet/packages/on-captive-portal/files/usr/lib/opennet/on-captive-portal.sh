@@ -84,25 +84,6 @@ captive_portal_repair_empty_network_bridge() {
 }
 
 
-## @fn captive_portal_uses_wifi_only_bridge()
-## @brief Prüfe ob eine fehleranfällige Brige-Konstruktion vorliegt.
-## @details Reine wifi-Bridges scheinen mit openwrt nicht nutzbar zu sein.
-captive_portal_uses_wifi_only_bridge() {
-	local uci_prefix="network.${NETWORK_FREE}"
-	local ifname
-	if [ "$(uci_get "${uci_prefix}.type")" = "bridge" ]; then
-		ifname=$(uci_get "${uci_prefix}.ifname")
-		if [ -z "$ifname" ] || [ "$ifname" = "none" ]; then
-			if [ -n "$(get_subdevices_of_interface "$NETWORK_FREE")" ]; then
-				# anscheinend handelt es sich um eine reine wifi-Bridge
-				return 0
-			fi
-		fi
-	fi
-	trap "" EXIT && return 1
-}
-
-
 update_captive_portal_status() {
 	if is_on_module_installed_and_enabled "on-captive-portal"; then
 		sync_captive_portal_state_with_mig_connections

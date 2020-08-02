@@ -10,6 +10,7 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 ]]--
 
+module("luci.model.opennet.on_captive_portal", package.seeall)
 
 require("luci.model.opennet.funcs")
 

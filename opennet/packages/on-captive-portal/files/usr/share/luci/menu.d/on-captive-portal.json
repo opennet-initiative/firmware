@@ -1,0 +1,20 @@
+{
+	"opennet/zugangspunkt": {
+                "title": "Public Hotspot",
+                "order": 50,
+                "action": {
+                        "type": "firstchild",
+                        "preferred": "overview",
+                        "recurse": true
+                }
+        },
+
+	"opennet/status/zugangspunkt/*": {
+		"action": {
+			"type": "call",
+			"module": "luci.model.opennet.on_captive_portal",
+			"function": "status_captive_portal"
+		}
+	}
+
+}

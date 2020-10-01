@@ -1,6 +1,11 @@
+#we only want to have image for mANTBox with ath10k included
 CONFIG_TARGET_ar71xx=y
 CONFIG_TARGET_ar71xx_mikrotik=y
-CONFIG_TARGET_ar71xx_mikrotik_Default=y
+CONFIG_TARGET_ar71xx_mikrotik_DEVICE_nand-large=y
+CONFIG_TARGET_PROFILE="DEVICE_nand-large"
+CONFIG_PACKAGE_kmod-hwmon-core=y
+CONFIG_PACKAGE_kmod-ath10k-ct=y
+CONFIG_ATH10K-CT_LEDS=y
 
 CONFIG_PACKAGE_ATH_DFS=y
 CONFIG_PACKAGE_ATH_DEBUG=y

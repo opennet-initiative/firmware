@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Dieses Skript wird (als Cronjob) regelmaessig ausgefuehrt und sorgt dafuer,
+# dass - falls ein Kanal im TDWR-Bereich (5.600 MHz - 5.650 MHz, entspricht
+# Kanaelen 120-128) fest eingestellt ist - die Einstellung durch "auto"
+# ersetzt wird und diese Aenderung sofort zur Anwedung kommt (Neustart des
+# WLAN durch "wifi").
+#
+
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+# Kanal, der eingestellt wird, wenn ein "schlechter" Kanal konfiguriert ist
+readonly NEW_CHANNEL='auto'
+
+# Fix channel entry in /etc/config/wireless to avoid blocking.
+# info: wifi is blocked if channel entry is not allowed by regdb.
+find_all_uci_sections wireless wifi-device "hwmode=11a" | while read -r device_uci_prefix; do
+	channelx=$(uci_get "${device_uci_prefix}.channel")
+	( [ -z "$channelx" ] || [ "$channelx" = "auto" ] ) && continue
+	( [ $channelx -lt 120 ] || [ $channelx -gt 128 ] ) && continue
+	uci set "${device_uci_prefix}.channel=${NEW_CHANNEL}"
+	uci commit "$device_uci_prefix"
+
+	# WLAN neustarten, damit Aenderung wirksam wird
+	# (Es scheint Situationen zu geben, in denen hostapd sich selbst blockiert
+	# siehe https://dev.opennet-initiative.de/ticket/184, daher folgender
+	# Workaround mit killall.)
+	killall -q -TERM hostapd || true
+	wifi
+
+	message="wifi channel fixed for ${device_uci_prefix} (was: '${channelx}', now: '${NEW_CHANNEL}')"
+	logger "$message"
+	add_banner_event "$message"
+done

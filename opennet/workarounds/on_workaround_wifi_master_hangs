@@ -39,6 +39,10 @@ is_wifi_master() {
 	iwinfo "$WIFI_DEVICE" info | grep -qw "Mode: Master"
 }
 
+is_ath10k_device() {                                                                                                                     
+        #wenn dies ein ath10k Geraet ist, dann soll der Workaround nicht gestartet werden                                                
+        lsmod | grep -q ath10k                                                                                                           
+} 
 
 is_olsr_interface() {
 	grep -wqs "$WIFI_DEVICE" /var/etc/olsrd.conf
@@ -150,6 +154,7 @@ reset_wireless_interfaces() {
 # check conditions for this workaround
 is_wifi_device || exit 0
 is_wifi_master || exit 0
+! is_ath10k_device || exit 0
 # We do not want to reset interfaces due to the lack of traffic (e.g. local wifi interfaces).
 # Thus we insist on OLSR being used on this interface.  This guarantees permanent traffic flow.
 is_olsr_interface || exit 0

@@ -154,7 +154,7 @@ reset_wireless_interfaces() {
 # check conditions for this workaround
 is_wifi_device || exit 0
 is_wifi_master || exit 0
-! is_ath10k_device || exit 0
+is_ath10k_device && exit 0
 # We do not want to reset interfaces due to the lack of traffic (e.g. local wifi interfaces).
 # Thus we insist on OLSR being used on this interface.  This guarantees permanent traffic flow.
 is_olsr_interface || exit 0

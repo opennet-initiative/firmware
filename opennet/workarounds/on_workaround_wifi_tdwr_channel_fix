@@ -1,5 +1,9 @@
 #!/bin/sh
 #
+# NOTE: keep the following two files in the respository in sync:
+#    opennet/workarounds/on_workaround_wifi_tdwr_channel_fix
+#    opennet/packages/on-core/files/etc/cron.5mins/on_workaround_wifi_tdwr_channel_fix
+#
 # Dieses Skript wird (als Cronjob) regelmaessig ausgefuehrt und sorgt dafuer,
 # dass - falls ein Kanal im TDWR-Bereich (5.600 MHz - 5.650 MHz, entspricht
 # Kanaelen 120-128) fest eingestellt ist - die Einstellung durch "auto"

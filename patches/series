@@ -24,3 +24,5 @@ olsrd_del_pud.patch
 hardware_comfast_ew72.patch
 hardware_comfast_e313ac.patch
 hostapd_800-dfs-enter-DFS-if-no-available-channel-is.found.patch
+regdb_channels.patch
+regdb_prohibit-tdwr-channels.patch

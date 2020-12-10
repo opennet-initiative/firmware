@@ -14,6 +14,7 @@ muninlite_swap.patch
 muninlite_makefile.patch
 muninlite_fix_v6_slash.patch
 regdb_remove-srd-channels.patch
+regdb_prohibit-tdwr-channels.patch
 olsrd2_update_to_0.15.1.patch
 radar_silent_chirp.patch
 radar_counter.patch
@@ -24,5 +25,3 @@ olsrd_del_pud.patch
 hardware_comfast_ew72.patch
 hardware_comfast_e313ac.patch
 hostapd_800-dfs-enter-DFS-if-no-available-channel-is.found.patch
-regdb_channels.patch
-regdb_prohibit-tdwr-channels.patch

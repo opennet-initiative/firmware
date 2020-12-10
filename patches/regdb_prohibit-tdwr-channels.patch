@@ -1,18 +1,14 @@
 --- /dev/null	2020-09-30 05:48:14.072000000 +0200
 +++ on_firmware/openwrt/package/firmware/wireless-regdb/patches/701-opennet-prohibit-tdwr-channels.patch	2020-11-09 22:39:55.106700667 +0100
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,13 @@
 +--- a/db.txt	2020-11-09 22:30:30.400206751 +0100
 ++++ b/db.txt	2020-11-09 22:33:41.461051536 +0100
-+@@ -435,11 +435,13 @@
-+ # 60GHz: https://erhvervsstyrelsen.dk/sites/default/files/radiograenseflader-63.pdf
-+ #
-+ # Opennet modification: removed SRD channels to prevent APs from using channels with too low TX power
-++# Opennet modification: prohibit TDWR range 5600-5650 MHz entirely
-+ country DK: DFS-ETSI
++@@ -420,7 +420,9 @@
 + 	(2400 - 2483.5 @ 40), (100 mW)
 + 	(5150 - 5250 @ 80), (200 mW), NO-OUTDOOR, AUTO-BW, wmmrule=ETSI
 + 	(5250 - 5350 @ 80), (100 mW), NO-OUTDOOR, DFS, AUTO-BW, wmmrule=ETSI
 +-	(5470 - 5725 @ 160), (500 mW), DFS, wmmrule=ETSI
+++	# prohibit TDWR range 5600-5650 MHz
 ++	(5470 - 5600 @ 80), (500 mW), DFS, wmmrule=ETSI
 ++	(5650 - 5725 @ 80), (500 mW), DFS, wmmrule=ETSI
 + 	# short range devices (ETSI EN 300 440-1)

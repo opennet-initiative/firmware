@@ -18,7 +18,7 @@ readonly NEW_CHANNEL='auto'
 find_all_uci_sections wireless wifi-device "hwmode=11a" | while read -r device_uci_prefix; do
 	channelx=$(uci_get "${device_uci_prefix}.channel")
 	( [ -z "$channelx" ] || [ "$channelx" = "auto" ] ) && continue
-	( [ $channelx -lt 120 ] || [ $channelx -gt 128 ] ) && continue
+	( [ $channelx -lt 116 ] || [ $channelx -gt 128 ] ) && continue
 	uci set "${device_uci_prefix}.channel=${NEW_CHANNEL}"
 	uci commit "$device_uci_prefix"
 

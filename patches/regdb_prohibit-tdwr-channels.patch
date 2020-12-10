@@ -10,7 +10,7 @@
 +-	(5470 - 5725 @ 160), (500 mW), DFS, wmmrule=ETSI
 ++	# prohibit TDWR range 5600-5650 MHz
 ++	(5470 - 5600 @ 80), (500 mW), DFS, wmmrule=ETSI
-++	(5650 - 5725 @ 80), (500 mW), DFS, wmmrule=ETSI
+++	(5650 - 5725 @ 40), (500 mW), DFS, wmmrule=ETSI
 + 	# short range devices (ETSI EN 300 440-1)
 + 	# disabled on purpose by Opennet (allowed TX power too low for our purposes)
 + 	#(5725 - 5875 @ 80), (25 mW)

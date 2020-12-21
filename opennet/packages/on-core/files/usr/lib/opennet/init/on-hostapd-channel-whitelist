@@ -22,8 +22,12 @@ find_all_uci_sections wireless wifi-device "hwmode=11a" "channel=auto" | while r
 	# Use one (random) indoor channel and multiple outdoor channels. This allows a usable
 	# fallback even under bad conditions.
 	indoor_channel=$(( 36 + 4 * $(get_random 4) ))
-	# use all outdoor channels except 128 (used by the local weather station)
-	# and 124 to protect 128 while using HT40
-	uci set "${device_uci_prefix}.chanlist=$indoor_channel 100-120 132-140"
+	# remove TDWR channels + bandwidth
+	uci set "${device_uci_prefix}.chanlist=$indoor_channel 100-116 132-140"
+	oldhtmode=$(uci_get "${device_uci_prefix}.htmode")
+	# Fix 11ac default bandwidth
+	if [ "$oldhtmode" = "VHT80" ]; then
+	  uci set "${device_uci_prefix}.htmode=VHT20"
+	fi
 	uci commit "$device_uci_prefix"
 done

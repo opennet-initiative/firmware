@@ -206,12 +206,12 @@ index 0000000000..f19ef01d49
 +
 +				partition@0 {
 +					label = "kernel";
-+					reg = <0x000000 0x200000>;
++					reg = <0x000000 0x160000>;
 +				};
 +
-+				partition@200000 {
++				partition@160000 {
 +					label = "rootfs";
-+					reg = <0x200000 0x580000>;
++					reg = <0x160000 0x5c0000>;
 +				};
 +			};
 +
@@ -311,8 +311,8 @@ index 773e7ed26c..cfd3645950 100644
  			{"signature", 0x32000, 0x00400},
 -			{"os-image", 0x40000, 0x1c0000},
 -			{"file-system", 0x200000, 0x5b0000},
-+			{"os-image", 0x40000, 0x200000},
-+			{"file-system", 0x240000, 0x570000},
++			{"os-image", 0x40000, 0x160000},
++			{"file-system", 0x1a0000, 0x5c0000},
 +			{"soft-version", 0x7b0000, 0x00100},
 +			{"support-list", 0x7b1000, 0x00400},
 +			{"user-config", 0x7c0000, 0x10000},
@@ -356,8 +356,8 @@ index 773e7ed26c..cfd3645950 100644
 +			{"default-mac", 0x30000, 0x00020},
 +			{"product-info", 0x31100, 0x00100},
 +			{"signature", 0x32000, 0x00400},
-+			{"os-image", 0x40000, 0x200000},
-+			{"file-system", 0x240000, 0x570000},
++			{"os-image", 0x40000, 0x160000},
++			{"file-system", 0x1a0000, 0x5c0000},
  			{"soft-version", 0x7b0000, 0x00100},
  			{"support-list", 0x7b1000, 0x00400},
  			{"user-config", 0x7c0000, 0x10000},

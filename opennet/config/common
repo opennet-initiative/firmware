@@ -134,6 +134,11 @@ CONFIG_OPENSSL_WITH_SRP=n
 # vermeide die Verwendung von mbedtls (da OpenSSL aufgrund von openssl-utils vorhanden ist)
 CONFIG_LIBCURL_OPENSSL=y
 
+# vermeide die Verwendung von wolfssl da es einen Konflikt mit CONFIG_PACKAGE_libustream-openssl gibt
+# Option kann nicht komplett deaktiviert werden, da es von anderen Abhaengigkeiten benoetigt wird
+# Deshalb hier das "Deaktivieren" durch die Einbindung als Modul
+CONFIG_PACKAGE_libustream-wolfssl=m
+
 # openvpn - moeglichst wenig Features
 CONFIG_OPENVPN_openssl_ENABLE_SERVER=n
 CONFIG_OPENVPN_openssl_ENABLE_HTTP=n

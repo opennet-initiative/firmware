@@ -608,3 +608,4 @@ OpenWrt {#doc-openwrt}
 
 Die Entwicklungsdokumentation von *OpenWrt* ist hier zu finden: http://wiki.openwrt.org/doc/devel/start
 
+Die *OpenWrt* Build Umgebung ist in https://openwrt.org/docs/guide-developer/build-system/use-buildsystem beschrieben.

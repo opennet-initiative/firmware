@@ -50,7 +50,7 @@ config-%:
 menuconfig:
 	$(warning "'menuconfig' gibt es hier nicht - vielleicht meinst du eine der folgenden Aktionen?")
 	$(warning " 		make -C openwrt menuconfig")
-	$(warning " 		make config-ar71xx")
+	$(warning " 		make config-ath79")
 	$(warning " 		make diff-menuconfig")
 	$(error "unbekanntes Ziel 'menuconfig'")
 

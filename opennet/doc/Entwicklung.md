@@ -246,7 +246,7 @@ Fehler beim Build analysieren {#analyze-build-errors}
 
 Eine detaillierte Fehlerausgabe erhältst mit der make-Zugabe von `V=s`:
 
-    make ar71xx V=s
+    make ath79 V=s
 
 Dabei erleichtert es den Überblick deutlich, wenn du parallele Build-Prozess (z.B. `-j 3`) *nicht* verwendest. Andernfalls musst du eventuell ein paar Seiten in der Build-Ausgabe zurückblättern, um die Fehlermeldung zu finden.
 
@@ -270,7 +270,7 @@ Die opennet-Entwicklungsumgebung verwendet grundlegend die Abläufe der OpenWrt 
 Zusammensetzung einer config-Datei {#config-assemble}
 ----------------------------------
 
-Da die opennet-Firmware verschiedene Ziel-Plattformen (ar71xx, ixp44, x86, ...) unterstützt, müssen verschiedene Konfigurationen gepflegt werden. Zur Erleichterung der Pflege und zur Vermeidung von Doppelungen gibt es für jede Ziel-Plattform eine separate Datei (z.B. *opennet/config/ar71xx*), sowie eine Datei mit Einstellungen, die für alle Zielplattformen gelten (*opennet/config/common*). Letztere ist für den Entwicklungsprozess wohl die wichtigere.
+Da die opennet-Firmware verschiedene Ziel-Plattformen (ath79, ixp44, x86, ...) unterstützt, müssen verschiedene Konfigurationen gepflegt werden. Zur Erleichterung der Pflege und zur Vermeidung von Doppelungen gibt es für jede Ziel-Plattform eine separate Datei (z.B. *opennet/config/ath79*), sowie eine Datei mit Einstellungen, die für alle Zielplattformen gelten (*opennet/config/common*). Letztere ist für den Entwicklungsprozess wohl die wichtigere.
 
 Die plattform-spezifische config-Datei wird durch *opennet/config/Makefile* mit der allgemeinen config-Datei zusammengefügt. Anschließend werden folgende Ersetzungen vorgenommen:
 * der Platzhalter ``__PKG_STATUS__`` wird durch *stable* oder *snapshots* ersetzt (je nachdem, ob der aktuelle git-commit ein Versions-Tag trägt)

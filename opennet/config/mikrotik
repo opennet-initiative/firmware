@@ -1,8 +1,18 @@
 #we only want to have image for mANTBox with ath10k included
-CONFIG_TARGET_ar71xx=y
-CONFIG_TARGET_ar71xx_mikrotik=y
-CONFIG_TARGET_ar71xx_mikrotik_DEVICE_nand-large-ac=y
-CONFIG_TARGET_PROFILE="DEVICE_nand-large-ac"
+
+#default setting for ath79 mikrotik
+CONFIG_TARGET_ath79=y
+CONFIG_TARGET_ath79_mikrotik=y
+CONFIG_TARGET_ath79_mikrotik_DEVICE_mikrotik_routerboard-921gs-5hpacd-15s=y
+CONFIG_TARGET_PROFILE="DEVICE_mikrotik_routerboard-921gs-5hpacd-15s"
+CONFIG_DEFAULT_ath10k-firmware-qca988x-ct=y
+CONFIG_DEFAULT_kmod-ath10k-ct=y
+CONFIG_DEFAULT_nand-utils=y
+CONFIG_USES_MINOR=y
+CONFIG_NAND_SUPPORT=y
+CONFIG_FSTOOLS_UBIFS_EXTROOT=y
+CONFIG_PACKAGE_nand-utils=y
+CONFIG_PACKAGE_ubi-utils=y
 
 CONFIG_PACKAGE_ATH_DFS=y
 CONFIG_PACKAGE_ATH_DEBUG=y

@@ -21,9 +21,9 @@ Abhängigkeiten installieren {#dependencies}
 
 Debian:
 
-    apt-get install build-essential git flex gcc-multilib subversion doxygen file gawk unzip python quilt
-    apt-get install libncurses5-dev zlib1g-dev liblzo2-dev libssl-dev
-
+    apt install build-essential git flex gcc-multilib subversion doxygen file gawk unzip python quilt
+    apt install libncurses5-dev zlib1g-dev liblzo2-dev libssl-dev
+    apt install rsync qemu-utils
 
 Repository herunterladen {#repository}
 ------------------------

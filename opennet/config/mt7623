@@ -1,0 +1,8 @@
+CONFIG_TARGET_mediatek=y
+CONFIG_TARGET_mediatek_mt7623=y
+
+CONFIG_TARGET_mediatek_mt7623_DEVICE_7623n-bananapi-bpi-r2=y
+CONFIG_TARGET_mediatek_mt7623_DEVICE_bpi_bananapi-r2=y
+
+# Für OpenWrt in LXC
+CONFIG_TARGET_ROOTFS_TARGZ=y

@@ -9,7 +9,7 @@ GIT_CURRENT_RELEASE_TAG = $(shell git tag -l --points-at HEAD | sed 's/^v//g')
 NEXT_VERSION = $(shell grep "^CONFIG_VERSION_NUMBER=" "$(COMMON_CONFIG)" | cut -f 2 -d '"')
 OPENWRT_VERSION = $(shell cd ../../openwrt && git describe --abbrev=0 | cut -c2-)
 
-ARCHITECTURES = ath79 bcm2708 bcm2709 bcm2710 ipq40xx mikrotik ramips ramips7620 sunxi x86
+ARCHITECTURES = ath79 bcm2708 bcm2709 bcm2710 ipq40xx mikrotik mt7623 ramips ramips7620 sunxi x86
 
 .PHONY: all list $(ARCHITECTURES) save-config check-old-config list-subarch help
 
@@ -51,7 +51,7 @@ save-config:
 check-old-config:
 	@# fill in missing default values
 	@$(MAKE) -C "$(BUILD_DIR)" defconfig >/dev/null
-	@# if previous config has same content as new config, revert new config to indicate build process that nothing has changed 
+	@# if previous config has same content as new config, revert new config to indicate build process that nothing has changed
 	@if test -e "$(PREVIOUS_CONFIG)" && diff -q "$(CURRENT_CONFIG)" "$(PREVIOUS_CONFIG)" >/dev/null; then \
 			mv "$(PREVIOUS_CONFIG)" "$(CURRENT_CONFIG)"; \
 		else	rm -f "$(PREVIOUS_CONFIG)"; fi

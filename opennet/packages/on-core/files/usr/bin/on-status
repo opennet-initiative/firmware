@@ -16,7 +16,7 @@ fi
 echo
 
 echo "****** OLSRv1 Links ******"
-echo /lin | nc localhost 2006 | sed '1,/^Local IP/d; /^$/d'
+echo /lin | nc 127.0.0.1 2006 | sed '1,/^Local IP/d; /^$/d'
 echo
 
 

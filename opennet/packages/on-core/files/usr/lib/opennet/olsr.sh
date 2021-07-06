@@ -236,7 +236,7 @@ remove_old_olsr_services() {
 ## @details Bei Problemen mit dem Verbindungsaufbau erscheint ein Hinweis im syslog.
 request_olsrd_txtinfo() {
 	local request="$1"
-	if ! echo "/$request" | timeout 4 nc localhost 2006 2>/dev/null; then
+	if ! echo "/$request" | timeout 4 nc 127.0.0.1 2006 2>/dev/null; then
 		# keine Fehlermeldung, falls wir uns gerade noch im Boot-Prozess befinden
 		# Dies tritt besonders nach einem Reboot via Web-Interface auf, da dann die Status-Seite
 		# noch während des Hochfahrens abgerufen wird.

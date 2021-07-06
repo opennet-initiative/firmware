@@ -46,7 +46,7 @@ is_olsrd_running() {
 
 
 # Ein seltsamer Bug fuehrt gelegentlich dazu, dass die Routen-Liste von olsrd leer ist
-# (echo /routes | nc localhost 2006 | grep -q "^[0-9]"), obwohl laut OLSR-Topology Routen bekannt
+# (echo /routes | nc 127.0.0.1 2006 | grep -q "^[0-9]"), obwohl laut OLSR-Topology Routen bekannt
 # sind.
 is_routing_table_out_of_sync() {
 	# Falls Routen vorhanden sind, ist der Fehler nicht aufgetreten.

@@ -7,3 +7,9 @@ CONFIG_TARGET_mediatek_mt7623_DEVICE_bpi_bananapi-r2=y
 
 # Für OpenWrt in LXC
 CONFIG_TARGET_ROOTFS_TARGZ=y
+
+# Support für SATA Geräte
+CONFIG_PACKAGE_kmod-ata-ahci=m
+
+# Netzwerk Support für LXC/Docker
+CONFIG_PACKAGE_kmod-veth=m

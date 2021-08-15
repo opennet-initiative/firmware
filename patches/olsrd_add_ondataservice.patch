@@ -22,12 +22,12 @@ Index: on_firmware/routing/olsrd/Makefile
  define Package/olsrd-mod-p2pd
    $(call Package/olsrd/template)
    DEPENDS:=olsrd
-@@ -170,7 +182,7 @@ MAKE_FLAGS+= \
+@@ -181,7 +193,7 @@ MAKE_FLAGS+= \
  	DESTDIR="$(PKG_INSTALL_DIR)" \
  	STRIP="true" \
  	INSTALL_LIB="true" \
--	SUBDIRS="arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo netjson mdns nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog"
-+	SUBDIRS="arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo netjson mdns nameservice ondataservice_light p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog"
+-	SUBDIRS="arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo filtergw jsoninfo netjson mdns nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog"
++	SUBDIRS="arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo filtergw jsoninfo netjson mdns nameservice ondataservice_light p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog"
  
  define Build/Compile
  	$(call Build/Compile/Default,all)
@@ -70,8 +70,8 @@ Index: on_firmware/routing/olsrd/patches/023-ondataservice.patch
 +
 + # This is quite ugly but at least it works
 + ifeq ($(OS),linux)
-+-SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo info jsoninfo mdns mini nameservice netjson poprouting p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog
-++SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo info jsoninfo mdns mini nameservice netjson poprouting p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog ondataservice ondataservice_light
++-SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain filtergw httpinfo info jsoninfo mdns mini nameservice netjson poprouting p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog
+++SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain filtergw httpinfo info jsoninfo mdns mini nameservice netjson poprouting p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog ondataservice ondataservice_light
 + else
 + ifeq ($(OS),win32)
 + SUBDIRS := dot_draw httpinfo info jsoninfo mini netjson pgraph secure txtinfo

@@ -9,7 +9,7 @@ CONFIG_DIR = opennet/config
 # list all files except Makefile, common file and hidden files
 ARCHS = $(shell ls "$(CONFIG_DIR)/" | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
 QUILT_BIN ?= $(shell which quilt)
-PULL_SUBMODULES_BRANCH ?= openwrt-19.07
+PULL_SUBMODULES_BRANCH ?= openwrt-21.02
 
 
 .PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs doc quilt-check lint test

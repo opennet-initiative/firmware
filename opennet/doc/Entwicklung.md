@@ -23,7 +23,7 @@ Debian:
 
     apt install build-essential git flex gcc-multilib subversion doxygen file gawk unzip python quilt
     apt install libncurses5-dev zlib1g-dev liblzo2-dev libssl-dev
-    apt install rsync qemu-utils
+    apt install rsync qemu-utils python3-distutils python3-lib2to3
 
 Repository herunterladen {#repository}
 ------------------------

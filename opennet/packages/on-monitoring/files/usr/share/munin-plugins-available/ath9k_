@@ -95,9 +95,26 @@ exit $?
 true <<"EOF"
 """
 
+import uos
 import os
-import os.path
+#import os.path
 import sys
+
+
+import ffi
+libc = ffi.open('libc.so')
+getpid = libc.func("i", "getpid", "")
+access_ = libc.func("i", "access", "si")
+
+def access(path, mode):
+    return access_(path, mode) == 0
+
+def path_join(*args):
+    # TODO: this is non-compliant
+    if type(args[0]) is bytes:
+        return b"/".join(args)
+    else:
+        return "/".join(args)
 
 
 plugin_version = "0.5"
@@ -138,9 +155,9 @@ class Station:
         self._rc_stats = self._parse_rc_stats()
 
     def _parse_rc_stats(self):
-        csv_filename = os.path.join(self._path, "rc_stats_csv")
-        legacy_filename = os.path.join(self._path, "rc_stats")
-        if os.path.exists(csv_filename):
+        csv_filename = path_join(self._path, "rc_stats_csv")
+        legacy_filename = path_join(self._path, "rc_stats")
+        if access(csv_filename, 0):
             return self._parse_rc_stats_csv(csv_filename)
         else:
             return self._parse_rc_stats_legacy(legacy_filename)
@@ -268,8 +285,8 @@ class Station:
         stats = {}
         for counter in counters:
             # some events are not handled with older versions (e.g. "beacon_loss_count")
-            filename = os.path.join(self._path, counter)
-            if os.path.exists(filename):
+            filename = path_join(self._path, counter)
+            if access(filename, 0):
                 content = open(filename, "r").read().strip()
                 stats[counter] = int(content)
         return stats
@@ -422,7 +439,7 @@ class WifiInterface:
         return arp_cache
 
     def _parse_stations(self):
-        stations_base = os.path.join(self._path, "stations")
+        stations_base = path_join(self._path, "stations")
         arp_cache = self._parse_arp_cache()
         for item in os.listdir(stations_base):
             peer_mac = item
@@ -433,7 +450,7 @@ class WifiInterface:
             else:
                 label = peer_mac
                 key = "host_" + peer_mac.replace(":", "").replace(".", "")
-            yield Station(label, key, os.path.join(stations_base, item))
+            yield Station(label, key, path_join(stations_base, item))
 
     def get_config(self, scope):
         yield from Station.get_summary_config(scope, self.stations, self._graph_base)
@@ -459,8 +476,8 @@ class WifiPhy:
 
     def _parse_dfs_events(self):
         result = {}
-        fname = os.path.join(self._path, "ath9k", "dfs_stats")
-        if not os.path.exists(fname):
+        fname = path_join(self._path, "ath9k", "dfs_stats")
+        if not access(fname, 0):
             # older ath9k modules (e.g. Linux 3.3) did not provide this data
             return {}
         for line in open(fname, "r").read().split("\n"):
@@ -477,7 +494,7 @@ class WifiPhy:
             if item.startswith("netdev:"):
                 wifi = item.split(":", 1)[1]
                 label = "{phy}/{interface}".format(phy=self.name, interface=wifi)
-                wifi_path = os.path.join(self._path, item)
+                wifi_path = path_join(self._path, item)
                 graph_base = "{base}_{phy}_{interface}".format(base=self._graph_base,
                                                                phy=self.name, interface=wifi)
                 yield WifiInterface(label, wifi_path, graph_base)
@@ -516,10 +533,10 @@ class Ath9kDriver:
         self.phys = list(self._parse_phys())
 
     def _parse_phys(self):
-        if not os.path.exists(self._path):
+        if not access(self._path, 0):
             return
         for phy in os.listdir(self._path):
-            phy_path = os.path.join(self._path, phy)
+            phy_path = path_join(self._path, phy)
             graph_base = "{base}_{phy}".format(base=self._graph_base, phy=phy)
             yield WifiPhy(phy, phy_path, graph_base)
 
@@ -601,7 +618,7 @@ if __name__ == "__main__":
                 do_fetch(ath9k)
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
-            if os.path.exists(SYS_BASE_DIR):
+            if access(SYS_BASE_DIR, 0):
                 print('yes')
             else:
                 print('no (missing ath9k driver sysfs directory: {})'.format(SYS_BASE_DIR))

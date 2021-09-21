@@ -10,7 +10,7 @@ define Package/on-monitoring
   URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=Monitoring of Opennet services and network properties
-  DEPENDS:=+on-core +muninlite +micropython +micropython-lib
+  DEPENDS:=+on-core +muninlite +micropython
 endef
 
 define Package/on-monitoring/description

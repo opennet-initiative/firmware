@@ -10,8 +10,9 @@
 ##   der Variable 'PLUGINS' umgesetzt. Dies ist ein kleines bisschen hässlich :(
 enable_munin_plugins() {
 	local target="${IPKG_INSTROOT:-}/usr/sbin/munin-node"
+	local target1="${IPKG_INSTROOT:-}/usr/sbin/muninlite"
 	# nicht installiert?
-	[ -e "$target" ] || return 0
+	[ -e "$target" ] || [ -e "$target1" ] || return 0
 	# bereits konfiguriert?
 	grep -q "^PLUGINS=.*plugindir_" "$target" && return 0
 	# "plugindir_" einfuegen

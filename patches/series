@@ -14,3 +14,4 @@ radar_counter.patch
 olsrd2_remove_timer_warning.patch
 olsrd_del_pud.patch
 always-enable-dfs.patch
+muninlite.patch

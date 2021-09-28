@@ -13,3 +13,33 @@
 + 
 + # Remove unwanted plugins from this list
 +
+--- on_firmware.orig/packages/admin/muninlite/Makefile
++++ on_firmware/packages/admin/muninlite/Makefile
+@@ -36,14 +36,14 @@ endef
+ 
+ define Package/muninlite/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin/
+-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/muninlite $(1)/usr/sbin/
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/muninlite $(1)/usr/sbin/munin-node
+ 	$(INSTALL_DIR) $(1)/etc/xinetd.d
+-	$(INSTALL_DATA) ./files/etc/xinetd.d/muninlite $(1)/etc/xinetd.d/
++	$(INSTALL_DATA) ./files/etc/xinetd.d/muninlite $(1)/etc/xinetd.d/munin
+ 	$(INSTALL_DIR) $(1)/etc/munin/plugins
+ endef
+ 
+ define Package/muninlite/conffiles
+-/etc/xinetd.d/muninlite
++/etc/xinetd.d/munin
+ endef
+ 
+ $(eval $(call BuildPackage,muninlite))
+--- on_firmware.orig/packages/admin/muninlite/files/etc/xinetd.d/muninlite
++++ on_firmware/packages/admin/muninlite/files/etc/xinetd.d/munin
+@@ -5,6 +5,6 @@ service munin
+ 	wait		= no
+ 	user		= root
+ 	group		= root
+-	server		= /usr/sbin/muninlite
++	server		= /usr/sbin/munin-node
+ 	disable		= no
+ }

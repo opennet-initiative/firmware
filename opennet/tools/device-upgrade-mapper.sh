@@ -39,6 +39,7 @@ DEVICE_MAP="
     tplink,tl-wr1043nd-v4       ath79/generic   tplink_tl-wr1043nd-v4-squashfs-sysupgrade.bin
     tplink,tl-wr1043n-v5        ath79/generic   tplink_tl-wr1043n-v5-squashfs-sysupgrade.bin
     tl-wdr3500                  ar71xx/generic  tl-wdr3500-v1-squashfs-sysupgrade.bin
+    tl-wdr3600                  ar71xx/generic  tl-wdr3600-v1-squashfs-sysupgrade.bin
     tl-wdr4300                  ar71xx/generic  tl-wdr4300-v1-squashfs-sysupgrade.bin
     cpe210                      ar71xx/generic  cpe210-220-v1-squashfs-sysupgrade.bin
     tplink,cpe210-v2            ath79/generic   tplink_cpe210-v2-squashfs-sysupgrade.bin

@@ -1,15 +1,11 @@
 CONFIG_TARGET_mediatek=y
 CONFIG_TARGET_mediatek_mt7623=y
 
-CONFIG_TARGET_mediatek_mt7623_DEVICE_7623n-bananapi-bpi-r2=y
 CONFIG_TARGET_mediatek_mt7623_DEVICE_bpi_bananapi-r2=y
-# CONFIG_PACKAGE_u-boot-mt7623a_unielec_u7623 is not set
-
-# Für OpenWrt in LXC
-CONFIG_TARGET_ROOTFS_TARGZ=y
 
 # Support für SATA Geräte
 CONFIG_PACKAGE_kmod-ata-ahci=m
+CONFIG_PACKAGE_kmod-fs-ext4=m
 
 # Netzwerk Support für LXC/Docker
 CONFIG_PACKAGE_kmod-veth=m

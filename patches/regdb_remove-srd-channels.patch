@@ -10,6 +10,7 @@
 +-	(5725 - 5875 @ 80), (25 mW)
 ++	# disabled on purpose by Opennet (allowed TX power too low for our purposes)
 ++	#(5725 - 5875 @ 80), (25 mW)
-+ 	# 60 GHz band channels 1-4 (ETSI EN 302 567)
-+ 	(57000 - 66000 @ 2160), (40)
-+ 
++	# WiFi 6E
++	(5945 - 6425 @ 160), (200 mW), NO-OUTDOOR, AUTO-BW, wmmrule=ETSI
++	# 60 GHz band channels 1-4 (ETSI EN 302 567)
+

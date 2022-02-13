@@ -4,7 +4,7 @@
 # Die Verbindungen werden anhand von nf_conntrack ermittelt.
 #
 
-import os
+import uos
 import sys
 
 

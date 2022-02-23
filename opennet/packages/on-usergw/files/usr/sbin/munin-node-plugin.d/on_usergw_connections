@@ -118,7 +118,7 @@ if __name__ == "__main__":
         else:
             # unknown argument
             message = "Unknown argument"
-            linesep = getattr(os, "linesep", "\n")
+            linesep = "\n"
             sys.stderr.write(message + linesep)
             sys.exit(1)
 

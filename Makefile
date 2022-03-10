@@ -129,7 +129,7 @@ clean: unpatch
 # Menschen ausgefuehrt werden - es ist lediglich fuer den trac-Autobuilder gedacht
 autobuilder-clean:
 	git fetch --all
-	git reset --hard origin/master
+	git reset --hard origin/main
 	@# eventuell Reste von (zwischenzeitlich geaenderten) Patches entfernen
 	git submodule foreach git reset --hard
 	git submodule foreach git clean -f

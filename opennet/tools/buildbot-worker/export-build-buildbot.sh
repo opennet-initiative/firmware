@@ -13,6 +13,11 @@ EXPORT_SSH_USER=trac-bitten-slave
 EXPORT_DIR="~/export"  # this folder is on remote download server
 RSYNC_OPTIONS="--archive"
 
+# cleanup old file
+rm $BIN_DIR/version.txt
+rm $BIN_DIR/device-upgrade-map.csv
+rm -f $BIN_DIR/__*
+
 snapshot_name=$(grep "^CONFIG_VERSION_NUMBER=" "$OPENWRT_CONFIG" | cut -f 2 -d '"')
 [ -z "$snapshot_name" ] && return 1
 

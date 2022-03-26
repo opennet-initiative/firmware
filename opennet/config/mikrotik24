@@ -1,0 +1,19 @@
+#we only want to have image for mANTBox 2 12s
+
+#default setting for ath79 mikrotik
+CONFIG_TARGET_ath79=y
+CONFIG_TARGET_ath79_mikrotik=y
+CONFIG_TARGET_ath79_mikrotik_DEVICE_mikrotik_routerboard-912uag-2hpnd=y
+CONFIG_TARGET_PROFILE="DEVICE_mikrotik_routerboard-912uag-2hpnd"
+CONFIG_DEFAULT_nand-utils=y
+CONFIG_USES_MINOR=y
+CONFIG_NAND_SUPPORT=y
+CONFIG_FSTOOLS_UBIFS_EXTROOT=y
+CONFIG_PACKAGE_nand-utils=y
+CONFIG_PACKAGE_ubi-utils=y
+
+
+CONFIG_PACKAGE_ATH_DFS=y
+CONFIG_PACKAGE_ATH_DEBUG=y
+CONFIG_PACKAGE_ATH_SPECTRAL=y
+CONFIG_PACKAGE_ATH_DYNACK=y

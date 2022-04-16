@@ -21,24 +21,20 @@ Abhängigkeiten installieren {#dependencies}
 
 Debian:
 
-    apt install build-essential git flex gcc-multilib subversion doxygen file gawk unzip python quilt
-    apt install libncurses5-dev zlib1g-dev liblzo2-dev libssl-dev
-    apt install rsync qemu-utils python3-distutils python3-lib2to3
+    apt install build-essential git flex gcc-multilib doxygen file gawk unzip python quilt \
+      libncurses5-dev zlib1g-dev liblzo2-dev libssl-dev install rsync qemu-utils \
+      python3-distutils python3-lib2to3
 
 Repository herunterladen {#repository}
 ------------------------
 
-Nur-Lese-Zugriff:
+Quellcode Zugriff:
 
-    git clone https://dev.opennet-initiative.de/git/on_firmware
-
-Schreibzugriff:
-
-    git clone git@dev.opennet-initiative.de:on_firmware
+    git clone https://github.com/opennet-initiative/firmware.git 
 
 Die lokale Arbeitsumgebung wird mit folgenden Kommandos abgeschlossen:
 
-    cd on_firmware
+    cd firmware
     make init
 
 Die obige Aktion wird eine Weile dauern, da die OpenWrt Repositories heruntergeladen werden.
@@ -62,21 +58,10 @@ Falls die obigen Einstellungen nicht gesetzt werden, wird quilt unnötige Patch-
 Dies ist nicht wünschenswert.
 
 
-Umstellung der nur-lese git-URL {#git-repo-writable}
--------------------------------
-
-Für das Einbringen von Änderungen in das öffentliche Firmware-Repository benötigst du einen git-Account.
-Diesen kannst du auf der Opennet-Firmware-Mailingliste erfragen: https://list.opennet-initiative.de/mailman/listinfo/firmware
-
-Sobald du einen git-Account zum pushen deiner Änderungen hast, solltest du den Upstream auf die schreibfähige URL umstellen:
-
-    git remote set-url origin git@dev.opennet-initiative.de:on_firmware.git
-
-
 Build-Service {#build-service}
 -------------
 
-Auf dem Server ``minato`` ist ein automatischer Build-Dienst konfiguriert, der kurz nach einem push einen neuen Snapshot der Firmware erzeugt. Innerhalb von ca. 30 Minuten sind die ersten neuen Images dann verfügbar: http://downloads.opennet-initiative.de/openwrt/testing
+Auf einem Opennet Server ist ein automatischer Build-Dienst konfiguriert, der kurz nach einem push einen neuen Snapshot der Firmware erzeugt. Innerhalb von ca. 30 Minuten sind die ersten neuen Images dann verfügbar: http://downloads.opennet-initiative.de/openwrt/testing
 
 
 Änderungen an der Firmware vornehmen {#developing}
@@ -543,15 +528,15 @@ Die opennet-relevanten Pakete (*on-core* u.s.w) erhalten dieselbe Versionsnummer
 @sa ../../patches/makefile_include_opennet_packages.patch
 
 
-Build-Server (minato) {#build-server}
+Build-Server {#build-server}
 =====================
 
-Wir verwenden trac als Web-Interface und Entwicklungswerkzeug: http://dev.opennet-initiative.de/.
+Wir verwenden buildbot als Web-Interface und Baumumgebung: http://dev.opennet-initiative.de/.
 
-Das trac-Plugin *bitten* wird durch einen git-commit-Hook ausgelöst und regt wenige Minuten nach einem *git push* einen Build-Prozess auf dem Server *minato* an. Dieser Build-Prozess wird vom Nutzer *trac-bitten-slave* ausgeführt. Die Build-Schritte sind im Web-Interface definiert.
+Die buildbot Software wird durch einen git-commit ausgelöst und regt wenige Minuten nach einem *git push* einen Build-Prozess auf dem zuordneten Bau-Server an. Die Build-Schritte sind im Web-Interface sichtbar.
 
 Innerhalb des Build-Prozess wird das export-Skript ausgeführt. Es kopiert das Build-Ergebnis für eine Plattform oder wahlweise die erstellte Dokumentation in das Export-Verzeichnis, welches via Webserver veröffentlicht wird (http://downloads.opennet-initiative.de/openwrt/). Das exakte Zielverzeichnis ergibt sich dabei aus der Versionsnummer (siehe @ref version-numbers).
-@sa ../tools/trac-bitten-slave/export-build.sh
+@sa ../tools/buildbot-worker/export-build-builtbot.sh
 
 
 Upgrade-Tests {#upgrade}

@@ -10,6 +10,7 @@ OPENWRT_CONFIG="$BUILD_DIR/openwrt/.config"
 
 EXPORT_SERVER="downloads.on"
 EXPORT_SSH_USER=trac-bitten-slave
+EXPORT_SSH_KEY=buildbot_rsa_key
 EXPORT_DIR="~/export"  # this folder is on remote download server
 RSYNC_OPTIONS="--archive"
 
@@ -34,5 +35,5 @@ echo "$snapshot_name" >"$BIN_DIR/version.txt"
 	>"$BIN_DIR/device-upgrade-map.csv"
 
 echo "Copy generated files to download server ..."
-rsync -a -e "ssh -i /var/lib/buildbot/.ssh/ssh_host_rsa_key -o PasswordAuthentication=no" $BIN_DIR/ $EXPORT_SSH_USER@$EXPORT_SERVER:$EXPORT_DIR/$snapshot_name/
+rsync -a -e "ssh -i /var/lib/buildbot/.ssh/$EXPORT_SSH_KEY -o PasswordAuthentication=no" $BIN_DIR/ $EXPORT_SSH_USER@$EXPORT_SERVER:$EXPORT_DIR/$snapshot_name/
 

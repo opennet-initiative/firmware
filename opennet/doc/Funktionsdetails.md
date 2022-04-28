@@ -36,8 +36,8 @@ Die Aktion des Trigger-Skripts lässt sich manuell auslösen:
 Einige Dienste werden nicht via olsr-nameservice, sondern via HTTP-Request ermittelt.
 
 Folgende URLs enthalten Dienste, die von APs verwendet werden:
-* [https://service-discovery.opennet-initiative.de/ugw-services.csv](): Auflistung aller Gateway- und Mesh-Server
-* [https://service-discovery.opennet-initiative.de/user-services.csv](): Auflistung von Nutzer-VPN-Tunnel-Server
+* [https://services.opennet-initiative.de/ugw-services.csv](): Auflistung aller Gateway- und Mesh-Server
+* [https://services.opennet-initiative.de/user-services.csv](): Auflistung von Nutzer-VPN-Tunnel-Server
 
 Die Spalten werden durch Tabulatoren getrennt (keine Leerzeichen).
 

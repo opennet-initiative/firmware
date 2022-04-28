@@ -24,7 +24,7 @@ SERVICES_LOG_BASE=/var/log/on-services
 # Namenspräfix für weiterzuleitende Dienste
 RELAYABLE_SERVICE_PREFIX="proxy-"
 UPDATE_TRUSTED_SERVICES_PERIOD_MINUTES=360
-USER_SERVICES_URL=https://service-discovery.opennet-initiative.de/user-services.csv
+USER_SERVICES_URL=https://services.opennet-initiative.de/user-services.csv
 
 # andere Module fügen eventuell weitere URLs hinzu
 SERVICES_LIST_URLS="${SERVICES_LIST_URLS:-} $USER_SERVICES_URL"

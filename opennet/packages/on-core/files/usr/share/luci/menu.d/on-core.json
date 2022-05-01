@@ -97,14 +97,6 @@
       "function": "action_network"
     }
   },
-  "opennet/basis/network/wireless_ifaces": {
-    "title": "WirelessInterfaces",
-    "action": {
-      "type": "call",
-      "module": "luci.model.opennet.base",
-      "function": "action_network"
-    }
-  },
   "opennet/basis/admin": {
     "title": "Administrationi111",
     "order": 2,

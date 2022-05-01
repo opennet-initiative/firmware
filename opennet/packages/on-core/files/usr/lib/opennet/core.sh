@@ -1283,16 +1283,9 @@ get_location_for_main_ip() {
 }
 
 
-# Request a URL via https or http. Opennet-CA certificates are trusted (if locally installed). In
-# case of failure, public certificates are trusted, too.
+# Request a URL via https or http.
 http_request() {
-	# Try to use the Opennet-CA-only request and fall back to a generic HTTP request using
-	# public certificates.
-	if is_function_available "https_request_opennet"; then
-		https_request_opennet "$@"
-	else
-		false
-	fi || wget -q -O - "$@"
+	wget -q -O - "$@"
 }
 
 # Ende der Doku-Gruppe

@@ -18,7 +18,7 @@ configure_free_network() {
 	# es wurde bereits einmalig konfiguriert
 	if [ -z "$(uci_get "$uci_prefix")" ]; then
 		uci set "${uci_prefix}=interface"
-		uci set "${uci_prefix}.ifname=none"
+		uci set "${uci_prefix}.device=none"
 		uci set "${uci_prefix}.proto=static"
 		uci set "${uci_prefix}.ipaddr=$(get_on_captive_portal_default free_ipaddress)"
 		uci set "${uci_prefix}.netmask=$(get_on_captive_portal_default free_netmask)"
@@ -68,13 +68,13 @@ captive_portal_has_devices() {
 captive_portal_repair_empty_network_bridge() {
 	local uci_prefix="network.${NETWORK_FREE}"
 	local sub_device_count
-	if [ "$(uci_get "${uci_prefix}.type")" = "bridge" ] && [ "$(uci_get "${uci_prefix}.ifname")" = "none" ]; then
+	if [ "$(uci_get "${uci_prefix}.type")" = "bridge" ] && [ "$(uci_get "${uci_prefix}.device")" = "none" ]; then
 		# verdaechtig: Bruecke mit "none"-Device
 		sub_device_count=$(get_subdevices_of_interface "$NETWORK_FREE" | wc -w)
 		if [ "$sub_device_count" -eq "1" ]; then
 			# wifi-Device is konfiguriert - Bruecke und "none" kann entfernt werden
 			uci_delete "${uci_prefix}.type"
-			uci_delete "${uci_prefix}.ifname"
+			uci_delete "${uci_prefix}.device"
 		else
 			# nichts ist konfiguriert - erstmal nur die Bruecke entfernen
 			uci_delete "${uci_prefix}.type"

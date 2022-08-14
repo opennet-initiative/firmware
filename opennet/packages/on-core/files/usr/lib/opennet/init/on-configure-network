@@ -60,7 +60,7 @@ configure_olsr_radio() {
 	bssid=$(get_on_core_default wifi_bssid)
 
 	uci set "${uci_wifi}.network=$iface_logical"
-	uci set "${uci_wifi}.ifname=$iface_phys"
+	uci set "${uci_wifi}.device=$iface_phys"
 
 	uci set "wireless.radio${iface_index}.country=$(get_on_core_default wifi_country)"
 	uci_delete "wireless.radio${iface_index}.disabled"
@@ -93,7 +93,7 @@ configure_olsr_single_interface() {
 	# configure on_wifi
 	uci set "network.${iface_logical}=interface"
 	uci set "network.${iface_logical}.proto=static"
-	uci set "network.${iface_logical}.ifname=$iface_phys"
+	uci set "network.${iface_logical}.device=$iface_phys"
 	uci set "network.${iface_logical}.netmask=$iface_netmask"
 	uci set "network.${iface_logical}.defaultroute=0"
 	uci set "network.${iface_logical}.peerdns=0"

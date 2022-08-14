@@ -388,9 +388,9 @@ move_wifidog_networks_to_captive_portal() {
 	# (das migrations-Skript wird vor dem on-captive-portal-Skript via uci-defaults ausgefuehrt)
 	configure_free_network
 	# die nicht-wifi-Netzwerke übertragen
-	old_interfaces=$(uci_get "network.${old_name}.ifname")
+	old_interfaces=$(uci_get "network.${old_name}.device")
 	# das Interface muss immer angegeben sein (oder "none")
-	uci set "network.${new_name}.ifname=${old_interfaces:-none}"
+	uci set "network.${new_name}.device=${old_interfaces:-none}"
 	# alle wifi-Interfaces verschieben
 	for uci_prefix in $(find_all_uci_sections "wireless" "wifi-iface" "network=$old_name"); do
 		uci set "${uci_prefix}.network=$new_name"
@@ -565,8 +565,8 @@ rename_gpio_switch_poe_passthrough() {
 ##        Aufgrund potentieller Uneindeutigkeit durch Timing-Probleme heißt das Interface seit
 ##        v0.5.4 "tun-on-user".
 rename_tun_to_tun_on_user() {
-	[ "$(uci_get "network.on_vpn.ifname")" = "tun0" ] || return 0
-	uci set "network.on_vpn.ifname=tun-on-user"
+	[ "$(uci_get "network.on_vpn.device")" = "tun0" ] || return 0
+	uci set "network.on_vpn.device=tun-on-user"
 	uci commit network
 	reload_config
 }

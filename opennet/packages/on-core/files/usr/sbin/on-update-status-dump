@@ -143,7 +143,7 @@ print_interfaces_2_6() {
       on_networks=
       on_zones=
       lastnetwork=
-      all_networks=$(uci -q show network | awk 'BEGIN{FS="="} /network\..*\.ifname/ {if ($2 == "'"${if_name##br-}"'") {gsub("network.",""); gsub(".ifname",""); print$1;}}')
+      all_networks=$(uci -q show network | awk 'BEGIN{FS="="} /network\..*\.device/ {if ($2 == "'"${if_name##br-}"'") {gsub("network.",""); gsub(".device",""); print$1;}}')
       for network in $all_networks; do
         if [ -n "$network" ] && [ "$(uci_get "network.$network.proto")" != "none" ]; then
           on_networks="${on_networks:+$on_networks }$network"

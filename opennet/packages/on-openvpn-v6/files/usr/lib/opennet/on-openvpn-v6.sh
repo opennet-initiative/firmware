@@ -25,7 +25,7 @@ configure_tunnel_v6_network() {
 	# add new network to configuration (to be recognized by olsrd)
 	uci set "${uci_prefix}=interface"
 	uci set "${uci_prefix}.proto=dhcpv6"
-	uci set "${uci_prefix}.ifname=on_tap_user6"
+	uci set "${uci_prefix}.device=on_tap_user6"
 	uci set "${uci_prefix}.reqprefix=auto"
 	uci set "${uci_prefix}.reqaddress=try"
 	uci set "${uci_prefix}.clientid=$clientid_rand"

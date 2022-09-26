@@ -239,7 +239,7 @@ get_subdevices_of_interface() {
 	local uci_prefix
 	{
 		# kabelgebundene Geräte
-		for device in $(uci_get "network.${interface}.ifname"); do
+		for device in $(uci_get "network.${interface}.device"); do
 			# entferne Alias-Nummerierungen
 			device=$(echo "$device" | cut -f 1 -d :)
 			[ -z "$device" ] || [ "$device" = "none" ] && continue
@@ -447,8 +447,8 @@ run_iwinfo_scan() {
 	local needs_auto_channel
 	wifi_interface_uci=$(find_first_uci_section "wireless" "wifi-iface" "device=$phy_device")
 	[ -z "$wifi_interface_uci" ] && return 0
-	# the field "ifname" is not strictly specified - thus fall back to a sane default
-	wifi_interface=$(uci_get "$wifi_interface_uci.ifname" "wlan0")
+	# the field "device" is not strictly specified - thus fall back to a sane default
+	wifi_interface=$(uci_get "$wifi_interface_uci.device" "wlan0")
 	# try whether it works without any changes and exit early in case of success
 	iwinfo "$wifi_interface" scan 2>/dev/null && return 0
 	# Possible reason for failure: "scan" does not seem to work for a master on a DFS channel:

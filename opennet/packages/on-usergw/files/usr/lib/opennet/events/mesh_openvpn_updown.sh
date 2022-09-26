@@ -30,7 +30,7 @@ setup_mesh_interface() {
 	uci set "network.${netname}.proto=none"
 	# wir duerfen das Interface nicht via uci hinzufuegen - andernfalls verliert das Interface durch netifd seine Konfiguration
 	# siehe https://lists.openwrt.org/pipermail/openwrt-devel/2015-June/033501.html
-	#uci set "network.${netname}.ifname=$ifname"
+	#uci set "network.${netname}.device=$ifname"
 	ubus call network reload
 	add_interface_to_zone "$ZONE_MESH" "$netname"
 	apply_changes network firewall

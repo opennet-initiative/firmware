@@ -62,7 +62,7 @@ configure_ipv6_address() {
 	[ "$main_ipv6" = "$(uci get "${uci_prefix}.ip6addr")" ] && return 0
 	uci set "$uci_prefix=interface"
 	uci set "${uci_prefix}.proto=static"
-	uci set "${uci_prefix}.ifname=lo"
+	uci set "${uci_prefix}.device=lo"
 	echo "$main_ipv6" | uci_replace_list "${uci_prefix}.ip6addr"
 	apply_changes network
 }

@@ -43,7 +43,7 @@ You may obtain a copy of the License at
 				<table class="cbi-section-table">
 					<% for net_name, net in pairs(mesh_interfaces) do %>
 					<tr id="cbi-network-lan" class="cbi-section-table-row">
-						<th><h3><%=net_name%> (<%:device%> <%=net.ifname%>)</h3></th>
+						<th><h3><%=net_name%> (<%:device%> <%=net.device%>)</h3></th>
 						<td class="cbi-value-field"><div id="cbi-network-lan-ipaddr"><%=net.ipaddr%> / <%=net.netmask%></div></td>
 					</tr>
 				<% end %>

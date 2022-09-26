@@ -25,6 +25,13 @@ Debian:
       libncurses5-dev zlib1g-dev liblzo2-dev libssl-dev install rsync qemu-utils \
       python3-distutils python3-lib2to3
 
+Ubuntu 22.04:
+
+    apt install build-essential git flex gcc-multilib doxygen file gawk unzip python3 quilt \
+      libncurses5-dev zlib1g-dev liblzo2-dev libssl-dev rsync qemu-utils \
+      python3-distutils python3-lib2to3
+
+
 Repository herunterladen {#repository}
 ------------------------
 

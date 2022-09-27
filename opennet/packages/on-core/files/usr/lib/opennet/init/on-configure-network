@@ -53,20 +53,20 @@ configure_olsr_radio() {
 
 	local uci_wifi="wireless.@wifi-iface[$iface_index]"
 	local uci_radio
-	local radio_hwmode
+	local radio_band
 	local bssid
 	uci_radio="wireless.$(uci_get "${uci_wifi}.device")"
-	radio_hwmode=$(uci_get "${uci_radio}.hwmode")
+	radio_band=$(uci_get "${uci_radio}.band")
 	bssid=$(get_on_core_default wifi_bssid)
 
 	uci set "${uci_wifi}.network=$iface_logical"
-	uci set "${uci_wifi}.device=$iface_phys"
+	uci set "${uci_wifi}.device=$iface_device"
 
 	uci set "wireless.radio${iface_index}.country=$(get_on_core_default wifi_country)"
 	uci_delete "wireless.radio${iface_index}.disabled"
 
 	# typ-spezifische Attribute
-	if echo "$radio_hwmode" | grep -q "a"; then
+	if echo "$radio_band" | grep -q "5g"; then
 		# 5 GHz: kein Mesh-Modus verfuegbar
 		uci set "${uci_wifi}.ssid=$(get_on_core_default wifi_ssid_5ghz)"
 		uci set "${uci_wifi}.mode=$(get_on_core_default wifi_mode_5ghz)"

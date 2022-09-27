@@ -30,7 +30,6 @@ wifi_channel	1
 
 wifi_ssid_5ghz	test.opennet-initiative.de
 wifi_mode_5ghz	ap
-# use an indoor channel by default: otherwise a wireless scans fail (ap + DFS channel -> no scan)
-wifi_channel_5ghz	36
+wifi_outdoor_chanlist "100-116 132-140"
 
 on_modules	on-openvpn on-usergw on-captive-portal on-monitoring on-goodies on-olsr2 on-olsr2-netjsongraph

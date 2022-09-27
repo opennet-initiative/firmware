@@ -57,6 +57,7 @@ configure_olsr_radio() {
 	local bssid
 	uci_radio="wireless.$(uci_get "${uci_wifi}.device")"
 	radio_band=$(uci_get "${uci_radio}.band")
+	htmode=$(uci_get "${uci_radio}.htmode")
 	bssid=$(get_on_core_default wifi_bssid)
 
 	uci set "${uci_wifi}.network=$iface_logical"
@@ -70,7 +71,16 @@ configure_olsr_radio() {
 		# 5 GHz: kein Mesh-Modus verfuegbar
 		uci set "${uci_wifi}.ssid=$(get_on_core_default wifi_ssid_5ghz)"
 		uci set "${uci_wifi}.mode=$(get_on_core_default wifi_mode_5ghz)"
-		uci set "${uci_radio}.channel=$(get_on_core_default wifi_channel_5ghz)"
+		# Use one (random) indoor channel and multiple outdoor channels. 
+		# Indoor channel: as fallback otherwise wireless scans fail (ap + DFS channel -> no scan)
+		# Outdoor channels: remove TDWR channels + bandwidth
+		indoor_channel=$(( 36 + 4 * $(get_random 4) ))
+		uci set "${uci_radio}.channel=$indoor_channel"
+		uci set "${uci_radio}.chanlist=$indoor_channel $(get_on_core_default wifi_outdoor_chanlist)"
+		# Fix 11ac default bandwidth
+		if [ "$htmode" = "VHT80" ]; then
+			uci set "${uci_radio}.htmode=VHT20"
+		fi
 		uci set "${uci_wifi}.isolate=1"
 	else
 		# 2,4 GHz: Ad-hoc-Modus

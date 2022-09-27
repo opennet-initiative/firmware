@@ -49,7 +49,7 @@ configure_olsr_radio() {
 	trap 'error_trap configure_olsr_radio "$*"' EXIT
 	local iface_index="$1"
 	local iface_logical="$2"
-	local iface_phys="$3"
+	local iface_device="$3"
 
 	local uci_wifi="wireless.@wifi-iface[$iface_index]"
 	local uci_radio
@@ -88,12 +88,12 @@ configure_olsr_single_interface() {
 	local iface_logical="$1"
 	local iface_addr="$2"
 	local iface_netmask="$3"
-	local iface_phys="$4"
+	local iface_device="$4"
 
 	# configure on_wifi
 	uci set "network.${iface_logical}=interface"
 	uci set "network.${iface_logical}.proto=static"
-	uci set "network.${iface_logical}.device=$iface_phys"
+	uci set "network.${iface_logical}.device=$iface_device"
 	uci set "network.${iface_logical}.netmask=$iface_netmask"
 	uci set "network.${iface_logical}.defaultroute=0"
 	uci set "network.${iface_logical}.peerdns=0"

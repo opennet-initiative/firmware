@@ -76,7 +76,7 @@ configure_olsr_radio() {
 		# Outdoor channels: remove TDWR channels + bandwidth
 		indoor_channel=$(( 36 + 4 * $(get_random 4) ))
 		uci set "${uci_radio}.channel=$indoor_channel"
-		uci set "${uci_radio}.chanlist=$indoor_channel $(get_on_core_default wifi_outdoor_chanlist)"
+		uci set "${uci_radio}.chanlist=$indoor_channel $(get_on_core_default wifi_outdoor_chanlist_5ghz)"
 		# Fix 11ac default bandwidth
 		if [ "$htmode" = "VHT80" ]; then
 			uci set "${uci_radio}.htmode=VHT20"

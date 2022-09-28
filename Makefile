@@ -41,6 +41,7 @@ $(ARCHS): feeds translate
 	$(MAKE) "config-$@"
 	@# alte Build-Images erzeugen (seit Chaos Calmer enthalten die Namen die Release-Nummer - er ist also veraenderlich)
 	@[ -d "$(OPENWRT_DIR)/bin/$@" ] && find "$(OPENWRT_DIR)/bin/$@" -maxdepth 1 -type f -name "openwrt-*" -delete || true
+	$(MAKE) -C "$(OPENWRT_DIR) clean"
 	$(MAKE) -C "$(OPENWRT_DIR)"
 
 config-%:

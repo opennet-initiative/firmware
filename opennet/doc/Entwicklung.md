@@ -19,13 +19,7 @@ Der gesamte Prozess der Image-Erzeugung erfordert dagegen ca. 10 GB Festplattenp
 Abhängigkeiten installieren {#dependencies}
 ---------------------------
 
-Debian:
-
-    apt install build-essential git flex gcc-multilib doxygen file gawk unzip python quilt \
-      libncurses5-dev zlib1g-dev liblzo2-dev libssl-dev install rsync qemu-utils \
-      python3-distutils python3-lib2to3
-
-Ubuntu 22.04:
+Debian / Ubuntu:
 
     apt install build-essential git flex gcc-multilib doxygen file gawk unzip python3 quilt \
       libncurses5-dev zlib1g-dev liblzo2-dev libssl-dev rsync qemu-utils \

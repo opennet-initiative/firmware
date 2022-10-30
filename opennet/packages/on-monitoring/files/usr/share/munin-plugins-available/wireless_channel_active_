@@ -50,7 +50,7 @@ if command -v iwinfo >/dev/null; then
 	# "iwinfo" has a stable output format but is only available on OpenWrt
 	get_physical_interfaces() { iwinfo | sed -n 's/^.*PHY name: \+\(.*\)$/\1/p'; }
 	get_physical_interface_current_channel() { iwinfo "$1" info \
-		| grep Channel | sed 's/^.*Channel: \+\([0-9]\+\) .*$/\1/'; }
+		| grep Channel: | sed 's/^.*Channel: \+\([0-9]\+\) .*$/\1/'; }
 	get_physical_interfaces_channel_descriptions() {
 		# return: CHANNEL CHANNEL_DESCRIPTION
 		# e.g.: "104 5.520 GHz (Channel 104)"

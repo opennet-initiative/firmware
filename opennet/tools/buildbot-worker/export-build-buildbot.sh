@@ -9,8 +9,8 @@ DOC_DIR="$BUILD_DIR/build-doc/api/html"
 OPENWRT_CONFIG="$BUILD_DIR/openwrt/.config"
 
 EXPORT_SERVER="downloads.on"
-EXPORT_SSH_USER=trac-bitten-slave
-EXPORT_SSH_KEY=buildbot_rsa_key
+EXPORT_SSH_USER="buildbot"
+EXPORT_SSH_KEY="buildbot_rsa_key"
 EXPORT_DIR="export"  # this folder is on remote download server
 RSYNC_OPTIONS="--archive --verbose"
 

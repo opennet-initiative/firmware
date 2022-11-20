@@ -94,7 +94,6 @@ enable_firewall_reload_trigger() {
 
 enable_default_modules() {
 	local module
-	[ -n "$(uci_get "on-core.modules")" ] && return 0
 	# prepare the uci settings for modules
 	save_on_modules_list
 	for module in $DEFAULT_ENABLED_PACKAGES; do

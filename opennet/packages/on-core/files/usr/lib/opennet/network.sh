@@ -181,9 +181,47 @@ is_interface_in_zone() {
 ## @details Ein Bridge-Interface wird als Gerät betrachtet und zurückgeliefert (nicht seine Einzelteile).
 get_device_of_interface() {
 	local interface="$1"
+	local found_bridge=0
+
+	# OpenWrt nutzt jetzt DSA anstatt swconfig. Daher sind fuer eine Uebergangszeit hier zwei Pruefungen notwendig.
+	
+	# Bereite DSA Check vor. Ermittle aktuelle Anzahl an Devices laut network.@device[].
+	# (Alternative zur Schleife unten ist die Nutzung von config_foreach(), siehe https://openwrt.org/docs/guide-developer/config-scripting.)
+	local i=0
+	local max_dev_index=-1  # finde groessten Index
+	local MAX_BRIDGES=10  # oberes Limit gegen Endlosschleife
+	while [ $i -lt $MAX_BRIDGES ]; do
+		local dev_exists="-1"
+		dev_exists="$(uci_get "network.@device[$i].type" -1)"
+		if [ "$dev_exists" != "-1" ]; then
+			# Device existiert
+			max_dev_index=$i
+		elif [ "$dev_exists" == "-1" ]; then
+			# abbrechen
+			i=$MAX_BRIDGES
+		fi
+		i=$(($i+1))
+	done
+
+	# DSA: Ist Interface eine Bridge?
+	local phy_dev="$(uci_get "network.${interface}.device")"
+	local i=0
+	while [ $i -le $max_dev_index ]; do
+		if [ "$(uci_get "network.@device[$i].name")" = "${phy_dev}" ] && [ "$(uci_get "network.@device[$i].type")" = "bridge" ]; then
+			found_bridge=1
+			echo "${phy_dev}"
+		fi
+		i=$(($i+1))
+	done
+
+	# swconfig: Ist Interface eine Bridge?
 	if [ "$(uci_get "network.${interface}.type")" = "bridge" ]; then
+		found_bridge=1
 		echo "br-$interface"
-	else
+	fi
+
+	if [ $found_bridge -ne 1 ]; then
+		# Interface ist keine Bridge
 		get_subdevices_of_interface "$interface"
 	fi
 }

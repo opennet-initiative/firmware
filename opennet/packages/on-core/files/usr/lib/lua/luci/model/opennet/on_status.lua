@@ -185,7 +185,7 @@ function status_issues()
 	local result = ""
 	local warnings = on_function("get_potential_error_messages", {"30"})
 	if not is_string_empty(warnings) then
-		result = result .. '<a title="' .. luci.util.pcdata(warnings) .. '">'
+		result = result .. '<a title="' .. luci.xml.pcdata(warnings) .. '">'
 		    .. luci.i18n.translate("There are indications for possible technical issues.") .. "</a><br/>"
 		local support_contact = get_default_value("on-core", "support_contact")
 		result = result .. luci.i18n.translatef('You may want to send a <a href="%s">report</a> to the Opennet community (%s).', on_url("basis", 'bericht'), '<a href="mailto:' .. support_contact ..'">' .. support_contact .. '</a>')

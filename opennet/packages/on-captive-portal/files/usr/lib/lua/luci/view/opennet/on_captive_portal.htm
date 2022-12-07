@@ -54,7 +54,7 @@ You may obtain a copy of the License at
 			<%# MAC-Adresse %>
 			<td class="cbi-value-field"><%= details[2] %></td>
 			<%# Verbindungsbeginn %>
-			<td class="cbi-value-field"><%= luci.util.pcdata(get_timestamp_age_string(tonumber(details[3]))) %></td>
+			<td class="cbi-value-field"><%= luci.xml.pcdata(get_timestamp_age_string(tonumber(details[3]))) %></td>
 			<%# Download %>
 			<td class="cbi-value-field"><%= details[4] %></td>
 			<%# Upload %>

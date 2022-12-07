@@ -2,3 +2,5 @@
 .*.sw[op]
 *~
 /build-doc/
+opennet/po/de/*
+opennet/po/templates/*

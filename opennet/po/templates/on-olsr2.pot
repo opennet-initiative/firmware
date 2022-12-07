@@ -1,34 +1,34 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:32
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:35
 msgid "Currently there are no known routing neighbours."
 msgstr ""
 
-#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:8
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:11
 msgid "IP-Address"
 msgstr ""
 
-#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:9
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:12
 msgid "Interface"
 msgstr ""
 
-#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:33
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:36
 msgid "Maybe you want to connect to a local <a href=\"%s\">wifi peer</a>."
 msgstr ""
 
-#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:7
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:10
 msgid "Name"
 msgstr ""
 
-#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:12
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:15
 msgid "Number of routes via this neighbour"
 msgstr ""
 
-#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:11
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:14
 msgid "Potential incoming rate: estimated by our neighbour"
 msgstr ""
 
-#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:10
+#: opennet/packages/on-olsr2/files/usr/lib/lua/luci/model/opennet/on_olsr2.lua:13
 msgid "Potential outgoing rate: estimated by this host"
 msgstr ""

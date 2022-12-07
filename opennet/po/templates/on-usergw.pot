@@ -7,17 +7,17 @@ msgid ""
 "these services into the Opennet Mesh by default."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:56
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:57
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:48
 msgid "Actions"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:189
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:190
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:132
 msgid "Add"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:46
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:49
 msgid ""
 "Allowing certain public services to be reachable within your local "
 "neighbourhood. The most notable example is the Internet Gateway Service "
@@ -32,34 +32,34 @@ msgstr ""
 msgid "Available Services to be relayed"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:101
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:103
 msgid "Certificate is missing"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:104
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:29
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:106
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:30
 msgid "Certificate management"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:95
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:97
 msgid "Connected Mesh Gateways: %s"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:45
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:48
 msgid ""
 "Connecting your local neighbourhood with the complete mesh of all Opennet "
 "nodes."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:49
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:50
 msgid "Connection to an Mesh VPN service succeeded."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:55
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:58
 msgid "Current Status"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:53
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:54
 msgid "Estimated upload and download speed to this exit gateway."
 msgstr ""
 
@@ -67,28 +67,28 @@ msgstr ""
 msgid "Exit Gateway host"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:44
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:45
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:42
 msgid "Gateway"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:176
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:177
 msgid "Host"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:26
+#: opennet/packages/on-usergw/files/usr/share/luci/menu.d/on-usergw.json:3
 msgid "Internet Sharing"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:52
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:55
 msgid "Internet Sharing Status"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:29
+#: opennet/packages/on-usergw/files/usr/share/luci/menu.d/on-usergw.json:23
 msgid "Key Management"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:34
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:35
 msgid "Known Mesh Gateways"
 msgstr ""
 
@@ -96,11 +96,11 @@ msgstr ""
 msgid "Local Port"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:51
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:52
 msgid "MTU"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:168
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:169
 msgid "Manually add a Mesh Gateway"
 msgstr ""
 
@@ -108,59 +108,63 @@ msgstr ""
 msgid "Manually add a Service Relay"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:31
+#: opennet/packages/on-usergw/files/usr/share/luci/menu.d/on-usergw.json:32
 msgid "Mesh Connections"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:22
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:23
 msgid "Mesh Gateways"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:97
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:99
 msgid "No Mesh Gateways connected"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:162
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:163
 msgid ""
 "No Mesh Gateways were found. Probably there is no DNS service available. "
 "Maybe you want to verify your internet connection."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:38
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:41
 msgid ""
 "OpenVPN does not support mtu-check, please compile openvpn without \"--"
 "enable-small\" option."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:70
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:73
 msgid "Other routeable addresses"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:55
+#: opennet/packages/on-usergw/files/usr/share/luci/menu.d/on-usergw.json:14
+msgid "Overview"
+msgstr ""
+
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:56
 msgid "Ping"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:55
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:56
 msgid ""
 "Ping latency describes the travelling time of a small packet to the gateway "
 "and back."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:180
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:181
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:123
 msgid "Port"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:45
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:46
 msgid "Priority"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:184
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:185
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:127
 msgid "Protocol"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:115
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:117
 msgid "Relayed user tunnel connections: %s"
 msgstr ""
 
@@ -168,11 +172,11 @@ msgstr ""
 msgid "Relaying external Services for the Opennet Mesh"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:66
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:69
 msgid "Routeable addresses via Mesh VPN"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/controller/opennet/on_usergw.lua:33
+#: opennet/packages/on-usergw/files/usr/share/luci/menu.d/on-usergw.json:41
 msgid "Service Relay"
 msgstr ""
 
@@ -188,17 +192,17 @@ msgid ""
 "processing resources."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:42
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:45
 msgid "Sharing your Internet connection"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:43
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/on_usergw.htm:46
 msgid ""
 "Sharing your internet connection with the Opennet Community usually consists "
 "of two distinct parts:"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:36
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:37
 msgid ""
 "Some Opennet servers are exposed to the internet in order to connect "
 "detached local mesh networks into a unified routing space. Every participant "
@@ -206,11 +210,11 @@ msgid ""
 "least one of these Mesh Gateways."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:53
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:54
 msgid "Speed"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:51
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:52
 msgid ""
 "The configured Maximum Transmission Unit can cause subtle problems. Thus it "
 "needs to be tested carefully."
@@ -229,13 +233,13 @@ msgid ""
 "The most important relayed service is the Mesh Internet Gateway service."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:28
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:29
 msgid ""
 "The required certificate and key for your mesh connection with Opennet seems "
 "to be missing"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:47
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:48
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:45
 msgid "The route to the gateway should point at a WAN interface."
 msgstr ""
@@ -252,7 +256,7 @@ msgid ""
 "network."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:49
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:50
 msgid "VPN"
 msgstr ""
 
@@ -260,7 +264,7 @@ msgstr ""
 msgid "VPN Certificate for Mesh Connection"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:47
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:48
 msgid "WAN"
 msgstr ""
 
@@ -278,51 +282,52 @@ msgid ""
 "in order to connect your local neighbourhood with the Opennet Mesh network."
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:43
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:44
 msgid "active"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:145
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:146
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:90
 msgid "auto-discovered services cannot be deleted"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:150
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:151
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:94
 msgid "delete"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:153
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:154
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:97
 msgid "disable"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:135
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:136
 #: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/service_relay.htm:84
 msgid "enable"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:140
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:141
 msgid "move down"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:138
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:139
 msgid "move up"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:108
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:109
 msgid "reset offset"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:102
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:29
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:104
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:30
 msgid "see"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:113
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/model/opennet/on_usergw.lua:115
 msgid "unknown (the 'on-monitoring' module is required for this information)"
 msgstr ""
 
-#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:125
+#: opennet/packages/on-usergw/files/usr/lib/lua/luci/view/opennet/mesh_connections.htm:126
+msgctxt "?"
 msgid "upload to Internet %s kBit/s | download from Internet %s kBit/s"
 msgstr ""

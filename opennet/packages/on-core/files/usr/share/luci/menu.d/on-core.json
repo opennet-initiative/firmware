@@ -7,9 +7,7 @@
       "recurse": true
     },
     "auth": {
-      "methods": [
-        "cookie:sysauth"
-      ],
+      "methods": [ "cookie:sysauth_https", "cookie:sysauth_http" ],
       "login": true
     }
   },
@@ -38,48 +36,42 @@
     "action": {
       "type": "template",
       "path": "opennet/on_status"
-    },
-    "auth": {}
+    }
   },
   "opennet/status/neighbors/*": {
     "action": {
       "type": "call",
       "module": "luci.model.opennet.on_status",
       "function": "status_neighbors"
-    },
-    "auth": {}
+    }
   },
   "opennet/status/network/*": {
     "action": {
       "type": "call",
       "module": "luci.model.opennet.on_status",
       "function": "status_network"
-    },
-    "auth": {}
+    }
   },
   "opennet/status/modules/*": {
     "action": {
       "type": "call",
       "module": "luci.model.opennet.on_status",
       "function": "status_modules"
-    },
-    "auth": {}
+    }
   },
   "opennet/status/issues/*": {
     "action": {
       "type": "call",
       "module": "luci.model.opennet.on_status",
       "function": "status_issues"
-    },
-    "auth": {}
+    }
   },
   "opennet/status/firmware_update_info/*": {
     "action": {
       "type": "call",
       "module": "luci.model.opennet.on_status",
       "function": "status_firmware_update_info"
-    },
-    "auth": {}
+    }
   },
   "opennet/basis/network": {
     "title": "Network",
@@ -95,13 +87,6 @@
       "type": "call",
       "module": "luci.model.opennet.base",
       "function": "action_network"
-    }
-  },
-  "opennet/basis/admin": {
-    "title": "Administrationi111",
-    "order": 2,
-    "action": {
-      "type": "firstchild"
     }
   },
   "opennet/basis/module/*": {

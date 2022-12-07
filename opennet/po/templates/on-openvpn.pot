@@ -1,27 +1,27 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:178
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:190
 msgid "<a href=\"%s\">A certificate is required</a>."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:338
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:414
 msgid "Actions"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:170
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:182
 msgid "Active VPN-Tunnel: %s"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:374
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:450
 msgid "Add"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:364
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:440
 msgid "Add Gateway manually"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:282
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:358
 msgid ""
 "Additionally you may choose to rank specific gateways higher or lower than "
 "their routing distance would indicate. Please be careful with this manual "
@@ -29,23 +29,23 @@ msgid ""
 "path. Usually you should just keep the default values."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:335
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:411
 msgid "Announced Upload / Download Speed."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:28
+#: opennet/packages/on-openvpn/files/usr/share/luci/menu.d/on-openvpn.json:14
 msgid "Certificate"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:301
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:377
 msgid "Certificate management"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:174
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:186
 msgid "Check the <a href=\"%s\">System Log</a> for details."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:30
+#: opennet/packages/on-openvpn/files/usr/share/luci/menu.d/on-openvpn.json:32
 msgid "Connection Log"
 msgstr ""
 
@@ -53,52 +53,52 @@ msgstr ""
 msgid "Connection log"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:355
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:431
 msgid "Developers or experimenting users may want to add custom gateways here."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:328
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:404
 msgid "Distance"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:331
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:407
 msgid "ETX"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:331
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:407
 msgid ""
 "Expected Transmission Count - Quality of the Connection to the Gateway "
 "regarding OLSR"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:321
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:397
 msgid "Gateway Server"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:310
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:386
 msgid "Gateway-List"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:29
+#: opennet/packages/on-openvpn/files/usr/share/luci/menu.d/on-openvpn.json:23
 msgid "Gateways"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:272
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:348
 msgid "Here you can configure the IP-Addresses of your choosen Gateways."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:318
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:394
 msgid "IP-Address"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:283
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:359
 msgid ""
 "If you notice a severe slow-down of your connection, you should try to "
 "remove your manual priorities first. Use the small \"clear\" icon in th e "
 "\"offset/distance\" column for this purpose."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:353
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:429
 msgid "Manually add a Gateway"
 msgstr ""
 
@@ -108,23 +108,23 @@ msgid ""
 "Internet Gateways provided by the association."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:328
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:404
 msgid "Number of Hops to the Gateway"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:266
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:342
 msgid "Opennet OpenVPN Gateways"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:368
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:444
 msgid "Port"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:320
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:396
 msgid "Short name of the public gateway server (if known)"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:335
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:411
 msgid "Speed"
 msgstr ""
 
@@ -132,7 +132,7 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:277
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:353
 msgid ""
 "Take a look at the Opennet wiki, if you would like to know more about the "
 "Gateway system. Usually the first found Gateway in your list is th e one you "
@@ -140,42 +140,42 @@ msgid ""
 "Gateway does not work for approximately 120 seconds."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:281
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:357
 msgid ""
 "The \"distance\" column indicates the routing distance to this Gateway. The "
 "selection of your preferred gateway is based on this value."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:181
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:193
 msgid "The VPN-Tunnel is not active,"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:345
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:421
 msgid ""
 "The first reachable Gateway is currently not in use. The Tunnel will be "
 "restarted and the Gateway will be changed in a few minutes. This change will "
 "be shown after a reload of this page."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:300
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:376
 msgid ""
 "The required certificate and key for your internet access via Opennet seems "
 "to be missing"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:325
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:401
 msgid "This offset is added to the values before use/display"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:131
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:141
 msgid "Tunnel active"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:136
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:146
 msgid "Tunnel inactive"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:134
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:144
 msgid "Tunnel starting"
 msgstr ""
 
@@ -183,18 +183,18 @@ msgstr ""
 msgid "VPN Certificate and Internet Access"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/controller/opennet/on_openvpn.lua:24
+#: opennet/packages/on-openvpn/files/usr/share/luci/menu.d/on-openvpn.json:3
 msgid "VPN Tunnel"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:337
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:413
 msgid "VPN-Status"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:311
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:387
 msgid ""
-"You can change the sorting mechanism of gateways in the <a href=\"%s"
-"\">Service Settings section</a>."
+"You can change the sorting mechanism of gateways in the <a "
+"href=\"%s\">Service Settings section</a>."
 msgstr ""
 
 #: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_openvpn.htm:19
@@ -203,69 +203,69 @@ msgid ""
 "Gateways."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:279
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:355
 msgid ""
 "Your router periodically tries to connect to all available Gateways in the "
 "Opennet network. The results of these tests are indicated in the \"Status\" "
 "column below."
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:317
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:393
 msgid "active"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:193
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:269
 msgid "auto-discovered services cannot be deleted"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:196
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:272
 msgid "delete"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:198
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:274
 msgid "disable"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:182
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:258
 msgid "enable"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:188
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:264
 msgid "move down"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:186
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:262
 msgid "move to top and connect immediately"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:187
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:263
 msgid "move up"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:156
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:232
 msgid "reset offset"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:147
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:158
 msgid "restart VPN Tunnel"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:301
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:377
 msgid "see"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:149
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/model/opennet/on_mig_openvpn.lua:160
 msgid "start VPN Tunnel"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:179
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:255
 msgid "tested %d minutes ago"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:149
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:225
 msgid "unreachable"
 msgstr ""
 
-#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:175
+#: opennet/packages/on-openvpn/files/usr/lib/lua/luci/view/opennet/on_gateways.htm:251
 msgid "upload to Internet %s kbit/s; download from Internet %s kbit/s"
 msgstr ""

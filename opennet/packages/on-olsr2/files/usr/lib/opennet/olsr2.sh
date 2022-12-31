@@ -75,6 +75,7 @@ update_olsr2_interfaces() {
 	local uci_prefix
 	local token
 	local is_configured=0
+	local pyh_if
 	# auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
 	local ipv6_limit="-0.0.0.0/0 -::1/128 default_accept"
 	interfaces="$NETWORK_LOOPBACK $(get_zone_interfaces "$ZONE_MESH")"
@@ -96,7 +97,11 @@ update_olsr2_interfaces() {
 			uci_delete_list "${uci_prefix}.name" "$token"
 		done
 		# Alle neuen hinzufügen.
-		for token in $interfaces; do uci_add_list "${uci_prefix}.name" "$token"; done
+		for token in $interfaces; do
+			# olsrd2 benoetigt den physischen Interface-Namen
+			phy_dev=$(uci_get network."$token".device)
+			[ -n "$phy_dev" ] && uci_add_list "${uci_prefix}.name" "$phy_dev"
+		done
 		is_configured=1
 	done
 	if [ "$is_configured" = "0" ]; then

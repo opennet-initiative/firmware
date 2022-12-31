@@ -51,7 +51,11 @@ configure_tunnel_firewall() {
 }
 
 configure_tos_firewall_handling() {
-	cat >> /etc/firewall.user <<-  EOF
+	# Meaning of: <<-'EOF'
+	#  <<EOF    is here docs and ends with string EOF as delimiter
+	#  <<-EOF   means that leading tabs are stripped even in line containing delimiter
+	#  <<-'EOF' means that not interpretation of text will take place
+	cat >> /etc/firewall.user <<-'EOF'
 	# 
 	# Mit TOS 0x08 markierter Traffic wird nicht ueber den User-VPN-Tunnel geleitet, weil wir davon ausgehen,
 	#  dass dieser Traffic zum UGW direkt gesendet werden soll. Siehe hierzu auch die Doku:

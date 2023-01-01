@@ -98,9 +98,16 @@ update_olsr2_interfaces() {
 		done
 		# Alle neuen hinzufügen.
 		for token in $interfaces; do
-			# olsrd2 benoetigt den physischen Interface-Namen
+			# olsrd2 benoetigt den physischen Interface-Namen (z.B. wlan0, tap0, eth4)
+			# Wir versuche erst den physischen Interface-Namen zu ermitteln.
 			phy_dev=$(uci_get network."$token".device)
-			[ -n "$phy_dev" ] && uci_add_list "${uci_prefix}.name" "$phy_dev"
+			if [[ -n "$phy_dev" ]]; then
+				# Wenn physicher Name nicht abgeleitet werden kann, dann gehen wir davon aus, 
+				#  dass es bereits ein physischer Name ist.
+				uci_add_list "${uci_prefix}.name" "$phy_dev"
+			else
+				uci_add_list "${uci_prefix}.name" "$token"
+			fi
 		done
 		is_configured=1
 	done

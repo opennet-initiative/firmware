@@ -107,6 +107,8 @@ pull-submodules: unpatch
 	git submodule update --remote --checkout
 	git submodule foreach git checkout "$(PULL_SUBMODULES_BRANCH)"
 	git submodule foreach git pull
+	@#for openwrt submodule checkout latest tag of branch
+	git -C openwrt checkout "$(shell git -C openwrt describe --tags --abbrev=0)"
 
 commit-submodules: unpatch
 	detailed_diff=$$(git diff --submodule=short | awk '{ if ($$1 == "---") module=substr($$2, 3); if ($$1 == "-Subproject") old_commit=$$3; if ($$1 == "+Subproject") {new_commit=$$3; print(module":"); system("cd "module"; git --no-pager log --oneline "old_commit".."new_commit); print("")}}'); \

@@ -16,7 +16,6 @@ Die Verzeichnisse haben die folgenden Inhalte:
     * *packages* -- die meisten openwrt-Pakete
     * *routing* -- Routing-Pakete
     * *luci* -- luci-basierte Webinterface-Pakete
-    * *telephony* -- Telefonie-Pakete
 * *opennet* -- Opennet-Pakete und angepasste/neue Pakete
 * *patches* -- Änderungen an openwrt oder den externen Paket-Feeds
 * *doc* -- diese Dokumentation
@@ -25,7 +24,7 @@ Die Verzeichnisse haben die folgenden Inhalte:
 Externe Respositories {#repositories}
 ---------------------
 
-Die externen Repositories (openwrt, packages, routing, telephony) werden von uns nur in Form von Patches angepasst.
+Die externen Repositories (openwrt, packages, routing) werden von uns nur in Form von Patches angepasst.
 
 Deren Version (also die git-commit-ID) wird in unserem Repository versioniert - der aktuelle Stand bezüglich der Upstream-Repositories ist also Teil der Versionsverwaltung.
 

@@ -188,7 +188,6 @@ update_uhttpd_configuration() {
 
 
 migrate_uci_definition_changes
-remove_opennet_ca_certificates_from_previous_location
 # die Pruefung muss vor der Loeschung der wifidog-Konfiguration stattfinden
 guess_previously_used_modules
 remove_wifidog_config

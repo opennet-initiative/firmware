@@ -50,29 +50,6 @@ migrate_uci_definition_changes() {
 }
 
 
-## @fn remove_opennet_ca_certificates_from_previous_location()
-## @brief Löschung alter CA-Dateien an nicht mehr verwendeten Orten.
-## @details Bis Version v0.5.1 wurden die CA-Zertifikate für die OpenVPN-Verbindungen
-##   im openvpn-Verzeichnis neben den persönlichen Schlüsseln und Zertifikaten gespeichert.
-##   Da diese Verzeichnisse jedoch von luci als zu erhaltender Bereich bei einem Upgrade
-##   konfiguriert ist (luci.flash_keep.openvpn=/etc/openvpn), blieben diese Dateien bei einem
-##   Upgrade der Firmware unverändert. Der Austausch eines CA-Zertifikats war somit nicht
-##   möglich.
-##   Mit der Verschiebung aller Opennet-Zertifikate an einen nicht-zu-sichernden Ort
-##   (/etc/ssl/certs/opennet-initiative.de) können nun die alten CA-Zertifikate an ihrem ursprünglichen
-##   Ort gelöscht werden.
-##   Folgende Orte sind betroffen:
-##     /etc/openvpn/opennet_user/opennet-ca.crt
-##     /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
-##     /etc/openvpn/opennet_vpntest/opennet-ca.crt
-remove_opennet_ca_certificates_from_previous_location() {
-	trap 'error_trap remove_opennet_ca_certificates_from_previous_location "$*"' EXIT
-	rm -f /etc/openvpn/opennet_user/opennet-ca.crt
-	rm -f /etc/openvpn/opennet_ugw/opennet-ca_ugws.crt
-	rm -f /etc/openvpn/opennet_vpntest/opennet-ca.crt
-}
-
-
 ## @fn remove_wifidog_config()
 ## @brief Lösche die nicht mehr verwendete Konfiguration von "wifidog" und "on-wifidog".
 ## @details Die Konfiguration enthält keine relevanten Inhalte mehr, die zu übertragen wären.
@@ -211,7 +188,6 @@ update_uhttpd_configuration() {
 
 
 migrate_uci_definition_changes
-remove_opennet_ca_certificates_from_previous_location
 # die Pruefung muss vor der Loeschung der wifidog-Konfiguration stattfinden
 guess_previously_used_modules
 remove_wifidog_config

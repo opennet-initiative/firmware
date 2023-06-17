@@ -4,7 +4,7 @@
 ## @{
 
 
-ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem"
+ON_CERT_BUNDLE_PATH="/etc/ssl/certs/opennet-initiative.de/opennet-server_certchain_2022.crt"
 
 
 ## @fn https_request_opennet()

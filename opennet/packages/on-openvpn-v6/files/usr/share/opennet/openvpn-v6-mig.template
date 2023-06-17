@@ -3,7 +3,7 @@ writepid /var/run/gw_openvpn_v6_fd32_d8d3_87da__245_1700_udp.pid
 dev on_tap_user6
 dev-type tap
 
-ca /etc/ssl/certs/opennet-initiative.de/opennet-server_bundle.pem
+ca /etc/ssl/certs/opennet-initiative.de/opennet-server_certchain_2022.crt
 remote-cert-tls server
 
 cert /etc/openvpn/opennet_user/on_aps.crt

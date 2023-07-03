@@ -3,7 +3,7 @@ Index: on_firmware/openwrt/include/opennet.mk
 ===================================================================
 --- /dev/null
 +++ on_firmware/openwrt/include/opennet.mk
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,52 @@
 +# wir lesen die Versionsnummer aus der config-Datei
 +VERSION_NUMBER = $(shell cat "$(TOPDIR)/.config" | grep "^CONFIG_VERSION_NUMBER=" | cut -f 2- -d = | tr -d \"\')
 +ifeq "$(VERSION_NUMBER)" ""
@@ -54,7 +54,5 @@ Index: on_firmware/openwrt/include/opennet.mk
 +	[ -x "$(PO_CONV)" ] || make -C ../../../luci/modules/luci-base/src/ po2lmo
 +	@# "find" liefert leider keine Fehlermeldung, falls "-exec" fehlschlaegt - also loesen wir es manuell aus
 +	[ -x "$(PO_CONV)" ] || { echo >&2 "ERROR: po2lmo does not exist"; exit 1; }
-+	@# TODO: mehrere Sprachen?
-+	find ../../po/de -type f -name "$(PKG_NAME).po" -exec "$(PO_CONV)" '{}' "$(PKG_BUILD_DIR)/lmo/$(PKG_NAME).de.lmo" \;
 +endef
 +

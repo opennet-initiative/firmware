@@ -5,11 +5,10 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
-* Bugfix: on_wifi_0 und on_wifi_1 sind nun wieder einem Interface zugeordnet
+* 
 
 = Interne Änderungen =
-* Update auf OpenWrt 21.02.7
-* Aktualisieren der Opennet (Sub-)CA Zertifikate
+* 
 
 = Bemerkenswertes / Fehler / Mängel =
-* -
+* 

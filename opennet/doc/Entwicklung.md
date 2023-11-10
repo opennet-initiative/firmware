@@ -561,9 +561,10 @@ Für ein Release sind folgende Schritte durchzuführen:
 * einen letzten commit (z.B. mit Doku) erstellen
 * den Commit taggen: ``git tag -a v0.5.1``
 * den Commit und das Tag zum Server pushen: ``git push --tags``
-* das erzeugte Build-Verzeichnis nach "stable" verschieben: ``cd /var/www/downloads.opennet-initiative.de/openwrt && mv testing/VERSION stable/``
+* das erzeugte Build-Verzeichnis nach "stable" verschieben: ``cd /var/www/downloads/openwrt && mv ../../downloads-buildbot/export/VERSION stable/VERSIONONLYNUMBER``
 * Download-Link zu stable ``latest`` korrigieren (siehe ``ls -l /var/www/downloads.opennet-initiative.de/openwrt/stable``)
 * die "CONFIG_VERSION_NUMBER" in ``opennet/config/common`` erhöhen
+* Kommentare aus der ``opennet/changes.txt`` entfernen
 * Wiki-Doku aktualisieren:
     * https://opennet-initiative.de/wiki/Opennet_Firmware_Versionen
     * https://opennet-initiative.de/wiki/Opennet_Firmware/Download

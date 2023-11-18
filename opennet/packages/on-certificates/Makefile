@@ -11,6 +11,7 @@ define Package/on-certificates
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=CA Certificates for OpenVPN and http clients
   DEPENDS:=+curl +openssl-util
+  PKGARCH:=all
 endef
 
 define Package/on-certificates/description

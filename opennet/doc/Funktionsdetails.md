@@ -268,13 +268,12 @@ Diese werden daher von einer zentralen Stelle via http heruntergeladen (siehe @r
 
 Jeder weiterzuleitende Dienst stellt eine Belastung für die Internet-Spender dar. Daher dürften diese Announcierungen nicht via olsrd erfolgen, um eine unerwünschte Nutzung der Internetfreigabe durch triviale olsr-Announcements zu verhindern.
 
-Stattdesen erfolgt die Announcierung mittels der unter administrativer Kontrolle stehenden Opennet-Domain in Form von DNS-SRV-Einträgen.
-Somit verwenden wir stattdessen eine csv-Datei, die via HTTP von einem Opennet-Server bereitgestellt wird (@ref #ugw-server-list).
+Stattdesen erfolgt die Announcierung mittels der unter administrativer Kontrolle stehenden Opennet-Domain in Form einer csv-Datei, die via HTTP von einem Opennet-Server bereitgestellt wird (@ref ugw-server-list).
 
 Es werden nur diejenigen Dienste weitergereicht und announciert, die den folgenden Bedingungen genügen:
 
 * die Route zum Ziel-Host verläuft über das WAN-Interface
-* die Quelle (*source*) des Dienstes ist *manual* (selbstverwaltet) oder *dns-srv* (durch den Verein verwaltet)
+* die Quelle (*source*) des Dienstes ist *manual* (selbstverwaltet) oder *zentrale-csv* (durch den Verein verwaltet)
 
 
 ### Kombinierter Betrieb mit Nutzer-Tunnel {#ugw-nutzer-kombi}

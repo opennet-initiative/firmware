@@ -262,7 +262,7 @@ Die UGW-Server bieten üblicherweise zwei Dienste an:
 * Zugang zum Internet aus dem mesh-Netzwerk heraus
 
 Beide Dienste sind über ihre öffentlichen IPs erreichbar. Daher ist eine Announcierung via olsrd-nameservice nicht umsetzbar.
-Diese werden daher von einer zentralen Stelle via http heruntergeladen (siehe "Abruf zentraler Dienste-Listen").
+Diese werden daher von einer zentralen Stelle via http heruntergeladen (siehe @ref services-list-download).
 
 ### Dienst-Weiterleitung: Service-Relay {#service-relay}
 

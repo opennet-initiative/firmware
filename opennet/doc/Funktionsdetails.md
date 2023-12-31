@@ -31,13 +31,13 @@ Die Aktion des Trigger-Skripts lässt sich manuell auslösen:
     on-function update_olsr_services
 
 
-### Abfruf zentraler Dienst-Listen {#services-list-download}
+### Abruf zentraler Dienst-Listen {#services-list-download}
 
 Einige Dienste werden nicht via olsr-nameservice, sondern via HTTP-Request ermittelt.
 
 Folgende URLs enthalten Dienste, die von APs verwendet werden:
-* [https://services.opennet-initiative.de/ugw-services.csv](): Auflistung aller Gateway- und Mesh-Server
-* [https://services.opennet-initiative.de/user-services.csv](): Auflistung von Nutzer-VPN-Tunnel-Server
+* https://services.opennet-initiative.de/ugw-services.csv: Auflistung aller Gateway- und Mesh-Server
+* https://services.opennet-initiative.de/user-services.csv: Auflistung von Nutzer-VPN-Tunnel-Server
 
 Die Spalten werden durch Tabulatoren getrennt (keine Leerzeichen).
 

@@ -107,33 +107,7 @@ You may obtain a copy of the License at
   </fieldset>
 
   <%# Manuelles Hinzufügen weiterer Service-Relays %>
-  <fieldset class="cbi-section">
-    <legend><%:Manually add a Service Relay%></legend>
-    <form name="relay_services" method="post" action="<%= REQUEST_URI %>">
-      <div class="cbi-value">
-        <input type="hidden" name="service_type" value="mesh" />
-        <input type="hidden" name="service_path" value="/" />
-        <input type="hidden" name="service_scheme" value="openvpn" />
-        <input type="hidden" name="service_details" value="" />
-        <input type="hidden" name="service_priority" value="5" />
-        <label class="cbi-value-title" for="service_host"><%:Exit Gateway host%>:</label>
-        <div class="cbi-value-field">
-          <input class="cbi-input-text" name="service_host" id="service_host" size="24" />
-        </div>
-        <label class="cbi-value-title" for="service_port"><%:Port%>:</label>
-        <div class="cbi-value-field">
-          <input class="cbi-input-text" name="service_port" id="service_port" size="5" />
-        </div>
-        <label class="cbi-value-title" for="service_protocol"><%:Protocol%>:</label>
-        <div class="cbi-value-field">
-          <input class="cbi-input-text" name="service_protocol" id="service_protocol"
-              size="5" title="udp / udp4 / udp6 / tcp / tcp4 / tcp6" />
-          <input class="cbi-button cbi-button-apply" type="submit"
-              id="add_service" name="add_service" value="<%:Add%>" />
-        </div>
-      </div>
-    </form>
-  </fieldset>
+  If you want to add a Service-Relay then have a look at the function 'add_custom_proxy_gw()' in service.sh.
 
 </div>
 <%+footer%>

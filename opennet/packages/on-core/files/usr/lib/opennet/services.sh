@@ -892,6 +892,29 @@ retrieve_service_list_url() {
 }
 
 
+# e.g. add_proxy_gw_manually itsuki.on-i.de 1600 udp
+## @fn add_custom_proxy_gw()
+## @brief Fuege eine zusätzliches Dienst-Weiterleitung hinzu (proxy-gw). Dies ist eine Hilfsfunktion für einen Workaround.
+## @param host der DNS Name des OpenVPN Servers
+## @param port der Port des OpenVPN Server (i.d.R. 1600)
+## @param protocol udp oder tcp (i.d.R. udp)
+add_custom_proxy_gw() {
+	local scheme="openvpn"
+	local host=$1
+	local port=$2
+	local protocol=$3
+	local priority=5
+	local details=""
+	local service_name
+
+	service_name=$(notify_service "manual" "proxy-gw" "$scheme" "$host" "$port" "$protocol" "/" "$details")
+		set_service_value "$service_name" "priority" "$priority"
+		if is_function_available "pick_local_service_relay_port"; then
+			pick_local_service_relay_port "$service_name" >/dev/null
+		fi
+}
+
+
 ## @fn update_trusted_services_list()
 ## @brief Hole die vertrauenswürdigen Dienste von signierten Opennet-Quellen.
 ## @details Diese Dienste führen beispielsweise auf UGW-APs zur Konfiguration von Portweiterleitungen

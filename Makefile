@@ -128,6 +128,9 @@ test: lint
 clean: unpatch
 	$(MAKE) -C $(CUSTOM_DOC_DIR) clean
 
+distclean: clean
+	$(MAKE) -C $(OPENWRT_DIR) distclean
+
 # VORSICHT: alle lokalen Aenderungen gehen verloren - dies sollte nie von einem
 # Menschen ausgefuehrt werden - es ist lediglich fuer den trac-Autobuilder gedacht
 autobuilder-clean:

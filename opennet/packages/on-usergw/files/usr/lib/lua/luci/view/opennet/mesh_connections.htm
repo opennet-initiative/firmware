@@ -106,7 +106,7 @@ You may obtain a copy of the License at
 		<td class="cbi-value-field">
 			<% if gateway.offset ~= 0 then %>
 				(<%= gateway.offset %>)<input class="cbi-button cbi-button-clear cbi-button-small"
-					type="submit" value="<%= gateway.id %>" title="<%:reset offset%>" name="reset_service_offset" />
+					type="submit" value="<%= gateway.id %>" title="<%:reset offset%>" name="reset_service_offset" style="background:transparent url(/luci-static/opennet/gtk-clear.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;"/>
 			<% end %>
 			<%= gateway.priority + gateway.offset %></td>
 		<td class="cbi-value-field">
@@ -133,25 +133,25 @@ You may obtain a copy of the License at
 		<td class="cbi-value-field">
 			<% if gateway.disabled then %>
 				<input class="cbi-button cbi-button-enable cbi-button-small" type="submit"
-					value="<%= gateway.id %>" title="<%:enable%>" name="enable_service" />
+					value="<%= gateway.id %>" title="<%:enable%>" name="enable_service" style="background:transparent url(/luci-static/opennet/starred.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
 			<% else %>
 				<input class="cbi-button cbi-button-up cbi-button-small" type="submit"
-					value="<%= gateway.id %>" title="<%:move up%>" name="move_service_up" />
+					value="<%= gateway.id %>" title="<%:move up%>" name="move_service_up" style="background:transparent url(/luci-static/opennet/gtk-go-up.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
 				<input class="cbi-button cbi-button-down cbi-button-small" type="submit"
-					value="<%= gateway.id %>" title="<%:move down%>" name="move_service_down" />
+					value="<%= gateway.id %>" title="<%:move down%>" name="move_service_down" style="background:transparent url(/luci-static/opennet/gtk-go-down.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
 				<% if gateway.source ~= "manual" then %>
 					<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
 					<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
 						value="<%= gateway.id %>"
 						title="<%:auto-discovered services cannot be deleted%>"
-						name="delete_service" disabled="disabled" />
+						name="delete_service" disabled="disabled" style="background:transparent url(/luci-static/opennet/user-trash.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
 				<% else %>
 					<%# Loeschen ist moeglich %>
 					<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
-						value="<%= gateway.id %>" title="<%:delete%>" name="delete_service" />
+						value="<%= gateway.id %>" title="<%:delete%>" name="delete_service" style="background:transparent url(/luci-static/opennet/user-trash.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
 				<% end %>
 				<input class="cbi-button cbi-button-disable cbi-button-small" type="submit"
-					value="<%= gateway.id %>" title="<%:disable%>" name="disable_service" />
+					value="<%= gateway.id %>" title="<%:disable%>" name="disable_service" style="background:transparent url(/luci-static/opennet/error.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
 			<% end %>
 		</td>
 	</tr>

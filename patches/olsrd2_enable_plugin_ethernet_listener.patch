@@ -6,12 +6,13 @@ Index: on_firmware/routing/oonf-olsrd2/Makefile
 ===================================================================
 --- on_firmware.orig/routing/oonf-olsrd2/Makefile
 +++ on_firmware/routing/oonf-olsrd2/Makefile
-@@ -37,7 +37,7 @@ CMAKE_OPTIONS+=-D CMAKE_BUILD_TYPE:String=$(BUILD_TYPE) \
+@@ -36,7 +36,7 @@
                 -D OONF_NO_TESTING:Bool=true \
                 -D UCI:Bool=true \
                 -D OONF_APP_DEFAULT_CFG_HANDLER:String=uci \
--               -D OONF_STATIC_PLUGINS:String="class;clock;duplicate_set;layer2;packet_socket;rfc5444;socket;stream_socket;telnet;timer;viewer;os_clock;os_fd;os_interface;os_routing;os_system;nhdp;olsrv2;ff_dat_metric;neighbor_probing;nl80211_listener;link_config;layer2info;systeminfo;cfg_uciloader;cfg_compact;nhdpinfo;olsrv2info;netjsoninfo;${CMAKE_OPTIONAL_PLUGINS}" \
-+               -D OONF_STATIC_PLUGINS:String="class;clock;duplicate_set;layer2;packet_socket;rfc5444;socket;stream_socket;telnet;timer;viewer;os_clock;os_fd;os_interface;os_routing;os_system;nhdp;olsrv2;ff_dat_metric;neighbor_probing;eth_listener;nl80211_listener;link_config;layer2info;systeminfo;cfg_uciloader;cfg_compact;nhdpinfo;olsrv2info;netjsoninfo;${CMAKE_OPTIONAL_PLUGINS}" \
-                -D OONF_LIB_GIT:String=v$(PKG_VERSION)-archive \
-                -D OONF_VERSION:String=$(PKG_VERSION) \
+-               -D OONF_STATIC_PLUGINS:String="class;callback;clock;duplicate_set;layer2;packet_socket;rfc5444;socket;stream_socket;telnet;timer;viewer;os_clock;os_fd;os_interface;os_routing;os_system;nhdp;olsrv2;ff_dat_metric;neighbor_probing;nl80211_listener;link_config;layer2info;systeminfo;cfg_uciloader;cfg_compact;nhdpinfo;olsrv2info;netjsoninfo;${CMAKE_OPTIONAL_PLUGINS}" \
++               -D OONF_STATIC_PLUGINS:String="class;callback;clock;duplicate_set;layer2;packet_socket;rfc5444;socket;stream_socket;telnet;timer;viewer;os_clock;os_fd;os_interface;os_routing;os_system;nhdp;olsrv2;ff_dat_metric;neighbor_probing;eth_listener;nl80211_listener;link_config;layer2info;systeminfo;cfg_uciloader;cfg_compact;nhdpinfo;olsrv2info;netjsoninfo;${CMAKE_OPTIONAL_PLUGINS}" \
+                -D OONF_LIB_GIT:String=$(PKG_SOURCE_VERSION) \
+                -D VERSION_SUB_TAG:String=$(PKG_SOURCE_DATE) \
                 -D INSTALL_LIB_DIR:Path=lib/oonf \
+

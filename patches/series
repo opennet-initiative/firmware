@@ -6,11 +6,8 @@ olsrd_add_ondataservice.patch
 olsrd_debug_sigsegv.patch
 improved_dfs_detection.patch
 olsrd2_enable_plugin_ethernet_listener.patch
-radar_pulse_debug.patch
 regdb_remove-srd-channels.patch
 regdb_prohibit-tdwr-channels.patch
-radar_silent_chirp.patch
 radar_counter.patch
 olsrd_del_pud.patch
-always-enable-dfs.patch
 muninlite.patch

@@ -15,3 +15,4 @@ olsrd2_remove_timer_warning.patch
 olsrd_del_pud.patch
 always-enable-dfs.patch
 muninlite.patch
+flash_new_ubnt_wa.patch 

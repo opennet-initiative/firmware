@@ -233,9 +233,6 @@ update_service_relay_status() {
 			is_service_routed_via_wan "$service_name" && wan_status="true" || wan_status="false"
 			set_service_value "$service_name" "wan_status" "$wan_status"
 			is_service_relay_possible "$service_name" || continue
-			#MG: die folgende Zeile wollen wir überspringen, wenn wir ein Relay manuell hinzugefügt haben
-			#    wie bekommen wir heraus, ob dieser $service_name manuell hinzugefügt wurde?
-			#      Können wir hier get_services() irgendwie nutzen oder is_srvice_relay_custom() neu erstellen oder so?
 			announce_olsr_service_relay "$service_name"
 		done
 		update_relay_firewall_rules

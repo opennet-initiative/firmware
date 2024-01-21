@@ -60,7 +60,7 @@ require("luci.model.opennet.funcs")
 						<option
 							value="<%=item.key%>"
 							<%=(current_sorting == item.key) and 'selected="selected"' or '' %>>
-							<%=luci.util.pcdata(item.label)%></option>
+							<%=luci.xml.pcdata(item.label)%></option>
 					<% end %>
 					</select>
 				</div>

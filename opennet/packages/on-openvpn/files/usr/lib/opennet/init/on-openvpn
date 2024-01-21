@@ -50,36 +50,6 @@ configure_tunnel_firewall() {
 	apply_changes firewall
 }
 
-configure_tos_firewall_handling() {
-	# Meaning of: <<-'EOF'
-	#  <<EOF    is here docs and ends with string EOF as delimiter
-	#  <<-EOF   means that leading tabs are stripped even in line containing delimiter
-	#  <<-'EOF' means that not interpretation of text will take place
-	cat >> /etc/firewall.user <<-'EOF'
-	# 
-	# Mit TOS 0x08 markierter Traffic wird nicht ueber den User-VPN-Tunnel geleitet, weil wir davon ausgehen,
-	#  dass dieser Traffic zum UGW direkt gesendet werden soll. Siehe hierzu auch die Doku:
-	#  https://downloads.opennet-initiative.de/openwrt/stable/latest/doc/md__funktionsdetails.html#ugw-nutzer-kombi
-	# Wir muessen sicherstellen, dass jeglicher Traffic aus dem LAN kein TOS 0x08 hat.
-	#
-
-	ON_CHAIN="on_tos_lan_vpn"
-	iptables  -t mangle --new-chain "$ON_CHAIN" 2>/dev/null || iptables  -t mangle --flush "$ON_CHAIN"
-	ip6tables -t mangle --new-chain "$ON_CHAIN" 2>/dev/null || ip6tables -t mangle --flush "$ON_CHAIN"
-
-	# Wenn Traffic aus LAN TOS 0x08 hat, dann ersetze TOS durch 0x00
-	iptables  -t mangle -A "$ON_CHAIN" -i br-lan -m tos --tos 0x08 -j TOS --set-tos 0x00
-	ip6tables -t mangle -A "$ON_CHAIN" -i br-lan -m tos --tos 0x08 -j TOS --set-tos 0x00
-
-	# Loesche Regeln, falls bereits vorhanden. Regeln muessen idempotent sein.
-	iptables  -t mangle -D PREROUTING -j "$ON_CHAIN" 2>/dev/null
-	ip6tables -t mangle -D PREROUTING -j "$ON_CHAIN" 2>/dev/null
-	# Fuege Weiterleitung an unsere Chain hinzu.
-	iptables  -t mangle -A PREROUTING -j "$ON_CHAIN"
-	ip6tables -t mangle -A PREROUTING -j "$ON_CHAIN"
-	EOF
-}
 
 configure_tunnel_network
 configure_tunnel_firewall
-configure_tos_firewall_handling

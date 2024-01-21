@@ -114,12 +114,12 @@ You may obtain a copy of the License at
 		<td class="cbi-value-field">
 			<div class="opennet-bool" status="<%= bool_to_yn(gateway.vpn_status) %>"
 				<% if bool_to_yn(gateway.vpn_status) == "n" then %>
-					title="<%= luci.util.pcdata(on_function('get_service_log_content',
+					title="<%= luci.xml.pcdata(on_function('get_service_log_content',
 							{service_name, 20, 'openvpn', 'verify'})) %>"
 				<% end %> /></td>
 		<td class="cbi-value-field">
 			<div class="opennet-bool" status="<%= bool_to_yn(gateway.mtu_status) %>"
-				title="<%= luci.util.pcdata(gateway.mtu_msg) %>"/></td>
+				title="<%= luci.xml.pcdata(gateway.mtu_msg) %>"/></td>
 		<td class="cbi-value-field">
 			<% if (gateway.wan_speed_upload or gateway.wan_speed_download) then
 				local speed = (gateway.wan_speed_upload or '?') .. " kbps / " .. (gateway.wan_speed_upload or '?') .. " kbps";

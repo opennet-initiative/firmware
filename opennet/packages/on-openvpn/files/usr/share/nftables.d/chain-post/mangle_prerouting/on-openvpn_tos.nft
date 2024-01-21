@@ -1,0 +1,3 @@
+# See https://www.tucny.com/Home/dscp-tos for used values
+iifname "br-lan" ip dscp 0x02 ip dscp set 0x00 return
+iifname "br-lan" ip6 dscp 0x02 ip6 dscp set 0x00 return

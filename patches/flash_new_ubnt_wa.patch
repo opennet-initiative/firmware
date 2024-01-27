@@ -1,6 +1,6 @@
 Change firmware version for Ubiquiti WA devices to 8.7.4.
---- a/openwrt/target/linux/ath79/image/generic-ubnt.mk
-+++ b/openwrt/target/linux/ath79/image/generic-ubnt.mk
+--- a/openwrt/target/linux/ath79/image/common-ubnt.mk
++++ b/openwrt/target/linux/ath79/image/common-ubnt.mk
 @@ -84,7 +84,7 @@ define Device/ubnt-wa
    UBNT_BOARD := WA
    UBNT_CHIP := ar934x

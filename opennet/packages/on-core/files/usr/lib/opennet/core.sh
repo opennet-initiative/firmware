@@ -202,7 +202,7 @@ update_dns_servers() {
 	# es gab eine Aenderung
 	msg_info "updating DNS servers"
 	# Konfiguration neu einlesen
-	killall -s HUP dnsmasq 2>/dev/null || true
+	service dnsmasq restart 2>/dev/null || true
 }
 
 

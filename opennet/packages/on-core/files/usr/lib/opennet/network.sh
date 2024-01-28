@@ -16,7 +16,7 @@ DNS_TIMEOUT=3
 
 # Liefere alle IPs fuer diesen Namen zurueck
 query_dns() {
-	nslookup "$1" 2>/dev/null | sed '1,/^Name:/d' | awk '{print $3}' | sort -n
+	nslookup "$1" 2>/dev/null | sed '1,3d' | grep "^Address:" | awk '{print $2}' | sort -n
 }
 
 

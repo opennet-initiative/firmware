@@ -7,9 +7,8 @@ set -eu
 
 
 # aktuell wirksame Firewall-Regeln
-nft list tables | while read -r table; do	
-    filename="${table// /_}"
-    nft list $table >"${filename}_rule.nft"
+for table in filter nat mangle; do
+	iptables -t "$table" -L -vn >"iptables_${table}.rules"
 done
 
 

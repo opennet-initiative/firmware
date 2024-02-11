@@ -87,7 +87,7 @@ set_timezone_berlin() {
 
 enable_firewall_reload_trigger() {
 	local script_path="/usr/lib/opennet/events/on-firewall-reload"
-	create_uci_section_if_missing "firewall" "include" "path=$script_path" "reload=1" || return 0
+	create_uci_section_if_missing "firewall" "include" "path=$script_path" || return 0
 	apply_changes firewall
 }
 

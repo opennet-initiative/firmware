@@ -1,0 +1,21 @@
+# 
+# Mit TOS 0x08 markierter Traffic wird nicht ueber den User-VPN-Tunnel geleitet, weil wir davon ausgehen,
+#  dass dieser Traffic zum UGW direkt gesendet werden soll. Siehe hierzu auch die Doku:
+#  https://downloads.opennet-initiative.de/openwrt/stable/latest/doc/md__funktionsdetails.html#ugw-nutzer-kombi
+# Wir muessen sicherstellen, dass jeglicher Traffic aus dem LAN kein TOS 0x08 hat.
+#
+# Ermittlung der DSCP Werte siehe https://www.tucny.com/Home/dscp-tos
+#
+
+# Stelle zuerst sicher, dass die Tabelle leer ist bevor wir sie mit Regeln fuellen.
+# Sonst verdoppeln sich die Regeln bei einem 'firewall restart'.
+table inet on_uservpn_table
+flush table inet on_uservpn_table
+
+table inet on_uservpn_table {
+    chain on_tos_user_vpn {
+		type filter hook prerouting priority mangle; policy accept;
+		iifname "br-lan" ip dscp 0x02 ip dscp set 0x00 return
+		iifname "br-lan" ip6 dscp 0x02 ip6 dscp set 0x00 return
+	}
+}

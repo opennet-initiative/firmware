@@ -1,3 +1,5 @@
 #!/bin/sh
 
-on-function run_parts /etc/on-firewall.d/
+if [ -d "/etc/on-firewall.d/" ]; then
+    on-function run_parts /etc/on-firewall.d/
+fi

@@ -1,0 +1,16 @@
+#
+# Erstelle eine extra Tabelle mit Firewallregeln. So können wir ein
+# einfaches 'flush' aller Regeln zwischendurch durchfuehren.
+#
+
+# Stelle zuerst sicher, dass die Tabelle leer ist bevor wir sie mit Regeln fuellen.
+table inet on_usergw_table
+flush table inet on_usergw_table
+
+table inet on_usergw_table {
+	chain on_tos_mesh_vpn {
+		# Da wir lokal generierte Pakete mit TOS markieren wollen,
+		# benoetigen wir die "output" chain, siehe https://en.wikipedia.org/wiki/Netfilter
+		type filter hook output priority mangle; policy accept;
+	}
+}

@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Konfiguriere Weiterleitung in Firewall für Service Relay Funktion
+#
+# Dieses Skript wird nur ein einziges Mal nach einem Upgrade oder der Erstinstallation ausgefuehrt:
+#   http://wiki.openwrt.org/doc/uci#defaults
+#
+
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
+configure_opennet_fw_forward_service_relay() {
+	add_zone_forward "$ZONE_MESH" "$ZONE_WAN"
+}
+
+# jede Funktion sollte selbst pruefen, ob ihre Aktion bereits abgeschlossen ist
+configure_opennet_fw_forward_service_relay
+
+apply_changes firewall

@@ -49,10 +49,9 @@ update_relay_firewall_rules() {
 	local protocol
 	local target_ip
 	local main_ip
+	local table="on_usergw_table"
 	local dnat_chain="on_service_relay_dnat"
-	local parent_dnat_chain="prerouting_${ZONE_MESH}_rule"
 	local tos_chain="on_service_relay_tos"
-	local parent_tos_chain="PREROUTING"
 	local new_rules
 	main_ip=$(get_main_ip)
 	# calculate the entries for the new rules
@@ -72,21 +71,25 @@ update_relay_firewall_rules() {
 	done)
 	# do not apply changes, if there are no valid rules
 	[ -z "$new_rules" ] && return 0
-	# neue Chains erzeugen
-	iptables -t nat --new-chain "$dnat_chain" 2>/dev/null || iptables -t nat --flush "$dnat_chain"
-	iptables -t mangle --new-chain "$tos_chain" 2>/dev/null || iptables -t mangle --flush "$tos_chain"
-	# Verweis auf die neue Chain erzeugen
-	iptables -t nat --check "$parent_dnat_chain" -j "$dnat_chain" 2>/dev/null \
-		|| iptables -t nat --insert "$parent_dnat_chain" -j "$dnat_chain"
-	iptables -t mangle --check "$parent_tos_chain" -j "$tos_chain" 2>/dev/null \
-		|| iptables -t mangle --insert "$parent_tos_chain" -j "$tos_chain"
+	
+	# alte Regeln aus Chains löschen (siehe auch /usr/share/nftables.d/ fuer Definition der Chain)
+	nft flush chain inet "$table" "$dnat_chain"
+	nft flush chain inet "$table" "$tos_chain"
+	
 	# DNAT- und TOS-Chain fuellen
 	echo "$new_rules" | while read -r host port protocol local_port target_ip; do
-		iptables -t nat -A "$dnat_chain" --destination "$main_ip" --protocol "$protocol" --dport "$local_port" \
-			-j DNAT --to-destination "${target_ip}:${port}"
-		# falls on-openvpn vorhanden ist, wollen wir vermeiden, dass mesh-Tunnel ueber den Internet-Tunnel laufen
-		[ -z "${TOS_NON_TUNNEL:-}" ] || iptables -t mangle -A "$tos_chain" --destination "$main_ip" \
-			--protocol "$protocol" --dport "$local_port" -j TOS --set-tos "$TOS_NON_TUNNEL"
+		if is_ipv4 "$main_ip"; then
+			nft add rule inet "$table" "$dnat_chain" ip daddr "$main_ip" "$protocol" dport "$local_port" counter dnat to "${target_ip}:${port}"
+		else
+			nft add rule inet "$table" "$dnat_chain" ip6 daddr "$main_ip" "$protocol" dport "$local_port" counter dnat to "${target_ip}:${port}"
+		fi
+
+		# falls on-openvpn vorhanden ist, wollen wir vermeiden, dass mesh-Tunnel ueber den Internet-Tunnel laufen (und setzten TOS=8 bzw. DSCP=0x02)
+		[ -z "${TOS_NON_TUNNEL:-}" ] || if is_ipv4 "$main_ip"; then
+			nft add rule inet "$table" "$tos_chain" ip daddr "$main_ip" "$protocol" dport "$local_port" counter ip dscp set 0x02
+		else
+			nft add rule inet "$table" "$tos_chain" ip6 daddr "$main_ip" "$protocol" dport "$local_port" counter ip6 dscp set 0x02
+		fi
 	done
 	# Connection-Tracking-Tabelle flushen
 	# Sonst werden Aenderungen fuer bestehende Verbindungen nicht wirksam.

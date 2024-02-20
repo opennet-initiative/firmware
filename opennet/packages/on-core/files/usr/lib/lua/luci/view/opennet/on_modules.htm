@@ -95,13 +95,21 @@ on_module_descriptions["on-olsr2-netjsongraph"] = luci.i18n.translate("Visualiza
 				</td>
 				<td class="cbi-section-table-cell">
 					<% if is_installed then
-						action_label = "remove"
-						action_url = REQUEST_URI .. "?remove=" .. mod_name
-					else
-						action_label = "install"
-						action_url = REQUEST_URI .. "?install=" .. mod_name
+							action_label = "remove"
+							action_url = REQUEST_URI .. "?remove=" .. mod_name    
+					%>
+							<a href="<%= action_url %>"><%= action_label %></a>
+					<% else
+							action_label = "install"
+							action_url = REQUEST_URI .. "?install=" .. mod_name
+							
+							local is_on_openvpn_installed_and_enable = on_bool_function("is_on_module_installed_and_enabled", {"on-openvpn"} )
+							if mod_name == "on-usergw" and is_on_openvpn_installed_and_enable then %>
+								<abbr title="Die Module 'on-usergw' und 'on-openvpn' dürfen nicht gleichzeitig aktiv sein. Bitte erst das Modul 'on-openvpn' deaktivieren, um dann 'on-usergw' zu installieren."><%= action_label %></abbr>
+							<% else %>
+								<a href="<%= action_url %>"><%= action_label %></a>
+							<% end
 					end %>
-					<a href="<%= action_url %>"><%= action_label %></a>
 				</td>
 				<td class="cbi-section-table-cell"><%= on_module_descriptions[mod_name] or mod_name %></td>
 			</tr>

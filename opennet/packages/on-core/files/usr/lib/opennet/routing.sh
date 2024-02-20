@@ -52,16 +52,13 @@ filter_routable_addresses() {
 ## @fn get_target_route_interface()
 ## @brief Ermittle das Netzwerkinterface, über den der Verkehr zu einem Ziel laufen würde.
 ## @param target Hostname oder IP des Ziel-Hosts
-## @tos_field tos Optionale type-of-service-Zahl
 ## @details Falls erforderlich, findet eine Namensauflösung statt.
 ## @return Name des physischen Netzwerk-Interface, über den der Verkehr zum Ziel-Host fließen würde
 get_target_route_interface() {
 	local target="$1"
-	local tos_field="${2:-}"
 	local all_addresses
 	local ipaddr
 	local route_get_args=
-	[ -n "$tos_field" ] && route_get_args="tos $tos_field"
 	if is_ipv4 "$target" || is_ipv6 "$target"; then
 		all_addresses=$target
 	else

@@ -8,15 +8,7 @@ table inet on_usergw_table
 flush table inet on_usergw_table
 
 table inet on_usergw_table {
-	chain on_tos_mesh_vpn {
-		# Da wir lokal generierte Pakete mit TOS markieren wollen,
-		# benoetigen wir die "output" chain, siehe https://en.wikipedia.org/wiki/Netfilter
-		type filter hook output priority mangle; policy accept;
-	}
 	chain on_service_relay_dnat {
 		type nat hook prerouting priority dstnat; policy accept;
-	}
-	chain on_service_relay_tos {
-		type filter hook output priority mangle; policy accept;
 	}
 }

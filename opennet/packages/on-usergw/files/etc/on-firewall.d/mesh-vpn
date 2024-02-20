@@ -1,4 +1,0 @@
-#!/bin/sh
-
-# Neuaufbau der Liste der Firewall-Regeln fuer mesh-Gateways (Markierung fuer nicht-Tunnel-Routing)
-on-function update_mesh_gateway_firewall_rules

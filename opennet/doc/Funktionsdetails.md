@@ -278,19 +278,11 @@ Es werden nur diejenigen Dienste weitergereicht und announciert, die den folgend
 
 ### Kombinierter Betrieb mit Nutzer-Tunnel {#ugw-nutzer-kombi}
 
-Internet-Spender möchten eventuell zeitgleich mit dem Einspeisen auch einen lokalen Nutzer-Tunnel aufbauen (Internetzugang über Opennet-Server). Dies ist insbesondere für folgende Anwendungsfälle sinnvoll:
+Es ist wünschenswert, dass auf einem Gerät, welches als Internet-Spender agiert, auch ein Nutzer-Tunnel aktiviert werden kann. Dieses Feature führt jedoch zu einer sehr komplexen Konfiguration um zu verhindern, dass Pakete nicht im "falschen" Tunnel weitergeleitet werden.
 
-* Nutzung als offener Zugangspunkt (Captive Portal)
-* Verwendung des Nutzer-Tunnels als Ersatz-Internetzugang beim Ausfall des lokalen Zugangs
+Diese Funktion wurde während der Umstellung von iptables auf nftables ausgebaut. Bei Bedarf kann dies später wieder eingebaut werden (Freiwillige vor).
 
 #### Routing
-
-Beim gleichzeitigen Betrieb ist sicherzustellen, dass die Mesh-VPN-Tunnel (deren Gegenstellen öffentliche IPs haben) nie über den Nutzer-Tunnel hinweg aufgebaut werden. Außerdem dürfen Service-Relay-Portweiterleitungen nicht über den Nutzer-Tunnel verlaufen.
-
-Eine Zuordnung der Verkehrsarten für diese Routing-Ausnahmen ist komplex. Daher wird die Markierung via Firewall-Regeln in Form der Zuweisung von TOS-Markierungen (Type of Service) umgesetzt.
-
-Ein Skript (``on-usergw/files/etc/on-firewall.d/mesh-vpn``) sorgt für die Erstellung von Firewall-Regeln, die die TOS-Markierungen an allen lokal erzeugten oder via Service-Relay umgeleiteten Paketen anbringen, die die passende IP/Port-Kombination ansprechen wollen. Eine vom Paket *on-openvpn* erzeugte *throw*-Route in der Policy-Routing-Tabelle *on-tunnel* sorgt dafür, dass diese Tabelle für die obigen markierten Pakete nicht verwendbar ist. Das Skript wird auch im Rahmen jedes Firewall-Reloads ausgeführt (@see firewall).
-
 
 Offene Zugangspunkte / Captive Portal {#captive}
 -------------------------------------

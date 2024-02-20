@@ -300,41 +300,6 @@ iptables_by_target_family() {
 }
 
 
-## @fn update_mesh_gateway_firewall_rules()
-## @brief markiere alle lokal erzeugten Pakete, die an einen mesh-Gateway-Dienst adressiert sind
-## @details Diese Markierung ermöglicht die Filterung (throw) der Pakete für mesh-Gateways in der
-##   Nutzer-Tunnel-Routingtabelle.
-update_mesh_gateway_firewall_rules() {
-	local host
-	local port
-	local protocol
-	local target_ip
-	local table="on_usergw_table"
-	local chain="on_tos_mesh_vpn"
-	# Chain leeren (siehe auch /usr/share/nftables.d/ fuer Definition der Chain)
-    nft flush chain inet "$table" "$chain"
-
-	# falls es keinen Tunnel-Anbieter gibt, ist nichts zu tun
-	[ -z "${TOS_NON_TUNNEL:-}" ] && return 0
-	# Regeln fuer jeden mesh-Gateway aufstellen
-	for service in $(get_services "mesh"); do
-		host=$(get_service_value "$service" "host")
-		port=$(get_service_value "$service" "port")
-		protocol=$(get_service_value "$service" "protocol")
-		for target_ip in $(query_dns "$host" | filter_routable_addresses); do
-			# unaufloesbare Hostnamen ignorieren
-			[ -z "$target_ip" ] && continue
-			# Setze TOS=8 (DSCP=0x02) wenn Ziel mesh-Gateway-Dienst
-			if is_ipv4 "$target_ip"; then
-				nft add rule inet "$table" "$chain" ip daddr "$target_ip" "$protocol" dport "$port" counter ip dscp set 0x02
-			else
-				nft add rule inet "$table" "$chain" ip6 daddr "$target_ip" "$protocol" dport "$port" counter ip6 dscp set 0x02
-			fi
-		done
-	done
-}
-
-
 ## @fn disable_on_usergw()
 ## @brief Alle mesh-Verbindungen trennen.
 disable_on_usergw() {
@@ -381,7 +346,6 @@ update_on_usergw_status() {
 	trap 'error_trap update_on_usergw_status "$*"' EXIT
 	if is_on_module_installed_and_enabled "on-usergw"; then
 		fix_wan_route_if_missing
-		update_mesh_gateway_firewall_rules
 		# ohne Zertifikat ist nicht mehr zu tun
 		if has_mesh_openvpn_credentials; then
 			verify_mesh_gateways

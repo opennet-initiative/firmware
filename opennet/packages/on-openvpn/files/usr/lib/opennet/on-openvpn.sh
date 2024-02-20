@@ -7,9 +7,6 @@ MIG_OPENVPN_DIR=/etc/openvpn/opennet_user
 MIG_OPENVPN_CONFIG_TEMPLATE_FILE=/usr/share/opennet/openvpn-mig.template
 # shellcheck disable=SC2034
 DEFAULT_MIG_PORT=1600
-# Pakete mit dieser TOS-Markierung duerfen nicht in den Tunnel
-# shellcheck disable=SC2034
-TOS_NON_TUNNEL=8
 ## Quelldatei für Standardwerte des Nutzer-VPN-Pakets
 ON_OPENVPN_DEFAULTS_FILE=/usr/share/opennet/openvpn.defaults
 MIG_PREFERRED_SERVERS_FILE=/var/run/mig-tunnel-servers.list

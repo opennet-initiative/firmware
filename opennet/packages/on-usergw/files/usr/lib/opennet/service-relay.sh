@@ -51,7 +51,6 @@ update_relay_firewall_rules() {
 	local main_ip
 	local table="on_usergw_table"
 	local dnat_chain="on_service_relay_dnat"
-	local tos_chain="on_service_relay_tos"
 	local new_rules
 	main_ip=$(get_main_ip)
 	# calculate the entries for the new rules
@@ -74,21 +73,13 @@ update_relay_firewall_rules() {
 	
 	# alte Regeln aus Chains löschen (siehe auch /usr/share/nftables.d/ fuer Definition der Chain)
 	nft flush chain inet "$table" "$dnat_chain"
-	nft flush chain inet "$table" "$tos_chain"
 	
-	# DNAT- und TOS-Chain fuellen
+	# DNAT Chain fuellen
 	echo "$new_rules" | while read -r host port protocol local_port target_ip; do
 		if is_ipv4 "$main_ip"; then
 			nft add rule inet "$table" "$dnat_chain" ip daddr "$main_ip" "$protocol" dport "$local_port" counter dnat to "${target_ip}:${port}"
 		else
 			nft add rule inet "$table" "$dnat_chain" ip6 daddr "$main_ip" "$protocol" dport "$local_port" counter dnat to "${target_ip}:${port}"
-		fi
-
-		# falls on-openvpn vorhanden ist, wollen wir vermeiden, dass mesh-Tunnel ueber den Internet-Tunnel laufen (und setzten TOS=8 bzw. DSCP=0x02)
-		[ -z "${TOS_NON_TUNNEL:-}" ] || if is_ipv4 "$main_ip"; then
-			nft add rule inet "$table" "$tos_chain" ip daddr "$main_ip" "$protocol" dport "$local_port" counter ip dscp set 0x02
-		else
-			nft add rule inet "$table" "$tos_chain" ip6 daddr "$main_ip" "$protocol" dport "$local_port" counter ip6 dscp set 0x02
 		fi
 	done
 	# Connection-Tracking-Tabelle flushen

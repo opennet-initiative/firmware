@@ -10,9 +10,8 @@ define Package/on-usergw
   URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=Usergateway extensions
-  # iptables-mod-ipopt ist fuer das iptables-Modul "tos" erforderlich
   # TODO: micropython ist fuer den Verbindungszaehler auf der Status-Seite erforderlich - wie werden wir dies los?
-  DEPENDS+=+on-core +on-certificates +openvpn-openssl +iptables-mod-ipopt +micropython
+  DEPENDS+=+on-core +on-certificates +openvpn-openssl +micropython
 endef
 
 define Package/on-usergw/description

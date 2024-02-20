@@ -10,8 +10,7 @@ define Package/on-openvpn
   URL:=https://www.opennet-initiative.de/
   MAINTAINER:=Opennet Initiative <admin@opennet-initiative.de>
   TITLE:=VPN extensions
-  # iptables-mod-ipopt ist fuer das iptables-Modul "tos" erforderlich
-  DEPENDS+=+on-core +on-certificates +openvpn-openssl +iptables-mod-ipopt +@OPENVPN_openssl_ENABLE_LZO
+  DEPENDS+=+on-core +on-certificates +openvpn-openssl +@OPENVPN_openssl_ENABLE_LZO
 endef
 
 define Package/on-openvpn/description

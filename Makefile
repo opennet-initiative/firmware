@@ -39,11 +39,15 @@ list-archs:
 $(ARCHS): feeds translate
 	@echo "Building for target architecture: $@"
 	$(MAKE) "config-$@"
-	@# alte Build-Images erzeugen (seit Chaos Calmer enthalten die Namen die Release-Nummer - er ist also veraenderlich)
-	@[ -d "$(OPENWRT_DIR)/bin/$@" ] && find "$(OPENWRT_DIR)/bin/$@" -maxdepth 1 -type f -name "openwrt-*" -delete || true
-	$(MAKE) -C "$(OPENWRT_DIR)" clean
+	@# Besonderheit für mikrotik: Wir haben zwei config Dateien, um Mikrotik zu bauen - opennet/config/(mikrotik|mikrotik24)
+	@#   Wenn bspw. mikrotik gebaut wird und anschließend mikrotik24, dann löscht der Lauf von mikrotik24 die bin/*
+	@#   Dateien des vorherigen mikrotik Laufs. Dies muessen wir verhindern.
+	@if [ "$@" != "mikrotik" ] && [ "$@" != "mikrotik24" ]; then \
+			[ -d "$(OPENWRT_DIR)/bin/$@" ] && find "$(OPENWRT_DIR)/bin/$@" -maxdepth 1 -type f -name "openwrt-*" -delete || true; \
+			$(MAKE) -C "$(OPENWRT_DIR)" clean ; \
+	fi
 	$(MAKE) -C "$(OPENWRT_DIR)"
-
+	
 config-%:
 	@[ -f "$(OPENWRT_DIR)/feeds.conf" ] || echo "**** FEHLER! DATEI feeds.conf FEHLT. Fuehre bitte 'make feeds' aus. ****"
 	$(MAKE) -C "$(CONFIG_DIR)/" "$(patsubst config-%,%,$@)"

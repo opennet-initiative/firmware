@@ -2,7 +2,7 @@
 
 Basic information for all "Opennet Initiative e.V." code repositories. 
 
-* Website: https://opennet-initiative.de/
+* Website: https://www.opennet-initiative.de/
 * Opennet DEV Team: https://wiki.opennet-initiative.de/wiki/Opennet_DEV
 
 ## Supported Versions

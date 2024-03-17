@@ -7,9 +7,7 @@ set -eu
 
 
 # aktuell wirksame Firewall-Regeln
-for table in filter nat mangle; do
-	iptables -t "$table" -L -vn >"iptables_${table}.rules"
-done
+nft list ruleset  >"nft_ruleset"
 
 
 # uci-Konfiguration

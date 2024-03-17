@@ -7,7 +7,7 @@ set -eu
 
 
 ping_neighbour() {
-	echo -n "ping $1 - "
+	echo -n "ping $1"
 	ping -W 2 -c 3 "$1" >/dev/null 2>&1 && echo "OK" || echo "Error"
 }
 
@@ -47,11 +47,15 @@ traceroute_target() {
 ) >traceroute.log &
 
 
-# alle Routen
-ip rule >ip_rules.txt
-ip route show >ip_route_table_main.txt
-ip route show table olsrd >ip_route_table_olsrd.txt
 # Routing-Tabellennummern
 [ -e /etc/iproute2/rt_tables ] && cat /etc/iproute2/rt_tables >rt_tables
+# alle Routen IPv4
+ip rule >ip4_rules.txt
+ip route show >ip4_route_table_main.txt
+ip route show table all >ip4_route_table_all.txt
+# alle Routen IPv4
+ip -6 rule >ip6_rules.txt
+ip -6 route show >ip6_route_table_main.txt
+ip -6 route show table all >ip6_route_table_all.txt
 
 wait

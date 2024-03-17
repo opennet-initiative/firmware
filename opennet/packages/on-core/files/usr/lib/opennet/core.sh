@@ -863,7 +863,7 @@ get_potential_error_messages() {
 	filters="${filters}|RTNETLINK answers: Network is unreachable"
 	# 24) olsrd2: wrote '/var/run/olsrd2_dev'
 	#    beim OLSRD2-Start wird diese Meldung auf stderr ausgegeben
-	filters="${filters}|olsrd2: wrote .*olsrd2_dev"
+	filters="${filters}|olsrd2: wrote .*olsrd2_dev'"
 	# 25) nl80211 not found
 	#    Während der initialen wireless-Konfigurationsermittlung beim ersten Boot-Vorgang wird
 	#    "iw" aufgerufen, auch wenn eventuell kein wifi-Interface vorhanden ist. In diesem Fall

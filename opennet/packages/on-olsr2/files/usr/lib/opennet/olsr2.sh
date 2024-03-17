@@ -102,11 +102,17 @@ update_olsr2_interfaces() {
 			# Wir versuche erst den physischen Interface-Namen zu ermitteln.
 			phy_dev=$(uci_get network."$token".device)
 			if [[ -n "$phy_dev" ]]; then
-				# Wenn physicher Name nicht abgeleitet werden kann, dann gehen wir davon aus, 
-				#  dass es bereits ein physischer Name ist.
 				uci_add_list "${uci_prefix}.name" "$phy_dev"
 			else
-				uci_add_list "${uci_prefix}.name" "$token"
+				# Wenn physicher Name nicht abgeleitet werden kann, dann koennen wir uns nicht
+				#  sicher sein, ob es ein log. oder phys. Interface ist.
+				# Zur Sicherheit pruefen wir, dass das Interface nicht mit "on_" beginnt,
+				#  denn ansonsten ist es mit hoher Wahrscheinlichkeit ein log. Interface und
+				#  diese wollen wir ignorieren. Dies ist bspw. der Fall wenn ein log. Interface
+				#  kein phys. Interface hat und somit nur ein Platzhalter fuer spaeter ist.
+				if [ "${token:0:3}" != "on_" ]; then
+					uci_add_list "${uci_prefix}.name" "$token"
+				fi
 			fi
 		done
 		is_configured=1

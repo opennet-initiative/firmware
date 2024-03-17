@@ -20,19 +20,34 @@ update_olsr_interfaces() {
 	local uci_prefix
 	local interfaces
 	local current
-	interfaces="$(get_zone_interfaces "$ZONE_MESH") $(get_zone_raw_devices "$ZONE_MESH")"
+	
+	interfaces_log="$(get_zone_interfaces "$ZONE_MESH")"
+	interfaces_phy="$(get_zone_raw_devices "$ZONE_MESH")"
+	
+	# Das uci Interface zu olsrd benötigt folgenden Input:
+	# - log. Interfaces, welches mind ein phys. Interface enthalten
+	# - phys. Interfaces, welche keinem log. Interface zugeordnet sind
+	interfaces_olsr="$interfaces_phy"
+	for interface_log in $interfaces_log; do
+		subinterface="$(get_device_of_interface $interface_log)"
+		# Fuege nur log. Interfaces hinzu, welche phys. Interfaces enthalten
+		if [ -n "$subinterface" ]; then
+			interfaces_olsr=$(echo -e "$interfaces_olsr\n$interface_log")
+		fi
+	done
+
 	for uci_prefix in $(find_all_uci_sections "olsrd" "Interface"); do
 		current=$(uci_get "${uci_prefix}.interface")
-		if echo "$interfaces" | grep -qFw "$current"; then
+		if echo "$interfaces_olsr" | grep -qFw "$current"; then
 			# OLSR fuer das Interface aktivieren
-		        uci set "${uci_prefix}.ignore=0"
+	        uci set "${uci_prefix}.ignore=0"
 		else
 			# Interfaces entfernen, die nicht mehr in der on-Zone sind
 			uci_delete "$uci_prefix"
 		fi
 	done
 	# alle fehlenden Interfaces neu anlegen
-	for current in $interfaces; do
+	for current in $interfaces_olsr; do
 		uci_prefix=$(find_first_uci_section "olsrd" "Interface" "interface=$current")
 		# existiert es bereits? Dann wurde es oben konfiguriert.
 		[ -n "$uci_prefix" ] && continue

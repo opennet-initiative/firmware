@@ -128,21 +128,30 @@ get_zone_interfaces() {
 	# falls 'network' und 'device' leer sind, dann enthaelt 'name' den Interface-Namen
 	# siehe http://wiki.openwrt.org/doc/uci/firewall#zones
 	[ -z "$interfaces" ] && [ -z "$(uci_get "${uci_prefix}.device")" ] && interfaces="$(uci_get "${uci_prefix}.name")"
-	echo "$interfaces"
+	for interface in $interfaces; do
+		if [ "$interface" != "$(get_device_of_interface $interface)" ]; then
+			echo "$interface"
+		fi
+	done
 }
 
 
 ## @fn get_zone_raw_devices()
 ## @brief Ermittle die physischen Netzwerkinterfaces, die direkt einer Firewall-Zone zugeordnet sind.
 ## @details Hier werden _nicht_ die logischen Interfaces in die physischen aufgeloest, sondern
-##   es wird lediglich der Inhalt des 'devices'-Eintrags einer Firewall-Zone ausgelesen.
+##   es werden nur die physischen Interfaces zurückgegeben.
 get_zone_raw_devices() {
 	trap 'error_trap get_zone_raw_devices "'"$*"'"' EXIT
 	local zone="$1"
 	local uci_prefix
 	uci_prefix=$(find_first_uci_section "firewall" "zone" "name=$zone")
 	[ -z "$uci_prefix" ] && msg_debug "Failed to retrieve raw devices of non-existing zone '$zone'" && return 0
-	uci_get_list "${uci_prefix}.device"
+	# extrahiere die phys. Interfaces
+	for interface in $(uci_get_list "${uci_prefix}.network"); do
+		if [ "$interface" = "$(get_device_of_interface $interface)" ]; then
+			echo "$interface"
+		fi
+	done
 }
 
 
@@ -179,6 +188,7 @@ is_interface_in_zone() {
 ## @fn get_device_of_interface()
 ## @brief Ermittle das physische Netzwerk-Gerät, das einem logischen Netzwerk entspricht.
 ## @details Ein Bridge-Interface wird als Gerät betrachtet und zurückgeliefert (nicht seine Einzelteile).
+##   Entspricht der Parameter einem physischen Interface, dann wird es mit gleichem Namen unveraendert wieder zurueckgegeben.
 get_device_of_interface() {
 	local interface="$1"
 	local found_bridge=0

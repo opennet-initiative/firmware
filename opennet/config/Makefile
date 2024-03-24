@@ -9,7 +9,7 @@ GIT_CURRENT_RELEASE_TAG = $(shell git tag -l --points-at HEAD | sed 's/^v//g')
 NEXT_VERSION = $(shell grep "^CONFIG_VERSION_NUMBER=" "$(COMMON_CONFIG)" | cut -f 2 -d '"')
 OPENWRT_VERSION = $(shell cd ../../openwrt && git describe --abbrev=0 | cut -c2-)
 
-ARCHITECTURES = ath79 bcm2708 bcm2709 bcm2710 ipq40xx mikrotik mikrotik24 mt7623 ramips ramips7621 rockchip sunxi x86
+ARCHITECTURES = ath79 bcm2708 bcm2709 bcm2710 ipq40xx mikrotik mikrotik24 mt7623 ramips7621 rockchip sunxi x86
 
 .PHONY: all list $(ARCHITECTURES) save-config check-old-config list-subarch help
 

@@ -2,5 +2,8 @@ CONFIG_TARGET_ramips=y
 CONFIG_TARGET_ramips_mt7621=y
 
 CONFIG_TARGET_MULTI_PROFILE=y
-CONFIG_TARGET_ramips_mt7621_DEVICE_ubnt_edgerouter-x=y
-CONFIG_TARGET_ramips_mt7621_DEVICE_ubnt_edgerouter-x-sfp=y
+CONFIG_TARGET_ALL_PROFILES=n
+
+CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_ubnt_edgerouter-x=y
+CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_ubnt_edgerouter-x-sfp=y
+CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_glinet_gl-mt1300=y

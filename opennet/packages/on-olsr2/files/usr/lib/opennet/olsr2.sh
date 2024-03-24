@@ -78,7 +78,7 @@ update_olsr2_interfaces() {
 	local pyh_if
 	# auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
 	local ipv6_limit="-0.0.0.0/0 -::1/128 default_accept"
-	interfaces="$NETWORK_LOOPBACK $(get_zone_interfaces "$ZONE_MESH")"
+	interfaces="$NETWORK_LOOPBACK $(get_zone_log_interfaces "$ZONE_MESH") $(get_zone_raw_devices "$ZONE_MESH")"
 	# alle konfigurierten Interfaces durchgehen und überflüssige löschen
 	for uci_prefix in $(find_all_uci_sections "olsrd2" "interface"); do
 		# seit olsrd2 v0.12 benötigen wir "ifname" nicht mehr

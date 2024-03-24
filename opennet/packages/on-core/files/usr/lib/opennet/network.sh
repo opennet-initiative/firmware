@@ -81,7 +81,7 @@ update_opennet_zone_masquerading() {
 	# alle masquerade-Netzwerke entfernen
 	uci_delete "${uci_prefix}.masq_src"
 	# aktuelle Netzwerke wieder hinzufuegen
-	for network in $(get_zone_interfaces "$ZONE_LOCAL"; get_zone_interfaces "$ZONE_WAN"); do
+	for network in $(get_zone_log_interfaces "$ZONE_LOCAL"; get_zone_log_interfaces "$ZONE_WAN"); do
 		for network_with_prefix in $(get_current_addresses_of_network "$network"); do
 			echo "$network_with_prefix"
 		done
@@ -116,8 +116,8 @@ get_current_addresses_of_network() {
 
 
 # Liefere die logischen Netzwerk-Schnittstellen einer Zone zurueck.
-get_zone_interfaces() {
-	trap 'error_trap get_zone_interfaces "'"$*"'"' EXIT
+get_zone_log_interfaces() {
+	trap 'error_trap get_zone_log_interfaces "'"$*"'"' EXIT
 	local zone="$1"
 	local uci_prefix
 	local interfaces
@@ -162,7 +162,7 @@ is_device_in_zone() {
 	local zone="$2"
 	local log_interface
 	local item
-	for log_interface in $(get_zone_interfaces "$2"); do
+	for log_interface in $(get_zone_log_interfaces "$2"); do
 		for item in $(get_subdevices_of_interface "$log_interface"); do
 			[ "$device" = "$item" ] && return 0
 			true
@@ -177,7 +177,7 @@ is_interface_in_zone() {
 	local interface="$1"
 	local zone="$2"
 	local item
-	for item in $(get_zone_interfaces "$zone"); do
+	for item in $(get_zone_log_interfaces "$zone"); do
 		[ "$item" = "$interface" ] && return 0
 		true
 	done
@@ -244,7 +244,7 @@ is_device_in_zone() {
 	local zone="$2"
 	local log_interface
 	local item
-	for log_interface in $(get_zone_interfaces "$2"); do
+	for log_interface in $(get_zone_log_interfaces "$2"); do
 		for item in $(get_subdevices_of_interface "$log_interface"); do
 			[ "$device" = "$item" ] && return 0
 			true
@@ -341,8 +341,8 @@ get_zone_of_device() {
 	local interface
 	local current_device
 	find_all_uci_sections firewall zone | while read -r uci_prefix; do
-		zone=$(uci_get "${uci_prefix}.name")
-		for interface in $(get_zone_interfaces "$zone"); do
+		zone=$(uci_get "${uci_prefix}.name")  # e.g. on_mesh
+		for interface in $(get_zone_log_interfaces "$zone"); do
 			for current_device in \
 					$(get_device_of_interface "$interface") \
 					$(get_subdevices_of_interface "$interface"); do
@@ -368,7 +368,7 @@ get_zone_of_interface() {
 	local zone
 	find_all_uci_sections firewall zone | while read -r uci_prefix; do
 		zone=$(uci_get "${uci_prefix}.name")
-		interfaces=$(get_zone_interfaces "$zone")
+		interfaces=$(get_zone_log_interfaces "$zone")
 		is_in_list "$interface" "$interfaces" && echo -n "$zone" && return 0
 		true
 	done
@@ -393,7 +393,7 @@ get_sorted_opennet_interfaces() {
 	#   1 - on_wifi*
 	#   2 - on_eth*
 	#   3 - alle anderen
-	for network in $(get_zone_interfaces "$ZONE_MESH"); do
+	for network in $(get_zone_log_interfaces "$ZONE_MESH"); do
 		order=10
 		[ -z "$(get_subdevices_of_interface "$network")" ] && order=20
 		if [ "${network#on_wifi}" != "$network" ]; then

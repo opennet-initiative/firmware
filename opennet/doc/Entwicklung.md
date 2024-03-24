@@ -296,11 +296,11 @@ Alle Funktionen werden durch die folgende Zeile im globalen Namensraum verfügba
 
 Alle Funktionen aus den shell-Bibliotheken lassen sich folgendermaßen prüfen:
 
-    on-function get_zone_interfaces on_mesh
+    on-function get_zone_log_interfaces on_mesh
 
 Dabei ist zu debug-Zwecken auch die ausführliche Ausführungsprotokollierung verfügbar:
 
-    ON_DEBUG=1 on-function get_zone_interfaces on_mesh
+    ON_DEBUG=1 on-function get_zone_log_interfaces on_mesh
 
 
 

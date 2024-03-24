@@ -56,7 +56,7 @@ end
 
 function print_zone_info(zone_variable_name)
 	local zone_name = on_function("get_variable", {zone_variable_name})
-	local network_interfaces = on_function("get_zone_interfaces", {zone_name})
+	local network_interfaces = on_function("get_zone_log_interfaces", {zone_name})
 	if not is_string_empty(network_interfaces) then
 		local title
 		local interface_name

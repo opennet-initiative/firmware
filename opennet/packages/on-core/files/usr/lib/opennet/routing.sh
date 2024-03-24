@@ -126,7 +126,7 @@ add_zone_policy_rules_by_iif() {
 	local interface
 	local device
 	# ermittle alle physischen Geräte inklusive Bridge-Interfaces, die zu dieser Zone gehören
-	for interface in $(get_zone_interfaces "$zone"); do
+	for interface in $(get_zone_log_interfaces "$zone"); do
 		get_device_of_interface "$interface"
 		for device in $(get_subdevices_of_interface "$interface"); do
 			echo "$device"

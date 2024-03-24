@@ -21,7 +21,7 @@ update_olsr_interfaces() {
 	local interfaces
 	local current
 	
-	interfaces_log="$(get_zone_interfaces "$ZONE_MESH")"
+	interfaces_log="$(get_zone_log_interfaces "$ZONE_MESH")"
 	interfaces_phy="$(get_zone_raw_devices "$ZONE_MESH")"
 	
 	# Das uci Interface zu olsrd benötigt folgenden Input:

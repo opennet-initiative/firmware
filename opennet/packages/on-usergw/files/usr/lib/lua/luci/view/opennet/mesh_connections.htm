@@ -38,128 +38,102 @@ You may obtain a copy of the License at
     </div>
     <fieldset class="cbi-section-node">
 	<form name="gateways" method="post" action="<%= REQUEST_URI %>">
-	<table class="cbi-section-table" id="on-gateway-list">
-	<tr class="cbi-section-table-titles">
-		<th colspan = "1" />
-		<th class="cbi-section-table-cell"><%:active%></th>
-		<th class="cbi-section-table-cell"><%:Gateway%></th>
-		<th class="cbi-section-table-cell"><%:Priority%></th>
-		<th class="cbi-section-table-cell">
-			<abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN%></abbr></th>
-		<th class="cbi-section-table-cell">
-			<abbr title="<%:Connection to an Mesh VPN service succeeded.%>"><%:VPN%></abbr></th>
-		<th class="cbi-section-table-cell">
-			<abbr title="<%:The configured Maximum Transmission Unit can cause subtle problems. Thus it needs to be tested carefully.%>"><%:MTU%></abbr></th>
-		<th class="cbi-section-table-cell">
-			<abbr title="<%:Estimated upload and download speed to this exit gateway.%>"><%:Speed%></abbr></th>
-		<th class="cbi-section-table-cell">
-			<abbr title="<%:Ping latency describes the travelling time of a small packet to the gateway and back.%>"><%:Ping%></abbr></th>
-		<th class="cbi-section-table-cell"><%:Actions%></th>
-		<th />
-	</tr>
-	<%
-	local services = line_split(get_services_sorted_by_priority("mesh"))
-        for index, service_name in ipairs(services) do
-          local gateway = parse_csv_service(service_name, {
-              connection_state="string|function|get_openvpn_service_state",
-              disabled="string|value|disabled",
-              host="string|value|host",
-              mtu_status="string|value|mtu_status",
-              mtu_msg="string|value|mtu_msg",
-              offset="number|value|offset|0",
-              port="number|value|port",
-              priority="number|value|priority|10",
-              source="string|value|source",
-              vpn_status="string|value|vpn_status",
-              wan_speed_download="number|value|wan_speed_download",
-              wan_speed_upload="number|value|wan_speed_upload",
-              wan_ping="number|value|wan_ping",
-              wan_status="string|value|wan_status",
-          })
-	  if gateway then
-            local label = gateway.host
-	    -- falls das Ziel nicht wie eine IP (v4/v6) aussehen sollte, dann nimm den Text-Bestandteil vor dem ersten Punkt
-            if not string.match(label or "", "^[0-9a-fA-F:.]+$") then label = dot_split(label)[1] end
-            -- Port an die IP haengen
-	    if label and gateway.port then
-	      label = label .. "<small>:" .. gateway.port .. "</small>"
-            end
-            if not label then label = service_name end
-	%>
-	<tr class="cbi-section-table-row cbi-opennet-gateways" disabled="<%= bool_to_yn(gateway.disabled) %>">
-		<td class="cbi-value-field" style="text-align:right;"><%= index %>.</td>
-		<td class="cbi-value-field">
-			<%
-				local conn_state_indicator
-				if gateway.connection_state == "active" then
-					conn_state_indicator = "y"
-				elseif gateway.connection_state == "connecting" then
-					conn_state_indicator = "n"
-				else
-					conn_state_indicator = ""
+	
+	
+	<table class="table lases" id="on-gateway-list">
+		<tr class="tr table-titles">
+			<th class="th">Nr.</th>
+			<th class="th"><%:Gateway%></th>
+			<th class="th"><%:Priority%></th>
+			<th class="th"><abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN%></abbr></th>
+			<th class="th"><abbr title="<%:Connection to an Mesh VPN service succeeded.%>"><%:VPN%></abbr></th>
+			<th class="th"><abbr title="<%:The configured Maximum Transmission Unit can cause subtle problems. Thus it needs to be tested carefully.%>"><%:MTU%></abbr></th>
+			<th class="th"><abbr title="<%:Estimated upload and download speed to this exit gateway.%>"><%:Speed%></abbr></th>
+			<th class="th"><abbr title="<%:Ping latency describes the travelling time of a small packet to the gateway and back.%>"><%:Ping%></abbr></th>
+			<th class="th cbi-section-actions"><%:Actions%></th>
+		</tr>
+		<%
+		local services = line_split(get_services_sorted_by_priority("mesh"))
+			for index, service_name in ipairs(services) do
+			local gateway = parse_csv_service(service_name, {
+				connection_state="string|function|get_openvpn_service_state",
+				disabled="string|value|disabled",
+				host="string|value|host",
+				mtu_status="string|value|mtu_status",
+				mtu_msg="string|value|mtu_msg",
+				offset="number|value|offset|0",
+				port="number|value|port",
+				priority="number|value|priority|10",
+				source="string|value|source",
+				vpn_status="string|value|vpn_status",
+				wan_speed_download="number|value|wan_speed_download",
+				wan_speed_upload="number|value|wan_speed_upload",
+				wan_ping="number|value|wan_ping",
+				wan_status="string|value|wan_status",
+			})
+		if gateway then
+				local label = gateway.host
+			-- falls das Ziel nicht wie eine IP (v4/v6) aussehen sollte, dann nimm den Text-Bestandteil vor dem ersten Punkt
+				if not string.match(label or "", "^[0-9a-fA-F:.]+$") then label = dot_split(label)[1] end
+				-- Port an die IP haengen
+			if label and gateway.port then
+			label = label .. "<small>:" .. gateway.port .. "</small>"
 				end
-			%>
-			<div class="opennet-bool" status="<%= conn_state_indicator %>">&nbsp;</div></td>
-		<td id="name_<%= service_name %>">
-			<div title="<%= gateway.host %>:<%= gateway.port %>"><%= label %></div></td>
-		<!-- begin of other status section -->
-		<td class="cbi-value-field">
-			<% if gateway.offset ~= 0 then %>
+				if not label then label = service_name end
+		%>
+	
+		<tr class="tr cbi-section-table-row">
+			<td class="td cbi-value-field"><%= index %></td>
+			<td class="td cbi-value-field"><div title="<%= gateway.host %>:<%= gateway.port %>"><%= label %></div></td>
+			<td class="td cbi-value-field">
+				<% if gateway.offset ~= 0 then %>
 				(<%= gateway.offset %>)<input class="cbi-button cbi-button-clear cbi-button-small"
 					type="submit" value="<%= gateway.id %>" title="<%:reset offset%>" name="reset_service_offset" style="background:transparent url(/luci-static/opennet/gtk-clear.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;"/>
-			<% end %>
-			<%= gateway.priority + gateway.offset %></td>
-		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= bool_to_yn(gateway.wan_status) %>" /></td>
-		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= bool_to_yn(gateway.vpn_status) %>"
-				<% if bool_to_yn(gateway.vpn_status) == "n" then %>
-					title="<%= luci.xml.pcdata(on_function('get_service_log_content',
-							{service_name, 20, 'openvpn', 'verify'})) %>"
-				<% end %> /></td>
-		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= bool_to_yn(gateway.mtu_status) %>"
-				title="<%= luci.xml.pcdata(gateway.mtu_msg) %>"/></td>
-		<td class="cbi-value-field">
-			<% if (gateway.wan_speed_upload or gateway.wan_speed_download) then
+				<% end %>
+				<%= gateway.priority + gateway.offset %>
+			</td>
+			<td class="td cbi-value-field"><%= bool_to_yn(gateway.wan_status) %></td>
+			<td class="td cbi-value-field"><%= bool_to_yn(gateway.vpn_status) %></td>
+			<td class="td cbi-value-field"><%= bool_to_yn(gateway.mtu_status) %> -- <%= luci.xml.pcdata(gateway.mtu_msg) %></td>
+			<td class="td cbi-value-field">
+				<% if (gateway.wan_speed_upload or gateway.wan_speed_download) then
 				local speed = (gateway.wan_speed_upload or '?') .. " kbps / " .. (gateway.wan_speed_upload or '?') .. " kbps";
 				local speed_abbr = luci.i18n.translatef('upload to Internet %s kBit/s | download from Internet %s kBit/s', gateway.wan_speed_upload or "?", gateway.wan_speed_download or "?")
-			%>
-				<div class="vpn-wan-speed" name="speed" id="cbi-opennet-gateways-speed">
-					<abbr title="<%= speed_abbr %>"><%= speed %></abbr></div>
-			<% end %></td>
-		<td id="wan_ping_<%= service_name %>" class="cbi-value-field"><%= gateway.wan_ping %></td>
-		<!-- end of other status section -->
-		<td class="cbi-value-field">
-			<% if gateway.disabled then %>
-				<input class="cbi-button cbi-button-enable cbi-button-small" type="submit"
-					value="<%= gateway.id %>" title="<%:enable%>" name="enable_service" style="background:transparent url(/luci-static/opennet/starred.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
-			<% else %>
-				<input class="cbi-button cbi-button-up cbi-button-small" type="submit"
-					value="<%= gateway.id %>" title="<%:move up%>" name="move_service_up" style="background:transparent url(/luci-static/opennet/gtk-go-up.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
-				<input class="cbi-button cbi-button-down cbi-button-small" type="submit"
-					value="<%= gateway.id %>" title="<%:move down%>" name="move_service_down" style="background:transparent url(/luci-static/opennet/gtk-go-down.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
-				<% if gateway.source ~= "manual" then %>
-					<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
-					<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
-						value="<%= gateway.id %>"
-						title="<%:auto-discovered services cannot be deleted%>"
-						name="delete_service" disabled="disabled" style="background:transparent url(/luci-static/opennet/user-trash.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
-				<% else %>
-					<%# Loeschen ist moeglich %>
-					<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
-						value="<%= gateway.id %>" title="<%:delete%>" name="delete_service" style="background:transparent url(/luci-static/opennet/user-trash.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
+				%>
+					<abbr title="<%= speed_abbr %>"><%= speed %></abbr>
 				<% end %>
-				<input class="cbi-button cbi-button-disable cbi-button-small" type="submit"
-					value="<%= gateway.id %>" title="<%:disable%>" name="disable_service" style="background:transparent url(/luci-static/opennet/error.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
-			<% end %>
-		</td>
-	</tr>
+			</td>
+			<td class="td cbi-value-field"><%= gateway.wan_ping %></td>
+			<td class="td cbi-value-field">
+				<% if gateway.disabled then %>
+					<input class="cbi-button cbi-button-enable cbi-button-small" type="submit"
+						value="<%= gateway.id %>" title="<%:enable%>" name="enable_service" style="background:transparent url(/luci-static/opennet/starred.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
+				<% else %>
+					<input class="cbi-button cbi-button-up cbi-button-small" type="submit"
+						value="<%= gateway.id %>" title="<%:move up%>" name="move_service_up" style="background:transparent url(/luci-static/opennet/gtk-go-up.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
+					<input class="cbi-button cbi-button-down cbi-button-small" type="submit"
+						value="<%= gateway.id %>" title="<%:move down%>" name="move_service_down" style="background:transparent url(/luci-static/opennet/gtk-go-down.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
+					<% if gateway.source ~= "manual" then %>
+						<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
+						<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
+							value="<%= gateway.id %>"
+							title="<%:auto-discovered services cannot be deleted%>"
+							name="delete_service" disabled="disabled" style="background:transparent url(/luci-static/opennet/user-trash.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
+					<% else %>
+						<%# Loeschen ist moeglich %>
+						<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
+							value="<%= gateway.id %>" title="<%:delete%>" name="delete_service" style="background:transparent url(/luci-static/opennet/user-trash.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
+					<% end %>
+					<input class="cbi-button cbi-button-disable cbi-button-small" type="submit"
+						value="<%= gateway.id %>" title="<%:disable%>" name="disable_service" style="background:transparent url(/luci-static/opennet/error.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
+				<% end %>
+			</td>
+		</tr>
+		<% end %>
 	<% end %>
-	<% end %>
-
 	</table>
 	</form>
+
 	<% if not services then write(html_box(luci.i18n.translate("No Mesh Gateways were found. Probably there is no DNS service available. Maybe you want to verify your internet connection."), "error")) end %>
     </fieldset>
 </fieldset>

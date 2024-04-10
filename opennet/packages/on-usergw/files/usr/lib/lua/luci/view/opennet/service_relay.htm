@@ -35,20 +35,20 @@ You may obtain a copy of the License at
 	<br/>
 	<%:Service relay announcements are slowly broadcast through the mesh. Their status is updated hourly.%>
     </div>
-    <fieldset class="cbi-section-node">
+
+	
+  <div>
 	<form name="relay_services" method="post" action="<%= REQUEST_URI %>">
-	<table class="cbi-section-table" id="on-gateway-list">
-	<tr class="cbi-section-table-titles">
-		<th class="cbi-section-table-cell"><%:Gateway%></th>
-		<th class="cbi-section-table-cell"><%:Local Port%></th>
-		<th class="cbi-section-table-cell">
-			<abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN Test%></abbr></th>
-		<th class="cbi-section-table-cell">
-			<abbr title="<%:The service announcement (via olsr) will be active soon after a successful test.%>"><%:Announcement%></abbr></th>
-		<th class="cbi-section-table-cell"><%:Actions%></th>
-		<th />
-	</tr>
-	<%
+	<h3>List of Service Relays</h3>
+	<table class="table lases" id="on-gateway-list">
+		<tr class="tr table-titles">
+			<th class="th"><%:Gateway%></th>
+			<th class="th"><%:Local Port%></th>
+			<th class="th"><abbr title="<%:The route to the gateway should point at a WAN interface.%>"><%:WAN Test%></abbr></th>
+			<th class="th"><abbr title="<%:The service announcement (via olsr) will be active soon after a successful test.%>"><%:Announcement%></abbr></th>
+			<th class="th cbi-section-actions"><%:Actions%></th>
+		</tr>
+		<%
         for index, service_name in ipairs(relay_services) do
           local service = parse_csv_service(service_name, {
               disabled="string|value|disabled",
@@ -59,55 +59,52 @@ You may obtain a copy of the License at
               source="string|value|source",
               wan_status="string|value|wan_status",
           })
-	  if service then
-            local label = service.host
-	    -- falls das Ziel nicht wie eine IP (v4/v6) aussehen sollte, dann nimm den Text-Bestandteil vor dem ersten Punkt
-            if not string.match(label or "", "^[0-9a-fA-F:.]+$") then label = dot_split(label)[1] end
-            -- Port immer hinzufügen (bis v0.4-5 war 1602 der Standard-Wert für das Mesh)
-	    if label then
-              label = label .. ":" .. service.port
-            else
-              label = service_name
-            end
-	%>
-	<tr class="cbi-section-table-row cbi-opennet-services" disabled="<%= bool_to_yn(service.disabled) %>">
-		<td><div title="<%= service.host %>:<%= service.port %>"><%= label %></div></td>
-		<td><%= service.local_relay_port %></td>
-		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= bool_to_yn(service.wan_status) %>" /></td>
-		<td class="cbi-value-field">
-			<div class="opennet-bool" status="<%= bool_to_yn(service.olsr_announcement) %>" />
-		</td>
-		<td class="cbi-value-field">
-			<% if service.disabled then %>
+			if service then
+					local label = service.host
+				-- falls das Ziel nicht wie eine IP (v4/v6) aussehen sollte, dann nimm den Text-Bestandteil vor dem ersten Punkt
+					if not string.match(label or "", "^[0-9a-fA-F:.]+$") then label = dot_split(label)[1] end
+					-- Port immer hinzufügen (bis v0.4-5 war 1602 der Standard-Wert für das Mesh)
+				if label then
+					label = label .. ":" .. service.port
+					else
+					label = service_name
+					end
+			%>
+		<tr class="tr cbi-section-table-row">
+			<td class="td cbi-value-field"><div title="<%= service.host %>:<%= service.port %>"><%= label %></div></td>
+			<td class="td cbi-value-field"><%= service.local_relay_port %></td>
+			<td class="td cbi-value-field"><%= bool_to_yn(service.wan_status) %></td>
+			<td class="td cbi-value-field"><%= bool_to_yn(service.olsr_announcement) %></td>
+			<td class="td cbi-value-field">
+				<% if service.disabled then %>
 				<input class="cbi-button cbi-button-enable cbi-button-small" type="submit"
-					value="<%= service.id %>" title="<%:enable%>" name="enable_service" />
-			<% else %>
-				<% if service.source ~= "manual" then %>
-					<%# Loeschen ist "disabled" - im tooltip ist eine Erklaerung enthalten #%>
-					<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
-						value="<%= service.id %>" name="delete_service" disabled="disabled"
-						title="<%:auto-discovered services cannot be deleted%>" />
-				<% else %>
-					<%# Loeschen ist moeglich %>
-					<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
-						value="<%= service.id %>" title="<%:delete%>" name="delete_service" />
-				<% end %>
+					value="<%= service.id %>" title="<%:enable%>" name="enable_service" style="background:transparent url(/luci-static/opennet/starred.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
+			    <% else %>
+					<% if service.source ~= "manual" then %>
+						<%# Loeschen ist nicht moeglich %>
+					<% else %>
+						<%# Loeschen ist moeglich %>
+						<input class="cbi-button cbi-button-del cbi-button-small" type="submit"
+							value="<%= service.id %>" title="<%:delete%>" name="delete_service" style="background:transparent url(/luci-static/opennet/user-trash.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;"/>
+					<% end %>
 				<input class="cbi-button cbi-button-disable cbi-button-small" type="submit"
-					value="<%= service.id %>" title="<%:disable%>" name="disable_service" />
-			<% end %>
-		</td>
-	</tr>
+					value="<%= service.id %>" title="<%:disable%>" name="disable_service" style="background:transparent url(/luci-static/opennet/error.png) no-repeat scroll 1px center; font-size: 0px; height: 24px; width: 24px;" />
+			    <% end %>
+			</td>
+			
+		</tr>
+		<% end %>
 	<% end %>
-	<% end %>
-
 	</table>
 	</form>
-    </fieldset>
-  </fieldset>
+</div>
 
   <%# Manuelles Hinzufügen weiterer Service-Relays %>
-  If you want to add a Service-Relay then have a look at the function 'add_custom_proxy_gw()' in service.sh.
+  <p>
+  <b>Add new Service-Relay:</b> This feature is not yet implemented in web UI. But via console you can run 
+  the following command to add a new Service-Relay: 
+  <p><pre>on-function add_custom_proxy_gw YOURSERVER.on-i.de 1600 udp</pre>
+  </p>
 
 </div>
 <%+footer%>

@@ -887,9 +887,9 @@ retrieve_service_list_url() {
 }
 
 
-# e.g. add_proxy_gw_manually itsuki.on-i.de 1600 udp
+# Beispiel zum Aufruf dieser Funktion: "on-function add_custom_proxy_gw itsuki.on-i.de 1600 udp"
 ## @fn add_custom_proxy_gw()
-## @brief Fuege eine zusätzliches Dienst-Weiterleitung hinzu (proxy-gw). Dies ist eine Hilfsfunktion für einen Workaround.
+## @brief Fuege eine zusätzliches Dienst-Weiterleitung hinzu (proxy-gw).
 ## @param host der DNS Name des OpenVPN Servers
 ## @param port der Port des OpenVPN Server (i.d.R. 1600)
 ## @param protocol udp oder tcp (i.d.R. udp)

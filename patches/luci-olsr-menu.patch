@@ -1,0 +1,29 @@
+Damit wir ein einheitlichen Web UI Verhalten in luci haben,
+müssen wir die Besonderheiten des OLSR Moduls aendern.
+Wenn die "order" kleiner als 10 ist, dann taucht die olsr
+Webseite gleich nach dem Login auf und irritiert die Nutzer,
+weil diese entweder einen Login erwarten oder die Opennet
+Status Seite.
+Zusaetzlich muessen wir einen Login erzwingen, da sonst auch
+wieder diese Seite als erstes erscheint.
+diff --git a/applications/luci-app-olsr/root/usr/share/luci/menu.d/luci-app-olsr-frontend.json b/applications/luci-app-olsr/root/usr/share/luci/menu.d/luci-app-olsr-frontend.json
+index 34fd703cf0..e43a4ff49e 100644
+--- a/luci/applications/luci-app-olsr/root/usr/share/luci/menu.d/luci-app-olsr-frontend.json
++++ b/luci/applications/luci-app-olsr/root/usr/share/luci/menu.d/luci-app-olsr-frontend.json
+@@ -1,10 +1,14 @@
+ {
+ 	"olsr": {
+ 		"title": "OLSR",
+-		"order": 9,
++		"order": 10,
+ 		"action": {
+ 			"type": "firstchild"
+-		}
++		},
++		"auth": {
++			"methods": [ "cookie:sysauth_https", "cookie:sysauth_http" ],
++			"login": true
++		  }
+ 	},
+ 	"olsr/neighbours": {
+ 		"title": "Neighbours",

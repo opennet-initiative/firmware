@@ -302,12 +302,14 @@ Es werden nur diejenigen Dienste weitergereicht und announciert, die den folgend
 
 Es ist wünschenswert, dass auf einem Gerät, welches als Internet-Spender agiert, auch ein Nutzer-Tunnel aktiviert werden kann. Dieses Feature führt jedoch zu einer sehr komplexen Konfiguration um zu verhindern, dass Pakete nicht im "falschen" Tunnel weitergeleitet werden.
 
-Diese Funktion wurde während der Umstellung von iptables auf nftables ausgebaut. Bei Bedarf kann dies später wieder eingebaut werden (Freiwillige vor).
+Allgemein wurde diese Funktion während der Umstellung von iptables auf nftables ausgebaut. Im einem speziellen Fall, wird dieses Feature jedoch noch benötigt. Hier handelt es sich um Szenarien, wo ein Standort einen Internetanschluss hat (hier wird UGW Funktion benötigt) und am gleichen Standort der Internetverkehr der Nutzenden über Opennet geleitet werden soll. In diesem Szenario gibt es aber explizit keine weiteren Opennet Geräte an diesem Standort.
 
-#### Routing
+Im obigen Szenarion kann das UGW+Nutzer-Tunnel Feature wie folgt aktiviert werden:
+* zuerst das Modul für den Nutzer-Tunnel aktivieren (z.B. über Webinterface)
+* jetzt das Modul für den UGW-Tunnel über die Konsole/SSH installieren: `opkg-oni install on-usergw`
+* nun kann wie gewohnt über das Webinterface die Konfiguration der Zertifikate für beiden Tunnel vorgenommen werden
 
-Offene Zugangspunkte / Captive Portal {#captive}
--------------------------------------
+### Routing - Offene Zugangspunkte / Captive Portal {#captive}
 
 Offene Zugangspunkte stellen ihrer Umgebung Zugang zum Internet zur Verfügung. Verkehr wird dabei erst nach dem ersten Aufbau einer http-Verbindung durchgelassen. Dies ermöglicht uns die einmalige Einblendung einer Portal-Webseite.
 

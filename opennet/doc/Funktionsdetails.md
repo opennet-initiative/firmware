@@ -202,6 +202,28 @@ Die persistenten Informationen liegen unter ``/etc/on-services.d``.
 Die volatilen Informationen liegen unter ``/tmp/on-services-volatile.d``.
 
 
+### Debugging der initialen Erstellung von UGW VPN Tunnel
+
+Wenn ein neues Gerät gebootet wird, möchte man eventuell den Prozess bis zum Aufbauen des ersten UGW VPN Tunnels beschleunigen, da es sonst bis zu 20min dauert. Hierfür können folgende Schritte vorgenommen werden.
+
+Schritt 1: Für welche UGW Server liegen gerade Informationen zum Verbindung vor? Beispiel:
+
+    $ on-function get_services "mesh"
+    mesh_openvpn_erina_opennet_initiative_de_1602_udp
+    mesh_openvpn_subaru_opennet_initiative_de_1602_udp
+    mesh_openvpn_megumi_opennet_initiative_de_1602_udp
+
+Schritt 2: Die Funktion `verify_mesh_gateways()` prüft regelmäßig, ob diese Server alle Voraussetzungen (`wan_status`,`mtu`, ...) erfüllen und ruft selbst `is_mesh_gateway_usable()` auf. Also können wir den Prozess beschleunigen, indem wir für die Server folgendes aufrufen:
+```
+$ on-function is_mesh_gateway_usable mesh_openvpn_erina_opennet_initiative_de_1602_udp
+```
+Das Ergebnis der Prüfung ist in `/etc/on-services.d/mesh_openvpn_SERVERNAME` zu finden. Dort muss bspw auch `mtu_status true` am Ende stehen.
+
+Schritt 3: Die Funktion `sync_mesh_openvpn_connection_processes()` erstellt eine OpenVPN Konfigurationsdatei, z.B. `/tmp/etc/openvpn/mesh_openvpn_erina_opennet_initiative_de_1602_udp.conf` und setzt in uci bspw. den Wert:
+    openvpn.mesh_openvpn_erina_opennet_initiative_de_1602_udp.enabled='1'
+Diesen Schritt können wir durch das manuelle Aufrufen von `sync_mesh_openvpn_connection_processes()` beschleunigt starten.
+
+
 Internet-Freigabe (Usergateways) {#ugw}
 --------------------------------
 

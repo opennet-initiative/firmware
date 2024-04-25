@@ -100,10 +100,7 @@ function status_ugw_connection()
         end
     else
         -- kein Zertifikat vorhanden
-	table.insert(status_lines, luci.i18n.translate("Certificate is missing")
-            .. " (" ..  luci.i18n.translate("see")
-            .. ' <a href="' .. on_url("mesh_tunnel", "zertifikat") .. '">'
-            ..  luci.i18n.translate("Certificate management") .. "</a>).")
+	table.insert(status_lines, luci.i18n.translate("Certificate is missing"))
     end
     -- weitergeleitete Nutzerverbindungen koennen auch ohne Mesh-VPN existieren (nur service-relay)
     if file_exists("/usr/sbin/munin-node-plugin.d/on_usergw_connections") then

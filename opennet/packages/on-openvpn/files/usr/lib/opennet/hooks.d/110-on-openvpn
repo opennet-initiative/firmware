@@ -2,8 +2,11 @@
 
 set -eu
 
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
 case "$1" in
 	on-openvpn)
-		on-function update_mig_connection_status
+		echo "on-function update_mig_connection_status" | schedule_task
 		;;
 esac

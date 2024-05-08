@@ -2,10 +2,13 @@
 
 set -eu
 
+# shellcheck source=opennet/packages/on-core/files/usr/lib/opennet/on-helper.sh
+. "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
+
 case "$1" in
 	network|wireless|firewall)
 		# eventuelle Zonen-Zuordnungen zu olsr uebertragen
-		on-function update_olsr_interfaces
+		echo "on-function update_olsr_interfaces" | schedule_task
 		;;
 	olsrd)
 		/etc/init.d/olsrd reload || true

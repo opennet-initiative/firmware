@@ -2,4 +2,4 @@
 
 set -eu
 
-on-function update_mesh_interfaces
+echo "on-function update_mesh_interfaces" | on-function schedule_task

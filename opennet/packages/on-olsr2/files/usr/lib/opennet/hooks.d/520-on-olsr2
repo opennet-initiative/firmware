@@ -6,7 +6,7 @@
 case "$1" in
 	network|wireless|firewall)
 		# eventuelle Zonen-Zuordnungen zu olsrd2 uebertragen
-		update_olsr2_interfaces
+		echo "on-function update_olsr2_interfaces" | schedule_task
 		;;
 	olsrd2)
 		if is_on_module_installed_and_enabled "on-olsr2"; then
@@ -14,7 +14,7 @@ case "$1" in
 		fi
 		;;
 	on-olsr2)
-		update_olsr2_interfaces
-		update_olsr2_daemon_state
+		echo "on-function update_olsr2_interfaces" | schedule_task
+		echo "on-function update_olsr2_daemon_state" | schedule_task
 		;;
 esac

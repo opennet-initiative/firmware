@@ -82,12 +82,16 @@ configure_olsr_radio() {
 			uci set "${uci_radio}.htmode=VHT20"
 		fi
 		uci set "${uci_wifi}.isolate=1"
+		# wir wollen einfache Interface Namen haben (wlan0,wlan1) und keine kryptischen Namen (phy-ap0,phy-sta0,...)
+		uci set "${uci_wifi}.ifname=wlan${iface_index}"
 	else
 		# 2,4 GHz: Ad-hoc-Modus
 		uci set "${uci_wifi}.ssid=$(get_on_core_default wifi_ssid)"
 		uci set "${uci_wifi}.mode=$(get_on_core_default wifi_mode)"
 		[ -n "$bssid" ] && uci set "${uci_wifi}.bssid=$bssid"
 		uci set "${uci_radio}.channel=$(get_on_core_default wifi_channel)"
+		# wir wollen einfache Interface Namen haben (wlan0,wlan1) und keine kryptischen Namen (phy-ap0,phy-sta0,...)
+		uci set "${uci_wifi}.ifname=wlan${iface_index}"
 	fi
 	return
 }

@@ -31,7 +31,7 @@ Repository herunterladen {#repository}
 
 Quellcode Zugriff:
 
-    git clone https://github.com/opennet-initiative/firmware.git 
+    git clone https://github.com/opennet-initiative/firmware.git
 
 Die lokale Arbeitsumgebung wird mit folgenden Kommandos abgeschlossen:
 
@@ -48,11 +48,11 @@ Für die komfortable Verwendung des Patch-Verwaltungsystems *quilt* sollten ein 
 
 Als dauerhafte Lösung ist folgendes möglich - dabei werden jedoch eventuell vorhandene quilt-Einstellungen gelöscht:
 
-    cp quiltrc ~/.quiltrc
+    cp opennet/quiltrc ~/.quiltrc
 
 Alternativ können die Einstellungen auch zu Beginn jeder Shell-Sitzung importiert werden:
 
-    source quiltrc
+    source opennet/quiltrc
 
 Falls die obigen Einstellungen nicht gesetzt werden, wird quilt unnötige Patch-Korrekturen vornehmen, sobald sich Zeitstempel ändern.
 
@@ -62,7 +62,7 @@ Dies ist nicht wünschenswert.
 Build-Service {#build-service}
 -------------
 
-Auf einem Opennet Server ist ein automatischer Build-Dienst konfiguriert, der kurz nach einem push einen neuen Snapshot der Firmware erzeugt. Innerhalb von ca. 30 Minuten sind die ersten neuen Images dann verfügbar: http://downloads.opennet-initiative.de/openwrt/testing
+Auf einem Opennet Server ist ein automatischer Build-Dienst konfiguriert, der kurz nach einem push einen neuen Snapshot der Firmware erzeugt. Innerhalb von ca. 90 Minuten sind die ersten neuen Images dann verfügbar: http://downloads.opennet-initiative.de/openwrt/testing
 
 
 Änderungen an der Firmware vornehmen {#developing}
@@ -71,7 +71,7 @@ Auf einem Opennet Server ist ein automatischer Build-Dienst konfiguriert, der ku
 Änderungen im Opennet-Repository auf den Server pushen {#git-push}
 ------------------------------------------------------
 
-Nach dem Auschecken editiere die gewünschten Dateien. Wenn du .patch-Dateien editieren will, musst du weitere Dinge beachten (siehe andere Abschnitte). 
+Nach dem Auschecken editiere die gewünschten Dateien. Wenn du .patch-Dateien editieren willst, musst du weitere Dinge beachten (siehe andere Abschnitte).
 
 Um deine Änderungen einzuchecken, führe folgende Kommandos aus:
 
@@ -81,7 +81,7 @@ Um deine Änderungen einzuchecken, führe folgende Kommandos aus:
     git push
     # Wenn es keinen Fehler gibt, bist du fertig. Glückwunsch!
 
-Nun kann es sein, dass andere Personen zwischendurch Änderungen gemacht haben. Wenn dem so ist, bekommst du eine Fehlermeldung mit entsprechendem Hinweis. Dieses Problem kannst du folgendermaßen lösen: 
+Nun kann es sein, dass andere Personen zwischendurch Änderungen gemacht haben. Wenn dem so ist, bekommst du eine Fehlermeldung mit entsprechendem Hinweis. Dieses Problem kannst du folgendermaßen lösen:
 
     # alle vorher eingespielten Patches zurückspielen
     make unpatch
@@ -100,7 +100,7 @@ Daher wird anstelle des üblichen `git pull` folgende Abfolge empfohlen:
 
     # lokale Patches zurücknehmen (vermeidet Konflikte, falls Patch-Dateien geändert werden)
     make unpatch
-    # entfernte Änderungen 
+    # entfernte Änderungen
     git pull --rebase
 
 
@@ -142,7 +142,7 @@ Im Gegensatz zum OpenWrt Repository befinden sich in den Paket-Repositories ledi
 
 3. die OpenWrt-spezifische Dokumentation zum Erstellen von Patches lesen und anwenden:
 
-        http://wiki.openwrt.org/doc/devel/patches
+        https://openwrt.org/docs/guide-developer/toolchain/use-patches-with-buildsystem
 
 4. den Inhalt der neuen Patch-Datei erfassen:
 
@@ -217,7 +217,7 @@ Einzelnes Paket bauen {#build-single}
 Für die schnelle Lösung von Build-Problemen ist es oft sinnvoll, nur das eine problematische Paket erstellen zu lassen:
 
     make -C openwrt package/on-core/{clean,compile} V=s
- 
+
 
 Neue Pakete oder Paketoptionen einbinden {#config-change}
 ----------------------------------------
@@ -244,7 +244,7 @@ Wie üblich in make-Buildumgebung kannst du manuell mehrere parallele Prozesse f
 
     make -j 5
 
-In den ersten 20 Zeilen der Build-Ausgabe wirst du ein paar Fehlermeldung bezüglich `-j1` finden - diese sind ein Indikator für eine openwert-spezifische Unfeinheit. Der finale Build-Prozess wird ungeachtet dieser Warnungen parallelisiert ablaufen.
+In den ersten 20 Zeilen der Build-Ausgabe wirst du ein paar Fehlermeldung bezüglich `-j1` finden - diese sind ein Indikator für eine *OpenWrt*-spezifische Unfeinheit. Der finale Build-Prozess wird ungeachtet dieser Warnungen parallelisiert ablaufen.
 
 
 Build-Konfiguration (menuconfig) {#menuconfig}
@@ -266,7 +266,7 @@ Die plattform-spezifische config-Datei wird durch *opennet/config/Makefile* mit 
 Konfiguration für eine Plattform erstellen {#platform-config}
 ------------------------------------------
 
-Die finale OpenWrt Konfiguration wird aus der Ziel-Plattform-Konfiguration und der allgemeinen Konfiguration erstellt und anschließend mittels `make -C openwrt defconfig` durch OpenWrt auf Abhängigkeiten zu prüfen und mit den Standardwerten aufzufüllen.
+Die finale OpenWrt Konfiguration wird aus der Ziel-Plattform-Konfiguration und der allgemeinen Konfiguration erstellt und anschließend mittels `make -C openwrt defconfig` durch OpenWrt auf Abhängigkeiten geprüfen und mit den Standardwerten aufgefüllt.
 
 Diese Konfiguration für eine Plattform kann beispielsweise mittels `make config-arx71xx` erstellt werden. Das Ergebnis ist anschließend als *openwrt/.config* verfügbar.
 
@@ -294,7 +294,7 @@ Alle Funktionen werden durch die folgende Zeile im globalen Namensraum verfügba
 
 ### Funktionen ausprobieren {#shell-run}
 
-Alle Funktionen aus den shell-Bibliotheken lassen sich folgendermaßen prüfen:
+Alle Funktionen aus den Shell-Bibliotheken lassen sich folgendermaßen prüfen:
 
     on-function get_zone_log_interfaces on_mesh
 
@@ -366,7 +366,7 @@ Dies listet alle Commit mit entsprechender ONI Versionsnummer auf und einem Abst
 lua-Skripte {#lua}
 -----------
 
-Das OpenWrt Webinterface basiert auf lua-Skripten. Der grundlegende Code sollte in den shell-Bibliotheken untergebracht werden - lediglich die für die Darstellung notwendige Logik gehört in die lua-Skripte.
+Das OpenWrt Webinterface basiert auf lua-Skripten. Der grundlegende Code sollte in den Shell-Bibliotheken untergebracht werden - lediglich die für die Darstellung notwendige Logik gehört in die lua-Skripte.
 
 
 ### Funktionen {#lua-functions}
@@ -407,7 +407,7 @@ Hotplug-System {#hotplug}
 --------------
 
 OpenWrt verwendet ``procd`` für die Behandlung von hotplug-Ereignissen.
-Skripte liegen unter ``/etc/hotplug.d/``. Für unsere netzwerkbasierten Ereignisse (z.B. Hinzufügen neuer olsrd-Interfaces) verwenden wir den hotplug-Typ ``ifcace``.
+Skripte liegen unter ``/etc/hotplug.d/``. Für unsere netzwerkbasierten Ereignisse (z.B. Hinzufügen neuer olsrd-Interfaces) verwenden wir den hotplug-Typ ``iface``.
 
 Der Aufruf von hotplug-Skripten lässt sich folgendermaßen emulieren:
 
@@ -419,16 +419,16 @@ Hilfreiche Werkzeuge {#tools}
 
 ### Unbenutzte Funktionen finden {#tools-unused}
 
-Das Skript ``opennet/tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
+Das Skript ``opennet/tools/check_for_obsolete_functions.sh`` gibt potentiell unbenutzte lua- und Shell-Funktionen aus. Ein gelegentliches Prüfen der Ausgabe dieses Skripts hilft dabei, nicht mehr benötigte Funktionen zu beräumen.
 
 
 ### Lokale Änderungen auf einen AP übertragen {#tools-copy}
 
-Das Skript ``opennet/tools/copy-package-files-to-AP.sh`` kopiert die Inhalte der lokalen Entwicklungsverzeichnisse direkt auf einen angebenen AP. Dies ist möglich, da in unseren Pakete lediglich Interpreter-Code (shell/lua) vorhanden ist und somit kein Build-Prozess erforderlich ist.
+Das Skript ``opennet/tools/copy-package-files-to-AP.sh`` kopiert die Inhalte des lokalen Entwicklungsverzeichnisse direkt auf einen angebenen AP. Dies ist möglich, da in unseren Pakete lediglich Interpreter-Code (shell/lua) vorhanden ist und somit kein Build-Prozess erforderlich ist.
 
 Falls auf dem Ziel-AP *rsync* installiert ist, wird die Übertragung deutlich beschleunigt.
 
-  opennet/tools/copy-package-files-to-AP.sh 172.16.0.1
+    opennet/tools/copy-package-files-to-AP.sh 172.16.0.1
 
 
 Tests {#tests}
@@ -442,15 +442,15 @@ Debugging {#debugging}
 
 Mehr Log-Ausgaben (debug) ins syslog (*logread*) schreiben:
 
-  uci set on-core.settings.debug=true
+    uci set on-core.settings.debug=true
 
 Ein Skript mit detaillierter Ausführungsverfolgung starten:
 
-  ON_DEBUG=1 on-function print_services
+    ON_DEBUG=1 on-function print_services
 
 Fehlermeldungen des Web-Interface ausgeben:
 
-  killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-\*; uhttpd -h /www -p 80 -f
+    killall -9 uhttpd 2>/dev/null; sleep 1; rm -rf /var/luci-\*; uhttpd -h /www -p 80 -f
 
 
 Profiling {#profiling}
@@ -460,7 +460,7 @@ Für Performance-Optimierungen sind Daten zum Zeitbedarf der verschiedenen Funkt
 
 Mit dem folgenden Kommando werden alle Shell-Skripte der opennet-Pakete derart manipuliert, dass fortan der Zeitbedarf jedes Funktionsaufrufs aufgezeichnet wird:
 
-  on-function enable_profiling
+    on-function enable_profiling
 
 Vor der Manipulation der Shell-Skripte prüft das obige Skript, ob die notwendigen Zusatzpakete (z.B. *bash*) intalliert sind.
 
@@ -470,7 +470,7 @@ Die Ergebnisse des Profiling werden unter `/var/run/on-profiling` abgelegt. Für
 
 Die Auswertung des Profiling ist folgendermaßen möglich:
 
-  on-function summary_profiling
+    on-function summary_profiling
 
 Mit fortlaufendem Profiling wird das tmp-Verzeichnis (bzw. der RAM) schrittweise gefüllt. Ein Host mit aktiviertem Profiling darf also nicht im produktiven Einsatz sein, da im Verlauf von Stunden eine Speichermangel-Situation droht.
 
@@ -488,7 +488,7 @@ Einige Pakete können über das Web-Interface installiert werden. Diese Pakete m
 * *config/common*: das Paket als Modul aktivieren (*CONFIG_PACKAGE_on-foobar=m*) und somit in den Build-Prozess aufnehmen
 * falls das Paket übersetzungsfähige Texte enthalten kann: *touch opennet/po/de/on-foobar.po* (die Datei wird später durch "make translate" mit Inhalten gefüllt)
 
-Das minimalste Paket ist *on-goodies* - es besteht lediglich aus einer Liste von Abhängigkeiten und ist daher gut als Vorlage geeignet. Zusätzlich sollten die meisten Pakete Initialisierungs- und Aufräumaktionen in *postinst*- und*prerm*-Skripten unterbringen.
+Das minimalste Paket ist *on-goodies* - es besteht lediglich aus einer Liste von Abhängigkeiten und ist daher gut als Vorlage geeignet. Zusätzlich sollten die meisten Pakete Initialisierungs- und Aufräumaktionen in *postinst*- und *prerm*-Skripten unterbringen.
 
 
 Übersetzungen {#translations}
@@ -532,9 +532,9 @@ Die opennet-relevanten Pakete (*on-core* u.s.w) erhalten dieselbe Versionsnummer
 Build-Server {#build-server}
 =====================
 
-Wir verwenden buildbot als Web-Interface und Baumumgebung: http://dev.opennet-initiative.de/.
+Wir verwenden buildbot als Web-Interface und Bauumgebung: https://dev.opennet-initiative.de/.
 
-Die buildbot Software wird durch einen git-commit ausgelöst und regt wenige Minuten nach einem *git push* einen Build-Prozess auf dem zuordneten Bau-Server an. Die Build-Schritte sind im Web-Interface sichtbar.
+Die buildbot Software wird durch einen git-commit ausgelöst und regt wenige Minuten nach einem *git push* einen Build-Prozess auf dem zugeordneten Bau-Server an. Die Build-Schritte sind im Web-Interface sichtbar.
 
 Innerhalb des Build-Prozess wird das export-Skript ausgeführt. Es kopiert das Build-Ergebnis für eine Plattform oder wahlweise die erstellte Dokumentation in das Export-Verzeichnis, welches via Webserver veröffentlicht wird (http://downloads.opennet-initiative.de/openwrt/). Das exakte Zielverzeichnis ergibt sich dabei aus der Versionsnummer (siehe @ref version-numbers).
 @sa ../tools/buildbot-worker/export-build-builtbot.sh
@@ -558,7 +558,7 @@ Release {#release}
 
 Für ein Release sind folgende Schritte durchzuführen:
 
-* einen letzten commit erstellen, bspw. Änderungen in changes.txt vervollstaendigen
+* einen letzten commit erstellen, bspw. Änderungen in changes.txt vervollständigen
 * den Commit taggen: ``git tag -a v0.5.1``
 * den Commit und das Tag zum Server pushen: ``git push origin v0.5.1``
 * das erzeugte Build-Verzeichnis nach "stable" verschieben: ``cd /var/www/downloads/openwrt && mv ../../downloads-buildbot/export/VERSION stable/VERSIONONLYNUMBER``
@@ -587,12 +587,12 @@ quilt {#doc-quilt}
 
 Wir verwenden das Patch-Verwaltungssystem *quilt*. Dies erleichtert die Erstellung und Pflege von Patch-Serien gegenüber fremden Quellen.
 
-Das Howto von *quilt* ist hier zu finden: http://repo.or.cz/w/guilt.git/blob/HEAD:/Documentation/HOWTO
+Das Howto von *quilt* ist hier zu finden: http://repo.or.cz/w/guilt.git/blob/HEAD:/Documentation/HOWTO.md
 
 
 OpenWrt {#doc-openwrt}
 -------
 
-Die Entwicklungsdokumentation von *OpenWrt* ist hier zu finden: http://wiki.openwrt.org/doc/devel/start
+Die Entwicklungsdokumentation von *OpenWrt* ist hier zu finden: https://openwrt.org/docs/guide-developer/start
 
 Die *OpenWrt* Build Umgebung ist in https://openwrt.org/docs/guide-developer/build-system/use-buildsystem beschrieben.

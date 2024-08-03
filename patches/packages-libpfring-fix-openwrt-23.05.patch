@@ -16,9 +16,9 @@ index 000000000..c0a901797
 +   struct sock *sk = sock->sk;
 +-  char name[sizeof(sa->sa_data)+1];
 ++  char name[sizeof(sa->sa_data_min)+1];
-+ 
++
 +   debug_printk(2, "ring_bind() called\n");
-+ 
++
 +   /*
 +    * Check legality
 +    */
@@ -26,9 +26,9 @@ index 000000000..c0a901797
 +     return(-EINVAL);
 +   if(sa->sa_family != PF_RING)
 +     return(-EINVAL);
-+ 
++
 +-  memcpy(name, sa->sa_data, sizeof(sa->sa_data));
 ++  memcpy(name, sa->sa_data, sizeof(sa->sa_data_min));
-+ 
++
 +   /* Add trailing zero if missing */
 +   name[sizeof(name)-1] = '\0';

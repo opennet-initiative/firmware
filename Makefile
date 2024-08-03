@@ -12,7 +12,7 @@ QUILT_BIN ?= $(shell which quilt)
 PULL_SUBMODULES_BRANCH ?= openwrt-23.05
 
 
-.PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs doc quilt-check lint test
+.PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git help list-archs doc quilt-check lint test
 
 all: $(ARCHS)
 

@@ -9,7 +9,7 @@ CONFIG_DIR = opennet/config
 # list all files except Makefile, common file and hidden files
 ARCHS = $(shell ls "$(CONFIG_DIR)/" | grep -v ^Makefile | grep -v "^$(COMMON_CONFIG)$$")
 QUILT_BIN ?= $(shell which quilt)
-PULL_SUBMODULES_BRANCH ?= openwrt-22.03
+PULL_SUBMODULES_BRANCH ?= openwrt-23.05
 
 
 .PHONY: all clean patch unpatch menuconfig diff-menuconfig feeds init init-git init-git help list-archs doc quilt-check lint test
@@ -47,7 +47,7 @@ $(ARCHS): feeds translate
 			$(MAKE) -C "$(OPENWRT_DIR)" clean ; \
 	fi
 	$(MAKE) -C "$(OPENWRT_DIR)"
-	
+
 config-%:
 	@[ -f "$(OPENWRT_DIR)/feeds.conf" ] || echo "**** FEHLER! DATEI feeds.conf FEHLT. Fuehre bitte 'make feeds' aus. ****"
 	$(MAKE) -C "$(CONFIG_DIR)/" "$(patsubst config-%,%,$@)"
@@ -107,7 +107,7 @@ unpatch: quilt-check
 pull-submodules: unpatch
 	@#use 'git submodule' for updating submodules. When using 'git pull' in submodule directory then the error 'detached head' occurs. There are two ways to solve this:
 	@# 1. use 'git submodule update --remote --checkout'
-	@# 2. go into every submodules directory, find out which remote branch it relies on, checkout this branch. 
+	@# 2. go into every submodules directory, find out which remote branch it relies on, checkout this branch.
 	git submodule update --remote --checkout
 	git submodule foreach git checkout "$(PULL_SUBMODULES_BRANCH)"
 	git submodule foreach git pull

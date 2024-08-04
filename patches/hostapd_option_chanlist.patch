@@ -2,20 +2,20 @@ Allow optional 'chanlist' restriction for hostapd.
 
 Signed-off-by: Lars Kruse <devel@sumpfralle.de>
 
-Index: on_firmware/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+Index: firmware/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
 ===================================================================
---- on_firmware.orig/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-+++ on_firmware/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -28,6 +28,7 @@ drv_mac80211_init_device_config() {
+--- firmware.orig/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
++++ firmware/openwrt/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+@@ -24,6 +24,7 @@ drv_mac80211_init_device_config() {
+ 
  	config_add_string path phy 'macaddr:macaddr'
- 	config_add_string hwmode
  	config_add_string tx_burst
 +	config_add_string chanlist
  	config_add_string distance
  	config_add_int beacon_int chanbw frag rts
- 	config_add_int rxantenna txantenna antenna_gain txpower
-@@ -350,6 +351,10 @@ mac80211_hostapd_setup_base() {
- 		[ -n "$vht_capab" ] && append base_cfg "vht_capab=$vht_capab" "$N"
+ 	config_add_int rxantenna txantenna txpower min_tx_power
+@@ -488,6 +489,10 @@ mac80211_hostapd_setup_base() {
+ 		append base_cfg "he_mu_edca_ac_vo_timer=255" "$N"
  	fi
  
 +	# define limited list of allowed channels (e.g. only outdoor channels)

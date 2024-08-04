@@ -1,11 +1,10 @@
 libpfring is not compiling in packages repo with branch openwrt23.05.
 This fixes the compiling error.
 
-diff --git a/libs/libpfring/patches/999-issue-23621.patch b/libs/libpfring/patches/999-issue-23621.patch
-new file mode 100644
-index 000000000..c0a901797
+Index: firmware/packages/libs/libpfring/patches/999-issue-23621.patch
+===================================================================
 --- /dev/null
-+++ b/packages/libs/libpfring/patches/999-issue-23621.patch
++++ firmware/packages/libs/libpfring/patches/999-issue-23621.patch
 @@ -0,0 +1,25 @@
 +see https://github.com/openwrt/packages/issues/23621
 +

@@ -1,9 +1,9 @@
 Quelle: http://absorb.it/software/opennet/ondataservice/olsrd-0.6.6.2.tgz
-Index: on_firmware/routing/olsrd/Makefile
+Index: firmware/routing/olsrd/Makefile
 ===================================================================
---- on_firmware.orig/routing/olsrd/Makefile
-+++ on_firmware/routing/olsrd/Makefile
-@@ -104,6 +104,18 @@ define Package/olsrd-mod-nameservice
+--- firmware.orig/routing/olsrd/Makefile
++++ firmware/routing/olsrd/Makefile
+@@ -109,6 +109,18 @@ define Package/olsrd-mod-nameservice
    TITLE:=Lightweight hostname resolver plugin
  endef
  
@@ -31,7 +31,7 @@ Index: on_firmware/routing/olsrd/Makefile
  
  define Build/Compile
  	$(call Build/Compile/Default,all)
-@@ -242,6 +254,16 @@ define Package/olsrd-mod-nameservice/ins
+@@ -256,6 +268,16 @@ define Package/olsrd-mod-nameservice/ins
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/nameservice/olsrd_nameservice.so.* $(1)/usr/lib/
  endef
  
@@ -48,7 +48,7 @@ Index: on_firmware/routing/olsrd/Makefile
  define Package/olsrd-mod-p2pd/install
  	$(INSTALL_DIR) $(1)/usr/lib
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/p2pd/olsrd_p2pd.so.* $(1)/usr/lib/
-@@ -301,6 +323,8 @@ $(eval $(call BuildPackage,olsrd-mod-jso
+@@ -321,6 +343,8 @@ $(eval $(call BuildPackage,olsrd-mod-jso
  $(eval $(call BuildPackage,olsrd-mod-netjson))
  $(eval $(call BuildPackage,olsrd-mod-mdns))
  $(eval $(call BuildPackage,olsrd-mod-nameservice))
@@ -57,10 +57,10 @@ Index: on_firmware/routing/olsrd/Makefile
  $(eval $(call BuildPackage,olsrd-mod-p2pd))
  $(eval $(call BuildPackage,olsrd-mod-pgraph))
  $(eval $(call BuildPackage,olsrd-mod-pud))
-Index: on_firmware/routing/olsrd/patches/023-ondataservice.patch
+Index: firmware/routing/olsrd/patches/023-ondataservice.patch
 ===================================================================
 --- /dev/null
-+++ on_firmware/routing/olsrd/patches/023-ondataservice.patch
++++ firmware/routing/olsrd/patches/023-ondataservice.patch
 @@ -0,0 +1,2897 @@
 +diff --git a/Makefile b/Makefile
 +index 8ce6dc5..cf3b410 100644

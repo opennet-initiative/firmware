@@ -12,5 +12,4 @@ radar_counter.patch
 olsrd_del_pud.patch
 muninlite.patch
 flash_new_ubnt_wa.patch
-packages-libpfring-fix-openwrt-23.05.patch
 luci-olsr-menu.patch

@@ -19,8 +19,8 @@ _prepare_on_modules() {
 
 
 ## @fn is_on_module_installed_and_enabled()
-## @brief Pruefe ob ein Modul sowohl installiert, als auch aktiv ist.
-## @param module Eins der Opennet-Pakete (siehe 'get_on_modules').
+## @brief Pruefe ob ein Opennet-Modul sowohl installiert, als auch aktiviert ist.
+## @param module Name des Opennet-Paketes (siehe 'get_on_modules').
 ## @details Die Aktivierung eines Modules wird anhand der uci-Einstellung "${module}.settings.enabled" geprueft.
 ##   Der Standardwert ist "false" (ausgeschaltet).
 is_on_module_installed_and_enabled() {
@@ -40,6 +40,9 @@ _is_on_module_enabled() {
 }
 
 
+## @fn is_on_module_installed()
+## @brief Pruefe ob ein Opennet-Modul installiert ist.
+## @param module Name des Opennet-Paketes (siehe 'get_on_modules').
 is_on_module_installed() {
 	local module="$1"
 	_prepare_on_modules
@@ -50,7 +53,7 @@ is_on_module_installed() {
 
 ## @fn enable_on_module()
 ## @brief Aktiviere ein Opennet-Modul
-## @param module Eins der Opennet-Pakete (siehe 'get_on_modules').
+## @param module Name des Opennet-Paketes (siehe 'get_on_modules').
 enable_on_module() {
 	trap 'error_trap enable_on_module "$*"' EXIT
 	local module="$1"
@@ -64,7 +67,7 @@ enable_on_module() {
 
 ## @fn disable_on_module()
 ## @brief Deaktiviere ein Opennet-Modul
-## @param module Eins der Opennet-Pakete (siehe 'get_on_modules').
+## @param module Name des Opennet-Paketes (siehe 'get_on_modules').
 disable_on_module() {
 	trap 'error_trap disable_on_module "$*"' EXIT
 	local module="$1"
@@ -77,6 +80,7 @@ disable_on_module() {
 
 ## @fn warn_if_unknown_module()
 ## @brief Gib eine Warnung aus, falls der angegebene Modul-Name unbekannt ist.
+## @param module Name des Opennet-Paketes (siehe 'get_on_modules').
 ## @details Das Ergebnis der Prüfung ist nur für Warnmeldungen geeignet, da es im Laufe der Zeit
 ##          Veränderungen in der Liste der bekannten Module geben kann.
 warn_if_unknown_module() {
@@ -87,6 +91,9 @@ warn_if_unknown_module() {
 }
 
 
+## @fn warn_if_not_installed_module()
+## @brief Gib eine Warnung aus, falls das Opennet-Module nicht installiert ist.
+## @param module Name des Opennet-Paketes (siehe 'get_on_modules').
 warn_if_not_installed_module() {
 	local module="$1"
 	is_on_module_installed "$module" && return 0
@@ -116,6 +123,7 @@ get_not_installed_on_modules() {
 ## @fn was_on_module_installed_before()
 ## @brief Prüfe ob ein Modul "früher" (vor der letzten manuellen Änderung durch den Benutzer) installiert war.
 ## @details Diese Prüfung ist hilfreich für die Auswahl von nachträglich zu installierenden Paketen.
+## @param module Name des Opennet-Paketes (siehe 'get_on_modules').
 was_on_module_installed_before() {
 	local module="$1"
 	uci_is_in_list "on-core.modules.installed" "$module" && return 0
@@ -124,7 +132,7 @@ was_on_module_installed_before() {
 
 
 ## @fn get_missing_modules()
-## @brief Collect the names of modules that were probably installed before the last upgrade.
+## @brief Ermittle diejenigen Module, die vor dem letzten Upgrade installiert waren.
 get_missing_modules() {
 	local module
 	for module in $(get_on_modules); do
@@ -178,8 +186,8 @@ install_from_opennet_repository() {
 }
 
 
-## @fn remove_opennet_module()
-## @param module Name des oder der zu entfernenden Module
+## @fn remove_opennet_modules()
+## @param module Name der oder des zu entfernenden Modules
 remove_opennet_modules() {
 	# "--force-remove" ist für on-monitoring notwendig, da sonst xinetd wegen einer Änderung
 	# /etc/xinet.d/munin nicht entfernt wird
@@ -307,7 +315,7 @@ generate_opennet_opkg_config() {
 
 	local base_url
 	base_url=$(get_configured_opennet_opkg_repository_base_url)
-	
+
 	# Füge non-core package hinzu (z.B. feeds routing,opennet,luci,...)
 	# Hole Architektur und CPU Type
 	local arch_cpu_type

@@ -467,7 +467,7 @@ get_main_ip() {
 
 ## @fn run_with_cron_lock()
 ## @details Führe eine Aktion aus, falls das Lock für Cron-Jobs übernommen werden konnte
-## @params command alle Parameter werden als auszuführendes Kommando interpretiert
+## @param command alle Parameter werden als auszuführendes Kommando interpretiert
 run_with_cron_lock() {
 	local returncode
 	# Der Timeout ist nötig, weil alle cron-Jobs gleichzeitig gestartet werden. Somit treffen
@@ -733,7 +733,7 @@ run_delayed_in_background() {
 
 ## @fn get_filesize()
 ## @brief Ermittle die Größe einer Datei in Bytes.
-## @params filename Name der zu untersuchenden Datei.
+## @param filename Name der zu untersuchenden Datei.
 get_filesize() {
 	local filename="$1"
 	wc -c "$filename" | awk '{ print $1 }'

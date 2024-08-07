@@ -319,7 +319,7 @@ disable_on_openvpn() {
 
 ## @fn get_mig_tunnel_servers()
 ## @brief Ermittle die Server für den gewünschen Dienst, die via Tunnel erreichbar sind.
-## @params stype Dienst-Typ (z.B. "DNS" oder "NTP") - entspricht den DHCP-Options, die vom OpenVPN-Server gepusht werden.
+## @param stype Dienst-Typ (z.B. "DNS" oder "NTP") - entspricht den DHCP-Options, die vom OpenVPN-Server gepusht werden.
 ## @details Die Ausgabe ist leer, falls kein Tunnel aufgebaut ist.
 get_mig_tunnel_servers() {
 	trap 'error_trap get_mig_tunnel_server "$*"' EXIT

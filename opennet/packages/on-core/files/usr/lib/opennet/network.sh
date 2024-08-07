@@ -256,8 +256,8 @@ is_device_in_zone() {
 
 ## @fn _run_system_network_function()
 ## @brief Führe eine der in /lib/functions/network.sh definierten Funktionen aus.
-## @params func: der Name der Funktion
-## @params ...: alle anderen Parameter werden der Funktion nach der Zielvariable (also ab
+## @param func: der Name der Funktion
+## @param ...: alle anderen Parameter werden der Funktion nach der Zielvariable (also ab
 ##              Parameter #2) übergeben
 ## @returns: die Ausgabe der Funktion
 _run_system_network_function() {

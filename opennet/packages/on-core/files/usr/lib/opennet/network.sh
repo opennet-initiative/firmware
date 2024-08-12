@@ -129,8 +129,8 @@ get_zone_log_interfaces() {
 	# siehe http://wiki.openwrt.org/doc/uci/firewall#zones
 	[ -z "$interfaces" ] && [ -z "$(uci_get "${uci_prefix}.device")" ] && interfaces="$(uci_get "${uci_prefix}.name")"
 	for interface in $interfaces; do
-		if [ "$interface" != "$(get_device_of_interface $interface)" ]; then
-			echo "$interface"
+		if [ "$interface" != "$(get_device_of_interface "$interface")" ]; then
+			printf '%s\n' "$interface"
 		fi
 	done
 }
@@ -148,8 +148,8 @@ get_zone_raw_devices() {
 	[ -z "$uci_prefix" ] && msg_debug "Failed to retrieve raw devices of non-existing zone '$zone'" && return 0
 	# extrahiere die phys. Interfaces
 	for interface in $(uci_get_list "${uci_prefix}.network"); do
-		if [ "$interface" = "$(get_device_of_interface $interface)" ]; then
-			echo "$interface"
+		if [ "$interface" = "$(get_device_of_interface "$interface")" ]; then
+			printf '%s\n' "$interface"
 		fi
 	done
 }
@@ -200,28 +200,29 @@ get_device_of_interface() {
 	local i=0
 	local max_dev_index=-1  # finde groessten Index
 	local MAX_BRIDGES=10  # oberes Limit gegen Endlosschleife
-	while [ $i -lt $MAX_BRIDGES ]; do
+	while [ "$i" -lt "$MAX_BRIDGES" ]; do
 		local dev_exists="-1"
 		dev_exists="$(uci_get "network.@device[$i].type" -1)"
 		if [ "$dev_exists" != "-1" ]; then
 			# Device existiert
 			max_dev_index=$i
-		elif [ "$dev_exists" == "-1" ]; then
+		elif [ "$dev_exists" = "-1" ]; then
 			# abbrechen
 			i=$MAX_BRIDGES
 		fi
-		i=$(($i+1))
+		i=$((i + 1))
 	done
 
 	# DSA: Ist Interface eine Bridge?
-	local phy_dev="$(uci_get "network.${interface}.device")"
-	local i=0
-	while [ $i -le $max_dev_index ]; do
+	local phy_dev
+	phy_dev="$(uci_get "network.${interface}.device")"
+	i=0
+	while [ "$i" -le "$max_dev_index" ]; do
 		if [ "$(uci_get "network.@device[$i].name")" = "${phy_dev}" ] && [ "$(uci_get "network.@device[$i].type")" = "bridge" ]; then
 			found_bridge=1
-			echo "${phy_dev}"
+			printf '%s\n' "${phy_dev}"
 		fi
-		i=$(($i+1))
+		i=$((i + 1))
 	done
 
 	# swconfig: Ist Interface eine Bridge?
@@ -230,7 +231,7 @@ get_device_of_interface() {
 		echo "br-$interface"
 	fi
 
-	if [ $found_bridge -ne 1 ]; then
+	if [ "$found_bridge" -ne 1 ]; then
 		# Interface ist keine Bridge
 		get_subdevices_of_interface "$interface"
 	fi

@@ -75,7 +75,7 @@ update_olsr2_interfaces() {
 	local uci_prefix
 	local token
 	local is_configured=0
-	local pyh_if
+	local phy_dev
 	# auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
 	local ipv6_limit="-0.0.0.0/0 -::1/128 default_accept"
 	interfaces="$NETWORK_LOOPBACK $(get_zone_log_interfaces "$ZONE_MESH") $(get_zone_raw_devices "$ZONE_MESH")"

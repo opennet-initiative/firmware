@@ -102,6 +102,15 @@ update_olsr2_interfaces() {
 			# Wir versuche erst den physischen Interface-Namen zu ermitteln.
 			phy_dev=$(uci_get network."$token".device)
 			if [ -n "$phy_dev" ]; then
+				# Wir muessen sicherstellen, dass ein Interface niemals mehrfach in
+				# der Konfiguration aufgefuehrt wird.
+				# Andernfalls loest dies Paketstuerme aus.
+				# Siehe https://github.com/opennet-initiative/firmware/issues/14
+				# Daher loeschen wir zuerst einen eventuellen frueher verwendeten
+				# logischen Interface-Namen (z.B. beim Update von einer aelteren
+				# Firmware oder nachdem einem zuvor leeren Interface ein erstes
+				# physisches Device zugeordnet wurde).
+				uci_delete_list "${uci_prefix}.name" "$token"
 				uci_add_list "${uci_prefix}.name" "$phy_dev"
 			else
 				# Wenn physischer Name nicht abgeleitet werden kann, dann koennen wir uns nicht

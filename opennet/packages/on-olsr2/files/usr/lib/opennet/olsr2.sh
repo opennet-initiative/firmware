@@ -75,7 +75,7 @@ update_olsr2_interfaces() {
 	local uci_prefix
 	local token
 	local is_configured=0
-	local pyh_if
+	local phy_dev
 	# auf IPv6 begrenzen (siehe http://www.olsr.org/mediawiki/index.php/OLSR_network_deployments)
 	local ipv6_limit="-0.0.0.0/0 -::1/128 default_accept"
 	interfaces="$NETWORK_LOOPBACK $(get_zone_log_interfaces "$ZONE_MESH") $(get_zone_raw_devices "$ZONE_MESH")"
@@ -101,16 +101,25 @@ update_olsr2_interfaces() {
 			# olsrd2 benoetigt den physischen Interface-Namen (z.B. wlan0, tap0, eth4)
 			# Wir versuche erst den physischen Interface-Namen zu ermitteln.
 			phy_dev=$(uci_get network."$token".device)
-			if [[ -n "$phy_dev" ]]; then
+			if [ -n "$phy_dev" ]; then
+				# Wir muessen sicherstellen, dass ein Interface niemals mehrfach in
+				# der Konfiguration aufgefuehrt wird.
+				# Andernfalls loest dies Paketstuerme aus.
+				# Siehe https://github.com/opennet-initiative/firmware/issues/14
+				# Daher loeschen wir zuerst einen eventuellen frueher verwendeten
+				# logischen Interface-Namen (z.B. beim Update von einer aelteren
+				# Firmware oder nachdem einem zuvor leeren Interface ein erstes
+				# physisches Device zugeordnet wurde).
+				uci_delete_list "${uci_prefix}.name" "$token"
 				uci_add_list "${uci_prefix}.name" "$phy_dev"
 			else
-				# Wenn physicher Name nicht abgeleitet werden kann, dann koennen wir uns nicht
+				# Wenn physischer Name nicht abgeleitet werden kann, dann koennen wir uns nicht
 				#  sicher sein, ob es ein log. oder phys. Interface ist.
-				# Zur Sicherheit pruefen wir, dass das Interface nicht mit "on_" beginnt,
-				#  denn ansonsten ist es mit hoher Wahrscheinlichkeit ein log. Interface und
+				# Zur Sicherheit pruefen wir, ob das Interface mit "on_" beginnt.
+				# In diesem Fall ist es mit hoher Wahrscheinlichkeit ein log. Interface und
 				#  diese wollen wir ignorieren. Dies ist bspw. der Fall wenn ein log. Interface
 				#  kein phys. Interface hat und somit nur ein Platzhalter fuer spaeter ist.
-				if [ "${token:0:3}" != "on_" ]; then
+				if ! printf '%s' "$token" | grep -q "^on_"; then
 					uci_add_list "${uci_prefix}.name" "$token"
 				fi
 			fi

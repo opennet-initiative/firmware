@@ -4,11 +4,7 @@
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 case "$1" in
-	network|wireless|firewall)
-		# eventuelle Zonen-Zuordnungen zu olsrd2 uebertragen
-		echo "on-function update_olsr2_interfaces" | schedule_task
-		;;
-	olsrd2)
+	network|wireless|firewall|olsrd2)
 		if is_on_module_installed_and_enabled "on-olsr2"; then
 			update_olsr2_daemon_state
 		fi

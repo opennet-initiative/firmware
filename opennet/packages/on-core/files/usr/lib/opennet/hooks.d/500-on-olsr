@@ -6,11 +6,7 @@ set -eu
 . "${IPKG_INSTROOT:-}/usr/lib/opennet/on-helper.sh"
 
 case "$1" in
-	network|wireless|firewall)
-		# eventuelle Zonen-Zuordnungen zu olsr uebertragen
-		echo "on-function update_olsr_interfaces" | schedule_task
-		;;
-	olsrd)
+	network|wireless|firewall|olsrd)
 		/etc/init.d/olsrd reload || true
 		;;
 esac

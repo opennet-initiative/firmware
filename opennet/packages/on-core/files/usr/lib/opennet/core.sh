@@ -1116,7 +1116,6 @@ run_scheduled_tasks() {
 		# zuerst schnell wegbewegen, damit wir keine Ereignisse verpassen
 		# Im Fehlerfall (eine race condition) einfach beim naechsten Eintrag weitermachen.
 		mv "$fname" "$temp_fname" 2>/dev/null || continue
-		msg_info "Start scheduled task: $(cat "$temp_fname")"
 		{ /bin/sh "$temp_fname" | logger -t "on-scheduled"; } 2>&1 | logger -t "on-scheduled-error ($fname)"
 		rm -f "$temp_fname"
 	done

@@ -189,7 +189,7 @@ Neue Commits in dem zugrundeliegenden Branch werden von uns also nicht automatis
 
     make pull-submodules
     # die geänderten Submodule-Commit-IDs für zukünftige Builds festlegen
-    git commit -m "Update upstream sources" luci openwrt packages routing
+    make commit-submodules
 
 
 Einen neuen Paket-Feed einbinden {#feed-add}

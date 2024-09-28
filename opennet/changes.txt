@@ -5,10 +5,19 @@ Anschließend kann diese Liste wieder geleert werden.
 
 
 = Änderungen aus Nutzersicht =
-* 
+* Update auf OpenWrt 23.05.4.
+* Architektur ramips7620 wird nicht mehr unterstützt.
+* Wir bauen keine Images mehr für Comfast Geräte.
+* Neue Architektur x86_64 wird unterstützt.
+* Formatierung der Tabellen in UGW Webansicht ist korrigiert.
+* Neue Doku: Debugging der initialen Erstellung von UGW VPN Tunnel
 
 = Interne Änderungen =
-* 
+* DFS default Einstellungen
+* Viele Opennet Skripte werden jetzt nur über den Opennet Scheduler aufgerufen. Dies verhindert, dass sehr viele Skripte parallel laufen und dadurch bspw. die Weboberfläche nach dem Booten für längeren Zeit nicht fehlerfrei benutzbar ist.
+* Fehler in munin olsr Plugin korrigiert
+* Verhindere das doppelte Aufzählen von Interfaces in olsr2 Config Dateien (z.B. loopback + on_loopback)
+* Zirkulären Aufruf von Skripten nach dem Boot gefixt.
 
 = Bemerkenswertes / Fehler / Mängel =
-* 
+

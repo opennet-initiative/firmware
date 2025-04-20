@@ -4,5 +4,5 @@ CONFIG_TARGET_mediatek_filogic=y
 CONFIG_TARGET_MULTI_PROFILE=y
 CONFIG_TARGET_ALL_PROFILES=n
 
-CONFIG_TARGET_mediatek_filogic_DEVICE_glinet_gl-mt3000=y
-CONFIG_TARGET_mediatek_filogic_DEVICE_bananapi_bpi-r3=y
+CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt3000=y
+CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_bananapi_bpi-r3=y

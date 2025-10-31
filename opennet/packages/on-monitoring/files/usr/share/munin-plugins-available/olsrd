@@ -35,19 +35,19 @@ Collect basic information about the neighbours of an OLSR node:
 
 This plugin works with the following python interpreters:
 
-    * Python 2
     * Python 3
     * micropython (e.g. OpenWrt)
 
 
 =head1 VERSION
 
-  0.4
+  0.5
 
 
 =head1 AUTHOR
 
 Lars Kruse <devel@sumpfralle.de>
+Martin Garbe
 
 
 =head1 LICENSE
@@ -84,7 +84,7 @@ MICROPYTHON_BIN=$(which micropython || true)
 if [ -n "$MICROPYTHON_BIN" ]; then
     "$MICROPYTHON_BIN" -X "heapsize=${MICROPYTHON_HEAP:-512k}" "$0" "$@"
 else
-    python "$0" "$@"
+    python3 "$0" "$@"
 fi
 exit $?
 
@@ -94,13 +94,18 @@ true <<EOF
 """
 
 
-import uos
-#import os.path
-#import socket
+try:
+    import uos
+except ImportError:
+    import os as uos
 import sys
 
-from usocket import *
-import usocket as _socket
+try:
+    from usocket import *
+    import usocket as _socket
+except ImportError:
+    from socket import *
+    import socket as _socket
 
 
 _GLOBAL_DEFAULT_TIMEOUT = 30
@@ -329,13 +334,35 @@ def _read_file(filename):
         return []
 
 
-import ffi
-libc = ffi.open('libc.so')
-getpid = libc.func("i", "getpid", "")
-access_ = libc.func("i", "access", "si")
+# MicroPython uses 'ffi'. On CPython, fall back to ctypes.
+try:
+    import ffi
+    libc = ffi.open('libc.so')
+    getpid = libc.func("i", "getpid", "")
+    access_ = libc.func("i", "access", "si")
 
-def access(path, mode):
-    return access_(path, mode) == 0
+    def access(path, mode):
+        return access_(path, mode) == 0
+except Exception:
+    import ctypes
+    import ctypes.util
+
+    _libc_path = ctypes.util.find_library('c') or 'libc.so.6'
+    _libc = ctypes.CDLL(_libc_path)
+
+    def getpid():
+        return _libc.getpid()
+
+    _libc.access.argtypes = [ctypes.c_char_p, ctypes.c_int]
+    _libc.access.restype = ctypes.c_int
+
+    def access(path, mode):
+        if isinstance(path, str):
+            path_b = path.encode()
+        else:
+            path_b = path
+        return _libc.access(path_b, mode) == 0
+
 
 def get_ping_times(hosts):
     tempfile = "/tmp/munin-olsrd-{pid}.tmp".format(pid=getpid())
@@ -453,7 +480,7 @@ if __name__ == "__main__":
                 do_fetch()
             sys.exit(0)
         elif sys.argv[1] == "autoconf":
-	    if access(uos.getenv('OLSRD_BIN_PATH') or '/usr/sbin/olsrd', 0):
+            if access(uos.getenv('OLSRD_BIN_PATH') or '/usr/sbin/olsrd', 0):
                 print('yes')
             else:
                 print('no')

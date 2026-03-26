@@ -108,11 +108,10 @@ pull-submodules: unpatch
 	@#use 'git submodule' for updating submodules. When using 'git pull' in submodule directory then the error 'detached head' occurs. There are two ways to solve this:
 	@# 1. use 'git submodule update --remote --checkout'
 	@# 2. go into every submodules directory, find out which remote branch it relies on, checkout this branch.
-	git submodule update --remote --checkout
+	git submodule update --remote
 	git submodule foreach git checkout "$(PULL_SUBMODULES_BRANCH)"
-	git submodule foreach git pull
 	@#for openwrt submodule checkout latest tag of branch
-	git -C openwrt checkout "$(shell git -C openwrt describe --tags --abbrev=0)"
+	git -C openwrt checkout --detach $$(git -C openwrt describe --tags --abbrev=0)
 
 commit-submodules: unpatch
 	detailed_diff=$$(git diff --submodule=short | awk '{ if ($$1 == "---") module=substr($$2, 3); if ($$1 == "-Subproject") old_commit=$$3; if ($$1 == "+Subproject") {new_commit=$$3; print(module":"); system("cd "module"; git --no-pager log --oneline "old_commit".."new_commit); print("")}}'); \

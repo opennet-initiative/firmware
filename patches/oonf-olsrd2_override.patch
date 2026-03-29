@@ -1,0 +1,32 @@
+Description: Updates the oonf-olsrd2 package in routing submodule
+---
+Index: firmware/routing/oonf-olsrd2/Makefile
+===================================================================
+--- firmware.orig/routing/oonf-olsrd2/Makefile
++++ firmware/routing/oonf-olsrd2/Makefile
+@@ -5,9 +5,9 @@ PKG_RELEASE:=2
+ 
+ PKG_SOURCE_PROTO:=git
+ PKG_SOURCE_URL:=https://github.com/OLSR/OONF.git
+-PKG_SOURCE_DATE:=2022-08-25
+-PKG_SOURCE_VERSION:=1cec9b21086fb52ab4262c69aabd087e4d2d3a44
+-PKG_MIRROR_HASH:=e9065af0a7103e84b9084683bb1db87c3361c1d97d8ad8a48a021b904b35ed56
++PKG_SOURCE_DATE:=2025-12-05
++PKG_SOURCE_VERSION:=b3b64d508884b239a750ab97b134f0e6cc1f7baf
++PKG_MIRROR_HASH:=68bc0495cb042203f0d2374e1fa7f8103d75848e2e704c172020fe6dc9a2af08
+ 
+ CMAKE_INSTALL:=1
+ 
+Index: firmware/routing/oonf-olsrd2/patches/100-enable-lan-import-plugin.patch
+===================================================================
+--- firmware.orig/routing/oonf-olsrd2/patches/100-enable-lan-import-plugin.patch
++++ /dev/null
+@@ -1,8 +0,0 @@
+---- a/src/olsrv2/CMakeLists.txt
+-+++ b/src/olsrv2/CMakeLists.txt
+-@@ -6,4 +6,5 @@ add_subdirectory(olsrv2_old_lan)
+- add_subdirectory(olsrv2_l2import)
+- add_subdirectory(olsrv2_lan)
+- add_subdirectory(route_modifier)
+-+add_subdirectory(lan_import)
+- 

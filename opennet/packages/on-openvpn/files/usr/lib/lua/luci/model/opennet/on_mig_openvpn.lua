@@ -184,7 +184,7 @@ function status_mig_openvpn()
 		if on_bool_function("has_mig_openvpn_credentials") then
 			-- Zertifikat vorhanden - syslog?
 			result = luci.i18n.translatef('Check the <a href="%s">System Log</a> for details.',
-					luci.dispatcher.build_url("admin", "status", "syslog"))
+					luci.dispatcher.build_url("admin", "status", "logs"))
 		else
 			-- das Zertifikat fehlt
 			result = luci.i18n.translatef('<a href="%s">A certificate is required</a>.',
